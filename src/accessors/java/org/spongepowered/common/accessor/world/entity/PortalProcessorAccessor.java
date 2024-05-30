@@ -22,40 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.portal;
+package org.spongepowered.common.accessor.world.entity;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.world.portal.Portal;
-import org.spongepowered.api.world.portal.PortalType;
-import org.spongepowered.api.world.server.ServerLocation;
+import net.minecraft.world.entity.PortalProcessor;
+import net.minecraft.world.level.block.Portal;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.Optional;
-
-public class VanillaPortal implements Portal {
-
-    private final PortalType type;
-    private final ServerLocation minCorner;
-    private final @Nullable ServerLocation destination;
-
-    public VanillaPortal(final PortalType type, final ServerLocation minCorner, final @Nullable ServerLocation destination) {
-        this.type = type;
-        this.minCorner = minCorner;
-        this.destination = destination;
-    }
-
-    @Override
-    public PortalType type() {
-        return this.type;
-    }
-
-    @Override
-    public ServerLocation origin() {
-        return this.minCorner;
-    }
-
-    // Vanilla has no knowledge of where portals go to until you try, best we can do...
-    @Override
-    public Optional<ServerLocation> destination() {
-        return Optional.ofNullable(this.destination);
-    }
+@Mixin(PortalProcessor.class)
+public interface PortalProcessorAccessor {
+    @Accessor("portal") Portal accessor$portal();
 }

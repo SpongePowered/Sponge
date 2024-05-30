@@ -24,13 +24,10 @@
  */
 package org.spongepowered.vanilla.mixin.core.server.level;
 
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.entity.player.ClientType;
@@ -41,7 +38,6 @@ import org.spongepowered.common.event.tracking.context.transaction.Transactional
 import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
 import org.spongepowered.common.network.packet.ChangeViewerEnvironmentPacket;
 import org.spongepowered.common.network.packet.SpongePacketHandler;
-import org.spongepowered.common.world.portal.PortalLogic;
 import org.spongepowered.vanilla.mixin.core.world.entity.LivingEntityMixin_Vanilla;
 
 @Mixin(net.minecraft.server.level.ServerPlayer.class)
@@ -52,26 +48,6 @@ public abstract class ServerPlayerMixin_Vanilla extends LivingEntityMixin_Vanill
         if (this.bridge$getClientType() == ClientType.SPONGE_VANILLA) {
             SpongePacketHandler.getChannel().sendTo((ServerPlayer) this, new ChangeViewerEnvironmentPacket(dimensionType));
         }
-    }
-
-    /**
-     * @author dualspiral - 18th December 2020 - 1.16.4
-     * @reason Redirects the vanilla changeDimension method to our own
-     *         to support our event and other logic (see
-     *         ServerPlayerEntityMixin on the common mixin sourceset for
-     *         details).
-     *
-     *         This method does not explicitly exist on SeverPlayerEntity
-     *         on Forge, it is an overridden method in Vanilla so needs doing
-     *         here as well as in EntityMixin_Vanilla.
-     *
-     *         This will get called on the nether dimension changes, as the
-     *         end portal teleport call itself has been redirected to provide
-     *         the correct type.
-     */
-    @Overwrite
-    public net.minecraft.world.entity.@Nullable Entity changeDimension(final ServerLevel target) {
-        return this.bridge$changeDimension(target, (PortalLogic) target.getPortalForcer());
     }
 
     // override from LivingEntityMixin_Vanilla

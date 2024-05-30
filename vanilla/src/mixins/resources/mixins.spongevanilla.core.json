@@ -40,12 +40,10 @@
         "world.entity.MobMixin_Attack_Impl",
         "world.entity.ai.attributes.DefaultAttributesMixin",
         "world.entity.item.ItemEntityMixin_Vanilla",
-        "world.entity.projectile.ThrownEnderpearlMixin_Vanilla",
         "world.entity.player.PlayerMixin_Attack_Impl",
         "world.entity.vehicle.BoatMixin_Vanilla",
         "world.level.block.FireBlockMixin_Vanilla",
         "world.level.block.entity.AbstractFurnaceBlockEntityMixin_Vanilla",
-        "world.level.portal.PortalForcerMixin_Vanilla",
         "world.level.storage.LevelStorageSourceMixin_Vanilla"
     ],
     "overwrites": {

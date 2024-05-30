@@ -24,36 +24,17 @@
  */
 package org.spongepowered.common.entity;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
-import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
-import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
-import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.Mth;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.biome.BiomeManager;
-import net.minecraft.world.level.storage.LevelData;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.common.accessor.server.level.ServerPlayerAccessor;
-import org.spongepowered.common.accessor.server.network.ServerCommonPacketListenerImplAccessor;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
-import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
-import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
-import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
-import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.math.vector.Vector3d;
@@ -86,78 +67,6 @@ public final class EntityUtil {
                 }
             }
         }
-    }
-
-    public static void performPostChangePlayerWorldLogic(final ServerPlayer player, final ServerLevel fromWorld,
-            final ServerLevel originalToWorld, final ServerLevel toWorld, final boolean isPortal) {
-        // Sponge Start - Send any platform dimension data
-        ((ServerPlayerBridge) player).bridge$sendDimensionData(((ServerCommonPacketListenerImplAccessor) player.connection).accessor$connection(), toWorld.dimensionType(), toWorld.dimension());
-        // Sponge End
-        final LevelData worldinfo = toWorld.getLevelData();
-        // We send dimension change for portals before loading chunks
-        if (!isPortal) {
-            // Sponge Start - Allow the platform to handle how dimension changes are sent down
-            ((ServerPlayerBridge) player).bridge$sendChangeDimension(toWorld.dimensionTypeRegistration(), toWorld.dimension(), BiomeManager.obfuscateSeed(toWorld.getSeed()),
-                    player.gameMode.getGameModeForPlayer(), player.gameMode.getPreviousGameModeForPlayer(),
-                    toWorld.isDebug(), toWorld.isFlat(), ClientboundRespawnPacket.KEEP_ALL_DATA
-            );
-        }
-        // Sponge End
-        player.connection.send(new ClientboundChangeDifficultyPacket(worldinfo.getDifficulty(), worldinfo.isDifficultyLocked()));
-        final PlayerList playerlist = player.getServer().getPlayerList();
-        playerlist.sendPlayerPermissionLevel(player);
-
-        // Sponge Start - Have the platform handle removing the entity from the world. Move this to after the event call so
-        //                that we do not remove the player from the world unless we really have teleported..
-        ((PlatformServerLevelBridge) fromWorld).bridge$removeEntity(player, Entity.RemovalReason.CHANGED_DIMENSION, true);
-        ((PlatformEntityBridge) player).bridge$revive();
-        // Sponge End
-
-        player.setServerLevel(toWorld);
-        toWorld.addDuringPortalTeleport(player);
-        if (isPortal) {
-            ((ServerPlayerAccessor) player).invoker$triggerDimensionChangeTriggers(toWorld);
-        }
-        player.gameMode.setLevel(toWorld);
-        player.connection.send(new ClientboundPlayerAbilitiesPacket(player.getAbilities()));
-        playerlist.sendLevelInfo(player, toWorld);
-        playerlist.sendAllPlayerInfo(player);
-
-        for (final MobEffectInstance effectinstance : player.getActiveEffects()) {
-            player.connection.send(new ClientboundUpdateMobEffectPacket(player.getId(), effectinstance, false));
-        }
-
-        if (isPortal) {
-            player.connection.send(new ClientboundLevelEventPacket(1032, BlockPos.ZERO, 0, false));
-        }
-
-        ((ServerLevelBridge) fromWorld).bridge$getBossBarManager().onPlayerDisconnect(player);
-        ((ServerLevelBridge) toWorld).bridge$getBossBarManager().onPlayerDisconnect(player);
-
-        ((ServerPlayerAccessor) player).accessor$lastSentExp(-1);
-        ((ServerPlayerAccessor) player).accessor$lastSentHealth(-1.0f);
-        ((ServerPlayerAccessor) player).accessor$lastSentFood(-1);
-
-        if (!isPortal) {
-            player.connection.teleport(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
-            player.connection.resetPosition();
-        }
-
-        if (player.containerMenu != player.inventoryMenu) {
-            player.closeContainer();
-        }
-
-        // Sponge Start - Call event
-        Sponge.eventManager().post(
-                SpongeEventFactory.createChangeEntityWorldEventPost(
-                        PhaseTracker.getCauseStackManager().currentCause(),
-                        (org.spongepowered.api.entity.Entity) player,
-                        (ServerWorld) fromWorld,
-                        (ServerWorld) originalToWorld,
-                        (ServerWorld) toWorld
-                )
-        );
-        // Sponge End
     }
 
     public static boolean processEntitySpawn(final org.spongepowered.api.entity.Entity entity, final Supplier<Optional<UUID>> supplier, final Consumer<Entity> spawner) {

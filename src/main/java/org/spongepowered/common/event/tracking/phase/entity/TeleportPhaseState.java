@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.entity;
 
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 
 public final class TeleportPhaseState extends EntityPhaseState<TeleportContext> {
 
@@ -33,4 +34,9 @@ public final class TeleportPhaseState extends EntityPhaseState<TeleportContext> 
         return new TeleportContext(this, tracker);
     }
 
+
+    @Override
+    public void unwind(final TeleportContext phaseContext) {
+        TrackingUtil.processBlockCaptures(phaseContext);
+    }
 }

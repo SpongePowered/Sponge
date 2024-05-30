@@ -100,8 +100,6 @@ import org.spongepowered.api.world.ChunkRegenerateFlags;
 import org.spongepowered.api.world.generation.config.flat.FlatGeneratorConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfigs;
-import org.spongepowered.api.world.portal.PortalType;
-import org.spongepowered.api.world.portal.PortalTypes;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.schematic.PaletteTypes;
 import org.spongepowered.api.world.weather.WeatherType;
@@ -152,9 +150,6 @@ import org.spongepowered.common.map.decoration.orientation.SpongeMapDecorationOr
 import org.spongepowered.common.registry.RegistryLoader;
 import org.spongepowered.common.util.SpongeOrientation;
 import org.spongepowered.common.world.SpongeChunkRegenerateFlag;
-import org.spongepowered.common.world.portal.EndPortalType;
-import org.spongepowered.common.world.portal.NetherPortalType;
-import org.spongepowered.common.world.portal.UnknownPortalType;
 import org.spongepowered.common.world.schematic.SpongePaletteType;
 import org.spongepowered.common.world.weather.SpongeWeatherType;
 import org.spongepowered.math.vector.Vector3d;
@@ -385,14 +380,6 @@ public final class SpongeRegistryLoader {
             l.add(ParticleOptions.TO_COLOR, k -> new SpongeParticleOption<>(Color.class));
             l.add(ParticleOptions.TRAVEL_TIME, k -> new SpongeParticleOption<>(Ticks.class));
             l.add(ParticleOptions.VELOCITY, k -> new SpongeParticleOption<>(Vector3d.class));
-        });
-    }
-
-    public static RegistryLoader<PortalType> portalType() {
-        return RegistryLoader.of(l -> {
-            l.add(PortalTypes.END, EndPortalType::new);
-            l.add(PortalTypes.NETHER, NetherPortalType::new);
-            l.add(PortalTypes.UNKNOWN, UnknownPortalType::new);
         });
     }
 

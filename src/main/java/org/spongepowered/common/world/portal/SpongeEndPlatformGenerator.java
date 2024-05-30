@@ -24,29 +24,27 @@
  */
 package org.spongepowered.common.world.portal;
 
-import org.spongepowered.api.entity.Entity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.levelgen.feature.EndPlatformFeature;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.world.portal.Portal;
-import org.spongepowered.api.world.portal.PortalType;
+import org.spongepowered.api.world.portal.PortalLogic;
 import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
 
-public final class UnknownPortalType implements PortalType {
+
+public final class SpongeEndPlatformGenerator implements PortalLogic.PortalGenerator {
+
+    public static final SpongeEndPlatformGenerator INSTANCE = new SpongeEndPlatformGenerator();
 
     @Override
-    public boolean generatePortal(final ServerLocation location, final Axis axis) {
-        return false;
+    public Optional<Portal> generatePortal(final ServerLocation location, final Axis axis) {
+        final var level = (ServerLevel) location.world();
+        final var bottomCenter = VecHelper.toBlockPos(location.blockPosition()).getBottomCenter();
+        EndPlatformFeature.createEndPlatform(level, BlockPos.containing(bottomCenter).below(), true);
+        return Optional.of(new SpongePortal(location, null)); // TODO set portallogic?
     }
-
-    @Override
-    public Optional<Portal> findPortal(final ServerLocation location) {
-        return Optional.empty();
-    }
-
-    @Override
-    public boolean teleport(final Entity entity, final ServerLocation destination, final boolean generateDestinationPortal) {
-        return false;
-    }
-
 }

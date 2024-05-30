@@ -27,6 +27,7 @@ package org.spongepowered.common.data.provider.entity;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PortalProcessor;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -34,10 +35,14 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.PushReaction;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Ticks;
+import org.spongepowered.api.world.portal.Portal;
+import org.spongepowered.api.world.portal.PortalLogic;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
+import org.spongepowered.common.accessor.world.entity.PortalProcessorAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.entity.EntityMaxAirBridge;
+import org.spongepowered.common.bridge.world.entity.PortalProcessorBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.entity.SpongeEntityArchetype;
 import org.spongepowered.common.entity.SpongeEntitySnapshot;
@@ -229,6 +234,15 @@ public final class EntityData {
                             m.hurtMarked = true;
                         })
                         .supports(m -> m.getDeltaMovement().lengthSqr() > 0)
+                    .create(Keys.PORTAL)
+                        .get(h -> (Portal) h.portalProcess)
+                    .create(Keys.PORTAL_LOGIC)
+                        .get(h -> h.portalProcess == null ? null : (PortalLogic) ((PortalProcessorAccessor) h.portalProcess).accessor$portal())
+                        .set((h, v) -> {
+                            h.portalProcess = new PortalProcessor((net.minecraft.world.level.block.Portal) v, h.blockPosition());
+                            ((PortalProcessorBridge)h.portalProcess).bridge$init(h.level());
+                        })
+                        .delete(h -> h.portalProcess = null)
                 .asMutable(EntityMaxAirBridge.class)
                     .create(Keys.MAX_AIR)
                         .get(EntityMaxAirBridge::bridge$getMaxAir)

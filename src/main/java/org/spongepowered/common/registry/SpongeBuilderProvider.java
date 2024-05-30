@@ -129,6 +129,7 @@ import org.spongepowered.api.world.generation.structure.StructureSetTemplate;
 import org.spongepowered.api.world.generation.structure.StructureTemplate;
 import org.spongepowered.api.world.generation.structure.jigsaw.JigsawPoolTemplate;
 import org.spongepowered.api.world.generation.structure.jigsaw.ProcessorListTemplate;
+import org.spongepowered.api.world.portal.PortalLogic;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.server.TicketType;
@@ -233,6 +234,7 @@ import org.spongepowered.common.world.generation.structure.SpongeStructureSetTem
 import org.spongepowered.common.world.generation.structure.SpongeStructureTemplate;
 import org.spongepowered.common.world.generation.structure.jigsaw.SpongeJigsawPoolTemplate;
 import org.spongepowered.common.world.generation.structure.jigsaw.SpongeProcessorListTemplate;
+import org.spongepowered.common.world.portal.SpongePortalLogicBuilder;
 import org.spongepowered.common.world.schematic.SpongePaletteTypeBuilder;
 import org.spongepowered.common.world.schematic.SpongeSchematicBuilder;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
@@ -389,6 +391,7 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(ChatTypeTemplate.Builder.class, SpongeChatTypeTemplate.BuilderImpl::new)
                 .register(DamageTypeTemplate.Builder.class, SpongeDamageTypeTemplate.BuilderImpl::new)
                 .register(TicketType.Builder.class, SpongeTicketTypeBuilder::new)
+                .register(PortalLogic.Builder.class, SpongePortalLogicBuilder::new)
         ;
     }
 }

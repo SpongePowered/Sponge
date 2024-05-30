@@ -69,6 +69,7 @@ import org.spongepowered.common.event.tracking.context.transaction.block.Prepare
 import org.spongepowered.common.event.tracking.context.transaction.block.RemoveBlockEntity;
 import org.spongepowered.common.event.tracking.context.transaction.block.ReplaceBlockEntity;
 import org.spongepowered.common.event.tracking.context.transaction.block.ScheduleUpdateTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.effect.BlockAddedEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.EntityPerformingDropsEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.InventoryEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.PrepareBlockDrops;
@@ -217,6 +218,16 @@ interface TransactionSink {
         final SpawnEntityTransaction transaction = new SpawnEntityTransaction(worldSupplier, entityIn, contextualType);
         this.logTransaction(transaction);
     }
+
+
+    @SuppressWarnings("ConstantConditions")
+    default WrapperTransaction logWrapper() {
+        final var transaction = new WrapperTransaction<>();
+        this.logTransaction(transaction);
+        this.pushEffect(new ResultingTransactionBySideEffect(BlockAddedEffect.getInstance()));
+        return transaction;
+    }
+
 
     default boolean logTileReplacement(
         final BlockPos pos, final @Nullable BlockEntity existing, final @Nullable BlockEntity proposed,

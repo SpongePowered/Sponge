@@ -22,32 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.test.portal;
+package org.spongepowered.common.bridge.world.level.block;
 
-import org.spongepowered.api.event.Event;
-import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.cause.entity.MovementTypes;
-import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.util.Axis;
+import org.spongepowered.api.world.portal.Portal;
+import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.math.vector.Vector3i;
 
-public final class PortalTestListener {
+import java.util.Optional;
 
-    @Listener
-    private void onChangeWorldPre(final ChangeEntityWorldEvent.Pre event) {
-        if (PortalTestListener.filter(event)) {
-            event.setDestinationWorld(event.originalWorld());
-        }
-    }
+public interface PortalBlockBridge {
 
-    @Listener
-    private void onChangeWorldReposition(final ChangeEntityWorldEvent.Reposition event) {
-        if (PortalTestListener.filter(event)) {
-            event.setDestinationPosition(event.originalPosition().add(100, 0, 100));
-        }
-    }
 
-    private static boolean filter(final Event event) {
-        return event.cause().context().get(EventContextKeys.MOVEMENT_TYPE).filter(x -> x == MovementTypes.PORTAL.get()).isPresent();
-    }
+    Optional<ServerLocation> bridge$calculatePortalExit(ServerWorld from, Vector3i fromPos, Entity entity);
 
+    Optional<Portal> bridge$findPortal(ServerLocation at, int searchRange);
+
+    Optional<Portal> bridge$generatePortal(ServerLocation location, Axis axis);
+
+    boolean bridge$teleport(Entity entity, ServerLocation destination, boolean generateDestinationPortal);
 }

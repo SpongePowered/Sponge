@@ -24,21 +24,90 @@
  */
 package org.spongepowered.common.mixin.core.world.level.block;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.EndPortalBlock;
+import net.minecraft.world.level.levelgen.feature.EndPlatformFeature;
+import net.minecraft.world.level.portal.DimensionTransition;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.util.Axis;
+import org.spongepowered.api.world.portal.Portal;
+import org.spongepowered.api.world.portal.PortalLogic;
+import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.world.entity.EntityBridge;
-import org.spongepowered.common.world.portal.VanillaPortalLogic;
+import org.spongepowered.common.bridge.world.level.block.PortalBlockBridge;
+import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.portal.SpongePortal;
+import org.spongepowered.math.vector.Vector3i;
+
+import java.util.Optional;
 
 @Mixin(EndPortalBlock.class)
-public abstract class EndPortalBlockMixin {
+public abstract class EndPortalBlockMixin implements PortalBlockBridge {
 
-    @Redirect(method = "entityInside", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;changeDimension(Lnet/minecraft/server/level/ServerLevel;)Lnet/minecraft/world/entity/Entity;"))
-    private Entity impl$useEndPortalTeleporterWhenTeleporting(final Entity entity, final ServerLevel p_241206_1_) {
-        return ((EntityBridge) entity).bridge$changeDimension(p_241206_1_, VanillaPortalLogic.getEndInstance());
+    @Override
+    public Optional<ServerLocation> bridge$calculatePortalExit(final ServerWorld from, final Vector3i fromPos, final Entity entity) {
+        final var fromLevel = (ServerLevel) from.world();
+        final var toLevelKey = fromLevel.dimension() == Level.END ? Level.OVERWORLD : Level.END;
+        final var toLevel = fromLevel.getServer().getLevel(toLevelKey);
+        if (toLevel == null) {
+            return Optional.empty();
+        }
+        return Optional.of(EndPortalBlockMixin.impl$calculateVanillaPortalExit(entity, toLevel));
+    }
+
+    private static ServerLocation impl$calculateVanillaPortalExit(final Entity entity, final ServerLevel toLevel) {
+        final var toEnd = toLevel.dimension() == Level.END;
+        if (toEnd) {
+            return ServerLocation.of((ServerWorld) toLevel, VecHelper.toVector3i(ServerLevel.END_SPAWN_POINT));
+        }
+
+        if (entity instanceof ServerPlayer player) {
+            var transition = player.findRespawnPositionAndUseSpawnBlock(false, DimensionTransition.DO_NOTHING);
+            return ServerLocation.of((ServerWorld) transition.newLevel(), VecHelper.toVector3d(transition.pos()));
+        }
+
+        final var sharedSpawnPos = toLevel.getSharedSpawnPos();
+        final var spawnPos = ((net.minecraft.world.entity.Entity) entity).adjustSpawnLocation(toLevel, sharedSpawnPos).getBottomCenter();
+        return ServerLocation.of((ServerWorld) toLevel, VecHelper.toVector3d(spawnPos));
+    }
+
+
+    @Override
+    public Optional<Portal> bridge$findPortal(final ServerLocation at, final int searchRange) {
+        final var level = (ServerLevel) at.world();
+        if (level.dimension() == Level.END) {
+            return Optional.empty(); // End platform always generates
+        }
+        return Optional.of(new SpongePortal(at, (PortalLogic) this)); // this should be spawn - but the parameter takes precedence
+    }
+
+    @Override
+    public Optional<Portal> bridge$generatePortal(final ServerLocation at, final Axis axis) {
+        final var level = (ServerLevel) at.world();
+        // If a target dimension is set assume we always want to generate a portal otherwise we could have used a spawn teleporter
+        if (level.dimension() == Level.END) {
+            final var bottomCenter = VecHelper.toBlockPos(at.blockPosition()).getBottomCenter();
+            EndPlatformFeature.createEndPlatform(level, BlockPos.containing(bottomCenter).below(), true);
+            return Optional.of(new SpongePortal(at, (PortalLogic) this));
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public boolean bridge$teleport(final org.spongepowered.api.entity.Entity entity, final ServerLocation destination, final boolean generateDestinationPortal) {
+        final var toLevel = (ServerLevel) destination.world();
+        if (toLevel.dimension() == Level.END) {
+            if (generateDestinationPortal) {
+                this.bridge$generatePortal(destination, Axis.X);
+            }
+        }
+
+        var exit = EndPortalBlockMixin.impl$calculateVanillaPortalExit(entity, toLevel);
+        return entity.setLocation(exit);
     }
 
 }

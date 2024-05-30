@@ -26,12 +26,9 @@ package org.spongepowered.vanilla.mixin.core.world.entity;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
-import org.spongepowered.common.world.portal.PortalLogic;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin_Vanilla implements EntityBridge {
@@ -39,18 +36,5 @@ public abstract class EntityMixin_Vanilla implements EntityBridge {
     // @formatter:off
     @Shadow public abstract Level shadow$level();
     // @formatter:on
-
-
-    /**
-     * @author dualspiral - 19th December 2020 - 1.16.4
-     * @reason Overwrite to redirect call to
-     *         {@link #bridge$changeDimension(net.minecraft.server.level.ServerLevel, PortalLogic)}, this
-     *         is to support Forge mods and their ITeleporter
-     */
-    @Overwrite
-    @Nullable
-    public Entity changeDimension(final net.minecraft.server.level.ServerLevel originalDestinationWorld) {
-        return this.bridge$changeDimension(originalDestinationWorld, (PortalLogic) originalDestinationWorld.getPortalForcer());
-    }
 
 }

@@ -24,35 +24,35 @@
  */
 package org.spongepowered.common.world.portal;
 
-import net.minecraft.server.level.ServerLevel;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.util.Axis;
-import org.spongepowered.api.world.portal.Portal;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.world.portal.PortalLogic;
 import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.math.vector.Vector3i;
 
-import java.util.Objects;
 import java.util.Optional;
 
-public final class EndPortalType extends VanillaPortalType {
+public final class SpongeTargetPortalFinder implements PortalLogic.PortalExitCalculator {
 
-    @Override
-    public boolean generatePortal(final ServerLocation location, final Axis axis) {
-        Objects.requireNonNull(location);
-        PortalHelper.generateEndPortal((ServerLevel) location.world(), location.blockX(), location.blockY(), location.blockZ(), true);
-        return true;
+
+    private final ResourceKey origin;
+    private final ResourceKey target;
+    private final Vector3d targetPos;
+
+    public SpongeTargetPortalFinder(final ResourceKey origin, final ResourceKey target, final Vector3d targetPos) {
+        this.origin = origin;
+        this.target = target;
+        this.targetPos = targetPos;
     }
 
     @Override
-    public Optional<Portal> findPortal(final ServerLocation location) {
-        Objects.requireNonNull(location);
-        return Optional.empty();
+    public Optional<ServerLocation> calculatePortalExit(final ServerWorld from, final Vector3i fromPos, final org.spongepowered.api.entity.Entity entity) {
+        if (!from.key().equals(this.origin)) {
+            return Optional.empty();
+        }
+        return Sponge.server().worldManager().world(target).map(world -> world.location(this.targetPos));
     }
 
-    @Override
-    public boolean teleport(final Entity entity, final ServerLocation destination, final boolean generateDestinationPortal) {
-        Objects.requireNonNull(entity);
-        Objects.requireNonNull(destination);
-
-        return false;
-    }
 }

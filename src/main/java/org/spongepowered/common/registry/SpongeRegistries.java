@@ -72,7 +72,6 @@ public final class SpongeRegistries {
         holder.createFrozenRegistry(RegistryTypes.ORIENTATION, SpongeRegistryLoader.orientation());
         holder.createFrozenRegistry(RegistryTypes.PALETTE_TYPE, SpongeRegistryLoader.paletteType());
         holder.createFrozenRegistry(RegistryTypes.PARTICLE_OPTION, SpongeRegistryLoader.particleOption());
-        holder.createFrozenRegistry(RegistryTypes.PORTAL_TYPE, SpongeRegistryLoader.portalType());
         holder.createFrozenRegistry(RegistryTypes.QUERY_TYPE, SpongeRegistryLoader.queryType());
         holder.createFrozenRegistry(RegistryTypes.RESOLVE_OPERATION, SpongeRegistryLoader.resolveOperation());
         holder.createFrozenRegistry(RegistryTypes.SKIN_PART, SpongeRegistryLoader.skinPart());

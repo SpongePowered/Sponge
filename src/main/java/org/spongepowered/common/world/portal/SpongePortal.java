@@ -24,30 +24,47 @@
  */
 package org.spongepowered.common.world.portal;
 
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.portal.PortalInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.event.cause.entity.MovementType;
-import org.spongepowered.api.world.portal.PortalType;
+import org.spongepowered.api.util.AABB;
+import org.spongepowered.api.world.portal.Portal;
+import org.spongepowered.api.world.portal.PortalLogic;
+import org.spongepowered.api.world.server.ServerLocation;
 
-import java.util.function.Function;
+import java.util.Optional;
 
-public interface PortalLogic {
+public class SpongePortal implements Portal {
 
-    // Matches Forge ITeleporter
-    @Nullable PortalInfo getPortalInfo(Entity entity, ServerLevel targetWorld, Function<ServerLevel, PortalInfo> defaultPortalInfo);
+    private final ServerLocation position;
+    @Nullable private final PortalLogic portalLogic;
+    @Nullable private final AABB aabb;
 
-    // Matches Forge ITeleporter
-    // Implementor note: the final function Boolean is true if a portal exists
-    @Nullable Entity placeEntity(Entity entity, ServerLevel currentWorld, ServerLevel targetWorld, float yRot, Function<Boolean, Entity> teleportLogic);
+    public SpongePortal(final ServerLocation position, @Nullable final PortalLogic portalLogic, @Nullable final AABB aabb) {
+        this.position = position;
+        this.portalLogic = portalLogic;
+        this.aabb = aabb;
+    }
 
-    // Matches Forge ITeleporter
-    // This isn't if it's a vanilla portal - it's if it's vanilla(ish) logic.
-    boolean isVanilla();
+    public SpongePortal(final ServerLocation position, final PortalLogic portalLogic) {
+        this(position, portalLogic, null);
+    }
 
-    MovementType getMovementType();
 
-    PortalType getPortalType();
+    public SpongePortal(final ServerLocation position) {
+        this(position, null, null);
+    }
 
+    @Override
+    public Optional<PortalLogic> logic() {
+        return Optional.ofNullable(this.portalLogic);
+    }
+
+    @Override
+    public ServerLocation position() {
+        return this.position;
+    }
+
+    @Override
+    public Optional<AABB> boundingBox() {
+        return Optional.ofNullable(this.aabb);
+    }
 }

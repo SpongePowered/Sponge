@@ -22,25 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.portal;
+package org.spongepowered.common.bridge.world.entity;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.world.portal.PortalType;
-import org.spongepowered.api.world.portal.TwoDimensionalPortal;
-import org.spongepowered.api.world.server.ServerLocation;
+import net.minecraft.world.level.Level;
 
-public final class VanillaTwoDimensionalPortal extends VanillaPortal implements TwoDimensionalPortal {
+public interface PortalProcessorBridge {
 
-    private final ServerLocation maxCorner;
+    void bridge$init(Level level);
+    Level bridge$level();
 
-    public VanillaTwoDimensionalPortal(
-            final PortalType type, final ServerLocation minCorner, final ServerLocation maxCorner, @Nullable final ServerLocation destination) {
-        super(type, minCorner, destination);
-        this.maxCorner = maxCorner;
-    }
-
-    @Override
-    public ServerLocation maxCorner() {
-        return this.maxCorner;
-    }
+    void bridge$setTransitionTime(Integer customTime);
 }

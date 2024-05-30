@@ -44,23 +44,6 @@ import org.spongepowered.forge.mixin.core.world.entity.LivingEntityMixin_Forge;
 @Mixin(ServerPlayer.class)
 public abstract class ServerPlayerMixin_Forge extends LivingEntityMixin_Forge {
 
-    /**
-     * @author dualspiral - 18th December 2020 - 1.16.4
-     * @reason Redirects the Forge changeDimension method to our own
-     *         to support our event and other logic (see
-     *         ServerPlayerEntityMixin on the common mixin sourceset for
-     *         details).
-     *
-     *         This will get called on the nether dimension changes, as the
-     *         end portal teleport call itself has been redirected to provide
-     *         the correct type.
-     */
-    @Overwrite
-    @Nullable // should be javax.annotations.Nullable
-    public Entity changeDimension(final ServerLevel serverLevel, final ITeleporter teleporter) {
-        return ((EntityBridge) this).bridge$changeDimension(serverLevel, (PortalLogic) teleporter);
-    }
-
     // override from LivingEntityMixin_Forge
     @Override
     protected void forge$onElytraUse(final CallbackInfo ci) {

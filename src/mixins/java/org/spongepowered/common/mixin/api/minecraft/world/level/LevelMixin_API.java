@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.api.minecraft.world.level;
 import net.kyori.adventure.sound.Sound;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
@@ -47,7 +46,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
@@ -119,13 +117,10 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
 
     // @formatter:off
     @Shadow public @Final net.minecraft.util.RandomSource random;
-    @Shadow @Final protected List<TickingBlockEntity> blockEntityTickers;
 
     @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
-    @Shadow public abstract BlockState shadow$getBlockState(BlockPos p_180495_1_);
     @Shadow public abstract void shadow$playSound(net.minecraft.world.entity.player.@Nullable Player p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, SoundSource p_184148_9_, float p_184148_10_, float p_184148_11_);
     @Shadow public abstract LevelData shadow$getLevelData();
-    @Shadow public abstract void shadow$removeBlockEntity(BlockPos pos);
     @Shadow public abstract ResourceKey<net.minecraft.world.level.Level> shadow$dimension();
     @Shadow public abstract void shadow$setBlockEntity(net.minecraft.world.level.block.entity.BlockEntity var1);
     @Shadow public abstract LevelChunk shadow$getChunkAt(BlockPos param0);

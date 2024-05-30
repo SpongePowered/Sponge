@@ -24,21 +24,44 @@
  */
 package org.spongepowered.common.world.portal;
 
-import net.minecraft.world.level.portal.PortalInfo;
-import net.minecraft.world.phys.Vec3;
-import org.spongepowered.api.world.portal.Portal;
+import net.minecraft.world.level.block.Portal;
+import org.spongepowered.api.world.portal.PortalLogic;
 
-public final class SpongePortalInfo extends PortalInfo {
+import java.util.ArrayList;
+import java.util.List;
 
-    private final Portal portal;
+public final class SpongePortalLogicBuilder implements PortalLogic.Builder {
 
-    public SpongePortalInfo(final Vec3 var1, final Vec3 var2, final float var3, final float var4, final Portal portal) {
-        super(var1, var2, var3, var4);
-        this.portal = portal;
+    private List<Portal> rules = new ArrayList<>();
+
+
+    @Override
+    public PortalLogic.Builder reset() {
+        this.rules.clear();
+        return this;
     }
 
-    public Portal portal() {
-        return this.portal;
+
+    @Override
+    public PortalLogic.Builder addPortal(final PortalLogic.PortalExitCalculator calulator,
+            final PortalLogic.PortalFinder finder,
+            final PortalLogic.PortalGenerator generator) {
+        var portal = new SpongeCustomPortalLogic(calulator, finder, generator);
+        this.rules.add(portal);
+        return this;
     }
+
+    @Override
+    public <T extends PortalLogic.PortalExitCalculator & PortalLogic.PortalFinder & PortalLogic.PortalGenerator> PortalLogic.Builder addPortal(final T logic) {
+        var portal = new SpongeCustomPortalLogic(logic, logic, logic);
+        this.rules.add(portal);
+        return this;
+    }
+
+    @Override
+    public PortalLogic build() {
+        return new SpongeCompositePortalLogic(this.rules);
+    }
+
 
 }

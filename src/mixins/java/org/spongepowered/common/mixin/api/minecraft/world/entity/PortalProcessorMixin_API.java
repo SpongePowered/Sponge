@@ -22,32 +22,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.level.portal;
+package org.spongepowered.common.mixin.api.minecraft.world.entity;
 
-import net.minecraft.BlockUtil;
-import net.minecraft.core.Direction;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.portal.PortalInfo;
-import net.minecraft.world.level.portal.PortalShape;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.PortalProcessor;
+import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.world.portal.Portal;
+import org.spongepowered.api.world.portal.PortalLogic;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.world.portal.NetherPortalType;
-import org.spongepowered.common.world.portal.SpongePortalInfo;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.world.entity.PortalProcessorBridge;
+import org.spongepowered.common.util.VecHelper;
 
-@Mixin(PortalShape.class)
-public abstract class PortalShapeMixin {
+import java.util.Optional;
 
-    @Redirect(method = "createPortalInfo", at = @At(value = "NEW", target = "net/minecraft/world/level/portal/PortalInfo"))
-    private static PortalInfo impl$createSpongePortalInfo(final Vec3 var1, final Vec3 var2, final float var3, final float var4,
-        final ServerLevel $$0, final BlockUtil.FoundRectangle $$1, final Direction.Axis $$2,
-        final Vec3 $$3, final Entity $$4, final Vec3 $$5, final float $$6, final float $$7) {
-        final Portal portal = NetherPortalType.portalObjectFromRectangle((ServerWorld) $$0, $$1);
-        return new SpongePortalInfo(var1, var2, var3, var4, portal);
+@Mixin(PortalProcessor.class)
+public abstract class PortalProcessorMixin_API implements Portal, PortalProcessorBridge {
+
+    // @formatter:off
+    @Shadow private net.minecraft.world.level.block.Portal portal;
+    @Shadow private BlockPos entryPosition;
+    // @formatter:on
+
+    @Override
+    public Optional<PortalLogic> logic() {
+        return Optional.of((PortalLogic) this.portal);
     }
 
+    @Override
+    public ServerLocation position() {
+        if (this.bridge$level() instanceof ServerWorld world) {
+            return ServerLocation.of(world, VecHelper.toVector3i(this.entryPosition));
+        }
+        throw new IllegalStateException("PortalProcessor was not initialized for sponge usage.");
+    }
+
+    @Override
+    public Optional<AABB> boundingBox() {
+        return Optional.empty(); // not known without potentially generating blocks
+    }
 }

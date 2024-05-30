@@ -40,13 +40,11 @@ import net.minecraft.network.chat.OutgoingChatMessage;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
-import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityLinkPacket;
-import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
-import net.minecraft.network.protocol.game.CommonPlayerSpawnInfo;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerLevel;
@@ -60,7 +58,6 @@ import net.minecraft.util.Unit;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -72,10 +69,10 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.border.WorldBorder;
-import net.minecraft.world.level.portal.PortalInfo;
+import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Team;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
@@ -105,6 +102,7 @@ import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.event.entity.living.player.KickPlayerEvent;
 import org.spongepowered.api.event.entity.living.player.PlayerChangeClientSettingsEvent;
+import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -119,7 +117,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
@@ -136,22 +133,21 @@ import org.spongepowered.common.bridge.world.BossEventBridge;
 import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
 import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.type.SpongeSkinPart;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
+import org.spongepowered.common.event.tracking.phase.entity.TeleportContext;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.mixin.core.world.entity.player.PlayerMixin;
 import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
-import org.spongepowered.common.world.portal.PortalLogic;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 
 // See also: SubjectMixin_API and SubjectMixin
@@ -165,22 +161,16 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Shadow @Final public MinecraftServer server;
     @Shadow private int lastRecordedExperience;
     @Shadow private boolean isChangingDimension;
-    @Shadow public boolean wonGame;
-    @Shadow private boolean seenCredits;
     @Shadow private net.minecraft.world.phys.Vec3 enteredNetherPosition;
     @Shadow private int lastSentExp;
     @Shadow private float lastSentHealth;
     @Shadow private int lastSentFood;
 
     @Shadow public abstract ServerLevel shadow$serverLevel();
-    @Shadow public abstract void shadow$setCamera(final Entity entity);
-    @Shadow public abstract void shadow$closeContainer();
     @Shadow public abstract void shadow$resetStat(final Stat<?> statistic);
     @Shadow protected abstract void shadow$tellNeutralMobsThatIDied();
-    @Shadow protected abstract void shadow$createEndPlatform(ServerLevel p_241206_1_, BlockPos blockPos);
     @Shadow protected abstract void shadow$triggerDimensionChangeTriggers(ServerLevel serverworld);
     @Shadow public abstract void shadow$doCloseContainer();
-    @Shadow public abstract void shadow$setServerLevel(ServerLevel serverLevel);
     @Shadow public abstract boolean shadow$setGameMode(GameType param0);
     // @formatter:on
 
@@ -221,28 +211,26 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     }
 
     @Override
-    protected final boolean impl$setLocation(final boolean isChangeOfWorld, final ServerLevel originalDestination,
-            final ServerLevel destinationWorld, final Vector3d destinationPosition) {
+    protected final boolean impl$setLocation(final boolean isChangeOfWorld, final ServerLevel level, final Vector3d pos) {
         if (this.shadow$isRemoved()) {
             return false;
         }
+        final var thisPlayer = ((net.minecraft.server.level.ServerPlayer) (Object) this);
 
-        final net.minecraft.server.level.ServerPlayer player = ((net.minecraft.server.level.ServerPlayer) (Object) this);
-        player.stopRiding();
-        if (player.isSleeping()) {
-            player.stopSleepInBed(true, true);
+        final ChunkPos chunkPos = new ChunkPos(VecHelper.toBlockPos(pos));
+        level.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkPos, 1, thisPlayer.getId());
+
+        thisPlayer.stopRiding();
+        if (thisPlayer.isSleeping()) {
+            thisPlayer.stopSleepInBed(true, true);
         }
 
-        final ChunkPos chunkPos = VecHelper.toChunkPos(Sponge.server().chunkLayout().forceToChunk(destinationPosition.toInt()));
-        destinationWorld.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkPos, 1, player.getId());
-
-        if (isChangeOfWorld) {
-            this.shadow$absMoveTo(destinationPosition.x(), destinationPosition.y(), destinationPosition.z(), this.shadow$getYRot(), this.shadow$getXRot());
-            EntityUtil.performPostChangePlayerWorldLogic(player, this.shadow$serverLevel(), destinationWorld, destinationWorld, false);
-        } else {
-            this.connection.teleport(destinationPosition.x(), destinationPosition.y(), destinationPosition.z(), this.shadow$getYRot(), this.shadow$getXRot(),
-                    new HashSet<>());
+        if (!isChangeOfWorld) {
+            this.connection.teleport(pos.x(), pos.y(), pos.z(), this.shadow$getYRot(), this.shadow$getXRot(), new HashSet<>());
             this.connection.resetPosition();
+        } else {
+            this.bridge$changeDimension(new DimensionTransition(level, VecHelper.toVanillaVector3d(pos), thisPlayer.getKnownMovement(),
+                    this.shadow$getYRot(), this.shadow$getXRot(), DimensionTransition.DO_NOTHING));
         }
         return true;
     }
@@ -392,216 +380,199 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 */
 
     /**
-     * @author zidane - November 21st, 2020 - Minecraft 1.15
-     * @reason Ensure that the teleport hook honors our events
+     * @author faithcaio - 2024-05-30 - MC 1.21
+     * @reason Redirect all teleports through {@link #bridge$changeDimension} to fire our move/rotate/teleport events
      */
     @Overwrite
-    public void teleportTo(
-            final ServerLevel world, final double x, final double y, final double z, final float yaw, final float pitch) {
-        final net.minecraft.server.level.ServerPlayer player = (net.minecraft.server.level.ServerPlayer) (Object) this;
-        double actualX = x;
-        double actualY = y;
-        double actualZ = z;
-        double actualYaw = yaw;
-        double actualPitch = pitch;
-
+    public void teleportTo(final ServerLevel world, final double x, final double y, final double z, final float yaw, final float pitch) {
         final boolean hasMovementContext = PhaseTracker.getCauseStackManager().currentContext().containsKey(EventContextKeys.MOVEMENT_TYPE);
-
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             if (!hasMovementContext) {
                 frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
             }
 
-            if (world == player.level()) {
-                final @Nullable Vector3d destination = this.impl$fireMoveEvent(PhaseTracker.SERVER, new Vector3d(x, y, z));
-                if (destination == null) {
-                    return;
-                }
-                actualX = destination.x();
-                actualY = destination.y();
-                actualZ = destination.z();
-
-                if (ShouldFire.ROTATE_ENTITY_EVENT) {
-                    final RotateEntityEvent rotateEvent = SpongeEventFactory.createRotateEntityEvent(frame.currentCause(),
-                            (org.spongepowered.api.entity.Entity) player, new Vector3d(actualPitch, actualYaw, 0),
-                            new Vector3d(pitch, yaw, 0));
-
-                    SpongeCommon.post(rotateEvent);
-
-                    actualYaw = rotateEvent.isCancelled() ? player.getYRot() : rotateEvent.toRotation().y();
-                    actualPitch = rotateEvent.isCancelled() ? player.getXRot() : rotateEvent.toRotation().x();
-                }
-
-                this.shadow$setCamera(player);
-                this.shadow$stopRiding();
-
-                if (player.isSleeping()) {
-                    player.stopSleepInBed(true, true);
-                }
-
-                player.connection.teleport(actualX, actualY, actualZ, (float) actualYaw, (float) actualPitch);
-
-                player.setYHeadRot((float) actualYaw);
-
-                final ChunkPos chunkpos = new ChunkPos(new BlockPos((int) actualX, (int) actualY, (int) actualZ));
-                world.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkpos, 1, player.getId());
-            } else {
-                final ChangeEntityWorldEvent.Pre preEvent = PlatformHooks.INSTANCE.getEventHooks().callChangeEntityWorldEventPre(player, world);
-                if (SpongeCommon.post(preEvent)) {
-                    return;
-                }
-
-                final MoveEntityEvent posEvent = SpongeEventFactory.createChangeEntityWorldEventReposition(frame.currentCause(),
-                        (org.spongepowered.api.entity.Entity) player, preEvent.originalWorld(), VecHelper.toVector3d(player.position()),
-                        new Vector3d(x, y, z), preEvent.originalDestinationWorld(), new Vector3d(x, y, z), preEvent.destinationWorld());
-
-                if (SpongeCommon.post(posEvent)) {
-                    return;
-                }
-
-                actualX = posEvent.destinationPosition().x();
-                actualY = posEvent.destinationPosition().y();
-                actualZ = posEvent.destinationPosition().z();
-                this.shadow$setPos(actualX, actualY, actualZ);
-
-                if (ShouldFire.ROTATE_ENTITY_EVENT) {
-                    final RotateEntityEvent rotateEvent = SpongeEventFactory.createRotateEntityEvent(frame.currentCause(),
-                            (org.spongepowered.api.entity.Entity) player, new Vector3d(actualYaw, actualPitch, 0),
-                            new Vector3d(yaw, pitch, 0));
-
-                    if (!SpongeCommon.post(rotateEvent)) {
-                        actualYaw = (float) rotateEvent.toRotation().x();
-                        actualPitch = (float) rotateEvent.toRotation().y();
-                    }
-                }
-                this.shadow$setYRot((float) actualYaw);
-                this.shadow$setXRot((float) actualPitch);
-
-                EntityUtil.performPostChangePlayerWorldLogic(player, (ServerLevel) preEvent.originalWorld(),
-                        (ServerLevel) preEvent.originalDestinationWorld(),
-                        (ServerLevel) preEvent.destinationWorld(), false);
-            }
+            final var thisPlayer = (net.minecraft.server.level.ServerPlayer) (Object) this;
+            this.bridge$changeDimension(new DimensionTransition(world, new Vec3(x, y, z), Vec3.ZERO, yaw, pitch,
+                    e -> world.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, e.chunkPosition(), 1, thisPlayer.getId())));
         }
     }
 
+    /**
+     * This is effectively an overwrite of changeDimension and teleportTo.
+     * Handles {@link MoveEntityEvent} -> {@link RotateEntityEvent} for in dimension teleport
+     * Handles {@link ChangeEntityWorldEvent.Reposition} -> rotate -> {@link ChangeEntityWorldEvent.Post}
+     * {@link ChangeEntityWorldEvent.Pre} is handled at call sites. TODO only for known portals?
+     * For known portals {@link ChangeEntityWorldEvent.Reposition} is handled before at {@link Entity#handlePortal()}
+     *
+     * @return The {@link Entity} that is either this one, or replaces this one
+     */
     @Override
-    protected final void impl$onChangingDimension(final ServerLevel target) {
-        if (this.shadow$level() != target) {
-            this.isChangingDimension = true;
-        }
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @Override
-    protected final Entity impl$performGameWinLogic() {
-        this.shadow$unRide();
-        this.shadow$serverLevel().removePlayerImmediately((net.minecraft.server.level.ServerPlayer) (Object) this, Entity.RemovalReason.CHANGED_DIMENSION);
-        if (!this.wonGame) {
-            this.wonGame = true;
-            this.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.WIN_GAME, this.seenCredits ? 0.0F : 1.0F));
-            this.seenCredits = true;
+    public @Nullable Entity bridge$changeDimension(final DimensionTransition originalTransition) {
+        if (this.shadow$isRemoved()) {
+            return null;
         }
 
-        return (Entity) (Object) this;
-    }
+        final var thisPlayer = (net.minecraft.server.level.ServerPlayer) (Object) this;
 
-    @Override
-    protected final void impl$prepareForPortalTeleport(final ServerLevel currentWorld, final ServerLevel targetWorld) {
-        final LevelData levelData = targetWorld.getLevelData();
-        this.connection.send(new ClientboundRespawnPacket(new CommonPlayerSpawnInfo(targetWorld.dimensionTypeRegistration(), targetWorld.dimension(),
-                BiomeManager.obfuscateSeed(targetWorld.getSeed()), this.gameMode.getGameModeForPlayer(),
-                this.gameMode.getPreviousGameModeForPlayer(), targetWorld.isDebug(), targetWorld.isFlat(), this.shadow$getLastDeathLocation(), this.shadow$getPortalCooldown()),
-                ClientboundRespawnPacket.KEEP_ALL_DATA));
-        this.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
-        final PlayerList playerlist = this.server.getPlayerList();
-        playerlist.sendPlayerPermissionLevel((net.minecraft.server.level.ServerPlayer) (Object) this);
-        currentWorld.removePlayerImmediately((net.minecraft.server.level.ServerPlayer) (Object) this,
-            Entity.RemovalReason.CHANGED_DIMENSION);
+        if (originalTransition.missingRespawnBlock()) { // Player only code
+            this.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.NO_RESPAWN_BLOCK_AVAILABLE, 0.0F));
+        }
+
+        final var originalNewLevel = originalTransition.newLevel();
+        final var oldLevel = this.shadow$serverLevel();
+
+        // SpongeStart
+        final var transition = this.impl$fireDimensionTransitionEvents(originalTransition, thisPlayer);
+        if (transition == null) {
+            return null;
+        }
+        final var newLevel = transition.newLevel();
+        // Sponge End
+
+        if (newLevel.dimension() == oldLevel.dimension()) { // actually no dimension change
+             this.connection.teleport(transition.pos().x, transition.pos().y, transition.pos().z, transition.yRot(), transition.xRot());
+             this.connection.resetPosition();
+            transition.postDimensionTransition().onTransition(thisPlayer);
+            // TODO setYHeadRot after would rotate event result
+            return thisPlayer;
+        }
+        this.isChangingDimension = true;
+        LevelData lvlData = newLevel.getLevelData();
+        this.connection.send(new ClientboundRespawnPacket(thisPlayer.createCommonSpawnInfo(newLevel), ClientboundRespawnPacket.KEEP_ALL_DATA));
+        this.connection.send(new ClientboundChangeDifficultyPacket(lvlData.getDifficulty(), lvlData.isDifficultyLocked()));
+        PlayerList playerList = this.server.getPlayerList();
+        playerList.sendPlayerPermissionLevel(thisPlayer);
+        oldLevel.removePlayerImmediately(thisPlayer, Entity.RemovalReason.CHANGED_DIMENSION);
         this.shadow$unsetRemoved();
-    }
 
-    @SuppressWarnings("ConstantConditions")
-    @Override
-    protected final void impl$validateEntityAfterTeleport(final Entity e, final PortalLogic portalLogic) {
-        if (e != (Object) this) {
-            throw new IllegalArgumentException(String.format("Teleporter %s "
-                    + "did not return the expected player entity: got %s, expected PlayerEntity %s", portalLogic, e, this));
+        oldLevel.getProfiler().push("moving");
+        if (oldLevel.dimension() == Level.OVERWORLD && newLevel.dimension() == Level.NETHER) {
+            this.enteredNetherPosition = thisPlayer.position();
         }
-    }
+        oldLevel.getProfiler().pop();
 
-    @SuppressWarnings("ConstantConditions")
-    @Override
-    protected final Entity impl$portalRepositioning(final boolean createEndPlatform,
-            final ServerLevel serverworld,
-            final ServerLevel targetWorld,
-            final PortalInfo portalinfo) {
-        serverworld.getProfiler().push("moving");
-        if (serverworld.dimension() == Level.OVERWORLD && targetWorld.dimension() == Level.NETHER) {
-            this.enteredNetherPosition = this.shadow$position();
-            // Sponge: From Forge - only enter this branch if the teleporter indicated that we should
-            // create end platforms and we're in the end (vanilla only has the second condition)
-        } else if (createEndPlatform && targetWorld.dimension() == Level.END) {
-            this.shadow$createEndPlatform(targetWorld, new BlockPos((int) portalinfo.pos.x, (int) portalinfo.pos.y, (int) portalinfo.pos.z));
-        }
-
-        // This is standard vanilla processing
-        serverworld.getProfiler().pop();
-        serverworld.getProfiler().push("placing");
-        this.shadow$setServerLevel(targetWorld);
-        targetWorld.addDuringPortalTeleport((net.minecraft.server.level.ServerPlayer) (Object) this);
-        this.shadow$setRot(portalinfo.yRot, portalinfo.xRot);
-        // Sponge Start: prevent sending the teleport packet here, we'll do so later.
-        // this.shadow$moveTo(portalinfo.pos.x, portalinfo.pos.y, portalinfo.pos.z);
-        this.shadow$absMoveTo(portalinfo.pos.x, portalinfo.pos.y, portalinfo.pos.z);
-        // Sponge End
-        serverworld.getProfiler().pop();
-
-        return (Entity) (Object) this;
-    }
-
-    @Override
-    protected final void impl$postPortalForceChangeTasks(final Entity entity, final ServerLevel targetWorld,
-            final boolean isNetherPortal) {
-        // Standard vanilla processing
-        this.gameMode.setLevel(targetWorld);
-        this.connection.send(new ClientboundPlayerAbilitiesPacket(this.shadow$getAbilities()));
-        final PlayerList playerlist = this.server.getPlayerList();
-        playerlist.sendLevelInfo((net.minecraft.server.level.ServerPlayer) (Object) this, targetWorld);
-        playerlist.sendAllPlayerInfo((net.minecraft.server.level.ServerPlayer) (Object) this);
-
-        // Sponge Start: teleport here after all data is sent to avoid any potential "stuttering" due to slow packets.
-        final net.minecraft.world.phys.Vec3 finalPos = this.shadow$position();
-        this.shadow$teleportTo(finalPos.x, finalPos.y, finalPos.z);
+        oldLevel.getProfiler().push("placing");
+        thisPlayer.setServerLevel(newLevel);
+        this.connection.teleport(transition.pos().x, transition.pos().y, transition.pos().z, transition.yRot(), transition.xRot());
         this.connection.resetPosition();
-        // Sponge End
+        newLevel.addDuringTeleport(thisPlayer);
+        oldLevel.getProfiler().pop();
 
-        for (final MobEffectInstance effectinstance : this.shadow$getActiveEffects()) {
-            this.connection.send(new ClientboundUpdateMobEffectPacket(this.shadow$getId(), effectinstance, false));
-        }
-
-        if (isNetherPortal) { // Sponge: only play the sound if we've got a vanilla teleporter that reports a nether portal
-            this.connection.send(new ClientboundLevelEventPacket(1032, BlockPos.ZERO, 0, false));
-        } // Sponge: end if
+        this.shadow$triggerDimensionChangeTriggers(oldLevel); // TODO old sponge EntityUtil#performPostChangePlayerWorldLogic this was only done when using a portal
+        this.connection.send(new ClientboundPlayerAbilitiesPacket(thisPlayer.getAbilities()));
+        playerList.sendLevelInfo(thisPlayer, newLevel);
+        playerList.sendAllPlayerInfo(thisPlayer);
+        playerList.sendActivePlayerEffects(thisPlayer);
+        transition.postDimensionTransition().onTransition(thisPlayer);
+        // TODO old sponge EntityUtil#performPostChangePlayerWorldLogic called bridge$getBossBarManager().onPlayerDisconnect(player); on both worlds
+        // TODO old sponge EntityUtil#performPostChangePlayerWorldLogic closed player.closeContainer(); when open
         this.lastSentExp = -1;
         this.lastSentHealth = -1.0F;
         this.lastSentFood = -1;
+        // Sponge Start TODO cause/context like in impl$fireDimensionTransitionEvents
+        Sponge.eventManager().post(
+                SpongeEventFactory.createChangeEntityWorldEventPost(
+                        PhaseTracker.getCauseStackManager().currentCause(),
+                        (org.spongepowered.api.entity.Entity) this,
+                        (ServerWorld) oldLevel,
+                        (ServerWorld) newLevel,
+                        (ServerWorld) originalNewLevel
+                )
+        );
+        // Sponge End
+        return thisPlayer;
     }
 
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    @Redirect(method = "getExitPortal",
-            slice = @Slice(
-                    from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getExitPortal(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;ZLnet/minecraft/world/level/border/WorldBorder;)Ljava/util/Optional;"),
-                    to = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;level()Lnet/minecraft/world/level/Level;")
-            ),
-            at = @At(value = "INVOKE", remap = false, target = "Ljava/util/Optional;isPresent()Z"))
-    private boolean impl$dontCreatePortalIfItsAlreadyBeenAttempted(final Optional<?> optional) {
-        // This prevents a second attempt at a portal creation if the portal
-        // creation attempt due to a reposition event failed (this would put it
-        // in the original position, and we don't want that to happen!).
-        //
-        // In this case, we just force it to return the empty optional by
-        // claiming the optional is "present".
-        return this.impl$dontCreateExitPortal || optional.isPresent();
+    @Nullable
+    private DimensionTransition impl$fireDimensionTransitionEvents(final DimensionTransition originalTransition,
+            final net.minecraft.server.level.ServerPlayer thisPlayer) {
+        var transition = originalTransition;
+        var isDimensionChange = transition.newLevel() != thisPlayer.serverLevel();
+
+        if (!this.impl$moveEventsFired) {
+            final var contextToSwitchTo = EntityPhase.State.PORTAL_DIMENSION_CHANGE.createPhaseContext(PhaseTracker.getInstance()).worldChange()
+                    .player();
+            final boolean hasMovementContext = PhaseTracker.SERVER.currentContext().containsKey(EventContextKeys.MOVEMENT_TYPE);
+            try (final TeleportContext context = contextToSwitchTo.buildAndSwitch();
+                    final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+                frame.pushCause(thisPlayer);
+                if (!hasMovementContext) {
+                    // TODO we should be able to detect normal plugin code though
+                    // add an unknown movement type?
+                    frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
+                }
+
+                final var originalDest = VecHelper.toVector3d(transition.pos());
+                final @Nullable Vector3d newDest;
+
+                if (isDimensionChange) {
+                    if (transition.newLevel() != thisPlayer.level()) {
+                        final ChangeEntityWorldEvent.Pre preEvent = PlatformHooks.INSTANCE.getEventHooks().callChangeEntityWorldEventPre(thisPlayer, transition.newLevel());
+                        if (SpongeCommon.post(preEvent)) {
+                            return null;
+                        }
+                        if (preEvent.destinationWorld() != preEvent.originalDestinationWorld()) {
+                            transition = new DimensionTransition((ServerLevel) preEvent.destinationWorld(),
+                                    transition.pos(),
+                                    transition.speed(),
+                                    transition.yRot(), transition.xRot(),
+                                    transition.missingRespawnBlock(),
+                                    transition.postDimensionTransition());
+                        }
+                    }
+
+                    final var reposition = this.bridge$fireRepositionEvent((ServerWorld) thisPlayer.serverLevel(), (ServerWorld) transition.newLevel(), originalDest);
+                    if (reposition.isCancelled()) {
+                        return null; // we did not move yet so just return
+                    }
+                    newDest = reposition.destinationPosition();
+                } else {
+                    if (ShouldFire.MOVE_ENTITY_EVENT) { // TODO move into impl$fireMoveEvent?
+                        newDest = this.impl$fireMoveEvent(PhaseTracker.SERVER, originalDest);
+                        if (newDest == null) {
+                            return null;
+                        }
+                    } else {
+                        newDest = originalDest;
+                    }
+                }
+                if (newDest != originalDest) {
+                    // if changed override the DimensionTransition
+                    transition = new DimensionTransition(transition.newLevel(),
+                            VecHelper.toVanillaVector3d(newDest),
+                            transition.speed(),
+                            transition.yRot(), transition.xRot(),
+                            transition.missingRespawnBlock(),
+                            transition.postDimensionTransition());
+                }
+
+                final Vector3d toRot = new Vector3d(transition.xRot(), transition.yRot(), 0);
+                final Vector3d fromRot = new Vector3d(thisPlayer.getXRot(), thisPlayer.getYRot(), 0);
+                // TODO this skips with fuzzy rotation change check. Do we want this?
+                var newToRot = SpongeCommonEventFactory.callRotateEvent((org.spongepowered.api.entity.Entity) thisPlayer, fromRot, toRot);
+                if (newToRot == null) {
+                    newToRot = fromRot; // Cancelled Rotate - Reset to original rotation
+                }
+                if (toRot != newToRot) {
+                    transition = new DimensionTransition(transition.newLevel(),
+                            transition.pos(),
+                            transition.speed(),
+                            (float) newToRot.y(), (float) newToRot.x(),
+                            transition.missingRespawnBlock(),
+                            transition.postDimensionTransition());
+                }
+
+            }
+
+        }
+
+        thisPlayer.setCamera(thisPlayer);
+        thisPlayer.stopRiding();
+        if (thisPlayer.isSleeping()) {
+            thisPlayer.stopSleepInBed(true, true);
+        }
+
+        return transition;
     }
 
     @Redirect(
@@ -920,5 +891,21 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Overwrite
     private boolean isPvpAllowed() {
         return ((ServerWorld) this.shadow$serverLevel()).properties().pvp();
+    }
+
+    @Overwrite
+    public Entity changeDimension(final DimensionTransition transition) {
+        return this.bridge$changeDimension(transition);
+    }
+
+    @Redirect(method = "findRespawnPositionAndUseSpawnBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;getRespawnDimension()Lnet/minecraft/resources/ResourceKey;"))
+    private ResourceKey<Level> impl$callRespawnPlayerSelectWorld(final net.minecraft.server.level.ServerPlayer player) {
+        final var playerRespawnDestination = this.server.getLevel(player.getRespawnDimension());
+
+        final RespawnPlayerEvent.SelectWorld event = SpongeEventFactory.createRespawnPlayerEventSelectWorld(PhaseTracker.getCauseStackManager().currentCause(),
+                (ServerWorld) playerRespawnDestination, (ServerWorld) player.serverLevel(), (ServerWorld) playerRespawnDestination, (ServerPlayer) player);
+        SpongeCommon.post(event);
+
+        return ((ServerLevel) event.destinationWorld()).dimension();
     }
 }

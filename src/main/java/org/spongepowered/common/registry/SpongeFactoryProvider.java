@@ -93,6 +93,7 @@ import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.generation.config.SurfaceRule;
 import org.spongepowered.api.world.generation.config.flat.LayerConfig;
 import org.spongepowered.api.world.generation.structure.jigsaw.JigsawPoolElement;
+import org.spongepowered.api.world.portal.PortalLogic;
 import org.spongepowered.api.world.schematic.PaletteReference;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerLocationCreator;
@@ -159,6 +160,7 @@ import org.spongepowered.common.world.generation.SpongeChunkGeneratorFactory;
 import org.spongepowered.common.world.generation.config.flat.SpongeLayerConfigFactory;
 import org.spongepowered.common.world.generation.config.noise.SpongeSurfaceRulesFactory;
 import org.spongepowered.common.world.generation.structure.jigsaw.SpongeJigsawFactory;
+import org.spongepowered.common.world.portal.SpongePortalLogicFactory;
 import org.spongepowered.common.world.schematic.SpongePaletteReferenceFactory;
 import org.spongepowered.common.world.server.SpongeServerLocation;
 import org.spongepowered.common.world.server.SpongeServerLocationCreatorFactory;
@@ -278,6 +280,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(NaturalSpawner.Factory.class, new SpongeNaturalSpawnerFactory())
                 .registerFactory(ScoreFormat.Factory.class, new SpongeScoreFormatFactory())
                 .registerFactory(ToolRule.Factory.class, new SpongeToolRuleFactory())
+                .registerFactory(PortalLogic.Factory.class, new SpongePortalLogicFactory())
         ;
     }
 }
