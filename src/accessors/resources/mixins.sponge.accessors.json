@@ -89,7 +89,6 @@
     "world.entity.decoration.ArmorStandAccessor",
     "world.entity.decoration.HangingEntityAccessor",
     "world.entity.decoration.ItemFrameAccessor",
-    "world.entity.decoration.PaintingAccessor",
     "world.entity.item.FallingBlockEntityAccessor",
     "world.entity.item.PrimedTntAccessor",
     "world.entity.monster.BlazeAccessor",

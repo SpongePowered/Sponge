@@ -26,23 +26,8 @@ package org.spongepowered.common.mixin.api.minecraft.world.entity.decoration;
 
 import org.spongepowered.api.data.type.ArtType;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(net.minecraft.world.entity.decoration.PaintingVariant.class)
 public abstract class PaintingVariantMixin_API implements ArtType {
 
-    // @formatter:off
-    @Shadow public abstract int shadow$getWidth();
-    @Shadow public abstract int shadow$getHeight();
-    // @formatter:on
-
-    @Override
-    public int width() {
-        return this.shadow$getWidth();
-    }
-
-    @Override
-    public int height() {
-        return this.shadow$getHeight();
-    }
 }
