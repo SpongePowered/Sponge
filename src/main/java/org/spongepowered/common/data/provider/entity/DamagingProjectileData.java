@@ -26,9 +26,7 @@ package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.world.entity.projectile.AbstractHurtingProjectileAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.math.vector.Vector3d;
 
 public final class DamagingProjectileData {
 
@@ -40,12 +38,8 @@ public final class DamagingProjectileData {
         registrator
                 .asMutable(AbstractHurtingProjectile.class)
                     .create(Keys.ACCELERATION)
-                        .get(h -> new Vector3d(h.xPower, h.yPower, h.zPower))
-                        .set((h, v) -> {
-                            ((AbstractHurtingProjectileAccessor) h).accessor$xPower(v.x());
-                            ((AbstractHurtingProjectileAccessor) h).accessor$yPower(v.y());
-                            ((AbstractHurtingProjectileAccessor) h).accessor$zPower(v.z());
-                        });
+                        .get(h -> h.accelerationPower)
+                        .set((h, v) -> h.accelerationPower = v);
     }
     // @formatter:on
 }
