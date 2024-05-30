@@ -22,15 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.entity.projectile;
+package org.spongepowered.common.bridge.world.entity.projectile;
 
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-@Mixin(AbstractArrow.class)
-public interface AbstractArrowAccessor {
+public interface AbstractArrowBridge {
 
-    @Accessor("knockback") int accessor$knockback();
-
+    double bridge$getKnockback();
+    void bridge$setKnockback(@Nullable Double knockback);
 }

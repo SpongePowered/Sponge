@@ -110,7 +110,6 @@
         "world.entity.npc.AbstractVillagerAccessor",
         "world.entity.player.AbilitiesAccessor",
         "world.entity.player.PlayerAccessor",
-    "world.entity.projectile.AbstractArrowAccessor",
         "world.entity.projectile.ArrowAccessor",
         "world.entity.projectile.EyeOfEnderAccessor",
         "world.entity.projectile.FireworkRocketEntityAccessor",
