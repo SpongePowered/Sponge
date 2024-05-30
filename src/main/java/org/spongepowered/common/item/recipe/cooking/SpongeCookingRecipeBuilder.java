@@ -26,20 +26,20 @@ package org.spongepowered.common.item.recipe.cooking;
 
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.item.recipe.RecipeType;
 import org.spongepowered.api.item.recipe.cooking.CookingRecipe;
+import org.spongepowered.api.item.recipe.crafting.RecipeInput;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -54,7 +54,7 @@ public final class SpongeCookingRecipeBuilder extends AbstractResourceKeyedBuild
     private net.minecraft.world.item.crafting.RecipeType<?> type;
     private Ingredient ingredient;
     private ItemStack result;
-    private Function<Container, net.minecraft.world.item.ItemStack> resultFunction;
+    private Function<SingleRecipeInput, net.minecraft.world.item.ItemStack> resultFunction;
 
     private @Nullable Float experience;
     private @Nullable Ticks cookingTime;
@@ -104,9 +104,9 @@ public final class SpongeCookingRecipeBuilder extends AbstractResourceKeyedBuild
     }
 
     // currently unused
-    public EndStep result(final Function<Inventory, org.spongepowered.api.item.inventory.ItemStack> resultFunction, final org.spongepowered.api.item.inventory.ItemStack exemplaryResult) {
+    public EndStep result(final Function<RecipeInput.Single, org.spongepowered.api.item.inventory.ItemStack> resultFunction, final org.spongepowered.api.item.inventory.ItemStack exemplaryResult) {
         this.result = ItemStackUtil.toNative(exemplaryResult);
-        this.resultFunction = (inv) -> ItemStackUtil.toNative(resultFunction.apply(InventoryUtil.toInventory(inv)));
+        this.resultFunction = (inv) -> ItemStackUtil.toNative(resultFunction.apply(InventoryUtil.toSponge(inv)));
         return this;
     }
 

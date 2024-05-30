@@ -200,6 +200,7 @@
         "world.item.crafting.ShapelessRecipe_SerializerMixin",
         "world.item.crafting.ShapelessRecipeMixin",
         "world.item.crafting.SimpleCookingSerializerMixin",
+        "world.item.crafting.SimpleCraftingRecipeSerializerMixin",
         "world.item.crafting.SingleItemRecipeMixin",
         "world.item.crafting.SmithingTransformRecipe_SerializerMixin",
         "world.item.crafting.SmithingTransformRecipeMixin",

@@ -22,39 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.inventory.api.world.inventory;
+package org.spongepowered.common.mixin.inventory.api.world.item.crafting;
 
 
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.TransientCraftingContainer;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
+import net.minecraft.world.item.crafting.CraftingInput;
 import org.spongepowered.api.item.inventory.type.GridInventory;
+import org.spongepowered.api.item.recipe.crafting.RecipeInput;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.world.inventory.LensGeneratorBridge;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.impl.comp.CraftingGridInventoryLens;
+import org.spongepowered.common.inventory.lens.Lens;
+import org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
-@Mixin(TransientCraftingContainer.class)
-public abstract class TransientCraftingContainerMixin_Inventory_API implements CraftingGridInventory {
+@Mixin(CraftingInput.class)
+public abstract class CraftingInputMixin_Inventory_API implements RecipeInput.Crafting, LensGeneratorBridge {
 
-    // @formatter:off
-    @Shadow @Final private AbstractContainerMenu menu;
-    // @formatter:on
-
+    @Shadow @Final private int width;
+    @Shadow @Final private int height;
     private GridInventory api$gridAdapter;
-
 
     @Override
     public GridInventory asGrid() {
         // override with caching
-        final CraftingGridInventoryLens lens = (CraftingGridInventoryLens) ((InventoryAdapter) this).inventoryAdapter$getRootLens();
+        final GridInventoryLens lens = (GridInventoryLens) ((InventoryAdapter) this).inventoryAdapter$getRootLens();
         if (this.api$gridAdapter == null) {
-            this.api$gridAdapter = (GridInventory) lens.getGrid().getAdapter((Fabric) this, ((Inventory) this.menu));
+            this.api$gridAdapter = (GridInventory) lens.getAdapter((Fabric) this, this);
         }
         return this.api$gridAdapter;
     }
 
+    @Override
+    public Lens lensGeneratorBridge$generateLens(final SlotLensProvider slotLensProvider) {
+        return new GridInventoryLens(0, this.width, this.height, slotLensProvider);
+    }
 }

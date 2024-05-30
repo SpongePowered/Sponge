@@ -25,36 +25,45 @@
 package org.spongepowered.common.mixin.inventory.api.world.inventory;
 
 
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.TransientCraftingContainer;
-import org.spongepowered.api.item.inventory.Inventory;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.crafting.CraftingInput;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.inventory.type.GridInventory;
-import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.api.item.recipe.RecipeTypes;
+import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
+import org.spongepowered.api.item.recipe.crafting.RecipeInput;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.comp.CraftingGridInventoryLens;
 
-@Mixin(TransientCraftingContainer.class)
-public abstract class TransientCraftingContainerMixin_Inventory_API implements CraftingGridInventory {
+import java.util.Objects;
+import java.util.Optional;
+
+@Mixin(CraftingContainer.class)
+public interface CraftingContainerMixin_Inventory_API extends CraftingGridInventory {
 
     // @formatter:off
-    @Shadow @Final private AbstractContainerMenu menu;
+    @Shadow CraftingInput shadow$asCraftInput();
     // @formatter:on
 
-    private GridInventory api$gridAdapter;
-
+    @Override
+    default RecipeInput.Crafting asRecipeInput() {
+        return (RecipeInput.Crafting) this.shadow$asCraftInput();
+    }
 
     @Override
-    public GridInventory asGrid() {
-        // override with caching
+    default GridInventory asGrid() {
         final CraftingGridInventoryLens lens = (CraftingGridInventoryLens) ((InventoryAdapter) this).inventoryAdapter$getRootLens();
-        if (this.api$gridAdapter == null) {
-            this.api$gridAdapter = (GridInventory) lens.getGrid().getAdapter((Fabric) this, ((Inventory) this.menu));
-        }
-        return this.api$gridAdapter;
+        return (GridInventory) lens.getGrid().getAdapter(((Fabric) this), null); // TODO crafter block
+    }
+
+    @Override
+    default Optional<CraftingRecipe> recipe(ServerWorld world) {
+        return Sponge.server().recipeManager().findMatchingRecipe(RecipeTypes.CRAFTING, this.asRecipeInput(), Objects.requireNonNull(world, "world")).map(CraftingRecipe.class::cast);
     }
 
 }

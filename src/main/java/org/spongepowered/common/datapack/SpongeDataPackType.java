@@ -99,7 +99,7 @@ public record SpongeDataPackType<E, T extends DataPackEntry<T>>(String dir, bool
                 true);
 
         private final SpongeDataPackType<JsonElement, @NonNull RecipeRegistration> recipe = SpongeDataPackType.custom(RecipeRegistration.class,
-                "recipes", new RecipeDataPackSerializer(SpongeRecipeRegistration::encode, null), // TODO decoder
+                "recipe", new RecipeDataPackSerializer(SpongeRecipeRegistration::encode, null), // TODO decoder
                 true);
 
         private final SpongeDataPackType<JsonElement, @NonNull WorldTypeTemplate> worldType = SpongeDataPackType.basic(WorldTypeTemplate.class,

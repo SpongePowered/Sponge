@@ -30,9 +30,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.SmithingRecipeInput;
 import net.minecraft.world.item.crafting.SmithingTransformRecipe;
 import org.spongepowered.common.bridge.world.item.crafting.RecipeResultBridge;
 import org.spongepowered.common.bridge.world.item.crafting.SmithingRecipeBridge;
@@ -76,7 +76,7 @@ public class SpongeSmithingRecipe extends SmithingTransformRecipe implements Res
     }
 
     @Override
-    public ItemStack assemble(Container $$0, HolderLookup.Provider $$1) {
+    public ItemStack assemble(final SmithingRecipeInput $$0, final HolderLookup.Provider $$1) {
         if (this.resultFunctionId != null) {
             return IngredientResultUtil.cachedResultFunction(this.resultFunctionId).apply($$0);
         }

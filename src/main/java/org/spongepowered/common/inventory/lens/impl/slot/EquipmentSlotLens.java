@@ -25,7 +25,7 @@
 package org.spongepowered.common.inventory.lens.impl.slot;
 
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.Mob;
+import net.minecraft.world.item.Equipable;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
@@ -52,7 +52,8 @@ public class EquipmentSlotLens extends FilteringSlotLens {
             if (item.isEmpty()) {
                 return true;
             }
-            final EquipmentSlot itemSlotType = Mob.getEquipmentSlotForItem(ItemStackUtil.toNative(item));
+            final var equipable = Equipable.get(ItemStackUtil.toNative(item));
+            final var itemSlotType = equipable != null ? equipable.getEquipmentSlot() : EquipmentSlot.MAINHAND;
             return itemSlotType == (Object) type;
         };
     }

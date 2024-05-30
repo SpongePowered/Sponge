@@ -22,22 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.optimization.general;
+package org.spongepowered.common.accessor.world.inventory;
 
-import com.mojang.datafixers.DataFixerBuilder;
-import net.minecraft.util.datafix.DataFixers;
+import net.minecraft.world.Container;
+import net.minecraft.world.inventory.StonecutterMenu;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.util.LazyDataFixerBuilder;
+import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedInvokerError;
 
-@Mixin(DataFixers.class)
-public abstract class DataFixersMixin_Optimization_LazyDFU {
+@Mixin(StonecutterMenu.class)
+public interface StonecutterMenuAccessor {
 
-    // Replaces Mojang's default DataFixerBuilder with a version that doesn't prebake all version rules at server
-    // startup.
-    @Redirect(method = "createFixerUpper", at = @At(value = "NEW", target = "com/mojang/datafixers/DataFixerBuilder"))
-    private static DataFixerBuilder createFixerUpper$replaceBuilder(int dataVersion) {
-        return new LazyDataFixerBuilder(dataVersion);
+    @Invoker("createRecipeInput") static SingleRecipeInput invoker$createRecipeInput(Container $$0) {
+        throw new UntransformedInvokerError();
     }
+
 }

@@ -28,7 +28,14 @@ import net.minecraft.world.CompoundContainer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.inventory.StonecutterMenu;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
+import net.minecraft.world.item.crafting.SmithingRecipeInput;
 import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
+import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.properties.ChestType;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -38,12 +45,15 @@ import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.carrier.chest.Chest;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import org.spongepowered.api.item.recipe.crafting.RecipeInput;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.world.inventory.CraftingMenuAccessor;
+import org.spongepowered.common.accessor.world.inventory.SmithingMenuAccessor;
+import org.spongepowered.common.accessor.world.inventory.StonecutterMenuAccessor;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.entity.player.SpongeUserData;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
@@ -68,21 +78,37 @@ public final class InventoryUtil {
         return (CraftingGridInventory) inv;
     }
 
-    @SuppressWarnings("unchecked")
-    public static <C extends net.minecraft.world.Container> C toNativeInventory(final Inventory inv) {
-        if (inv instanceof CraftingContainer) {
-            return (C) inv;
-        }
-        if (inv instanceof Container) {
-            for (final Object inventory : ((InventoryAdapter) inv).inventoryAdapter$getFabric().fabric$allInventories()) {
-                if (inventory instanceof CraftingContainer) {
-                    return (C) inventory;
-                }
-            }
-        }
+    public static RecipeInput.Crafting toSponge(final CraftingInput input) {
+        return (RecipeInput.Crafting) input;
+    }
 
-        // Gather Debug Info...
-        throw new IllegalStateException("Invalid CraftingGridInventory. Could not find CraftingInventory.\nInventory was: " + inv.getClass().getSimpleName());
+    public static RecipeInput.Smithing toSponge(final SmithingRecipeInput input) {
+        return (RecipeInput.Smithing) (Object) input;
+    }
+
+    public static RecipeInput.Single toSponge(final SingleRecipeInput input) {
+        return (RecipeInput.Single) (Object) input;
+    }
+
+
+    @SuppressWarnings("unchecked")
+    public static <I extends CraftingInput> Optional<I> toCraftingInput(final Inventory inv) {
+        final var recipeInput = switch (inv) {
+            case AbstractFurnaceBlockEntity furnace -> new SingleRecipeInput(furnace.getItem(0));
+            case CampfireBlockEntity campfire -> campfire.getItems().stream().filter(stack -> !stack.isEmpty()).findFirst()
+                    .map(SingleRecipeInput::new).orElse(null);
+            case CraftingMenuAccessor menu -> menu.accessor$craftSlots().asCraftInput();
+            case InventoryMenu menu -> menu.getCraftSlots().asCraftInput();
+            case StonecutterMenu menu -> StonecutterMenuAccessor.invoker$createRecipeInput(menu.container);
+            case SmithingMenuAccessor menu -> menu.invoker$createRecipeInput();
+            default -> null;
+        };
+        return Optional.ofNullable((I) recipeInput);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <I extends CraftingInput> I toCraftingInputOrThrow(final Inventory inv) {
+       return (I) toCraftingInput(inv).orElseThrow(() -> new IllegalStateException("Invalid CraftingGridInventory. Could not find CraftingInventory.\nInventory was: " + inv.getClass().getSimpleName()));
     }
 
     public static Optional<Inventory> getDoubleChestInventory(final ChestBlockEntity chest) {

@@ -24,14 +24,13 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.item.crafting;
 
-import static org.spongepowered.common.inventory.util.InventoryUtil.toNativeInventory;
+import static org.spongepowered.common.inventory.util.InventoryUtil.toCraftingInputOrThrow;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeInput;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.Recipe;
 import org.spongepowered.api.item.recipe.RecipeType;
@@ -47,14 +46,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Mixin(net.minecraft.world.item.crafting.Recipe.class)
-public interface RecipeMixin_API<C extends Container> extends Recipe {
+public interface RecipeMixin_API<I extends RecipeInput, I2 extends org.spongepowered.api.item.recipe.crafting.RecipeInput> extends Recipe<I2> {
 
     // @formatter:off
-    @Shadow ItemStack shadow$assemble(C inv, HolderLookup.Provider registryAccess);
+    @Shadow ItemStack shadow$assemble(I inv, HolderLookup.Provider registryAccess);
     @Shadow net.minecraft.world.item.ItemStack shadow$getResultItem(HolderLookup.Provider registryAccess);
     @Shadow boolean shadow$isSpecial();
-    @Shadow boolean shadow$matches(C inv, net.minecraft.world.level.Level worldIn);
-    @Shadow NonNullList<ItemStack> shadow$getRemainingItems(C inv);
+    @Shadow boolean shadow$matches(I inv, net.minecraft.world.level.Level worldIn);
+    @Shadow NonNullList<ItemStack> shadow$getRemainingItems(I inv);
     @Shadow net.minecraft.world.item.crafting.RecipeType<?> shadow$getType();
     @Shadow NonNullList<net.minecraft.world.item.crafting.Ingredient> shadow$getIngredients();
     // @formatter:on
@@ -66,20 +65,21 @@ public interface RecipeMixin_API<C extends Container> extends Recipe {
     }
 
     @Override
-    default boolean isValid(@NonNull final Inventory inv, @NonNull final ServerWorld world) {
-        return this.shadow$matches(toNativeInventory(inv), (net.minecraft.world.level.Level) world);
+    default boolean isValid(@NonNull final I2 inv, @NonNull final ServerWorld world) {
+        return this.shadow$matches((I) toCraftingInputOrThrow(inv), (net.minecraft.world.level.Level) world);
     }
 
     @NonNull
     @Override
-    default ItemStackSnapshot result(@NonNull final Inventory inv) {
-        return ItemStackUtil.snapshotOf(this.shadow$assemble(toNativeInventory(inv), SpongeCommon.server().registryAccess()));
+    default ItemStackSnapshot result(@NonNull final I2 inv) {
+        return ItemStackUtil.snapshotOf(this.shadow$assemble((I) toCraftingInputOrThrow(inv), SpongeCommon.server().registryAccess()));
     }
 
     @NonNull
     @Override
-    default List<ItemStackSnapshot> remainingItems(@NonNull final Inventory inv) {
-        return this.shadow$getRemainingItems(toNativeInventory(inv)).stream()
+    default List<ItemStackSnapshot> remainingItems(@NonNull final I2 inv) {
+        final var nonNullList = this.shadow$getRemainingItems((I) toCraftingInputOrThrow(inv));
+        return nonNullList.stream()
                 .map(ItemStackUtil::snapshotOf)
                 .collect(Collectors.toList());
     }

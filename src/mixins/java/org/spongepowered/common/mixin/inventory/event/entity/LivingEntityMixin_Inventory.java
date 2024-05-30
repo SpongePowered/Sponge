@@ -90,8 +90,8 @@ public abstract class LivingEntityMixin_Inventory extends Entity {
             final Slot slotAdapter = this.impl$getSpongeSlot(entry.getKey());
             final ItemStack oldStack = switch (entry.getKey().getType()) {
                 case HAND -> this.shadow$getLastHandItem(entry.getKey());
-                case ARMOR -> this.shadow$getLastArmorItem(entry.getKey());
-                case BODY -> this.lastBodyItemStack;
+                case HUMANOID_ARMOR -> this.shadow$getLastArmorItem(entry.getKey());
+                case ANIMAL_ARMOR -> this.lastBodyItemStack;
             };
             entry.setValue(this.impl$callEquipmentEvent(entry.getKey(), slotAdapter, entry.getValue(), oldStack));
         });

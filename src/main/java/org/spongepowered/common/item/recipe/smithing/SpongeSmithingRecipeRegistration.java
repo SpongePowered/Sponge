@@ -26,10 +26,10 @@ package org.spongepowered.common.item.recipe.smithing;
 
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.SmithingRecipeInput;
 import net.minecraft.world.item.crafting.SmithingTransformRecipe;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.item.recipe.Recipe;
@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.function.Function;
 
 public class SpongeSmithingRecipeRegistration extends SpongeRecipeRegistration<SmithingTransformRecipe> implements
-        SpongeRecipeRegistration.ResultFunctionRegistration<Container> {
+        SpongeRecipeRegistration.ResultFunctionRegistration<SmithingRecipeInput> {
 
     // Vanilla Recipe
     private final Ingredient template;
@@ -51,10 +51,10 @@ public class SpongeSmithingRecipeRegistration extends SpongeRecipeRegistration<S
 
     // Sponge Recipe
     private final ItemStack spongeResult;
-    private final Function<Container, ItemStack> resultFunction;
+    private final Function<SmithingRecipeInput, ItemStack> resultFunction;
 
     public SpongeSmithingRecipeRegistration(ResourceLocation key, String group, final Ingredient template, Ingredient base,
-            Ingredient addition, ItemStack spongeResult, Function<Container, ItemStack> resultFunction,
+            Ingredient addition, ItemStack spongeResult, Function<SmithingRecipeInput, ItemStack> resultFunction,
             DataPack<RecipeRegistration> pack, final RecipeCategory category) {
         super(key, group, pack, category, RecipeSerializer.SMITHING_TRANSFORM);
         this.template = template;
@@ -75,7 +75,7 @@ public class SpongeSmithingRecipeRegistration extends SpongeRecipeRegistration<S
     }
 
     @Override
-    public Function<Container, ItemStack> resultFunction() {
+    public Function<SmithingRecipeInput, ItemStack> resultFunction() {
         return this.resultFunction;
     }
 }

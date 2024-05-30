@@ -76,7 +76,7 @@ public class CraftingPreviewTransaction extends ContainerBasedTransaction {
         }
         final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.player.containerMenu.getCarried());
         final SlotTransaction previewTransaction = this.getPreviewTransaction(this.craftingInventory.result(), slotTransactions);
-        final var recipe = this.player.level().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, this.craftSlots, this.player.level());
+        final var recipe = this.player.level().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, this.craftSlots.asCraftInput(), this.player.level());
         final CraftItemEvent.Preview event = SpongeEventFactory.createCraftItemEventPreview(currentCause,
                 ContainerUtil.fromNative(this.menu), this.craftingInventory, new Transaction<>(cursor, cursor), previewTransaction,
                 recipe.map(RecipeHolder::value).map(CraftingRecipe.class::cast),

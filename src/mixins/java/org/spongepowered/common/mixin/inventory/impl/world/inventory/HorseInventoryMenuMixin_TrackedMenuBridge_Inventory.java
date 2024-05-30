@@ -39,7 +39,7 @@ import org.spongepowered.common.bridge.world.inventory.container.TrackedMenuBrid
 public abstract class HorseInventoryMenuMixin_TrackedMenuBridge_Inventory {
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void inventory$attachContainerMenu(final int $$0, final Inventory $$1, final Container $$2, final AbstractHorse $$3, final CallbackInfo ci) {
+    private void inventory$attachContainerMenu(final int $$0, final Inventory $$1, final Container $$2, final AbstractHorse $$3, final int $$4, final CallbackInfo ci) {
         if ($$1 instanceof final TrackedMenuBridge trackedMenu) {
             trackedMenu.bridge$trackContainerMenu((AbstractContainerMenu) (Object) this);
         }

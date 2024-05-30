@@ -30,8 +30,8 @@ import net.minecraft.world.item.crafting.CraftingBookCategory;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
+import org.spongepowered.api.item.recipe.crafting.RecipeInput;
 import org.spongepowered.api.item.recipe.crafting.SpecialCraftingRecipe;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
@@ -43,27 +43,27 @@ import java.util.function.Function;
 public final class SpongeSpecialCraftingRecipeBuilder extends AbstractResourceKeyedBuilder<RecipeRegistration, SpecialCraftingRecipe.Builder>
         implements SpecialCraftingRecipe.Builder, SpecialCraftingRecipe.Builder.ResultStep, SpecialCraftingRecipe.Builder.EndStep {
 
-    private BiPredicate<CraftingGridInventory, ServerWorld> biPredicate;
-    private Function<CraftingGridInventory, List<ItemStack>> remainingItemsFunction;
-    private Function<CraftingGridInventory, ItemStack> resultFunction;
+    private BiPredicate<RecipeInput.Crafting, ServerWorld> biPredicate;
+    private Function<RecipeInput.Crafting, List<ItemStack>> remainingItemsFunction;
+    private Function<RecipeInput.Crafting, ItemStack> resultFunction;
     private DataPack<RecipeRegistration> pack = DataPacks.RECIPE;
 
     private RecipeCategory recipeCategory = RecipeCategory.MISC; // TODO support category
 
     @Override
-    public ResultStep matching(BiPredicate<CraftingGridInventory, ServerWorld> biPredicate) {
+    public ResultStep matching(BiPredicate<RecipeInput.Crafting, ServerWorld> biPredicate) {
         this.biPredicate = biPredicate;
         return this;
     }
 
     @Override
-    public ResultStep remainingItems(Function<CraftingGridInventory, List<ItemStack>> remainingItemsFunction) {
+    public ResultStep remainingItems(Function<RecipeInput.Crafting, List<ItemStack>> remainingItemsFunction) {
         this.remainingItemsFunction = remainingItemsFunction;
         return this;
     }
 
     @Override
-    public EndStep result(Function<CraftingGridInventory, ItemStack> resultFunction) {
+    public EndStep result(Function<RecipeInput.Crafting, ItemStack> resultFunction) {
         this.resultFunction = resultFunction;
         return this;
     }

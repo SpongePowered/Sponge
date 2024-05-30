@@ -35,6 +35,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -86,9 +87,9 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
 
     @Inject(method = "onTake", at = @At("HEAD"))
     private void impl$beforeTake(final Player thePlayer, final ItemStack stack, final CallbackInfo ci) {
-        if (this.impl$onTakeRecipe == null || !this.impl$onTakeRecipe.value().matches(this.craftSlots, thePlayer.level())) {
+        if (this.impl$onTakeRecipe == null || !this.impl$onTakeRecipe.value().matches(this.craftSlots.asCraftInput(), thePlayer.level())) {
             final RecipeManager manager = thePlayer.level().getRecipeManager();
-            this.impl$onTakeRecipe = manager.getRecipeFor(RecipeType.CRAFTING, this.craftSlots, thePlayer.level()).orElse(null);
+            this.impl$onTakeRecipe = manager.getRecipeFor(RecipeType.CRAFTING, this.craftSlots.asCraftInput(), thePlayer.level()).orElse(null);
         }
 
         // When shift-crafting the crafted item was reduced to quantity 0
@@ -104,12 +105,12 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
         stack.shrink(1);
     }
 
-    @Redirect(method = "onTake", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/crafting/RecipeManager;getRemainingItemsFor(Lnet/minecraft/world/item/crafting/RecipeType;Lnet/minecraft/world/Container;Lnet/minecraft/world/level/Level;)Lnet/minecraft/core/NonNullList;"))
-    private <C extends Container, T extends Recipe<C>> NonNullList<ItemStack> impl$onGetRemainingItems(final RecipeManager recipeManager, final RecipeType<T> recipeTypeIn, final C inventoryIn, final net.minecraft.world.level.Level worldIn) {
+    @Redirect(method = "onTake", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/crafting/RecipeManager;getRemainingItemsFor(Lnet/minecraft/world/item/crafting/RecipeType;Lnet/minecraft/world/item/crafting/RecipeInput;Lnet/minecraft/world/level/Level;)Lnet/minecraft/core/NonNullList;"))
+    private <I extends RecipeInput, T extends Recipe<I>> NonNullList<ItemStack> impl$onGetRemainingItems(final RecipeManager recipeManager, final RecipeType<T> recipeTypeIn, final I recipeInput, final net.minecraft.world.level.Level worldIn) {
         if (this.impl$onTakeRecipe == null) {
-            return NonNullList.withSize(inventoryIn.getContainerSize(), ItemStack.EMPTY);
+            return NonNullList.withSize(recipeInput.size(), ItemStack.EMPTY);
         }
-        return worldIn.getRecipeManager().getRemainingItemsFor(recipeTypeIn, inventoryIn, worldIn);
+        return worldIn.getRecipeManager().getRemainingItemsFor(recipeTypeIn, recipeInput, worldIn);
     }
 
     @Inject(method = "onTake", cancellable = true, at = @At("RETURN"))

@@ -27,9 +27,9 @@ package org.spongepowered.common.item.recipe.crafting.shaped;
 import net.minecraft.core.NonNullList;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapedRecipePattern;
@@ -42,22 +42,22 @@ import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import java.util.function.Function;
 
 public class SpongeShapedCraftingRecipeRegistration extends SpongeRecipeRegistration<ShapedRecipe> implements
-        SpongeRecipeRegistration.ResultFunctionRegistration<CraftingContainer>,
-        SpongeRecipeRegistration.RemainingItemsFunctionRegistration<CraftingContainer> {
+        SpongeRecipeRegistration.ResultFunctionRegistration<CraftingInput>,
+        SpongeRecipeRegistration.RemainingItemsFunctionRegistration<CraftingInput> {
 
     // Vanilla Recipe
     private final ShapedRecipePattern pattern;
 
     // Sponge Recipe
     private final ItemStack spongeResult;
-    private final Function<CraftingContainer, ItemStack> resultFunction;
-    private final Function<CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction;
+    private final Function<CraftingInput, ItemStack> resultFunction;
+    private final Function<CraftingInput, NonNullList<ItemStack>> remainingItemsFunction;
     private final CraftingBookCategory craftingBookCategory;
     private final boolean showNotification = true;
 
     public SpongeShapedCraftingRecipeRegistration(final ResourceLocation key, final String group, final ShapedRecipePattern pattern,
-            final ItemStack spongeResult, final Function<CraftingContainer, ItemStack> resultFunction,
-            final Function<CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction,
+            final ItemStack spongeResult, final Function<CraftingInput, ItemStack> resultFunction,
+            final Function<CraftingInput, NonNullList<ItemStack>> remainingItemsFunction,
             final DataPack<RecipeRegistration> pack, final RecipeCategory category, final CraftingBookCategory craftingBookCategory) {
         super(key, group, pack, category, RecipeSerializer.SHAPED_RECIPE);
         this.pattern = pattern;
@@ -68,12 +68,12 @@ public class SpongeShapedCraftingRecipeRegistration extends SpongeRecipeRegistra
     }
 
     @Override
-    public Function<CraftingContainer, ItemStack> resultFunction() {
+    public Function<CraftingInput, ItemStack> resultFunction() {
         return this.resultFunction;
     }
 
     @Override
-    public Function<CraftingContainer, NonNullList<ItemStack>> remainingItems() {
+    public Function<CraftingInput, NonNullList<ItemStack>> remainingItems() {
         return this.remainingItemsFunction;
     }
 

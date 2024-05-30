@@ -22,34 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.level.block.entity;
+package org.spongepowered.common.mixin.inventory.api.world.item.crafting;
 
-import net.minecraft.world.item.crafting.AbstractCookingRecipe;
-import net.minecraft.world.item.crafting.RecipeManager;
+
 import net.minecraft.world.item.crafting.SingleRecipeInput;
-import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
+import org.spongepowered.api.item.recipe.crafting.RecipeInput;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(AbstractFurnaceBlockEntity.class)
-public interface AbstractFurnaceBlockEntityAccessor {
-
-    @Accessor("litTime") int accessor$litTime();
-
-    @Accessor("litTime") void accessor$litTime(final int litTime);
-
-    @Accessor("litDuration") int accessor$litDuration();
-
-    @Accessor("litDuration") void accessor$litDuration(final int litDuration);
-
-    @Accessor("cookingProgress") int accessor$cookingProgress();
-
-    @Accessor("cookingProgress") void accessor$cookingProgress(final int cookingProgress);
-
-    @Accessor("cookingTotalTime") int accessor$cookingTotalTime();
-
-    @Accessor("cookingTotalTime") void accessor$cookingTotalTime(final int cookingTotalTime);
-
-    @Accessor("quickCheck")  RecipeManager.CachedCheck<SingleRecipeInput, ? extends AbstractCookingRecipe> accessor$quickCheck();
+@Mixin(SingleRecipeInput.class)
+public interface SingleRecipeInputMixin_Inventory_API extends RecipeInput.Single {
 
 }

@@ -22,34 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.level.block.entity;
+package org.spongepowered.common.item.recipe;
 
-import net.minecraft.world.item.crafting.AbstractCookingRecipe;
-import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
-import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import net.minecraft.world.item.crafting.SmithingRecipeInput;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.type.GridInventory;
+import org.spongepowered.api.item.recipe.crafting.RecipeInput;
+import org.spongepowered.common.item.util.ItemStackUtil;
 
-@Mixin(AbstractFurnaceBlockEntity.class)
-public interface AbstractFurnaceBlockEntityAccessor {
+public final class SpongeRecipeInputFactory implements RecipeInput.Factory {
 
-    @Accessor("litTime") int accessor$litTime();
+    @Override
+    public RecipeInput.Single single(final ItemStack stack) {
+        return (RecipeInput.Single) (Object) new SingleRecipeInput(ItemStackUtil.toNative(stack));
+    }
 
-    @Accessor("litTime") void accessor$litTime(final int litTime);
+    @Override
+    public RecipeInput.Smithing smithing(final ItemStack template, final ItemStack base, final ItemStack addtion) {
+        return (RecipeInput.Smithing) (Object) new SmithingRecipeInput(ItemStackUtil.toNative(template), ItemStackUtil.toNative(base), ItemStackUtil.toNative(addtion));
+    }
 
-    @Accessor("litDuration") int accessor$litDuration();
-
-    @Accessor("litDuration") void accessor$litDuration(final int litDuration);
-
-    @Accessor("cookingProgress") int accessor$cookingProgress();
-
-    @Accessor("cookingProgress") void accessor$cookingProgress(final int cookingProgress);
-
-    @Accessor("cookingTotalTime") int accessor$cookingTotalTime();
-
-    @Accessor("cookingTotalTime") void accessor$cookingTotalTime(final int cookingTotalTime);
-
-    @Accessor("quickCheck")  RecipeManager.CachedCheck<SingleRecipeInput, ? extends AbstractCookingRecipe> accessor$quickCheck();
-
+    @Override
+    public RecipeInput.Crafting crafting(final GridInventory grid) {
+        final var list = grid.slots().stream().map(Slot::peek).map(ItemStackUtil::toNative).toList();
+        return (RecipeInput.Crafting) CraftingInput.of(grid.columns(), grid.rows(), list);
+    }
 }

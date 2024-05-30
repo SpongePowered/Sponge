@@ -30,9 +30,9 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapedRecipePattern;
 import org.spongepowered.common.bridge.world.item.crafting.RecipeResultBridge;
@@ -103,15 +103,15 @@ public class SpongeShapedRecipe extends ShapedRecipe implements ResultFunctionRe
     }
 
     @Override
-    public NonNullList<ItemStack> getRemainingItems(CraftingContainer inv) {
+    public NonNullList<ItemStack> getRemainingItems(final CraftingInput $$0) {
         if (this.remainingItemsFunctionId != null) {
-            return IngredientResultUtil.cachedRemainingItemsFunction(this.remainingItemsFunctionId).apply(inv);
+            return IngredientResultUtil.cachedRemainingItemsFunction(this.remainingItemsFunctionId).apply($$0);
         }
-        return super.getRemainingItems(inv);
+        return super.getRemainingItems($$0);
     }
 
     @Override
-    public ItemStack assemble(final CraftingContainer $$0, final HolderLookup.Provider $$1) {
+    public ItemStack assemble(final CraftingInput $$0, final HolderLookup.Provider $$1) {
         if (this.resultFunctionId != null) {
             return IngredientResultUtil.cachedResultFunction(this.resultFunctionId).apply($$0);
         }

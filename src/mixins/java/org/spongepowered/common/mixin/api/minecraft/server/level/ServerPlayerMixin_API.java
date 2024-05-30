@@ -308,7 +308,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         if (this.shadow$getHealth() > 0.0F) {
             return false;
         }
-        this.connection.player = this.server.getPlayerList().respawn((net.minecraft.server.level.ServerPlayer) (Object) this, false);
+        this.connection.player = this.server.getPlayerList().respawn((net.minecraft.server.level.ServerPlayer) (Object) this, false, Entity.RemovalReason.DISCARDED);
         return true;
     }
 

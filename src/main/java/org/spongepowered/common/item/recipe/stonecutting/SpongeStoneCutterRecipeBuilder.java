@@ -27,17 +27,17 @@ package org.spongepowered.common.item.recipe.stonecutting;
 
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
+import org.spongepowered.api.item.recipe.crafting.RecipeInput;
 import org.spongepowered.api.item.recipe.single.StoneCutterRecipe;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
@@ -53,7 +53,7 @@ public final class SpongeStoneCutterRecipeBuilder extends AbstractResourceKeyedB
 
     private ItemStack result;
     private Ingredient ingredient;
-    private Function<Container, net.minecraft.world.item.ItemStack> resultFunction;
+    private Function<SingleRecipeInput, net.minecraft.world.item.ItemStack> resultFunction;
     private @Nullable String group;
     private DataPack<RecipeRegistration> pack = DataPacks.RECIPE;
 
@@ -87,12 +87,12 @@ public final class SpongeStoneCutterRecipeBuilder extends AbstractResourceKeyedB
     }
 
     @Override
-    public EndStep result(Function<Inventory, ItemStack> resultFunction, ItemStack exemplaryResult) {
+    public EndStep result(Function<RecipeInput.Single, ItemStack> resultFunction, ItemStack exemplaryResult) {
         Objects.requireNonNull(exemplaryResult, "exemplaryResult");
         Preconditions.checkState(!exemplaryResult.isEmpty(), "exemplaryResult must not be empty");
 
         this.result = exemplaryResult;
-        this.resultFunction = (inv) -> ItemStackUtil.toNative(resultFunction.apply(InventoryUtil.toInventory(inv)));
+        this.resultFunction = (inv) -> ItemStackUtil.toNative(resultFunction.apply(InventoryUtil.toSponge(inv)));
         return this;
     }
 

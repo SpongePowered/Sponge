@@ -26,10 +26,10 @@ package org.spongepowered.common.item.recipe.stonecutting;
 
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.item.recipe.Recipe;
@@ -41,17 +41,17 @@ import java.util.Collections;
 import java.util.function.Function;
 
 public class SpongeStonecuttingRecipeRegistration extends SpongeRecipeRegistration<StonecutterRecipe> implements
-        SpongeRecipeRegistration.ResultFunctionRegistration<Container> {
+        SpongeRecipeRegistration.ResultFunctionRegistration<SingleRecipeInput> {
 
     // Vanilla Recipe
     private final Ingredient ingredient;
 
     // Sponge Recipe
     private final ItemStack spongeResult;
-    private Function<Container, ItemStack> resultFunction;
+    private Function<SingleRecipeInput, ItemStack> resultFunction;
 
     public SpongeStonecuttingRecipeRegistration(ResourceLocation key, String group, Ingredient ingredient,
-            ItemStack spongeResult, Function<Container, ItemStack> resultFunction,
+            ItemStack spongeResult, Function<SingleRecipeInput, ItemStack> resultFunction,
             DataPack<RecipeRegistration> pack, final RecipeCategory category) {
         super(key, group, pack, category, RecipeSerializer.STONECUTTER);
         this.ingredient = ingredient;
@@ -70,7 +70,7 @@ public class SpongeStonecuttingRecipeRegistration extends SpongeRecipeRegistrati
     }
 
     @Override
-    public Function<Container, ItemStack> resultFunction() {
+    public Function<SingleRecipeInput, ItemStack> resultFunction() {
         return this.resultFunction;
     }
 }

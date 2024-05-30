@@ -34,7 +34,7 @@ import java.util.Collection;
 /**
  * Provides {@link Fabric} access to an {@link Container}
  */
-class IInventoryTranslator implements InventoryTranslator<Container> {
+class ContainerTranslator implements InventoryTranslator<Container> {
     @Override
     public Collection<InventoryBridge> allInventories(Container inventory) {
         return ImmutableSet.of((InventoryBridge) inventory);

@@ -388,9 +388,10 @@ public final class SpongeViewableInventoryBuilder implements ViewableInventory.B
         // horse is used for distance to player
         // checking HorseArmor Item in Slot
         // chested State and capacity (hasChest/getInventoryColumns) to add more Slots
+        int chestColumns = 0;
         AbstractHorse horse = null;
         ContainerTypeInfo.of(0, 0,
-                (id, i, p, vi) -> new HorseInventoryMenu(id, i, vi, horse));
+                (id, i, p, vi) -> new HorseInventoryMenu(id, i, vi, horse, chestColumns));
 
         return SpongeViewableInventoryBuilder.containerTypeInfo;
     }

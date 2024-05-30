@@ -26,16 +26,12 @@ package org.spongepowered.common.mixin.api.minecraft.world.item.crafting;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
-import net.minecraft.world.inventory.CraftingContainer;
-import net.minecraft.world.inventory.CraftingMenu;
-import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.inventory.StonecutterMenu;
-import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
-import net.minecraft.world.level.block.entity.CampfireBlockEntity;
+import net.minecraft.world.item.crafting.RecipeInput;
+import net.minecraft.world.item.crafting.RecipeManager.CachedCheck;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
+import net.minecraft.world.level.Level;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.Recipe;
 import org.spongepowered.api.item.recipe.RecipeManager;
@@ -44,9 +40,7 @@ import org.spongepowered.api.item.recipe.cooking.CookingRecipe;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.accessor.world.inventory.CraftingMenuAccessor;
-import org.spongepowered.common.accessor.world.inventory.InventoryMenuAccessor;
-import org.spongepowered.common.accessor.world.level.block.entity.AbstractFurnaceBlockEntityAccessor;
+import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.Collection;
@@ -59,33 +53,33 @@ public abstract class RecipeManagerMixin_API implements RecipeManager {
 
     // @formatter:off
     @Shadow public abstract Optional<? extends net.minecraft.world.item.crafting.Recipe<?>> shadow$byKey(ResourceLocation recipeId);
-    @Shadow protected abstract <C extends Container, T extends net.minecraft.world.item.crafting.Recipe<C>> Collection<RecipeHolder<T>> shadow$byType(net.minecraft.world.item.crafting.RecipeType<T> recipeTypeIn);
+    @Shadow protected abstract <I extends RecipeInput, T extends net.minecraft.world.item.crafting.Recipe<I>> Collection<RecipeHolder<T>> shadow$byType(net.minecraft.world.item.crafting.RecipeType<T> recipeTypeIn);
     @Shadow public abstract Collection<net.minecraft.world.item.crafting.Recipe<?>> shadow$getRecipes();
-    @Shadow public abstract <C extends Container, T extends net.minecraft.world.item.crafting.Recipe<C>> Optional<T> shadow$getRecipeFor(net.minecraft.world.item.crafting.RecipeType<T> recipeTypeIn, C inventoryIn, net.minecraft.world.level.Level worldIn);
+    @Shadow public abstract <I extends RecipeInput, T extends net.minecraft.world.item.crafting.Recipe<I>> Optional<T> shadow$getRecipeFor(net.minecraft.world.item.crafting.RecipeType<T> recipeTypeIn, I inventoryIn, net.minecraft.world.level.Level worldIn);
 
     // @formatter:on
 
     @Override
-    public Optional<Recipe> byKey(final ResourceKey key) {
+    public Optional<Recipe<?>> byKey(final ResourceKey key) {
         Objects.requireNonNull(key);
         return this.shadow$byKey((ResourceLocation) (Object) key).map(Recipe.class::cast);
     }
 
     @Override
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
-    public Collection<Recipe> all() {
+    public Collection<Recipe<?>> all() {
         return (Collection) this.shadow$getRecipes();
     }
 
     @Override
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
-    public <T extends Recipe> Collection<T> allOfType(final RecipeType<T> type) {
+    public <T extends Recipe<?>> Collection<T> allOfType(final RecipeType<T> type) {
         Objects.requireNonNull(type);
         return this.shadow$byType((net.minecraft.world.item.crafting.RecipeType)type);
     }
 
     @Override
-    public <T extends Recipe> Collection<T> findByResult(final RecipeType<T> type, final ItemStackSnapshot result) {
+    public <T extends Recipe<?>> Collection<T> findByResult(final RecipeType<T> type, final ItemStackSnapshot result) {
         Objects.requireNonNull(type);
         Objects.requireNonNull(result);
         return this.allOfType(type).stream()
@@ -94,44 +88,24 @@ public abstract class RecipeManagerMixin_API implements RecipeManager {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Optional<Recipe> findMatchingRecipe(final Inventory inventory, final ServerWorld world) {
-        Objects.requireNonNull(inventory);
-        Objects.requireNonNull(world);
-        if (inventory instanceof AbstractFurnaceBlockEntity furnace) {
-
-            final Optional<? extends AbstractCookingRecipe> recipeFor = ((AbstractFurnaceBlockEntityAccessor) inventory).accessor$quickCheck().getRecipeFor(furnace, furnace.getLevel()).map(RecipeHolder::value);
-            return recipeFor.map(Recipe.class::cast);
-        }
-        if (inventory instanceof CampfireBlockEntity) {
-            return this.shadow$getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CAMPFIRE_COOKING, (Container) inventory, (net.minecraft.world.level.Level) world).map(Recipe.class::cast);
-        }
-        if (inventory instanceof CraftingMenu) {
-            final CraftingContainer craftingInventory = ((CraftingMenuAccessor) inventory).accessor$craftSlots();
-            return this.shadow$getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING, craftingInventory, (net.minecraft.world.level.Level) world).map(Recipe.class::cast);
-        }
-        if (inventory instanceof InventoryMenu) {
-            final CraftingContainer craftingInventory = ((InventoryMenuAccessor) inventory).accessor$craftSlots();
-            return this.shadow$getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING, craftingInventory, (net.minecraft.world.level.Level) world).map(Recipe.class::cast);
-        }
-        if (inventory instanceof StonecutterMenu) {
-            final Container stonecutterInventory = ((StonecutterMenu) inventory).container;
-            return this.shadow$getRecipeFor(net.minecraft.world.item.crafting.RecipeType.STONECUTTING, stonecutterInventory, (net.minecraft.world.level.Level) world).map(Recipe.class::cast);
-        }
-
-        return Optional.empty();
-    }
-
-    @Override
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
-    public <T extends Recipe> Optional<T> findMatchingRecipe(final RecipeType<T> type, final Inventory inventory, final ServerWorld world) {
+    public <I extends org.spongepowered.api.item.recipe.crafting.RecipeInput, T extends Recipe<I>> Optional<T> findMatchingRecipe(final RecipeType<T> type, final I inventory, final ServerWorld world) {
         Objects.requireNonNull(type);
         Objects.requireNonNull(inventory);
         Objects.requireNonNull(world);
         if (!(inventory instanceof Container)) {
             return Optional.empty();
         }
-        return this.shadow$getRecipeFor((net.minecraft.world.item.crafting.RecipeType) type, (Container) inventory, (net.minecraft.world.level.Level) world);
+
+        final var mcRecipeType = (net.minecraft.world.item.crafting.RecipeType) type;
+        final var checker = net.minecraft.world.item.crafting.RecipeManager.createCheck(mcRecipeType);
+        final var level = (Level) world;
+
+        return InventoryUtil.toCraftingInput(inventory).flatMap(in -> RecipeManagerMixin_API.impl$getRecipe(level, checker, in));
+    }
+
+    private static <I extends RecipeInput, T extends net.minecraft.world.item.crafting.Recipe<I>> Optional<Recipe<?>> impl$getRecipe(final Level level, final CachedCheck<I, T> checker, final I input) {
+        return checker.getRecipeFor(input, level).map(RecipeHolder::value).map(Recipe.class::cast);
     }
 
     @Override
@@ -139,8 +113,8 @@ public abstract class RecipeManagerMixin_API implements RecipeManager {
     public <T extends CookingRecipe> Optional<T> findCookingRecipe(final RecipeType<T> type, final ItemStackSnapshot ingredient) {
         Objects.requireNonNull(type);
         Objects.requireNonNull(ingredient);
-        final net.minecraft.world.SimpleContainer fakeFurnace = new net.minecraft.world.SimpleContainer(1);
-        fakeFurnace.setItem(0, ItemStackUtil.fromSnapshotToNative(ingredient));
-        return this.shadow$getRecipeFor((net.minecraft.world.item.crafting.RecipeType) type, fakeFurnace, null);
+
+        final SingleRecipeInput input = new SingleRecipeInput(ItemStackUtil.fromSnapshotToNative(ingredient));
+        return this.shadow$getRecipeFor((net.minecraft.world.item.crafting.RecipeType) type, input, null);
     }
 }

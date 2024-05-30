@@ -3,7 +3,6 @@
     "package": "org.spongepowered.common.mixin.optimization",
     "plugin": "org.spongepowered.common.mixin.plugin.OptimizationPlugin",
     "mixins": [
-        "general.DataFixersMixin_Optimization_LazyDFU",
         "world.entity.TamableAnimalMixin_Optimization_Owner",
         "world.level.block.entity.BellBlockEntityMixin_Optimization_BellLeak"
     ]

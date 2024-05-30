@@ -32,6 +32,8 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.RecipeInput;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.SpongeCommon;
 
@@ -57,8 +59,8 @@ public final class IngredientResultUtil {
 
     @Nullable
     @SuppressWarnings("unchecked")
-    public static <C extends Container> Function<C, net.minecraft.world.item.ItemStack> cachedResultFunction(String id) {
-        return (Function<C, net.minecraft.world.item.ItemStack>) IngredientResultUtil.cachedResultFunctions.get(id);
+    public static <I extends RecipeInput> Function<I, net.minecraft.world.item.ItemStack> cachedResultFunction(String id) {
+        return (Function<I, net.minecraft.world.item.ItemStack>) IngredientResultUtil.cachedResultFunctions.get(id);
     }
 
 
@@ -81,8 +83,8 @@ public final class IngredientResultUtil {
 
     @Nullable
     @SuppressWarnings("unchecked")
-    public static <C extends Container> Function<C, NonNullList<net.minecraft.world.item.ItemStack>> cachedRemainingItemsFunction(String id) {
-        return (Function<C, NonNullList<net.minecraft.world.item.ItemStack>>) IngredientResultUtil.cachedRemainingItemsFunctions.get(id);
+    public static <I extends CraftingInput> Function<I, NonNullList<net.minecraft.world.item.ItemStack>> cachedRemainingItemsFunction(String id) {
+        return (Function<I, NonNullList<net.minecraft.world.item.ItemStack>>) IngredientResultUtil.cachedRemainingItemsFunctions.get(id);
     }
 
 
