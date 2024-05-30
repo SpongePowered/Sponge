@@ -37,6 +37,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
@@ -690,7 +691,7 @@ public abstract class SpongeWorldManager implements WorldManager {
 
     public void loadLevel() {
 
-        final boolean multiworldEnabled = this.server.isSingleplayer() || this.server.isNetherEnabled();
+        final boolean multiworldEnabled = this.server.isSingleplayer() || (this.server instanceof DedicatedServer ds && ds.getProperties().allowNether);
         if (!multiworldEnabled) {
             SpongeCommon.logger().warn("The option 'allow-nether' has been set to 'false' in the server.properties. "
                     + "Multi-World support has been disabled and no worlds besides the default world will be loaded.");
