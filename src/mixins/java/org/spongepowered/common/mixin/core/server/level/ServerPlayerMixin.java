@@ -182,6 +182,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Shadow public abstract void shadow$doCloseContainer();
     @Shadow public abstract void shadow$setLevel(ServerLevel serverLevel);
     @Shadow public abstract boolean shadow$setGameMode(GameType param0);
+    @Shadow public abstract ServerLevel getLevel();
     // @formatter:on
 
     private net.minecraft.network.chat.@Nullable Component impl$connectionMessage;
@@ -904,5 +905,15 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Override
     public void bridge$replaceWorldBorder(final @Nullable WorldBorder border) {
         this.impl$worldBorder = border;
+    }
+
+    /**
+     * @author Zidane
+     * @reason Have PVP check if the world allows it or not
+     * @return True if PVP allowed
+     */
+    @Overwrite
+    private boolean isPvpAllowed() {
+        return ((ServerWorld) this.getLevel()).properties().pvp();
     }
 }

@@ -40,6 +40,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
+import net.minecraft.server.network.ServerPlayerConnection;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
@@ -414,13 +415,13 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         }
 
         if (this.bridge$vanishState().invisible()) {
-            for (final ServerPlayer entityPlayerMP : trackerAccessor.accessor$seenBy()) {
-                trackerAccessor.accessor$removePlayer(entityPlayerMP);
+            for (final ServerPlayerConnection playerConnection : trackerAccessor.accessor$seenBy()) {
+                trackerAccessor.accessor$removePlayer(playerConnection.getPlayer());
             }
 
             if ((Entity) (Object) this instanceof ServerPlayer) {
                 for (final ServerPlayer entityPlayerMP : SpongeCommon.server().getPlayerList().getPlayers()) {
-                    if ((Entity) (Object) this == entityPlayerMP) {
+                    if ((Object) this == entityPlayerMP) {
                         continue;
                     }
                     entityPlayerMP.connection.send(new ClientboundPlayerInfoRemovePacket(List.of(this.uuid)));
@@ -428,7 +429,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             }
         } else {
             for (final ServerPlayer entityPlayerMP : SpongeCommon.server().getPlayerList().getPlayers()) {
-                if ((Entity) (Object) this == entityPlayerMP) {
+                if ((Object) this == entityPlayerMP) {
                     continue;
                 }
                 if ((Entity) (Object) this instanceof ServerPlayer player) {

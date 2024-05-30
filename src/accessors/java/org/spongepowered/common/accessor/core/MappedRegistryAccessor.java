@@ -22,34 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.config.inheritable;
+package org.spongepowered.common.accessor.core;
 
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
-import org.spongepowered.configurate.objectmapping.meta.Comment;
-import org.spongepowered.configurate.objectmapping.meta.Setting;
+import net.minecraft.core.MappedRegistry;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-@ConfigSerializable
-public final class EntityCategory {
+@Mixin(MappedRegistry.class)
+public interface MappedRegistryAccessor<T> {
 
-    @Setting
-    public final HumanSubCategory human = new HumanSubCategory();
+    @Accessor("frozen")
+    boolean accessor$frozen();
 
-    @Setting
-    public final ItemSubCategory item = new ItemSubCategory();
-
-    @ConfigSerializable
-    public static final class HumanSubCategory {
-
-        @Setting("tab-list-remove-delay")
-        @Comment("Number of ticks before the fake player entry of a human is removed from the tab list (range of 0 to 100 ticks).")
-        public int tabListRemoveDelay = 10;
-    }
-
-    @ConfigSerializable
-    public static final class ItemSubCategory {
-
-        @Setting("despawn-rate")
-        @Comment("Controls the time in ticks for when an item despawns.")
-        public int despawnRate = 6000;
-    }
+    @Accessor("frozen")
+    @Mutable
+    void accessor$frozen(boolean frozen);
 }

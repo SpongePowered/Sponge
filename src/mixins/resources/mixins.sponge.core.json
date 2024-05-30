@@ -13,6 +13,7 @@
         "advancements.TreeNodePositionMixin",
         "adventure.KeyMixin",
         "adventure.bossbar.HackyBossBarPlatformBridgeMixin",
+        "adventure.chat.SignedMessageMixin",
         "adventure.text.AbstractComponentMixin",
         "adventure.text.format.StyleImplMixin",
         "block.BedBlockMixin",
@@ -40,11 +41,14 @@
         "network.protocol.game.ClientboundResourcePackPacketMixin",
         "network.syncher.EntityDataAccessorMixin",
         "network.syncher.SynchedEntityDataMixin",
+        "registries.BuiltInRegistriesMixin",
+        "resources.RegistryDataLoaderMixin",
         "server.MainMixin",
         "server.MinecraftServerMixin",
         "server.PlayerAdvancementsMixin",
         "server.ServerFunctionManagerMixin",
         "server.ServerScoreboardMixin",
+        "server.WorldLoaderMixin",
         "server.bossevents.CustomBossEventMixin",
         "server.commands.BossBarCommandsMixin",
         "server.commands.DifficultyCommandMixin",
@@ -91,6 +95,7 @@
         "world.BaseCommandBlockMixin",
         "world.BossEventMixin",
         "world.damagesource.DamageSourceMixin",
+        "world.damagesource.DamageSourcesMixin",
         "world.entity.ActiveChunkReferentMixin",
         "world.entity.AgableMobMixin",
         "world.entity.EntityMaxAirMixin",
@@ -187,6 +192,8 @@
         "world.level.block.CarvedPumpkinBlockMixin",
         "world.level.block.CommandBlockMixin",
         "world.level.block.EndPortalBlockMixin",
+        "world.level.block.FallingBlockMixin",
+        "world.level.block.FarmBlockMixin",
         "world.level.block.FireBlockMixin",
         "world.level.block.LeavesBlockMixin",
         "world.level.block.MagmaBlockMixin",
@@ -216,7 +223,9 @@
         "world.level.dimension.DimensionTypeMixin",
         "world.level.dimension.LevelStemMixin",
         "world.level.entity.PersistentEntitySectionManagerMixin",
+        "world.level.gameevent.vibrations.VibrationListenerMixin",
         "world.level.levelgen.NoiseGeneratorSettingsMixin",
+        "world.level.levelgen.WorldDimensionsMixin",
         "world.level.levelgen.WorldOptionsMixin",
         "world.level.levelgen.flat.FlatLayerInfoMixin",
         "world.level.levelgen.flat.FlatLevelGeneratorSettingsMixin",
@@ -234,17 +243,12 @@
         "world.scores.ScoreboardMixin",
         "world.scores.ScoreMixin",
         "world.ticks.LevelTicksMixin",
-        "world.ticks.ScheduledTickMixin",
-        "server.WorldLoaderMixin",
-        "registries.BuiltInRegistriesMixin",
-        "adventure.chat.SignedMessageMixin",
-        "world.level.gameevent.vibrations.VibrationListenerMixin",
-        "resources.RegistryDataLoaderMixin",
-        "world.level.levelgen.WorldDimensionsMixin",
-        "world.damagesource.DamageSourcesMixin"
+        "world.ticks.ScheduledTickMixin"
     ],
     "client": [
         "client.MinecraftMixin",
+        "client.gui.screens.worldselection.CreateWorldScreenMixin",
+        "client.gui.screens.worldselection.WorldOpenFlowsMixin",
         "client.multiplayer.ClientHandshakePacketListenerImplMixin",
         "client.multiplayer.ClientLevelMixin",
         "client.multiplayer.ClientPacketListenerMixin",
@@ -252,12 +256,11 @@
         "client.player.AbstractClientPlayerMixin",
         "client.server.IntegratedPlayerListMixin",
         "client.server.IntegratedServerMixin",
-        "server.network.MemoryServerHandshakePacketListenerImplMixin",
-        "client.gui.screens.worldselection.CreateWorldScreenMixin",
-        "client.gui.screens.worldselection.WorldOpenFlowsMixin"
+        "server.network.MemoryServerHandshakePacketListenerImplMixin"
     ],
     "server": [
-        "server.dedicated.DedicatedServerMixin"
+        "server.dedicated.DedicatedServerMixin",
+        "server.dedicated.ServerWatchdogMixin"
     ],
     "injectors": {
         "maxShiftBy": 3

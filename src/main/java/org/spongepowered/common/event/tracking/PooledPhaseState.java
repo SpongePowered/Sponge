@@ -43,13 +43,13 @@ public abstract class PooledPhaseState<C extends PhaseContext<C>> implements IPh
         }
 
         if (tracker == PhaseTracker.SERVER) {
-            if (this.serverCached != null && !this.serverCached.isCompleted) {
+            if (this.serverCached != null) {
                 final C cached = this.serverCached;
                 this.serverCached = null;
                 return cached;
             }
         } else if (tracker == PhaseTracker.CLIENT) {
-            if (this.clientCached != null && !this.clientCached.isCompleted) {
+            if (this.clientCached != null) {
                 final C cached = this.clientCached;
                 this.clientCached = null;
                 return cached;
@@ -57,20 +57,9 @@ public abstract class PooledPhaseState<C extends PhaseContext<C>> implements IPh
         }
         final @Nullable C peek = tracker.getContextPoolFor(this).pollFirst();
         if (peek != null) {
-            if (tracker == PhaseTracker.SERVER) {
-                this.serverCached = peek;
-            } else if (tracker == PhaseTracker.CLIENT) {
-                this.clientCached = peek;
-            }
             return peek;
         }
-        final C maybeCached = this.createNewContext(tracker);
-        if (tracker == PhaseTracker.SERVER) {
-            this.serverCached = maybeCached;
-        } else if (tracker == PhaseTracker.CLIENT) {
-            this.clientCached = maybeCached;
-        }
-        return maybeCached;
+        return this.createNewContext(tracker);
     }
 
     final void releaseContextFromPool(final C context) {
@@ -79,25 +68,18 @@ public abstract class PooledPhaseState<C extends PhaseContext<C>> implements IPh
             throw new IllegalStateException("Asynchronous Thread Access to PhaseTracker: " + createdTracker);
         }
         if (createdTracker == PhaseTracker.SERVER) {
-            if (this.serverCached == context) {
-                return;
-            }
             if (this.serverCached == null) {
                 this.serverCached = context;
                 return;
             }
         }
-        if (createdTracker == PhaseTracker.CLIENT) {
-            if (this.clientCached == context) {
-                return;
-            }
+        else if (createdTracker == PhaseTracker.CLIENT) {
             if (this.clientCached == null) {
                 this.clientCached = context;
                 return;
             }
         }
         createdTracker.getContextPoolFor(this).push(context);
-
     }
 
     protected abstract C createNewContext(PhaseTracker tracker);

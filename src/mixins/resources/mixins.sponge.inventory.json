@@ -63,6 +63,7 @@
         "impl.common.entity.player.SpongeUserInventoryMixin_Lens_Bridge",
         "impl.common.inventory.custom.CarriedWrapperInventoryMixin_Adapter_Inventory",
         "impl.common.inventory.custom.CustomInventoryMixin_Lens_Inventory",
+        "impl.server.level.ServerPlayer_Mixin_Inventory",
         "impl.world.ContainerMixin_Fabric_Inventory",
         "impl.world.TraitMixin_TrackedMenuBridge_Inventory",
         "impl.world.entity.LivingEntityMixin_EquipmentFabric_Inventory",

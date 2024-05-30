@@ -22,34 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.config.inheritable;
+package org.spongepowered.common.mixin.core.server.dedicated;
 
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
-import org.spongepowered.configurate.objectmapping.meta.Comment;
-import org.spongepowered.configurate.objectmapping.meta.Setting;
+import net.minecraft.server.dedicated.ServerWatchdog;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.util.JvmUtil;
 
-@ConfigSerializable
-public final class EntityCategory {
+@Mixin(ServerWatchdog.class)
+public abstract class ServerWatchdogMixin {
 
-    @Setting
-    public final HumanSubCategory human = new HumanSubCategory();
-
-    @Setting
-    public final ItemSubCategory item = new ItemSubCategory();
-
-    @ConfigSerializable
-    public static final class HumanSubCategory {
-
-        @Setting("tab-list-remove-delay")
-        @Comment("Number of ticks before the fake player entry of a human is removed from the tab list (range of 0 to 100 ticks).")
-        public int tabListRemoveDelay = 10;
-    }
-
-    @ConfigSerializable
-    public static final class ItemSubCategory {
-
-        @Setting("despawn-rate")
-        @Comment("Controls the time in ticks for when an item despawns.")
-        public int despawnRate = 6000;
+    @Inject(method = "exit", at = @At("HEAD"))
+    private void impl$dumpHeap(final CallbackInfo ci) {
+        if (Boolean.getBoolean("sponge.watchdogWriteDumpHeap")) {
+            JvmUtil.dumpHeap();
+        }
     }
 }

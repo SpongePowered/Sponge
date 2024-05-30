@@ -53,8 +53,6 @@ public interface PrimaryLevelDataBridge {
 
     UUID bridge$uniqueId();
 
-    void bridge$setUniqueId(UUID uniqueId);
-
     boolean bridge$customDifficulty();
 
     boolean bridge$customGameType();
@@ -95,19 +93,17 @@ public interface PrimaryLevelDataBridge {
 
     void bridge$populateFromLevelStem(LevelStem dimension);
 
-    void bridge$setMapUUIDIndex(BiMap<Integer, UUID> index);
-
     BiMap<Integer, UUID> bridge$getMapUUIDIndex();
 
     int bridge$getIndexForUniqueId(UUID uuid);
 
     Optional<UUID> bridge$getUniqueIdForIndex(int ownerIndex);
 
-    void bridge$readSpongeLevelData(Dynamic<Tag> impl$spongeLevelData);
-
-    CompoundTag bridge$writeSpongeLevelData();
-
     void bridge$hardcore(boolean hardcore);
 
     void bridge$allowCommands(boolean commands);
+
+    void bridge$readSpongeLevelData(Dynamic<Tag> impl$spongeLevelData);
+
+    CompoundTag bridge$writeSpongeLevelData();
 }

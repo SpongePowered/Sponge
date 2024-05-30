@@ -22,34 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.level.block.entity;
+package org.spongepowered.common.bridge.core;
 
-import org.spongepowered.api.data.type.StructureMode;
-import org.spongepowered.math.vector.Vector3i;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 
-public interface StructureBlockEntityBridge {
+public interface MappedRegistryBridge<T> {
 
-    String bridge$getAuthor();
-
-    void bridge$setAuthor(String author);
-
-    boolean bridge$shouldIgnoreEntities();
-
-    float bridge$getIntegrity();
-
-    StructureMode bridge$getMode();
-
-    void bridge$setMode(StructureMode mode);
-
-    Vector3i bridge$getPosition();
-
-    void bridge$setPosition(Vector3i position);
-
-    boolean bridge$shouldShowAir();
-
-    boolean bridge$shouldShowBoundingBox();
-
-    Vector3i bridge$getSize();
-
-    void bridge$setSize(Vector3i size);
+    void bridge$forceRemoveValue(ResourceKey<Registry<T>> key);
 }

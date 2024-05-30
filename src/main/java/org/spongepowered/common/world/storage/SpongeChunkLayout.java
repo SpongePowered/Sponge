@@ -39,10 +39,9 @@ public final class SpongeChunkLayout implements ChunkLayout {
     private final Vector3i spaceSize;
 
     public SpongeChunkLayout(final int minY, final int height) {
-        final var totalHeight = Math.abs(minY) + height;
-        this.size = new Vector3i(16, totalHeight, 16);
+        this.size = new Vector3i(16, height, 16);
         this.mask = this.size.sub(1, 1, 1);
-        this.spaceMax = new Vector3i(Constants.World.BLOCK_MAX.x(), height, Constants.World.BLOCK_MAX.z()).sub(1, 1, 1);
+        this.spaceMax = new Vector3i(Constants.World.BLOCK_MAX.x(), minY + height, Constants.World.BLOCK_MAX.z()).sub(1, 1, 1);
         this.spaceMin = new Vector3i(Constants.World.BLOCK_MIN.x(), minY, Constants.World.BLOCK_MIN.z());
         this.spaceSize = this.spaceMax.sub(this.spaceMin).add(1, 1, 1);
     }
@@ -88,17 +87,17 @@ public final class SpongeChunkLayout implements ChunkLayout {
 
     @Override
     public boolean isInChunk(final int wx, final int wy, final int wz, final int cx, final int cy, final int cz) {
-        return this.isInChunk(wx - (cx << 4), wy - (cy << 8), wz - (cz << 4));
+        return this.isInChunk(wx - (cx << 4), wy - Math.floorDiv(cy - this.spaceMin.y(), this.size.y()), wz - (cz << 4));
     }
 
     @Override
     public Vector3i forceToChunk(final int x, final int y, final int z) {
-        return new Vector3i(x >> 4, y >> 8, z >> 4);
+        return new Vector3i(x >> 4, Math.floorDiv(y - this.spaceMin.y(), this.size.y()), z >> 4);
     }
 
     @Override
     public Vector3i forceToWorld(final int x, final int y, final int z) {
-        return new Vector3i(x << 4, y << 8, z << 4);
+        return new Vector3i(x << 4, (y * this.size.y()) + this.spaceMin.y(), z << 4);
     }
 
 }

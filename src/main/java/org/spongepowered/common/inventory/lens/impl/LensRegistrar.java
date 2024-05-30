@@ -72,7 +72,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
 /**
@@ -246,7 +245,7 @@ public class LensRegistrar {
 
     public static class BasicSlotLensProvider implements SlotLensProvider {
 
-        private static Map<Integer, BasicSlotLens> basicSlotLenses = new ConcurrentHashMap<>();
+        private Map<Integer, BasicSlotLens> basicSlotLenses = new HashMap<>();
 
         public final int base;
         public final int size;
@@ -262,7 +261,7 @@ public class LensRegistrar {
 
         @Override
         public SlotLens getSlotLens(int index) {
-            return BasicSlotLensProvider.basicSlotLenses.computeIfAbsent(index, BasicSlotLens::new);
+            return this.basicSlotLenses.computeIfAbsent(index, BasicSlotLens::new);
         }
 
         @Override

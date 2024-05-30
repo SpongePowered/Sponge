@@ -107,7 +107,7 @@ public record SpongeDataPackType<E, T extends DataPackEntry<T>>(String dir, bool
                 false);
 
         private final SpongeDataPackType<JsonElement, @NonNull WorldTemplate> world = SpongeDataPackType.basic(WorldTemplate.class,
-                "dimension", SpongeWorldTemplate::serialize, SpongeWorldTemplate::decode,
+                "dimension", SpongeWorldTemplate::encode, SpongeWorldTemplate::decode,
                 false);
 
         private final SpongeDataPackType<JsonElement, @NonNull BiomeTemplate> biome = SpongeDataPackType.basic(BiomeTemplate.class,
