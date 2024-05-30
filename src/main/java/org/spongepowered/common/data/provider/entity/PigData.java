@@ -42,7 +42,7 @@ public final class PigData {
                         .get(Pig::isSaddled)
                         .set((h, v) -> {
                             if (v) {
-                                h.equipSaddle(null);
+                                h.equipSaddle(null, null);
                             } else {
                                 ((PigAccessor) h).accessor$steering().setSaddle(false);
                             }

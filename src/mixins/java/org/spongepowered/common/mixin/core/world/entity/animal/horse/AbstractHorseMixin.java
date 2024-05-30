@@ -28,6 +28,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -39,7 +40,7 @@ public abstract class AbstractHorseMixin extends AgableMobMixin implements Abstr
 
     // @formatter:off
     @Shadow protected SimpleContainer inventory;
-    @Shadow public abstract void shadow$equipSaddle(@Nullable SoundSource sound);
+    @Shadow public abstract void shadow$equipSaddle(ItemStack stack, @Nullable SoundSource sound);
     @Shadow public abstract boolean shadow$isSaddled();
     // @formatter:on
 
@@ -51,7 +52,7 @@ public abstract class AbstractHorseMixin extends AgableMobMixin implements Abstr
     @Override
     public void bridge$setSaddled(boolean saddled) {
         if (!this.shadow$isSaddled() && saddled) {
-            this.shadow$equipSaddle(null);
+            this.shadow$equipSaddle(new ItemStack(Items.SADDLE), null);
         } else if (this.shadow$isSaddled() && !saddled){
             this.inventory.setItem(0, ItemStack.EMPTY);
         }
