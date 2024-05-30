@@ -25,21 +25,18 @@
 package org.spongepowered.common.mixin.api.minecraft.world.item.enchantment;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import net.minecraft.core.Holder;
 import net.minecraft.world.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Interface.Remap;
-import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 @Mixin(net.minecraft.world.item.enchantment.Enchantment.class)
-@Implements(@Interface(iface = EnchantmentType.class, prefix = "enchantment$", remap = Remap.NONE))
 public abstract class EnchantmentMixin_API implements EnchantmentType {
 
     // @formatter:off
@@ -47,14 +44,9 @@ public abstract class EnchantmentMixin_API implements EnchantmentType {
     @Shadow public abstract int shadow$getMaxLevel();
     @Shadow public abstract int shadow$getMinCost(int level);
     @Shadow public abstract int shadow$getMaxCost(int level);
-    @Shadow protected abstract boolean shadow$checkCompatibility(net.minecraft.world.item.enchantment.Enchantment ench);
-    @Shadow protected abstract String shadow$getOrCreateDescriptionId();
-    @Shadow public abstract boolean shadow$isTreasureOnly();
-    @Shadow public abstract boolean shadow$isCurse();
     @Shadow public abstract int shadow$getWeight();
-
+    @Shadow @Final private net.minecraft.network.chat.Component description;
     // @formatter:on
-
 
     @Override
     public int weight() {
@@ -93,22 +85,12 @@ public abstract class EnchantmentMixin_API implements EnchantmentType {
 
     @Override
     public boolean isCompatibleWith(final EnchantmentType ench) {
-        return this.shadow$checkCompatibility((net.minecraft.world.item.enchantment.Enchantment) ench);
+        return Enchantment.areCompatible(Holder.direct((Enchantment) (Object) this), Holder.direct((Enchantment) (Object) ench));
     }
 
     @Override
     public Component asComponent() {
-        return Component.translatable(this.shadow$getOrCreateDescriptionId(), this.shadow$isCurse() ? NamedTextColor.RED : NamedTextColor.GRAY);
-    }
-
-    @Override
-    public boolean isTreasure() {
-        return this.shadow$isTreasureOnly();
-    }
-
-    @Intrinsic
-    public boolean enchantment$isCurse() {
-        return this.shadow$isCurse();
+        return SpongeAdventure.asAdventure(this.description);
     }
 
 }

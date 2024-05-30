@@ -26,10 +26,10 @@ package org.spongepowered.common.datapack;
 
 import com.google.gson.JsonElement;
 import io.leangen.geantyref.TypeToken;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagManager;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.advancement.AdvancementTemplate;
 import org.spongepowered.api.adventure.ChatTypeTemplate;
@@ -260,7 +260,7 @@ public record SpongeDataPackType<E, T extends DataPackEntry<T>>(String dir, bool
 
         @Override
         public <T extends Taggable<T>> DataPackType<TagTemplate<T>> tag(RegistryType<T> registry) {
-            final String tagDir = TagManager.getTagDir(ResourceKey.createRegistryKey((ResourceLocation) (Object) registry.location()));
+            final String tagDir = Registries.tagsDirPath(ResourceKey.createRegistryKey((ResourceLocation) (Object) registry.location()));
             return SpongeDataPackType.custom(new TypeToken<>() {}, tagDir,
                             new TagDataPackSerializer<>(SpongeTagTemplate::encode, null), // TODO decoder
                     true);

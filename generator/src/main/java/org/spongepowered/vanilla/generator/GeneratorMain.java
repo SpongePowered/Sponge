@@ -653,6 +653,13 @@ public final class GeneratorMain {
                     "tag",
                     "FluidTypeTags"
             ),
+            new TagGenerator(
+                    "ENCHANTMENT_TYPE",
+                    Registries.ENCHANTMENT,
+                    context.relativeClass("item.enchantment", "EnchantmentType"),
+                    "tag",
+                    "EnchantmenTypeTags"
+            ),
             new RegistryEntriesGenerator<>(
                     "event.cause.entity.damage",
                     "DamageTypes",
