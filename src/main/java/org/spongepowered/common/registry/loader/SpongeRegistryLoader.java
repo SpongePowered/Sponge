@@ -239,7 +239,10 @@ public final class SpongeRegistryLoader {
                 DamageModifierTypes.OFFENSIVE_POTION_EFFECT,
                 DamageModifierTypes.SHIELD,
                 DamageModifierTypes.SWEEPING,
-                DamageModifierTypes.WEAPON_ENCHANTMENT
+                DamageModifierTypes.WEAPON_ENCHANTMENT,
+                DamageModifierTypes.WEAPON_BONUS,
+                DamageModifierTypes.ATTACK_STRENGTH,
+                DamageModifierTypes.FREEZING_BONUS
         )));
     }
 

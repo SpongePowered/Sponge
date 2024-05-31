@@ -32,9 +32,6 @@ import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.vehicle.minecart.TNTMinecart;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -45,15 +42,14 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.DamageEventUtil;
 
-import java.util.ArrayList;
 import java.util.Optional;
 
 @Mixin(MinecartTNT.class)
@@ -166,16 +162,11 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
         }
     }
 
-    @Inject(method = "hurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/vehicle/MinecartTNT;explode(Lnet/minecraft/world/damagesource/DamageSource;D)V"), cancellable = true)
-    private void impl$postOnAttackEntityFrom(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(source);
-            final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.currentCause(),
-                (TNTMinecart) this, new ArrayList<>(), 0, amount);
-            SpongeCommon.post(event);
-            if (event.isCancelled()) {
-                cir.setReturnValue(true);
-            }
+    @Inject(method = "hurt", cancellable = true, at = @At(value = "INVOKE",
+        target = "Lnet/minecraft/world/entity/vehicle/MinecartTNT;explode(Lnet/minecraft/world/damagesource/DamageSource;D)V"))
+    private void attackImpl$postOnAttackEntityFrom(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
+        if (DamageEventUtil.callOtherAttackEvent((Entity) (Object) this, source, amount).isCancelled()) {
+            cir.setReturnValue(true);
         }
     }
 

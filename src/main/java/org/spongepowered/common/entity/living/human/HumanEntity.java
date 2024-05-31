@@ -43,6 +43,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerEntity;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -298,37 +299,6 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
         // Make the body rotation follow head rotation
         this.setYRot(this.getYHeadRot());
         return retValue;
-    }
-
-    @Override
-    public boolean doHurtTarget(final Entity entityIn) {
-        super.doHurtTarget(entityIn);
-        this.swing(this.getUsedItemHand());
-        float f = (float) this.getAttribute(Attributes.ATTACK_DAMAGE).getValue();
-        int i = 0;
-
-        f += EnchantmentHelper.getDamageBonus(this.getItemInHand(InteractionHand.MAIN_HAND), this.getType());
-        i += EnchantmentHelper.getKnockbackBonus(this);
-
-        final boolean flag = entityIn.hurt(this.damageSources().mobAttack(this), f);
-
-        if (flag) {
-            if (i > 0) {
-                entityIn.push(-Mth.sin(this.getYRot() * (float) Math.PI / 180.0F) * i * 0.5F, 0.1D,
-                        Mth.cos(this.getYRot() * (float) Math.PI / 180.0F) * i * 0.5F);
-                this.setDeltaMovement(this.getDeltaMovement().multiply(0.6, 1.0, 0.6));
-            }
-
-            final int j = EnchantmentHelper.getFireAspect(this);
-
-            if (j > 0) {
-                entityIn.igniteForSeconds(j * 4);
-            }
-
-            this.doEnchantDamageEffects(this, entityIn);
-        }
-
-        return flag;
     }
 
     private void setProfileName(final net.minecraft.network.chat.@Nullable Component newName) {
