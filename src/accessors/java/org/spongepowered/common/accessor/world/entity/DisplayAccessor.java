@@ -52,6 +52,9 @@ public interface DisplayAccessor {
 
     @Invoker("getTransformationInterpolationDuration") int invoker$getInterpolationDuration();
 
+    @Invoker("getPosRotInterpolationDuration") int invoker$getTeleportDuration();
+
+    @Invoker("setPosRotInterpolationDuration") void invoker$setTeleportDuration(int $$0);
 
     @Invoker("setTransformationInterpolationDelay") void invoker$setInterpolationDelay(int $$0);
 
