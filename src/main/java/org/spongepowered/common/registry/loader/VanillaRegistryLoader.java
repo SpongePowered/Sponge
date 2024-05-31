@@ -170,9 +170,9 @@ public final class VanillaRegistryLoader {
         this.automaticSerializedName(RegistryTypes.DOOR_HINGE, DoorHingeSide.values());
         this.automaticSerializedName(RegistryTypes.DRIPSTONE_SEGMENT, DripstoneThickness.values());
         this.manualName(RegistryTypes.EQUIPMENT_GROUP, EquipmentSlot.Type.values(), map -> {
-            map.put(EquipmentSlot.Type.ARMOR, "worn");
+            map.put(EquipmentSlot.Type.HUMANOID_ARMOR, "worn");
             map.put(EquipmentSlot.Type.HAND, "held");
-            map.put(EquipmentSlot.Type.BODY, "body");
+            map.put(EquipmentSlot.Type.ANIMAL_ARMOR, "animal_armor");
         });
         this.manualName(RegistryTypes.EQUIPMENT_TYPE, EquipmentSlot.values(), map -> {
             map.put(EquipmentSlot.CHEST, "chest");
