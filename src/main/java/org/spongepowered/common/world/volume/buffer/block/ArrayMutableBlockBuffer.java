@@ -118,7 +118,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
     }
 
     @Override
-    public Palette<BlockState, BlockType> getPalette() {
+    public Palette<BlockState, BlockType> blockPalette() {
         return this.palette;
     }
 

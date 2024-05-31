@@ -40,7 +40,8 @@ public abstract class AbstractBlockBuffer extends AbstractVolumeBuffer implement
         super(start, size);
     }
 
-    public abstract Palette<BlockState, BlockType> getPalette();
+    @Override
+    public abstract Palette<BlockState, BlockType> blockPalette();
 
 
 }

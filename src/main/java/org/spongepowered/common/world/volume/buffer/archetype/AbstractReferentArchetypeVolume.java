@@ -26,6 +26,7 @@ package org.spongepowered.common.world.volume.buffer.archetype;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.entity.BlockEntityArchetype;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.fluid.FluidState;
@@ -35,6 +36,7 @@ import org.spongepowered.api.util.mirror.Mirrors;
 import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.api.util.transformation.Transformation;
 import org.spongepowered.api.world.biome.Biome;
+import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.volume.Volume;
 import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
 import org.spongepowered.api.world.volume.archetype.block.entity.BlockEntityArchetypeVolume;
@@ -116,6 +118,11 @@ public class AbstractReferentArchetypeVolume<A extends ArchetypeVolume> implemen
         // we're not going to want to "flatten" the positions, we need to correctly
         // round and then re-add the offset post transformation
         return this.transformation.transformPosition(blockPosition);
+    }
+
+    @Override
+    public Palette<BlockState, BlockType> blockPalette() {
+        return this.reference.get().blockPalette();
     }
 
     @Override

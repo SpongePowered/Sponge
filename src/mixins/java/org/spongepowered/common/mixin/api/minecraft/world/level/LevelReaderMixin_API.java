@@ -26,36 +26,44 @@ package org.spongepowered.common.mixin.api.minecraft.world.level;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.CollisionGetter;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.world.HeightType;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.border.WorldBorder;
 import org.spongepowered.api.world.chunk.Chunk;
+import org.spongepowered.api.world.schematic.Palette;
+import org.spongepowered.api.world.schematic.PaletteTypes;
 import org.spongepowered.api.world.volume.game.Region;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
+import org.spongepowered.common.world.schematic.PaletteWrapper;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Objects;
 
-@SuppressWarnings({"RedundantTypeArguments", "unchecked", "RedundantCast"})
+@SuppressWarnings({"RedundantTypeArguments", "RedundantCast"})
 @Mixin(LevelReader.class)
 public interface LevelReaderMixin_API<R extends Region<R>> extends Region<R> {
 
@@ -70,7 +78,20 @@ public interface LevelReaderMixin_API<R extends Region<R>> extends Region<R> {
     @Shadow net.minecraft.world.level.dimension.DimensionType shadow$dimensionType();
     @Shadow boolean shadow$containsAnyLiquid(net.minecraft.world.phys.AABB bb);
     @Shadow Holder<net.minecraft.world.level.biome.Biome> shadow$getBiome(BlockPos p_226691_1_);
+    @Shadow RegistryAccess shadow$registryAccess();
     // @formatter:on
+
+    // BlockVolume
+
+    @SuppressWarnings("unchecked")
+    @Override
+    default Palette<BlockState, BlockType> blockPalette() {
+        return PaletteWrapper.of(
+            PaletteTypes.BLOCK_STATE_PALETTE.get(),
+            Block.BLOCK_STATE_REGISTRY,
+            (Registry<BlockType>) this.shadow$registryAccess().registryOrThrow(Registries.BLOCK)
+        );
+    }
 
     // Region
 

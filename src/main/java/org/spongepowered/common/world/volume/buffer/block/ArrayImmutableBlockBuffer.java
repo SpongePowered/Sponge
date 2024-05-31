@@ -79,7 +79,7 @@ public class ArrayImmutableBlockBuffer extends AbstractBlockBuffer implements Bl
     }
 
     @Override
-    public Palette<BlockState, BlockType> getPalette() {
+    public Palette<BlockState, BlockType> blockPalette() {
         return this.palette;
     }
 

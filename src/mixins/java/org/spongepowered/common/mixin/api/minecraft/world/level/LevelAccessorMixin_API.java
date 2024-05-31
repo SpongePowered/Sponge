@@ -25,19 +25,24 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.storage.LevelData;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.WorldLike;
 import org.spongepowered.api.world.difficulty.Difficulty;
+import org.spongepowered.api.world.schematic.Palette;
+import org.spongepowered.api.world.schematic.PaletteTypes;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Interface.Remap;
@@ -50,6 +55,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
+import org.spongepowered.common.world.schematic.PaletteWrapper;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -67,6 +73,18 @@ public interface LevelAccessorMixin_API<P extends WorldLike<P>> extends WorldLik
     @Shadow net.minecraft.util.RandomSource shadow$getRandom();
     @Shadow LevelData shadow$getLevelData();
     //@formatter:on
+
+    // BlockVolume
+
+    @SuppressWarnings("unchecked")
+    @Override
+    default Palette<org.spongepowered.api.block.BlockState, BlockType> blockPalette() {
+        return PaletteWrapper.of(
+            PaletteTypes.BLOCK_STATE_PALETTE.get(),
+            Block.BLOCK_STATE_REGISTRY,
+            (org.spongepowered.api.registry.Registry<BlockType>) ((LevelAccessor) (Object) this).registryAccess().registryOrThrow(Registries.BLOCK)
+        );
+    }
 
     // MutableBiomeVolume
 
