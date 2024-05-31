@@ -57,6 +57,9 @@ public interface DisplayAccessor {
 
     @Invoker("getTransformationInterpolationDelay") int invoker$getInterpolationDelay();
 
+    @Invoker("setPosRotInterpolationDuration") void invoker$setPosRotInterpolationDuration(int $$0);
+
+    @Invoker("getPosRotInterpolationDuration") int invoker$getPosRotInterpolationDuration();
 
     @Invoker("setShadowRadius") void invoker$setShadowRadius(float $$0);
 
