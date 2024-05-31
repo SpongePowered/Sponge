@@ -47,6 +47,7 @@ import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.util.Transform;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.imaginary.Quaterniond;
 import org.spongepowered.math.vector.Vector3d;
@@ -81,6 +82,7 @@ public class DisplayEntityTest {
                         final int col4 = 2;
                         final int col5 = 3;
                         final int col6 = 5;
+                        final int col7 = 6;
                         var textDisplay = spawnEntity(player.world(), EntityTypes.TEXT_DISPLAY, centerPos, forwardDir, -4, -1);
                         textDisplay.offer(Keys.DISPLAY_NAME, Component.text("DisplayEntityTest").color(NamedTextColor.GOLD));
                         textDisplay.offer(Keys.SEE_THROUGH_BLOCKS, true);
@@ -224,8 +226,18 @@ public class DisplayEntityTest {
                         blockDisplay.offer(Keys.INTERPOLATION_DURATION, Ticks.of(20));
                         blockDisplay.offer(Keys.INTERPOLATION_DELAY, Ticks.of(20));
 
-                        textDisplay = createEntity(player.world(), EntityTypes.TEXT_DISPLAY, centerPos, forwardDir, col6, 0);
-                        textDisplay.offer(Keys.DISPLAY_NAME, Component.text("Look at this interpolation").color(NamedTextColor.RED));
+                        blockDisplay = createEntity(player.world(), EntityTypes.BLOCK_DISPLAY, centerPos, forwardDir, col6, 0);
+                        blockDisplay.offer(Keys.BLOCK_STATE, BlockTypes.OBSIDIAN.get().defaultState());
+                        blockDisplay.offer(Keys.TRANSFORM, Transform.of(blockCenterOffset)); // set initial value before spawning
+                        blockDisplay.offer(Keys.SHADOW_RADIUS, 2d); // set initial value before spawning
+                        blockDisplay.offer(Keys.SHADOW_STRENGTH, 5d); // set initial value before spawning
+                        player.world().spawnEntity(blockDisplay);
+                        blockDisplay.offer(Keys.TELEPORT_DURATION, Ticks.of(20));
+                        blockDisplay.setLocation(((ServerLocation) blockDisplay.location().add(0.0, 4.0, 0.0)));
+
+
+                        textDisplay = createEntity(player.world(), EntityTypes.TEXT_DISPLAY, centerPos, forwardDir, col7, 0);
+                        textDisplay.offer(Keys.DISPLAY_NAME, Component.text("Look at these interpolations").color(NamedTextColor.RED));
                         textDisplay.offer(Keys.LINE_WIDTH, 100);
                         textDisplay.offer(Keys.SEE_THROUGH_BLOCKS, true);
                         textDisplay.offer(Keys.TEXT_BACKGROUND_COLOR, Color.BLACK); // set initial value before spawning
