@@ -336,11 +336,11 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     }
 
     @Override
-    public int bridge$getExperiencePointsOnDeath(final LivingEntity entity) {
+    public int bridge$getExperiencePointsOnDeath(final LivingEntity entity, final ServerLevel $$0, final Entity $$1) {
         if (this.impl$keepInventory != null && this.impl$keepInventory) {
             return 0;
         }
-        return super.bridge$getExperiencePointsOnDeath(entity);
+        return super.bridge$getExperiencePointsOnDeath(entity, $$0, $$1);
     }
 
     @Override
