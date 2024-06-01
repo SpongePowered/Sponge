@@ -209,7 +209,7 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
         }
     }
 
-    @Inject(method = "disconnect", at = @At(value = "INVOKE", target = "Lio/netty/channel/ChannelFuture;awaitUninterruptibly()Lio/netty/channel/ChannelFuture;"), cancellable = true)
+    @Inject(method = "disconnect(Lnet/minecraft/network/DisconnectionDetails;)V", at = @At(value = "INVOKE", target = "Lio/netty/channel/ChannelFuture;awaitUninterruptibly()Lio/netty/channel/ChannelFuture;"), cancellable = true)
     private void impl$disconnectAsync(final CallbackInfo ci) {
         ci.cancel(); //This can cause deadlock within the event loop
 
