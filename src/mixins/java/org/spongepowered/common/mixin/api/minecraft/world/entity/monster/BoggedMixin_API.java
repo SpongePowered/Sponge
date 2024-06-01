@@ -22,11 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.entity.projectile;
+package org.spongepowered.common.mixin.api.minecraft.world.entity.monster;
 
-import org.spongepowered.api.entity.projectile.windcharge.WindCharge;
+import org.spongepowered.api.entity.living.monster.skeleton.Stray;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(net.minecraft.world.entity.projectile.windcharge.WindCharge.class)
-public abstract class WindChargeMixin_API extends AbstractHurtingProjectileMixin_API implements WindCharge {
+@Mixin(net.minecraft.world.entity.monster.Bogged.class)
+public abstract class BoggedMixin_API extends AbstractSkeletonMixin_API implements Stray {
+
 }
