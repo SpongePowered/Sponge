@@ -40,6 +40,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.Services;
 import net.minecraft.server.WorldStem;
+import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
@@ -93,6 +94,7 @@ import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.scheduler.ServerScheduler;
 import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.util.UsernameCache;
+import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.common.world.storage.SpongePlayerDataManager;
 import org.spongepowered.common.world.teleport.SpongeTeleportHelper;
@@ -130,7 +132,6 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
     @Shadow public abstract boolean shadow$isCommandBlockEnabled();
     @Shadow public abstract boolean shadow$isSpawningMonsters();
     @Shadow public abstract boolean shadow$isSpawningAnimals();
-    @Shadow public abstract boolean shadow$isNetherEnabled();
     @Shadow public abstract Commands shadow$getCommands();
     @Shadow public abstract PackRepository shadow$getPackRepository();
     @Shadow public abstract net.minecraft.server.packs.resources.ResourceManager shadow$getResourceManager();
@@ -141,6 +142,10 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
     @Shadow @Final protected LevelStorageSource.LevelStorageAccess storageSource;
 
     @Shadow public abstract RegistryAccess.Frozen registryAccess();
+
+    @Shadow public abstract boolean repliesToStatus();
+
+    @Shadow public abstract boolean isSingleplayer();
 
     private Iterable<? extends Audience> audiences;
     private ServerScheduler api$scheduler;
@@ -265,9 +270,12 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
         return this.shadow$isSpawningAnimals();
     }
 
+    /**
+     * See {@link SpongeWorldManager#loadLevel()}
+     */
     @Override
     public boolean isMultiWorldEnabled() {
-        return this.shadow$isNetherEnabled();
+        return this.isSingleplayer() || ((Object) this instanceof DedicatedServer ds) && ds.getProperties().allowNether;
     }
 
     @Override
