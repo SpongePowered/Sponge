@@ -58,7 +58,7 @@ public abstract class CampfireBlockMixin extends BlockMixin {
 
 
     @Redirect(method = "entityInside",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/DamageSources;inFire()Lnet/minecraft/world/damagesource/DamageSource;"))
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/DamageSources;campfire()Lnet/minecraft/world/damagesource/DamageSource;"))
     private DamageSource impl$spongeRedirectForFireDamage(final DamageSources instance, final BlockState blockState, final Level world, final BlockPos blockPos, final Entity entity) {
         final DamageSource source = instance.inFire();
         if (world.isClientSide) { // Short Circuit
@@ -71,7 +71,7 @@ public abstract class CampfireBlockMixin extends BlockMixin {
         return (DamageSource) blockSource;
     }
 
-    @Inject(method = "useItemOn", locals = LocalCapture.CAPTURE_FAILEXCEPTION, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/CampfireBlockEntity;placeFood(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/item/ItemStack;I)Z"))
+    @Inject(method = "useItemOn", locals = LocalCapture.CAPTURE_FAILEXCEPTION, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/CampfireBlockEntity;placeFood(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;I)Z"))
     public void impl$placeFood(ItemStack $$0, BlockState $$1, Level $$2, BlockPos $$3, Player $$4, InteractionHand $$5, BlockHitResult $$6,
             CallbackInfoReturnable<InteractionResult> cir,
             BlockEntity tileEntity, CampfireBlockEntity campfire, ItemStack itemStack, Optional<RecipeHolder<CampfireCookingRecipe>> optional) {

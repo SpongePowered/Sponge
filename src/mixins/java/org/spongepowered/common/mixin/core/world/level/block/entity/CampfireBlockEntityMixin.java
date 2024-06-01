@@ -26,11 +26,11 @@ package org.spongepowered.common.mixin.core.world.level.block.entity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
-import net.minecraft.world.Container;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -100,7 +100,7 @@ public abstract class CampfireBlockEntityMixin implements CampfireBlockEntityBri
             target = "Lnet/minecraft/world/Containers;dropItemStack(Lnet/minecraft/world/level/Level;DDDLnet/minecraft/world/item/ItemStack;)V"))
     private static void impl$assembleCampfireResult(final Level level, final BlockPos pos, final BlockState state,
         final CampfireBlockEntity self, final CallbackInfo ci, final boolean hasChanged, final int i,
-        final ItemStack itemStack, final Container iInventory, final ItemStack itemStack1) {
+        final ItemStack itemStack, final SingleRecipeInput recipeInput, final ItemStack itemStack1) {
         final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
         final CampfireBlockEntityMixin mixinSelf = MixinTargetHelper.cast(self);
         final SlotTransaction transaction = new SlotTransaction(((Campfire) self).inventory().slot(i).get(), ItemStackUtil.snapshotOf(itemStack1), ItemStackSnapshot.empty());
