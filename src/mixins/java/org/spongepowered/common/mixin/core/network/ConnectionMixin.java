@@ -225,6 +225,17 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
         }
     }
 
+    @Redirect(method = "genericsFtw", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/network/protocol/Packet;handle(Lnet/minecraft/network/PacketListener;)V"))
+    private static <T extends PacketListener> void impl$logPacketError(Packet<T> $$0, PacketListener $$1) {
+        try {
+            $$0.handle((T)$$1);
+        } catch (ExceptionInInitializerError e) {
+            SpongeCommon.logger().error("Error handling packet " + $$0.getClass(), e);
+            throw e;
+        }
+    }
+
     @Inject(method = "exceptionCaught", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Connection;disconnect(Lnet/minecraft/network/chat/Component;)V"))
     private void impl$onExceptionDisconnect(final ChannelHandlerContext $$0, final Throwable $$1, final CallbackInfo ci) {
         SpongeCommon.logger().error("Disconnected due to error", $$1);
