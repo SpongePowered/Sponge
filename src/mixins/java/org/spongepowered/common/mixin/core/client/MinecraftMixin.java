@@ -53,10 +53,6 @@ public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnabl
     @Shadow @Nullable private IntegratedServer singleplayerServer;
     // @formatter:on
 
-    @Shadow public abstract boolean renderOnThread();
-
-    @Shadow public abstract void pauseGame(boolean $$0);
-
     private IntegratedServer impl$temporaryIntegratedServer;
 
     public MinecraftMixin(String param0) {
