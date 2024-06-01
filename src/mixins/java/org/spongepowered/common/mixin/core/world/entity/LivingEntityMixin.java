@@ -138,7 +138,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Shadow protected abstract void shadow$hurtArmor(DamageSource source, float damage);
     @Shadow public abstract ItemStack shadow$getItemInHand(InteractionHand hand);
     @Shadow protected abstract void shadow$dropEquipment();
-    @Shadow protected abstract void shadow$dropAllDeathLoot(DamageSource damageSourceIn);
+    @Shadow protected abstract void shadow$dropAllDeathLoot(ServerLevel level, DamageSource damageSourceIn);
     @Shadow @Nullable public abstract LivingEntity shadow$getKillCredit();
     @Shadow protected abstract void shadow$createWitherRose(@Nullable LivingEntity p_226298_1_);
     @Shadow  public abstract Collection<MobEffectInstance> shadow$getActiveEffects();

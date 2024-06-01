@@ -631,7 +631,8 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         }
         // Sponge end
 
-        final boolean flag = this.shadow$level().getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) && !event.isMessageCancelled();
+        final var level = this.shadow$level();
+        final boolean flag = level.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) && !event.isMessageCancelled();
         if (flag) {
             final net.minecraft.network.chat.Component component = this.shadow$getCombatTracker().getDeathMessage();
             final ClientboundPlayerCombatKillPacket packet = new ClientboundPlayerCombatKillPacket(this.shadow$getId(), component);
@@ -666,7 +667,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         }
 
         this.shadow$removeEntitiesOnShoulder();
-        if (this.shadow$level().getGameRules().getBoolean(GameRules.RULE_FORGIVE_DEAD_PLAYERS)) {
+        if (level.getGameRules().getBoolean(GameRules.RULE_FORGIVE_DEAD_PLAYERS)) {
             this.shadow$tellNeutralMobsThatIDied();
         }
 
@@ -674,8 +675,8 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         // during the death update ticks
         this.impl$keepInventory = event.keepInventory();
 
-        if (!this.shadow$isSpectator()) {
-            this.shadow$dropAllDeathLoot(cause);
+        if (!this.shadow$isSpectator() && level instanceof ServerLevel sLevel) {
+            this.shadow$dropAllDeathLoot(sLevel, cause);
         }
         // Sponge End
 
@@ -688,7 +689,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
             this.shadow$createWitherRose(livingentity);
         }
 
-        this.shadow$level().broadcastEntityEvent((net.minecraft.server.level.ServerPlayer) (Object) this, (byte) 3);
+        level.broadcastEntityEvent((net.minecraft.server.level.ServerPlayer) (Object) this, (byte) 3);
         this.shadow$awardStat(Stats.DEATHS);
         this.shadow$resetStat(Stats.CUSTOM.get(Stats.TIME_SINCE_DEATH));
         this.shadow$resetStat(Stats.CUSTOM.get(Stats.TIME_SINCE_REST));
