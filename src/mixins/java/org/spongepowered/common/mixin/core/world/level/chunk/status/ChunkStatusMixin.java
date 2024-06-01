@@ -37,12 +37,13 @@ import java.util.function.Function;
 @Mixin(ChunkStatus.class)
 public abstract class ChunkStatusMixin {
 
-    @Redirect(method = "generate", at = @At(value = "INVOKE",
-            target = "Ljava/util/concurrent/CompletableFuture;thenApply(Ljava/util/function/Function;)Ljava/util/concurrent/CompletableFuture;",
-            remap = false),
-            slice = @Slice(
-                    from = @At(value = "INVOKE",
-                            target = "Lnet/minecraft/world/level/chunk/status/ChunkStatus$GenerationTask;doWork(Lnet/minecraft/world/level/chunk/status/WorldGenContext;Lnet/minecraft/world/level/chunk/status/ChunkStatus;Ljava/util/concurrent/Executor;Lnet/minecraft/world/level/chunk/status/ToFullChunk;Ljava/util/List;Lnet/minecraft/world/level/chunk/ChunkAccess;)Ljava/util/concurrent/CompletableFuture;")))
+    // TODO update me
+//    @Redirect(method = "generate", at = @At(value = "INVOKE",
+//            target = "Ljava/util/concurrent/CompletableFuture;thenApply(Ljava/util/function/Function;)Ljava/util/concurrent/CompletableFuture;",
+//            remap = false),
+//            slice = @Slice(
+//                    from = @At(value = "INVOKE",
+//                            target = "Lnet/minecraft/world/level/chunk/status/ChunkStatus$GenerationTask;doWork(Lnet/minecraft/world/level/chunk/status/WorldGenContext;Lnet/minecraft/world/level/chunk/status/ChunkStatus;Ljava/util/concurrent/Executor;Lnet/minecraft/world/level/chunk/status/ToFullChunk;Ljava/util/List;Lnet/minecraft/world/level/chunk/ChunkAccess;)Ljava/util/concurrent/CompletableFuture;")))
     private CompletableFuture<ChunkAccess> impl$guardForUnloadedChunkOnGenerate(final CompletableFuture<ChunkAccess> instance,
                                                                                 final Function<ChunkAccess, ChunkAccess> function) {
         //See ChunkStatusTasksMixin, only applies for when generation is cancelled due to world unload

@@ -24,11 +24,9 @@
  */
 package org.spongepowered.common.mixin.tracker.server.level;
 
-import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -36,13 +34,9 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhasePrinter;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -66,7 +60,7 @@ public abstract class ChunkMapMixin_Tracker {
         return exception;
     }
 
-    @Redirect(method = "lambda$prepareTickingChunk$42",
+    @Redirect(method = "lambda$prepareTickingChunk$27",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;startTickingChunk(Lnet/minecraft/world/level/chunk/LevelChunk;)V"))
     private void tracker$wrapUnpackTicks(final ServerLevel level, final LevelChunk chunk) {
         if (!PhaseTracker.SERVER.onSidedThread()) {
@@ -93,59 +87,6 @@ public abstract class ChunkMapMixin_Tracker {
             chunk.unpackTicks(level.getLevelData().getGameTime());
         }
 
-    }
-
-    @Redirect(method = "lambda$protoChunkToFullChunk$35",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;runPostLoad()V"),
-        slice = @Slice(
-            from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;setFullStatus(Ljava/util/function/Supplier;)V"),
-            to = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;registerAllBlockEntitiesAfterLevelLoad()V")
-        )
-    )
-    private void tracker$startLoad(final LevelChunk chunk) {
-        chunk.runPostLoad();
-        final boolean isFake = ((LevelBridge) chunk.getLevel()).bridge$isFake();
-        if (isFake) {
-            return;
-        }
-        if (!PhaseTracker.SERVER.onSidedThread()) {
-            new PrettyPrinter(60).add("Illegal Async Chunk Load").centre().hr()
-                    .addWrapped("Sponge relies on knowing when chunks are being loaded as chunks add entities"
-                            + " to the parented world for management. These operations are generally not"
-                            + " threadsafe and shouldn't be considered a \"Sponge bug \". Adding/removing"
-                            + " entities from another thread to the world is never ok.")
-                    .add()
-                    .add(" %s : %s", "Chunk Pos", chunk.getPos().toString())
-                    .add()
-                    .add(new Exception("Async Chunk Load Detected"))
-                    .log(SpongeCommon.logger(), Level.ERROR);
-            return;
-        }
-        if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
-            return;
-        }
-        GenerationPhase.State.CHUNK_LOADING.createPhaseContext(PhaseTracker.getInstance())
-                .source(chunk)
-                .world((ServerLevel) chunk.getLevel())
-                .chunk(chunk)
-                .buildAndSwitch();
-    }
-
-    @Inject(method = "lambda$protoChunkToFullChunk$35",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;registerAllBlockEntitiesAfterLevelLoad()V", shift = At.Shift.BY, by = 2),
-        slice = @Slice(
-            from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;runPostLoad()V")
-        ),
-        require = 1
-    )
-    private void tracker$endLoad(final ChunkHolder chunkHolder, final ChunkAccess chunk, final CallbackInfoReturnable<ChunkAccess> cir) {
-        if (!((LevelBridge) this.level).bridge$isFake() && PhaseTracker.SERVER.onSidedThread()) {
-            if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
-                return;
-            }
-            // IF we're not on the main thread,
-            PhaseTracker.getInstance().getPhaseContext().close();
-        }
     }
 
 }
