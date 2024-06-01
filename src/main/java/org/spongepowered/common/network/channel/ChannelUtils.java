@@ -25,6 +25,7 @@
 package org.spongepowered.common.network.channel;
 
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.util.Constants;
@@ -33,7 +34,7 @@ import java.util.ArrayList;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public final class ChannelUtils {
-    public static final CustomPacketPayload.Type<SpongeChannelPayload> REGISTER = CustomPacketPayload.createType(Constants.Channels.REGISTER_KEY.toString());
+    public static final CustomPacketPayload.Type<SpongeChannelPayload> REGISTER = new CustomPacketPayload.Type<>((ResourceLocation) (Object) Constants.Channels.REGISTER_KEY);
 
     public static ArrayList spongeChannelCodecs(final int maxPayloadSize) {
         ArrayList channels = new ArrayList<>();
