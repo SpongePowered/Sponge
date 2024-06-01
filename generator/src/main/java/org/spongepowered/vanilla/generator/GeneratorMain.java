@@ -320,7 +320,8 @@ public final class GeneratorMain {
                 "ArtTypes",
                 "ART_TYPE",
                 context.relativeClass("data.type", "ArtType"),
-                Registries.PAINTING_VARIANT
+                Registries.PAINTING_VARIANT,
+                a -> true, RegistryScope.SERVER
             ),
             new RegistryEntriesGenerator<>(
                 "entity.attribute.type",
