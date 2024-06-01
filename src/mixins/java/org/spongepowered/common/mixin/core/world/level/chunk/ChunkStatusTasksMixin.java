@@ -42,6 +42,7 @@ import org.spongepowered.api.event.world.chunk.ChunkEvent;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.chunk.BlockChunk;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
@@ -63,6 +64,7 @@ public abstract class ChunkStatusTasksMixin {
      * @author aromaa - December 17th, 2023 - 1.19.4
      * @author aromaa - December 18th, 2023 - Updated to 1.20.2
      * @author aromaa - May 14th, 2024 - Updated to 1.20.6
+     * @author aromaa - June 1st, 2024 - Updated to 1.21
      * @reason Fixes a deadlock when the world is unloading/unloaded.
      * The Blender#of method calls to the IOWorker#isOldChunkAround which
      * submits a task to the main thread while blocking the current thread
@@ -70,16 +72,15 @@ public abstract class ChunkStatusTasksMixin {
      * as it no longer responds to further work and causes the thread to block
      * indefinitely. Fixes this by special casing the IOWorker#isOldChunkAround
      * to throw a special exception when the IOWorker has finished up its work
-     * and catches it here to convert it to a ChunkLoadingFailure.
+     * and catches it here to convert it to a CompletableFuture.
      *
      * In previous versions you were able to return ChunkResult here but this
-     * is no longer the case, so we instead return null here which
-     * needs to be checking for in ChunkMap.
+     * is no longer the case.
      *
-     * See IOWorkerMixin#createOldDataForRegion
+     * See IOWorkerMixin#createOldDataForRegion and GenerationChunkHolderMixin#impl$guardForUnloadedChunkOnGenerate
      */
-    // TODO update me @Overwrite
-    private static CompletableFuture<ChunkAccess> FIXME$generateBiomes(final WorldGenContext $$0, final ChunkStep $$1, final StaticCache2D<GenerationChunkHolder> $$2, final ChunkAccess $$3) {
+    @Overwrite
+    static CompletableFuture<ChunkAccess> generateBiomes(final WorldGenContext $$0, final ChunkStep $$1, final StaticCache2D<GenerationChunkHolder> $$2, final ChunkAccess $$3) {
         ServerLevel $$4 = $$0.level();
         WorldGenRegion $$5 = new WorldGenRegion($$4, $$2, $$1, $$3);
         try { //Sponge: Add try
@@ -89,7 +90,7 @@ public abstract class ChunkStatusTasksMixin {
                 throw e;
             }
 
-            return null;
+            return SpongeUnloadedChunkException.INSTANCE_FUTURE;
         } //Sponge end
     }
 

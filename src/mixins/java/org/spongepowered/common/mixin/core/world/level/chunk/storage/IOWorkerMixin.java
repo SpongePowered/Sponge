@@ -119,7 +119,7 @@ public abstract class IOWorkerMixin implements IOWorkerBridge {
      * the task directly instead of indirectly from the background executor
      * and not blocking inside of it.
      */
-//  TODO update me  @Overwrite
+    @Overwrite
     private CompletableFuture<BitSet> createOldDataForRegion(final int x, final int z) {
         //The impl$submitTaskCancellable is related to another fix for a separate deadlock case.
         //The returned future is used inside the isOldChunkAround which tries to wait for the

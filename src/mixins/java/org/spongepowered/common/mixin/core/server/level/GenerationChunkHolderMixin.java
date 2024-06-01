@@ -22,17 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.level.chunk;
+package org.spongepowered.common.mixin.core.server.level;
 
+import net.minecraft.server.level.ChunkResult;
+import net.minecraft.server.level.GenerationChunkHolder;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.status.ChunkStep;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.world.level.chunk.SpongeUnloadedChunkException;
 
-import java.util.concurrent.CompletableFuture;
+@Mixin(GenerationChunkHolder.class)
+public abstract class GenerationChunkHolderMixin {
 
-public final class SpongeUnloadedChunkException extends Exception {
-
-    public static final SpongeUnloadedChunkException INSTANCE = new SpongeUnloadedChunkException();
-    public static final CompletableFuture<ChunkAccess> INSTANCE_FUTURE = CompletableFuture.failedFuture(SpongeUnloadedChunkException.INSTANCE);
-
-    private SpongeUnloadedChunkException() {
+    /**
+     * See IOWorkerMixin#createOldDataForRegion and ChunkStatusTasksMixin#generateBiomes
+     */
+    @Inject(method = "lambda$applyStep$0", at = @At("HEAD"), cancellable = true)
+    private void impl$guardForUnloadedChunkOnGenerate(final ChunkStep $$0x, final ChunkAccess $$1x, final Throwable $$2x, final CallbackInfoReturnable<ChunkResult<ChunkAccess>> cir) {
+        if ($$2x != null && $$2x.getCause() == SpongeUnloadedChunkException.INSTANCE) {
+            cir.setReturnValue(GenerationChunkHolder.UNLOADED_CHUNK);
+        }
     }
 }
