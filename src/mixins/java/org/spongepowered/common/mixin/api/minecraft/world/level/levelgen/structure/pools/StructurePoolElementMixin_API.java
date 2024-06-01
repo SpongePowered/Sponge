@@ -34,6 +34,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
+import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.generation.structure.jigsaw.JigsawPoolElement;
@@ -48,12 +49,9 @@ public abstract class StructurePoolElementMixin_API implements JigsawPoolElement
 
     // @formatter:off
     @Shadow private volatile StructureTemplatePool.@Nullable Projection projection;
-
-    @Shadow public abstract boolean shadow$place(final StructureTemplateManager var1,
-            final WorldGenLevel var2, final StructureManager var3,
-            final ChunkGenerator var4, final BlockPos var5, final BlockPos var6,
-            final Rotation var7, final BoundingBox var8,
-            final RandomSource var9, final boolean var10);
+    @Shadow public abstract boolean shadow$place(final StructureTemplateManager var1, final WorldGenLevel var2, final StructureManager var3,
+            final ChunkGenerator var4, final BlockPos var5, final BlockPos var6, final Rotation var7, final BoundingBox var8, final RandomSource var9,
+            final LiquidSettings var10, final boolean var11);
     // @formatter:on
 
     @Override
@@ -68,9 +66,16 @@ public abstract class StructurePoolElementMixin_API implements JigsawPoolElement
 
     @Override
     public boolean place(final ServerLocation location, boolean withStructureBlocks) {
+        return this.place(location, withStructureBlocks, true);
+    }
+
+    @Override
+    public boolean place(final ServerLocation location, final boolean withStructureBlocks, final boolean waterLogging) {
         final StructureTemplateManager stm = SpongeCommon.server().getStructureManager();
         final ServerLevel level = (ServerLevel) location.world();
         return this.shadow$place(stm, level, level.structureManager(), level.getChunkSource().getGenerator(),
-                VecHelper.toBlockPos(location.blockPosition()), BlockPos.ZERO, Rotation.NONE, BoundingBox.infinite(), level.getRandom(), withStructureBlocks);
+                VecHelper.toBlockPos(location.blockPosition()), BlockPos.ZERO, Rotation.NONE, BoundingBox.infinite(), level.getRandom(),
+                waterLogging ? LiquidSettings.APPLY_WATERLOGGING : LiquidSettings.IGNORE_WATERLOGGING,
+                withStructureBlocks);
     }
 }
