@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.world.entity;
 
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Leashable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -34,13 +35,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.objectweb.asm.Opcodes;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ai.goal.GoalExecutorTypes;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.entity.living.Living;
-import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
@@ -75,12 +73,10 @@ public abstract class MobMixin extends LivingEntityMixin {
     @Shadow @Final protected GoalSelector goalSelector;
     @Shadow @Final protected GoalSelector targetSelector;
     @Shadow @Nullable private LivingEntity target;
-    @Shadow public abstract net.minecraft.world.entity.@Nullable Entity  shadow$getLeashHolder();
+    @Shadow public abstract Leashable.LeashData shadow$getLeashData();
     @Shadow protected abstract void shadow$registerGoals();
     // @formatter:on
 
-
-    @Shadow @Final protected float[] handDropChances;
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Mob;registerGoals()V"))
     private void impl$registerGoals(final Mob this$0) {
@@ -101,18 +97,19 @@ public abstract class MobMixin extends LivingEntityMixin {
         }
     }
 
-    @Inject(method = "dropLeash",
-        at = @At(value = "FIELD",
-            target = "Lnet/minecraft/world/entity/Mob;leashHolder:Lnet/minecraft/world/entity/Entity;",
-            opcode = Opcodes.PUTFIELD
-        ),
-        cancellable = true)
+    @Inject(method = "dropLeash", cancellable = true,
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Leashable;dropLeash(ZZ)V"))
     private void impl$ThrowUnleashEvent(final boolean sendPacket, final boolean dropLead, final CallbackInfo ci) {
         if (this.shadow$level().isClientSide) {
             return;
         }
 
-        final net.minecraft.world.entity.Entity entity = this.shadow$getLeashHolder();
+        var leashData = this.shadow$getLeashData();
+        if (leashData == null) {
+            return;
+        }
+
+        final net.minecraft.world.entity.Entity entity = leashData.leashHolder;
 
         final CauseStackManager csm = PhaseTracker.getCauseStackManager();
         if (entity == null) {
@@ -279,16 +276,6 @@ public abstract class MobMixin extends LivingEntityMixin {
         }
 
         return result;
-    }
-
-    @Inject(method = "setLeashedTo", at = @At("HEAD"), cancellable = true)
-    private void impl$onSetLeashedTo(final net.minecraft.world.entity.Entity param0, final boolean param1, final CallbackInfo ci) {
-        if (!this.shadow$level().isClientSide) {
-            final Cause currentCause = Sponge.server().causeStackManager().currentCause();
-            if (Sponge.eventManager().post(SpongeEventFactory.createLeashEntityEvent(currentCause, (Entity) this))) {
-                ci.cancel();
-            }
-        }
     }
 
 }

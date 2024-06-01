@@ -189,6 +189,7 @@
     "minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhaseManagerMixin_API",
     "minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhaseMixin_API",
     "minecraft.world.entity.decoration.ArmorStandMixin_API",
+        "minecraft.world.entity.decoration.BlockAttachedEntityMixin_API",
     "minecraft.world.entity.decoration.HangingEntityMixin_API",
     "minecraft.world.entity.decoration.ItemFrameMixin_API",
     "minecraft.world.entity.decoration.LeashFenceKnotEntityMixin_API",

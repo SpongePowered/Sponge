@@ -24,11 +24,23 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.decoration;
 
-import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
-import org.spongepowered.api.entity.hanging.LeashKnot;
+import net.minecraft.world.entity.decoration.BlockAttachedEntity;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.entity.hanging.Hanging;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.mixin.api.minecraft.world.entity.EntityMixin_API;
 
-@Mixin(LeashFenceKnotEntity.class)
-public abstract class LeashFenceKnotEntityMixin_API extends BlockAttachedEntityMixin_API implements LeashKnot {
+import java.util.Set;
 
+@Mixin(BlockAttachedEntity.class)
+public abstract class BlockAttachedEntityMixin_API extends EntityMixin_API implements Hanging {
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.requireValue(Keys.DIRECTION).asImmutable());
+
+        return values;
+    }
 }

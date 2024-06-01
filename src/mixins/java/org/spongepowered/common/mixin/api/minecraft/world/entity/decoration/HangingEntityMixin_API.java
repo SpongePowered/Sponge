@@ -25,24 +25,9 @@
 package org.spongepowered.common.mixin.api.minecraft.world.entity.decoration;
 
 import net.minecraft.world.entity.decoration.HangingEntity;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.entity.hanging.Hanging;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.api.minecraft.world.entity.EntityMixin_API;
-
-import java.util.Set;
 
 @Mixin(HangingEntity.class)
-public abstract class HangingEntityMixin_API extends EntityMixin_API implements Hanging {
-
-    @Override
-    protected Set<Value.Immutable<?>> api$getVanillaValues() {
-        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
-
-        values.add(this.requireValue(Keys.DIRECTION).asImmutable());
-
-        return values;
-    }
+public abstract class HangingEntityMixin_API extends BlockAttachedEntityMixin_API {
 
 }
