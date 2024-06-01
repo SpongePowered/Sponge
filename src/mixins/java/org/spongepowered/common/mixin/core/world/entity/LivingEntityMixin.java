@@ -44,6 +44,7 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
@@ -429,7 +430,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     }
 
     @Redirect(
-        method = "eat(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/item/ItemStack;",
+        method = "eat(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/food/FoodProperties;)Lnet/minecraft/world/item/ItemStack;",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/level/Level;playSound(Lnet/minecraft/world/entity/player/Player;DDDLnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FF)V"
@@ -461,8 +462,8 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         return 0;
     }
 
-    @Inject(method = "broadcastBreakEvent(Lnet/minecraft/world/entity/EquipmentSlot;)V", at = @At("HEAD"), cancellable = true)
-    private void impl$vanishDoesNotBroadcastBreakEvents(final EquipmentSlot slot, final CallbackInfo ci) {
+    @Inject(method = "onEquippedItemBroken", at = @At("HEAD"), cancellable = true)
+    private void impl$vanishDoesNotBroadcastBreakEvents(final Item $$0, final EquipmentSlot $$1, final CallbackInfo ci) {
         if (this.bridge$vanishState().invisible()) {
             ci.cancel();
         }
@@ -493,7 +494,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
             final HandType handType = (HandType) (Object) hand;
             this.impl$addSelfToFrame(frame, snapshot, handType);
-            final Ticks useDuration = SpongeTicks.ticksOrInfinite(stack.getUseDuration());
+            final Ticks useDuration = SpongeTicks.ticksOrInfinite(stack.getUseDuration((LivingEntity) (Object) this));
             event = SpongeEventFactory.createUseItemStackEventStart(PhaseTracker.getCauseStackManager().currentCause(),
                 useDuration, useDuration, snapshot);
         }
