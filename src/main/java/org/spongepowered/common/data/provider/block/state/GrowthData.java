@@ -24,27 +24,52 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
+import net.minecraft.world.level.block.BambooStalkBlock;
+import net.minecraft.world.level.block.CactusBlock;
+import net.minecraft.world.level.block.CocoaBlock;
 import net.minecraft.world.level.block.CropBlock;
+import net.minecraft.world.level.block.NetherWartBlock;
+import net.minecraft.world.level.block.StemBlock;
+import net.minecraft.world.level.block.SugarCaneBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.world.level.block.CropBlockAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.BoundedUtil;
+import org.spongepowered.common.util.DataUtil;
 
-public final class CropsData {
+import java.util.function.Function;
 
-    private CropsData() {
+public final class GrowthData {
+
+    private GrowthData() {
     }
 
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
+        register(registrator, BambooStalkBlock.class, state -> BambooStalkBlock.AGE);
+        register(registrator, CactusBlock.class, state -> CactusBlock.AGE);
+        register(registrator, CocoaBlock.class, state -> CocoaBlock.AGE);
+        register(registrator, CropBlock.class, state -> ((CropBlockAccessor) state.getBlock()).invoker$getAgeProperty());
+        register(registrator, NetherWartBlock.class, state -> NetherWartBlock.AGE);
+        register(registrator, StemBlock.class, state -> StemBlock.AGE);
+        register(registrator, SugarCaneBlock.class, state -> SugarCaneBlock.AGE);
+    }
+
+    private static void register(
+            final DataProviderRegistrator registrator, final Class<?> cropClass, final Function<BlockState, IntegerProperty> propertyFunction
+    ) {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.GROWTH_STAGE)
-                        .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, ((CropBlockAccessor) h.getBlock()).invoker$getAgeProperty()))
-                        .get(h -> h.getValue(((CropBlockAccessor) h.getBlock()).invoker$getAgeProperty()))
-                        .set((h, v) -> BoundedUtil.setInteger(h, v, ((CropBlockAccessor) h.getBlock()).invoker$getAgeProperty()))
-                        .supports(h -> h.getBlock() instanceof CropBlock);
+                        .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, propertyFunction.apply(h)))
+                        .get(h -> h.getValue(propertyFunction.apply(h)))
+                        .set((h, v) -> BoundedUtil.setInteger(h, v, propertyFunction.apply(h)))
+                        .supports(cropClass::isInstance)
+                    .create(Keys.MAX_GROWTH_STAGE)
+                        .get(h -> DataUtil.maxi(propertyFunction.apply(h)))
+                        .supports(cropClass::isInstance);
     }
     // @formatter:on
 }
