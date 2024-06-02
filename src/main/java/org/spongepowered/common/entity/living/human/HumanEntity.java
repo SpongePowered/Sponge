@@ -202,7 +202,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     public void addAdditionalSaveData(final CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         final DataResult<Tag> result = ResolvableProfile.CODEC.encodeStart(NbtOps.INSTANCE, this.fakeProfile);
-        tag.put("profile", result.result().get());
+        result.ifSuccess(gameProfile -> tag.put("profile", gameProfile));
     }
 
     @Override
