@@ -29,6 +29,7 @@ import net.minecraft.world.level.block.CactusBlock;
 import net.minecraft.world.level.block.CocoaBlock;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.NetherWartBlock;
+import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.StemBlock;
 import net.minecraft.world.level.block.SugarCaneBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -53,6 +54,7 @@ public final class GrowthData {
         register(registrator, CocoaBlock.class, state -> CocoaBlock.AGE);
         register(registrator, CropBlock.class, state -> ((CropBlockAccessor) state.getBlock()).invoker$getAgeProperty());
         register(registrator, NetherWartBlock.class, state -> NetherWartBlock.AGE);
+        register(registrator, SaplingBlock.class, state -> SaplingBlock.STAGE);
         register(registrator, StemBlock.class, state -> StemBlock.AGE);
         register(registrator, SugarCaneBlock.class, state -> SugarCaneBlock.AGE);
     }
