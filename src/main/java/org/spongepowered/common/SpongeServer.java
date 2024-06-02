@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common;
 
+import net.minecraft.core.BlockPos;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Server;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.profile.SpongeGameProfileManager;
@@ -46,6 +48,10 @@ public interface SpongeServer extends SpongeEngine, Server {
     SpongeGameProfileManager gameProfileManagerIfPresent();
 
     UsernameCache getUsernameCache();
+
+    @Nullable Integer getBlockDestructionId(BlockPos pos);
+
+    int getOrCreateBlockDestructionId(BlockPos pos);
 
     SpongeUserManager userManager();
 
