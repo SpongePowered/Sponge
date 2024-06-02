@@ -39,19 +39,15 @@ public final class BlockStateDataProviders extends DataProviderRegistratorBuilde
         AbstractSignData.register(this.registrator);
         AnvilData.register(this.registrator);
         AttachedStemData.register(this.registrator);
-        BambooData.register(this.registrator);
         BannerData.register(this.registrator);
         BarrelData.register(this.registrator);
         BedData.register(this.registrator);
         BlockData.register(this.registrator);
-        CactusData.register(this.registrator);
         CakeData.register(this.registrator);
         CampfireData.register(this.registrator);
         CandleData.register(this.registrator);
         ChestData.register(this.registrator);
-        CocoaData.register(this.registrator);
         ComparatorData.register(this.registrator);
-        CropsData.register(this.registrator);
         DaylightDetectorData.register(this.registrator);
         DetectorRailData.register(this.registrator);
         DirectionalData.register(this.registrator);
@@ -64,6 +60,7 @@ public final class BlockStateDataProviders extends DataProviderRegistratorBuilde
         FenceData.register(this.registrator);
         FenceGateData.register(this.registrator);
         FlowingFluidData.register(this.registrator);
+        GrowthData.register(this.registrator);
         HopperData.register(this.registrator);
         HorizontalData.register(this.registrator);
         HorizontalFaceData.register(this.registrator);
@@ -74,7 +71,6 @@ public final class BlockStateDataProviders extends DataProviderRegistratorBuilde
         LeverData.register(this.registrator);
         MovingPistonData.register(this.registrator);
         NetherPortalData.register(this.registrator);
-        NetherWartData.register(this.registrator);
         NoteBlockData.register(this.registrator);
         PaneData.register(this.registrator);
         PistonData.register(this.registrator);
@@ -85,7 +81,6 @@ public final class BlockStateDataProviders extends DataProviderRegistratorBuilde
         RedstoneWireData.register(this.registrator);
         RepeaterData.register(this.registrator);
         RotatedPillarData.register(this.registrator);
-        SaplingData.register(this.registrator);
         SeaPickleData.register(this.registrator);
         SimpleWaterloggedBlockData.register(this.registrator);
         SkullData.register(this.registrator);
@@ -96,8 +91,6 @@ public final class BlockStateDataProviders extends DataProviderRegistratorBuilde
         StainedGlassPaneBlockData.register(this.registrator);
         StairsData.register(this.registrator);
         StandingSignData.register(this.registrator);
-        StemData.register(this.registrator);
-        SugarCaneData.register(this.registrator);
         TerracottaData.register(this.registrator);
         TNTData.register(this.registrator);
         TorchData.register(this.registrator);
