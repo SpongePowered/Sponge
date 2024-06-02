@@ -22,28 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.block.state;
+package org.spongepowered.common.mixin.core.network.syncher;
 
-import net.minecraft.world.level.block.CactusBlock;
-import net.minecraft.world.level.block.state.BlockState;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.util.BoundedUtil;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.entity.player.Player;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.common.entity.living.human.HumanEntity;
 
-public final class CactusData {
+@Mixin(SynchedEntityData.Builder.class)
+public abstract class SynchedEntityData_BuilderMixin {
 
-    private CactusData() {
+    @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/ClassTreeIdRegistry;getCount(Ljava/lang/Class;)I"))
+    private Class<?> impl$fakeHumanEntity(final Class<?> clazz) {
+        if (clazz != HumanEntity.class) {
+            return clazz;
+        }
+        //HumanEntity doesn't actually inherit from Player
+        return Player.class;
     }
-
-    // @formatter:off
-    public static void register(final DataProviderRegistrator registrator) {
-        registrator
-                .asImmutable(BlockState.class)
-                    .create(Keys.GROWTH_STAGE)
-                        .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, CactusBlock.AGE))
-                        .get(h -> h.getValue(CactusBlock.AGE))
-                        .set((h, v) -> BoundedUtil.setInteger(h, v, CactusBlock.AGE))
-                        .supports(h -> h.getBlock() instanceof CactusBlock);
-    }
-    // @formatter:on
 }

@@ -77,7 +77,7 @@ public final class HumanTest {
                         final ServerPlayer player = context.cause().first(ServerPlayer.class).get();
                         final Optional<String> optName = context.one(nameParameter);
                         final String mimicUsername = context.one(mimicParameter).orElse(optName.orElse(player.name()));
-                        final boolean result = this.spawnHuman(player.serverLocation(), optName.orElse("Human " + player.name()), mimicUsername);
+                        final boolean result = this.spawnHuman(player.serverLocation(), optName.orElse(player.name()), mimicUsername);
                         return result ? CommandResult.success() : CommandResult.error(Component.text("Failed to spawn the human!"));
                     })
                     .build()
