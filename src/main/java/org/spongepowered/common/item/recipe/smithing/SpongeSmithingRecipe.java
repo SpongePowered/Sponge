@@ -29,8 +29,7 @@ import static org.spongepowered.common.util.Constants.Recipe.SPONGE_TYPE;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -51,8 +50,7 @@ public class SpongeSmithingRecipe extends SmithingTransformRecipe implements Res
                             Ingredient.CODEC.fieldOf("template").forGetter($$0x -> ((SmithingRecipeBridge) $$0x).bridge$template()),
                             Ingredient.CODEC.fieldOf(Constants.Recipe.SMITHING_BASE_INGREDIENT).forGetter($$0x -> ((SmithingRecipeBridge) $$0x).bridge$base()),
                             Ingredient.CODEC.fieldOf(Constants.Recipe.SMITHING_ADDITION_INGREDIENT).forGetter($$0x -> ((SmithingRecipeBridge) $$0x).bridge$addition()),
-                            ItemStack.ITEM_WITH_COUNT_CODEC.fieldOf(Constants.Recipe.RESULT).forGetter($$0x -> ((RecipeResultBridge) $$0x).bridge$result()),
-                            ItemStack.CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULT, ItemStack.EMPTY).forGetter($$0x -> ((RecipeResultBridge) $$0x).bridge$spongeResult()),
+                            ItemStack.CODEC.fieldOf(Constants.Recipe.RESULT).forGetter($$0x -> ((RecipeResultBridge) $$0x).bridge$result()),
                             IngredientResultUtil.CACHED_RESULT_FUNC_CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULTFUNCTION).forGetter(ResultFunctionRecipe::resultFunctionId)
                     )
                     .apply($$0, SpongeSmithingRecipe::of)
@@ -61,9 +59,9 @@ public class SpongeSmithingRecipe extends SmithingTransformRecipe implements Res
     private final String resultFunctionId;
 
     public static SpongeSmithingRecipe of(final String spongeType, final Ingredient template, final Ingredient base,
-            final Ingredient addition, final ItemStack resultIn, final ItemStack spongeResult, final Optional<String> resultFunctionId)
+            final Ingredient addition, final ItemStack resultIn, final Optional<String> resultFunctionId)
     {
-        return new SpongeSmithingRecipe(template, base, addition, spongeResult.isEmpty() ? resultIn : spongeResult, resultFunctionId.orElse(null));
+        return new SpongeSmithingRecipe(template, base, addition, resultIn, resultFunctionId.orElse(null));
     }
 
     public SpongeSmithingRecipe(final Ingredient template, final Ingredient base,
@@ -78,17 +76,17 @@ public class SpongeSmithingRecipe extends SmithingTransformRecipe implements Res
     }
 
     @Override
-    public ItemStack assemble(Container $$0, RegistryAccess $$1) {
+    public ItemStack assemble(Container $$0, HolderLookup.Provider $$1) {
         if (this.resultFunctionId != null) {
             return IngredientResultUtil.cachedResultFunction(this.resultFunctionId).apply($$0);
         }
 
-        if (this.getResultItem($$1).hasTag()) {
-            final ItemStack itemStack = this.getResultItem($$1).copy();
-            CompoundTag compoundnbt = $$0.getItem(0).getTag();
-            if (compoundnbt != null) {
-                final CompoundTag merged = itemStack.getTag().merge(compoundnbt.copy());
-                itemStack.setTag(merged);
+        final ItemStack resultItem = this.getResultItem($$1);
+        if (!resultItem.getComponents().isEmpty()) {
+            final ItemStack itemStack = resultItem.copy();
+            var patch = $$0.getItem(0).getComponentsPatch();
+            if (!patch.isEmpty()) {
+                itemStack.applyComponents(patch);
                 return itemStack;
             }
         }
@@ -96,7 +94,7 @@ public class SpongeSmithingRecipe extends SmithingTransformRecipe implements Res
     }
 
     @Override
-    public ItemStack getResultItem(RegistryAccess $$1) {
+    public ItemStack getResultItem(HolderLookup.Provider $$1) {
         if (this.resultFunctionId != null) {
             return ItemStack.EMPTY;
         }

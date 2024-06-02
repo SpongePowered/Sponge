@@ -39,6 +39,7 @@ import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.transformers.modlauncher.AccessWidenerTransformationService;
 import org.spongepowered.transformers.modlauncher.SuperclassChanger;
 
 import java.net.MalformedURLException;
@@ -47,6 +48,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
+import java.util.jar.Attributes;
 
 public class SpongeForgeTransformationService implements ITransformationService {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -92,22 +94,43 @@ public class SpongeForgeTransformationService implements ITransformationService 
     @Override
     public List<Resource> completeScan(IModuleLayerManager layerManager) {
         final Environment env = Launcher.INSTANCE.environment();
+        final AccessWidenerTransformationService accessWidener = env.getProperty(AccessWidenerTransformationService.INSTANCE.get()).orElse(null);
         final SuperclassChanger superclassChanger = env.getProperty(SuperclassChanger.INSTANCE.get()).orElse(null);
 
-        if (superclassChanger != null) {
-            // TODO move this inside SuperclassChanger when updating SpongeCommon to latest ModLauncher
+        if (accessWidener != null || superclassChanger != null) {
+            // TODO move this inside modlauncher-transformers when updating SpongeVanilla to latest ModLauncher
             for (ModFileInfo fileInfo : LoadingModList.get().getModFiles()) {
                 final SecureJar jar = fileInfo.getFile().getSecureJar();
-                final String superclassChangeFiles = jar.moduleDataProvider().getManifest().getMainAttributes().getValue("Superclass-Transformer");
-                if (superclassChangeFiles != null) {
-                    final String jarFileName = fileInfo.getFile().getFileName();
-                    LOGGER.debug("Registering superclass changers from {} ...", jarFileName);
+                final Attributes attributes = jar.moduleDataProvider().getManifest().getMainAttributes();
 
-                    for (final String superclassChangeFile : superclassChangeFiles.split(",")) {
-                        try {
-                            superclassChanger.offerResource(jar.getPath(superclassChangeFile).toUri().toURL(), superclassChangeFile);
-                        } catch (final MalformedURLException e) {
-                            LOGGER.warn("Failed to register superclass changer {} from {}", superclassChangeFile, jarFileName, e);
+                if (accessWidener != null) {
+                    final String awPaths = attributes.getValue("Access-Widener");
+                    if (awPaths != null) {
+                        final String jarFileName = fileInfo.getFile().getFileName();
+                        LOGGER.debug("Registering access wideners from {} ...", jarFileName);
+
+                        for (final String awPath : awPaths.split(",")) {
+                            try {
+                                accessWidener.offerResource(jar.getPath(awPath).toUri().toURL(), awPath);
+                            } catch (final MalformedURLException e) {
+                                LOGGER.warn("Failed to register access widener {} from {}", awPath, jarFileName, e);
+                            }
+                        }
+                    }
+                }
+
+                if (superclassChanger != null) {
+                    final String scPaths = attributes.getValue("Superclass-Transformer");
+                    if (scPaths != null) {
+                        final String jarFileName = fileInfo.getFile().getFileName();
+                        LOGGER.debug("Registering superclass changers from {} ...", jarFileName);
+
+                        for (final String scPath : scPaths.split(",")) {
+                            try {
+                                superclassChanger.offerResource(jar.getPath(scPath).toUri().toURL(), scPath);
+                            } catch (final MalformedURLException e) {
+                                LOGGER.warn("Failed to register superclass changer {} from {}", scPath, jarFileName, e);
+                            }
                         }
                     }
                 }

@@ -25,12 +25,12 @@
 package org.spongepowered.common.bridge.server;
 
 import com.google.inject.Injector;
+import net.kyori.adventure.resource.ResourcePackRequest;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.thread.BlockableEventLoop;
 import net.minecraft.world.Difficulty;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
 import org.spongepowered.common.user.SpongeUserManager;
 
@@ -40,7 +40,7 @@ public interface MinecraftServerBridge {
 
     SpongeServerScopedServiceProvider bridge$getServiceProvider();
 
-    @Nullable ResourcePack bridge$getResourcePack();
+    @Nullable ResourcePackRequest bridge$getResourcePack();
 
     void bridge$setDifficulty(ServerLevel world, Difficulty newDifficulty, boolean forceDifficulty);
 

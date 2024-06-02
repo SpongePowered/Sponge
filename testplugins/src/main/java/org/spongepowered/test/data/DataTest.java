@@ -704,9 +704,6 @@ public final class DataTest  {
         snowball.offer(Keys.CUSTOM_NAME, Component.text("I am very inaccurate :)", NamedTextColor.RED));
         player.inventory().offer(snowball);
 
-        this.checkOfferData(itemEntity, Keys.INFINITE_DESPAWN_DELAY, true);
-        this.checkOfferData(itemEntity, Keys.INFINITE_DESPAWN_DELAY, false);
-        this.checkOfferData(itemEntity, Keys.INFINITE_PICKUP_DELAY, true);
         world.spawnEntity(itemEntity);
 
         final BlockState noteBlockState = BlockTypes.NOTE_BLOCK.get().defaultState();
@@ -1405,7 +1402,7 @@ public final class DataTest  {
         if (gotValue.isPresent()) {
             final List<T> actual = gotValue.get().get(new Random());
             if (!Objects.deepEquals(actual.toArray(), expected.toArray())) {
-                this.plugin.logger().error("Value differs om {} for {}.\nExpected: {}\nActual:   {}", DataTest.getHolderName(holder),
+                this.plugin.logger().error("Value differs on {} for {}.\nExpected: {}\nActual:   {}", DataTest.getHolderName(holder),
                         key.key().asString(), expected, actual);
             }
         } else {

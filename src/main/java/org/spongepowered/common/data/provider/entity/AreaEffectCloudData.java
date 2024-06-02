@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import com.google.common.collect.Streams;
 import net.minecraft.world.entity.AreaEffectCloud;
+import net.minecraft.world.item.alchemy.PotionContents;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.accessor.world.entity.AreaEffectCloudAccessor;
@@ -32,6 +34,8 @@ import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.util.PotionEffectUtil;
 import org.spongepowered.common.util.SpongeTicks;
+
+import java.util.Optional;
 
 public final class AreaEffectCloudData {
 
@@ -43,13 +47,16 @@ public final class AreaEffectCloudData {
         registrator
                 .asMutable(AreaEffectCloud.class)
                     .create(Keys.COLOR)
-                        .get(h -> Color.ofRgb(h.getColor()))
-                        .set((h, v) -> h.setFixedColor(v.rgb()))
+                        .get(h -> Color.ofRgb(((AreaEffectCloudAccessor) h).accessor$potionContents().getColor()))
+                        .set((h, v) -> {
+                            var contents = ((AreaEffectCloudAccessor) h).accessor$potionContents();
+                            h.setPotionContents(new PotionContents(contents.potion(), Optional.of(v.rgb()), contents.customEffects()));
+                        })
                     .create(Keys.DURATION)
                         .get(x -> new SpongeTicks(x.getDuration()))
                         .setAnd((h, v) -> {
-                            final int ticks = (int) v.ticks();
-                            if (ticks < 0) {
+                            final int ticks = SpongeTicks.toSaturatedIntOrInfinite(v);
+                            if (v.isInfinite() || ticks < 0) {
                                 return false;
                             }
                             h.setDuration(ticks);
@@ -69,17 +76,38 @@ public final class AreaEffectCloudData {
                         .set((h, v) -> h.setRadiusPerTick(v.floatValue()))
                     .create(Keys.WAIT_TIME)
                         .get(h -> new SpongeTicks(((AreaEffectCloudAccessor) h).accessor$waitTime()))
-                        .set((h, v) -> h.setWaitTime((int) v.ticks()))
+                        .setAnd((h, v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            h.setWaitTime(SpongeTicks.toSaturatedIntOrInfinite(v));
+                            return true;
+                        })
                 .asMutable(AreaEffectCloudAccessor.class)
                     .create(Keys.DURATION_ON_USE)
                         .get(h -> new SpongeTicks(h.accessor$durationOnUse()))
-                        .set((h, v) -> h.accessor$durationOnUse((int) v.ticks()))
+                        .setAnd((h, v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            h.accessor$durationOnUse(SpongeTicks.toSaturatedIntOrInfinite(v));
+                            return true;
+                        })
                     .create(Keys.POTION_EFFECTS)
-                        .get(h -> PotionEffectUtil.copyAsPotionEffects(h.accessor$effects()))
-                        .set((h, v) -> h.accessor$effects(PotionEffectUtil.copyAsEffectInstances(v)))
+                        .get(h -> PotionEffectUtil.copyAsPotionEffects(Streams.stream(h.accessor$potionContents().getAllEffects()).toList()))
+                        .set((h, v) -> {
+                            final PotionContents contents = h.accessor$potionContents();
+                            ((AreaEffectCloud) h).setPotionContents(new PotionContents(contents.potion(), contents.customColor(), PotionEffectUtil.copyAsEffectInstances(v)));
+                        })
                     .create(Keys.REAPPLICATION_DELAY)
                         .get(h -> new SpongeTicks(h.accessor$reapplicationDelay()))
-                        .set((h, v) -> h.accessor$reapplicationDelay((int) v.ticks()));
+                        .setAnd((h, v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            h.accessor$reapplicationDelay(SpongeTicks.toSaturatedIntOrInfinite(v));
+                            return true;
+                        });
     }
     // @formatter:on
 }

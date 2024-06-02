@@ -30,6 +30,7 @@ import com.mojang.datafixers.DataFixer;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.resource.ResourcePackRequest;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.commands.Commands;
@@ -59,7 +60,6 @@ import org.spongepowered.api.item.recipe.RecipeManager;
 import org.spongepowered.api.map.MapStorage;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.resource.ResourceManager;
-import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.util.Ticks;
@@ -392,7 +392,7 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
         return ((CommandsBridge) this.shadow$getCommands()).bridge$commandManager();
     }
 
-    public Optional<ResourcePack> server$resourcePack() {
+    public Optional<ResourcePackRequest> server$resourcePack() {
         return Optional.ofNullable(((MinecraftServerBridge) this).bridge$getResourcePack());
     }
 
@@ -470,15 +470,7 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
 
     @Override
     public void sendMessage(final Identity identity, final Component message, final MessageType type) {
-        if (type == MessageType.SYSTEM) {
-            this.shadow$getPlayerList().broadcastSystemMessage(SpongeAdventure.asVanilla(message), false);
-        } else {
-//            final ResourceKey<ChatType> chatTypeResourceKey = SpongeAdventure.asVanilla(type);
-
-//            this.shadow$getPlayerList().broadcastChatMessage(SpongeAdventure.asVanilla(message), );
-        }
-
-        // TODO identity this.shadow$getPlayerList().broadcastMessage(SpongeAdventure.asVanilla(message), SpongeAdventure.asVanilla(type), identity.uuid());
+        this.shadow$getPlayerList().broadcastSystemMessage(SpongeAdventure.asVanilla(message), false);
     }
 
     @Override

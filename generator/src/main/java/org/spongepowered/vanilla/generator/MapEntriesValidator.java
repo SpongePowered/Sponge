@@ -35,6 +35,8 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
+import com.github.javaparser.javadoc.Javadoc;
+import com.github.javaparser.javadoc.description.JavadocDescription;
 import net.minecraft.resources.ResourceLocation;
 import org.tinylog.Logger;
 
@@ -91,6 +93,8 @@ class MapEntriesValidator<V> implements Generator {
         final var compilationUnit = ctx.compilationUnit(this.relativePackageName, this.targetClassSimpleName);
         final var primaryTypeDeclaration = compilationUnit.getPrimaryType()
                 .orElseThrow(() -> new IllegalStateException("Could not find primary type for registry type " + this.targetClassSimpleName));
+
+        primaryTypeDeclaration.setJavadocComment(new Javadoc(JavadocDescription.parseText(Generator.GENERATED_FILE_JAVADOCS)));
 
         final Map<ResourceLocation, ?> map;
         try {

@@ -78,20 +78,15 @@ public final class SpongeRegistries {
         holder.createFrozenRegistry(RegistryTypes.RESOLVE_OPERATION, SpongeRegistryLoader.resolveOperation());
         holder.createFrozenRegistry(RegistryTypes.SKIN_PART, SpongeRegistryLoader.skinPart());
         holder.createFrozenRegistry(RegistryTypes.SPAWN_TYPE, SpongeRegistryLoader.spawnType());
-        holder.createFrozenRegistry(RegistryTypes.TICKET_TYPE, SpongeRegistryLoader.ticketType());
         holder.createFrozenRegistry(RegistryTypes.TRANSACTION_TYPE, SpongeRegistryLoader.transactionType());
         holder.createFrozenRegistry(RegistryTypes.WEATHER_TYPE, SpongeRegistryLoader.weather());
         holder.createFrozenRegistry(RegistryTypes.DATA_FORMAT, SpongeRegistryLoader.dataFormat());
         holder.createFrozenRegistry(RegistryTypes.MAP_COLOR_TYPE, SpongeRegistryLoader.mapColorType());
         holder.createFrozenRegistry(RegistryTypes.MAP_DECORATION_ORIENTATION, SpongeRegistryLoader.mapDecorationOrientation());
-        holder.createFrozenRegistry(RegistryTypes.MAP_DECORATION_TYPE, SpongeRegistryLoader.mapDecorationType());
         holder.createFrozenRegistry(RegistryTypes.MAP_SHADE, SpongeRegistryLoader.mapShade());
         holder.createFrozenRegistry(RegistryTypes.NOISE_CONFIG, SpongeRegistryLoader.noiseConfig());
 
         SpongeRegistries.registerEarlyDynamicRegistries(holder);
-
-
-
     }
 
     private static void registerEarlyDynamicRegistries(final SpongeRegistryHolder holder) {
@@ -107,11 +102,11 @@ public final class SpongeRegistries {
             return; // Already done
         }
         final RegistryAccess.ImmutableRegistryAccess builtInRegistryAccess = new RegistryAccess.ImmutableRegistryAccess(BuiltInRegistries.REGISTRY.stream().toList());
-        final CommandBuildContext cbCtx = CommandBuildContext.configurable(builtInRegistryAccess, featureFlags);
-        holder.createFrozenRegistry(RegistryTypes.COMMAND_TREE_NODE_TYPE, CommandRegistryLoader.clientCompletionKey(cbCtx));
-        holder.createFrozenRegistry(RegistryTypes.REGISTRY_KEYED_VALUE_PARAMETER, CommandRegistryLoader.valueParameter(cbCtx));
+        final CommandBuildContext cbCtx = CommandBuildContext.simple(builtInRegistryAccess, featureFlags);
+        holder.createOrReplaceFrozenRegistry(RegistryTypes.COMMAND_TREE_NODE_TYPE, CommandRegistryLoader.clientCompletionKey(cbCtx));
+        holder.createOrReplaceFrozenRegistry(RegistryTypes.REGISTRY_KEYED_VALUE_PARAMETER, CommandRegistryLoader.valueParameter(cbCtx));
 
-        holder.createFrozenRegistry(RegistryTypes.FLAT_GENERATOR_CONFIG, SpongeRegistryLoader.flatGeneratorConfig(registryAccess));
+        holder.createOrReplaceFrozenRegistry(RegistryTypes.FLAT_GENERATOR_CONFIG, SpongeRegistryLoader.flatGeneratorConfig(registryAccess));
     }
 
     public static void registerServerRegistries(final RegistryHolder holder) {

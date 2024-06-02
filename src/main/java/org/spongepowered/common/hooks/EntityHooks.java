@@ -35,8 +35,8 @@ public interface EntityHooks {
     }
 
     default Entity getParentPart(final Entity entity) {
-        if (entity instanceof EnderDragonPart) {
-            return ((EnderDragonPart) entity).parentMob;
+        if (entity instanceof EnderDragonPart edp) {
+            return edp.parentMob;
         }
         return entity;
     }

@@ -24,11 +24,18 @@
  */
 package org.spongepowered.common.data.provider.block.entity;
 
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BannerBlockEntity;
+import net.minecraft.world.level.block.entity.BannerPatternLayers;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.meta.BannerPatternLayer;
 import org.spongepowered.common.bridge.world.level.block.entity.BannerBlockEntityBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+
+import java.util.List;
 
 public final class BannerData {
 
@@ -40,11 +47,11 @@ public final class BannerData {
         registrator
                 .asMutable(BannerBlockEntity.class)
                     .create(Keys.BANNER_PATTERN_LAYERS)
-                        .get(h -> ((BannerBlockEntityBridge) h).bridge$getLayers())
+                        .get(h -> h.getPatterns().layers().stream().map(BannerPatternLayer.class::cast).toList())
                         .setAnd((h, v) -> {
                             final Level world = h.getLevel();
                             if (world != null && !world.isClientSide) { // This avoids a client crash because clientside.
-                                ((BannerBlockEntityBridge) h).bridge$setLayers(v);
+                                applyBannerPatternLayers(h, v);
                                 return true;
                             }
                             return false;
@@ -61,4 +68,12 @@ public final class BannerData {
                         });
     }
     // @formatter:on
+    private static void applyBannerPatternLayers(final BannerBlockEntity h, final List<BannerPatternLayer> v) {
+        final DataComponentMap.Builder builder = DataComponentMap.builder();
+        builder.addAll(h.collectComponents());
+        // TODO base color?
+        builder.set(DataComponents.BANNER_PATTERNS, new BannerPatternLayers(v.stream().map(BannerPatternLayers.Layer.class::cast).toList()));
+        final DataComponentMap components = builder.build();
+        h.applyComponents(components, DataComponentPatch.EMPTY);
+    }
 }

@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.map;
 
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.map.decoration.MapDecorationType;
 import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientation;
@@ -34,29 +35,31 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.storage.MapDecorationBridge;
-import org.spongepowered.common.map.decoration.SpongeMapDecorationType;
 import org.spongepowered.common.map.decoration.orientation.SpongeMapDecorationOrientation;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MapUtil;
 import org.spongepowered.common.util.Preconditions;
 import org.spongepowered.math.vector.Vector2i;
 
+import java.util.Optional;
+
 @Mixin(MapDecoration.class)
 public abstract class MapDecorationMixin_API implements org.spongepowered.api.map.decoration.MapDecoration {
 
     // @formatter:off
-    @Shadow @Final private MapDecoration.Type type;
+    @Shadow @Final private Holder<net.minecraft.world.level.saveddata.maps.MapDecorationType> type;
     @Shadow @Final @Mutable private byte x;
     @Shadow @Final @Mutable private byte y;
     @Shadow @Final @Mutable private byte rot;
-    @Shadow @Nullable public abstract Component shadow$name();
+    @Shadow @Final private Optional<Component> name;
     // @formatter:on
+
 
     @Override
     public MapDecorationType type() {
-        return SpongeMapDecorationType.toSpongeType(this.type)
-                .orElseThrow(() -> new IllegalStateException("Tried to get MapDecoration type but it didn't exist in Sponge's registries! Have MC Decoration types been missed?"));
+        return (MapDecorationType) (Object) this.type.value();
     }
 
     @Override
@@ -98,14 +101,12 @@ public abstract class MapDecorationMixin_API implements org.spongepowered.api.ma
     @Override
     public DataContainer toContainer() {
         final DataContainer data = DataContainer.createNew()
-                .set(Constants.Map.DECORATION_TYPE, this.type.getIcon())
+                .set(Constants.Map.DECORATION_TYPE, BuiltInRegistries.MAP_DECORATION_TYPE.getKey(this.type.value()))
                 .set(Constants.Map.DECORATION_ID, ((MapDecorationBridge) this).bridge$getKey())
                 .set(Constants.Map.DECORATION_X, this.x)
                 .set(Constants.Map.DECORATION_Y, this.y)
                 .set(Constants.Map.DECORATION_ROTATION, (byte) MapUtil.normalizeDecorationOrientation(this.rot));
-        if (this.shadow$name() != null) {
-            data.set(Constants.Map.NAME, Component.Serializer.toJson(this.shadow$name()));
-        }
+        this.name.ifPresent(component -> data.set(Constants.Map.NAME, Component.Serializer.toJson(component, SpongeCommon.server().registryAccess())));
         return data;
     }
 }

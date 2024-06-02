@@ -24,7 +24,10 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.StringUtil;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 
@@ -40,7 +43,23 @@ public final class HumanData {
                     .create(Keys.SKIN_PROFILE_PROPERTY)
                         .get(HumanEntity::getSkinProperty)
                         .set(HumanEntity::setSkinProperty)
-                        .delete(h -> h.setSkinProperty(null));
+                        .delete(h -> h.setSkinProperty(null))
+                    .create(Keys.CUSTOM_NAME)
+                        .get(h -> h.hasCustomName() ? SpongeAdventure.asAdventure(h.getCustomName()) : null)
+                        .setAnd((h, v) -> {
+                            final Component component = SpongeAdventure.asVanilla(v);
+                            if (!StringUtil.isValidPlayerName(component.getString())) {
+                                return false;
+                            }
+                            h.setCustomName(component);
+                            return true;
+                        })
+                        .delete(h -> {
+                            h.setCustomName(null);
+                            h.setCustomNameVisible(false);
+                        })
+
+        ;
     }
     // @formatter:on
 }

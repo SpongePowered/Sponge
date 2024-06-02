@@ -25,29 +25,28 @@
 package org.spongepowered.common.network.channel;
 
 import net.minecraft.network.Connection;
-import net.minecraft.network.protocol.login.ClientLoginPacketListener;
-import net.minecraft.network.protocol.login.ServerLoginPacketListener;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.EngineConnection;
+import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
-import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
+import org.spongepowered.common.network.SpongeEngineConnection;
 
 import java.util.Set;
 
 public final class ConnectionUtil {
 
     public static boolean isLoginPhase(final EngineConnection connection) {
-        return connection instanceof ClientLoginPacketListener ||
-                connection instanceof ServerLoginPacketListener;
+        final EngineConnectionState state = (EngineConnectionState) ((SpongeEngineConnection) connection).connection().getPacketListener();
+        return state instanceof EngineConnectionState.Login;
     }
 
     public static Set<ResourceKey> getRegisteredChannels(final EngineConnection connection) {
-        final Connection networkManager = ((ConnectionHolderBridge) connection).bridge$getConnection();
+        final Connection networkManager = ((SpongeEngineConnection) connection).connection();
         return ((ConnectionBridge) networkManager).bridge$getRegisteredChannels();
     }
 
     public static TransactionStore getTransactionStore(final EngineConnection connection) {
-        final Connection networkManager = ((ConnectionHolderBridge) connection).bridge$getConnection();
+        final Connection networkManager = ((SpongeEngineConnection) connection).connection();
         return ((ConnectionBridge) networkManager).bridge$getTransactionStore();
     }
 

@@ -64,9 +64,8 @@ public class BrewingStandBlockEntityMixin {
 
     @Inject(method = "serverTick",
             locals = LocalCapture.CAPTURE_FAILEXCEPTION,
-            slice = @Slice(to = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;isBrewable(Lnet/minecraft/core/NonNullList;)Z")),
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;" +
-                    "setChanged(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)V"))
+            slice = @Slice(to = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;isBrewable(Lnet/minecraft/world/item/alchemy/PotionBrewing;Lnet/minecraft/core/NonNullList;)Z")),
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;setChanged(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)V"))
     private static void impl$onConsumeFuel(final Level param0, final BlockPos param1, final BlockState param2, final BrewingStandBlockEntity param3,
                                            final CallbackInfo ci, final ItemStack fuelStack) {
         final Cause currentCause = Sponge.server().causeStackManager().currentCause();
@@ -88,7 +87,7 @@ public class BrewingStandBlockEntityMixin {
 
     @Inject(method = "serverTick",
             locals = LocalCapture.CAPTURE_FAILEXCEPTION,
-            slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;isBrewable(Lnet/minecraft/core/NonNullList;)Z")),
+            slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;isBrewable(Lnet/minecraft/world/item/alchemy/PotionBrewing;Lnet/minecraft/core/NonNullList;)Z")),
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;" +
                     "setChanged(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)V"))
     private static void impl$callBrewEvents(final Level param0, final BlockPos param1, final BlockState param2, final BrewingStandBlockEntity param3,

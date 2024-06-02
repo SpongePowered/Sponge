@@ -34,4 +34,6 @@ public interface BlockEntityAccessor {
 
     @Accessor("level") void accessor$level(final Level level);
 
+    @Accessor("level") Level accessor$level();
+
 }

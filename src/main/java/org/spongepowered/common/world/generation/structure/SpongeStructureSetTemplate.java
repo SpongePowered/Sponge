@@ -76,12 +76,12 @@ public record SpongeStructureSetTemplate(ResourceKey key, StructureSet represent
 
     public static JsonElement encode(final StructureSetTemplate template, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        return StructureSet.DIRECT_CODEC.encodeStart(ops, (StructureSet) (Object) template.structureSet()).getOrThrow(false, e -> {});
+        return StructureSet.DIRECT_CODEC.encodeStart(ops, (StructureSet) (Object) template.structureSet()).getOrThrow();
     }
 
     public static StructureSet decode(final JsonElement json, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        return StructureSet.DIRECT_CODEC.parse(ops, json).getOrThrow(false, e -> {});
+        return StructureSet.DIRECT_CODEC.parse(ops, json).getOrThrow();
     }
 
     public static SpongeStructureSetTemplate decode(final DataPack<StructureSetTemplate> pack, final ResourceKey key, final JsonElement packEntry, final RegistryAccess registryAccess) {

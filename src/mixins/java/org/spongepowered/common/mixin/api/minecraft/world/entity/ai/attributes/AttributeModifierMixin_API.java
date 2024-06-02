@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.ai.attributes;
 
+import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
 import org.spongepowered.api.entity.attribute.AttributeModifier;
 import org.spongepowered.api.entity.attribute.AttributeOperation;
 import org.spongepowered.asm.mixin.Final;
@@ -37,11 +38,12 @@ public abstract class AttributeModifierMixin_API implements AttributeModifier {
 
     // @formatter:off
     @Shadow @Final private String name;
+    @Shadow @Final private double amount;
+    @Shadow @Final private UUID id;
 
-    @Shadow public abstract double shadow$getAmount();
-    @Shadow public abstract net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation shadow$getOperation();
-    @Shadow public abstract UUID shadow$getId();
+    @Shadow @Final private Operation operation;
     // @formatter:on
+
 
 
     @Override
@@ -51,17 +53,18 @@ public abstract class AttributeModifierMixin_API implements AttributeModifier {
 
     @Override
     public AttributeOperation operation() {
-        return (AttributeOperation) (Object) this.shadow$getOperation();
+
+        return (AttributeOperation) (Object) this.operation;
     }
 
     @Override
     public double amount() {
-        return this.shadow$getAmount();
+        return this.amount;
     }
 
     @Override
     public UUID uniqueId() {
-        return this.shadow$getId();
+        return this.id;
     }
 
 }

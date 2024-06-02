@@ -75,7 +75,8 @@ public abstract class BlockStateMixin_API extends BlockBehaviour_BlockStateBaseM
             final BlockEntity blockEntity = location.blockEntity()
                     .orElseThrow(() -> new IllegalStateException("Unable to retrieve a TileEntity for location: " + location));
             builder.add(((SpongeDataHolderBridge) blockEntity).bridge$getManipulator());
-            final CompoundTag compound = ((net.minecraft.world.level.block.entity.BlockEntity) blockEntity).saveWithFullMetadata();
+            final var mcBlockEntity = (net.minecraft.world.level.block.entity.BlockEntity) blockEntity;
+            final CompoundTag compound = mcBlockEntity.saveWithFullMetadata(mcBlockEntity.getLevel().registryAccess());
             builder.addUnsafeCompound(compound);
         }
         return builder.build();

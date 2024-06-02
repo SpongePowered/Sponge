@@ -1,11 +1,8 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import net.fabricmc.loom.api.LoomGradleExtensionAPI
-import net.fabricmc.loom.task.RemapJarTask
-import org.gradle.configurationcache.extensions.capitalized
 
 buildscript {
     repositories {
-        maven("https://oss.sonatype.org/content/repositories/snapshots/")
         maven("https://repo.spongepowered.org/repository/maven-public") {
             name = "sponge"
         }
@@ -17,7 +14,7 @@ plugins {
     alias(libs.plugins.shadow)
     id("implementation-structure")
     alias(libs.plugins.blossom)
-    id("net.smoofyuniverse.loom") version "1.1-SNAPSHOT"
+    id("dev.architectury.loom") version "1.6-SNAPSHOT"
 }
 
 val commonProject = parent!!
@@ -69,7 +66,7 @@ val gameLayerConfig: NamedDomainObjectProvider<Configuration> = configurations.r
     extendsFrom(gameLibrariesConfig.get())
 
     afterEvaluate {
-        extendsFrom(configurations.getByName("minecraftNamed"))
+        extendsFrom(configurations.getByName("minecraftNamedCompile"))
     }
 }
 
@@ -146,33 +143,10 @@ configurations.configureEach {
     if (name != "minecraft") { // awful terrible hack sssh
         exclude(group = "com.mojang", module = "minecraft")
     }
-}
 
-sourceSets.configureEach {
-    val sourceSet = this
-    val isMain = "main".equals(sourceSet.name)
-    val classifier = if (isMain) "sources" else (sourceSet.name + "-sources")
-
-    val sourcesJarName: String = if (isMain) "sourcesJar" else (sourceSet.name + "SourcesJar")
-    val sourcesJarTask = tasks.register(sourcesJarName, Jar::class) {
-        group = "build"
-        archiveClassifier.set(classifier + "-dev")
-        from(sourceSet.allJava)
-    }
-
-    val remapSourcesJarName = "remap" + sourcesJarName.capitalized()
-
-    // remapSourcesJar is already registered (but disabled) by Loom
-    if (!isMain) {
-        tasks.register(remapSourcesJarName, net.fabricmc.loom.task.RemapSourcesJarTask::class)
-    }
-
-    tasks.named(remapSourcesJarName, net.fabricmc.loom.task.RemapSourcesJarTask::class) {
-        group = "loom"
-        archiveClassifier.set(classifier)
-        inputFile.set(sourcesJarTask.flatMap { it.archiveFile })
-        dependsOn(sourcesJarTask)
-        enabled = true
+    // Fix that can be found in Forge MDK too
+    resolutionStrategy {
+        force("net.sf.jopt-simple:jopt-simple:5.0.4")
     }
 }
 
@@ -198,6 +172,11 @@ extensions.configure(LoomGradleExtensionAPI::class) {
             configuration(gameManagedLibrariesConfig.get())
             configuration(gameShadedLibrariesConfig.get())
         }
+    }
+
+    // Arch-loom bug, skip broken union-relauncher
+    runs.forEach {
+        it.mainClass.set("net.minecraftforge.bootstrap.ForgeBootstrap")
     }
 }
 
@@ -256,11 +235,8 @@ dependencies {
     }
 
     val runTaskOnly = runTaskOnlyConfig.name
-    testPluginsProject?.also {
-        runTaskOnly(project(it.path)) {
-            exclude(group = "org.spongepowered")
-        }
-    }
+    // Arch-loom bug, fix support of MOD_CLASSES
+    runTaskOnly("net.minecraftforge:bootstrap-dev:2.1.1")
 }
 
 val forgeManifest = java.manifest {
@@ -282,9 +258,6 @@ val mixinConfigs: MutableSet<String> = spongeImpl.mixinConfigurations
 tasks {
     jar {
         manifest.from(forgeManifest)
-
-        // Undo Loom devlibs dir
-        destinationDirectory.set(project.buildDir.resolve("libs"))
     }
     val forgeAppLaunchJar by registering(Jar::class) {
         archiveClassifier.set("applaunch")
@@ -316,7 +289,7 @@ tasks {
     }
 
     val forgeServicesDevJar by registering(Jar::class) {
-        archiveClassifier.set("services-dev")
+        archiveClassifier.set("services")
         manifest.from(forgeManifest)
 
         from(commonProject.sourceSets.named("applaunch").map { it.output })
@@ -327,13 +300,29 @@ tasks {
 
     afterEvaluate {
         withType(net.fabricmc.loom.task.AbstractRunTask::class) {
-            classpath += files(forgeServicesDevJar, forgeLangJar, runTaskOnlyConfig)
+            // Default classpath is a mess, we better start a new one from scratch
+            classpath = files(
+                    configurations.getByName("forgeRuntimeLibrary"),
+                    forgeServicesDevJar, forgeLangJar, runTaskOnlyConfig
+            )
+
+            testPluginsProject?.also {
+                val testPluginsOutput = it.sourceSets.getByName("main").output
+                val dirs: MutableList<File> = mutableListOf()
+                dirs.add(testPluginsOutput.resourcesDir!!)
+                dirs.addAll(testPluginsOutput.classesDirs)
+                environment["SPONGE_PLUGINS"] = dirs.joinToString("&")
+
+                dependsOn(it.tasks.classes)
+            }
 
             argumentProviders += CommandLineArgumentProvider {
                 mixinConfigs.asSequence()
                         .flatMap { sequenceOf("--mixin.config", it) }
                         .toList()
             }
+
+            // jvmArguments.add("-Dbsl.debug=true") // Uncomment to debug bootstrap classpath
 
             sourceSets.forEach {
                 dependsOn(it.classesTaskName)
@@ -378,13 +367,14 @@ tasks {
 
     shadowJar {
         group = "shadow"
-        archiveClassifier.set("mod-dev")
+        archiveClassifier.set("mod")
 
         mergeServiceFiles()
         configurations = listOf(gameShadedLibrariesConfig.get())
 
         manifest {
             attributes(
+                "Access-Widener" to "common.accesswidener",
                 "Superclass-Transformer" to "common.superclasschange,forge.superclasschange",
                 "MixinConfigs" to mixinConfigs.joinToString(",")
             )
@@ -401,14 +391,6 @@ tasks {
         from(forgeMixins.output)
     }
 
-    val remapShadowJar = register("remapShadowJar", RemapJarTask::class) {
-        group = "loom"
-        archiveClassifier.set("mod")
-
-        inputFile.set(shadowJar.flatMap { it.archiveFile })
-        atAccessWideners.add("common.accesswidener")
-    }
-
     val universalJar = register("universalJar", Jar::class) {
         group = "build"
         archiveClassifier.set("universal")
@@ -418,7 +400,7 @@ tasks {
         from(forgeServicesShadowJar.archiveFile.map { zipTree(it) })
 
         into("jars") {
-            from(remapShadowJar)
+            from(shadowJar)
             rename("spongeforge-(.*)-mod.jar", "spongeforge-mod.jar")
 
             from(forgeLangJar)
@@ -463,33 +445,28 @@ indraSpotlessLicenser {
     property("url", projectUrl)
 }
 
-val sourcesJar by tasks.existing
-val forgeAppLaunchJar by tasks.existing
-val forgeLaunchJar by tasks.existing
-val forgeMixinsJar by tasks.existing
-
 publishing {
     publications {
         register("sponge", MavenPublication::class) {
-            artifact(tasks.named("remapJar")) {
-                builtBy(tasks.named("remapJar"))
-            }
-            artifact(sourcesJar) {
-                builtBy(tasks.named("remapSourcesJar"))
-            }
-            artifact(tasks.named("remapShadowJar")) {
-                builtBy(tasks.named("remapShadowJar"))
-            }
-            artifact(forgeAppLaunchJar.get())
-            artifact(forgeLaunchJar.get())
-            artifact(forgeMixinsJar.get())
-            artifact(tasks["applaunchSourcesJar"])
-            artifact(tasks["launchSourcesJar"])
-            artifact(tasks["mixinsSourcesJar"])
             artifact(tasks["universalJar"])
 
+            artifact(tasks["jar"])
+            artifact(tasks["sourcesJar"])
+
+            artifact(tasks["forgeMixinsJar"])
+            artifact(tasks["mixinsSourcesJar"])
+
+            artifact(tasks["forgeAccessorsJar"])
+            artifact(tasks["accessorsSourcesJar"])
+
+            artifact(tasks["forgeLaunchJar"])
+            artifact(tasks["launchSourcesJar"])
+
+            artifact(tasks["forgeAppLaunchJar"])
+            artifact(tasks["applaunchSourcesJar"])
+
             pom {
-                artifactId = project.name.toLowerCase()
+                artifactId = project.name.lowercase()
                 this.name.set(project.name)
                 this.description.set(project.description)
                 this.url.set(projectUrl)
@@ -511,6 +488,7 @@ publishing {
 }
 
 tasks.register("printConfigsHierarchy") {
+    group = "debug"
     doLast {
         configurations.forEach { conf: Configuration  ->
             val seen = mutableSetOf<Configuration>()
@@ -532,6 +510,7 @@ fun printParents(conf: Configuration, indent: String, seen: MutableSet<Configura
 }
 
 tasks.register("printConfigsResolution") {
+    group = "debug"
     doLast {
         configurations.forEach { conf: Configuration  ->
             println()

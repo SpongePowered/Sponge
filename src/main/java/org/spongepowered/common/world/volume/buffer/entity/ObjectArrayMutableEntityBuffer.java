@@ -26,23 +26,18 @@ package org.spongepowered.common.world.volume.buffer.entity;
 
 import com.google.common.collect.ImmutableList;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.util.AABB;
-import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.volume.entity.EntityVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
 import org.spongepowered.common.world.volume.SpongeVolumeStream;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
-import org.spongepowered.common.world.volume.buffer.block.AbstractBlockBuffer;
-import org.spongepowered.common.world.volume.buffer.block.ArrayMutableBlockBuffer;
+import org.spongepowered.common.world.volume.buffer.AbstractVolumeBuffer;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -52,79 +47,17 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class ObjectArrayMutableEntityBuffer extends AbstractBlockBuffer implements EntityVolume.Mutable {
-    // This is our backing block buffer
-    private final ArrayMutableBlockBuffer blockBuffer;
+public class ObjectArrayMutableEntityBuffer extends AbstractVolumeBuffer implements EntityVolume.Mutable {
     private final List<Entity> entities;
 
     public ObjectArrayMutableEntityBuffer(final Vector3i start, final Vector3i size) {
         super(start, size);
-        this.blockBuffer = new ArrayMutableBlockBuffer(start, size);
         this.entities = new ArrayList<>();
-    }
-
-    public ObjectArrayMutableEntityBuffer(final Vector3i start, final Vector3i size,
-        final ArrayMutableBlockBuffer blockBuffer
-    ) {
-        super(start, size);
-        this.blockBuffer = blockBuffer;
-        this.entities = new ArrayList<>();
-    }
-
-    @Override
-    public Palette<BlockState, BlockType> getPalette() {
-        return this.blockBuffer.getPalette();
-    }
-
-    @Override
-    public BlockState block(final int x, final int y, final int z) {
-        return this.blockBuffer.block(x, y, z);
-    }
-
-    @Override
-    public FluidState fluid(final int x, final int y, final int z) {
-        return this.blockBuffer.fluid(x, y, z);
-    }
-
-    @Override
-    public int highestYAt(final int x, final int z) {
-        return this.blockBuffer.highestYAt(x, z);
-    }
-
-    @Override
-    public VolumeStream<EntityVolume.Mutable, BlockState> blockStateStream(final Vector3i min, final Vector3i max,
-        final StreamOptions options) {
-        VolumeStreamUtils.validateStreamArgs(min, max, this.min(), this.max(), options);
-        final ArrayMutableBlockBuffer buffer;
-        if (options.carbonCopy()) {
-            buffer = this.blockBuffer.copy();
-        } else {
-            buffer = this.blockBuffer;
-        }
-        final Stream<VolumeElement<EntityVolume.Mutable, BlockState>> stateStream = IntStream.rangeClosed(min.x(), max.x())
-            .mapToObj(x -> IntStream.rangeClosed(min.z(), max.z())
-                .mapToObj(z -> IntStream.rangeClosed(min.y(), max.y())
-                    .mapToObj(y -> VolumeElement.of((EntityVolume.Mutable) this, () -> buffer.block(x, y, z), new Vector3d(x, y, z)))
-                ).flatMap(Function.identity())
-            ).flatMap(Function.identity());
-        return new SpongeVolumeStream<>(stateStream, () -> this);
-    }
-
-    @Override
-    public boolean setBlock(final int x, final int y, final int z, final BlockState block) {
-        return this.blockBuffer.setBlock(x, y, z, block);
-    }
-
-    @Override
-    public boolean removeBlock(final int x, final int y, final int z) {
-        return this.blockBuffer.removeBlock(x, y, z);
     }
 
     @Override

@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world.entity.monster;
 
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -46,7 +47,6 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
-import java.util.function.Consumer;
 
 @Mixin(net.minecraft.world.entity.monster.Creeper.class)
 public abstract class CreeperMixin extends MonsterMixin implements FusedExplosiveBridge, ExplosiveBridge {
@@ -168,12 +168,12 @@ public abstract class CreeperMixin extends MonsterMixin implements FusedExplosiv
 
     @Redirect(method = "mobInteract",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/item/ItemStack;hurtAndBreak(ILnet/minecraft/world/entity/LivingEntity;Ljava/util/function/Consumer;)V"
+            target = "Lnet/minecraft/world/item/ItemStack;hurtAndBreak(ILnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/entity/EquipmentSlot;)V"
         )
     )
-    private void impl$onDamageFlintAndSteel(ItemStack fas, int amount, LivingEntity player, Consumer<LivingEntity> onBroken) {
+    private void impl$onDamageFlintAndSteel(final ItemStack fas, final int amount, final LivingEntity player, final EquipmentSlot slot) {
         if (!this.impl$interactPrimeCancelled) {
-            fas.hurtAndBreak(amount, player, onBroken);
+            fas.hurtAndBreak(amount, player, slot);
         }
         this.impl$interactPrimeCancelled = false;
     }

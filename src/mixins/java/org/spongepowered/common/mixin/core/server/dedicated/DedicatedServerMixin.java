@@ -25,7 +25,8 @@
 package org.spongepowered.common.mixin.core.server.dedicated;
 
 import com.mojang.datafixers.DataFixer;
-import net.kyori.adventure.text.Component;
+import net.kyori.adventure.resource.ResourcePackInfo;
+import net.kyori.adventure.resource.ResourcePackRequest;
 import net.minecraft.server.Services;
 import net.minecraft.server.WorldStem;
 import net.minecraft.server.dedicated.DedicatedServer;
@@ -40,13 +41,15 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.server.players.GameProfileCacheBridge;
 import org.spongepowered.common.datapack.SpongeDataPackManager;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.mixin.core.server.MinecraftServerMixin;
-import org.spongepowered.common.resourcepack.SpongeResourcePack;
 
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Optional;
 
 @Mixin(DedicatedServer.class)
 public abstract class DedicatedServerMixin extends MinecraftServerMixin {
@@ -56,7 +59,11 @@ public abstract class DedicatedServerMixin extends MinecraftServerMixin {
             DedicatedServerSettings $$4, DataFixer $$5, Services $$6, ChunkProgressListenerFactory $$7, CallbackInfo ci) {
         $$4.getProperties().serverResourcePackInfo.ifPresent(packInfo -> {
             try {
-                this.impl$resourcePack = SpongeResourcePack.create(packInfo.url(), packInfo.hash(), Component.empty());
+                this.impl$resourcePack = ResourcePackRequest.resourcePackRequest()
+                        .packs(ResourcePackInfo.resourcePackInfo(packInfo.id(), new URI(packInfo.url()), packInfo.hash()))
+                        .required(packInfo.isRequired())
+                        .prompt(SpongeAdventure.asAdventure(Optional.ofNullable(packInfo.prompt())))
+                        .build();
             } catch (final URISyntaxException e) {
                 e.printStackTrace();
             }

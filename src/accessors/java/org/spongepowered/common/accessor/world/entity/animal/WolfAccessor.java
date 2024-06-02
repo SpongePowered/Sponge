@@ -26,8 +26,10 @@ package org.spongepowered.common.accessor.world.entity.animal;
 
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.world.entity.animal.Wolf;
+import net.minecraft.world.item.DyeColor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedAccessorError;
 
 @Mixin(Wolf.class)
@@ -48,5 +50,6 @@ public interface WolfAccessor {
     @Accessor("shakeAnim") void accessor$shakeAnim(final float shakeAnim);
 
     @Accessor("shakeAnimO") void accessor$shakeAnimO(final float shakeAnim0);
+    @Invoker("setCollarColor") void invoker$setCollarColor(final DyeColor $$0);
 
 }

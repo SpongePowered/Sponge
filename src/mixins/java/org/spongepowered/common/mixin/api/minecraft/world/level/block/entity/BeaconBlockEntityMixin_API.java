@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Holder;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -41,9 +41,9 @@ import java.util.Set;
 public abstract class BeaconBlockEntityMixin_API extends BlockEntityMixin_API implements Beacon {
 
     // @formatter:off
-    @Shadow private int levels;
-    @Shadow @Nullable private MobEffect primaryPower;
-    @Shadow @Nullable private MobEffect secondaryPower;
+    @Shadow int levels;
+    @Shadow @Nullable Holder<MobEffect> primaryPower;
+    @Shadow @Nullable Holder<MobEffect> secondaryPower;
     // @formatter:on
 
     @Override
@@ -54,8 +54,8 @@ public abstract class BeaconBlockEntityMixin_API extends BlockEntityMixin_API im
     @Override
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
-        container.set(Constants.TileEntity.Beacon.PRIMARY, BuiltInRegistries.MOB_EFFECT.getId(this.primaryPower));
-        container.set(Constants.TileEntity.Beacon.SECONDARY, BuiltInRegistries.MOB_EFFECT.getId(this.secondaryPower));
+        container.set(Constants.TileEntity.Beacon.PRIMARY, this.primaryPower.unwrapKey());
+        container.set(Constants.TileEntity.Beacon.SECONDARY, this.secondaryPower.unwrapKey());
         return container;
     }
 

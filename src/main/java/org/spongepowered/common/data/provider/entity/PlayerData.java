@@ -60,14 +60,8 @@ public final class PlayerData {
                         .get(h -> (HandPreference) (Object) h.getMainArm())
                         .set((h, v) -> h.setMainArm((HumanoidArm) (Object) v))
                     .create(Keys.EXHAUSTION)
-                        .get(h -> (double) ((FoodDataAccessor) h.getFoodData()).accessor$exhaustionLevel())
-                        .setAnd((h, v) -> {
-                            if (v < 0 || v > PlayerData.EXHAUSTION_MAX) {
-                                return false;
-                            }
-                            ((FoodDataAccessor) h.getFoodData()).accessor$exhaustionLevel(v.floatValue());
-                            return true;
-                        })
+                        .get(h -> (double) h.getFoodData().getExhaustionLevel())
+                        .set((h, v) -> ((FoodDataAccessor) h.getFoodData()).accessor$exhaustionLevel(v.floatValue()))
                     .create(Keys.EXPERIENCE)
                         .get(h -> h.totalExperience)
                         .set(ExperienceHolderUtil::setExperience)
@@ -98,23 +92,13 @@ public final class PlayerData {
                         .delete(h -> ExperienceHolderUtil.setExperience(h, 0))
                     .create(Keys.FLYING_SPEED)
                         .get(h -> (double) h.getAbilities().getFlyingSpeed())
-                        .setAnd((h, v) -> {
-                            if (v < 0) {
-                                return false;
-                            }
+                        .set((h, v) -> {
                             ((AbilitiesAccessor) h.getAbilities()).accessor$flyingSpeed(v.floatValue());
                             h.onUpdateAbilities();
-                            return true;
                         })
                     .create(Keys.FOOD_LEVEL)
                         .get(h -> h.getFoodData().getFoodLevel())
-                        .setAnd((h, v) -> {
-                            if (v < 0 || v > PlayerData.FOOD_LEVEL_MAX) {
-                                return false;
-                            }
-                            h.getFoodData().setFoodLevel(v);
-                            return true;
-                        })
+                        .set((h, v) -> ((FoodDataAccessor) h.getFoodData()).accessor$foodLevel(v))
                     .create(Keys.IS_FLYING)
                         .get(h -> h.getAbilities().flying)
                         .set((h, v) -> {
@@ -131,13 +115,7 @@ public final class PlayerData {
                         .get(h -> PlayerData.SATURATION_MAX)
                     .create(Keys.SATURATION)
                         .get(h -> (double) h.getFoodData().getSaturationLevel())
-                        .setAnd((h, v) -> {
-                            if (v < 0 || v > PlayerData.SATURATION_MAX) {
-                                return false;
-                            }
-                            ((FoodDataAccessor) h.getFoodData()).accessor$saturationLevel(v.floatValue());
-                            return true;
-                        })
+                        .set((h, v) -> ((FoodDataAccessor) h.getFoodData()).accessor$saturationLevel(v.floatValue()))
                     .create(Keys.SLEEP_TIMER)
                         .get(Player::getSleepTimer)
                         .set((p, i) -> ((PlayerAccessor) p).accessor$sleepCounter(i))

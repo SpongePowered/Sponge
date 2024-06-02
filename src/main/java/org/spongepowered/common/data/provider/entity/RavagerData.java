@@ -40,7 +40,13 @@ public final class RavagerData {
                 .asMutable(RavagerAccessor.class)
                     .create(Keys.ATTACK_TIME)
                         .get(x -> new SpongeTicks(x.accessor$attackTick()))
-                        .set((h, v) -> h.accessor$attackTick((int) v.ticks()))
+                        .setAnd((h, v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            h.accessor$attackTick(SpongeTicks.toSaturatedIntOrInfinite(v));
+                            return true;
+                        })
                     .create(Keys.IS_IMMOBILIZED)
                         .get(h -> h.accessor$attackTick() > 0 || h.accessor$stunnedTick() > 0 || h.accessor$roarTick() > 0)
                     .create(Keys.IS_ROARING)
@@ -49,10 +55,22 @@ public final class RavagerData {
                         .get(h -> h.accessor$stunnedTick() > 0)
                     .create(Keys.ROARING_TIME)
                         .get(x -> new SpongeTicks(x.accessor$roarTick()))
-                        .set((h, v) -> h.accessor$roarTick((int) v.ticks()))
+                        .setAnd((h, v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            h.accessor$roarTick(SpongeTicks.toSaturatedIntOrInfinite(v));
+                            return true;
+                        })
                     .create(Keys.STUNNED_TIME)
                         .get(x -> new SpongeTicks(x.accessor$stunnedTick()))
-                        .set((h, v) -> h.accessor$stunnedTick((int) v.ticks()));
+                        .setAnd((h, v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            h.accessor$stunnedTick(SpongeTicks.toSaturatedIntOrInfinite(v));
+                            return true;
+                        });
     }
     // @formatter:on
 }

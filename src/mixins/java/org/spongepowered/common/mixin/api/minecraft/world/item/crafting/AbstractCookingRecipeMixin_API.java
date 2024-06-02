@@ -35,6 +35,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.util.SpongeTicks;
 
 import java.util.Optional;
 
@@ -67,7 +68,7 @@ public abstract class AbstractCookingRecipeMixin_API implements CookingRecipe {
 
     @Override
     public Ticks cookingTime() {
-        return Ticks.of(this.shadow$getCookingTime());
+        return SpongeTicks.ticksOrInfinite(this.shadow$getCookingTime());
     }
 
     @Override

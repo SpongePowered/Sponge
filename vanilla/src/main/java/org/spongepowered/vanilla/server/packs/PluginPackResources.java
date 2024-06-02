@@ -28,6 +28,7 @@ import net.minecraft.ResourceLocationException;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.AbstractPackResources;
+import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
@@ -59,8 +60,8 @@ public final class PluginPackResources extends AbstractPackResources {
     private final @Nullable Supplier<FileSystem> fileSystem;
     private final File file;
 
-    public PluginPackResources(final String name, final PluginContainer container, final @Nullable Supplier<FileSystem> fileSystem) {
-        super(name, false);
+    public PluginPackResources(final PackLocationInfo info, final PluginContainer container, final @Nullable Supplier<FileSystem> fileSystem) {
+        super(info);
         this.file = new File("sponge_plugin_pack");
         this.container = container;
         this.metadata = new PackMetadataSection(Component.literal("Plugin Resources"), 6, Optional.empty());

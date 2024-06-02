@@ -73,12 +73,12 @@ public record SpongeProcessorListTemplate(ResourceKey key, StructureProcessorLis
 
     public static JsonElement encode(final ProcessorListTemplate template, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        return StructureProcessorType.LIST_OBJECT_CODEC.encodeStart(ops, ((StructureProcessorList) template.processorList())).getOrThrow(false, e -> {});
+        return StructureProcessorType.LIST_OBJECT_CODEC.encodeStart(ops, ((StructureProcessorList) template.processorList())).getOrThrow();
     }
 
     public static StructureProcessorList decode(final JsonElement json, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        return StructureProcessorType.LIST_OBJECT_CODEC.parse(ops, json).getOrThrow(false, e -> {});
+        return StructureProcessorType.LIST_OBJECT_CODEC.parse(ops, json).getOrThrow();
     }
 
     public static SpongeProcessorListTemplate decode(final DataPack<ProcessorListTemplate> pack, final ResourceKey key, final JsonElement json, final RegistryAccess registryAccess) {
@@ -96,18 +96,12 @@ public record SpongeProcessorListTemplate(ResourceKey key, StructureProcessorLis
 
         @Override
         public Function<ProcessorListTemplate, ProcessorList> valueExtractor() {
-            return ProcessorListTemplate::processorList;
+            return value -> (ProcessorList) ((SpongeProcessorListTemplate) value).representedProcessors;
         }
 
         @Override
         public Builder fromValues(final List<Processor> processorList) {
             this.processorList = new StructureProcessorList((List) processorList);
-            return this;
-        }
-
-        @Override
-        public Builder from(final ProcessorListTemplate value) {
-            this.processorList = ((SpongeProcessorListTemplate) value).representedProcessors;
             return this;
         }
 

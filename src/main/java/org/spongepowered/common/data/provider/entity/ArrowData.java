@@ -26,12 +26,15 @@ package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.projectile.Arrow;
+import net.minecraft.world.item.alchemy.PotionContents;
+import org.apache.commons.lang3.stream.Streams;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.common.accessor.world.entity.projectile.ArrowAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
-import java.util.Set;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public final class ArrowData {
@@ -45,20 +48,27 @@ public final class ArrowData {
                 .asMutable(Arrow.class)
                     .create(Keys.POTION_EFFECTS)
                         .get(h -> {
-                            final Set<MobEffectInstance> effects = ((ArrowAccessor) h).accessor$effects();
-                            return effects.stream()
-                                    .map(effect -> (PotionEffect) new MobEffectInstance(effect.getEffect(), effect.getDuration(),
-                                            effect.getAmplifier(), effect.isAmbient(), effect.isVisible()))
+                            final Iterable<MobEffectInstance> effects = ((ArrowAccessor) h).invoker$getPotionContents().getAllEffects();
+                            return Streams.of(effects)
+                                    .map(effect -> (PotionEffect) ArrowData.clone(effect))
                                     .collect(Collectors.toList());
                         })
                         .set((h, v) -> {
-                            ((ArrowAccessor) h).accessor$effects().clear();
-                            for (final PotionEffect effect : v) {
-                                final MobEffectInstance mcEffect = new MobEffectInstance(((MobEffectInstance) effect).getEffect(), (int) effect.duration().ticks(),
-                                        effect.amplifier(), effect.isAmbient(), effect.showsParticles());
-                                h.addEffect(mcEffect);
-                            }
+                            final PotionContents previousContents = ((ArrowAccessor) h).invoker$getPotionContents();
+                            final List<MobEffectInstance> list = v.stream().map(effect -> ArrowData.clone((MobEffectInstance) effect)).toList();
+                            ((ArrowAccessor) h).invoker$setPotionContents(new PotionContents(previousContents.potion(), previousContents.customColor(), list));
                         });
     }
     // @formatter:on
+    @NotNull
+    private static MobEffectInstance clone(final MobEffectInstance effect) {
+        return new MobEffectInstance(effect.getEffect(),
+                                    effect.getDuration(),
+                                    effect.getAmplifier(),
+                                    effect.isAmbient(),
+                                    effect.isVisible(),
+                                    effect.showIcon());
+        // TODO API showIcon?
+        // TODO hiddenEffect?
+    }
 }

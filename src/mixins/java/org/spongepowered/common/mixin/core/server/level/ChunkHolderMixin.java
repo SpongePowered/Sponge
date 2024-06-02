@@ -24,17 +24,20 @@
  */
 package org.spongepowered.common.mixin.core.server.level;
 
-import com.mojang.datafixers.util.Either;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ChunkMap;
+import net.minecraft.server.level.ChunkResult;
+import net.minecraft.server.level.FullChunkStatus;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.chunk.ChunkEvent;
+import org.spongepowered.api.world.chunk.WorldChunk;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -51,6 +54,11 @@ import java.util.concurrent.CompletableFuture;
 
 @Mixin(ChunkHolder.class)
 abstract class ChunkHolderMixin {
+
+    // @formatter:off
+    @Shadow public abstract CompletableFuture<ChunkResult<LevelChunk>> shadow$getEntityTickingChunkFuture();
+    // @formatter:on
+
     @Inject(
         method = "replaceProtoChunk(Lnet/minecraft/world/level/chunk/ImposterProtoChunk;)V",
         at = @At("TAIL")
@@ -69,9 +77,21 @@ abstract class ChunkHolderMixin {
     }
 
     @Inject(method = "getOrScheduleFuture", at = @At("HEAD"), cancellable = true)
-    private void impl$onGetOrScheduleFuture(final ChunkStatus $$0, final ChunkMap chunkMap, final CallbackInfoReturnable<CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>>> cir) {
+    private void impl$onGetOrScheduleFuture(final ChunkStatus $$0, final ChunkMap chunkMap, final CallbackInfoReturnable<CompletableFuture<ChunkResult<ChunkAccess>>> cir) {
         if (!((ServerLevelBridge) ((ChunkMapAccessor) chunkMap).accessor$level()).bridge$isLoaded()) {
             cir.setReturnValue(ChunkHolder.UNLOADED_CHUNK_FUTURE);
+        }
+    }
+
+    @Inject(method = "lambda$scheduleFullChunkPromotion$5", at = @At("TAIL"))
+    private void impl$onScheduleFullChunkPromotion(final ChunkMap $$0x, final FullChunkStatus $$1x, final CallbackInfo ci) {
+        if ($$1x == FullChunkStatus.ENTITY_TICKING && ShouldFire.CHUNK_EVENT_LOAD) {
+            this.shadow$getEntityTickingChunkFuture().getNow(ChunkHolder.UNLOADED_LEVEL_CHUNK).ifSuccess(chunk -> {
+                final Vector3i chunkPos = VecHelper.toVector3i(chunk.getPos());
+                final ChunkEvent.Load event = SpongeEventFactory.createChunkEventLoad(PhaseTracker.getInstance().currentCause(),
+                        (WorldChunk) chunk, chunkPos, (ResourceKey) (Object) chunk.getLevel().dimension().location());
+                SpongeCommon.post(event);
+            });
         }
     }
 }

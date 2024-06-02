@@ -28,6 +28,7 @@ import com.google.common.collect.Maps;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistry;
+import net.minecraftforge.registries.IForgeRegistry;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -78,9 +79,9 @@ public abstract class ForgeRegistryMixin_Forge<V> {
 
     @SuppressWarnings("unchecked")
     @Inject(method = "setSlaveMap", at = @At("TAIL"))
-    public void forge$establishParent(final ResourceLocation name, final Object obj, final CallbackInfo ci) {
+    public <T> void forge$establishParent(final IForgeRegistry.SlaveKey<?> key, final Object obj, final CallbackInfo ci) {
         if (obj instanceof RegistryBridge) {
-            this.forge$parents.put((ResourceKey) (Object) name, (RegistryBridge<V>) obj);
+            this.forge$parents.put((ResourceKey) (Object) key.name(), (RegistryBridge<V>) obj);
         }
     }
 

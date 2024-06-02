@@ -25,14 +25,14 @@
 package org.spongepowered.common.data.provider.entity;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.Fireworks;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.accessor.world.entity.projectile.FireworkRocketEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.FireworkUtil;
 import org.spongepowered.common.util.SpongeTicks;
 
@@ -52,20 +52,20 @@ public final class FireworkRocketData {
                     .create(Keys.FIREWORK_FLIGHT_MODIFIER)
                         .get(h -> {
                             final ItemStack item = FireworkUtil.getItem(h);
-                            final CompoundTag fireworks = item.getOrCreateTagElement(Constants.Item.Fireworks.FIREWORKS);
-                            if (fireworks.contains(Constants.Item.Fireworks.FLIGHT)) {
-                                return new SpongeTicks(fireworks.getByte(Constants.Item.Fireworks.FLIGHT));
+                            final Fireworks fireworks = item.get(DataComponents.FIREWORKS);
+                            if (fireworks == null) {
+                                return null;
                             }
-                            return null;
+                            return new SpongeTicks(fireworks.flightDuration());
                         })
                         .setAnd((h, v) -> {
-                            final int ticks = (int) v.ticks();
-                            if (ticks < 0 || ticks > Byte.MAX_VALUE) {
+                            final int ticks = SpongeTicks.toSaturatedIntOrInfinite(v);
+                            if (v.isInfinite() || ticks < 0 || ticks > Byte.MAX_VALUE) {
                                 return false;
                             }
                             final ItemStack item = FireworkUtil.getItem(h);
-                            final CompoundTag fireworks = item.getOrCreateTagElement(Constants.Item.Fireworks.FIREWORKS);
-                            fireworks.putByte(Constants.Item.Fireworks.FLIGHT, (byte) ticks);
+                            final Fireworks fireworks = item.get(DataComponents.FIREWORKS);
+                            item.set(DataComponents.FIREWORKS, new Fireworks((int) v.ticks(), fireworks.explosions()));
                             ((FireworkRocketEntityAccessor) h).accessor$lifetime(10 * ticks + ((EntityAccessor) h).accessor$random().nextInt(6) + ((EntityAccessor) h).accessor$random().nextInt(7));
                             return true;
                         });

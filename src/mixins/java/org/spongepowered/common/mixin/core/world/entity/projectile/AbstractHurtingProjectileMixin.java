@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.world.entity.projectile;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
+import net.minecraft.world.entity.projectile.ProjectileDeflection;
 import net.minecraft.world.phys.HitResult;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -36,17 +37,17 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 @Mixin(AbstractHurtingProjectile.class)
 public abstract class AbstractHurtingProjectileMixin extends ProjectileMixin {
 
-    @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/AbstractHurtingProjectile;onHit(Lnet/minecraft/world/phys/HitResult;)V"))
-    private void impl$callCollideImpactEvent(AbstractHurtingProjectile projectile, HitResult result) {
+    @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/AbstractHurtingProjectile;hitTargetOrDeflectSelf(Lnet/minecraft/world/phys/HitResult;)Lnet/minecraft/world/entity/projectile/ProjectileDeflection;"))
+    private ProjectileDeflection impl$callCollideImpactEvent(AbstractHurtingProjectile projectile, HitResult result) {
         if (result.getType() == HitResult.Type.MISS || ((LevelBridge) this.shadow$level()).bridge$isFake()) {
-            this.shadow$onHit(result);
-            return;
+            return this.shadow$hitTargetOrDeflectSelf(result);
         }
 
         if (SpongeCommonEventFactory.handleCollideImpactEvent(projectile, this.impl$getProjectileSource(), result)) {
             this.shadow$remove(Entity.RemovalReason.DISCARDED);
+            return ProjectileDeflection.NONE;
         } else {
-            this.shadow$onHit(result);
+            return this.shadow$hitTargetOrDeflectSelf(result);
         }
     }
 }

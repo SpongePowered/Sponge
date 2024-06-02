@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.server;
 
 import com.google.inject.Injector;
+import net.kyori.adventure.resource.ResourcePackRequest;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.ChatDecorator;
@@ -52,7 +53,6 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.UnloadWorldEvent;
-import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectProxy;
 import org.spongepowered.api.world.SerializationBehavior;
@@ -120,7 +120,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
 
     private final ChatDecorator impl$spongeDecorator = new SpongeChatDecorator();
     private @Nullable SpongeServerScopedServiceProvider impl$serviceProvider;
-    protected @Nullable ResourcePack impl$resourcePack;
+    protected @Nullable ResourcePackRequest impl$resourcePack;
     private final BlockableEventLoop<Runnable> impl$spongeMainThreadExecutor = new BlockableEventLoop<>("Sponge") {
 
         //Used to schedule internal Sponge tasks to the main thread
@@ -161,7 +161,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     }
 
     @Override
-    public ResourcePack bridge$getResourcePack() {
+    public ResourcePackRequest bridge$getResourcePack() {
         return this.impl$resourcePack;
     }
 
@@ -344,10 +344,10 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
             return;
         }
 
-        if (forceDifficulty) {
+        if (forceDifficulty && world.getLevelData() instanceof PrimaryLevelDataBridge bridge && bridge.bridge$isVanilla()) {
             // Don't allow vanilla forcing the difficulty at launch set ours if we have a custom one
-            if (!((PrimaryLevelDataBridge) world.getLevelData()).bridge$customDifficulty()) {
-                ((PrimaryLevelDataBridge) world.getLevelData()).bridge$forceSetDifficulty(newDifficulty);
+            if (!bridge.bridge$customDifficulty()) {
+                bridge.bridge$forceSetDifficulty(newDifficulty);
             }
         } else {
             ((PrimaryLevelData) world.getLevelData()).setDifficulty(newDifficulty);

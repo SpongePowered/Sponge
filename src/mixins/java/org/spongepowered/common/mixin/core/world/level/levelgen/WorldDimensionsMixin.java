@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.level.levelgen;
 
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.dimension.LevelStem;
@@ -34,11 +33,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
 
+import java.util.Map;
+
 @Mixin(WorldDimensions.class)
 public abstract class WorldDimensionsMixin {
 
-    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/Registry;get(Lnet/minecraft/resources/ResourceKey;)Ljava/lang/Object;"))
-    private <T> T findOverworldStem(Registry<T> instance, ResourceKey<T> key) {
+    @Redirect(method = "<init>(Ljava/util/Map;)V", at = @At(value = "INVOKE", target = "Ljava/util/Map;get(Ljava/lang/Object;)Ljava/lang/Object;"))
+    private Object findOverworldStem(final Map instance, final Object key) {
         var val = instance.get(key);
         // Yes this looks strange. The issue is Sponge gives all levels a PrimaryLevelData. Vanilla reads that file and reads the
         // "worldgensettings" tag section which is really where LevelStems are retained. It then creates a view of the stems, wherein called
@@ -51,7 +52,7 @@ public abstract class WorldDimensionsMixin {
         // ends up being a double lookup for all worlds but the overworld but I feel it is a small price to pay vs. a very complicated series
         // of mixins to remove retrieving the level stem settings solely for all worlds but the overworld
         if (val == null) {
-            return (T) SpongeCommon.vanillaRegistry(Registries.LEVEL_STEM).get((ResourceKey<LevelStem>) key);
+            return SpongeCommon.vanillaRegistry(Registries.LEVEL_STEM).get((ResourceKey<LevelStem>) key);
         }
 
         return val;

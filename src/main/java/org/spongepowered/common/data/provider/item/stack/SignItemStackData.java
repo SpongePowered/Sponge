@@ -27,8 +27,10 @@ package org.spongepowered.common.data.provider.item.stack;
 import com.google.common.collect.Lists;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -47,8 +49,8 @@ public final class SignItemStackData {
                 .asMutable(ItemStack.class)
                     .create(Keys.SIGN_LINES)
                         .get(h -> {
-                            final @Nullable CompoundTag tag = h.getTagElement(Constants.Item.BLOCK_ENTITY_TAG);
-                            if (tag == null) {
+                            final CompoundTag tag = h.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY).copyTag();
+                            if (tag.isEmpty()) {
                                 return null;
                             }
                             final String id = tag.getString(Constants.Item.BLOCK_ENTITY_ID);
@@ -64,7 +66,7 @@ public final class SignItemStackData {
                         })
                         .set((h, v) -> {
                             final GsonComponentSerializer gcs = GsonComponentSerializer.gson();
-                            final CompoundTag tag = h.getOrCreateTagElement(Constants.Item.BLOCK_ENTITY_TAG);
+                            final CompoundTag tag = new CompoundTag();
                             tag.putString(Constants.Item.BLOCK_ENTITY_ID, Constants.TileEntity.SIGN);
                             for (int i = 0; i < 4; i++) {
                                 final @Nullable Component line = v.size() > i ? v.get(i) : Component.empty();
@@ -73,8 +75,9 @@ public final class SignItemStackData {
                                 }
                                 tag.putString("Text" + (i + 1), gcs.serialize(line));
                             }
+                            h.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
                         })
-                        .delete(h -> h.removeTagKey(Constants.Item.BLOCK_ENTITY_TAG));
+                        .delete(h -> h.remove(DataComponents.BLOCK_ENTITY_DATA));
     }
     // @formatter:on
 }

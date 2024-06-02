@@ -29,10 +29,12 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
@@ -43,6 +45,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.entity.Entity;
@@ -56,6 +59,8 @@ import org.spongepowered.api.world.HeightTypes;
 import org.spongepowered.api.world.WorldLike;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.chunk.WorldChunk;
+import org.spongepowered.api.world.schematic.Palette;
+import org.spongepowered.api.world.schematic.PaletteTypes;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
@@ -75,6 +80,7 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.schematic.PaletteWrapper;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.common.world.volume.buffer.biome.ObjectArrayMutableBiomeBuffer;
@@ -117,19 +123,27 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
         super($$0, $$1, $$2, $$3, $$4, $$5, $$6);
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public Palette<BlockState, BlockType> blockPalette() {
+        return PaletteWrapper.of(
+            PaletteTypes.BLOCK_STATE_PALETTE.get(),
+            Block.BLOCK_STATE_REGISTRY,
+            (org.spongepowered.api.registry.Registry<BlockType>) this.level.registryAccess().registry(Registries.BLOCK).get()
+        );
+    }
+
     @Override
     public Biome biome(final int x, final int y, final int z) {
         if (!this.contains(x, y, z)) {
             throw new PositionOutOfBoundsException(new Vector3i(x, y, z), Constants.World.BLOCK_MIN, Constants.World.BLOCK_MAX);
         }
-        return (Biome) (Object) this.level.getBiome(new BlockPos(x, y, z));
+        return (Biome) (Object) this.level.getBiome(new BlockPos(x, y, z)).value();
     }
 
     @Override
     public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
-        // TODO ChunkBiomeContainerAccessor is dead
-        //return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, biome, () -> (ChunkBiomeContainerAccessor) this.biomes, () -> this.setUnsaved(true));
-        return false;
+        return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, biome, () -> this.getSection(this.getSectionIndex(y)), () -> this.setUnsaved(true));
     }
 
     @Intrinsic
@@ -144,6 +158,10 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
 
     @Override
     public void setInhabitedTime(final Ticks newInhabitedTime) {
+        Objects.requireNonNull(newInhabitedTime);
+        if (newInhabitedTime.isInfinite()) {
+            throw new IllegalArgumentException("Inhabited time cannot be infinite!");
+        }
         this.setInhabitedTime(newInhabitedTime.ticks());
     }
 
@@ -248,7 +266,7 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
             (blockPos, world) -> {
                 final net.minecraft.world.level.block.state.BlockState tileEntity = shouldCarbonCopy
                     ? backingVolume.getBlock(blockPos)
-                    : ((LevelReader) world).getBlockState(blockPos);
+                    : ((BlockGetter) world).getBlockState(blockPos);
                 return new Tuple<>(blockPos, tileEntity);
             }
         );

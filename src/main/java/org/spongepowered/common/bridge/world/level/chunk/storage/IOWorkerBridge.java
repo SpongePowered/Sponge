@@ -26,8 +26,9 @@ package org.spongepowered.common.bridge.world.level.chunk.storage;
 
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
+import org.spongepowered.common.world.level.chunk.storage.SpongeIOWorkerType;
 
 public interface IOWorkerBridge {
 
-    void bridge$setDimension(ResourceKey<Level> dimension);
+    void bridge$setDimension(SpongeIOWorkerType type, ResourceKey<Level> dimension);
 }

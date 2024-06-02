@@ -36,13 +36,13 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DirectionalBlock;
 import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
 import net.minecraft.world.level.block.piston.PistonStructureResolver;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapIndex;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.phys.BlockHitResult;
@@ -783,8 +783,8 @@ public final class SpongeCommonEventFactory {
 
         final int id = mapIdTrackerBridge.bridge$getHighestMapId().orElse(-1) + 1;
         // Advance map id.
-        final int mcId = defaultWorld.getFreeMapId();
-        if (id != mcId) {
+        final MapId mcId = defaultWorld.getFreeMapId();
+        if (id != mcId.id()) {
             // TODO: REMOVE OR replace for Integer.MAX_VALUE
             SpongeCommon.logger().warn("Map size corruption, vanilla only allows " + Integer.MAX_VALUE + "! " +
                     "Expected next number was not equal to the true next number.");
@@ -794,8 +794,7 @@ public final class SpongeCommonEventFactory {
             return Optional.empty();
         }
 
-        final String mapId = MapItem.makeKey(id);
-        defaultWorld.setMapData(mapId, mapData);
+        defaultWorld.setMapData(new MapId(id), mapData);
         ((MapItemSavedDataBridge) mapData).bridge$initMapId(id);
 
         ((SpongeMapStorage) Sponge.server().mapStorage()).addMapInfo(mapInfo);

@@ -40,10 +40,10 @@ import org.spongepowered.common.util.SpongeTicks;
 
 public final class ItemData {
 
-    public static final Key<Value<Integer>> PREVIOUS_PICKUP_DELAY = Key.builder().key(ResourceKey.sponge("power")).elementType(Integer.class).build();
-    public static final Key<Value<Integer>> PREVIOUS_DESPAWN_DELAY = Key.builder().key(ResourceKey.sponge("power")).elementType(Integer.class).build();
+    public static final Key<Value<Boolean>> INFINITE_DESPAWN_DELAY = Key.builder().key(ResourceKey.sponge("infinite_despawn_delay")).elementType(Boolean.class).build();
+    public static final Key<Value<Boolean>> INFINITE_PICKUP_DELAY = Key.builder().key(ResourceKey.sponge("infinite_pickup_delay")).elementType(Boolean.class).build();
 
-    private static final DataContentUpdater INFINITE_DELAYS_UPDATER_BYTE_TO_BOOL_FIX = new ByteToBooleanContentUpdater(1, 2, Keys.INFINITE_PICKUP_DELAY, Keys.INFINITE_DESPAWN_DELAY);
+    private static final DataContentUpdater INFINITE_DELAYS_UPDATER_BYTE_TO_BOOL_FIX = new ByteToBooleanContentUpdater(1, 2, ItemData.INFINITE_PICKUP_DELAY, ItemData.INFINITE_DESPAWN_DELAY);
 
     private ItemData() {
     }
@@ -57,40 +57,31 @@ public final class ItemData {
                         .set((h, v) -> h.setItem(ItemStackUtil.fromSnapshotToNative(v)))
                 .asMutable(ItemEntityBridge.class)
                     .create(Keys.DESPAWN_DELAY)
-                        .get(h -> new SpongeTicks(h.bridge$getDespawnDelay()))
+                        .get(h -> SpongeTicks.ticksOrInfinite(h.bridge$getDespawnDelay(), Constants.Entity.Item.MAGIC_NO_DESPAWN))
                         .setAnd((h, v) -> {
-                            final int ticks = (int) v.ticks();
-                            if (ticks < 0) {
+                            final int ticks = SpongeTicks.toSaturatedIntOrInfinite(v, Constants.Entity.Item.MAGIC_NO_DESPAWN);
+                            if (!v.isInfinite() && ticks < 0) {
                                 return false;
                             }
-                            h.bridge$setDespawnDelay(ticks, false);
+                            h.bridge$setDespawnDelay(ticks);
                             return true;
                         })
-                    .create(Keys.INFINITE_DESPAWN_DELAY)
-                        .get(ItemEntityBridge::bridge$infiniteDespawnDelay)
-                        .set((h, v) -> h.bridge$setDespawnDelay(h.bridge$getDespawnDelay(), v))
-                    .create(Keys.INFINITE_PICKUP_DELAY)
-                        .get(ItemEntityBridge::bridge$infinitePickupDelay)
-                        .set((h, v) -> h.bridge$setPickupDelay(h.bridge$getPickupDelay(), v))
                     .create(Keys.PICKUP_DELAY)
-                        .get(h -> new SpongeTicks(h.bridge$getPickupDelay()))
-                        .set((h, v) -> h.bridge$setPickupDelay((int) v.ticks(), false))
+                        .get(h -> SpongeTicks.ticksOrInfinite(h.bridge$getPickupDelay(), Constants.Entity.Item.MAGIC_NO_PICKUP))
+                        .set((h, v) -> h.bridge$setPickupDelay(SpongeTicks.toSaturatedIntOrInfinite(v, Constants.Entity.Item.MAGIC_NO_PICKUP)))
                     // Only for internal use
-                    .create(ItemData.PREVIOUS_PICKUP_DELAY)
-                        .get(v -> -1)
-                        .set(ItemEntityBridge::bridge$setPrevPickupDelay)
-                    .create(ItemData.PREVIOUS_DESPAWN_DELAY)
-                        .get(v -> -1)
-                        .set(ItemEntityBridge::bridge$setPrevDespawnDelay)
+                    .create(ItemData.INFINITE_DESPAWN_DELAY)
+                        .get(h -> h.bridge$getDespawnDelay() == Constants.Entity.Item.MAGIC_NO_DESPAWN)
+                        .set((h, v) -> h.bridge$setDespawnDelay(Constants.Entity.Item.MAGIC_NO_DESPAWN))
+                    .create(ItemData.INFINITE_PICKUP_DELAY)
+                        .get(h -> h.bridge$getPickupDelay() == Constants.Entity.Item.MAGIC_NO_PICKUP)
+                        .set((h, v) -> h.bridge$setPickupDelay(Constants.Entity.Item.MAGIC_NO_PICKUP))
         ;
         final ResourceKey item = ResourceKey.sponge("item");
         registrator.spongeDataStore(item, 2, new DataContentUpdater[]{ItemData.INFINITE_DELAYS_UPDATER_BYTE_TO_BOOL_FIX}, ItemEntityBridge.class,
-                Keys.INFINITE_PICKUP_DELAY, ItemData.PREVIOUS_PICKUP_DELAY,
-                Keys.INFINITE_DESPAWN_DELAY, ItemData.PREVIOUS_DESPAWN_DELAY);
-        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Sponge.Entity.Item.INFINITE_PICKUP_DELAY, item, Keys.INFINITE_PICKUP_DELAY);
-        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Sponge.Entity.Item.PREVIOUS_PICKUP_DELAY, item, ItemData.PREVIOUS_PICKUP_DELAY);
-        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Sponge.Entity.Item.INFINITE_DESPAWN_DELAY, item, Keys.INFINITE_DESPAWN_DELAY);
-        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Sponge.Entity.Item.PREVIOUS_DESPAWN_DELAY, item, ItemData.PREVIOUS_DESPAWN_DELAY);
+                ItemData.INFINITE_PICKUP_DELAY, ItemData.INFINITE_DESPAWN_DELAY);
+        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Sponge.Entity.Item.INFINITE_PICKUP_DELAY, item, ItemData.INFINITE_PICKUP_DELAY);
+        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Sponge.Entity.Item.INFINITE_DESPAWN_DELAY, item, ItemData.INFINITE_DESPAWN_DELAY);
     }
     // @formatter:on
 }

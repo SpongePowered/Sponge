@@ -24,23 +24,24 @@
  */
 package org.spongepowered.common.mixin.core.server.level;
 
-import com.mojang.datafixers.util.Either;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ChunkMap;
+import net.minecraft.server.level.ChunkResult;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.chunk.storage.ChunkSerializer;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.chunk.ChunkEvent;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.SerializationBehavior;
+import org.spongepowered.api.world.chunk.BlockChunk;
 import org.spongepowered.api.world.chunk.WorldChunk;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -64,9 +65,12 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.DirectionUtil;
+import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.level.chunk.storage.SpongeIOWorkerType;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 @Mixin(ChunkMap.class)
 public abstract class ChunkMapMixin implements ChunkMapBridge {
@@ -84,7 +88,7 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$setIOWorkerDimension(final CallbackInfo ci) {
-        ((IOWorkerBridge) ((ChunkStorageAccessor) this).accessor$worker()).bridge$setDimension(this.level.dimension());
+        ((IOWorkerBridge) ((ChunkStorageAccessor) this).accessor$worker()).bridge$setDimension(SpongeIOWorkerType.CHUNK, this.level.dimension());
     }
 
     @Redirect(method = "save",
@@ -111,23 +115,23 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
     }
 
     @Redirect(method = "save", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/level/ChunkMap;write(Lnet/minecraft/world/level/ChunkPos;Lnet/minecraft/nbt/CompoundTag;)V"))
-    private void impl$doNotWriteIfWeHaveNoData(final ChunkMap chunkManager, final ChunkPos pos, final CompoundTag compound) {
+            target = "Lnet/minecraft/server/level/ChunkMap;write(Lnet/minecraft/world/level/ChunkPos;Lnet/minecraft/nbt/CompoundTag;)Ljava/util/concurrent/CompletableFuture;"))
+    private CompletableFuture<Void> impl$doNotWriteIfWeHaveNoData(final ChunkMap chunkManager, final ChunkPos pos, final CompoundTag compound) {
         if (compound == null) {
-            return;
+            return CompletableFuture.completedFuture(null);
         }
 
-        chunkManager.write(pos, compound);
+        return chunkManager.write(pos, compound);
     }
 
-    @Redirect(method = "lambda$scheduleUnload$14",
+    @Redirect(method = "lambda$scheduleUnload$16",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;unload(Lnet/minecraft/world/level/chunk/LevelChunk;)V"),
             slice = @Slice(
                     from = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ChunkMap;save(Lnet/minecraft/world/level/chunk/ChunkAccess;)Z")
             )
     )
     private void impl$onSetUnloaded(final ServerLevel level, final LevelChunk chunk) {
-        final Vector3i chunkPos = new Vector3i(chunk.getPos().x, 0, chunk.getPos().z);
+        final Vector3i chunkPos = VecHelper.toVector3i(chunk.getPos());
 
         if (ShouldFire.CHUNK_EVENT_UNLOAD_PRE) {
             final ChunkEvent.Unload event = SpongeEventFactory.createChunkEventUnloadPre(PhaseTracker.getInstance().currentCause(),
@@ -157,10 +161,10 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
     @Inject(method = "save", at = @At(value = "HEAD"), cancellable = true)
     private void impl$onSave(final ChunkAccess var1, final CallbackInfoReturnable<Boolean> cir) {
         if (var1 instanceof WorldChunk) {
-            if (ShouldFire.CHUNK_EVENT_SAVE_PRE) {
-                final Vector3i chunkPos = new Vector3i(var1.getPos().x, 0, var1.getPos().z);
-                final ChunkEvent.Save.Pre postSave = SpongeEventFactory.createChunkEventSavePre(PhaseTracker.getInstance().currentCause(),
-                    ((WorldChunk) var1), chunkPos, (ResourceKey) (Object) this.level.dimension().location());
+            if (ShouldFire.CHUNK_EVENT_BLOCKS_SAVE_PRE) {
+                final Vector3i chunkPos = VecHelper.toVector3i(var1.getPos());
+                final ChunkEvent.Blocks.Save.Pre postSave = SpongeEventFactory.createChunkEventBlocksSavePre(PhaseTracker.getInstance().currentCause(),
+                    ((BlockChunk) var1), chunkPos, (ResourceKey) (Object) this.level.dimension().location());
                 SpongeCommon.post(postSave);
                 if (postSave.isCancelled()) {
                     cir.setReturnValue(false);
@@ -169,7 +173,7 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
         }
     }
 
-    @Redirect(method = "lambda$protoChunkToFullChunk$34",
+    @Redirect(method = "lambda$protoChunkToFullChunk$35",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;setLoaded(Z)V"),
             slice = @Slice(
                     from = @At(value = "INVOKE", remap = false, target = "Lit/unimi/dsi/fastutil/longs/LongSet;add(J)Z"),
@@ -178,10 +182,10 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
     )
     private void impl$onLoad(final LevelChunk levelChunk, final boolean loaded) {
         levelChunk.setLoaded(true);
-        final Vector3i chunkPos = new Vector3i(levelChunk.getPos().x, 0, levelChunk.getPos().z);
-        if (ShouldFire.CHUNK_EVENT_LOAD) {
-            final ChunkEvent.Load loadEvent = SpongeEventFactory.createChunkEventLoad(PhaseTracker.getInstance().currentCause(),
-                ((WorldChunk) levelChunk), chunkPos, (ResourceKey) (Object) this.level.dimension().location());
+        final Vector3i chunkPos = VecHelper.toVector3i(levelChunk.getPos());
+        if (ShouldFire.CHUNK_EVENT_BLOCKS_LOAD) {
+            final ChunkEvent.Blocks.Load loadEvent = SpongeEventFactory.createChunkEventBlocksLoad(PhaseTracker.getInstance().currentCause(),
+                ((BlockChunk) levelChunk), chunkPos, (ResourceKey) (Object) this.level.dimension().location());
             SpongeCommon.post(loadEvent);
         }
 
@@ -201,9 +205,25 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
     }
 
     @Inject(method = "schedule", at = @At("HEAD"), cancellable = true)
-    private void impl$onSchedule(final CallbackInfoReturnable<CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>>> cir) {
+    private void impl$onSchedule(final CallbackInfoReturnable<CompletableFuture<ChunkResult<ChunkAccess>>> cir) {
         if (!((ServerLevelBridge) this.level).bridge$isLoaded()) {
             cir.setReturnValue(ChunkHolder.UNLOADED_CHUNK_FUTURE);
         }
+    }
+
+    @Redirect(method = "lambda$scheduleChunkGeneration$30",
+            at = @At(value = "INVOKE",
+                    target = "Ljava/util/concurrent/CompletableFuture;thenApply(Ljava/util/function/Function;)Ljava/util/concurrent/CompletableFuture;",
+                    remap = false),
+            slice = @Slice(
+                    from = @At(value = "INVOKE",
+                            target = "Lnet/minecraft/server/level/progress/ChunkProgressListener;onStatusChange(Lnet/minecraft/world/level/ChunkPos;Lnet/minecraft/world/level/chunk/status/ChunkStatus;)V")))
+    private CompletableFuture<ChunkResult<ChunkAccess>> impl$guardForUnloadedChunkOnGenerate(final CompletableFuture<ChunkAccess> instance,
+                                                                                             final Function<ChunkAccess, ChunkResult<ChunkAccess>> function) {
+        //See ChunkStatusTasksMixin, only applies for when generation is cancelled due to world unload
+        if (instance != null) {
+            return instance.thenApply(function);
+        }
+        return ChunkHolder.UNLOADED_CHUNK_FUTURE;
     }
 }

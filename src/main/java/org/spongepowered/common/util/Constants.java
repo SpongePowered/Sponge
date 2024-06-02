@@ -29,14 +29,11 @@ import static org.spongepowered.api.data.persistence.DataQuery.of;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Lists;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.commands.arguments.CompoundTagArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.FloatTag;
@@ -73,20 +70,14 @@ import org.spongepowered.api.data.type.StructureMode;
 import org.spongepowered.api.data.type.StructureModes;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
-import org.spongepowered.api.item.enchantment.Enchantment;
-import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.item.enchantment.SpongeEnchantment;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.net.InetSocketAddress;
 import java.time.Duration;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -217,7 +208,6 @@ public final class Constants {
         public static final class EntityArchetype {
 
             public static final int BASE_VERSION = 1;
-            public static final String REQUIRES_EXTRA_INITIAL_SPAWN = "RequireInitialSpawn";
             public static final String ENTITY_ID = "Id";
             public static final DataQuery ENTITY_TYPE = of("EntityType");
             public static final DataQuery ENTITY_DATA = of("EntityData");
@@ -253,6 +243,7 @@ public final class Constants {
             public static final class Player {
 
                 public static final String HEALTH_SCALE = "HealthScale";
+                public static final int ITEM_COOLDOWN_CANCELLED = -2;
             }
 
             public static final class Human {
@@ -271,6 +262,9 @@ public final class Constants {
                 public static final String NBT = "nbt";
             }
 
+            public static final class RangedAttackGoal {
+                public static final int INFINITE_ATTACK_TIME = -2;
+            }
         }
 
         public static final class User {
@@ -385,13 +379,6 @@ public final class Constants {
             public static final int CURRENT_VERSION = Potion.POTION_V2;
         }
 
-        public static final class ItemStackSnapshot {
-
-            public static final int DUPLICATE_MANIPULATOR_DATA_VERSION = 1;
-            public static final int REMOVED_DUPLICATE_DATA = 2;
-            public static final int CURRENT_VERSION = ItemStackSnapshot.REMOVED_DUPLICATE_DATA;
-        }
-
         public static final class BlockState {
 
             public static final int BLOCK_TYPE_WITH_DAMAGE_VALUE = 1;
@@ -457,6 +444,8 @@ public final class Constants {
 
         // Highest ticket level that will cause loading a full chunk, plus one.
         public static final int MAX_FULL_CHUNK_DISTANCE = ChunkTicket.MAX_FULL_CHUNK_TICKET_LEVEL + 1;
+
+        public static final int INFINITE_TIMEOUT = 0;
     }
 
     public static final class Networking {
@@ -525,13 +514,8 @@ public final class Constants {
         public static final String ITEM_ORIGINAL_NAME = "SpongeOriginalName";
         public static final String ITEM_ENCHANTMENT_ID = "id";
         public static final String ITEM_ENCHANTMENT_LEVEL = "lvl";
-        public static final String ITEM_BREAKABLE_BLOCKS = "CanDestroy";
-
-        public static final String ITEM_PLACEABLE_BLOCKS = "CanPlaceOn";
         public static final String ITEM_HIDE_FLAGS = "HideFlags";
         public static final String ITEM_UNBREAKABLE = "Unbreakable";
-        public static final String CUSTOM_MODEL_DATA = "CustomModelData";
-        public static final String CUSTOM_POTION_COLOR = "CustomPotionColor";
         public static final String CUSTOM_POTION_EFFECTS = "custom_potion_effects";
         public static final String LOCK = "Lock";
 
@@ -1059,26 +1043,6 @@ public final class Constants {
             }
         }
 
-        public static List<Enchantment> getItemEnchantments(final net.minecraft.world.item.ItemStack itemStack) {
-            if (!itemStack.isEnchanted()) {
-                return Collections.emptyList();
-            }
-            final List<Enchantment> enchantments = Lists.newArrayList();
-            final ListTag list = itemStack.getEnchantmentTags();
-            for (int i = 0; i < list.size(); i++) {
-                final CompoundTag compound = list.getCompound(i);
-                final short enchantmentId = compound.getShort(Item.ITEM_ENCHANTMENT_ID);
-                final short level = compound.getShort(Item.ITEM_ENCHANTMENT_LEVEL);
-                final Registry<net.minecraft.world.item.enchantment.Enchantment> enchantmentRegistry = SpongeCommon.vanillaRegistry(Registries.ENCHANTMENT);
-                final EnchantmentType enchantmentType = (EnchantmentType) enchantmentRegistry.byId(enchantmentId);
-                if (enchantmentType == null) {
-                    continue;
-                }
-                enchantments.add(new SpongeEnchantment(enchantmentType, level));
-            }
-            return enchantments;
-        }
-
         public static ListTag newDoubleNBTList(final double... numbers) {
             final ListTag nbttaglist = new ListTag();
 
@@ -1211,13 +1175,29 @@ public final class Constants {
 
     public static final class ItemStack {
 
-        // ItemStacks
-        public static final DataQuery COUNT = of("Count");
-        public static final DataQuery TYPE = of("ItemType");
-        public static final DataQuery DAMAGE_VALUE = of("UnsafeDamage");
-        public static final String ATTRIBUTE_MODIFIERS = "AttributeModifiers";
-        public static final String ATTRIBUTE_NAME = "AttributeName";
-        public static final String ATTRIBUTE_SLOT = "Slot";
+        public static final DataQuery COUNT = of("count");
+        public static final DataQuery TYPE = of("id");
+        public static final DataQuery COMPONENTS = of("components");
+        public static final DataQuery CUSTOM_DATA = of("minecraft:custom_data");
+        public static final DataQuery DAMAGE = of("minecraft:damage");
+
+        @Deprecated
+        public static final class V2 {
+
+            public static final DataQuery DAMAGE_VALUE = of("UnsafeDamage");
+            // ItemStacks
+            public static final DataQuery COUNT = of("Count");
+            public static final DataQuery TYPE = of("ItemType");
+        }
+
+        // Previously only ItemStackSnapshot
+        public static final class Data {
+
+            public static final int DUPLICATE_MANIPULATOR_DATA_VERSION = 1;
+            public static final int REMOVED_DUPLICATE_DATA = 2;
+            public static final int DATA_COMPONENTS = 3;
+            public static final int CURRENT_VERSION = Data.DATA_COMPONENTS;
+        }
     }
 
     public static final class Map {
@@ -1269,7 +1249,6 @@ public final class Constants {
         public static final boolean DEFAULT_TRACKS_PLAYERS = true;
         public static final boolean DEFAULT_UNLIMITED_TRACKING = false;
         public static final boolean DEFAULT_MAP_LOCKED = false;
-        public static final String MAP_PREFIX = "map_";
         public static final int MAP_SIZE = 16384;
         public static final int MAP_MAX_INDEX = 127;
         public static final int MAP_PIXELS = 128;
@@ -1555,7 +1534,7 @@ public final class Constants {
         public static final double MINECRAFT_MINUTE_TICKS = TickConversions.MINECRAFT_HOUR_TICKS / 60.0;
         public static final double MINECRAFT_SECOND_TICKS = TickConversions.MINECRAFT_MINUTE_TICKS / 60.0;
         public static final int MINECRAFT_EPOCH_OFFSET = 6000;
-
+        public static final int INFINITE_TICKS = -1;
     }
 
     public static final class Universe {

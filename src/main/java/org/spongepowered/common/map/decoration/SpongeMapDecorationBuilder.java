@@ -26,7 +26,11 @@ package org.spongepowered.common.map.decoration;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
@@ -42,6 +46,7 @@ import org.spongepowered.common.util.MapUtil;
 import org.spongepowered.math.vector.Vector2i;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public final class SpongeMapDecorationBuilder implements MapDecoration.Builder {
     private @Nullable MapDecorationType type = null;
@@ -113,19 +118,19 @@ public final class SpongeMapDecorationBuilder implements MapDecoration.Builder {
         }
         this.reset();
 
-        final byte type = this.getByteFromContainer(container, Constants.Map.DECORATION_TYPE);
+        final Optional<Byte> oldType = container.getByte(Constants.Map.DECORATION_TYPE);
+        // TODO fix old type
+        // throw new InvalidDataException(Constants.Map.DECORATION_TYPE + ", is out of bounds. Should be 0-" + (possibleTypes-1));
+        final ResourceKey type = container.getResourceKey(Constants.Map.DECORATION_TYPE).get();
         final byte rot = this.getByteFromContainer(container, Constants.Map.DECORATION_ROTATION);
 
-        final net.minecraft.world.level.saveddata.maps.MapDecoration.Type[] decorations = net.minecraft.world.level.saveddata.maps.MapDecoration.Type.values();
-        final int possibleTypes = decorations.length;
-        if (type < 0 || type > possibleTypes) {
-            throw new InvalidDataException(Constants.Map.DECORATION_TYPE + ", is out of bounds. Should be 0-" + (possibleTypes-1));
+
+        final var mcType = BuiltInRegistries.MAP_DECORATION_TYPE.get((ResourceLocation) (Object) type);
+        if (mcType == null) {
+            throw new IllegalStateException("Missing a MapDecorationType, could not find one for Minecraft's MapDecoration.Type: " + type);
         }
 
-        final MapDecorationType mapDecorationType = SpongeMapDecorationType.toSpongeType(decorations[type])
-                .orElseThrow(() -> new IllegalStateException("Missing a MapDecorationType, could not find one for Minecraft's MapDecoration.Type: "
-                    + decorations[type].toString()));
-        this.type(mapDecorationType);
+        this.type((MapDecorationType) (Object) mcType);
 
         final int intRot = MapUtil.normalizeDecorationOrientation(rot);
         this.rotation(MapUtil.getMapRotById(intRot));
@@ -159,9 +164,9 @@ public final class SpongeMapDecorationBuilder implements MapDecoration.Builder {
     public MapDecoration build() throws IllegalStateException {
         Objects.requireNonNull(this.type, "Type has not been set");
         final MapDecoration decoration = (MapDecoration) (Object) new net.minecraft.world.level.saveddata.maps.MapDecoration(
-                ((SpongeMapDecorationType) this.type).getType(),
+                Holder.direct((net.minecraft.world.level.saveddata.maps.MapDecorationType) (Object) this.type),
                 (byte) this.x, (byte) this.y, (byte) ((SpongeMapDecorationOrientation) this.rot).getOrientationNumber(),
-                this.customName == null ? null : SpongeAdventure.asVanilla(this.customName));
+                Optional.ofNullable(this.customName).map(SpongeAdventure::asVanilla));
         ((MapDecorationBridge) decoration).bridge$setPersistent(true); // Anything that comes out of this builder should be persistent
         return decoration;
     }

@@ -26,6 +26,7 @@ package org.spongepowered.common.block.entity;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -34,11 +35,13 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.BlockEntityType;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.AbstractArchetype;
 import org.spongepowered.common.data.SpongeDataManager;
@@ -50,6 +53,8 @@ import org.spongepowered.common.data.provider.DataProviderLookup;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
@@ -63,6 +68,8 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
     public static final ImmutableList<RawDataValidator> VALIDATORS = ImmutableList.of();
 
     private static final DataProviderLookup lookup = SpongeDataManager.getProviderRegistry().getProviderLookup(SpongeBlockEntityArchetype.class);
+
+    private net.minecraft.world.level.block.entity.@Nullable BlockEntity cachedBlockEntity;
 
     SpongeBlockEntityArchetype(final SpongeBlockEntityArchetypeBuilder builder) {
         super(builder.type, NBTTranslator.INSTANCE.translate(builder.data));
@@ -106,7 +113,7 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
         compound.putInt(Constants.TileEntity.Y_POS, blockpos.getY());
         compound.putInt(Constants.TileEntity.Z_POS, blockpos.getZ());
         tileEntity.setBlockState((net.minecraft.world.level.block.state.BlockState) currentState);
-        tileEntity.load(compound);
+        tileEntity.loadWithComponents(compound, minecraftWorld.registryAccess());
         return Optional.of((org.spongepowered.api.block.entity.BlockEntity) tileEntity);
     }
 
@@ -185,5 +192,15 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
                 .add("type=" + this.type)
                 .add("state=" + this.blockState)
                 .add("data=" + this.compound).toString();
+    }
+
+    public List<DataHolder> impl$delegateDataHolder() {
+        if (this.cachedBlockEntity == null) {
+            final CompoundTag compound = this.compound.copy();
+            compound.putString(Constants.Item.BLOCK_ENTITY_ID, SpongeCommon.vanillaRegistry(Registries.BLOCK_ENTITY_TYPE).getKey((net.minecraft.world.level.block.entity.BlockEntityType<?>) this.type).toString());
+            //TODO fixme
+            //this.cachedBlockEntity = net.minecraft.world.level.block.entity.BlockEntity.loadStatic(new BlockPos(0, 0, 0), (net.minecraft.world.level.block.state.BlockState) this.blockState, compound);
+        }
+        return Arrays.asList(this, (DataHolder) this.cachedBlockEntity);
     }
 }

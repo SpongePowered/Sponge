@@ -339,7 +339,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         final Block currentBlock = currentState.getBlock();
         if ((currentState.getOptionalValue(BlockStateProperties.WATERLOGGED).orElse(false) && newBlock == Blocks.WATER) || newBlock == Blocks.AIR) {
             return BlockChange.BREAK;
-        } else if (newBlock != currentBlock && !TrackingUtil.forceModify(currentBlock, newBlock)) {
+        } else if (newBlock != currentBlock) {
             return BlockChange.PLACE;
         }
         return BlockChange.MODIFY;

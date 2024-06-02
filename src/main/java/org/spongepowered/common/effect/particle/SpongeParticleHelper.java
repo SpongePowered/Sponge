@@ -29,6 +29,7 @@ import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.DustColorTransitionOptions;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ItemParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SculkChargeParticleOptions;
 import net.minecraft.core.particles.ShriekParticleOption;
 import net.minecraft.core.particles.SimpleParticleType;
@@ -112,14 +113,15 @@ public final class SpongeParticleHelper {
         // The only way we can see what options are supported for a particular named particle
         // is to compare the internal type's deserializer to some static deserializer fields.
         // If only mojang had some type akin to our ParticleEffect...
-        if (internalType.getDeserializer() == BlockParticleOption.DESERIALIZER) {
-            // This particle type supports a block state option.
+        if (internalType == ParticleTypes.BLOCK || internalType == ParticleTypes.BLOCK_MARKER
+                || internalType == ParticleTypes.FALLING_DUST || internalType == ParticleTypes.DUST_PILLAR) {
+            //This particle type supports a block state option.
             final BlockState state = effect.optionOrDefault(ParticleOptions.BLOCK_STATE).get();
             final BlockParticleOption particleData = new BlockParticleOption(
                     (net.minecraft.core.particles.ParticleType<BlockParticleOption>) internalType,
                     (net.minecraft.world.level.block.state.BlockState) state);
             return new NamedCachedPacket(particleData, offset, quantity, velocity);
-        } else if (internalType.getDeserializer() == DustColorTransitionOptions.DESERIALIZER) {
+        } else if (internalType == ParticleTypes.DUST_COLOR_TRANSITION) {
             final Color color = effect.optionOrDefault(ParticleOptions.COLOR).get();
             final Color toColor = effect.optionOrDefault(ParticleOptions.TO_COLOR).get();
             final double scale = effect.optionOrDefault(ParticleOptions.SCALE).get();
@@ -136,8 +138,8 @@ public final class SpongeParticleHelper {
                     ),
                     (float) scale);
             return new NamedCachedPacket(particleData, offset, quantity, velocity);
-        } else if (internalType.getDeserializer() == DustParticleOptions.DESERIALIZER) {
-            // This particle type supports a color option.
+        } else if (internalType == ParticleTypes.DUST) {
+            //This particle type supports a color option.
             final Color color = effect.optionOrDefault(ParticleOptions.COLOR).get();
             final double scale = effect.optionOrDefault(ParticleOptions.SCALE).get();
             final DustParticleOptions particleData = new DustParticleOptions(new org.joml.Vector3f(
@@ -146,22 +148,22 @@ public final class SpongeParticleHelper {
                     (float) color.blue() / 255),
                     (float) scale);
             return new NamedCachedPacket(particleData, offset, quantity, velocity);
-        } else if (internalType.getDeserializer() == ItemParticleOption.DESERIALIZER) {
-            // This particle type supports an item option.
+        } else if (internalType == ParticleTypes.ITEM) {
+            //This particle type supports an item option.
             final ItemStackSnapshot snapshot = effect.optionOrDefault(ParticleOptions.ITEM_STACK_SNAPSHOT).get();
             final ItemParticleOption particleData = new ItemParticleOption(
                     (net.minecraft.core.particles.ParticleType<ItemParticleOption>) internalType,
                     (net.minecraft.world.item.ItemStack) (Object) snapshot.createStack());
             return new NamedCachedPacket(particleData, offset, quantity, velocity);
-        } else if (internalType.getDeserializer() == SculkChargeParticleOptions.DESERIALIZER) {
+        } else if (internalType == ParticleTypes.SCULK_CHARGE) {
             final double roll = effect.optionOrDefault(ParticleOptions.ROLL).get();
             final SculkChargeParticleOptions particleData = new SculkChargeParticleOptions((float) roll);
             return new NamedCachedPacket(particleData, offset, quantity, velocity);
-        } else if (internalType.getDeserializer() == ShriekParticleOption.DESERIALIZER) {
+        } else if (internalType == ParticleTypes.SHRIEK) {
             final int delay = effect.optionOrDefault(ParticleOptions.DELAY).get();
             final ShriekParticleOption particleData = new ShriekParticleOption(delay);
             return new NamedCachedPacket(particleData, offset, quantity, velocity);
-        } else if (internalType.getDeserializer() == VibrationParticleOption.DESERIALIZER) {
+        } else if (internalType == ParticleTypes.VIBRATION) {
             final Ticks delay = effect.optionOrDefault(ParticleOptions.TRAVEL_TIME).get();
             // TODO add position source
             final VibrationParticleOption particleData = new VibrationParticleOption(new BlockPositionSource(BlockPos.ZERO), (int) delay.ticks());
@@ -225,40 +227,33 @@ public final class SpongeParticleHelper {
             return new SpongeParticleEffect((ParticleType) type, Collections.emptyMap());
         }
 
-        if (type.getDeserializer() == BlockParticleOption.DESERIALIZER) {
-            final BlockParticleOption particleData = (BlockParticleOption) effect;
-            return new SpongeParticleEffect((ParticleType) type, Map.of(ParticleOptions.BLOCK_STATE.get(), particleData.getState()));
-        } else if (type.getDeserializer() == DustColorTransitionOptions.DESERIALIZER) {
-            final DustColorTransitionOptions particleData = (DustColorTransitionOptions) effect;
+        if (effect instanceof BlockParticleOption blockOptions) {
+            return new SpongeParticleEffect((ParticleType) type, Map.of(ParticleOptions.BLOCK_STATE.get(), blockOptions.getState()));
+        } else if (effect instanceof DustColorTransitionOptions dustColorTransitionOptions) {
             return new SpongeParticleEffect((ParticleType) type, Map.of(
                     ParticleOptions.COLOR.get(), Color.of(
-                            Vector3f.from(particleData.getFromColor().x, particleData.getFromColor().y, particleData.getFromColor().z).mul(255)),
+                            Vector3f.from(dustColorTransitionOptions.getFromColor().x, dustColorTransitionOptions.getFromColor().y, dustColorTransitionOptions.getFromColor().z).mul(255)),
                     ParticleOptions.TO_COLOR.get(), Color.of(
-                            Vector3f.from(particleData.getToColor().x, particleData.getToColor().y, particleData.getToColor().z).mul(255)),
-                    ParticleOptions.SCALE.get(), particleData.getScale()
+                            Vector3f.from(dustColorTransitionOptions.getToColor().x, dustColorTransitionOptions.getToColor().y, dustColorTransitionOptions.getToColor().z).mul(255)),
+                    ParticleOptions.SCALE.get(), dustColorTransitionOptions.getScale()
             ));
-        } else if (type.getDeserializer() == DustParticleOptions.DESERIALIZER) {
+        } else if (effect instanceof DustParticleOptions dustOptions) {
             // This particle type supports a color option.
-            final DustParticleOptions particleData = (DustParticleOptions) effect;
             return new SpongeParticleEffect((ParticleType) type, Map.of(
                     ParticleOptions.COLOR.get(), Color.of(
-                            Vector3f.from(particleData.getColor().x, particleData.getColor().y, particleData.getColor().z).mul(255)),
-                    ParticleOptions.SCALE.get(), particleData.getScale()
+                            Vector3f.from(dustOptions.getColor().x, dustOptions.getColor().y, dustOptions.getColor().z).mul(255)),
+                    ParticleOptions.SCALE.get(), dustOptions.getScale()
             ));
-        } else if (type.getDeserializer() == ItemParticleOption.DESERIALIZER) {
+        } else if (effect instanceof ItemParticleOption itemOptions) {
             // This particle type supports an item option.
-            final ItemParticleOption particleData = (ItemParticleOption) effect;
-            return new SpongeParticleEffect((ParticleType) type, Map.of(ParticleOptions.BLOCK_STATE.get(), particleData.getItem().copy()));
-        } else if (type.getDeserializer() == SculkChargeParticleOptions.DESERIALIZER) {
-            final SculkChargeParticleOptions particleData = (SculkChargeParticleOptions) effect;
-            return new SpongeParticleEffect((ParticleType) type, Map.of(ParticleOptions.ROLL.get(), particleData.roll()));
-        } else if (type.getDeserializer() == ShriekParticleOption.DESERIALIZER) {
-            final ShriekParticleOption particleData = (ShriekParticleOption) effect;
-            return new SpongeParticleEffect((ParticleType) type, Map.of(ParticleOptions.DELAY.get(), particleData.getDelay()));
-        } else if (type.getDeserializer() == VibrationParticleOption.DESERIALIZER) {
+            return new SpongeParticleEffect((ParticleType) type, Map.of(ParticleOptions.BLOCK_STATE.get(), itemOptions.getItem().copy()));
+        } else if (effect instanceof SculkChargeParticleOptions sculkChargeOptions) {
+            return new SpongeParticleEffect((ParticleType) type, Map.of(ParticleOptions.ROLL.get(), sculkChargeOptions.roll()));
+        } else if (effect instanceof ShriekParticleOption shriekOption) {
+            return new SpongeParticleEffect((ParticleType) type, Map.of(ParticleOptions.DELAY.get(), shriekOption.getDelay()));
+        } else if (effect instanceof VibrationParticleOption vibrationOptions) {
             // TODO add position source
-            final VibrationParticleOption particleData = (VibrationParticleOption) effect;
-            return new SpongeParticleEffect((ParticleType) type, Map.of(ParticleOptions.TRAVEL_TIME.get(), Ticks.of(particleData.getArrivalInTicks())));
+            return new SpongeParticleEffect((ParticleType) type, Map.of(ParticleOptions.TRAVEL_TIME.get(), Ticks.of(vibrationOptions.getArrivalInTicks())));
         }
 
         return new SpongeParticleEffect((ParticleType) type, Collections.emptyMap());

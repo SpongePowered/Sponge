@@ -25,23 +25,20 @@
 package org.spongepowered.common.util;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.CombatRules;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -60,7 +57,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.world.damagesource.DamageSourceBridge;
@@ -68,11 +64,8 @@ import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.DoubleUnaryOperator;
 import java.util.function.Predicate;
@@ -108,7 +101,7 @@ public final class DamageEventUtil {
             return Optional.empty();
         }
 
-        final DoubleUnaryOperator function = incomingDamage -> -(incomingDamage - CombatRules.getDamageAfterAbsorb((float) incomingDamage, living.getArmorValue(), (float) living.getAttributeValue(Attributes.ARMOR_TOUGHNESS)));
+        final DoubleUnaryOperator function = incomingDamage -> -(incomingDamage - CombatRules.getDamageAfterAbsorb((float) incomingDamage, damageSource, living.getArmorValue(), (float) living.getAttributeValue(Attributes.ARMOR_TOUGHNESS)));
         final DamageFunction armorModifier;
         try (final CauseStackManager.StackFrame frame = ((Server) living.getServer()).causeStackManager().pushCauseFrame()){
             frame.pushCause(living);
@@ -223,46 +216,30 @@ public final class DamageEventUtil {
     }
 
     public static List<DamageFunction> createAttackEnchantmentFunction(final net.minecraft.world.item.ItemStack heldItem,
-            final MobType creatureAttribute, final float attackStrength) {
+            final EntityType<?> entityType, final float attackStrength) {
         if (heldItem.isEmpty()) {
             return Collections.emptyList();
         }
 
-        final ListTag enchantmentCompounds = heldItem.getEnchantmentTags();
+        final ItemEnchantments enchantmentCompounds = heldItem.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
         if (enchantmentCompounds.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        final Map<Enchantment, Collection<Integer>> enchantments = new HashMap<>();
-
-        for (int i = 0; i < enchantmentCompounds.size(); ++i) {
-            final String id = enchantmentCompounds.getCompound(i).getString("id");
-            final int enchantmentLevel = enchantmentCompounds.getCompound(i).getInt("lvl");
-
-            final Registry<net.minecraft.world.item.enchantment.Enchantment> enchantmentRegistry = SpongeCommon.vanillaRegistry(Registries.ENCHANTMENT);
-            final Enchantment enchantment = enchantmentRegistry.get(new ResourceLocation(id));
-            if (enchantment != null) {
-                enchantments.computeIfAbsent(enchantment, k -> new ArrayList<>()).add(enchantmentLevel);
-            }
-        }
-
-        if (enchantments.isEmpty()) {
             return Collections.emptyList();
         }
 
         final List<DamageFunction> damageModifierFunctions = new ArrayList<>();
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(heldItem);
 
-        for (final Map.Entry<Enchantment, Collection<Integer>> enchantment : enchantments.entrySet()) {
+        for (final var entry : enchantmentCompounds.entrySet()) {
+            final var enchantment = entry.getKey().value();
+            final int level = entry.getIntValue();
+
             final DamageModifier enchantmentModifier = DamageModifier.builder()
                     .type(DamageModifierTypes.WEAPON_ENCHANTMENT)
                     .cause(Cause.of(EventContext.empty(), snapshot, enchantment))
                     .build();
             final DoubleUnaryOperator enchantmentFunction = (damage) -> {
                 double totalDamage = 0;
-                for (final int level : enchantment.getValue()) {
-                    totalDamage += (double) enchantment.getKey().getDamageBonus(level, creatureAttribute) * attackStrength;
-                }
+                totalDamage += enchantment.getDamageBonus(level, entityType) * attackStrength;
                 return totalDamage;
             };
             damageModifierFunctions.add(new DamageFunction(enchantmentModifier, enchantmentFunction));

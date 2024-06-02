@@ -38,9 +38,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundDisconnectPacket;
-import net.minecraft.network.protocol.game.ClientboundLoginPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
-import net.minecraft.network.protocol.game.CommonPlayerSpawnInfo;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -129,7 +127,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -151,7 +148,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Shadow @Final private PlayerDataStorage playerIo;
 
     @Shadow public abstract MinecraftServer shadow$getServer();
-    @Shadow @Nullable public abstract CompoundTag shadow$load(net.minecraft.server.level.ServerPlayer playerIn);
+    @Shadow public abstract Optional<CompoundTag> shadow$load(final net.minecraft.server.level.ServerPlayer $$0);
     @Shadow public abstract boolean shadow$canBypassPlayerLimit(com.mojang.authlib.GameProfile param0);
     @Shadow protected abstract boolean shadow$verifyChatTrusted(final PlayerChatMessage $$0);
     @Shadow protected abstract void shadow$broadcastChatMessage(final PlayerChatMessage $$0, final Predicate<net.minecraft.server.level.ServerPlayer> $$1,
@@ -248,12 +245,12 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
     @Redirect(method = "placeNewPlayer",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/players/PlayerList;load(Lnet/minecraft/server/level/ServerPlayer;)Lnet/minecraft/nbt/CompoundTag;"
+            target = "Lnet/minecraft/server/players/PlayerList;load(Lnet/minecraft/server/level/ServerPlayer;)Ljava/util/Optional;"
         )
     )
-    private CompoundTag impl$setPlayerDataForNewPlayers(final PlayerList playerList, final net.minecraft.server.level.ServerPlayer playerIn) {
-        final CompoundTag compound = this.shadow$load(playerIn);
-        if (compound == null) {
+    private Optional<CompoundTag> impl$setPlayerDataForNewPlayers(final PlayerList playerList, final net.minecraft.server.level.ServerPlayer playerIn) {
+        final Optional<CompoundTag> compound = this.shadow$load(playerIn);
+        if (compound.isEmpty()) {
             ((SpongeServer) SpongeCommon.server()).getPlayerDataManager().setPlayerInfo(playerIn.getUUID(), Instant.now(), Instant.now());
         }
         return compound;
@@ -291,14 +288,14 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final ServerLocation location = player.serverLocation();
         final Vector3d rotation = player.rotation();
         // player.connection() cannot be used here, because it's still be null at this point
-        final ServerSideConnection connection = (ServerSideConnection) networkManager.getPacketListener();
+        final ServerSideConnection connection = (ServerSideConnection) ((ConnectionBridge) networkManager).bridge$getEngineConnection();
 
         // The user is not yet in the player list, so we need to make special provision.
         final User user = SpongeUserView.createLoginEventUser(player);
 
         final Cause cause = Cause.of(EventContext.empty(), connection, user);
         final ServerSideConnectionEvent.Login event = SpongeEventFactory.createServerSideConnectionEventLogin(cause, disconnectMessage,
-                disconnectMessage, location, location, rotation, rotation, connection, user);
+                disconnectMessage, location, location, rotation, rotation, connection, SpongeGameProfile.of(mcPlayer.getGameProfile()), user);
         if (kickReason != null) {
             event.setCancelled(true);
         }
@@ -377,24 +374,9 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         ((ServerPlayerBridge) playerIn).bridge$setConnectionMessageToSend(message);
     }
 
-    @Redirect(method = "placeNewPlayer", at = @At(value = "NEW", target = "(IZLjava/util/Set;IIIZZZLnet/minecraft/network/protocol/game/CommonPlayerSpawnInfo;)Lnet/minecraft/network/protocol/game/ClientboundLoginPacket;"))
-    private ClientboundLoginPacket impl$usePerWorldViewDistance(
-            final int playerId,
-            final boolean hardcore,
-            final Set levels,
-            final int maxPlayers,
-            final int chunkRadius,
-            final int simulationDistance,
-            final boolean reducedDebugInfo,
-            final boolean showDeathScreen,
-            final boolean limitedCrafting,
-            final CommonPlayerSpawnInfo info,
-            final Connection conn,
-            final net.minecraft.server.level.ServerPlayer player,
-            final CommonListenerCookie clc) {
-        final Integer viewDistance = ((PrimaryLevelDataBridge) player.serverLevel().getLevelData()).bridge$viewDistance().orElse(chunkRadius);
-        return new ClientboundLoginPacket(playerId, hardcore, levels, maxPlayers, viewDistance, simulationDistance, reducedDebugInfo,
-                showDeathScreen, limitedCrafting, info);
+    @Redirect(method = "placeNewPlayer", at = @At(value = "FIELD", target = "Lnet/minecraft/server/players/PlayerList;viewDistance:I"))
+    private int impl$usePerWorldViewDistance(final PlayerList instance, final Connection $$0, final net.minecraft.server.level.ServerPlayer $$1, final CommonListenerCookie $$2) {
+        return ((PrimaryLevelDataBridge) $$1.serverLevel().getLevelData()).bridge$viewDistance().orElse( instance.getViewDistance());
     }
 
     @Redirect(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()Lnet/minecraft/server/bossevents/CustomBossEvents;"))
@@ -419,7 +401,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final Connection playerConnection, final net.minecraft.server.level.ServerPlayer serverPlayer
     ) {
         if (((VanishableBridge) serverPlayer).bridge$vanishState().invisible()) {
-            playerConnection.send(addPlayer);
+            serverPlayer.connection.send(addPlayer);
             return;
         }
         playerList.broadcastAll(addPlayer);
@@ -448,7 +430,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final Component joinComponent = SpongeAdventure.asAdventure(((ServerPlayerBridge) mcPlayer).bridge$getConnectionMessageToSend());
 
         final ServerSideConnectionEvent.Join event = SpongeEventFactory.createServerSideConnectionEventJoin(cause, audience,
-                Optional.of(audience), joinComponent, joinComponent, connection, player, false);
+                Optional.of(audience), joinComponent, joinComponent, connection, player, SpongeGameProfile.of(mcPlayer.getGameProfile()), false);
         SpongeCommon.post(event);
         if (!event.isMessageCancelled()) {
             event.audience().ifPresent(audience1 -> audience1.sendMessage(Identity.nil(), event.message()));
@@ -643,10 +625,10 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final Component sender = SpongeAdventure.asAdventure($$4.name());
         final Component target = $$4.targetName() == null ? null : SpongeAdventure.asAdventure($$4.targetName());
         final Registry<ChatType> chatTypeRegistry = SpongeCommon.vanillaRegistry(Registries.CHAT_TYPE);
-        final var chatType = RegistryTypes.CHAT_TYPE.defaultReferenced((org.spongepowered.api.ResourceKey) (Object) chatTypeRegistry.getKey($$4.chatType()));
+        final var chatType = RegistryTypes.CHAT_TYPE.defaultReferenced((org.spongepowered.api.ResourceKey) (Object) chatTypeRegistry.getKey($$4.chatType().value()));
 
         final Predicate<net.minecraft.server.level.ServerPlayer> filter;
-        final ChatType.Bound boundChatType;
+        ChatType.Bound boundChatType;
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.SERVER.pushCauseFrame()) {
             if ($$2 != null) {
@@ -659,7 +641,8 @@ public abstract class PlayerListMixin implements PlayerListBridge {
                 return; // Do nothing when canceled or audience removed
             }
             boundChatType = ChatType.bind(ResourceKey.create(Registries.CHAT_TYPE, (ResourceLocation) (Object) event.chatType().location()),
-                    this.server.registryAccess(), SpongeAdventure.asVanilla(event.sender())).withTargetName(event.target().map(SpongeAdventure::asVanilla).orElse(null));
+                    this.server.registryAccess(), SpongeAdventure.asVanilla(event.sender()));
+            boundChatType = event.target().map(SpongeAdventure::asVanilla).map(boundChatType::withTargetName).orElse(boundChatType);
 
             filter = event.filter().map(f -> $$1.and((Predicate) f)).orElse($$1);
             if (!isTrusted && event.message() != event.originalMessage()) {

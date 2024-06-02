@@ -43,6 +43,10 @@ import java.util.UUID;
 
 public interface PrimaryLevelDataBridge {
 
+    default boolean bridge$isVanilla() {
+        return false;
+    }
+
     boolean bridge$valid();
 
     @Nullable ServerLevel bridge$world();
@@ -53,9 +57,13 @@ public interface PrimaryLevelDataBridge {
 
     UUID bridge$uniqueId();
 
-    void bridge$setUniqueId(UUID uniqueId);
-
-    boolean bridge$customDifficulty();
+    /**
+     * Gets whether the world data supports custom difficulties,
+     * @return
+     */
+    default boolean bridge$customDifficulty() {
+        return true;
+    }
 
     boolean bridge$customGameType();
 
@@ -95,19 +103,17 @@ public interface PrimaryLevelDataBridge {
 
     void bridge$populateFromLevelStem(LevelStem dimension);
 
-    void bridge$setMapUUIDIndex(BiMap<Integer, UUID> index);
-
     BiMap<Integer, UUID> bridge$getMapUUIDIndex();
 
     int bridge$getIndexForUniqueId(UUID uuid);
 
     Optional<UUID> bridge$getUniqueIdForIndex(int ownerIndex);
 
-    void bridge$readSpongeLevelData(Dynamic<Tag> impl$spongeLevelData);
-
-    CompoundTag bridge$writeSpongeLevelData();
-
     void bridge$hardcore(boolean hardcore);
 
     void bridge$allowCommands(boolean commands);
+
+    void bridge$readSpongeLevelData(Dynamic<Tag> impl$spongeLevelData);
+
+    CompoundTag bridge$writeSpongeLevelData();
 }

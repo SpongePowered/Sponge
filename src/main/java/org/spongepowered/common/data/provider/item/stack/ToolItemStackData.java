@@ -24,10 +24,23 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.Tool;
+import net.minecraft.world.level.block.Block;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.world.item.DiggerItemAccessor;
+import org.spongepowered.api.data.type.ToolRule;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public final class ToolItemStackData {
 
@@ -40,12 +53,79 @@ public final class ToolItemStackData {
                 .asMutable(ItemStack.class)
                     .create(Keys.EFFICIENCY)
                         .get(h -> {
-                            if (h.getItem() instanceof DiggerItemAccessor) {
-                                return (double) ((DiggerItemAccessor) h.getItem()).accessor$speed();
+                            final Tool tool = h.get(DataComponents.TOOL);
+                            if (tool != null) {
+                                return (double) tool.defaultMiningSpeed();
                             }
                             return null;
                         })
-                        .supports(h -> h.getItem() instanceof DiggerItemAccessor);
+                        .set((h, v) -> {
+                            final Tool tool = h.get(DataComponents.TOOL);
+                            if (tool != null) {
+                                h.set(DataComponents.TOOL, new Tool(tool.rules(), v.floatValue(), tool.damagePerBlock()));
+                                return;
+                            }
+                            h.set(DataComponents.TOOL, new Tool(List.of(), v.floatValue(), 1));
+                        })
+                        .delete(h -> h.remove(DataComponents.TOOL))
+                .create(Keys.TOOL_DAMAGE_PER_BLOCK)
+                    .get(h -> {
+                        final Tool tool = h.get(DataComponents.TOOL);
+                        if (tool != null) {
+                            return tool.damagePerBlock();
+                        }
+                        return null;
+                    })
+                    .set((h, v) -> {
+                        final Tool tool = h.get(DataComponents.TOOL);
+                        if (tool != null) {
+                            h.set(DataComponents.TOOL, new Tool(tool.rules(), tool.defaultMiningSpeed(), v));
+                            return;
+                        }
+                        h.set(DataComponents.TOOL, new Tool(List.of(), 1f, v));
+                    })
+                .create(Keys.TOOL_RULES)
+                    .get(h -> {
+                        final Tool tool = h.get(DataComponents.TOOL);
+                        if (tool == null) {
+                            return null;
+                        }
+                        return tool.rules().stream().map(ToolRule.class::cast).toList();
+                    })
+                    .set((h, v) -> {
+                        var mcValue = v.stream().map(Tool.Rule.class::cast).toList();
+                        final Tool tool = h.get(DataComponents.TOOL);
+                        if (tool != null) {
+                            h.set(DataComponents.TOOL, new Tool(mcValue, tool.defaultMiningSpeed(), tool.damagePerBlock()));
+                            return;
+                        }
+                        h.set(DataComponents.TOOL, new Tool(mcValue, 1f, 1));
+                    })
+                    .delete(h -> {
+                        final Tool tool = h.get(DataComponents.TOOL);
+                        if (tool != null) {
+                            h.set(DataComponents.TOOL, new Tool(List.of(), tool.defaultMiningSpeed(), tool.damagePerBlock()));
+                        }
+                    })
+                .create(Keys.CAN_HARVEST)
+                    .get(h -> {
+                        final Registry<Block> blockRegistry = SpongeCommon.vanillaRegistry(Registries.BLOCK);
+                        final Tool tool = h.get(DataComponents.TOOL);
+                        if (tool != null) {
+                            return tool.rules().stream().map(Tool.Rule::blocks)
+                                    .flatMap(HolderSet::stream)
+                                    .map(Holder::value)
+                                    .map(BlockType.class::cast)
+                                    .collect(Collectors.toSet());
+                        }
+
+                        final Set<BlockType> blockTypes = blockRegistry.stream()
+                                .filter(b -> h.isCorrectToolForDrops(b.defaultBlockState()))
+                                .map(BlockType.class::cast)
+                                .collect(Collectors.toUnmodifiableSet());
+                        return blockTypes.isEmpty() ? null : blockTypes;
+                    })
+        ;
     }
     // @formatter:on
 }

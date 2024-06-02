@@ -26,6 +26,7 @@ package org.spongepowered.common.map;
 
 import com.google.common.collect.BiMap;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapIndex;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
@@ -66,7 +67,7 @@ public final class SpongeMapStorage implements MapStorage {
         final int highestId = ((MapIdTrackerBridge) defaultWorld.getDataStorage()
                 .computeIfAbsent(MapIndex.factory(), Constants.Map.MAP_INDEX_DATA_NAME)).bridge$getHighestMapId().orElse(-1);
         for (int i = 0; i <= highestId; i++) {
-            final @Nullable MapInfo mapInfo = (MapInfo) defaultWorld.getMapData(Constants.Map.MAP_PREFIX + i);
+            final @Nullable MapInfo mapInfo = (MapInfo) defaultWorld.getMapData(new MapId(i));
             if (mapInfo == null) {
                 SpongeCommon.logger().warn("Missing map with id: " + i);
                 continue;
@@ -89,7 +90,7 @@ public final class SpongeMapStorage implements MapStorage {
             return Optional.empty();
         }
         final ServerLevel defaultWorld = (ServerLevel) Sponge.server().worldManager().world(DefaultWorldKeys.DEFAULT).get();
-        final MapInfo loadedMapInfo = (MapInfo) defaultWorld.getMapData(Constants.Map.MAP_PREFIX + mapId);
+        final MapInfo loadedMapInfo = (MapInfo) defaultWorld.getMapData(new MapId(mapId));
         return Optional.ofNullable(loadedMapInfo);
     }
 

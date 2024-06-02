@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.item.alchemy;
 
-import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.item.potion.PotionType;
 import org.spongepowered.asm.mixin.Final;
@@ -37,7 +36,7 @@ import java.util.List;
 public abstract class PotionMixin_API implements PotionType {
 
     // @formatter:off
-    @Shadow @Final private ImmutableList<net.minecraft.world.effect.MobEffectInstance> effects;
+    @Shadow @Final private List<net.minecraft.world.effect.MobEffectInstance> effects;
     // @formatter:on
 
     @Override

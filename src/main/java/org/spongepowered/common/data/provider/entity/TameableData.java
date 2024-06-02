@@ -42,12 +42,12 @@ public final class TameableData {
                         .set(TamableAnimal::setInSittingPose)
                     .create(Keys.IS_TAMED)
                         .get(TamableAnimal::isTame)
-                        .set(TamableAnimal::setTame)
+                        .set((h, v) -> h.setTame(v, true))
                     .create(Keys.TAMER)
                         .get(TamableAnimal::getOwnerUUID)
                         .set((h, v) -> {
                             h.setOwnerUUID(v);
-                            h.setTame(v != null);
+                            h.setTame(v != null, true);
                         });
     }
     // @formatter:on

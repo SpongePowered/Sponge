@@ -38,7 +38,6 @@ import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.accessor.world.LockCodeAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
@@ -56,7 +55,7 @@ public abstract class BaseContainerBlockEntityMixin_API extends BlockEntityMixin
     public DataContainer toContainer() {
         final DataContainer container = super.toContainer();
         if (this.lockKey != null) {
-            container.set(Constants.TileEntity.LOCK_CODE, ((LockCodeAccessor) this.lockKey).accessor$key());
+            container.set(Constants.TileEntity.LOCK_CODE, this.lockKey.key());
         }
         final List<DataView> items = Lists.newArrayList();
         for (int i = 0; i < ((Container) this).getContainerSize(); i++) {

@@ -18,7 +18,8 @@ minecraft {
 }
 
 configurations.configureEach {
-    exclude(group = "org.slf4j", module = "slf4j-api")
+    val dep = libs.log4j.slf4j2.get()
+    exclude(group = dep.group, module = dep.name)
 }
 
 dependencies {

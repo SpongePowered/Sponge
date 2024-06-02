@@ -64,14 +64,32 @@ public final class PandaData {
                         .set((h, v) -> h.setMainGene((Panda.Gene) (Object) v))
                     .create(Keys.SNEEZING_TIME)
                         .get(x -> new SpongeTicks(x.getSneezeCounter()))
-                        .set((h, v) -> h.setSneezeCounter((int) v.ticks()))
+                        .setAnd((h, v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            h.setSneezeCounter(SpongeTicks.toSaturatedIntOrInfinite(v));
+                            return true;
+                        })
                     .create(Keys.UNHAPPY_TIME)
                         .get(x -> new SpongeTicks(x.getUnhappyCounter()))
-                        .set((h, v) -> h.setUnhappyCounter((int) v.ticks()))
+                        .setAnd((h, v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            h.setUnhappyCounter(SpongeTicks.toSaturatedIntOrInfinite(v));
+                            return true;
+                        })
                 .asMutable(PandaAccessor.class)
                     .create(Keys.EATING_TIME)
                         .get(x -> new SpongeTicks(x.invoker$getEatCounter()))
-                        .set((h, v) -> h.invoker$setEatCounter((int) v.ticks()));
+                        .setAnd((h, v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            h.invoker$setEatCounter(SpongeTicks.toSaturatedIntOrInfinite(v));
+                            return true;
+                        });
     }
     // @formatter:on
 }

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.item.crafting;
 
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.inventory.CraftingContainer;
@@ -45,15 +44,12 @@ import org.spongepowered.api.item.recipe.cooking.CookingRecipe;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.accessor.world.inventory.CraftingMenuAccessor;
 import org.spongepowered.common.accessor.world.inventory.InventoryMenuAccessor;
 import org.spongepowered.common.accessor.world.level.block.entity.AbstractFurnaceBlockEntityAccessor;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -63,11 +59,10 @@ public abstract class RecipeManagerMixin_API implements RecipeManager {
 
     // @formatter:off
     @Shadow public abstract Optional<? extends net.minecraft.world.item.crafting.Recipe<?>> shadow$byKey(ResourceLocation recipeId);
-    @Shadow protected abstract <C extends Container, T extends net.minecraft.world.item.crafting.Recipe<C>> Map<ResourceLocation, net.minecraft.world.item.crafting.Recipe<C>> shadow$byType(net.minecraft.world.item.crafting.RecipeType<T> recipeTypeIn);
+    @Shadow protected abstract <C extends Container, T extends net.minecraft.world.item.crafting.Recipe<C>> Collection<RecipeHolder<T>> shadow$byType(net.minecraft.world.item.crafting.RecipeType<T> recipeTypeIn);
     @Shadow public abstract Collection<net.minecraft.world.item.crafting.Recipe<?>> shadow$getRecipes();
     @Shadow public abstract <C extends Container, T extends net.minecraft.world.item.crafting.Recipe<C>> Optional<T> shadow$getRecipeFor(net.minecraft.world.item.crafting.RecipeType<T> recipeTypeIn, C inventoryIn, net.minecraft.world.level.Level worldIn);
 
-    @Shadow private Map<net.minecraft.world.item.crafting.RecipeType<?>, Map<ResourceLocation, net.minecraft.world.item.crafting.Recipe<?>>> recipes;
     // @formatter:on
 
     @Override
@@ -86,7 +81,7 @@ public abstract class RecipeManagerMixin_API implements RecipeManager {
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
     public <T extends Recipe> Collection<T> allOfType(final RecipeType<T> type) {
         Objects.requireNonNull(type);
-        return this.shadow$byType((net.minecraft.world.item.crafting.RecipeType)type).values();
+        return this.shadow$byType((net.minecraft.world.item.crafting.RecipeType)type);
     }
 
     @Override
@@ -147,10 +142,5 @@ public abstract class RecipeManagerMixin_API implements RecipeManager {
         final net.minecraft.world.SimpleContainer fakeFurnace = new net.minecraft.world.SimpleContainer(1);
         fakeFurnace.setItem(0, ItemStackUtil.fromSnapshotToNative(ingredient));
         return this.shadow$getRecipeFor((net.minecraft.world.item.crafting.RecipeType) type, fakeFurnace, null);
-    }
-
-    @Redirect(method = "apply", at = @At(value = "INVOKE", remap = false, target = "Ljava/util/Map;size()I"))
-    public int impl$getActualRecipeCount(final Map<net.minecraft.world.item.crafting.RecipeType<?>, ImmutableMap.Builder<ResourceLocation, net.minecraft.world.item.crafting.Recipe<?>>>  map) {
-        return this.recipes.values().stream().mapToInt(Map::size).sum();
     }
 }

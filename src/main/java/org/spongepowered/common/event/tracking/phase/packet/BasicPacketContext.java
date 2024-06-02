@@ -35,9 +35,6 @@ public class BasicPacketContext extends PacketContext<BasicPacketContext> {
     @SuppressWarnings("unchecked")
     @Override
     public boolean hasCaptures() {
-        if (this.state == PacketPhase.General.RESOURCE_PACK) {
-            return true;
-        }
         if (this.state == PacketPhase.General.CLOSE_WINDOW) {
             return true;
         }

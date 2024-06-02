@@ -35,6 +35,8 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
+import com.github.javaparser.javadoc.Javadoc;
+import com.github.javaparser.javadoc.description.JavadocDescription;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
@@ -101,6 +103,8 @@ class RegistryEntriesValidator<V> implements Generator {
                 throw new IllegalArgumentException("Unknown registry " + this.registry);
             }
         }
+
+        primaryTypeDeclaration.setJavadocComment(new Javadoc(JavadocDescription.parseText(Generator.GENERATED_FILE_JAVADOCS)));
 
         // Find index of first field member
         // Take out all field members from the members list

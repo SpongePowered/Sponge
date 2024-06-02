@@ -55,12 +55,11 @@ import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.vehicle.Boat;
-import net.minecraft.world.item.ArmorMaterials;
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.item.FireworkRocketItem;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.Tiers;
+import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
@@ -101,7 +100,6 @@ import org.spongepowered.api.scoreboard.criteria.Criteria;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.common.accessor.world.entity.animal.MushroomCow_MushroomTypeAccessor;
 import org.spongepowered.common.accessor.world.entity.boss.enderdragon.phases.EnderDragonPhaseAccessor;
-import org.spongepowered.common.accessor.world.item.ArmorMaterialsAccessor;
 import org.spongepowered.common.accessor.world.level.GameRulesAccessor;
 import org.spongepowered.common.registry.RegistryLoader;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
@@ -146,15 +144,14 @@ public final class VanillaRegistryLoader {
     }
 
     private void loadEnumRegistries() {
-        this.knownName(RegistryTypes.ARMOR_MATERIAL, ArmorMaterials.values(), am -> ((ArmorMaterialsAccessor) (Object) am).accessor$name());
         this.automaticSerializedName(RegistryTypes.ATTACHMENT_SURFACE, AttachFace.values());
         this.automaticSerializedName(RegistryTypes.BAMBOO_LEAVES_TYPE, BambooLeaves.values());
         this.automaticSerializedName(RegistryTypes.BELL_ATTACHMENT_TYPE, BellAttachType.values());
         this.manualName(RegistryTypes.ATTRIBUTE_OPERATION, AttributeModifier.Operation.values(), map -> {
             // names come from net.minecraft.world.level.storage.loot.functions.SetAttributesFunction.Modifier#operationFromString
-            map.put(AttributeModifier.Operation.ADDITION, "addition");
-            map.put(AttributeModifier.Operation.MULTIPLY_BASE, "multiply_base");
-            map.put(AttributeModifier.Operation.MULTIPLY_TOTAL, "multiply_total");
+            map.put(AttributeModifier.Operation.ADD_VALUE, "addition");
+            map.put(AttributeModifier.Operation.ADD_MULTIPLIED_BASE, "multiply_base");
+            map.put(AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, "multiply_total");
         });
         this.knownName(RegistryTypes.BOAT_TYPE, Boat.Type.values(), Boat.Type::getName);
         this.automaticSerializedName(RegistryTypes.CHEST_ATTACHMENT_TYPE, ChestType.values());
@@ -172,6 +169,7 @@ public final class VanillaRegistryLoader {
         this.manualName(RegistryTypes.EQUIPMENT_GROUP, EquipmentSlot.Type.values(), map -> {
             map.put(EquipmentSlot.Type.ARMOR, "worn");
             map.put(EquipmentSlot.Type.HAND, "held");
+            map.put(EquipmentSlot.Type.BODY, "body");
         });
         this.manualName(RegistryTypes.EQUIPMENT_TYPE, EquipmentSlot.values(), map -> {
             map.put(EquipmentSlot.CHEST, "chest");
@@ -180,6 +178,7 @@ public final class VanillaRegistryLoader {
             map.put(EquipmentSlot.LEGS, "legs");
             map.put(EquipmentSlot.MAINHAND, "main_hand");
             map.put(EquipmentSlot.OFFHAND, "off_hand");
+            map.put(EquipmentSlot.BODY, "body");
         });
         this.knownName(RegistryTypes.FOX_TYPE, Fox.Type.values(), Fox.Type::getSerializedName);
         this.knownName(RegistryTypes.GAME_MODE, GameType.values(), GameType::getName);
@@ -258,11 +257,11 @@ public final class VanillaRegistryLoader {
 
     private static RegistryLoader<FireworkShape> fireworkShape() {
         return RegistryLoader.of(l -> {
-            l.add(FireworkRocketItem.Shape.BURST.getId(), FireworkShapes.BURST, () -> (FireworkShape) (Object) FireworkRocketItem.Shape.BURST);
-            l.add(FireworkRocketItem.Shape.CREEPER.getId(), FireworkShapes.CREEPER, () -> (FireworkShape) (Object) FireworkRocketItem.Shape.CREEPER);
-            l.add(FireworkRocketItem.Shape.LARGE_BALL.getId(), FireworkShapes.LARGE_BALL, () -> (FireworkShape) (Object) FireworkRocketItem.Shape.LARGE_BALL);
-            l.add(FireworkRocketItem.Shape.SMALL_BALL.getId(), FireworkShapes.SMALL_BALL, () -> (FireworkShape) (Object) FireworkRocketItem.Shape.SMALL_BALL);
-            l.add(FireworkRocketItem.Shape.STAR.getId(), FireworkShapes.STAR, () -> (FireworkShape) (Object) FireworkRocketItem.Shape.STAR);
+            l.addWithId(FireworkExplosion.Shape.BURST.getId(), FireworkShapes.BURST, () -> (FireworkShape) (Object) FireworkExplosion.Shape.BURST);
+            l.addWithId(FireworkExplosion.Shape.CREEPER.getId(), FireworkShapes.CREEPER, () -> (FireworkShape) (Object) FireworkExplosion.Shape.CREEPER);
+            l.addWithId(FireworkExplosion.Shape.LARGE_BALL.getId(), FireworkShapes.LARGE_BALL, () -> (FireworkShape) (Object) FireworkExplosion.Shape.LARGE_BALL);
+            l.addWithId(FireworkExplosion.Shape.SMALL_BALL.getId(), FireworkShapes.SMALL_BALL, () -> (FireworkShape) (Object) FireworkExplosion.Shape.SMALL_BALL);
+            l.addWithId(FireworkExplosion.Shape.STAR.getId(), FireworkShapes.STAR, () -> (FireworkShape) (Object) FireworkExplosion.Shape.STAR);
         });
     }
 

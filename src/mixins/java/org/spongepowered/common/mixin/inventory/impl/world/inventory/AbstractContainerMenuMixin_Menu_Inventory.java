@@ -38,6 +38,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.world.inventory.AbstractContainerMenu_InventoryBridge;
 import org.spongepowered.common.bridge.world.inventory.container.MenuBridge;
 import org.spongepowered.common.inventory.custom.SpongeInventoryMenu;
 
@@ -105,7 +106,7 @@ public abstract class AbstractContainerMenuMixin_Menu_Inventory implements MenuB
 
     private boolean impl$onMayPlace(final Slot slot, final ItemStack stack) {
         if (this.bridge$isReadonlyMenu(slot)) {
-            this.bridge$refreshListeners();
+            ((AbstractContainerMenu_InventoryBridge) this).bridge$markDirty();
             return false;
         }
         return slot.mayPlace(stack);
@@ -114,7 +115,7 @@ public abstract class AbstractContainerMenuMixin_Menu_Inventory implements MenuB
     @Redirect(method = "doClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;mayPickup(Lnet/minecraft/world/entity/player/Player;)Z"))
     public boolean impl$verifyReadOnlyMenu(final Slot slot, final Player player) {
         if (this.bridge$isReadonlyMenu(slot)) {
-            this.bridge$refreshListeners();
+            ((AbstractContainerMenu_InventoryBridge) this).bridge$markDirty();
             return false;
         }
         return slot.mayPickup(player);
@@ -124,7 +125,7 @@ public abstract class AbstractContainerMenuMixin_Menu_Inventory implements MenuB
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;getItem()Lnet/minecraft/world/item/ItemStack;", ordinal = 0))
     public ItemStack impl$beforeMergeStack(final Slot slot) {
         if (this.bridge$isReadonlyMenu(slot)) {
-            this.bridge$refreshListeners();
+            ((AbstractContainerMenu_InventoryBridge) this).bridge$markDirty();
             return ItemStack.EMPTY;
         }
         return slot.getItem();
@@ -132,12 +133,7 @@ public abstract class AbstractContainerMenuMixin_Menu_Inventory implements MenuB
 
     @Override
     public boolean bridge$isReadonlyMenu(final Slot slot) {
-        return this.impl$menu != null && this.impl$menu.isReadOnly() && slot.container == this.impl$menu.inventory();
+        return this.impl$menu != null && slot.container == this.impl$menu.inventory()
+                && this.impl$menu.isReadOnly(slot.index);
     }
-
-    @Override
-    public void bridge$refreshListeners() {
-        this.shadow$sendAllDataToRemote();
-    }
-
 }

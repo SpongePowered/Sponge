@@ -49,6 +49,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.world.inventory.AbstractContainerMenu_InventoryBridge;
 import org.spongepowered.common.bridge.world.inventory.container.MenuBridge;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
@@ -68,7 +69,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(AbstractContainerMenu.class)
-public abstract class AbstractContainerMenuMixin_Inventory implements TrackedContainerBridge, InventoryAdapter {
+public abstract class AbstractContainerMenuMixin_Inventory implements TrackedContainerBridge, InventoryAdapter, AbstractContainerMenu_InventoryBridge {
 
     //@formatter:off
     @Final @Shadow private NonNullList<ItemStack> lastSlots;
@@ -89,6 +90,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     private boolean impl$isClicking; // Menu Callbacks are only called when clicking in a container
     // Detects if a mod overrides detectAndSendChanges
     private boolean impl$captureSuccess = false;
+    private boolean impl$dirty;
 
     @Override
     public boolean bridge$capturePossible() {
@@ -166,7 +168,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     private ItemStack impl$verifyReadOnlyMenu(final Slot slot, final int param0, final int param1, final Player param2) {
         if (!((LevelBridge) param2.level()).bridge$isFake()) {
             if (((MenuBridge) this).bridge$isReadonlyMenu(slot)) {
-                ((MenuBridge) this).bridge$refreshListeners();
+                ((AbstractContainerMenu_InventoryBridge) this).bridge$markDirty();
                 return ItemStack.EMPTY;
             }
         }
@@ -213,7 +215,9 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         } finally {
             this.impl$isClicking = false;
         }
-
+        if (this.impl$dirty) {
+            this.shadow$sendAllDataToRemote();
+        }
     }
 
     @Inject(method = "broadcastFullState", at = @At("HEAD"), cancellable = true)
@@ -363,4 +367,12 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         transactor.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
     }
 
+    @Override
+    public void bridge$markDirty() {
+        if (this.impl$isClicking) {
+            this.impl$dirty = true;
+            return;
+        }
+        this.shadow$sendAllDataToRemote();
+    }
 }

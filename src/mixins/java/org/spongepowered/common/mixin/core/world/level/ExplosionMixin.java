@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.world.level;
 import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
@@ -95,12 +96,12 @@ public abstract class ExplosionMixin implements ExplosionBridge {
     private double impl$knockback;
 
     @Inject(
-        method = "<init>(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;Lnet/minecraft/world/level/ExplosionDamageCalculator;DDDFZLnet/minecraft/world/level/Explosion$BlockInteraction;Lnet/minecraft/core/particles/ParticleOptions;Lnet/minecraft/core/particles/ParticleOptions;Lnet/minecraft/sounds/SoundEvent;)V",
+        method = "<init>(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;Lnet/minecraft/world/level/ExplosionDamageCalculator;DDDFZLnet/minecraft/world/level/Explosion$BlockInteraction;Lnet/minecraft/core/particles/ParticleOptions;Lnet/minecraft/core/particles/ParticleOptions;Lnet/minecraft/core/Holder;)V",
         at = @At("RETURN")
     )
-    private void impl$onConstructed(final Level worldIn, final Entity exploderIn, final DamageSource $$2, final ExplosionDamageCalculator $$3, final double $$4,
-            final double $$5, final double $$6, final float $$7, final boolean $$8, final net.minecraft.world.level.Explosion.BlockInteraction modeIn,
-            final ParticleOptions $$10, final ParticleOptions $$11, final SoundEvent $$12, final CallbackInfo ci) {
+    private void impl$onConstructed(final Level $$0, final Entity $$1, final DamageSource $$2, final ExplosionDamageCalculator $$3, final double $$4,
+            final double $$5, final double $$6, final float $$7, final boolean $$8, final net.minecraft.world.level.Explosion.BlockInteraction $$9,
+            final ParticleOptions $$10, final ParticleOptions $$11, final Holder<SoundEvent> $$12, final CallbackInfo ci) {
         // In Vanilla and Forge, 'damagesTerrain' controls both smoke particles and block damage
         // Sponge-created explosions will explicitly set 'impl$shouldBreakBlocks' to its proper value
         this.impl$shouldBreakBlocks = this.blockInteraction == net.minecraft.world.level.Explosion.BlockInteraction.DESTROY_WITH_DECAY || this.blockInteraction == net.minecraft.world.level.Explosion.BlockInteraction.DESTROY;

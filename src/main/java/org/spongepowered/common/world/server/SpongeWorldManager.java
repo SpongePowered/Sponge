@@ -49,7 +49,6 @@ import net.minecraft.world.entity.npc.WanderingTraderSpawner;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.ForcedChunksSavedData;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
@@ -97,6 +96,7 @@ import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.user.SpongeUserManager;
@@ -303,7 +303,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         final ChunkProgressListener chunkStatusListener = ((MinecraftServerAccessor) this.server).accessor$progressListenerFactory().create(11);
         final ServerLevel world;
         try {
-            world = this.createLevel(registryKey, levelStem, worldKey, worldTypeKey.orElse(null), chunkStatusListener);
+            world = this.createNonDefaultLevel(registryKey, levelStem, worldKey, worldTypeKey.orElse(null), chunkStatusListener);
         } catch (final IOException e) {
             return FutureUtil.completedWithException(new RuntimeException(String.format("Failed to create level data for world '%s'!", worldKey), e));
         }
@@ -329,13 +329,14 @@ public abstract class SpongeWorldManager implements WorldManager {
         final GameType gameType = levelStemBridge.bridge$gameMode();
         final Boolean hardcore = levelStemBridge.bridge$hardcore();
         final Difficulty difficulty = levelStemBridge.bridge$difficulty();
-        final Boolean commands = levelStemBridge.bridge$commands();
-        return new LevelSettings(directoryName,
+        final Boolean allowCommands = levelStemBridge.bridge$allowCommands();
+        return new LevelSettings(
+                directoryName,
                 gameType == null ? defaultLevelData.getGameType() : gameType,
                 hardcore == null ? defaultLevelData.isHardcore() : hardcore,
                 difficulty == null ? defaultLevelData.getDifficulty() : difficulty,
-                commands == null ? defaultLevelData.getAllowCommands() : commands,
-                new GameRules(),
+                allowCommands == null ? defaultLevelData.isAllowCommands() : allowCommands,
+                defaultLevelData.getGameRules().copy(),
                 defaultLevelData.getDataConfiguration());
     }
 
@@ -728,12 +729,14 @@ public abstract class SpongeWorldManager implements WorldManager {
                 this.prepareWorld(world);
             } else {
                 try {
-                    final ServerLevel world = this.createLevel(registryKey, template, worldKey, worldTypeKey.orElse(null), chunkStatusListener);
+                    final ServerLevel world = this.createNonDefaultLevel(registryKey, template, worldKey, worldTypeKey.orElse(null), chunkStatusListener);
                     // Ensure that the world border is registered.
                     world.getWorldBorder().applySettings(((PrimaryLevelData) world.getLevelData()).getWorldBorder());
                     this.prepareWorld(world);
                 } catch (final IOException e) {
                     throw new RuntimeException(String.format("Failed to create level data for world '%s'!", worldKey), e);
+                } catch (final Exception e) {
+                    throw new IllegalStateException(String.format("Failed to create level data for world '%s'!", worldKey), e);
                 }
             }
         }
@@ -754,9 +757,13 @@ public abstract class SpongeWorldManager implements WorldManager {
 
     private PrimaryLevelData getOrCreateLevelData(final Dynamic<?> dynamicLevelData, final LevelStem levelStem, final String directoryName) {
         final PrimaryLevelData defaultLevelData = (PrimaryLevelData) this.server.getWorldData();
-        @Nullable PrimaryLevelData levelData = this.loadLevelData(this.server.registryAccess(), defaultLevelData.getDataConfiguration(), dynamicLevelData);
-        if (levelData != null) {
-            return levelData;
+        try {
+            @Nullable PrimaryLevelData levelData = this.loadLevelData(this.server.registryAccess(), defaultLevelData.getDataConfiguration(), dynamicLevelData);
+            if (levelData != null) {
+                return levelData;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load level data from " + directoryName, e);
         }
 
         if (this.server.isDemo()) {
@@ -781,7 +788,8 @@ public abstract class SpongeWorldManager implements WorldManager {
         return levelData == null ? null : (PrimaryLevelData) levelData.worldData();
     }
 
-    private ServerLevel createLevel(
+    // Do not call this for the default world, that is handled very special in loadLevel()
+    private ServerLevel createNonDefaultLevel(
             final net.minecraft.resources.ResourceKey<Level> registryKey,
             final LevelStem levelStem,
             final ResourceKey worldKey,
@@ -854,12 +862,15 @@ public abstract class SpongeWorldManager implements WorldManager {
                 final boolean hasSpawnAlready = levelDataBridge.bridge$customSpawnPosition();
                 if (!hasSpawnAlready) {
                     if (isDefaultWorld || levelDataBridge.bridge$performsSpawnLogic()) {
-                        MinecraftServerAccessor.invoker$setInitialSpawn(world, levelData, levelData.worldGenOptions().generateBonusChest(), isDebugGeneration);
+                        try (final var state = GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext(PhaseTracker.getInstance())) {
+                            state.buildAndSwitch();
+                            MinecraftServerAccessor.invoker$setInitialSpawn(world, levelData, levelData.worldGenOptions().generateBonusChest(), isDebugGeneration);
+                        }
                     } else if (Level.END.equals(world.dimension())) {
                         levelData.setSpawn(ServerLevel.END_SPAWN_POINT, 0);
                     }
                 } else if (levelData.worldGenOptions().generateBonusChest()) {
-                    final BlockPos pos = new BlockPos(levelData.getXSpawn(), levelData.getYSpawn(), levelData.getZSpawn());
+                    final BlockPos pos = levelData.getSpawnPos();
                     final ConfiguredFeature<?, ?> bonusChestFeature = SpongeCommon.vanillaRegistry(Registries.CONFIGURED_FEATURE).get(MiscOverworldFeatures.BONUS_CHEST);
                     bonusChestFeature.place(world, world.getChunkSource().getGenerator(), world.random, pos);
                 }
@@ -884,7 +895,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         this.server.getPlayerList().addWorldborderListener(world);
 
         if (levelData.getCustomBossEvents() != null) {
-            ((ServerLevelBridge) world).bridge$getBossBarManager().load(levelData.getCustomBossEvents());
+            ((ServerLevelBridge) world).bridge$getBossBarManager().load(levelData.getCustomBossEvents(), world.registryAccess());
         }
 
         return world;

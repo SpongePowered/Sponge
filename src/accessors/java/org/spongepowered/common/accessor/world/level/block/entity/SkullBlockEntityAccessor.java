@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.accessor.world.level.block.entity;
 
-import com.mojang.authlib.GameProfile;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -32,6 +32,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(SkullBlockEntity.class)
 public interface SkullBlockEntityAccessor {
 
-    @Accessor("owner") GameProfile accessor$owner();
+    @Accessor("noteBlockSound") void accessor$noteBlockSound(final ResourceLocation location);
+
+    @Accessor("noteBlockSound") ResourceLocation accessor$noteBlockSound();
 
 }

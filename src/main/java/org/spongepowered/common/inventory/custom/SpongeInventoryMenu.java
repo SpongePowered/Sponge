@@ -52,6 +52,7 @@ import org.spongepowered.common.accessor.world.inventory.AbstractContainerMenuAc
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.inventory.container.MenuBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.ArrayList;
@@ -73,6 +74,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
     private @Nullable CloseHandler closeHandler;
 
     private boolean readonly; // TODO make with wrapper slot
+    private final HashMap<Integer, Boolean> slotReadOnly = new HashMap<>();
 
     public SpongeInventoryMenu(final ViewableInventory inventory) {
         this.inventory = inventory;
@@ -85,6 +87,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
 
     @Override
     public void setCurrentInventory(final ViewableInventory inventory) {
+        this.slotReadOnly.clear();
         if (inventory.getClass().equals(this.inventory.getClass()) && inventory instanceof ViewableCustomInventory && inventory.capacity() == this.inventory.capacity()) {
             this.inventory = inventory;
             for (Map.Entry<Container, ServerPlayer> entry : this.tracked.entrySet()) {
@@ -141,6 +144,15 @@ public class SpongeInventoryMenu implements InventoryMenu {
     }
 
     @Override
+    public InventoryMenu setReadOnly(final org.spongepowered.api.item.inventory.Slot slot, final boolean readOnly) {
+        if (!this.inventory.containsInventory(slot)) {
+            throw new IllegalArgumentException();
+        }
+        this.slotReadOnly.put(((SlotAdapter) slot).getOrdinal(), readOnly);
+        return this;
+    }
+
+    @Override
     public void registerHandler(final InventoryCallbackHandler handler) {
         if (handler instanceof ClickHandler) {
             this.registerClick(((ClickHandler) handler));
@@ -159,8 +171,8 @@ public class SpongeInventoryMenu implements InventoryMenu {
         }
     }
 
-    public boolean isReadOnly() {
-        return this.readonly;
+    public boolean isReadOnly(final int slot) {
+        return this.slotReadOnly.getOrDefault(slot, this.readonly);
     }
 
     @Override

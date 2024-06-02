@@ -26,6 +26,7 @@ package org.spongepowered.common.world.volume;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.Registries;
@@ -40,11 +41,12 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.chunk.PalettedContainer;
 import net.minecraft.world.level.chunk.ProtoChunk;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.entity.EntitySection;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -175,7 +177,10 @@ public final class VolumeStreamUtils {
         final int maskedX = x & 3;
         final int maskedY = y & 3;
         final int maskedZ = z & 3;
-        // TODO section.getBiomes().set(maskedX, maskedY, maskedZ, Holder.direct((Biome) (Object) biome));
+        final var old = ((PalettedContainer<Holder<Biome>>) section.getBiomes()).getAndSet(maskedX, maskedY, maskedZ, Holder.direct((Biome) (Object) biome));
+        if (old.value() == (Object) biome) {
+            return false;
+        }
 
         finalizer.run();
         return true;
@@ -255,14 +260,14 @@ public final class VolumeStreamUtils {
         final boolean shouldCarbonCopy, final ObjectArrayMutableBlockEntityBuffer backingVolume, final @Nullable Level level
     ) {
         return shouldCarbonCopy ? (pos, tile) -> {
-            final CompoundTag nbt = tile.saveWithFullMetadata();
+            final CompoundTag nbt = tile.saveWithFullMetadata(tile.getLevel().registryAccess()); // TODO NPE possible?
             final BlockState state = tile.getBlockState();
             final net.minecraft.world.level.block.entity.@Nullable BlockEntity cloned = tile.getType().create(pos, state);
             Objects.requireNonNull(
                 cloned,
                 () -> String.format(
                     "TileEntityType[%s] creates a null TileEntity!", BlockEntityType.getKey(tile.getType()))
-            ).load(nbt);
+            ).loadWithComponents(nbt, tile.getLevel().registryAccess()); // TODO NPE possible?
 
             if (level != null) {
                 ((BlockEntityAccessor) cloned).accessor$level(level);

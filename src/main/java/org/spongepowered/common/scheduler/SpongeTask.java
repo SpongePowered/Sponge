@@ -128,6 +128,8 @@ public final class SpongeTask implements Task {
             Objects.requireNonNull(delay);
             if (delay.ticks() < 0) {
                 throw new IllegalArgumentException("Delay must be equal to or greater than zero!");
+            } else if (delay.isInfinite()) {
+                throw new IllegalArgumentException("Delay must not be infinite!");
             }
             this.delay = delay.ticks() * SpongeScheduler.TICK_DURATION_NS;
             this.tickBasedDelay = true;
@@ -173,6 +175,8 @@ public final class SpongeTask implements Task {
             Objects.requireNonNull(interval, "interval");
             if (interval.ticks() < 0) {
                 throw new IllegalArgumentException("Interval must be equal to or greater than zero!");
+            } else if (interval.isInfinite()) {
+                throw new IllegalArgumentException("Interval must not be infinite!");
             }
             this.interval = interval.ticks() * SpongeScheduler.TICK_DURATION_NS;
             this.tickBasedInterval = true;

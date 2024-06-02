@@ -34,6 +34,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.item.ItemCooldowns_CooldownInstanceAccessor;
 import org.spongepowered.common.bridge.world.item.ItemCooldownsBridge;
+import org.spongepowered.common.util.SpongeTicks;
 
 import java.util.Map;
 import java.util.Objects;
@@ -76,7 +77,7 @@ public abstract class ItemCooldownsMixin_API implements org.spongepowered.api.en
     @Override
     public boolean setCooldown(final ItemType type, final Ticks ticks) {
         Objects.requireNonNull(type, "Item type cannot be null!");
-        this.shadow$addCooldown((Item) type, (int) ticks.ticks());
+        this.shadow$addCooldown((Item) type, SpongeTicks.toSaturatedIntOrInfinite(ticks));
         return ((ItemCooldownsBridge) this).bridge$getSetCooldownResult();
     }
 

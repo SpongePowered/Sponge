@@ -27,23 +27,26 @@ package org.spongepowered.common.mixin.core.world.entity.player;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.ProjectileDeflection;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
@@ -57,7 +60,6 @@ import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.ModifierFunction;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -75,7 +77,6 @@ import org.spongepowered.common.util.DamageEventUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @SuppressWarnings("ConstantConditions")
 @Mixin(value = Player.class, priority = 900)
@@ -146,19 +147,22 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin {
                 // } else {
                 //     enchantmentDamage = EnchantmentHelper.getModifierForCreature(this.getHeldItemMainhand(), CreatureAttribute.UNDEFINED);
                 // }
+                if (targetEntity.getType().is(EntityTypeTags.REDIRECTABLE_PROJECTILE) && targetEntity instanceof Projectile proj) {
+                    proj.deflect(ProjectileDeflection.AIM_DEFLECT, (Player) (Object) this, (Player) (Object) this, true);
+                    // sponge - move the reset attack strength early to avoid resetting it from other events
+                    this.shadow$resetAttackStrengthTicker();
+                    return;
+                }
                 final float attackStrength = this.shadow$getAttackStrengthScale(0.5F);
 
                 final List<DamageFunction> originalFunctions = new ArrayList<>();
 
-                final MobType creatureAttribute = targetEntity instanceof LivingEntity
-                    ? ((LivingEntity) targetEntity).getMobType()
-                    : MobType.UNDEFINED;
                 final List<DamageFunction> enchantmentModifierFunctions = DamageEventUtil
-                    .createAttackEnchantmentFunction(this.shadow$getMainHandItem(), creatureAttribute, attackStrength);
+                    .createAttackEnchantmentFunction(this.shadow$getMainHandItem(), targetEntity.getType(), attackStrength);
                 // This is kept for the post-damage event handling
                 final List<DamageModifier> enchantmentModifiers = enchantmentModifierFunctions.stream()
                     .map(ModifierFunction::modifier)
-                    .collect(Collectors.toList());
+                    .toList();
 
                 enchantmentDamage = (float) enchantmentModifierFunctions.stream()
                     .map(ModifierFunction::function)
@@ -205,7 +209,7 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin {
 
                     final ItemStack heldItem = this.shadow$getMainHandItem();
                     if (isStrongAttack && !isCriticalAttack && !isSprintingAttack && this.shadow$onGround() && distanceWalkedDelta < (double) this.shadow$getSpeed()) {
-                        if (heldItem.getItem() instanceof SwordItem) {
+                        if (PlatformHooks.INSTANCE.getItemHooks().canPerformSweepAttack(heldItem)) {
                             isSweapingAttack = true;
                         }
                     }
@@ -248,21 +252,27 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin {
 
                         if (fireAspectModifier > 0 && !targetEntity.isOnFire()) {
                             litEntityOnFire = true;
-                            targetEntity.setSecondsOnFire(1);
+                            targetEntity.igniteForSeconds(1);
                         }
                     }
 
-                    final net.minecraft.world.phys.Vec3 targetMotion = targetEntity.getDeltaMovement();
+                    final Vec3 targetMotion = targetEntity.getDeltaMovement();
                     final boolean attackSucceeded = targetEntity.hurt(this.shadow$level().damageSources().playerAttack((net.minecraft.world.entity.player.Player) (Object) this), damage);
 
                     if (attackSucceeded) {
                         if (knockbackModifier > 0) {
-                            if (targetEntity instanceof LivingEntity) {
-                                ((LivingEntity) targetEntity).knockback((float) knockbackModifier * 0.5F, (double) Mth
-                                    .sin(this.shadow$getYRot() * 0.017453292F), (double) (-Mth.cos(this.shadow$getYRot() * 0.017453292F)));
+                            if (targetEntity instanceof LivingEntity le) {
+                                le.knockback(
+                                    (float) knockbackModifier * 0.5F,
+                                    Mth.sin(this.shadow$getYRot() * 0.017453292F),
+                                    -Mth.cos(this.shadow$getYRot() * 0.017453292F)
+                                );
                             } else {
-                                targetEntity.push((double) (-Mth.sin(this.shadow$getYRot() * 0.017453292F) * (float) knockbackModifier * 0.5F), 0.1D, (double) (Mth.cos(this.shadow$getYRot()
-                                    * 0.017453292F) * (float) knockbackModifier * 0.5F));
+                                targetEntity.push(
+                                    -Mth.sin(this.shadow$getYRot() * 0.017453292F) * (float) knockbackModifier * 0.5F,
+                                    0.1D,
+                                    Mth.cos(this.shadow$getYRot() * 0.017453292F) * (float) knockbackModifier * 0.5F
+                                );
                             }
 
                             this.shadow$setDeltaMovement(this.shadow$getDeltaMovement().multiply(0.6D, 1.0D, 0.6D));
@@ -270,8 +280,9 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin {
                         }
 
                         if (isSweapingAttack) {
-                            for (final LivingEntity livingEntity : this.shadow$level()
-                                .getEntitiesOfClass(LivingEntity.class, targetEntity.getBoundingBox().inflate(1.0D, 0.25D, 1.0D))) {
+                            // Sponge - add forge compatibility hook
+                            final var hitbox = PlatformHooks.INSTANCE.getItemHooks().getSweepingHitBox(((Player) (Object) this), this.shadow$getItemInHand(InteractionHand.MAIN_HAND), targetEntity);
+                            for (final LivingEntity livingEntity : this.shadow$level().getEntitiesOfClass(LivingEntity.class, hitbox)) {
                                 if (livingEntity != (net.minecraft.world.entity.player.Player) (Object) this && livingEntity != targetEntity && !this.shadow$isAlliedTo(livingEntity) && (!(livingEntity instanceof ArmorStand) || !((ArmorStand)livingEntity).isMarker()) && this.shadow$distanceToSqr(livingEntity) < 9.0D) {
                                     // Sponge Start - Do a small event for these entities
                                     // livingEntity.knockBack(this, 0.4F, (double)MathHelper.sin(this.rotationYaw * 0.017453292F), (double)(-MathHelper.cos(this.rotationYaw * 0.017453292F)));
@@ -320,10 +331,10 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin {
                             this.shadow$sweepAttack();
                         }
 
-                        if (targetEntity instanceof ServerPlayer && targetEntity.hurtMarked) {
-                            ((ServerPlayer) targetEntity).connection.send(new ClientboundSetEntityMotionPacket(targetEntity));
-                            targetEntity.hurtMarked = false;
-                            targetEntity.setDeltaMovement(targetMotion);
+                        if (targetEntity instanceof ServerPlayer sp && sp.hurtMarked) {
+                            sp.connection.send(new ClientboundSetEntityMotionPacket(targetEntity));
+                            sp.hurtMarked = false;
+                            sp.setDeltaMovement(targetMotion);
                         }
 
                         if (isCriticalAttack) {
@@ -347,8 +358,8 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin {
 
                         this.shadow$setLastHurtMob(targetEntity);
 
-                        if (targetEntity instanceof LivingEntity) {
-                            EnchantmentHelper.doPostHurtEffects((LivingEntity) targetEntity, (net.minecraft.world.entity.player.Player) (Object) this);
+                        if (targetEntity instanceof LivingEntity le) {
+                            EnchantmentHelper.doPostHurtEffects(le, (net.minecraft.world.entity.player.Player) (Object) this);
                         }
 
                         EnchantmentHelper.doPostDamageEffects((net.minecraft.world.entity.player.Player) (Object) this, targetEntity);
@@ -361,8 +372,8 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin {
                         //    entity = ((EnderDragonPart) targetEntity).parentMob;
                         // }
 
-                        if(!this.shadow$level().isClientSide && !itemstack1.isEmpty() && entity instanceof LivingEntity) {
-                            itemstack1.hurtEnemy((LivingEntity) entity, (net.minecraft.world.entity.player.Player) (Object) this);
+                        if(!this.shadow$level().isClientSide && !itemstack1.isEmpty() && entity instanceof LivingEntity le) {
+                            itemstack1.hurtEnemy(le, (net.minecraft.world.entity.player.Player) (Object) this);
                             if(itemstack1.isEmpty()) {
                                 // Sponge - platform hook for forge
                                 PlatformHooks.INSTANCE.getEventHooks().callItemDestroyedEvent((net.minecraft.world.entity.player.Player) (Object) this, itemstack1, InteractionHand.MAIN_HAND);
@@ -376,17 +387,17 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin {
                             // Spong End
                         }
 
-                        if (targetEntity instanceof LivingEntity) {
-                            final float f5 = targetOriginalHealth - ((LivingEntity) targetEntity).getHealth();
+                        if (targetEntity instanceof LivingEntity le) {
+                            final float f5 = targetOriginalHealth - le.getHealth();
                             this.shadow$awardStat(Stats.DAMAGE_DEALT, Math.round(f5 * 10.0F));
 
                             if (fireAspectModifier > 0) {
-                                targetEntity.setSecondsOnFire(fireAspectModifier * 4);
+                                targetEntity.igniteForSeconds(fireAspectModifier * 4);
                             }
 
-                            if (this.shadow$level() instanceof ServerWorld && f5 > 2.0F) {
+                            if (this.shadow$level() instanceof ServerLevel swe && f5 > 2.0F) {
                                 final int k = (int) ((double) f5 * 0.5D);
-                                ((net.minecraft.server.level.ServerLevel) this.shadow$level()).sendParticles(ParticleTypes.DAMAGE_INDICATOR, targetEntity.getX(), targetEntity.getY() + (double) (targetEntity.getBbHeight() * 0.5F), targetEntity.getZ(), k, 0.1D, 0.0D, 0.1D, 0.2D);
+                                swe.sendParticles(ParticleTypes.DAMAGE_INDICATOR, targetEntity.getX(), targetEntity.getY() + (double) (targetEntity.getBbHeight() * 0.5F), targetEntity.getZ(), k, 0.1D, 0.0D, 0.1D, 0.2D);
                             }
                         }
 

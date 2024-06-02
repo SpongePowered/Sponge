@@ -31,7 +31,6 @@ import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.util.ExtraCodecs;
 
 import java.util.Optional;
 
@@ -51,8 +50,8 @@ public final class SpongeScoreTrigger extends SimpleCriterionTrigger<SpongeScore
     public record TriggerInstance(Optional<ContextAwarePredicate> player, int triggerTimes) implements SimpleCriterionTrigger.SimpleInstance {
 
         public static final Codec<TriggerInstance> CODEC = RecordCodecBuilder.create(($$0) -> $$0.group(
-                ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(TriggerInstance::player),
-                ExtraCodecs.strictOptionalField(Codec.INT, "triggerTimes", -1).forGetter(TriggerInstance::triggerTimes)
+                EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(TriggerInstance::player),
+                Codec.INT.optionalFieldOf("triggerTimes", -1).forGetter(TriggerInstance::triggerTimes)
         ).apply($$0, TriggerInstance::new));
 
 

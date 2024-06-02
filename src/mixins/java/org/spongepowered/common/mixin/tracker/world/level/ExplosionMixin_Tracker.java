@@ -82,7 +82,7 @@ public abstract class ExplosionMixin_Tracker {
         // Sponge End
 
         // Sponge Start - Send the sound packet down. We must do this as we do not call doExplosionB client-side
-        this.level.playSound(null, this.x, this.y, this.z, SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS, 4.0F,
+        this.level.playSound(null, this.x, this.y, this.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 4.0F,
                 (1.0F + (this.level.random.nextFloat() - this.level.random.nextFloat()) * 0.2F) * 0.7F);
         // Sponge End
 

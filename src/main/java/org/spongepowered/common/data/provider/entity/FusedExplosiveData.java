@@ -42,8 +42,8 @@ public final class FusedExplosiveData {
                     .create(Keys.FUSE_DURATION)
                         .get(h -> new SpongeTicks(((FusedExplosiveBridge) h).bridge$getFuseDuration()))
                         .setAnd((h, v) -> {
-                            final int ticks = (int) v.ticks();
-                            if (ticks < 0) {
+                            final int ticks = SpongeTicks.toSaturatedIntOrInfinite(v);
+                            if (!v.isInfinite() || ticks < 0) {
                                 return false;
                             }
                             ((FusedExplosiveBridge) h).bridge$setFuseDuration(ticks);
@@ -52,8 +52,8 @@ public final class FusedExplosiveData {
                     .create(Keys.TICKS_REMAINING)
                         .get(h -> new SpongeTicks(((FusedExplosiveBridge) h).bridge$getFuseTicksRemaining()))
                         .setAnd((h, v) -> {
-                            final int ticks = (int) v.ticks();
-                            if (ticks < 0) {
+                            final int ticks = SpongeTicks.toSaturatedIntOrInfinite(v);
+                            if (v.isInfinite() || ticks < 0) {
                                 return false;
                             }
                             // TODO isPrimed on bridge?

@@ -36,6 +36,4 @@ public interface MenuBridge {
 
     boolean bridge$isReadonlyMenu(Slot slot);
 
-    void bridge$refreshListeners();
-
 }

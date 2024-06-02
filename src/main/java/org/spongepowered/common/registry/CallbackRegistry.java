@@ -27,6 +27,7 @@ package org.spongepowered.common.registry;
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 
@@ -43,7 +44,7 @@ public final class CallbackRegistry<T> extends MappedRegistry<T> {
     }
 
     @Override
-    public Holder.Reference<T> register(final ResourceKey<T> key, final T instance, final Lifecycle lifecycle) {
+    public Holder.Reference<T> register(final ResourceKey<T> key, final T instance, final RegistrationInfo lifecycle) {
         final Holder.Reference<T> value = super.register(key, instance, lifecycle);
         if (this.callbackEnabled) {
             this.callback.accept(key, instance);

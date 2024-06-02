@@ -25,9 +25,12 @@
 package org.spongepowered.common.item.merchant;
 
 
+import net.minecraft.core.component.DataComponentPredicate;
+import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.DataView;
@@ -124,14 +127,25 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
         Preconditions.checkState(this.firstItem != null, "Trading item has not been set");
         Preconditions.checkState(this.sellingItem != null, "Selling item has not been set");
         Preconditions.checkState(this.useCount <= this.maxUses, String.format("Usage count cannot be greater than the max usage count (%d)", this.maxUses));
-        final ItemStack first = this.firstItem.createStack();
-        final ItemStack second = this.secondItem == null ? null : this.secondItem.createStack();
-        final ItemStack selling = this.sellingItem.createStack();
-        final MerchantOffer merchantOffer = new MerchantOffer(ItemStackUtil.toNative(first), ItemStackUtil.toNative(second), ItemStackUtil.toNative(selling),
-                this.useCount, this.maxUses, this.merchantExperienceGranted, (float) this.priceGrowthMultiplier);
+        final var first = ItemStackUtil.fromSnapshotToNative(this.firstItem);
+        final var second = ItemStackUtil.fromSnapshotToNative(this.secondItem);
+        final var selling = ItemStackUtil.fromSnapshotToNative(this.sellingItem);
+
+        final MerchantOffer merchantOffer = new MerchantOffer(SpongeTradeOfferBuilder.itemCostOf(first),
+                                                              Optional.ofNullable(second).map(SpongeTradeOfferBuilder::itemCostOf),
+                                                              selling,
+                                                              this.useCount,
+                                                              this.maxUses,
+                                                              this.merchantExperienceGranted,
+                                                              (float) this.priceGrowthMultiplier);
         ((MerchantOfferAccessor) merchantOffer).accessor$rewardExp(this.allowsExperience);
         ((MerchantOfferAccessor) merchantOffer).accessor$demand(this.demandBonus);
         return (TradeOffer) merchantOffer;
+    }
+
+    @NotNull
+    private static ItemCost itemCostOf(final net.minecraft.world.item.ItemStack stack) {
+        return new ItemCost(stack.getItemHolder(), stack.getCount(), DataComponentPredicate.allOf(stack.getComponents()), stack);
     }
 
     @Override

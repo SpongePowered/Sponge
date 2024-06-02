@@ -24,29 +24,19 @@
  */
 package org.spongepowered.common.accessor.network.chat;
 
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.world.item.Item;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
-
-import java.util.Optional;
 
 @Mixin(HoverEvent.ItemStackInfo.class)
 public interface HoverEvent_ItemStackInfoAccessor {
 
     @Invoker("<init>")
-    static HoverEvent.ItemStackInfo invoker$new(final Item item, final int count, final @Nullable CompoundTag tag) {
+    static HoverEvent.ItemStackInfo invoker$new(final Holder<Item> item, final int count, final DataComponentPatch patch) {
         throw new UntransformedInvokerError();
     }
-
-    @Accessor("item") Item accessor$item();
-
-    @Accessor("count") int accessor$count();
-
-    @Accessor("tag") Optional<CompoundTag> accessor$tag();
-
 }

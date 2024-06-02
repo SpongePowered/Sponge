@@ -55,6 +55,7 @@ import org.spongepowered.common.bridge.world.level.chunk.storage.IOWorkerBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.world.level.chunk.SpongeUnloadedChunkException;
+import org.spongepowered.common.world.level.chunk.storage.SpongeIOWorkerType;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.BitSet;
@@ -78,24 +79,33 @@ public abstract class IOWorkerMixin implements IOWorkerBridge {
     @Shadow protected abstract void shadow$tellStorePending();
     // @formatter:on
 
-    @MonotonicNonNull private ResourceKey<Level> impl$dimension; //We only set this for chunk related IO workers
+    // We only set these for chunk and entity related IO workers
+    @MonotonicNonNull private SpongeIOWorkerType impl$type;
+    @MonotonicNonNull private ResourceKey<Level> impl$dimension;
 
     @Override
-    public void bridge$setDimension(ResourceKey<Level> dimension) {
+    public void bridge$setDimension(final SpongeIOWorkerType type, final ResourceKey<Level> dimension) {
+        this.impl$type = type;
         this.impl$dimension = dimension;
     }
 
     @Inject(method = "runStore", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Ljava/util/concurrent/CompletableFuture;complete(Ljava/lang/Object;)Z"))
     private void impl$onSaved(final ChunkPos param0, final @Coerce Object param1, final CallbackInfo ci) {
-        if (this.impl$dimension == null) {
-            return;
+        if (this.impl$type == SpongeIOWorkerType.CHUNK) {
+            if (ShouldFire.CHUNK_EVENT_BLOCKS_SAVE_POST) {
+                final Vector3i chunkPos = new Vector3i(param0.x, 0, param0.z);
+                final ChunkEvent.Blocks.Save.Post postSave = SpongeEventFactory.createChunkEventBlocksSavePost(PhaseTracker.getInstance().currentCause(), chunkPos,
+                        (org.spongepowered.api.ResourceKey) (Object) this.impl$dimension.location());
+                SpongeCommon.post(postSave);
+            }
         }
-
-        if (ShouldFire.CHUNK_EVENT_SAVE_POST) {
-            final Vector3i chunkPos = new Vector3i(param0.x, 0, param0.z);
-            final ChunkEvent.Save.Post postSave = SpongeEventFactory.createChunkEventSavePost(PhaseTracker.getInstance().currentCause(), chunkPos,
-                    (org.spongepowered.api.ResourceKey) (Object) this.impl$dimension.location());
-            SpongeCommon.post(postSave);
+        else if (this.impl$type == SpongeIOWorkerType.ENTITY) {
+            if (ShouldFire.CHUNK_EVENT_ENTITIES_SAVE_POST) {
+                final Vector3i chunkPos = new Vector3i(param0.x, 0, param0.z);
+                final ChunkEvent.Entities.Save.Post postSave = SpongeEventFactory.createChunkEventEntitiesSavePost(PhaseTracker.getInstance().currentCause(), chunkPos,
+                        (org.spongepowered.api.ResourceKey) (Object) this.impl$dimension.location());
+                SpongeCommon.post(postSave);
+            }
         }
     }
 

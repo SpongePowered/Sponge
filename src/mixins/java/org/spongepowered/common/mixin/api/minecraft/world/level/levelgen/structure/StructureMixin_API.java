@@ -119,7 +119,7 @@ public abstract class StructureMixin_API implements org.spongepowered.api.world.
     @Override
     public DataView toContainer() {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, SpongeCommon.server().registryAccess());
-        final JsonElement serialized = this.api$codec().encodeStart(ops, (Structure) (Object) this).getOrThrow(false, e -> {});
+        final JsonElement serialized = this.api$codec().encodeStart(ops, (Structure) (Object) this).getOrThrow();
         try {
             return DataFormats.JSON.get().read(serialized.toString());
         } catch (IOException e) {
@@ -129,6 +129,6 @@ public abstract class StructureMixin_API implements org.spongepowered.api.world.
 
     private <T extends Structure> Codec<T> api$codec() {
         final var type = (net.minecraft.world.level.levelgen.structure.StructureType<T>) this.shadow$type();
-        return type.codec();
+        return type.codec().codec();
     }
 }

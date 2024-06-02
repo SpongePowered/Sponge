@@ -68,16 +68,34 @@ public final class MobSpawnerData {
                         .set((h, v) -> ((BaseSpawnerAccessor) h.accessor$spawner()).accessor$maxNearbyEntities(v))
                     .create(Keys.MAX_SPAWN_DELAY)
                         .get(h -> new SpongeTicks(((BaseSpawnerAccessor) h.accessor$spawner()).accessor$maxSpawnDelay()))
-                        .set((h, v) -> ((BaseSpawnerAccessor) h.accessor$spawner()).accessor$maxSpawnDelay((int) v.ticks()))
+                        .setAnd((h, v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            ((BaseSpawnerAccessor) h.accessor$spawner()).accessor$maxSpawnDelay(SpongeTicks.toSaturatedIntOrInfinite(v));
+                            return true;
+                        })
                     .create(Keys.MIN_SPAWN_DELAY)
                         .get(h -> new SpongeTicks(((BaseSpawnerAccessor) h.accessor$spawner()).accessor$minSpawnDelay()))
-                        .set((h, v) -> ((BaseSpawnerAccessor) h.accessor$spawner()).accessor$minSpawnDelay((int) v.ticks()))
+                        .setAnd((h, v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            ((BaseSpawnerAccessor) h.accessor$spawner()).accessor$minSpawnDelay(SpongeTicks.toSaturatedIntOrInfinite(v));
+                            return true;
+                        })
                     .create(Keys.NEXT_ENTITY_TO_SPAWN)
                         .get(h -> MobSpawnerData.getNextEntity((BaseSpawnerAccessor) h.accessor$spawner()))
                         .set((h, v) -> MobSpawnerData.setNextEntity((SpawnerBlockEntity) h, v))
                     .create(Keys.REMAINING_SPAWN_DELAY)
                         .get(h -> new SpongeTicks(((BaseSpawnerAccessor) h.accessor$spawner()).accessor$spawnDelay()))
-                        .set((h, v) -> ((BaseSpawnerAccessor) h.accessor$spawner()).accessor$spawnDelay((int) v.ticks()))
+                        .setAnd((h, v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            ((BaseSpawnerAccessor) h.accessor$spawner()).accessor$spawnDelay(SpongeTicks.toSaturatedIntOrInfinite(v));
+                            return true;
+                        })
                     .create(Keys.REQUIRED_PLAYER_RANGE)
                         .get(h -> (double) ((BaseSpawnerAccessor) h.accessor$spawner()).accessor$requiredPlayerRange())
                         .set((h, v) -> ((BaseSpawnerAccessor) h.accessor$spawner()).accessor$requiredPlayerRange(v.intValue()))
@@ -123,14 +141,14 @@ public final class MobSpawnerData {
             compound.putString(Constants.Entity.ENTITY_TYPE_ID, key.toString());
         }
 
-        ((BaseSpawnerBridge) entity.getSpawner()).bridge$setNextSpawnData(entity.getLevel(), entity.getBlockPos(), new SpawnData(compound, Optional.empty()));
+        ((BaseSpawnerBridge) entity.getSpawner()).bridge$setNextSpawnData(entity.getLevel(), entity.getBlockPos(), new SpawnData(compound, Optional.empty(), Optional.empty()));
     }
 
     private static WeightedTable<EntityArchetype> getEntities(final BaseSpawner logic) {
         final WeightedTable<EntityArchetype> possibleEntities = new WeightedTable<>();
         for (final WeightedEntry.Wrapper<SpawnData> weightedEntity : ((BaseSpawnerAccessor) logic).accessor$spawnPotentials().unwrap()) {
 
-            final CompoundTag nbt = weightedEntity.getData().entityToSpawn();
+            final CompoundTag nbt = weightedEntity.data().entityToSpawn();
 
             final String resourceLocation = nbt.getString(Constants.Entity.ENTITY_TYPE_ID);
             final Registry<net.minecraft.world.entity.EntityType<?>> entityTypeRegistry = SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE);
@@ -162,7 +180,7 @@ public final class MobSpawnerData {
                 compound.putString(Constants.Entity.ENTITY_TYPE_ID, key.toString());
             }
 
-            builder.add(new SpawnData(compound, Optional.empty()), (int) entry.weight());
+            builder.add(new SpawnData(compound, Optional.empty(), Optional.empty()), (int) entry.weight());
         }
         logic.accessor$spawnPotentials(builder.build());
     }

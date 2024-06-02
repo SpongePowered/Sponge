@@ -309,6 +309,24 @@
             "name": "Click Container Event Cancelled Test",
             "entrypoint": "org.spongepowered.test.interact.ClickContainerEventCancelledTest",
             "description": "Testing Cancelling Click Container Primary Event"
+        },
+        {
+            "id": "infiniteticksdatatest",
+            "name": "Infinite Ticks Data Test",
+            "entrypoint": "org.spongepowered.test.data.InfiniteTicksDataTest",
+            "description": "Testing Infinite Ticks Data"
+        },
+        {
+            "id": "connectiontests",
+            "name": "Connection Tests",
+            "entrypoint": "org.spongepowered.test.connection.ConnectionTests",
+            "description": "Connection Tests"
+        },
+        {
+            "id": "resourcepacktests",
+            "name": "Resource Pack Tests",
+            "entrypoint": "org.spongepowered.test.resourcepack.ResourcePackTest",
+            "description": "Resource Pack Tests"
         }
     ]
 }

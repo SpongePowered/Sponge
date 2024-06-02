@@ -72,12 +72,12 @@ public record SpongeNoiseTemplate(ResourceKey key, NormalNoise.NoiseParameters n
     }
 
     public static JsonElement encode(final NoiseTemplate template, final RegistryAccess registryAccess) {
-        return NormalNoise.NoiseParameters.DIRECT_CODEC.encodeStart(JsonOps.INSTANCE, (NormalNoise.NoiseParameters) (Object) template.noise()).getOrThrow(false, e -> {});
+        return NormalNoise.NoiseParameters.DIRECT_CODEC.encodeStart(JsonOps.INSTANCE, (NormalNoise.NoiseParameters) (Object) template.noise()).getOrThrow();
     }
 
     public static NormalNoise.NoiseParameters decode(final JsonElement json, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        return NormalNoise.NoiseParameters.DIRECT_CODEC.parse(ops, json).getOrThrow(false, e -> {});
+        return NormalNoise.NoiseParameters.DIRECT_CODEC.parse(ops, json).getOrThrow();
     }
 
     public static SpongeNoiseTemplate decode(final DataPack<NoiseTemplate> pack, final ResourceKey key, final JsonElement packEntry, final RegistryAccess registryAccess) {

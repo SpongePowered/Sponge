@@ -44,6 +44,7 @@ import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.registry.DefaultedRegistryReference;
+import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -51,8 +52,6 @@ import org.spongepowered.math.imaginary.Quaterniond;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
-
-import java.awt.Color;
 
 @Plugin("displayentitytest")
 public class DisplayEntityTest {
@@ -229,9 +228,9 @@ public class DisplayEntityTest {
                         textDisplay.offer(Keys.DISPLAY_NAME, Component.text("Look at this interpolation").color(NamedTextColor.RED));
                         textDisplay.offer(Keys.LINE_WIDTH, 100);
                         textDisplay.offer(Keys.SEE_THROUGH_BLOCKS, true);
-                        textDisplay.offer(Keys.TEXT_BACKGROUND_COLOR, Color.black); // set initial value before spawning
+                        textDisplay.offer(Keys.TEXT_BACKGROUND_COLOR, Color.BLACK); // set initial value before spawning
                         player.world().spawnEntity(textDisplay);
-                        textDisplay.offer(Keys.TEXT_BACKGROUND_COLOR, Color.white);
+                        textDisplay.offer(Keys.TEXT_BACKGROUND_COLOR, Color.WHITE);
                         // TODO force interpolator start value update?
                         textDisplay.offer(Keys.INTERPOLATION_DURATION, Ticks.of(20));
                         textDisplay.offer(Keys.INTERPOLATION_DELAY, Ticks.of(20));

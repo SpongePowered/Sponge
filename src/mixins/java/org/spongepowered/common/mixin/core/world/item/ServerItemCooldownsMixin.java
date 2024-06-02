@@ -36,7 +36,11 @@ import org.spongepowered.api.util.Ticks;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.SpongeTicks;
 
 import java.util.Optional;
 
@@ -56,13 +60,13 @@ public abstract class ServerItemCooldownsMixin extends ItemCooldownsMixin {
         }
         final Optional<Ticks> beforeCooldown = ((CooldownTracker) this).cooldown(type);
         final CooldownEvent.Set event = SpongeEventFactory.createCooldownEventSet(PhaseTracker.getCauseStackManager().currentCause(),
-                Ticks.of(ticks), Ticks.of(ticks), type, (ServerPlayer) this.player, beforeCooldown);
+                SpongeTicks.ticksOrInfinite(ticks), SpongeTicks.ticksOrInfinite(ticks), type, (ServerPlayer) this.player, beforeCooldown);
 
         if (Sponge.eventManager().post(event)) {
             this.shadow$onCooldownStarted((Item) type, beforeCooldown.map(x -> (int) x.ticks()).orElse(0));
-            return -1;
+            return Constants.Sponge.Entity.Player.ITEM_COOLDOWN_CANCELLED;
         } else {
-            return (int) event.newCooldown().ticks();
+            return SpongeTicks.toSaturatedIntOrInfinite(event.newCooldown());
         }
     }
 
@@ -71,6 +75,14 @@ public abstract class ServerItemCooldownsMixin extends ItemCooldownsMixin {
         final CooldownEvent.End event = SpongeEventFactory.createCooldownEventEnd(PhaseTracker.getCauseStackManager().currentCause(),
                 type, (ServerPlayer) this.player);
         Sponge.eventManager().post(event);
+    }
+
+    @ModifyVariable(method = "onCooldownStarted", at = @At(value = "HEAD"), argsOnly = true)
+    private int impl$modifyPacketOnInfiniteCooldown(int ticks) {
+        if (ticks != Constants.TickConversions.INFINITE_TICKS) {
+            return ticks;
+        }
+        return Integer.MAX_VALUE / 2; //StartTime + Ticks
     }
 
 }

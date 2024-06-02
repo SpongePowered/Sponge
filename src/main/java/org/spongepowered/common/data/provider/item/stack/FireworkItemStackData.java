@@ -37,6 +37,7 @@ public final class FireworkItemStackData {
 
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
+        // TODO  DataComponents.FIREWORKS - flight_duration
         registrator
                 .asMutable(ItemStack.class)
                     .create(Keys.FIREWORK_EFFECTS)

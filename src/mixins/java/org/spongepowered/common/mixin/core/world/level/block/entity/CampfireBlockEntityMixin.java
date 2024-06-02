@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.world.level.block.entity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.Container;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -45,6 +46,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.MixinTargetHelper;
@@ -52,6 +54,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.level.block.entity.CampfireBlockEntityBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -62,15 +65,18 @@ public abstract class CampfireBlockEntityMixin implements CampfireBlockEntityBri
     // @Formatter:off
     @Shadow @Final private NonNullList<ItemStack> items;
     @Shadow @Final private int[] cookingProgress;
+    @Shadow @Final private int[] cookingTime;
     // @Formatter:on
 
     private final RecipeHolder[] impl$cookingRecipe = new RecipeHolder[4];
+    private int impl$currentIndex;
 
     // Tick up
     @Inject(method = "cookTick", locals = LocalCapture.CAPTURE_FAILEXCEPTION,
             at = @At(value = "FIELD", target = "Lnet/minecraft/world/level/block/entity/CampfireBlockEntity;cookingProgress:[I", ordinal = 1))
     private static void impl$canCook(final Level level, final BlockPos pos, final BlockState state, final CampfireBlockEntity self,
         final CallbackInfo ci, final boolean hasChanged, final int i, final ItemStack itemStack) {
+        ((CampfireBlockEntityMixin) (Object) self).impl$currentIndex = i;
         final boolean isEmpty = itemStack.isEmpty();
         if (!isEmpty) {
             final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
@@ -111,5 +117,16 @@ public abstract class CampfireBlockEntityMixin implements CampfireBlockEntityBri
                 return;
             }
         }
+    }
+
+    @Redirect(method = "cookTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;isItemEnabled(Lnet/minecraft/world/flag/FeatureFlagSet;)Z"))
+    private static boolean impl$checkInfiniteCookingTime(final ItemStack instance, final FeatureFlagSet featureFlagSet, final Level level, final BlockPos blockPos,
+                                  final BlockState state, final CampfireBlockEntity self) {
+        final int cookingTime =
+                ((CampfireBlockEntityMixin) (Object) self).cookingTime[((CampfireBlockEntityMixin) (Object) self).impl$currentIndex];
+        if (cookingTime != Constants.TickConversions.INFINITE_TICKS) {
+            return instance.isItemEnabled(featureFlagSet);
+        }
+        return false;
     }
 }

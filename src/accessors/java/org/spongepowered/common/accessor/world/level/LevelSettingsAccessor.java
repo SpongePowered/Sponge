@@ -24,13 +24,21 @@
  */
 package org.spongepowered.common.accessor.world.level;
 
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.LevelSettings;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(LevelSettings.class)
 public interface LevelSettingsAccessor {
 
+    @Accessor("difficulty")
+    @Mutable void accessor$difficulty(final Difficulty difficulty);
 
+    @Accessor("hardcore")
+    @Mutable void accessor$harcore(final boolean hardcore);
 
-
+    @Accessor("allowCommands")
+    @Mutable void accessor$allowCommands(final boolean allowCommands);
 }

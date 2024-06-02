@@ -25,8 +25,7 @@
 package org.spongepowered.common.mixin.core.resources;
 
 import com.mojang.serialization.Decoder;
-import com.mojang.serialization.Lifecycle;
-import net.minecraft.core.Registry;
+import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.ChatType;
@@ -48,16 +47,19 @@ import java.util.Map;
 public class RegistryDataLoaderMixin {
 
     @SuppressWarnings("unchecked")
-    @Inject(method = "loadRegistryContents", at = @At("RETURN"))
-    private static <E> void impl$afterLoadRegistryContents(final RegistryOps.RegistryInfoLookup $$0, final ResourceManager $$1, final ResourceKey<? extends Registry<E>> $$2,
-            final WritableRegistry<E> $$3, final Decoder<E> $$4, final Map<ResourceKey<?>, Exception> $$5, final CallbackInfo ci)
+    @Inject(method = "loadContentsFromManager", at = @At("RETURN"))
+    private static <E> void impl$afterLoadRegistryContents(
+            final ResourceManager $$0,
+            final RegistryOps.RegistryInfoLookup $$1,
+            final WritableRegistry<E> $$2,
+            final Decoder<E> $$3,
+            final Map<ResourceKey<?>, Exception> $$4,
+            final CallbackInfo ci)
     {
-        final ChatTypeDecoration narration = ChatTypeDecoration.withSender("chat.type.text.narrate");
-
-        if (Registries.CHAT_TYPE.equals($$2)) {
-
-            $$3.register(ResourceKey.create($$2, (ResourceLocation) (Object) ChatTypes.CUSTOM_CHAT.location()), (E) new ChatType(ChatTypeDecoration.withSender("%s%s"), narration), Lifecycle.stable());
-            $$3.register(ResourceKey.create($$2, (ResourceLocation) (Object) ChatTypes.CUSTOM_MESSAGE.location()), (E) new ChatType(ChatTypeDecoration.teamMessage("%s%s%s"), narration), Lifecycle.stable());
+        if (Registries.CHAT_TYPE.equals($$2.key())) {
+            final ChatTypeDecoration narration = ChatTypeDecoration.withSender("chat.type.text.narrate");
+            $$2.register(ResourceKey.create($$2.key(), (ResourceLocation) (Object) ChatTypes.CUSTOM_CHAT.location()), (E) new ChatType(ChatTypeDecoration.withSender("%s%s"), narration), RegistrationInfo.BUILT_IN);
+            $$2.register(ResourceKey.create($$2.key(), (ResourceLocation) (Object) ChatTypes.CUSTOM_MESSAGE.location()), (E) new ChatType(ChatTypeDecoration.teamMessage("%s%s%s"), narration), RegistrationInfo.BUILT_IN);
         }
     }
 }

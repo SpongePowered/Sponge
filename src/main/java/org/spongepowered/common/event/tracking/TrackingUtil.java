@@ -32,9 +32,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockEventData;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.RedstoneLampBlock;
-import net.minecraft.world.level.block.RedstoneTorchBlock;
-import net.minecraft.world.level.block.RepeaterBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.material.FluidState;
@@ -373,15 +370,6 @@ public final class TrackingUtil {
         return result;
     }
 
-    static boolean forceModify(final Block originalBlock, final Block newBlock) {
-        if (originalBlock instanceof RepeaterBlock && newBlock instanceof RepeaterBlock) {
-            return true;
-        } else if (originalBlock instanceof RedstoneTorchBlock && newBlock instanceof RedstoneTorchBlock) {
-            return true;
-        } else
-            return originalBlock instanceof RedstoneLampBlock && newBlock instanceof RedstoneLampBlock;
-    }
-
     private TrackingUtil() {
     }
 
@@ -457,7 +445,7 @@ public final class TrackingUtil {
         final SpongeBlockSnapshot.BuilderImpl builder) {
         // TODO - gather custom data.
         try {
-            final CompoundTag compound = existing.saveWithFullMetadata();
+            final CompoundTag compound = existing.saveWithFullMetadata(existing.getLevel().registryAccess());
             builder.addUnsafeCompound(compound);
         }
         catch (final Throwable t) {

@@ -510,7 +510,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Override
     protected final void impl$prepareForPortalTeleport(final ServerLevel currentWorld, final ServerLevel targetWorld) {
         final LevelData levelData = targetWorld.getLevelData();
-        this.connection.send(new ClientboundRespawnPacket(new CommonPlayerSpawnInfo(targetWorld.dimensionTypeId(), targetWorld.dimension(),
+        this.connection.send(new ClientboundRespawnPacket(new CommonPlayerSpawnInfo(targetWorld.dimensionTypeRegistration(), targetWorld.dimension(),
                 BiomeManager.obfuscateSeed(targetWorld.getSeed()), this.gameMode.getGameModeForPlayer(),
                 this.gameMode.getPreviousGameModeForPlayer(), targetWorld.isDebug(), targetWorld.isFlat(), this.shadow$getLastDeathLocation(), this.shadow$getPortalCooldown()),
                 ClientboundRespawnPacket.KEEP_ALL_DATA));
@@ -578,7 +578,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         // Sponge End
 
         for (final MobEffectInstance effectinstance : this.shadow$getActiveEffects()) {
-            this.connection.send(new ClientboundUpdateMobEffectPacket(this.shadow$getId(), effectinstance));
+            this.connection.send(new ClientboundUpdateMobEffectPacket(this.shadow$getId(), effectinstance, false));
         }
 
         if (isNetherPortal) { // Sponge: only play the sound if we've got a vanilla teleporter that reports a nether portal
@@ -911,5 +911,15 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Override
     public boolean bridge$isTransient() {
         return this.impl$transient;
+    }
+
+    /**
+     * @author Zidane
+     * @reason Have PVP check if the world allows it or not
+     * @return True if PVP allowed
+     */
+    @Overwrite
+    private boolean isPvpAllowed() {
+        return ((ServerWorld) this.shadow$serverLevel()).properties().pvp();
     }
 }

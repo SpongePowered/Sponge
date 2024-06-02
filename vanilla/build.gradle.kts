@@ -109,18 +109,6 @@ val vanillaAppLaunch by sourceSets.register("applaunch") {
     }
 }
 
-sourceSets.configureEach {
-    val sourceSet = this
-    val isMain = "main".equals(sourceSet.name)
-
-    val sourcesJarName: String = if (isMain) "sourcesJar" else (sourceSet.name + "SourcesJar")
-    tasks.register(sourcesJarName, Jar::class.java) {
-        group = "build"
-        val classifier = if (isMain) "sources" else (sourceSet.name + "-sources")
-        archiveClassifier.set(classifier)
-        from(sourceSet.allJava)
-    }
-}
 val vanillaAccessorsImplementation by configurations.named(vanillaAccessors.implementationConfigurationName) {
     extendsFrom(vanillaAppLaunchConfig.get())
 }
