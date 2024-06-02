@@ -68,10 +68,10 @@ public final class GrowthData {
                         .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, propertyFunction.apply(h)))
                         .get(h -> h.getValue(propertyFunction.apply(h)))
                         .set((h, v) -> BoundedUtil.setInteger(h, v, propertyFunction.apply(h)))
-                        .supports(cropClass::isInstance)
+                        .supports(h -> cropClass.isInstance(h.getBlock()))
                     .create(Keys.MAX_GROWTH_STAGE)
                         .get(h -> DataUtil.maxi(propertyFunction.apply(h)))
-                        .supports(cropClass::isInstance);
+                        .supports(h -> cropClass.isInstance(h.getBlock()));
     }
     // @formatter:on
 }
