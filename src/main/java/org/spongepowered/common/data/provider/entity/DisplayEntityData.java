@@ -92,14 +92,14 @@ public class DisplayEntityData {
                             return true;
                         })
                     .create(Keys.TELEPORT_DURATION)
-                    .get(h -> Ticks.of(h.invoker$getTeleportDuration()))
-                    .setAnd((h, v) -> {
-                        if (v.isInfinite()) {
-                            return false;
-                        }
-                        h.invoker$setTeleportDuration(SpongeTicks.toSaturatedIntOrInfinite(v));
-                        return true;
-                    })
+                        .get(h -> Ticks.of(h.invoker$getTeleportDuration()))
+                        .setAnd((h, v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            h.invoker$setTeleportDuration(SpongeTicks.toSaturatedIntOrInfinite(v));
+                            return true;
+                        })
                     .create(Keys.SHADOW_RADIUS)
                         .get(h -> (double) h.invoker$getShadowRadius())
                         .set((h ,v) -> h.invoker$setShadowRadius(v.floatValue()))

@@ -232,8 +232,8 @@ public class DisplayEntityTest {
                         blockDisplay.offer(Keys.SHADOW_RADIUS, 2d); // set initial value before spawning
                         blockDisplay.offer(Keys.SHADOW_STRENGTH, 5d); // set initial value before spawning
                         player.world().spawnEntity(blockDisplay);
-                        blockDisplay.offer(Keys.TELEPORT_DURATION,Ticks.of(20));
-                        blockDisplay.offer(Keys.INTERPOLATION_DELAY,Ticks.of(20));
+                        blockDisplay.offer(Keys.TELEPORT_DURATION, Ticks.of(20));
+                        blockDisplay.offer(Keys.INTERPOLATION_DELAY, Ticks.of(20));
                         blockDisplay.setLocation(((ServerLocation) blockDisplay.location().add(0.0, 4.0, 0.0)));
 
 
