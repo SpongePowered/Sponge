@@ -33,6 +33,7 @@ import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.scores.PlayerTeam;
+import net.minecraft.world.scores.ScoreAccess;
 import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
@@ -90,6 +91,11 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
             this.impl$apiCall = false;
             ((ObjectiveBridge) mcObjective).bridge$setSpongeObjective(so);
             so.register(this);
+            for (final Score score : objective.scores().values()) {
+                final SpongeScore spongeScore = (SpongeScore) score;
+                final ScoreAccess accessor = this.getOrCreatePlayerScore(spongeScore.holder, mcObjective);
+                spongeScore.registerAndUpdate(mcObjective, accessor);
+            }
         }
     }
 
