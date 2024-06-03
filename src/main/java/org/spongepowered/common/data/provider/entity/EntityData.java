@@ -31,6 +31,7 @@ import net.minecraft.world.entity.player.Player;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.PushReaction;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
@@ -189,6 +190,8 @@ public final class EntityData {
                             h.ejectPassengers();
                             v.forEach(v1 -> ((Entity) v1).startRiding(h, true));
                         })
+                    .create(Keys.PUSH_REACTION)
+                        .get(h -> (PushReaction) (Object) h.getPistonPushReaction())
                     .create(Keys.REMAINING_AIR)
                         .get(h -> Math.max(0, h.getAirSupply()))
                         .setAnd((h, v) -> {
