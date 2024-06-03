@@ -27,6 +27,7 @@ package org.spongepowered.test.entity;
 import com.google.inject.Inject;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.Command.Parameterized;
@@ -44,6 +45,7 @@ import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.registry.DefaultedRegistryReference;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.util.Transform;
@@ -233,7 +235,6 @@ public class DisplayEntityTest {
                         blockDisplay.offer(Keys.SHADOW_STRENGTH, 5d); // set initial value before spawning
                         player.world().spawnEntity(blockDisplay);
                         blockDisplay.offer(Keys.TELEPORT_DURATION, Ticks.of(20));
-                        blockDisplay.offer(Keys.INTERPOLATION_DELAY, Ticks.of(20));
                         blockDisplay.setLocation(((ServerLocation) blockDisplay.location().add(0.0, 4.0, 0.0)));
 
 

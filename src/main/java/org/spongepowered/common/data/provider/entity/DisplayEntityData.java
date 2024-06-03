@@ -34,6 +34,7 @@ import org.joml.Vector3f;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.display.BillboardType;
+import org.spongepowered.api.entity.display.DisplayEntity;
 import org.spongepowered.api.entity.display.ItemDisplayType;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Ticks;
@@ -61,6 +62,10 @@ public class DisplayEntityData {
                     .create(Keys.TRANSFORM)
                         .get(DisplayEntityData::getTransform)
                         .set(DisplayEntityData::setTransform)
+                .asMutable(DisplayEntity.class)
+                    .create(Keys.TELEPORT_DURATION)
+                    .get(DisplayEntity::bridge$getTeleportDuration)
+                    .setAnd(DisplayEntity::bridge$setTeleportDuration)
                 .asMutable(DisplayAccessor.class)
                     .create(Keys.BILLBOARD_TYPE)
                         .get(h -> (BillboardType) (Object) h.invoker$getBillboardConstraints())
@@ -89,15 +94,6 @@ public class DisplayEntityData {
                                 return false;
                             }
                             h.invoker$setInterpolationDelay(SpongeTicks.toSaturatedIntOrInfinite(v));
-                            return true;
-                        })
-                    .create(Keys.TELEPORT_DURATION)
-                        .get(h -> Ticks.of(h.invoker$getTeleportDuration()))
-                        .setAnd((h, v) -> {
-                            if (v.isInfinite()) {
-                                return false;
-                            }
-                            h.invoker$setTeleportDuration(SpongeTicks.toSaturatedIntOrInfinite(v));
                             return true;
                         })
                     .create(Keys.SHADOW_RADIUS)
@@ -146,6 +142,7 @@ public class DisplayEntityData {
                         .get(h -> DisplayEntityData.colorFromInt(h.invoker$getBackgroundColor()))
                         .set((h, v) -> h.invoker$setBackgroundColor(DisplayEntityData.colorToInt(v)))
         ;
+        registrator.spongeDataStore(Keys.TELEPORT_DURATION.key(), DisplayEntity.class, Keys.TELEPORT_DURATION);
     }
     // @formatter:on
 

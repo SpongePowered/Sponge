@@ -25,11 +25,35 @@
 package org.spongepowered.common.mixin.api.minecraft.world.entity;
 
 import net.minecraft.world.entity.Display;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.display.DisplayEntity;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
+import org.spongepowered.common.util.SpongeTicks;
 
 @Mixin(Display.class)
 public abstract class DisplayMixin_API extends EntityMixin_API implements DisplayEntity {
 
+    // @formatter:off
+    @Shadow protected abstract void setPosRotInterpolationDuration(int $$0);
+    @Shadow protected abstract int getPosRotInterpolationDuration();
+    // @formatter:on
 
+    @Override
+    public Ticks bridge$getTeleportDuration() {
+        return Ticks.of(getPosRotInterpolationDuration());
+    }
+
+    @Override
+    public boolean bridge$setTeleportDuration(final Ticks duration) {
+        if (duration.isInfinite()) {
+            return false;
+        }
+
+        setPosRotInterpolationDuration(SpongeTicks.toSaturatedIntOrInfinite(duration));
+        ((SpongeDataHolderBridge) this).bridge$offer(Keys.TELEPORT_DURATION, duration);
+        return true;
+    }
 }
