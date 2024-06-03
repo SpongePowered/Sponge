@@ -298,13 +298,13 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
 
     @Override
     public void sendBlockProgress(final int x, final int y, final int z, final float progress) {
-        if (progress < 0 || progress >= 1) {
+        if (progress < 0 || progress > 1) {
             throw new IllegalArgumentException("Progress must be between 0 and 1");
         }
 
         final BlockPos pos = new BlockPos(x, y, z);
         final int id = ((SpongeServer) this.server).getOrCreateBlockDestructionId(pos);
-        final int progressStage = (int) (progress * 10);
+        final int progressStage = progress == 1 ? 9 : (int) (progress * 10);
         this.connection.send(new ClientboundBlockDestructionPacket(id, pos, progressStage));
     }
 

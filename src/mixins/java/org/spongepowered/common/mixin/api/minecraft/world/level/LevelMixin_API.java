@@ -294,13 +294,13 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
 
     @Override
     public void sendBlockProgress(final int x, final int y, final int z, final float progress) {
-        if (progress < 0 || progress >= 1) {
+        if (progress < 0 || progress > 1) {
             throw new IllegalArgumentException("Progress must be between 0 and 1");
         }
 
         final BlockPos pos = new BlockPos(x, y, z);
         final int id = ((SpongeServer) this.shadow$getServer()).getOrCreateBlockDestructionId(pos);
-        final int progressStage = (int) (progress * 10);
+        final int progressStage = progress == 1 ? 9 : (int) (progress * 10);
         this.api$broadcast(new ClientboundBlockDestructionPacket(id, pos, progressStage));
     }
 
