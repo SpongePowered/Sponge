@@ -293,7 +293,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
     }
 
     @Override
-    public void sendBlockProgress(final int x, final int y, final int z, final float progress) {
+    public void sendBlockProgress(final int x, final int y, final int z, final double progress) {
         if (progress < 0 || progress > 1) {
             throw new IllegalArgumentException("Progress must be between 0 and 1");
         }
