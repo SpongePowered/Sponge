@@ -303,7 +303,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         }
 
         final BlockPos pos = new BlockPos(x, y, z);
-        final int id = ((SpongeServer) SpongeCommon.server()).getOrCreateBlockDestructionId(pos);
+        final int id = ((SpongeServer) this.server).getOrCreateBlockDestructionId(pos);
         final int progressStage = (int) (progress * 10);
         this.connection.send(new ClientboundBlockDestructionPacket(id, pos, progressStage));
     }
@@ -311,7 +311,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     @Override
     public void resetBlockProgress(final int x, final int y, final int z) {
         final BlockPos pos = new BlockPos(x, y, z);
-        final Integer id = ((SpongeServer) SpongeCommon.server()).getBlockDestructionId(pos);
+        final Integer id = ((SpongeServer) this.server).getBlockDestructionId(pos);
         if (id != null) {
             this.connection.send(new ClientboundBlockDestructionPacket(id, pos, -1));
         }
