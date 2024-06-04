@@ -29,6 +29,8 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.Property;
 import org.spongepowered.api.data.BlockStateKeys;
 import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.PushReaction;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.state.StateProperty;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -149,6 +151,9 @@ public final class BlockStateDataProvider {
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.WEST, BlockStateProperties.WEST);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.WEST_REDSTONE, BlockStateProperties.WEST_REDSTONE);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.WEST_WALL, BlockStateProperties.WEST_WALL);
+        registrator.asImmutable(BlockState.class)
+            .create(Keys.PUSH_REACTION)
+                .get(h -> (PushReaction) (Object) h.getPistonPushReaction());
     }
 
     // @formatter:off
