@@ -69,7 +69,12 @@ public abstract class BlockEntityMixin_API implements BlockEntity {
     //@formatter:on
 
     @Shadow @Final protected BlockPos worldPosition;
+    @Shadow private net.minecraft.world.level.block.state.BlockState blockState;
+
     @Nullable private LocatableBlock api$LocatableBlock;
+    private boolean api$canTickRequested = false;
+    private boolean api$canTick;
+    private boolean api$isTicking = true;
 
     public ServerLocation location() {
         return ServerLocation.of((ServerWorld) this.level, VecHelper.toVector3i(this.shadow$getBlockPos()));
@@ -132,13 +137,39 @@ public abstract class BlockEntityMixin_API implements BlockEntity {
     }
 
     @Override
-    public boolean isValid() {
-        return !this.remove;
+    public boolean isRemoved() {
+        return this.remove;
     }
 
     @Override
-    public void setValid(final boolean valid) {
-        this.remove = valid;
+    public void remove() {
+        if (!this.remove) {
+            this.world().removeBlockEntity(this.blockPosition());
+        }
+    }
+
+    @Override
+    public boolean canTick() {
+        if (!this.api$canTickRequested) {
+            this.api$canTick = this.blockState.getTicker(this.level, this.type) != null;
+            this.api$canTickRequested = true;
+        }
+
+        return api$canTick;
+    }
+
+    @Override
+    public boolean isTicking() {
+        return this.canTick() && this.api$isTicking;
+    }
+
+    @Override
+    public void setTicking(boolean ticking) {
+        if (!this.canTick()) {
+            throw new IllegalStateException("BlockEntity cannot tick");
+        }
+
+        this.api$isTicking = ticking;
     }
 
     @Override
