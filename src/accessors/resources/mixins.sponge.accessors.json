@@ -140,6 +140,7 @@
     "world.item.AdventureModePredicateAccessor",
     "world.item.ItemCooldowns_CooldownInstanceAccessor",
     "world.item.RecordItemAccessor",
+    "world.item.component.CustomDataAccessor",
     "world.item.enchantment.ItemEnchantmentsAccessor",
     "world.item.trading.MerchantOfferAccessor",
     "world.level.BaseCommandBlockAccessor",

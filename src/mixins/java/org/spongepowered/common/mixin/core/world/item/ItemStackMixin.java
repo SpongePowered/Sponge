@@ -43,6 +43,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.accessor.world.item.component.CustomDataAccessor;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.DataHolderProcessor;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
@@ -98,7 +99,7 @@ public abstract class ItemStackMixin implements SpongeDataHolderBridge, DataComp
 
     @Override
     public void data$setCompound(final CompoundTag nbt) {
-        this.components.set(DataComponents.CUSTOM_DATA, nbt == null ? CustomData.EMPTY : CustomData.of(nbt));
+        this.components.set(DataComponents.CUSTOM_DATA, nbt == null ? CustomData.EMPTY : CustomDataAccessor.invoker$new(nbt));
     }
 
     // Add our manipulators when creating copies from this ItemStack:
