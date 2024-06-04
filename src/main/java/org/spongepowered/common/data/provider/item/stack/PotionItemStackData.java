@@ -59,7 +59,7 @@ public final class PotionItemStackData {
                         .set((h, v) -> h.update(DataComponents.POTION_CONTENTS, PotionContents.EMPTY, contents -> new PotionContents(contents.potion(), Optional.of(v.rgb()), contents.customEffects())))
                         .delete(h -> h.update(DataComponents.POTION_CONTENTS, PotionContents.EMPTY, contents -> new PotionContents(contents.potion(), Optional.empty(), contents.customEffects())))
                         .supports(h -> h.getItem() == Items.POTION || h.getItem() == Items.SPLASH_POTION || h.getItem() == Items.LINGERING_POTION || h.getItem() == Items.TIPPED_ARROW)
-                    .create(Keys.POTION_EFFECTS)
+                    .create(Keys.CUSTOM_POTION_EFFECTS)
                         .get(h -> {
                             final List<MobEffectInstance> effects = h.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).customEffects();
                             return effects.isEmpty() ? null : ImmutableList.copyOf((List<PotionEffect>) (Object) effects);
@@ -78,7 +78,14 @@ public final class PotionItemStackData {
                         })
                         .delete(h -> h.update(DataComponents.POTION_CONTENTS, PotionContents.EMPTY, contents -> new PotionContents(Optional.empty(), contents.customColor(), contents.customEffects())))
                         .supports(h -> h.getItem() == Items.POTION || h.getItem() == Items.SPLASH_POTION ||
-                                h.getItem() == Items.LINGERING_POTION || h.getItem() == Items.TIPPED_ARROW);
+                                h.getItem() == Items.LINGERING_POTION || h.getItem() == Items.TIPPED_ARROW)
+                    .create(Keys.POTION_EFFECTS)
+                        .get(h -> {
+                            final Iterable<MobEffectInstance> effects = h.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).getAllEffects();
+                            return ImmutableList.copyOf((List<PotionEffect>) (Object) effects);
+                        })
+                        .supports(h -> h.getItem() == Items.POTION || h.getItem() == Items.SPLASH_POTION || h.getItem() == Items.LINGERING_POTION || h.getItem() == Items.TIPPED_ARROW)
+        ;
     }
     // @formatter:on
 }
