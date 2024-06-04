@@ -66,6 +66,8 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.trialspawner.TrialSpawnerState;
+import net.minecraft.world.level.block.entity.vault.VaultState;
 import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.level.block.state.properties.BambooLeaves;
 import net.minecraft.world.level.block.state.properties.BellAttachType;
@@ -239,6 +241,8 @@ public final class VanillaRegistryLoader {
         this.automaticName(RegistryTypes.LIGHT_TYPE, LightLayer.values());
         this.naming(RegistryTypes.DISPLAY_SLOT, DisplaySlot.values(), d -> d.getSerializedName().replace(".", "_"));
         this.automaticName(RegistryTypes.PUSH_REACTION, PushReaction.values());
+        this.automaticSerializedName(RegistryTypes.TRIAL_SPAWNER_STATE, TrialSpawnerState.values());
+        this.automaticSerializedName(RegistryTypes.VAULT_STATE, VaultState.values());
     }
 
     private static RegistryLoader<Criterion> criterion() {

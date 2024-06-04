@@ -385,6 +385,8 @@
     "minecraft.world.level.block.entity.TheEndGatewayBlockEntityMixin_API",
     "minecraft.world.level.block.entity.TheEndPortalBlockEntityMixin_API",
     "minecraft.world.level.block.entity.TrappedCheckBlockEntityMixin_API",
+    "minecraft.world.level.block.entity.trialspawner.TrialSpawnerStateMixin_API",
+    "minecraft.world.level.block.entity.vault.VaultStateMixin_API",
     "minecraft.world.level.block.piston.PistonMovingBlockEntityMixin_API",
     "minecraft.world.level.block.state.BlockBehaviour_BlockStateBaseMixin_API",
     "minecraft.world.level.block.state.BlockStateMixin_API",
