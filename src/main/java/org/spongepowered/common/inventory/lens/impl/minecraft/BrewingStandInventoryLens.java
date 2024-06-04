@@ -26,16 +26,15 @@ package org.spongepowered.common.inventory.lens.impl.minecraft;
 
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
-import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
 import org.spongepowered.common.inventory.lens.impl.RealLens;
 import org.spongepowered.common.inventory.lens.impl.slot.FilteringSlotLens.ItemStackFilter;
 import org.spongepowered.common.inventory.lens.impl.slot.FuelSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.InputSlotLens;
+import org.spongepowered.common.inventory.lens.impl.slot.PotionSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
 public class BrewingStandInventoryLens extends RealLens {
 
-    private DefaultIndexedLens potions;
     private InputSlotLens ingredient;
     private InputSlotLens fuel;
 
@@ -50,12 +49,13 @@ public class BrewingStandInventoryLens extends RealLens {
     }
 
     protected void init(final SlotLensProvider slots) {
+        for (int i = 0; i <= 2; i++) {
+            this.addSpanningChild(new PotionSlotLens(slots.getSlotLens(i), ItemStackFilter.filterIInventory(i)));
+        }
 
-        this.potions = new DefaultIndexedLens(0, 3, slots); // TODO filter
         this.ingredient = new InputSlotLens(slots.getSlotLens(3), ItemStackFilter.filterIInventory(3));
         this.fuel = new FuelSlotLens(slots.getSlotLens(4), ItemStackFilter.filterIInventory(4));
 
-        this.addSpanningChild(this.potions);
         this.addSpanningChild(this.ingredient);
         this.addSpanningChild(this.fuel);
     }
