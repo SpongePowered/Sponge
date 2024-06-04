@@ -79,6 +79,7 @@
     "minecraft.stats.StatTypeMixin_API",
     "minecraft.tags.TagKeyMixin_API",
     "minecraft.util.RandomSourceMixin_API",
+    "minecraft.util.StringRepresentableMixin_API",
     "minecraft.world.DifficultyMixin_API",
     "minecraft.world.InteractionHandMixin_API",
     "minecraft.world.IWorldGenerationBaseReaderMixin_API",
