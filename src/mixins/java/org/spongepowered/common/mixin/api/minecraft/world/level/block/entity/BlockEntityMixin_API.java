@@ -132,13 +132,15 @@ public abstract class BlockEntityMixin_API implements BlockEntity {
     }
 
     @Override
-    public boolean isValid() {
-        return !this.remove;
+    public boolean isRemoved() {
+        return this.remove;
     }
 
     @Override
-    public void setValid(final boolean valid) {
-        this.remove = valid;
+    public void remove() {
+        if (!this.remove) {
+            this.world().removeBlockEntity(this.blockPosition());
+        }
     }
 
     @Override
