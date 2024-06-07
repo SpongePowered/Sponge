@@ -24,10 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.item;
 
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.level.Explosion.BlockInteraction;
+import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
@@ -108,12 +110,17 @@ public abstract class PrimedTntMixin extends EntityMixin implements PrimedTntBri
         method = "explode",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/level/Level;explode(Lnet/minecraft/world/entity/Entity;DDDFLnet/minecraft/world/level/Level$ExplosionInteraction;)Lnet/minecraft/world/level/Explosion;"
+            target = "Lnet/minecraft/world/level/Level;explode(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;Lnet/minecraft/world/level/ExplosionDamageCalculator;DDDFZLnet/minecraft/world/level/Level$ExplosionInteraction;)Lnet/minecraft/world/level/Explosion;"
         )
     )
     private net.minecraft.world.level.@Nullable Explosion impl$useSpongeExplosion(final Level world,
-        final Entity entityIn, final double xIn, final double yIn, final double zIn, final float explosionRadius,
-        final Level.ExplosionInteraction modeIn) {
+            final Entity entityIn,
+            final DamageSource damageSource,
+            final ExplosionDamageCalculator explosionDamageCalculator,
+            final double xIn, final double yIn, final double zIn, final
+            float explosionRadius,
+            final boolean falseValue,
+            final Level.ExplosionInteraction modeIn) {
         return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
             .location(ServerLocation.of((ServerWorld) world, xIn, yIn, zIn))
             .sourceExplosive((PrimedTNT) this)
