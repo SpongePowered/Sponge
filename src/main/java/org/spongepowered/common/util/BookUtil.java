@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.util;
 
-import com.google.common.collect.Lists;
 import net.kyori.adventure.inventory.Book;
-import net.kyori.adventure.translation.GlobalTranslator;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenBookPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -40,44 +38,35 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.Collection;
-import java.util.Locale;
-import java.util.Objects;
 
 public final class BookUtil {
 
-    public static final int WINDOW_PLAYER_INVENTORY = 0;
-    private static final Locale STARTER_LOCALE = new Locale("placeholder", "LANG");
+    public static final int PLAYER_INVENTORY = -2;
 
     public static void fakeBookView(final Book book, final Collection<? extends Player> players) {
-
-        // First we need to send a fake a Book ItemStack with the BookView's
-        // contents to the player's hand
-        // These values are localized since sending item NBT doesn't trigger translation
-        final ItemStack item = ItemStack.of(ItemTypes.WRITTEN_BOOK, 1);
-        Locale lastLocale = BookUtil.STARTER_LOCALE;
+        final ItemStack item = ItemStack.of(ItemTypes.WRITTEN_BOOK);
+        item.offer(Keys.CUSTOM_NAME, book.title());
+        item.offer(Keys.AUTHOR, book.author());
+        item.offer(Keys.PAGES, book.pages());
 
         for (final Player player : players) {
-            if (!Objects.equals(player.locale(), lastLocale)) {
-                lastLocale = player.locale();
-                item.offer(Keys.CUSTOM_NAME, GlobalTranslator.render(book.title(), lastLocale));
-                item.offer(Keys.AUTHOR, GlobalTranslator.render(book.author(), lastLocale));
-                final Locale finalLastLocale = lastLocale;
-                item.offer(Keys.PAGES, Lists.transform(book.pages(), page -> GlobalTranslator.render(page, finalLastLocale)));
-            }
-
             final ServerPlayer mcPlayer = (ServerPlayer) player;
             final ServerGamePacketListenerImpl receiver = mcPlayer.connection;
 
             final Inventory inventory = mcPlayer.getInventory();
-            final int bookSlot = inventory.items.size() + inventory.selected;
-            receiver.send(new ClientboundContainerSetSlotPacket(BookUtil.WINDOW_PLAYER_INVENTORY, mcPlayer.containerMenu.getStateId(), bookSlot, ItemStackUtil.toNative(item)));
+            final int bookSlot = inventory.selected;
+            final net.minecraft.world.item.ItemStack oldItem = inventory.getSelected();
+
+            // First we need to send a fake a Book ItemStack with the BookView's
+            // contents to the player's hand
+            receiver.send(new ClientboundContainerSetSlotPacket(BookUtil.PLAYER_INVENTORY, 0, bookSlot, ItemStackUtil.toNative(item)));
 
             // Next we tell the client to open the Book GUI
             receiver.send(new ClientboundOpenBookPacket(InteractionHand.MAIN_HAND));
 
             // Now we can remove the fake Book since it's contents will have already
             // been transferred to the GUI
-            receiver.send(new ClientboundContainerSetSlotPacket(BookUtil.WINDOW_PLAYER_INVENTORY, mcPlayer.containerMenu.getStateId(), bookSlot, inventory.getSelected()));
+            receiver.send(new ClientboundContainerSetSlotPacket(BookUtil.PLAYER_INVENTORY, 0, bookSlot, oldItem));
         }
     }
 
