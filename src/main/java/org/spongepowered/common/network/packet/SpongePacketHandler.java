@@ -27,6 +27,7 @@ package org.spongepowered.common.network.packet;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.DimensionSpecialEffects;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.Entity;
@@ -37,8 +38,8 @@ import org.spongepowered.api.network.ClientConnectionState;
 import org.spongepowered.api.network.EngineConnectionStates;
 import org.spongepowered.api.network.channel.packet.PacketChannel;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.client.multiplayer.ClientLevelAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
 
@@ -99,7 +100,7 @@ public final class SpongePacketHandler {
                     }
 
                     final DimensionType dimensionType = SpongeCommon.vanillaRegistry(Registries.DIMENSION_TYPE).get(packet.dimensionLogic);
-                    ((LevelBridge) world).bridge$adjustDimensionLogic(dimensionType);
+                    ((ClientLevelAccessor) world).accessor$effects(DimensionSpecialEffects.forType(dimensionType));
                 }
         );
     }
