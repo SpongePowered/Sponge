@@ -25,13 +25,17 @@
 package org.spongepowered.common.accessor.client.multiplayer;
 
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.DimensionSpecialEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.entity.TransientEntitySectionManager;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(ClientLevel.class)
 public interface ClientLevelAccessor {
 
     @Accessor("entityStorage") TransientEntitySectionManager<Entity> accessor$getEntityStorage();
+
+    @Mutable @Accessor("effects") void accessor$effects(DimensionSpecialEffects effects);
 }
