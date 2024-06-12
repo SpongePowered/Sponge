@@ -27,6 +27,7 @@ package org.spongepowered.common.data.persistence.datastore;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.leangen.geantyref.TypeToken;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataHolder;
@@ -65,6 +66,20 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
     @Override
     public <T, V extends Value<T>> SpongeDataStoreBuilder key(final Key<V> key, final DataQuery dataQuery) {
         final BiFunction<DataView, DataQuery, Optional<T>> deserializer = DataDeserializer.deserializer(key.elementType());
+
+
+        var elementType = key.elementType();
+
+        if (elementType instanceof Class elementClass) {
+            for (final var regKey : BuiltInRegistries.REGISTRY.registryKeySet()) {
+                var regElementClass = BuiltInRegistries.REGISTRY.get(regKey.location()).iterator().next().getClass();
+                if (elementClass.isAssignableFrom(regElementClass)) {
+                    System.out.printf("Found matching Registry %s for key %s of type %s%n", regKey.location(), key.key(), elementClass.getSimpleName());
+                }
+            }
+        }
+
+
         return this.key(key, (view, value) -> view.set(dataQuery, value), v -> deserializer.apply(v, dataQuery));
     }
 
