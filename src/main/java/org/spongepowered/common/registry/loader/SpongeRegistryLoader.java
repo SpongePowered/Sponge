@@ -50,7 +50,6 @@ import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.data.type.SkinParts;
 import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.api.effect.particle.ParticleOptions;
-import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.effect.sound.music.MusicDiscs;
 import org.spongepowered.api.entity.ai.goal.GoalExecutorType;
@@ -95,12 +94,12 @@ import org.spongepowered.api.service.economy.account.AccountDeletionResultTypes;
 import org.spongepowered.api.service.economy.transaction.TransactionType;
 import org.spongepowered.api.service.economy.transaction.TransactionTypes;
 import org.spongepowered.api.util.Color;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.util.orientation.Orientation;
 import org.spongepowered.api.util.orientation.Orientations;
 import org.spongepowered.api.world.ChunkRegenerateFlag;
 import org.spongepowered.api.world.ChunkRegenerateFlags;
+import org.spongepowered.api.world.PositionSource;
 import org.spongepowered.api.world.generation.config.flat.FlatGeneratorConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfigs;
@@ -398,13 +397,17 @@ public final class SpongeRegistryLoader {
             l.add(ParticleOptions.BLOCK_STATE, k -> new SpongeParticleOption<>(BlockState.class));
             l.add(ParticleOptions.COLOR, k -> new SpongeParticleOption<>(Color.class));
             l.add(ParticleOptions.DELAY, k -> new SpongeParticleOption<>(Double.class));
-            l.add(ParticleOptions.DIRECTION, k -> new SpongeParticleOption<>(Direction.class));
-            l.add(ParticleOptions.ITEM_STACK_SNAPSHOT, k -> new SpongeParticleOption<>(ItemStackSnapshot.class));
+            l.add(ParticleOptions.DESTINATION, k -> new SpongeParticleOption<>(PositionSource.class));
+            l.add(ParticleOptions.ITEM_STACK_SNAPSHOT, k -> new SpongeParticleOption<>(ItemStackSnapshot.class,
+                    v -> v.isEmpty() ? new IllegalArgumentException("ItemStackSnapshot must not be empty") : null));
             l.add(ParticleOptions.OFFSET, k -> new SpongeParticleOption<>(Vector3d.class));
-            l.add(ParticleOptions.POTION_EFFECT_TYPE, k -> new SpongeParticleOption<>(PotionEffectType.class));
-            l.add(ParticleOptions.QUANTITY, k -> new SpongeParticleOption<>(Integer.class, v -> v < 1 ? new IllegalArgumentException("Quantity must be at least one") : null));
+            l.add(ParticleOptions.OPACITY, k -> new SpongeParticleOption<>(Double.class,
+                    v -> v < 0 || v > 1 ? new IllegalArgumentException("Opacity must be between 0 and 1") : null));
+            l.add(ParticleOptions.QUANTITY, k -> new SpongeParticleOption<>(Integer.class,
+                    v -> v < 1 ? new IllegalArgumentException("Quantity must be at least one") : null));
             l.add(ParticleOptions.ROLL, k -> new SpongeParticleOption<>(Double.class));
-            l.add(ParticleOptions.SCALE, k -> new SpongeParticleOption<>(Double.class, v -> v < 0 ? new IllegalArgumentException("Scale must not be negative") : null));
+            l.add(ParticleOptions.SCALE, k -> new SpongeParticleOption<>(Double.class,
+                    v -> v < 0 ? new IllegalArgumentException("Scale must not be negative") : null));
             l.add(ParticleOptions.TO_COLOR, k -> new SpongeParticleOption<>(Color.class));
             l.add(ParticleOptions.TRAVEL_TIME, k -> new SpongeParticleOption<>(Ticks.class));
             l.add(ParticleOptions.VELOCITY, k -> new SpongeParticleOption<>(Vector3d.class));
