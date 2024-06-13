@@ -25,7 +25,6 @@
 package org.spongepowered.vanilla.installer;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.mlpatcher.AsmFixerAgent;
 import org.tinylog.Logger;
 
 import java.io.File;
@@ -57,12 +56,10 @@ public class Agent {
 
     public static void premain(final String agentArgs, final Instrumentation instrumentation) {
         Agent.instrumentation = instrumentation;
-        AsmFixerAgent.premain("", instrumentation);
     }
 
     public static void agentmain(final String agentArgs, final Instrumentation instrumentation) {
         Agent.instrumentation = instrumentation;
-        AsmFixerAgent.agentmain("", instrumentation);
     }
 
     static void addJarToClasspath(final Path jar) {

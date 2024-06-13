@@ -7,7 +7,6 @@ eclipse {
     synchronizationTasks(tasks.jar)
 }
 
-
 val organization: String by project
 val projectUrl: String by project
 
@@ -31,14 +30,10 @@ dependencies {
     compileOnly(libs.modlauncher) {
         exclude(group = "org.ow2.asm")
         exclude(group = "org.apache.logging.log4j")
-        exclude(group = "net.sf.jopt-simple") // uses a newer version than MC
     }
 
     compileOnly(libs.joptSimple)
     compileOnly(libs.asm.commons)
-    compileOnly(libs.grossJava9Hacks) {
-        exclude(group="org.apache.logging.log4j")
-    }
     // Configurate dependencies, also to be provided by the platform
     //  making use of this project
     compileOnly(platform(apiLibs.configurate.bom))

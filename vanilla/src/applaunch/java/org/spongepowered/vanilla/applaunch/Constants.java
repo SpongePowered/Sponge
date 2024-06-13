@@ -22,22 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.installer;
-
-import org.objectweb.asm.Opcodes;
+package org.spongepowered.vanilla.applaunch;
 
 public final class Constants {
 
-    public static final class Libraries {
-
-        public static final String MINECRAFT_VERSION_TARGET = "{{ minecraftVersion }}";
-        public static final String MINECRAFT_MANIFEST_URL = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
-        public static final String MINECRAFT_PATH_PREFIX = "net/minecraft";
-        public static final String MINECRAFT_SERVER_JAR_NAME = "minecraft_server";
-        public static final String MINECRAFT_MAPPINGS_PREFIX = Libraries.MINECRAFT_PATH_PREFIX + "/mappings";
-        public static final String MINECRAFT_MAPPINGS_NAME = "server.txt";
-
-        public static final String SPONGE_NEXUS_DOWNLOAD_URL = "https://repo.spongepowered.org/service/rest/v1/search/assets?md5=%s&maven"
-            + ".groupId=%s&maven.artifactId=%s&maven.baseVersion=%s&maven.extension=jar";
+    public static final class ManifestAttributes {
+        public static final String ACCESS_WIDENER = "Access-Widener";
+        public static final String LAUNCH_TARGET = "Launch-Target";
+        public static final String SUPERCLASS_CHANGE = "Superclass-Transformer";
     }
 }

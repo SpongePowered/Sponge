@@ -19,14 +19,14 @@ plugins {
 
 val commonProject = parent!!
 val transformersProject = parent!!.project(":modlauncher-transformers")
+val testPluginsProject: Project? = rootProject.subprojects.find { "testplugins" == it.name }
+
 val apiVersion: String by project
 val minecraftVersion: String by project
 val forgeVersion: String by project
 val recommendedVersion: String by project
 val organization: String by project
 val projectUrl: String by project
-
-val testPluginsProject: Project? = rootProject.subprojects.find { "testplugins" == it.name }
 
 description = "The SpongeAPI implementation for MinecraftForge"
 version = spongeImpl.generatePlatformBuildVersionString(apiVersion, minecraftVersion, recommendedVersion, forgeVersion)
@@ -70,7 +70,7 @@ val gameLayerConfig: NamedDomainObjectProvider<Configuration> = configurations.r
     }
 }
 
-// Common source sets and configurations
+// SpongeCommon source sets
 val launchConfig: NamedDomainObjectProvider<Configuration> = commonProject.configurations.named("launch")
 val accessors: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("accessors")
 val launch: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("launch")
@@ -78,7 +78,7 @@ val applaunch: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.n
 val mixins: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("mixins")
 val main: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("main")
 
-// Forge source sets
+// SpongeForge source sets
 val forgeMain by sourceSets.named("main") {
     // implementation (compile) dependencies
     spongeImpl.applyNamedDependencyOnOutput(commonProject, accessors.get(), this, project, this.implementationConfigurationName)
@@ -102,6 +102,7 @@ val forgeLaunch by sourceSets.register("launch") {
 }
 val forgeAccessors by sourceSets.register("accessors") {
     spongeImpl.applyNamedDependencyOnOutput(commonProject, mixins.get(), this, project, this.implementationConfigurationName)
+    spongeImpl.applyNamedDependencyOnOutput(commonProject, accessors.get(), this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, this, forgeLaunch, project, forgeLaunch.implementationConfigurationName)
 
     configurations.named(implementationConfigurationName) {
@@ -326,7 +327,7 @@ tasks {
                         .toList()
             }
 
-            // jvmArguments.add("-Dbsl.debug=true") // Uncomment to debug bootstrap classpath
+            jvmArguments.add("-Dbsl.debug=true") // Uncomment to debug bootstrap classpath
 
             sourceSets.forEach {
                 dependsOn(it.classesTaskName)
@@ -491,45 +492,20 @@ publishing {
     }
 }
 
-tasks.register("printConfigsHierarchy") {
+tasks.register("printRunTasks") {
     group = "debug"
     doLast {
-        configurations.forEach { conf: Configuration  ->
-            val seen = mutableSetOf<Configuration>()
-            println("Parents of ${conf.name}:")
-            printParents(conf, "", seen)
-        }
-    }
-}
-
-fun printParents(conf: Configuration, indent: String, seen: MutableSet<Configuration>) {
-    for (parent in conf.extendsFrom) {
-        if (parent in seen) {
-            continue
-        }
-        seen.add(parent)
-        println("$indent - ${parent.name}")
-        printParents(parent, indent + "  ", seen)
-    }
-}
-
-tasks.register("printConfigsResolution") {
-    group = "debug"
-    doLast {
-        configurations.forEach { conf: Configuration  ->
+        tasks.withType(net.fabricmc.loom.task.AbstractRunTask::class) {
             println()
-            println("Artifacts of ${conf.name}:")
-            if (conf.isCanBeResolved) {
-                try {
-                    conf.forEach {
-                        println(it)
-                    }
-                } catch (e: Exception) {
-                    println("error")
-                }
-            } else {
-                println("not resolved")
-            }
+            println("Task ${this.name}:")
+            println("mainClass: " + this.mainClass.orNull)
+            println("mainModule: " + this.mainModule.orNull)
+            println("allJvmArgs: " + this.allJvmArgs)
+            println("jvmArgs: " + this.jvmArgs)
+            println("args: " + this.args)
+            println("commandLine: " + this.commandLine)
+            println("environment: " + this.environment)
+            println("classpath: " + this.classpath.files)
         }
     }
 }

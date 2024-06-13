@@ -24,7 +24,6 @@
  */
 package org.spongepowered.vanilla.applaunch.handler.dev;
 
-import cpw.mods.modlauncher.api.ITransformingClassLoader;
 import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.vanilla.applaunch.AppLaunchTargets;
 import org.spongepowered.vanilla.applaunch.handler.AbstractVanillaLaunchHandler;
@@ -33,18 +32,13 @@ import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 public final class ServerDevLaunchHandler extends AbstractVanillaLaunchHandler {
 
     @Override
-    protected boolean isDev() {
-        return true;
-    }
-
-    @Override
     public String name() {
         return AppLaunchTargets.SERVER_DEVELOPMENT.getLaunchTarget();
     }
 
     @Override
-    protected void launchService0(final String[] arguments, final ITransformingClassLoader launchClassLoader) throws Exception {
-        Class.forName("org.spongepowered.vanilla.launch.DedicatedServerLaunch", true, launchClassLoader.getInstance())
+    protected void launchService0(final String[] arguments, final ModuleLayer gameLayer) throws Exception {
+        Class.forName(gameLayer.findModule("sponge").orElseThrow(), "org.spongepowered.vanilla.launch.DedicatedServerLaunch")
                 .getMethod("launch", VanillaPluginPlatform.class, Boolean.class, String[].class)
                 .invoke(null, AppLaunch.pluginPlatform(), Boolean.TRUE, arguments);
     }

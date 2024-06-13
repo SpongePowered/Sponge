@@ -30,7 +30,6 @@ import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.filter.CompositeFilter;
 import org.apache.logging.log4j.core.filter.DenyAllFilter;
 import org.apache.logging.log4j.core.filter.RegexFilter;
-import org.intellij.lang.annotations.Language;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 
 import java.util.Queue;
@@ -45,7 +44,7 @@ public final class MixinLoggerInjector {
     private MixinLoggerInjector() {
     }
 
-    private static RegexFilter pattern(@Language("RegExp") final String pattern) {
+    private static RegexFilter pattern(final String pattern) {
         try {
             return RegexFilter.createFilter(pattern, new String[0], false, Filter.Result.ACCEPT, Filter.Result.NEUTRAL);
         } catch (final IllegalAccessException ex) {
