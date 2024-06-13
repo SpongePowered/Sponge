@@ -36,6 +36,7 @@ import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.recipes.RecipeCategory;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -152,7 +153,8 @@ public abstract class SpongeRecipeRegistration<R extends Recipe<? extends Recipe
             if (template instanceof SpongeRecipeRegistration<?> srr) {
                 srr.ensureCached();
             }
-            final DataResult<JsonElement> encoded = Recipe.CODEC.encodeStart(JsonOps.INSTANCE, (Recipe<?>) template.recipe());
+            final var ops = RegistryOps.create(JsonOps.INSTANCE, access);
+            final DataResult<JsonElement> encoded = Recipe.CODEC.encodeStart(ops, (Recipe<?>) template.recipe());
             if (encoded.result().isPresent()) {
                 return encoded.result().get().getAsJsonObject();
             }

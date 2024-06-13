@@ -190,7 +190,8 @@ public class SpongeIngredient extends Ingredient {
         @Override
         public boolean test(final ItemStack itemStack) {
             if (this.predicate == null) {
-                throw new IllegalStateException(key + " predicate was not registered. Is the plugin loaded?");
+                SpongeCommon.logger().error(key + " ingredient predicate was not registered. Is the plugin loaded?");
+                return false;
             }
             return this.predicate.test(itemStack);
         }
