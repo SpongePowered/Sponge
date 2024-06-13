@@ -236,7 +236,7 @@ dependencies {
 
     val runTaskOnly = runTaskOnlyConfig.name
     // Arch-loom bug, fix support of MOD_CLASSES
-    runTaskOnly("net.minecraftforge:bootstrap-dev:2.1.1")
+    runTaskOnly("net.minecraftforge:bootstrap-dev:2.1.3")
 }
 
 val forgeManifest = java.manifest {
