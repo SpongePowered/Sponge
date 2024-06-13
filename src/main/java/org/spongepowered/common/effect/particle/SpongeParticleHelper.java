@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.effect.particle;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.DustColorTransitionOptions;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ItemParticleOption;
@@ -39,18 +39,17 @@ import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.gameevent.BlockPositionSource;
+import net.minecraft.util.FastColor;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleOptions;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.Color;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Ticks;
+import org.spongepowered.api.world.PositionSource;
+import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3f;
 
@@ -58,7 +57,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Random;
 
 public final class SpongeParticleHelper {
@@ -153,7 +151,7 @@ public final class SpongeParticleHelper {
             final ItemStackSnapshot snapshot = effect.optionOrDefault(ParticleOptions.ITEM_STACK_SNAPSHOT).get();
             final ItemParticleOption particleData = new ItemParticleOption(
                     (net.minecraft.core.particles.ParticleType<ItemParticleOption>) internalType,
-                    (net.minecraft.world.item.ItemStack) (Object) snapshot.createStack());
+                    ItemStackUtil.fromSnapshotToNative(snapshot));
             return new NamedCachedPacket(particleData, offset, quantity, velocity);
         } else if (internalType == ParticleTypes.SCULK_CHARGE) {
             final double roll = effect.optionOrDefault(ParticleOptions.ROLL).get();
@@ -164,61 +162,24 @@ public final class SpongeParticleHelper {
             final ShriekParticleOption particleData = new ShriekParticleOption(delay);
             return new NamedCachedPacket(particleData, offset, quantity, velocity);
         } else if (internalType == ParticleTypes.VIBRATION) {
+            final PositionSource source  = effect.optionOrDefault(ParticleOptions.DESTINATION).get();
             final Ticks delay = effect.optionOrDefault(ParticleOptions.TRAVEL_TIME).get();
-            // TODO add position source
-            final VibrationParticleOption particleData = new VibrationParticleOption(new BlockPositionSource(BlockPos.ZERO), (int) delay.ticks());
+            final VibrationParticleOption particleData = new VibrationParticleOption(
+                    (net.minecraft.world.level.gameevent.PositionSource) source,
+                    (int) delay.ticks());
+            return new NamedCachedPacket(particleData, offset, quantity, velocity);
+        } else if (internalType == ParticleTypes.ENTITY_EFFECT) {
+            // This particle type supports color and opacity options.
+            final Color color = effect.optionOrDefault(ParticleOptions.COLOR).get();
+            final double opacity = effect.optionOrDefault(ParticleOptions.OPACITY).get();
+            final ColorParticleOption particleData = ColorParticleOption.create(
+                    (net.minecraft.core.particles.ParticleType<ColorParticleOption>) internalType,
+                    FastColor.ARGB32.color(FastColor.as8BitChannel((float) opacity), color.red(), color.green(), color.blue()));
             return new NamedCachedPacket(particleData, offset, quantity, velocity);
         }
 
-        // Otherwise, we don't really know how to get a valid IParticleData. Sorry mods!
+        // Otherwise, we don't really know how to get a valid ParticleOptions. Sorry mods!
         return EmptyCachedPacket.INSTANCE;
-    }
-
-    public static int getDirectionId(Direction direction) {
-        if (direction.isSecondaryOrdinal()) {
-            direction = Direction.closest(direction.asOffset(), Direction.Division.ORDINAL);
-        }
-        switch (direction) {
-            case SOUTHEAST:
-                return 0;
-            case SOUTH:
-                return 1;
-            case SOUTHWEST:
-                return 2;
-            case EAST:
-                return 3;
-            case WEST:
-                return 5;
-            case NORTHEAST:
-                return 6;
-            case NORTH:
-                return 7;
-            case NORTHWEST:
-                return 8;
-            default:
-                return 4;
-        }
-    }
-
-    public static int getBlockStateId(final ParticleEffect effect, final Optional<BlockState> defaultBlockState) {
-        final Optional<BlockState> blockState = effect.option(ParticleOptions.BLOCK_STATE);
-        if (blockState.isPresent()) {
-            // Use the provided block state option.
-            return Block.getId((net.minecraft.world.level.block.state.BlockState) blockState.get());
-        }
-
-        final Optional<ItemStackSnapshot> itemSnapshot = effect.option(ParticleOptions.ITEM_STACK_SNAPSHOT);
-        if (itemSnapshot.isPresent()) {
-            // Try to convert the item into a usable block state.
-            final Optional<BlockType> blockType = itemSnapshot.get().type().block();
-            // TODO: correct behavior?
-            return blockType.map(type -> Block.getId((net.minecraft.world.level.block.state.BlockState) type.defaultState()))
-                    .orElse(0);
-        }
-
-        // Otherwise, use the default block state option if available.
-        return defaultBlockState.map(state -> Block.getId((net.minecraft.world.level.block.state.BlockState) state))
-                .orElse(0);
     }
 
     public static ParticleEffect spongeParticleOptions(final net.minecraft.core.particles.ParticleOptions effect) {
@@ -246,14 +207,23 @@ public final class SpongeParticleHelper {
             ));
         } else if (effect instanceof ItemParticleOption itemOptions) {
             // This particle type supports an item option.
-            return new SpongeParticleEffect((ParticleType) type, Map.of(ParticleOptions.BLOCK_STATE.get(), itemOptions.getItem().copy()));
+            return new SpongeParticleEffect((ParticleType) type, Map.of(ParticleOptions.ITEM_STACK_SNAPSHOT.get(), ItemStackUtil.snapshotOf(itemOptions.getItem())));
         } else if (effect instanceof SculkChargeParticleOptions sculkChargeOptions) {
             return new SpongeParticleEffect((ParticleType) type, Map.of(ParticleOptions.ROLL.get(), sculkChargeOptions.roll()));
         } else if (effect instanceof ShriekParticleOption shriekOption) {
             return new SpongeParticleEffect((ParticleType) type, Map.of(ParticleOptions.DELAY.get(), shriekOption.getDelay()));
         } else if (effect instanceof VibrationParticleOption vibrationOptions) {
-            // TODO add position source
-            return new SpongeParticleEffect((ParticleType) type, Map.of(ParticleOptions.TRAVEL_TIME.get(), Ticks.of(vibrationOptions.getArrivalInTicks())));
+            return new SpongeParticleEffect((ParticleType) type, Map.of(
+                ParticleOptions.DESTINATION.get(), vibrationOptions.getDestination(),
+                ParticleOptions.TRAVEL_TIME.get(), Ticks.of(vibrationOptions.getArrivalInTicks())
+            ));
+        } else if (effect instanceof ColorParticleOption colorOptions) {
+            // This particle type supports color and opacity options.
+            return new SpongeParticleEffect((ParticleType) type, Map.of(
+                ParticleOptions.COLOR.get(), Color.of(
+                    Vector3f.from(colorOptions.getRed(), colorOptions.getGreen(), colorOptions.getBlue()).mul(255)),
+                ParticleOptions.OPACITY.get(), colorOptions.getAlpha()
+            ));
         }
 
         return new SpongeParticleEffect((ParticleType) type, Collections.emptyMap());

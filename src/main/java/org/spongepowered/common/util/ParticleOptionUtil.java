@@ -30,9 +30,12 @@ import net.minecraft.core.particles.ParticleTypes;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.api.effect.particle.ParticleOptions;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.util.Color;
+import org.spongepowered.api.world.PositionSource;
 import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.math.vector.Vector3i;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -52,10 +55,24 @@ public final class ParticleOptionUtil {
                 || type == ParticleTypes.FALLING_DUST || type == ParticleTypes.DUST_PILLAR) {
             options.put(ParticleOptions.BLOCK_STATE.get(), BlockTypes.AIR.get().defaultState());
         } else if (type == ParticleTypes.ITEM) {
-            options.put(ParticleOptions.ITEM_STACK_SNAPSHOT.get(), ItemStackSnapshot.empty());
+            options.put(ParticleOptions.ITEM_STACK_SNAPSHOT.get(), ItemStack.of(ItemTypes.STONE).createSnapshot());
         } else if (type == ParticleTypes.DUST) {
             options.put(ParticleOptions.COLOR.get(), Color.RED);
             options.put(ParticleOptions.SCALE.get(), 1.0d);
+        } else if (type == ParticleTypes.DUST_COLOR_TRANSITION) {
+            options.put(ParticleOptions.COLOR.get(), Color.RED);
+            options.put(ParticleOptions.TO_COLOR.get(), Color.RED);
+            options.put(ParticleOptions.SCALE.get(), 1.0d);
+        } else if (type == ParticleTypes.SCULK_CHARGE) {
+            options.put(ParticleOptions.ROLL.get(), 0);
+        } else if (type == ParticleTypes.SHRIEK) {
+            options.put(ParticleOptions.DELAY.get(), 0);
+        } else if (type == ParticleTypes.VIBRATION) {
+            options.put(ParticleOptions.DESTINATION.get(), PositionSource.of(Vector3i.ZERO));
+            options.put(ParticleOptions.TRAVEL_TIME.get(), 0);
+        } else if (type == ParticleTypes.ENTITY_EFFECT) {
+            options.put(ParticleOptions.COLOR.get(), Color.RED);
+            options.put(ParticleOptions.OPACITY.get(), 1.0d);
         }
 
         return ImmutableMap.copyOf(options);
