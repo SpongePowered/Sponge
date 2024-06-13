@@ -37,7 +37,6 @@ import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleOptions;
 import org.spongepowered.api.effect.particle.ParticleType;
-import org.spongepowered.api.effect.potion.PotionEffectTypes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
@@ -45,7 +44,6 @@ import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Color;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
@@ -90,8 +88,6 @@ public final class ParticleTest {
                 .option(ParticleOptions.BLOCK_STATE, BlockTypes.DIAMOND_BLOCK.get().defaultState())
                 .option(ParticleOptions.COLOR, Color.LIME)
                 .option(ParticleOptions.ITEM_STACK_SNAPSHOT, ItemStack.of(ItemTypes.GOLDEN_APPLE.get()).createSnapshot())
-                .option(ParticleOptions.DIRECTION, Direction.EAST)
-                .option(ParticleOptions.POTION_EFFECT_TYPE, PotionEffectTypes.HASTE.get())
                 .offset(Vector3d.from(0, 1, 1))
                 .velocity(Vector3d.RIGHT.mul(0.5))
                 .quantity(20)
