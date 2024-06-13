@@ -427,6 +427,7 @@
         "minecraft.world.level.chunk.LevelChunkMixin_API",
         "minecraft.world.level.chunk.ProtoChunkMixin_API",
         "minecraft.world.level.dimension.DimensionTypeMixin_API",
+        "minecraft.world.level.gameevent.PositionSourceMixin_API",
         "minecraft.world.level.levelgen.DensityFunctionMixin_API",
         "minecraft.world.level.levelgen.FlatLevelSourceMixin_API",
         "minecraft.world.level.levelgen.GenerationStep_CarvingMixin_API",
@@ -500,5 +501,5 @@
     ],
     "overwrites": {
         "conformVisibility": true
-  }
+    }
 }

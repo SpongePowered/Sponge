@@ -81,6 +81,7 @@ import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.util.blockray.RayTrace;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.DefaultWorldKeys;
+import org.spongepowered.api.world.PositionSource;
 import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.api.world.biome.AttributedBiome;
 import org.spongepowered.api.world.biome.BiomeAttributes;
@@ -149,6 +150,7 @@ import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.SpongeTransform;
 import org.spongepowered.common.util.raytrace.SpongeRayTraceFactory;
 import org.spongepowered.common.world.SpongeDefaultWorldKeysFactory;
+import org.spongepowered.common.world.SpongePositionSourceFactory;
 import org.spongepowered.common.world.SpongeWorldTypeEffect;
 import org.spongepowered.common.world.biome.SpongeAttributedBiome;
 import org.spongepowered.common.world.biome.SpongeBiomeAttributesFactory;
@@ -275,6 +277,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(IntegerStateProperty.Factory.class, new BlockStatePropertyImpl.IntegerFactoryImpl())
                 .registerFactory(EnumStateProperty.Factory.class, new BlockStatePropertyImpl.EnumFactoryImpl())
                 .registerFactory(DefaultWorldKeys.Factory.class, new SpongeDefaultWorldKeysFactory())
+                .registerFactory(PositionSource.Factory.class, new SpongePositionSourceFactory())
                 .registerFactory(JigsawPoolElement.Factory.class, new SpongeJigsawFactory())
                 .registerFactory(ParticleConfig.Factory.class, new SpongeParticleConfigFactory())
                 .registerFactory(SoundConfig.Factory.class, new SpongeSoundConfigFactory())
