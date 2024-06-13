@@ -25,23 +25,29 @@
 package org.spongepowered.vanilla.applaunch.plugin;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
-import cpw.mods.modlauncher.api.IEnvironment;
-import cpw.mods.modlauncher.api.ITransformationService;
-import cpw.mods.modlauncher.api.ITransformer;
+import cpw.mods.jarhandling.SecureJar;
+import cpw.mods.modlauncher.Launcher;
+import cpw.mods.modlauncher.api.*;
 import cpw.mods.modlauncher.serviceapi.ILaunchPluginService;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.fusesource.jansi.AnsiConsole;
 import org.spongepowered.asm.launch.MixinLaunchPluginLegacy;
 import org.spongepowered.common.applaunch.AppLaunch;
+import org.spongepowered.common.applaunch.plugin.PluginPlatformConstants;
 import org.spongepowered.plugin.PluginResource;
+import org.spongepowered.plugin.builtin.StandardEnvironment;
 import org.spongepowered.plugin.builtin.jvm.locator.JVMPluginResource;
 import org.spongepowered.transformers.modlauncher.AccessWidenerTransformationService;
 import org.spongepowered.transformers.modlauncher.SuperclassChanger;
-import org.spongepowered.vanilla.installer.Constants;
+import org.spongepowered.vanilla.applaunch.Constants;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +57,7 @@ public final class VanillaPlatformService implements ITransformationService {
 
     private static final String NAME = "vanilla_platform";
 
-    private static final VanillaPluginPlatform pluginPlatform = AppLaunch.pluginPlatform();
+    private @MonotonicNonNull VanillaPluginPlatform pluginPlatform;
 
     @Override
     public @NonNull String name() {
@@ -60,25 +66,20 @@ public final class VanillaPlatformService implements ITransformationService {
 
     @Override
     public void initialize(final IEnvironment environment) {
-        VanillaPlatformService.pluginPlatform.initialize();
+        this.pluginPlatform.initialize();
     }
 
     @Override
-    public void beginScanning(final IEnvironment environment) {
-        //NOOP
-    }
-
-    @Override
-    public List<Map.Entry<String, Path>> runScan(final IEnvironment environment) {
-        VanillaPlatformService.pluginPlatform.locatePluginResources();
-        VanillaPlatformService.pluginPlatform.createPluginCandidates();
+    public List<Resource> beginScanning(final IEnvironment environment) {
+        this.pluginPlatform.locatePluginResources();
+        this.pluginPlatform.createPluginCandidates();
         final AccessWidenerTransformationService accessWidener = environment.getProperty(AccessWidenerTransformationService.INSTANCE.get()).orElse(null);
         final SuperclassChanger superclassChanger = environment.getProperty(SuperclassChanger.INSTANCE.get()).orElse(null);
         final ILaunchPluginService mixin = environment.findLaunchPlugin(MixinLaunchPluginLegacy.NAME).orElse(null);
 
-        final List<Map.Entry<String, Path>> launchResources = new ArrayList<>();
+        final List<SecureJar> gameResources = new ArrayList<>();
 
-        for (final Map.Entry<String, Set<PluginResource>> resourcesEntry : VanillaPlatformService.pluginPlatform.getResources().entrySet()) {
+        for (final Map.Entry<String, Set<PluginResource>> resourcesEntry : this.pluginPlatform.getResources().entrySet()) {
             final Set<PluginResource> resources = resourcesEntry.getValue();
             for (final PluginResource resource : resources) {
 
@@ -86,7 +87,7 @@ public final class VanillaPlatformService implements ITransformationService {
                 if ((accessWidener != null || mixin != null || superclassChanger != null) && resource instanceof JVMPluginResource) {
                     if (mixin != null) {
                         // Offer jar to the Mixin service
-                        mixin.offerResource(((JVMPluginResource) resource).path(), ((JVMPluginResource) resource).path().getFileName().toString());
+                        mixin.offerResource(resource.path(), resource.path().getFileName().toString());
                     }
 
                     // Offer jar to the AW service
@@ -100,14 +101,14 @@ public final class VanillaPlatformService implements ITransformationService {
                                     }
                                     try {
                                         accessWidener.offerResource(
-                                            ((JVMPluginResource) resource).fileSystem().getPath(atFile).toUri().toURL(),
-                                            atFile
+                                                ((JVMPluginResource) resource).fileSystem().getPath(atFile).toUri().toURL(),
+                                                atFile
                                         );
                                     } catch (final MalformedURLException ex) {
-                                        VanillaPlatformService.pluginPlatform.logger().warn(
-                                            "Failed to read declared access widener {}, from {}:",
-                                            atFile,
-                                            resource.locator()
+                                        this.pluginPlatform.logger().warn(
+                                                "Failed to read declared access widener {}, from {}:",
+                                                atFile,
+                                                resource.locator()
                                         );
                                     }
                                 }
@@ -115,9 +116,9 @@ public final class VanillaPlatformService implements ITransformationService {
                         }
                         if (mixin != null && manifest.getMainAttributes().getValue(org.spongepowered.asm.util.Constants.ManifestAttributes.MIXINCONFIGS) != null) {
                             if (!VanillaPlatformService.isSponge((JVMPluginResource) resource)) {
-                                VanillaPlatformService.pluginPlatform.logger().warn(
-                                    "Plugin from {} uses Mixins to modify the Minecraft Server. If something breaks, remove it before reporting the "
-                                        + "problem to Sponge!", ((JVMPluginResource) resource).path()
+                                this.pluginPlatform.logger().warn(
+                                        "Plugin from {} uses Mixins to modify the Minecraft Server. If something breaks, remove it before reporting the "
+                                                + "problem to Sponge!", resource.path()
                                 );
                             }
                         }
@@ -130,14 +131,14 @@ public final class VanillaPlatformService implements ITransformationService {
                                     }
                                     try {
                                         superclassChanger.offerResource(
-                                            ((JVMPluginResource) resource).fileSystem().getPath(superclassChangeFile).toUri().toURL(),
-                                            superclassChangeFile
+                                                ((JVMPluginResource) resource).fileSystem().getPath(superclassChangeFile).toUri().toURL(),
+                                                superclassChangeFile
                                         );
                                     } catch (final MalformedURLException ex) {
-                                        VanillaPlatformService.pluginPlatform.logger().warn(
-                                            "Failed to read declared superclass changer {}, from {}:",
-                                            superclassChangeFile,
-                                            resource.locator()
+                                        this.pluginPlatform.logger().warn(
+                                                "Failed to read declared superclass changer {}, from {}:",
+                                                superclassChangeFile,
+                                                resource.locator()
                                         );
                                     }
                                 }
@@ -145,14 +146,13 @@ public final class VanillaPlatformService implements ITransformationService {
                         }
                     });
 
-                    final Map.Entry<String, Path> entry = Maps.immutableEntry(((JVMPluginResource) resource).path().getFileName().toString(),
-                        ((JVMPluginResource) resource).path());
-                    launchResources.add(entry);
+                    // TODO custom jar metadata ?
+                    gameResources.add(SecureJar.from(resource.path()));
                 }
             }
         }
 
-        return launchResources;
+        return List.of(new Resource(IModuleLayerManager.Layer.GAME, gameResources));
     }
 
     private static boolean isSponge(final JVMPluginResource resource) {
@@ -165,17 +165,45 @@ public final class VanillaPlatformService implements ITransformationService {
 
     @Override
     public void onLoad(final IEnvironment env, final Set<String> otherServices) {
-        final VanillaPluginPlatform pluginPlatform = VanillaPlatformService.pluginPlatform;
-        pluginPlatform.logger().info("SpongePowered PLUGIN Subsystem Version={} Source={}",
-            pluginPlatform.version(), this.getCodeSource());
+        AnsiConsole.systemInstall();
 
-        pluginPlatform.discoverLocatorServices();
-        pluginPlatform.getLocatorServices().forEach((k, v) -> pluginPlatform.logger().info("Plugin resource locator '{}' found.", k));
-        pluginPlatform.discoverLanguageServices();
-        pluginPlatform.getLanguageServices().forEach((k, v) -> pluginPlatform.logger().info("Plugin language loader '{}' found.", k));
+        this.pluginPlatform = new VanillaPluginPlatform(new StandardEnvironment());
+        AppLaunch.setPluginPlatform(this.pluginPlatform);
+
+        final String implementationVersion = StandardEnvironment.class.getPackage().getImplementationVersion();
+        final Path baseDirectory = Launcher.INSTANCE.environment().getProperty(IEnvironment.Keys.GAMEDIR.get()).orElse(Paths.get("."));
+
+        this.pluginPlatform.setVersion(implementationVersion == null ? "dev" : implementationVersion);
+        this.pluginPlatform.setBaseDirectory(baseDirectory);
+
+        this.pluginPlatform.logger().info("SpongePowered PLUGIN Subsystem Version={} Source={}",
+                this.pluginPlatform.version(), this.getCodeSource());
+
+        final Path modsDirectory = baseDirectory.resolve("mods");
+        if (Files.notExists(modsDirectory)) {
+            try {
+                Files.createDirectories(modsDirectory);
+            } catch (IOException ignored) {}
+        }
+
+        final Path pluginsDirectory = baseDirectory.resolve("plugins");
+        final List<Path> pluginDirectories = new ArrayList<>();
+        pluginDirectories.add(modsDirectory);
+        if (Files.exists(pluginsDirectory)) {
+            pluginDirectories.add(pluginsDirectory);
+        }
+
+        this.pluginPlatform.setPluginDirectories(pluginDirectories);
+        this.pluginPlatform.setMetadataFilePath(PluginPlatformConstants.METADATA_FILE_LOCATION);
+
+        this.pluginPlatform.discoverLocatorServices();
+        this.pluginPlatform.getLocatorServices().forEach((k, v) -> this.pluginPlatform.logger().info("Plugin resource locator '{}' found.", k));
+        this.pluginPlatform.discoverLanguageServices();
+        this.pluginPlatform.getLanguageServices().forEach((k, v) -> this.pluginPlatform.logger().info("Plugin language loader '{}' found.", k));
     }
 
     @Override
+    @SuppressWarnings("rawtypes")
     public @NonNull List<ITransformer> transformers() {
         return ImmutableList.of();
     }

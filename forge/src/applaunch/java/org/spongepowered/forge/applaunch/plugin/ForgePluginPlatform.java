@@ -49,11 +49,6 @@ public final class ForgePluginPlatform implements PluginPlatform {
     private final Logger logger;
     private final List<Path> pluginDirectories;
 
-    /**
-     * Bootstrap
-     * @param environment
-     * @return
-     */
     public static synchronized boolean bootstrap(final Environment environment) {
         if (ForgePluginPlatform.bootstrapped) {
             return false;
