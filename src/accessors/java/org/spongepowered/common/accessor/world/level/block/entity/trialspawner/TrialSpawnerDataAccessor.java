@@ -22,30 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.block.entity;
+package org.spongepowered.common.accessor.world.level.block.entity.trialspawner;
 
-import org.spongepowered.common.data.provider.DataProviderRegistratorBuilder;
+import net.minecraft.world.level.SpawnData;
+import net.minecraft.world.level.block.entity.trialspawner.TrialSpawnerData;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public final class BlockEntityDataProviders extends DataProviderRegistratorBuilder {
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
-    @Override
-    public void registerProviders() {
-        BannerData.register(this.registrator);
-        BeaconData.register(this.registrator);
-        BrewingStandData.register(this.registrator);
-        CommandBlockData.register(this.registrator);
-        ConduitData.register(this.registrator);
-        EndGatewayData.register(this.registrator);
-        AbstractFurnaceData.register(this.registrator);
-        HopperData.register(this.registrator);
-        JukeBoxData.register(this.registrator);
-        LecternData.register(this.registrator);
-        LockableData.register(this.registrator);
-        MobSpawnerData.register(this.registrator);
-        TrialSpawnerDataProvider.register(this.registrator);
-        SignData.register(this.registrator);
-        SkullData.register(this.registrator);
-        StructureBlockData.register(this.registrator);
-        CrafterData.register(this.registrator);
-    }
+@Mixin(TrialSpawnerData.class)
+public interface TrialSpawnerDataAccessor {
+
+    @Accessor("nextSpawnData") Optional<SpawnData> accessor$nextSpawnData();
+
+    @Accessor("nextSpawnData") void accessor$nextSpawnData(Optional<SpawnData> nextSpawnData);
+
+    @Accessor("nextMobSpawnsAt") long accessor$nextMobSpawnsAt();
+
+    @Accessor("nextMobSpawnsAt") void accessor$nextMobSpawnsAt(long nextMobSpawnsAt);
+
+
+    @Accessor("currentMobs") Set<UUID> accessor$currentMobs();
+    @Accessor("totalMobsSpawned") int accessor$totalMobsSpawned();
+
+    @Accessor("totalMobsSpawned") void accessor$totalMobsSpawned(int totalMobsSpawned);
+
 }

@@ -24,19 +24,35 @@
  */
 package org.spongepowered.common.entity;
 
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.util.random.SimpleWeightedRandomList;
+import net.minecraft.util.random.WeightedEntry;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.SpawnData;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.EntityArchetype;
+import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.util.weighted.WeightedObject;
+import org.spongepowered.api.util.weighted.WeightedSerializableObject;
+import org.spongepowered.api.util.weighted.WeightedTable;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
+import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.hooks.PlatformHooks;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.ArrayList;
@@ -164,5 +180,65 @@ public final class EntityUtil {
         }
         // Temporary fix for https://bugs.mojang.com/browse/MC-149563
         return from.level() != target.level();
+    }
+
+    public static EntityArchetype toArchetype(final SpawnData logic) {
+        final var tag = logic.entityToSpawn();
+        final var resourceLocation = tag.getString(Constants.Entity.ENTITY_TYPE_ID);
+        final var entityTypeRegistry = SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE);
+        final var type = entityTypeRegistry.getOptional(ResourceLocation.parse(resourceLocation))
+            .map(org.spongepowered.api.entity.EntityType.class::cast)
+            .orElse(EntityTypes.PIG.get());
+
+        return SpongeEntityArchetypeBuilder.pooled()
+                .type(type)
+                .entityData(NBTTranslator.INSTANCE.translateFrom(tag))
+                .build();
+    }
+
+    public static SpawnData toSpawnData(final EntityArchetype value) {
+        final var tag = NBTTranslator.INSTANCE.translate(value.entityData());
+        if (!tag.contains(Constants.Entity.ENTITY_TYPE_ID)) {
+            final ResourceKey key = (ResourceKey) (Object) EntityType.getKey((EntityType<?>) value.type());
+            tag.putString(Constants.Entity.ENTITY_TYPE_ID, key.toString());
+        }
+
+        // TODO customSpawnRules & equipment support
+        return new SpawnData(tag, Optional.empty(), Optional.empty());
+    }
+
+    public static WeightedTable<EntityArchetype> toWeightedArchetypes(final SimpleWeightedRandomList<SpawnData> spawnData) {
+        final WeightedTable<EntityArchetype> possibleEntities = new WeightedTable<>();
+
+        for (final WeightedEntry.Wrapper<SpawnData> weightedEntity : spawnData.unwrap()) {
+            final CompoundTag nbt = weightedEntity.data().entityToSpawn();
+            final String resourceLocation = nbt.getString(Constants.Entity.ENTITY_TYPE_ID);
+            final var mcType = SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE).getOptional(ResourceLocation.parse(resourceLocation));
+            final var type = mcType.map(org.spongepowered.api.entity.EntityType.class::cast).orElse(EntityTypes.PIG.get());
+
+            final EntityArchetype archetype = SpongeEntityArchetypeBuilder.pooled()
+                    .type(type)
+                    .entityData(NBTTranslator.INSTANCE.translateFrom(nbt))
+                    .build();
+
+            possibleEntities.add(new WeightedSerializableObject<>(archetype, weightedEntity.getWeight().asInt()));
+        }
+        return possibleEntities;
+    }
+
+    public static SimpleWeightedRandomList<SpawnData> toSpawnPotentials(final WeightedTable<EntityArchetype> table) {
+        final SimpleWeightedRandomList.Builder<SpawnData> builder = SimpleWeightedRandomList.builder();
+        for (final var entry : table) {
+            if (entry instanceof final WeightedObject<EntityArchetype> weightedObj) {
+                final var tag = NBTTranslator.INSTANCE.translate(weightedObj.get().entityData());
+                if (!tag.contains(Constants.Entity.ENTITY_TYPE_ID)) {
+                    final var key = EntityType.getKey((EntityType<?>) weightedObj.get().type());
+                    tag.putString(Constants.Entity.ENTITY_TYPE_ID, key.toString());
+                }
+                // TODO customSpawnRules & equipment support
+                builder.add(new SpawnData(tag, Optional.empty(), Optional.empty()), (int) entry.weight());
+            }
+        }
+        return builder.build();
     }
 }

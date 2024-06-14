@@ -63,12 +63,13 @@ public abstract class BlockEntityMixin_API implements BlockEntity {
     @Shadow @Final private net.minecraft.world.level.block.entity.BlockEntityType<?> type;
     @Shadow protected net.minecraft.world.level.Level level;
     @Shadow protected boolean remove;
-
     @Shadow public abstract BlockPos shadow$getBlockPos();
     @Shadow public abstract CompoundTag shadow$saveWithFullMetadata(HolderLookup.Provider $$0);
+    @Shadow @Final protected BlockPos worldPosition;
+    @Shadow public abstract net.minecraft.world.level.block.state.BlockState shadow$getBlockState();
+    @Shadow public abstract void shadow$setChanged();
     //@formatter:on
 
-    @Shadow @Final protected BlockPos worldPosition;
     @Nullable private LocatableBlock api$LocatableBlock;
 
     public ServerLocation location() {

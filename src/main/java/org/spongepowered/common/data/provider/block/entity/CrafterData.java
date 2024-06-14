@@ -24,28 +24,24 @@
  */
 package org.spongepowered.common.data.provider.block.entity;
 
-import org.spongepowered.common.data.provider.DataProviderRegistratorBuilder;
+import net.minecraft.world.level.block.entity.CrafterBlockEntity;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.accessor.world.level.block.entity.CrafterBlockEntityAccessor;
+import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.util.SpongeTicks;
 
-public final class BlockEntityDataProviders extends DataProviderRegistratorBuilder {
+public final class CrafterData {
 
-    @Override
-    public void registerProviders() {
-        BannerData.register(this.registrator);
-        BeaconData.register(this.registrator);
-        BrewingStandData.register(this.registrator);
-        CommandBlockData.register(this.registrator);
-        ConduitData.register(this.registrator);
-        EndGatewayData.register(this.registrator);
-        AbstractFurnaceData.register(this.registrator);
-        HopperData.register(this.registrator);
-        JukeBoxData.register(this.registrator);
-        LecternData.register(this.registrator);
-        LockableData.register(this.registrator);
-        MobSpawnerData.register(this.registrator);
-        TrialSpawnerDataProvider.register(this.registrator);
-        SignData.register(this.registrator);
-        SkullData.register(this.registrator);
-        StructureBlockData.register(this.registrator);
-        CrafterData.register(this.registrator);
+    private CrafterData() {
     }
+
+    // @formatter:off
+    public static void register(final DataProviderRegistrator registrator) {
+        registrator
+                .asMutable(CrafterBlockEntity.class)
+                    .create(Keys.COOLDOWN)
+                        .get(h -> new SpongeTicks(((CrafterBlockEntityAccessor)h).accessor$craftingTicksRemaining()))
+                        .set((h, v) -> h.setCraftingTicksRemaining(SpongeTicks.toSaturatedIntOrInfinite(v)));
+    }
+    // @formatter:on
 }

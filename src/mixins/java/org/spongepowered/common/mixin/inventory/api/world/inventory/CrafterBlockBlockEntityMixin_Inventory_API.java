@@ -25,16 +25,32 @@
 package org.spongepowered.common.mixin.inventory.api.world.inventory;
 
 
+import net.minecraft.core.NonNullList;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.level.block.CrafterBlock;
 import net.minecraft.world.level.block.entity.CrafterBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import org.spongepowered.api.block.entity.carrier.Crafter;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.accessor.world.level.block.CrafterBlockAccessor;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.comp.CraftingGridInventoryLens;
+import org.spongepowered.common.mixin.api.minecraft.world.level.block.entity.RandomizableContainerBlockEntityMixin_API;
 
 @Mixin(CrafterBlockEntity.class)
-public abstract class CrafterBlockBlockEntityMixin_Inventory_API implements CraftingGridInventory {
+public abstract class CrafterBlockBlockEntityMixin_Inventory_API extends RandomizableContainerBlockEntityMixin_API<Crafter> implements CraftingGridInventory, Crafter {
+
+    @Shadow public abstract void shadow$setCraftingTicksRemaining(final int $$0);
+
+    @Shadow public abstract NonNullList<ItemStack> shadow$getItems();
 
     private GridInventory api$gridAdapter;
 
@@ -48,4 +64,47 @@ public abstract class CrafterBlockBlockEntityMixin_Inventory_API implements Craf
         return this.api$gridAdapter;
     }
 
+
+    /**
+     * See CrafterBlock#dispenseFrom
+     */
+    @Override
+    public boolean craftItem() {
+        final var input = ((CraftingContainer) this).asCraftInput();
+        final var potentialResults = CrafterBlock.getPotentialResults(this.level, input);
+        if (potentialResults.isEmpty()) {
+            return false;
+        }
+        final var recipeHolder = potentialResults.get();
+        final var recipe = recipeHolder.value();
+        final var craftedStack = recipe.assemble(input, this.level.registryAccess());
+        if (craftedStack.isEmpty()) {
+            return false;
+        }
+        this.shadow$setCraftingTicksRemaining(6);
+        final var state = this.shadow$getBlockState();
+        this.level.setBlock(this.worldPosition, state.setValue(CrafterBlock.CRAFTING, true), 2);
+        craftedStack.onCraftedBySystem(this.level);
+
+        this.impl$dispenseItem(state, craftedStack, recipeHolder);
+
+        for (final ItemStack remainingStack : recipe.getRemainingItems(input)) {
+            if (!remainingStack.isEmpty()) {
+                this.impl$dispenseItem(state, remainingStack, recipeHolder);
+            }
+        }
+
+        this.shadow$getItems().forEach(stack -> {
+            if (!stack.isEmpty()) {
+                stack.shrink(1);
+            }
+        });
+        this.shadow$setChanged();
+        return true;
+    }
+
+    private void impl$dispenseItem(final BlockState state, final ItemStack craftedStack, final RecipeHolder<CraftingRecipe> recipeHolder) {
+        ((CrafterBlockAccessor) state.getBlock()).invoker$dispenseItem((ServerLevel) this.level, this.worldPosition, (CrafterBlockEntity)(Object) this,
+            craftedStack, state, recipeHolder);
+    }
 }
