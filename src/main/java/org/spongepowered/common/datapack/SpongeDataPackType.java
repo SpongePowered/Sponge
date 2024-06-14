@@ -95,7 +95,7 @@ public record SpongeDataPackType<E, T extends DataPackEntry<T>>(String dir, bool
     public static final class FactoryImpl implements DataPackType.Factory {
 
         private final SpongeDataPackType<JsonElement, @NonNull AdvancementTemplate> advancement = SpongeDataPackType.basic(AdvancementTemplate.class,
-                "advancements", SpongeAdvancementTemplate::encode, null, // TODO decoder
+                "advancement", SpongeAdvancementTemplate::encode, null, // TODO decoder
                 true);
 
         private final SpongeDataPackType<JsonElement, @NonNull RecipeRegistration> recipe = SpongeDataPackType.custom(RecipeRegistration.class,
@@ -143,7 +143,7 @@ public record SpongeDataPackType<E, T extends DataPackEntry<T>>(String dir, bool
                 false);
 
         private final SpongeDataPackType<CompoundTag, @NonNull SchematicTemplate> schematic = SpongeDataPackType.custom(SchematicTemplate.class,
-                "structures", new NbtDataPackSerializer<>(SpongeSchematicTemplate::encode, SpongeSchematicTemplate::decode),
+                "structure", new NbtDataPackSerializer<>(SpongeSchematicTemplate::encode, SpongeSchematicTemplate::decode),
                 false);
 
         private final SpongeDataPackType<JsonElement, @NonNull ProcessorListTemplate> processorList = SpongeDataPackType.basic(ProcessorListTemplate.class,
