@@ -66,6 +66,7 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.message.PlayerChatEvent;
 import org.spongepowered.api.event.message.SystemMessageEvent;
@@ -102,6 +103,7 @@ import org.spongepowered.common.bridge.server.players.PlayerListBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.entity.player.LoginPermissions;
 import org.spongepowered.common.entity.player.SpongeUserView;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
@@ -523,6 +525,22 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
         this.impl$isRespawnWithPosition = false;
         newPlayer.setPos(event.destinationPosition().x(), event.destinationPosition().y(), event.destinationPosition().z());
+
+        if (ShouldFire.ROTATE_ENTITY_EVENT) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+                frame.pushCause(event);
+
+                final RotateEntityEvent rotateEvent = SpongeEventFactory.createRotateEntityEvent(
+                    frame.currentCause(), recreatedPlayer, originalPlayer.rotation(), recreatedPlayer.rotation());
+                if (SpongeCommon.post(rotateEvent)) {
+                    newPlayer.setXRot(player.getXRot());
+                    newPlayer.setYRot(player.getYRot());
+                } else {
+                    newPlayer.setXRot((float) rotateEvent.toRotation().x());
+                    newPlayer.setYRot((float) rotateEvent.toRotation().y());
+                }
+            }
+        }
 
         return newPlayer.getX();
     }
