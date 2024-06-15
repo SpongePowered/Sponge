@@ -33,6 +33,8 @@ import net.minecraft.resources.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.advancement.AdvancementTemplate;
 import org.spongepowered.api.adventure.ChatTypeTemplate;
+import org.spongepowered.api.data.type.ArtType;
+import org.spongepowered.api.data.type.ArtTypeTemplate;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPackEntry;
 import org.spongepowered.api.datapack.DataPackType;
@@ -57,6 +59,7 @@ import org.spongepowered.api.world.generation.structure.jigsaw.ProcessorListTemp
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.common.advancement.SpongeAdvancementTemplate;
 import org.spongepowered.common.adventure.SpongeChatTypeTemplate;
+import org.spongepowered.common.data.type.SpongeArtTypeTemplate;
 import org.spongepowered.common.datapack.recipe.RecipeDataPackSerializer;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageTypeTemplate;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
@@ -167,6 +170,9 @@ public record SpongeDataPackType<E, T extends DataPackEntry<T>>(String dir, bool
                 "damage_type", SpongeDamageTypeTemplate::encode, SpongeDamageTypeTemplate::decode,
                 false);
 
+        private final SpongeDataPackType<JsonElement, @NonNull ArtTypeTemplate> artType = SpongeDataPackType.basic(ArtTypeTemplate.class,
+            "damage_type", SpongeArtTypeTemplate::encode, SpongeArtTypeTemplate::decode,
+            false);
 
         @Override
         public DataPackType<RecipeRegistration> recipe() {
@@ -266,6 +272,10 @@ public record SpongeDataPackType<E, T extends DataPackEntry<T>>(String dir, bool
                     true);
         }
 
+        @Override
+        public DataPackType<ArtTypeTemplate> artType() {
+            return this.artType;
+        }
     }
 
     public DataPack<T> pack(final String name, final String description) {
