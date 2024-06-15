@@ -40,6 +40,7 @@ import org.spongepowered.api.world.volume.block.BlockVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
+import org.spongepowered.common.world.schematic.CachingPalette;
 import org.spongepowered.common.world.schematic.MutableBimapPalette;
 import org.spongepowered.common.world.volume.SpongeVolumeStream;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
@@ -76,7 +77,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
             final Vector3i start, final Vector3i size
     ) {
         super(start, size);
-        final Palette.Mutable<BlockState, BlockType> mutablePalette = palette.asMutable(Sponge.game());
+        final Palette.Mutable<BlockState, BlockType> mutablePalette = new CachingPalette.MutableImpl<>(palette.asMutable(Sponge.game()));
         this.palette = mutablePalette;
         final int airId = mutablePalette.orAssign(ArrayMutableBlockBuffer.AIR);
 
