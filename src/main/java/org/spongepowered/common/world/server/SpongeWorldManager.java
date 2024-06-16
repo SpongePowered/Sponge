@@ -756,15 +756,17 @@ public abstract class SpongeWorldManager implements WorldManager {
         ((SpongeServer) SpongeCommon.server()).getPlayerDataManager().load();
     }
 
-    private PrimaryLevelData getOrCreateLevelData(final Dynamic<?> dynamicLevelData, final LevelStem levelStem, final String directoryName) {
+    private PrimaryLevelData getOrCreateLevelData(@Nullable final Dynamic<?> dynamicLevelData, final LevelStem levelStem, final String directoryName) {
         final PrimaryLevelData defaultLevelData = (PrimaryLevelData) this.server.getWorldData();
-        try {
-            @Nullable PrimaryLevelData levelData = this.loadLevelData(this.server.registryAccess(), defaultLevelData.getDataConfiguration(), dynamicLevelData);
-            if (levelData != null) {
-                return levelData;
+        if (dynamicLevelData != null) {
+            try {
+                @Nullable PrimaryLevelData levelData = this.loadLevelData(this.server.registryAccess(), defaultLevelData.getDataConfiguration(), dynamicLevelData);
+                if (levelData != null) {
+                    return levelData;
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to load level data from " + directoryName, e);
             }
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to load level data from " + directoryName, e);
         }
 
         if (this.server.isDemo()) {
@@ -783,10 +785,9 @@ public abstract class SpongeWorldManager implements WorldManager {
         return new PrimaryLevelData(levelSettings, defaultLevelData.worldGenOptions(), PrimaryLevelData.SpecialWorldProperty.NONE, Lifecycle.stable());
     }
 
-    @Nullable
     private PrimaryLevelData loadLevelData(final RegistryAccess.Frozen access, final WorldDataConfiguration datapackConfig, final Dynamic<?> dataTag) {
         final LevelDataAndDimensions levelData = LevelStorageSource.getLevelDataAndDimensions(dataTag, datapackConfig, access.registryOrThrow(Registries.LEVEL_STEM), access);
-        return levelData == null ? null : (PrimaryLevelData) levelData.worldData();
+        return (PrimaryLevelData) levelData.worldData();
     }
 
     // Do not call this for the default world, that is handled very special in loadLevel()
@@ -802,7 +803,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         try {
             dataTag = storageSource.getDataTag();
         } catch (IOException e) {
-            dataTag = ((MinecraftServerAccessor) this.server).accessor$storageSource().getDataTag(); // Fallback to overworld level.dat
+            dataTag = null; // ((MinecraftServerAccessor) this.server).accessor$storageSource().getDataTag(); // Fallback to overworld level.dat
         }
         final PrimaryLevelData levelData = this.getOrCreateLevelData(dataTag, levelStem, directoryName);
         ((ResourceKeyBridge) levelData).bridge$setKey(worldKey);
