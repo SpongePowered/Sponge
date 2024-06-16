@@ -33,7 +33,6 @@ import net.minecraft.resources.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.advancement.AdvancementTemplate;
 import org.spongepowered.api.adventure.ChatTypeTemplate;
-import org.spongepowered.api.data.type.ArtType;
 import org.spongepowered.api.data.type.ArtTypeTemplate;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPackEntry;

@@ -30,7 +30,6 @@ import com.mojang.serialization.JsonOps;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.decoration.PaintingVariant;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -39,9 +38,7 @@ import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.type.ArtType;
 import org.spongepowered.api.data.type.ArtTypeTemplate;
 import org.spongepowered.api.datapack.DataPack;
-import org.spongepowered.api.event.cause.entity.damage.DamageTypeTemplate;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.event.cause.entity.damage.SpongeDamageTypeTemplate;
 import org.spongepowered.common.util.AbstractDataPackEntryBuilder;
 import org.spongepowered.common.util.Preconditions;
 

@@ -235,7 +235,7 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin_Attack_i
 
         if (this.attackImpl$isStrongSprintAttack) {
             // Play prevented sprint attack sound
-            this.impl$playAttackSound(this.attackImpl$attack.sourceEntity(), SoundEvents.PLAYER_ATTACK_KNOCKBACK);
+            this.impl$playAttackSound((Player) (Object) this, SoundEvents.PLAYER_ATTACK_KNOCKBACK);
         }
 
         return targetEntity.hurt(damageSource, (float) this.attackImpl$attackEvent.finalOutputDamage());
