@@ -157,9 +157,10 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
         return super.getResultItem($$1);
     }
 
-    private static boolean matches(List<ItemStack> stacks, List<Ingredient> ingredients) {
+    private static boolean
+    matches(List<ItemStack> stacks, List<Ingredient> ingredients) {
         final int elements = ingredients.size();
-        if (stacks.size() != elements) {
+        if (stacks.size() < elements) {
             return false;
         }
 
