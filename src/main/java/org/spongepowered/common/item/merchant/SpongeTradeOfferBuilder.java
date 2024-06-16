@@ -132,7 +132,7 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
         final var selling = ItemStackUtil.fromSnapshotToNative(this.sellingItem);
 
         final MerchantOffer merchantOffer = new MerchantOffer(SpongeTradeOfferBuilder.itemCostOf(first),
-                                                              Optional.ofNullable(second).map(SpongeTradeOfferBuilder::itemCostOf),
+                                                              second.isEmpty() ? Optional.empty() : Optional.ofNullable(second).map(SpongeTradeOfferBuilder::itemCostOf),
                                                               selling,
                                                               this.useCount,
                                                               this.maxUses,
