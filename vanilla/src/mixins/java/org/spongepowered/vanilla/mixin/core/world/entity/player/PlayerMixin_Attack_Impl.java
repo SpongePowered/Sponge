@@ -270,7 +270,7 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin_Attack_i
     public void attackImpl$onNoDamageSound(final Level instance, final Player $$0, final double $$1, final double $$2, final double $$3,
             final SoundEvent $$4, final SoundSource $$5, final float $$6, final float $$7) {
         if (!this.attackImpl$attackEvent.isCancelled()) {
-            this.impl$playAttackSound($$0, SoundEvents.PLAYER_ATTACK_NODAMAGE);
+            this.impl$playAttackSound((Player) (Object) this, SoundEvents.PLAYER_ATTACK_NODAMAGE);
         }
     }
 
