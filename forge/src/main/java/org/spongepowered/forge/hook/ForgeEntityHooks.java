@@ -30,13 +30,7 @@ import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.entity.PartEntity;
 import org.spongepowered.common.hooks.EntityHooks;
 
-@SuppressWarnings("UnstableApiUsage")
 public class ForgeEntityHooks implements EntityHooks {
-    @Override
-    public boolean checkAttackEntity(final Player player, final Entity victim) {
-        return ForgeHooks.onPlayerAttackTarget(player, victim);
-    }
-
     @Override
     public Entity getParentPart(final Entity entity) {
         if (entity instanceof PartEntity<?> pe) {
