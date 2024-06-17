@@ -55,7 +55,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
-import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.util.DamageEventUtil;
 import org.spongepowered.forge.mixin.core.world.entity.LivingEntityMixin_Forge_Attack_impl;
 
