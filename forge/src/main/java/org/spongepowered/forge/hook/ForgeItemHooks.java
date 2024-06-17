@@ -24,21 +24,8 @@
  */
 package org.spongepowered.forge.hook;
 
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.phys.AABB;
-import net.minecraftforge.common.ToolActions;
 import org.spongepowered.common.hooks.ItemHooks;
 
 public class ForgeItemHooks implements ItemHooks {
-    @Override
-    public boolean canPerformSweepAttack(ItemStack heldItem) {
-        return heldItem.canPerformAction(ToolActions.SWORD_SWEEP);
-    }
 
-    @Override
-    public AABB getSweepingHitBox(Player player, ItemStack itemStack, Entity targetEntity) {
-        return itemStack.getSweepHitBox(player, targetEntity);
-    }
 }

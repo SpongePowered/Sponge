@@ -35,7 +35,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.ResourceKey;
@@ -93,17 +92,6 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin_Attack_i
         this.attackImpl$attack = null;
         this.attackImpl$attackEvent = null;
         this.attackImpl$finalDamageAmounts = null;
-    }
-
-    /**
-     * checkAttackEntity Hook
-     */
-    @Inject(method = "attack", cancellable = true, at = @At("HEAD"))
-    public void attackImpl$beforeAttackStart(final Entity target, final CallbackInfo ci){
-        final var thisPlayer = (Player) (Object) this;
-        if (!PlatformHooks.INSTANCE.getEntityHooks().checkAttackEntity(thisPlayer, target)) {
-            ci.cancel();
-        }
     }
 
     /**
@@ -198,18 +186,6 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin_Attack_i
     }
 
     /**
-     *  Sweep Hook - Redirects instanceOf SwordItem
-     */
-    @Redirect(method = "attack",
-            slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getItemInHand(Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/item/ItemStack;"),
-                    to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getHealth()F", ordinal = 0)),
-            at = @At(value = "CONSTANT", args = "classValue=net/minecraft/world/item/SwordItem"))
-    public boolean attackImpl$sweepHook(final Object instance, final Class<?> type) {
-        var stack = this.shadow$getItemInHand(InteractionHand.MAIN_HAND);
-        return PlatformHooks.INSTANCE.getItemHooks().canPerformSweepAttack(stack);
-    }
-
-    /**
      * Capture damageSource for sweep attacks event later
      * Calculate knockback earlier than vanilla for event
      * call the AttackEntityEvent
@@ -274,15 +250,6 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin_Attack_i
         }
     }
 
-    /**
-     * Sweep hit box Hook
-     */
-    @Redirect(method = "attack",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/phys/AABB;inflate(DDD)Lnet/minecraft/world/phys/AABB;"))
-    public AABB attackImpl$onSweepHitBox(final AABB instance, final double $$0, final double $$1, final double $$2) {
-        final var thisPlayer = (Player) (Object) this;
-        return PlatformHooks.INSTANCE.getItemHooks().getSweepingHitBox(thisPlayer, thisPlayer.getWeaponItem(), this.attackImpl$attack.target());
-    }
 
     /**
      * Call Sweep Attack Events
@@ -346,17 +313,6 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin_Attack_i
             at = @At(value = "CONSTANT", args = "classValue=net/minecraft/world/entity/boss/EnderDragonPart", ordinal = 0))
     public boolean attackImpl$parentPartsHookInstanceOf(final Object instance, final Class<?> type) {
         return false;
-    }
-
-    /**
-     * Hook parent part resolution
-     */
-    @ModifyVariable(method = "attack", ordinal = 1,
-            slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/boss/EnderDragonPart;parentMob:Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;"),
-                    to = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;hurtEnemy(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/entity/player/Player;)Z")),
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;level()Lnet/minecraft/world/level/Level;"))
-    public Entity attackImpl$parentPartsHook(final Entity entity) {
-        return PlatformHooks.INSTANCE.getEntityHooks().getParentPart(entity);
     }
 
     /**
