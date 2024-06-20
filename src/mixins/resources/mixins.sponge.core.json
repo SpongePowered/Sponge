@@ -250,6 +250,7 @@
         "world.level.chunk.LevelChunkMixin",
         "world.level.chunk.storage.EntityStorageMixin",
         "world.level.chunk.storage.IOWorkerMixin",
+        "world.level.chunk.storage.RegionFileMixin",
         "world.level.dimension.DimensionTypeMixin",
         "world.level.dimension.LevelStemMixin",
         "world.level.entity.PersistentEntitySectionManagerMixin",

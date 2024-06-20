@@ -75,6 +75,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.entity.raid.RaidsAccessor;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
+import org.spongepowered.common.bridge.world.level.chunk.storage.RegionFileBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.data.holder.SpongeServerLocationBaseDataHolder;
 import org.spongepowered.common.mixin.api.minecraft.world.level.LevelMixin_API;
@@ -367,7 +368,8 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     @Override
     public Stream<Vector3i> chunkPositions() {
         return this.api$chunkPosStream((regionFile, stream) ->
-                stream.filter(regionFile::doesChunkExist) // filter out non-existent chunks
+//            stream.filter(regionFile::doesChunkExist) // filter out non-existent chunks
+            stream.filter(cp -> ((RegionFileBridge) regionFile).bridge$doesChunkExist(cp)) // filter out non-existent chunks
                       .map(cp -> new Vector3i(cp.x, 0, cp.z)) // map to API type
         );
     }
