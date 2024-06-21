@@ -388,6 +388,19 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin_Attack_i
     }
 
     /**
+     * Set original damage after calling {@link Player#setAbsorptionAmount} in which we called the event
+     */
+    @ModifyVariable(method = "actuallyHurt", ordinal = 0,
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;setAbsorptionAmount(F)V",
+            shift = At.Shift.AFTER), argsOnly = true)
+    public float attackImpl$setOriginalDamage(final float value) {
+        if (this.attackImpl$actuallyHurtResult.event().isCancelled()) {
+            return 0;
+        }
+        return value;
+    }
+
+    /**
      * Set final damage after calling {@link Player#setAbsorptionAmount} in which we called the event
      */
     @ModifyVariable(method = "actuallyHurt", ordinal = 1,
