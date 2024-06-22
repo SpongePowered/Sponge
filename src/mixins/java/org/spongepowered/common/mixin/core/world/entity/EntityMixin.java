@@ -661,7 +661,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                                     (org.spongepowered.api.world.server.ServerWorld) targetWorld
                             );
                             final Vector3d finalPosition;
-                            if (reposition.isCancelled()) {
+                            if (SpongeCommon.post(reposition)) {
                                 // send them back to the original destination
                                 finalPosition = originalDestination;
                             } else if (reposition.destinationPosition() != destination) {

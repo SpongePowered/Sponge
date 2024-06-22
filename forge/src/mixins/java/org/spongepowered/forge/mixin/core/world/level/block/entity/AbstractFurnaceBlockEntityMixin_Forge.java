@@ -33,25 +33,33 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.entity.carrier.furnace.FurnaceBlockEntity;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.entity.CookingEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.recipe.cooking.CookingRecipe;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.MixinTargetHelper;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.block.entity.AbstractFurnaceBlockEntityBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -67,6 +75,7 @@ public abstract class AbstractFurnaceBlockEntityMixin_Forge implements AbstractF
     }
     // @formatter:on
 
+    private boolean forgeImpl$filledWaterBucket;
 
     // Tick up and Start
     @Redirect(method = "serverTick",
@@ -121,23 +130,55 @@ public abstract class AbstractFurnaceBlockEntityMixin_Forge implements AbstractF
     }
 
     // Finish
+    @Inject(method = "burn", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/NonNullList;set(ILjava/lang/Object;)Ljava/lang/Object;"),
+        slice = @Slice(
+            from = @At(value = "FIELD", target = "Lnet/minecraft/world/level/block/Blocks;WET_SPONGE:Lnet/minecraft/world/level/block/Block;", opcode = Opcodes.GETSTATIC)
+        ))
+    private void forgeImpl$captureBucketFill(final RegistryAccess $$0, final RecipeHolder<?> $$1, final NonNullList<ItemStack> $$2, final int $$3, final CallbackInfoReturnable<Boolean> cir) {
+        final AbstractFurnaceBlockEntityMixin_Forge mixinSelf = MixinTargetHelper.cast(this);
+        mixinSelf.forgeImpl$filledWaterBucket = true;
+    }
+
     @Inject(
         method = "burn",
+        locals = LocalCapture.CAPTURE_FAILHARD,
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;shrink(I)V"))
     private void forgeImpl$afterSmeltItem(
         final RegistryAccess registryAccess, final RecipeHolder<?> recipe,
         final NonNullList<ItemStack> slots, final int var2,
-        final CallbackInfoReturnable<Boolean> cir
+        final CallbackInfoReturnable<Boolean> cir,
+        final ItemStack $$4, final ItemStack $$5, final ItemStack $$6
     ) {
-        final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(slots.get(1));
-        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
-        final FurnaceBlockEntity entity = cause.first(FurnaceBlockEntity.class)
-            .orElseThrow(() -> new IllegalStateException("Expected to have a FurnaceBlockEntity in the Cause"));
-        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(recipe.value().getResultItem(registryAccess));
-        final CookingEvent.Finish event = SpongeEventFactory.createCookingEventFinish(cause, entity,
-            Collections.singletonList(snapshot), Optional.of(fuel),
-                Optional.of((CookingRecipe) recipe.value()), Optional.of((ResourceKey) (Object) recipe.id()));
-        SpongeCommon.post(event);
-    }
+        final AbstractFurnaceBlockEntityMixin_Forge mixinSelf = MixinTargetHelper.cast(this);
+        final FurnaceBlockEntity entity = (FurnaceBlockEntity) this;
 
+        final List<SlotTransaction> transactions = new ArrayList<>();
+        $$4.grow(1);
+        final ItemStackSnapshot originalSmeltItem = ItemStackUtil.snapshotOf($$4);
+        $$4.shrink(1);
+        transactions.add(new SlotTransaction(entity.inventory().slot(0).get(), originalSmeltItem, ItemStackUtil.snapshotOf($$4)));
+
+        final boolean hasFuel = !mixinSelf.forgeImpl$filledWaterBucket;
+        if (mixinSelf.forgeImpl$filledWaterBucket) {
+            transactions.add(new SlotTransaction(entity.inventory().slot(1).get(), ItemStackSnapshot.empty(), ItemStackUtil.snapshotOf(slots.get(1))));
+        }
+        mixinSelf.forgeImpl$filledWaterBucket = false;
+
+        if ($$6.isEmpty()) {
+            transactions.add(new SlotTransaction(entity.inventory().slot(2).get(), ItemStackSnapshot.empty(), ItemStackUtil.snapshotOf($$5)));
+        } else if (ItemStack.isSameItemSameComponents($$6, $$5)) {
+            $$6.shrink(1);
+            final ItemStackSnapshot originalResult = ItemStackUtil.snapshotOf($$6);
+            $$6.grow(1);
+            transactions.add(new SlotTransaction(entity.inventory().slot(2).get(), originalResult, ItemStackUtil.snapshotOf($$6)));
+        }
+        final Optional<ItemStackSnapshot> fuel = hasFuel && !slots.get(1).isEmpty() ? Optional.of(ItemStackUtil.snapshotOf(slots.get(1))) : Optional.empty();
+        final CookingEvent.Finish event = SpongeEventFactory.createCookingEventFinish(PhaseTracker.getCauseStackManager().currentCause(), entity,
+            fuel, Optional.ofNullable((CookingRecipe) recipe.value()), Optional.of((ResourceKey) (Object) recipe.id()), Collections.unmodifiableList(transactions));
+        SpongeCommon.post(event);
+
+        for (final SlotTransaction transaction : transactions) {
+            transaction.custom().ifPresent(item -> slots.set(((SlotAdapter) transaction.slot()).getOrdinal(), ItemStackUtil.fromSnapshotToNative(item)));
+        }
+    }
 }

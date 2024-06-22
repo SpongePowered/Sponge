@@ -178,6 +178,7 @@ public final class DataUtil {
             compound = new CompoundTag();
             dataHolder.data$setCompound(compound);
         }
+        compound = compound.copy(); // do not modify the original as it might be shared
         compound.remove(Constants.Sponge.Data.V3.SPONGE_DATA_ROOT.asString(".")); // Remove all previous SpongeData
 
         final DataContainer allData = NBTTranslator.INSTANCE.translate(compound);

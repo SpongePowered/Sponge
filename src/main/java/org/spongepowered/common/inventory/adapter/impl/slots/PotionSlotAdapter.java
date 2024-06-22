@@ -22,14 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.state;
+package org.spongepowered.common.inventory.adapter.impl.slots;
 
-import net.minecraft.world.level.block.state.properties.EnumProperty;
-import org.spongepowered.api.data.type.StringRepresentable;
-import org.spongepowered.api.state.EnumStateProperty;
-import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.slot.PotionSlot;
+import org.spongepowered.common.inventory.fabric.Fabric;
+import org.spongepowered.common.inventory.lens.impl.slot.FilteringSlotLens;
 
-@Mixin(value = EnumProperty.class)
-public abstract class EnumPropertyMixin_API<E extends Enum<E> & StringRepresentable> extends PropertyMixin_API<E> implements EnumStateProperty<E> {
+public class PotionSlotAdapter extends FilteringSlotAdapter implements PotionSlot {
 
+    public PotionSlotAdapter(final Fabric fabric, final FilteringSlotLens lens, final Inventory parent) {
+        super(fabric, lens, parent);
+    }
 }

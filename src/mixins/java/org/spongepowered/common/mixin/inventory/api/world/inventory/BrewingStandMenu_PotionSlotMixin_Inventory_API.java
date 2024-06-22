@@ -22,14 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.state;
+package org.spongepowered.common.mixin.inventory.api.world.inventory;
 
-import net.minecraft.world.level.block.state.properties.EnumProperty;
-import org.spongepowered.api.data.type.StringRepresentable;
-import org.spongepowered.api.state.EnumStateProperty;
+import org.spongepowered.api.item.inventory.slot.PotionSlot;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(value = EnumProperty.class)
-public abstract class EnumPropertyMixin_API<E extends Enum<E> & StringRepresentable> extends PropertyMixin_API<E> implements EnumStateProperty<E> {
-
+@Mixin(targets = "net/minecraft/world/inventory/BrewingStandMenu$PotionSlot")
+public abstract class BrewingStandMenu_PotionSlotMixin_Inventory_API implements PotionSlot {
 }

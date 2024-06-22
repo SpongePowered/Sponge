@@ -22,14 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.state;
+package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity.vault;
 
-import net.minecraft.world.level.block.state.properties.EnumProperty;
-import org.spongepowered.api.data.type.StringRepresentable;
-import org.spongepowered.api.state.EnumStateProperty;
+import net.minecraft.world.level.block.entity.vault.VaultState;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(value = EnumProperty.class)
-public abstract class EnumPropertyMixin_API<E extends Enum<E> & StringRepresentable> extends PropertyMixin_API<E> implements EnumStateProperty<E> {
-
+@Mixin(VaultState.class)
+public abstract class VaultStateMixin_API implements org.spongepowered.api.data.type.VaultState {
 }

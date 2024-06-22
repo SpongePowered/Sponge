@@ -108,6 +108,8 @@ public final class BlockData {
                                 return MatterTypes.SOLID.get();
                             }
                         })
+                    .create(Keys.BURNABLE)
+                        .get(BlockBehaviour.BlockStateBase::ignitedByLava)
                     // TODO state above
                     .create(Keys.REPRESENTED_INSTRUMENT)
                         .get(h -> (InstrumentType) (Object) h.instrument());

@@ -38,6 +38,7 @@ import org.spongepowered.common.inventory.lens.impl.QueryLens;
 import org.spongepowered.common.inventory.lens.impl.slot.QueriedSlotLens;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -73,6 +74,7 @@ public abstract class SpongeQuery implements Query {
         // Remove duplicate slot-lenses
         Map<SlotLens, Map<Key<?>, Object> > lenses = new LinkedHashMap<>();
         Map<Lens, Integer> toRemove = new HashMap<>();
+        Map<SlotLens, List<Lens>> backingLenses = new HashMap<>();
         for (Map.Entry<Lens, Integer> entry : matches.entrySet()) {
             final Lens slotLens = entry.getKey();
             if (slotLens.slotCount() == 1) {
@@ -84,6 +86,13 @@ public abstract class SpongeQuery implements Query {
                 final Map<Key<?>, Object> dataAt = parent == null ? Collections.emptyMap() : parent.getDataFor(slotLens);
                 // Collect all data for the SlotLens
                 lenses.computeIfAbsent(sl, k -> new HashMap<>()).putAll(dataAt);
+                backingLenses.computeIfAbsent(sl, k -> new ArrayList<>()).add(slotLens);
+            }
+        }
+        for (final Map.Entry<SlotLens, List<Lens>> entry : backingLenses.entrySet()) {
+            if (entry.getValue().size() == 1) {
+                toRemove.remove(entry.getValue().getFirst());
+                lenses.remove(entry.getKey());
             }
         }
         // remove all single-slot lenses
