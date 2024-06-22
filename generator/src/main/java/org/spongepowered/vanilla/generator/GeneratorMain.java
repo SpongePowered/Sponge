@@ -50,9 +50,12 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageEffects;
 import net.minecraft.world.damagesource.DamageScaling;
 import net.minecraft.world.entity.Display;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.animal.Fox;
+import net.minecraft.world.entity.animal.MushroomCow;
 import net.minecraft.world.entity.animal.Panda;
+import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.entity.animal.Rabbit;
 import net.minecraft.world.entity.animal.TropicalFish;
 import net.minecraft.world.entity.animal.horse.Llama;
@@ -289,6 +292,20 @@ public final class GeneratorMain {
                  "data.type",
                  "RabbitTypes",
                  Rabbit.Variant.class,
+                 "getSerializedName",
+                 "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                 "data.type",
+                 "ParrotTypes",
+                 Parrot.Variant.class,
+                 "getSerializedName",
+                 "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                 "data.type",
+                 "MooshroomTypes",
+                 MushroomCow.MushroomType.class,
                  "getSerializedName",
                  "sponge"
             ),
@@ -539,11 +556,11 @@ public final class GeneratorMain {
                 context.relativeClass("statistic", "Statistic"),
                 Registries.CUSTOM_STAT
             ),
-            /*new RegistryEntriesValidator<>( // TODO: Needs to be updated
+            new RegistryEntriesValidator<>(
                 "statistic",
                 "StatisticCategories",
-                Registry.STAT_TYPE_REGISTRY
-            ), */
+                Registries.STAT_TYPE
+            ),
             new RegistryEntriesGenerator<>(
                 "world.generation.structure",
                 "Structures",
@@ -618,8 +635,7 @@ public final class GeneratorMain {
             ),
             new BlockStateDataProviderGenerator(),
             new BlockStatePropertiesGenerator(),
-            // TODO fix me
-            //new BlockStatePropertyKeysGenerator(),
+            new BlockStatePropertyKeysGenerator(),
             new RegistryEntriesGenerator<>(
                     "world.generation.feature",
                     "PlacedFeatures",
@@ -728,6 +744,13 @@ public final class GeneratorMain {
                     "ItemDisplayTypes",
                     ItemDisplayContext.class,
                     "getSerializedName",
+                    "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                    "item.inventory.equipment",
+                    "EquipmentGroups",
+                    EquipmentSlot.Type.class,
+                    "name",
                     "sponge"
             ),
             new EnumEntriesValidator<>(
