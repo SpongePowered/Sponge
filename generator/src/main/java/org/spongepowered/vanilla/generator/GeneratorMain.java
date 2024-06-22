@@ -71,6 +71,7 @@ import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.block.state.properties.BambooLeaves;
+import net.minecraft.world.level.block.state.properties.DripstoneThickness;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.block.state.properties.SculkSensorPhase;
 import org.tinylog.Logger;
@@ -768,6 +769,13 @@ public final class GeneratorMain {
                     "EquipmentGroups",
                     EquipmentSlot.Type.class,
                     "name",
+                    "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                    "data.type",
+                    "DripstoneSegments",
+                    DripstoneThickness.class,
+                    "getSerializedName",
                     "sponge"
             ),
             new EnumEntriesValidator<>(
