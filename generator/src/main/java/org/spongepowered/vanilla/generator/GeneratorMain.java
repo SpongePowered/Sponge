@@ -241,14 +241,14 @@ public final class GeneratorMain {
                  "entity",
                  "EntityCategories",
                  MobCategory.class,
-                 "getName",
+                 "getSerializedName",
                  "sponge"
             ),
             new EnumEntriesValidator<>(
                  "data.type",
                  "BoatTypes",
                  Boat.Type.class,
-                 "getName",
+                 "getSerializedName",
                  "sponge"
             ),
             new RegistryEntriesGenerator<>(
@@ -276,7 +276,7 @@ public final class GeneratorMain {
                  "data.type",
                  "DyeColors",
                  DyeColor.class,
-                 "getName",
+                 "getSerializedName",
                  "sponge"
             ),
             new EnumEntriesValidator<>(
@@ -360,7 +360,7 @@ public final class GeneratorMain {
                  "item",
                  "ItemRarities",
                  Rarity.class,
-                 "name",
+                 "getSerializedName",
                  "sponge"
             ),
             new EnumEntriesValidator<>(
