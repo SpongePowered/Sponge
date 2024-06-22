@@ -245,6 +245,13 @@ public final class GeneratorMain {
                  context.relativeClass("data.type", "ArmorMaterial"),
                  Registries.ARMOR_MATERIAL
             ),
+            new RegistryEntriesGenerator<>(
+                 "map.decoration",
+                 "MapDecorationTypes",
+                 "MAP_DECORATION_TYPE",
+                 context.relativeClass("map.decoration", "MapDecorationType"),
+                 Registries.MAP_DECORATION_TYPE
+            ),
             new EnumEntriesValidator<>(
                  "data.type",
                  "BambooLeavesTypes",
