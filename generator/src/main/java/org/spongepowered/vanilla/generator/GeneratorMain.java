@@ -52,6 +52,7 @@ import net.minecraft.world.damagesource.DamageScaling;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.animal.Fox;
+import net.minecraft.world.entity.animal.MushroomCow;
 import net.minecraft.world.entity.animal.Panda;
 import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.entity.animal.TropicalFish;
@@ -289,6 +290,13 @@ public final class GeneratorMain {
                  "data.type",
                  "ParrotTypes",
                  Parrot.Variant.class,
+                 "getSerializedName",
+                 "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                 "data.type",
+                 "MooshroomTypes",
+                 MushroomCow.MushroomType.class,
                  "getSerializedName",
                  "sponge"
             ),
@@ -539,11 +547,11 @@ public final class GeneratorMain {
                 context.relativeClass("statistic", "Statistic"),
                 Registries.CUSTOM_STAT
             ),
-            /*new RegistryEntriesValidator<>( // TODO: Needs to be updated
+            new RegistryEntriesValidator<>(
                 "statistic",
                 "StatisticCategories",
-                Registry.STAT_TYPE_REGISTRY
-            ), */
+                Registries.STAT_TYPE
+            ),
             new RegistryEntriesGenerator<>(
                 "world.generation.structure",
                 "Structures",
