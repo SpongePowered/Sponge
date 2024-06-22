@@ -29,7 +29,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
@@ -284,12 +283,24 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
     @Override
     public void sendBlockChange(final int x, final int y, final int z, final org.spongepowered.api.block.BlockState state) {
         Objects.requireNonNull(state, "state");
-        this.api$broadcast(new ClientboundBlockUpdatePacket(new BlockPos(x, y, z), (BlockState) state));
+
+        final ClientboundBlockUpdatePacket packet = new ClientboundBlockUpdatePacket(new BlockPos(x, y, z), (BlockState) state);
+
+        ((net.minecraft.world.level.Level) (Object) this).players()
+                .stream()
+                .filter(ServerPlayer.class::isInstance)
+                .map(ServerPlayer.class::cast)
+                .forEach(p -> p.connection.send(packet));
     }
 
     @Override
     public void resetBlockChange(final int x, final int y, final int z) {
-        this.api$broadcast(new ClientboundBlockUpdatePacket((LevelReader) this, new BlockPos(x, y, z)));
+        final ClientboundBlockUpdatePacket packet = new ClientboundBlockUpdatePacket((LevelReader) this, new BlockPos(x, y, z));
+
+        ((net.minecraft.world.level.Level) (Object) this).players().stream()
+                .filter(ServerPlayer.class::isInstance)
+                .map(ServerPlayer.class::cast)
+                .forEach(p -> p.connection.send(packet));
     }
 
     @Override
@@ -301,7 +312,11 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
         final BlockPos pos = new BlockPos(x, y, z);
         final int id = ((SpongeServer) this.shadow$getServer()).getOrCreateBlockDestructionId(pos);
         final int progressStage = progress == 1 ? 9 : (int) (progress * 10);
-        this.api$broadcast(new ClientboundBlockDestructionPacket(id, pos, progressStage));
+        final ClientboundBlockDestructionPacket packet = new ClientboundBlockDestructionPacket(id, pos, progressStage);
+        ((net.minecraft.world.level.Level) (Object) this).players().stream()
+                .filter(ServerPlayer.class::isInstance)
+                .map(ServerPlayer.class::cast)
+                .forEach(p -> p.connection.send(packet));
     }
 
     @Override
@@ -309,7 +324,11 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
         final BlockPos pos = new BlockPos(x, y, z);
         final Integer id = ((SpongeServer) this.shadow$getServer()).getBlockDestructionId(pos);
         if (id != null) {
-            this.api$broadcast(new ClientboundBlockDestructionPacket(id, pos, -1));
+            final ClientboundBlockDestructionPacket packet =new ClientboundBlockDestructionPacket(id, pos, -1);
+            ((net.minecraft.world.level.Level) (Object) this).players().stream()
+                    .filter(ServerPlayer.class::isInstance)
+                    .map(ServerPlayer.class::cast)
+                    .forEach(p -> p.connection.send(packet));
         }
     }
 
@@ -425,6 +444,10 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
         return volume;
     }
 
+    private void api$playRecord(final Vector3i position, @Nullable final MusicDisc recordType) {
+        this.shadow$getServer().getPlayerList().broadcastAll(SpongeMusicDisc.createPacket(position, recordType), this.shadow$dimension());
+    }
+
     // EntityVolume
 
     @Override
@@ -529,17 +552,5 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
     public int light(final LightType type, final int x, final int y, final int z) {
         var thisLevel = ((BlockAndTintGetter) this);
         return thisLevel.getBrightness((LightLayer) (Object) type, new BlockPos(x, y, z));
-    }
-
-    private void api$playRecord(final Vector3i position, @Nullable final MusicDisc recordType) {
-        this.api$broadcast(SpongeMusicDisc.createPacket(position, recordType));
-    }
-
-    private void api$broadcast(final Packet<?> packet) {
-        ((net.minecraft.world.level.Level) (Object) this).players()
-                .stream()
-                .filter(ServerPlayer.class::isInstance)
-                .map(ServerPlayer.class::cast)
-                .forEach(p -> p.connection.send(packet));
     }
 }
