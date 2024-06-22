@@ -140,8 +140,8 @@ class RegistryEntriesGenerator<V> implements Generator {
         final Registry<V> finalRegistry = registry;
         registry.stream()
             .filter(this.filter)
-            .sorted(Comparator.comparing(registry::getKey))
             .map(v -> this.makeField(this.targetClassSimpleName, fieldType, factoryMethod, finalRegistry.getKey(v), v instanceof FeatureElement fe ? fe.requiredFeatures() : null))
+            .sorted(Comparator.comparing(f -> f.name))
             .forEachOrdered(clazz::addField);
 
         clazz.addMethod(registryMethod);
