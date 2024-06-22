@@ -49,6 +49,7 @@ import net.minecraft.server.packs.resources.MultiPackResourceManager;
 import net.minecraft.world.damagesource.DamageEffects;
 import net.minecraft.world.damagesource.DamageScaling;
 import net.minecraft.world.entity.Display;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.animal.Fox;
 import net.minecraft.world.entity.animal.TropicalFish;
@@ -695,6 +696,13 @@ public final class GeneratorMain {
                     "ItemDisplayTypes",
                     ItemDisplayContext.class,
                     "getSerializedName",
+                    "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                    "item.inventory.equipment",
+                    "EquipmentGroups",
+                    EquipmentSlot.Type.class,
+                    "name",
                     "sponge"
             ),
             new EnumEntriesValidator<>(
