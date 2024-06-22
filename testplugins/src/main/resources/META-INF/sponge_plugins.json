@@ -116,6 +116,12 @@
             "description": "Testing recipes"
         },
         {
+            "id": "registrytest",
+            "name": "Registry Test",
+            "entrypoint": "org.spongepowered.test.registry.RegistryTest",
+            "description": "Testing registries"
+        },
+        {
             "id": "particletest",
             "name": "Particle Test",
             "entrypoint": "org.spongepowered.test.particle.ParticleTest",
