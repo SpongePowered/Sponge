@@ -57,6 +57,7 @@ import net.minecraft.world.entity.animal.TropicalFish;
 import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.animal.horse.Markings;
 import net.minecraft.world.entity.animal.horse.Variant;
+import net.minecraft.world.entity.monster.SpellcasterIllager;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -274,6 +275,13 @@ public final class GeneratorMain {
                  "PandaGenes",
                  Panda.Gene.class,
                  "getSerializedName",
+                 "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                 "data.type",
+                 "SpellTypes",
+                 SpellcasterIllager.IllagerSpell.class,
+                 "name",
                  "sponge"
             ),
             new EnumEntriesValidator<>(
