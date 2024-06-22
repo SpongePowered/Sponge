@@ -550,7 +550,9 @@ public final class GeneratorMain {
                 "MusicDiscs",
                 "MUSIC_DISC",
                 context.relativeClass("effect.sound.music", "MusicDisc"),
-                Registries.JUKEBOX_SONG
+                Registries.JUKEBOX_SONG,
+                $ -> true,
+                RegistryScope.SERVER
             ),
             new RegistryEntriesValidator<>(
                 "item.recipe",
