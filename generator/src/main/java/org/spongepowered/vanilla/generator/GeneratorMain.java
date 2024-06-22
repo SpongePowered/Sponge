@@ -59,6 +59,7 @@ import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.Tiers;
 import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.WorldDataConfiguration;
@@ -695,6 +696,13 @@ public final class GeneratorMain {
                     "ItemDisplayTypes",
                     ItemDisplayContext.class,
                     "getSerializedName",
+                    "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                    "data.type",
+                    "ItemTiers",
+                    Tiers.class,
+                    "name",
                     "sponge"
             ),
             new EnumEntriesValidator<>(
