@@ -539,11 +539,11 @@ public final class GeneratorMain {
                 context.relativeClass("statistic", "Statistic"),
                 Registries.CUSTOM_STAT
             ),
-            /*new RegistryEntriesValidator<>( // TODO: Needs to be updated
+            new RegistryEntriesValidator<>(
                 "statistic",
                 "StatisticCategories",
-                Registry.STAT_TYPE_REGISTRY
-            ), */
+                Registries.STAT_TYPE
+            ),
             new RegistryEntriesGenerator<>(
                 "world.generation.structure",
                 "Structures",
