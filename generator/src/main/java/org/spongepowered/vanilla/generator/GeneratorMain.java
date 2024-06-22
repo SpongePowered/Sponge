@@ -66,6 +66,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.block.state.properties.BambooLeaves;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
+import net.minecraft.world.level.block.state.properties.SculkSensorPhase;
 import org.tinylog.Logger;
 
 import java.io.IOException;
@@ -717,6 +718,13 @@ public final class GeneratorMain {
                     "entity.display",
                     "BillboardTypes",
                     Display.BillboardConstraints.class,
+                    "getSerializedName",
+                    "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                    "data.type",
+                    "SculkSensorStates",
+                    SculkSensorPhase.class,
                     "getSerializedName",
                     "sponge"
             ),
