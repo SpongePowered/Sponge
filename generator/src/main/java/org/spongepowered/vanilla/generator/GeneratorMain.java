@@ -548,7 +548,7 @@ public final class GeneratorMain {
             new RegistryEntriesGenerator<>(
                 "effect.sound.music",
                 "MusicDiscs",
-                "JUKEBOX_SONG",
+                "MUSIC_DISC",
                 context.relativeClass("effect.sound.music", "MusicDisc"),
                 Registries.JUKEBOX_SONG
             ),
