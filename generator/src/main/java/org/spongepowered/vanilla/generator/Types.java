@@ -101,7 +101,12 @@ final class Types {
     }
 
     static String keyToFieldName(final String key) {
-        return Types.ILLEGAL_FIELD_CHARACTERS.matcher(key.toUpperCase(Locale.ROOT)).replaceAll("_");
+        return switch (key) {
+            case "5" -> "FIVE";
+            case "11" -> "ELEVEN";
+            case "13" -> "THIRTEEN";
+            default -> Types.ILLEGAL_FIELD_CHARACTERS.matcher(key.toUpperCase(Locale.ROOT)).replaceAll("_");
+        };
     }
 
     public static CodeBlock resourceKey(final ResourceLocation location) {
