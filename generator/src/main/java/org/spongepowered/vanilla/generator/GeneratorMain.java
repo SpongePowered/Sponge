@@ -530,6 +530,13 @@ public final class GeneratorMain {
                 context.relativeClass("data.type", "FrogType"),
                 Registries.FROG_VARIANT
             ),
+            new RegistryEntriesGenerator<>(
+                "effect.sound.music",
+                "MusicDiscs",
+                "JUKEBOX_SONG",
+                context.relativeClass("effect.sound.music", "MusicDisc"),
+                Registries.JUKEBOX_SONG
+            ),
             new RegistryEntriesValidator<>(
                 "item.recipe",
                 "RecipeTypes",
