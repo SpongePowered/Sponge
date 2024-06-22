@@ -46,20 +46,24 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.server.packs.resources.CloseableResourceManager;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageEffects;
 import net.minecraft.world.damagesource.DamageScaling;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.animal.Fox;
+import net.minecraft.world.entity.animal.Panda;
 import net.minecraft.world.entity.animal.Rabbit;
 import net.minecraft.world.entity.animal.TropicalFish;
 import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.animal.horse.Markings;
 import net.minecraft.world.entity.animal.horse.Variant;
+import net.minecraft.world.entity.monster.SpellcasterIllager;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.Tiers;
 import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.WorldDataConfiguration;
@@ -258,6 +262,27 @@ public final class GeneratorMain {
                  "DyeColors",
                  DyeColor.class,
                  "getName",
+                 "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                 "world.difficulty",
+                 "Difficulties",
+                 Difficulty.class,
+                 "getSerializedName",
+                 "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                 "data.type",
+                 "PandaGenes",
+                 Panda.Gene.class,
+                 "getSerializedName",
+                 "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                 "data.type",
+                 "SpellTypes",
+                 SpellcasterIllager.IllagerSpell.class,
+                 "name",
                  "sponge"
             ),
             new EnumEntriesValidator<>(
@@ -703,6 +728,13 @@ public final class GeneratorMain {
                     "ItemDisplayTypes",
                     ItemDisplayContext.class,
                     "getSerializedName",
+                    "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                    "data.type",
+                    "ItemTiers",
+                    Tiers.class,
+                    "name",
                     "sponge"
             ),
             new EnumEntriesValidator<>(
