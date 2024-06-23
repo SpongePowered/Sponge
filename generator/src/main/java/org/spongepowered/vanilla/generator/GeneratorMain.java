@@ -70,9 +70,12 @@ import net.minecraft.world.item.Tiers;
 import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.WorldDataConfiguration;
+import net.minecraft.world.level.block.entity.trialspawner.TrialSpawnerState;
 import net.minecraft.world.level.block.state.properties.BambooLeaves;
+import net.minecraft.world.level.block.state.properties.DripstoneThickness;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.block.state.properties.SculkSensorPhase;
+import net.minecraft.world.level.block.state.properties.Tilt;
 import net.minecraft.world.level.material.PushReaction;
 import org.tinylog.Logger;
 
@@ -780,6 +783,13 @@ public final class GeneratorMain {
             ),
             new EnumEntriesValidator<>(
                     "data.type",
+                    "DripstoneSegments",
+                    DripstoneThickness.class,
+                    "getSerializedName",
+                    "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                    "data.type",
                     "ItemTiers",
                     Tiers.class,
                     "name",
@@ -794,8 +804,22 @@ public final class GeneratorMain {
             ),
             new EnumEntriesValidator<>(
                     "data.type",
+                    "Tilts",
+                    Tilt.class,
+                    "getSerializedName",
+                    "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                    "data.type",
                     "SculkSensorStates",
                     SculkSensorPhase.class,
+                    "getSerializedName",
+                    "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                    "data.type",
+                    "TrialSpawnerStates",
+                    TrialSpawnerState.class,
                     "getSerializedName",
                     "sponge"
             ),
