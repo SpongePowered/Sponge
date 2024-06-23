@@ -148,7 +148,7 @@ public class HeldHandSlotLens extends AbstractLens implements SlotLens {
     }
 
     public Predicate<EquipmentType> getEquipmentTypeFilter() {
-        return (e) -> e == EquipmentTypes.MAIN_HAND.get();
+        return (e) -> e == EquipmentTypes.MAINHAND.get();
     }
 
     public Predicate<org.spongepowered.api.item.inventory.ItemStack> getItemStackFilter() {
