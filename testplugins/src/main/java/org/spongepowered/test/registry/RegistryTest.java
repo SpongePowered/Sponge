@@ -44,6 +44,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
+import java.util.Arrays;
 
 @Plugin("registrytest")
 public final class RegistryTest implements LoadableModule {
@@ -118,6 +119,10 @@ public final class RegistryTest implements LoadableModule {
                             final var catalogClass = catalogedByAnnotation.value()[0];
                             if (!Modifier.isFinal(catalogClass.getModifiers())) {
                                 this.logger.error("{} is not final", catalogClass.getSimpleName());
+                            }
+
+                            if (Arrays.stream(catalogClass.getDeclaredConstructors()).anyMatch(ctor -> !Modifier.isPrivate(ctor.getModifiers()))) {
+                                this.logger.error("{} has non-private constructors", catalogClass.getSimpleName());
                             }
 
                             final Method registryMethod;
