@@ -22,18 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.effect.particle;
+package org.spongepowered.common.bridge.effect;
 
-import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.List;
+public interface ViewerBridge {
 
-interface CachedParticlePacket {
+    // Used to send sponge custom packets
+    default void bridge$sendToViewer(final org.spongepowered.api.network.channel.packet.Packet packet) {
+    }
 
-    void process(double x, double y, double z, List<Packet<? super ClientGamePacketListener>> output);
+    default void bridge$sendToViewer(final Packet<ClientGamePacketListener> packet) {
+    }
 
-    @Nullable ParticleOptions particleOptions();
 }

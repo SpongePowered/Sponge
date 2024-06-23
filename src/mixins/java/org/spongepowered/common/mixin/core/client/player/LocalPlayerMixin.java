@@ -22,18 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.effect.particle;
+package org.spongepowered.common.mixin.core.client.player;
 
-import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.List;
+@Mixin(LocalPlayer.class)
+public abstract class LocalPlayerMixin extends AbstractClientPlayerMixin {
 
-interface CachedParticlePacket {
+    @Shadow @Final public ClientPacketListener connection;
 
-    void process(double x, double y, double z, List<Packet<? super ClientGamePacketListener>> output);
+    @Override
+    public void bridge$sendToViewer(final Packet<ClientGamePacketListener> packet) {
+        packet.handle(this.connection);
+    }
 
-    @Nullable ParticleOptions particleOptions();
 }

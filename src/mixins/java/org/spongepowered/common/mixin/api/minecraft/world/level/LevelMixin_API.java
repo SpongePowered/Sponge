@@ -26,27 +26,16 @@ package org.spongepowered.common.mixin.api.minecraft.world.level;
 
 import net.kyori.adventure.sound.Sound;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
-import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerChunkCache;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Tuple;
-import net.minecraft.world.item.JukeboxSong;
-import net.minecraft.world.item.JukeboxSongPlayer;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
@@ -58,7 +47,6 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.data.persistence.DataContainer;
-import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
@@ -84,12 +72,12 @@ import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.level.ChunkMapAccessor;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
-import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.bridge.effect.ViewerBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
-import org.spongepowered.common.effect.particle.SpongeParticleHelper;
+import org.spongepowered.common.effect.SpongeForwardingViewer;
+import org.spongepowered.common.effect.util.ViewerPacketUtil;
 import org.spongepowered.common.entity.SpongeEntityTypes;
 import org.spongepowered.common.registry.RegistryHolderLogic;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
@@ -113,13 +101,12 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 @Mixin(net.minecraft.world.level.Level.class)
-public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W, L>> implements World<W, L>, SpongeRegistryHolder, AutoCloseable {
+public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W, L>> implements World<W, L>, SpongeRegistryHolder, SpongeForwardingViewer, AutoCloseable {
 
     // @formatter:off
     @Shadow public @Final net.minecraft.util.RandomSource random;
 
     @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
-    @Shadow public abstract void shadow$playSound(net.minecraft.world.entity.player.@Nullable Player p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, SoundSource p_184148_9_, float p_184148_10_, float p_184148_11_);
     @Shadow public abstract LevelData shadow$getLevelData();
     @Shadow public abstract ResourceKey<net.minecraft.world.level.Level> shadow$dimension();
     @Shadow public abstract void shadow$setBlockEntity(net.minecraft.world.level.block.entity.BlockEntity var1);
@@ -255,70 +242,23 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
     // Viewer
 
     @Override
-    public void spawnParticles(final ParticleEffect particleEffect, final Vector3d position, final int radius) {
-        Objects.requireNonNull(particleEffect, "particleEffect");
-        Objects.requireNonNull(position, "position");
-        if (radius <= 0) {
-            throw new IllegalArgumentException("The radius has to be greater then zero!");
-        }
-
-        SpongeParticleHelper.sendPackets(particleEffect, position, radius, this.shadow$dimension(), this.shadow$getServer().getPlayerList());
-    }
-
-    @Override
-    public void playMusicDisc(final Vector3i position, final MusicDisc musicDisc) {
-        this.api$playRecord(Objects.requireNonNull(position, "position"), Objects.requireNonNull(musicDisc, "musicDisc"));
-    }
-
-    @Override
-    public void stopMusicDisc(final Vector3i position) {
-        this.api$playRecord(Objects.requireNonNull(position, "position"), null);
-    }
-
-    @Override
-    public void sendBlockChange(final int x, final int y, final int z, final org.spongepowered.api.block.BlockState state) {
-        Objects.requireNonNull(state, "state");
-
-        final ClientboundBlockUpdatePacket packet = new ClientboundBlockUpdatePacket(new BlockPos(x, y, z), (BlockState) state);
-
-        ((net.minecraft.world.level.Level) (Object) this).players()
-                .stream()
-                .filter(ServerPlayer.class::isInstance)
-                .map(ServerPlayer.class::cast)
-                .forEach(p -> p.connection.send(packet));
+    public void playMusicDisc(final int x, final int y, final int z, final MusicDisc musicDisc) {
+        ((ViewerBridge) this).bridge$sendToViewer(ViewerPacketUtil.playMusicDisc(x, y, z, musicDisc, ((LevelAccessor) this).registryAccess()));
     }
 
     @Override
     public void resetBlockChange(final int x, final int y, final int z) {
-        final ClientboundBlockUpdatePacket packet = new ClientboundBlockUpdatePacket((LevelReader) this, new BlockPos(x, y, z));
-
-        ((net.minecraft.world.level.Level) (Object) this).players().stream()
-                .filter(ServerPlayer.class::isInstance)
-                .map(ServerPlayer.class::cast)
-                .forEach(p -> p.connection.send(packet));
+        ((ViewerBridge) this).bridge$sendToViewer(ViewerPacketUtil.blockUpdate(x, y, z, this));
     }
-
-    // ArchetypeVolumeCreator
 
     // Audience
 
     @Override
     public void playSound(final Sound sound, final double x, final double y, final double z) {
-        // Check if the event is registered (ie has an integer ID)
-        final ResourceLocation soundKey = SpongeAdventure.asVanilla(sound.name());
-        final Optional<SoundEvent> event = SpongeCommon.vanillaRegistry(Registries.SOUND_EVENT).getOptional(soundKey);
-        final SoundSource soundCategory = SpongeAdventure.asVanilla(sound.source());
-        if (event.isPresent()) {
-            this.shadow$playSound(null,x, y, z, event.get(), soundCategory, sound.volume(), sound.pitch());
-        } else {
-            // Otherwise send it as a custom sound
-            final float volume = sound.volume();
-            final double radius = volume > 1.0f ? (16.0f * volume) : 16.0d;
-            final long random = this.random.nextLong();
-            final ClientboundSoundPacket packet = new ClientboundSoundPacket(Holder.direct(SoundEvent.createVariableRangeEvent(soundKey)), soundCategory, x, y, z, volume, sound.pitch(), random);
-            this.shadow$getServer().getPlayerList().broadcast(null, x, y, z, radius, this.shadow$dimension(), packet);
-        }
+        ((ViewerBridge) this).bridge$sendToViewer(ViewerPacketUtil.playSound(sound, this.random, x, y, z));
     }
+
+    // BlockEntityVolume
 
     @Override
     public Collection<? extends BlockEntity> blockEntities() {
@@ -369,6 +309,8 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
         return Optional.ofNullable(((LevelBridge) this).bridge$createEntity(container, position, null));
     }
 
+    // ArchetypeVolumeCreator
+
     @Override
     public ArchetypeVolume createArchetypeVolume(final Vector3i min, final Vector3i max, final Vector3i origin) {
         final Vector3i rawVolMin = Objects.requireNonNull(min, "min").min(Objects.requireNonNull(max, "max"));
@@ -408,11 +350,6 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
                 VolumeApplicators.applyEntityArchetypes()
             ));
         return volume;
-    }
-
-    private void api$playRecord(final Vector3i position, @Nullable final MusicDisc recordType) {
-        var songPlayer = new JukeboxSongPlayer(() -> {}, VecHelper.toBlockPos(position));
-        songPlayer.play((Level) (Object) this, Holder.direct((JukeboxSong) (Object) recordType));
     }
 
     // EntityVolume

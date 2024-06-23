@@ -35,10 +35,9 @@ import net.minecraft.core.particles.ShriekParticleOption;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.particles.VibrationParticleOption;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.players.PlayerList;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.gameevent.BlockPositionSource;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -63,25 +62,10 @@ import java.util.Random;
 
 public final class SpongeParticleHelper {
 
-    public static void sendPackets(final ParticleEffect particleEffect, final Vector3d position, final int radius, final ResourceKey<Level> type,
-                                   final PlayerList playerList) {
-        final List<Packet<?>> packets = SpongeParticleHelper.toPackets(particleEffect, position);
-
-        if (!packets.isEmpty()) {
-            final double x = position.x();
-            final double y = position.y();
-            final double z = position.z();
-
-            for (final Packet<?> packet : packets) {
-                playerList.broadcast(null, x, y, z, radius, type, packet);
-            }
-        }
-    }
-
-    public static List<Packet<?>> toPackets(final ParticleEffect effect, final Vector3d position) {
-        final List<Packet<?>> packets = new ArrayList<>();
-        SpongeParticleHelper.getCachedPacket((SpongeParticleEffect) effect).process(position, packets);
-        return packets;
+    public static ClientboundBundlePacket createPacket(final ParticleEffect effect, final double x, final double y, final double z) {
+        final List<Packet<? super ClientGamePacketListener>> packets = new ArrayList<>();
+        SpongeParticleHelper.getCachedPacket((SpongeParticleEffect) effect).process(x, y, z, packets);
+        return new ClientboundBundlePacket(packets);
     }
 
     public static net.minecraft.core.particles.@Nullable ParticleOptions vanillaParticleOptions(final ParticleEffect effect) {
@@ -264,7 +248,7 @@ public final class SpongeParticleHelper {
         public static final EmptyCachedPacket INSTANCE = new EmptyCachedPacket();
 
         @Override
-        public void process(final Vector3d position, final List<Packet<?>> output) {
+        public void process(final double x, final double y, final double z, final List<Packet<? super ClientGamePacketListener>> output) {
         }
 
         @Override
@@ -288,10 +272,10 @@ public final class SpongeParticleHelper {
         }
 
         @Override
-        public void process(final Vector3d position, final List<Packet<?>> output) {
-            final float posX = (float) position.x();
-            final float posY = (float) position.y();
-            final float posZ = (float) position.z();
+        public void process(final double x, final double y, final double z, final List<Packet<? super ClientGamePacketListener>> output) {
+            final float posX = (float) x;
+            final float posY = (float) y;
+            final float posZ = (float) z;
 
             final float offX = this.offset.x();
             final float offY = this.offset.y();
@@ -318,14 +302,15 @@ public final class SpongeParticleHelper {
                     final float py0 = posY + (random.nextFloat() * 2f - 1f) * offY;
                     final float pz0 = posZ + (random.nextFloat() * 2f - 1f) * offZ;
 
-                    final ClientboundLevelParticlesPacket message = new ClientboundLevelParticlesPacket(
+                    final ClientboundLevelParticlesPacket packet = new ClientboundLevelParticlesPacket(
                             this.particleData,
                             true,
                             px0, py0, pz0,
                             velocityX, velocityY, velocityZ,
                             1f,
                             0);
-                    output.add(message);
+
+                    output.add(packet);
                 }
             }
         }

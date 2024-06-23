@@ -44,6 +44,7 @@ import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.type.ToolRule;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.datapack.DataPackType;
+import org.spongepowered.api.effect.ForwardingViewer;
 import org.spongepowered.api.effect.VanishState;
 import org.spongepowered.api.event.EventListenerRegistration;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
@@ -120,6 +121,7 @@ import org.spongepowered.common.data.manipulator.ImmutableDataManipulatorFactory
 import org.spongepowered.common.data.manipulator.MutableDataManipulatorFactory;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.datapack.SpongeDataPackType;
+import org.spongepowered.common.effect.SpongeCustomForwardingViewer;
 import org.spongepowered.common.entity.effect.SpongeVanishState;
 import org.spongepowered.common.event.SpongeEventListenerRegistration;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
@@ -212,6 +214,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
         this
                 .registerFactory(ResourceKey.Factory.class, new SpongeResourceKeyFactory())
                 .registerFactory(Audiences.Factory.class, new AudiencesFactory())
+                .registerFactory(ForwardingViewer.Factory.class, new SpongeCustomForwardingViewer.FactoryImpl())
                 .registerFactory(AABB.Factory.class, new SpongeAABB.FactoryImpl())
                 .registerFactory(AdvancementCriterion.Factory.class, new SpongeAdvancementCriterionFactory())
                 .registerFactory(CommandCause.Factory.class, new SpongeCommandCauseFactory())
