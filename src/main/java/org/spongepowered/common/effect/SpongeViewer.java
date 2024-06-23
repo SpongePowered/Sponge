@@ -44,7 +44,7 @@ public interface SpongeViewer extends Viewer {
 
     @Override
     default void sendWorldType(final WorldType worldType) {
-        ((ViewerBridge) this).bridge$sendToViewer(ViewerPacketUtil.changeEnvironment(worldType));
+        ((ViewerBridge) this).bridge$sendSpongePacketToViewer(ViewerPacketUtil.changeEnvironment(worldType));
     }
 
     @Override

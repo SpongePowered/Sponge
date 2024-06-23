@@ -39,8 +39,8 @@ public interface SpongeForwardingViewer extends SpongeViewer, ForwardingViewer, 
     // ViewerBridge
 
     @Override
-    default void bridge$sendToViewer(final org.spongepowered.api.network.channel.packet.Packet packet) {
-        this.audiences().forEach(viewer -> ((ViewerBridge) viewer).bridge$sendToViewer(packet));
+    default void bridge$sendSpongePacketToViewer(final org.spongepowered.api.network.channel.packet.Packet packet) {
+        this.audiences().forEach(viewer -> ((ViewerBridge) viewer).bridge$sendSpongePacketToViewer(packet));
     }
 
     @Override

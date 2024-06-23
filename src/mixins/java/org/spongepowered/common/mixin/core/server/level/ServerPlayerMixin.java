@@ -377,7 +377,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     }
 
     @Override
-    public void bridge$sendToViewer(final org.spongepowered.api.network.channel.packet.Packet packet) {
+    public void bridge$sendSpongePacketToViewer(final org.spongepowered.api.network.channel.packet.Packet packet) {
         if (this.impl$isFake) {
             return;
         }

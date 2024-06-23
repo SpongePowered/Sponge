@@ -30,7 +30,7 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 public interface ViewerBridge {
 
     // Used to send sponge custom packets
-    default void bridge$sendToViewer(final org.spongepowered.api.network.channel.packet.Packet packet) {
+    default void bridge$sendSpongePacketToViewer(final org.spongepowered.api.network.channel.packet.Packet packet) {
     }
 
     default void bridge$sendToViewer(final Packet<ClientGamePacketListener> packet) {
