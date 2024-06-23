@@ -77,6 +77,7 @@ import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.block.state.properties.SculkSensorPhase;
 import net.minecraft.world.level.block.state.properties.Tilt;
 import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.scores.DisplaySlot;
 import org.tinylog.Logger;
 
 import java.io.IOException;
@@ -806,6 +807,13 @@ public final class GeneratorMain {
                     "data.type",
                     "Tilts",
                     Tilt.class,
+                    "getSerializedName",
+                    "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                    "scoreboard.displayslot",
+                    "DisplaySlots",
+                    DisplaySlot.class,
                     "getSerializedName",
                     "sponge"
             ),
