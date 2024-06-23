@@ -38,6 +38,7 @@ import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.description.JavadocDescription;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.StringRepresentable;
 import org.tinylog.Logger;
 
 import java.util.ArrayList;
@@ -51,7 +52,7 @@ class EnumEntriesValidator<V> implements Generator {
 
     private final String relativePackageName;
     private final String targetClassSimpleName;
-    private final Class<?> clazz;
+    private final Class<? extends Enum<?>> clazz;
     private final String keyFunction;
 
     private final String namespace;
@@ -59,7 +60,7 @@ class EnumEntriesValidator<V> implements Generator {
     EnumEntriesValidator(
             final String targetRelativePackage,
             final String targetClassSimpleName,
-            final Class<?> clazz,
+            final Class<? extends Enum<?>> clazz,
             final String keyFunction,
             final String namespace
     ) {
@@ -83,7 +84,7 @@ class EnumEntriesValidator<V> implements Generator {
         final var primaryTypeDeclaration = compilationUnit.getPrimaryType()
                 .orElseThrow(() -> new IllegalStateException("Could not find primary type for registry type " + this.targetClassSimpleName));
 
-        final Object[] map = this.clazz.getEnumConstants();
+        final Enum<?>[] map = this.clazz.getEnumConstants();
 
         primaryTypeDeclaration.setJavadocComment(new Javadoc(JavadocDescription.parseText(Generator.GENERATED_FILE_JAVADOCS)));
 
@@ -108,8 +109,11 @@ class EnumEntriesValidator<V> implements Generator {
         // Now, iterate the registry, discovering which fields were added and removed
         final var added = new HashSet<ResourceLocation>();
         final var processedFields = new ArrayList<FieldDeclaration>(map.length);
-        for (final Object f : map) {
+        for (final Enum<?> f : map) {
             final String name;
+            if (!this.keyFunction.equalsIgnoreCase("getSerializedName") && f instanceof StringRepresentable) {
+                Logger.warn("Using {} as keyFunction on a StringRepresentable object: {}.{}", this.keyFunction, this.clazz.getName(), f.name());
+            }
             try {
                 if (this.keyFunction.equals("name")) {
                     name = ((String) Enum.class.getMethod("name").invoke(f)).toLowerCase();
