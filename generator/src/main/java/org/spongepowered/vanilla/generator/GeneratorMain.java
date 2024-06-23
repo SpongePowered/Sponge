@@ -76,6 +76,7 @@ import net.minecraft.world.level.block.state.properties.DripstoneThickness;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.block.state.properties.SculkSensorPhase;
 import net.minecraft.world.level.block.state.properties.Tilt;
+import net.minecraft.world.level.material.PushReaction;
 import org.tinylog.Logger;
 
 import java.io.IOException;
@@ -764,6 +765,13 @@ public final class GeneratorMain {
                     "ItemDisplayTypes",
                     ItemDisplayContext.class,
                     "getSerializedName",
+                    "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                    "data.type",
+                    "PushReactions",
+                    PushReaction.class,
+                    "name",
                     "sponge"
             ),
             new EnumEntriesValidator<>(
