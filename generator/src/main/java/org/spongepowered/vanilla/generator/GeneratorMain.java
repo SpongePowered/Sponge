@@ -74,6 +74,7 @@ import net.minecraft.world.level.block.state.properties.BambooLeaves;
 import net.minecraft.world.level.block.state.properties.DripstoneThickness;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.block.state.properties.SculkSensorPhase;
+import net.minecraft.world.level.block.state.properties.Tilt;
 import org.tinylog.Logger;
 
 import java.io.IOException;
@@ -789,6 +790,13 @@ public final class GeneratorMain {
                     "entity.display",
                     "BillboardTypes",
                     Display.BillboardConstraints.class,
+                    "getSerializedName",
+                    "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                    "data.type",
+                    "Tilts",
+                    Tilt.class,
                     "getSerializedName",
                     "sponge"
             ),
