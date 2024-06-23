@@ -42,6 +42,7 @@ import org.spongepowered.test.LoadableModule;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 
 @Plugin("registrytest")
@@ -115,6 +116,10 @@ public final class RegistryTest implements LoadableModule {
                             }
 
                             final var catalogClass = catalogedByAnnotation.value()[0];
+                            if (!Modifier.isFinal(catalogClass.getModifiers())) {
+                                this.logger.error("{} is not final", catalogClass.getSimpleName());
+                            }
+
                             final Method registryMethod;
                             try {
                                 registryMethod = catalogClass.getDeclaredMethod("registry");
