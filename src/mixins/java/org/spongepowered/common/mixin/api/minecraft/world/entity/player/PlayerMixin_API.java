@@ -118,6 +118,16 @@ public abstract class PlayerMixin_API extends LivingEntityMixin_API implements P
         ((ViewerBridge) this).bridge$sendToViewer(ViewerPacketUtil.blockUpdate(x, y, z, this.world()));
     }
 
+    @Override
+    public void sendBlockProgress(final int x, final int y, final int z, final double progress) {
+        ((ViewerBridge) this).bridge$sendToViewer(ViewerPacketUtil.blockProgress(x, y, z, progress, this.world().engine()));
+    }
+
+    @Override
+    public void resetBlockProgress(final int x, final int y, final int z) {
+        ViewerPacketUtil.resetBlockProgress(x, y, z, this.world().engine()).ifPresent(((ViewerBridge) this)::bridge$sendToViewer);
+    }
+
     // Audience
 
     @Override

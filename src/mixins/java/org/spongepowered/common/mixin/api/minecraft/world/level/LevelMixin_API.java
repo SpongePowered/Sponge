@@ -251,6 +251,16 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
         ((ViewerBridge) this).bridge$sendToViewer(ViewerPacketUtil.blockUpdate(x, y, z, this));
     }
 
+    @Override
+    public void sendBlockProgress(final int x, final int y, final int z, final double progress) {
+        ((ViewerBridge) this).bridge$sendToViewer(ViewerPacketUtil.blockProgress(x, y, z, progress, this.engine()));
+    }
+
+    @Override
+    public void resetBlockProgress(final int x, final int y, final int z) {
+        ViewerPacketUtil.resetBlockProgress(x, y, z, this.engine()).ifPresent(((ViewerBridge) this)::bridge$sendToViewer);
+    }
+
     // Audience
 
     @Override

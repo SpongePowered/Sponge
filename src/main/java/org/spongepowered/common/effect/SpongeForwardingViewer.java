@@ -60,6 +60,16 @@ public interface SpongeForwardingViewer extends SpongeViewer, ForwardingViewer, 
         this.audiences().forEach(viewer -> viewer.resetBlockChange(x, y, z));
     }
 
+    @Override
+    default void sendBlockProgress(final int x, final int y, final int z, final double progress) {
+        this.audiences().forEach(viewer -> viewer.sendBlockProgress(x, y, z, progress));
+    }
+
+    @Override
+    default void resetBlockProgress(final int x, final int y, final int z) {
+        this.audiences().forEach(viewer -> viewer.resetBlockProgress(x, y, z));
+    }
+
     // Audience
 
     @Override

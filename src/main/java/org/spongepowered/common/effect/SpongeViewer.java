@@ -28,10 +28,6 @@ import net.kyori.adventure.sound.SoundStop;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.TitlePart;
-import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.Engine;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.effect.Viewer;
 import org.spongepowered.api.effect.particle.ParticleEffect;
@@ -76,33 +72,10 @@ public interface SpongeViewer extends Viewer {
 
     @Override
     default void sendBlockProgress(final int x, final int y, final int z, final double progress) {
-        final Engine engine;
-        if (Sponge.isServerAvailable()) {
-            engine = Sponge.server();
-        } else if (Sponge.isClientAvailable()) {
-            engine = Sponge.client();
-        } else {
-            return;
-        }
-
-        ((ViewerBridge) this).bridge$sendToViewer(ViewerPacketUtil.blockProgress(x, y, z, progress, engine));
     }
 
     @Override
     default void resetBlockProgress(final int x, final int y, final int z) {
-        final Engine engine;
-        if (Sponge.isServerAvailable()) {
-            engine = Sponge.server();
-        } else if (Sponge.isClientAvailable()) {
-            engine = Sponge.client();
-        } else {
-            return;
-        }
-
-        final @Nullable ClientboundBlockDestructionPacket packet = ViewerPacketUtil.resetBlockProgress(x, y, z, engine);
-        if (packet != null) {
-            ((ViewerBridge) this).bridge$sendToViewer(packet);
-        }
     }
 
     // Audience
