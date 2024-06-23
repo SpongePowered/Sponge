@@ -824,6 +824,13 @@ public final class GeneratorMain {
                     "sponge"
             ),
             new EnumEntriesValidator<>(
+                    "item.inventory.equipment",
+                    "EquipmentTypes",
+                    EquipmentSlot.class,
+                    "getSerializedName",
+                    "sponge"
+            ),
+            new EnumEntriesValidator<>(
                     "entity.display",
                     "TextAlignments",
                     Display.TextDisplay.Align.class,
