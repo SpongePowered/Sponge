@@ -34,6 +34,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
@@ -54,6 +55,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
@@ -61,6 +63,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.network.packet.ChangeViewerEnvironmentPacket;
@@ -120,6 +123,23 @@ public final class ViewerPacketUtil {
 
     public static ClientboundBlockUpdatePacket blockUpdate(final int x, final int y, final int z, final World<?, ?> world) {
         return new ClientboundBlockUpdatePacket((BlockGetter) world, new BlockPos(x, y, z));
+    }
+
+    public static ClientboundBlockDestructionPacket blockProgress(final int x, final int y, final int z, final double progress, final Server server) {
+        if (progress < 0 || progress > 1) {
+            throw new IllegalArgumentException("Progress must be between 0 and 1");
+        }
+
+        final BlockPos pos = new BlockPos(x, y, z);
+        final int id = ((SpongeServer) server).getOrCreateBlockDestructionId(pos);
+        final int progressStage = progress == 1 ? 9 : (int) (progress * 10);
+        return new ClientboundBlockDestructionPacket(id, pos, progressStage);
+    }
+
+    public static @Nullable ClientboundBlockDestructionPacket resetBlockProgress(final int x, final int y, final int z, final Server server) {
+        final BlockPos pos = new BlockPos(x, y, z);
+        final Integer id = ((SpongeServer) server).getBlockDestructionId(pos);
+        return id == null ? null : new ClientboundBlockDestructionPacket(id, pos, -1);
     }
 
     public static ClientboundSetActionBarTextPacket setActionBarText(final Component message) {

@@ -487,12 +487,12 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
     }
 
     @Override
-    public @Nullable Integer getBlockDestructionId(BlockPos pos) {
+    public @Nullable Integer getBlockDestructionId(final BlockPos pos) {
         return this.api$blockDestructionIdCache.getIfPresent(pos);
     }
 
     @Override
-    public int getOrCreateBlockDestructionId(BlockPos pos) {
+    public int getOrCreateBlockDestructionId(final BlockPos pos) {
         return this.api$blockDestructionIdCache.get(pos, (blockPos) -> this.api$blockDestructionIdCounter.decrementAndGet());
     }
 
