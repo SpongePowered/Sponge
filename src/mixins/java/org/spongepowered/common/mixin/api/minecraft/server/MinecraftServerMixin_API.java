@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.server;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.mojang.datafixers.DataFixer;
@@ -36,7 +34,6 @@ import net.kyori.adventure.resource.ResourcePackRequest;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.commands.Commands;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.MinecraftServer;
@@ -54,7 +51,6 @@ import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
@@ -97,6 +93,7 @@ import org.spongepowered.common.registry.RegistryHolderLogic;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.scheduler.ServerScheduler;
 import org.spongepowered.common.user.SpongeUserManager;
+import org.spongepowered.common.util.BlockDestructionIdCache;
 import org.spongepowered.common.util.UsernameCache;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
@@ -112,7 +109,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -165,10 +161,7 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
     private RegistryHolderLogic api$registryHolder;
     private SpongeUserManager api$userManager;
     private SpongeDataPackManager api$dataPackManager;
-    private Cache<BlockPos, Integer> api$blockDestructionIdCache = Caffeine.newBuilder()
-            .expireAfterAccess(1, TimeUnit.MINUTES)
-            .build();
-    private AtomicInteger api$blockDestructionIdCounter = new AtomicInteger();
+    private final BlockDestructionIdCache api$blockDestructionIdCache = new BlockDestructionIdCache(0, AtomicInteger::decrementAndGet);
 
     @Inject(method = "<init>", at = @At("TAIL"))
     public void api$initializeSpongeFieldsfinal(final Thread $$0, final LevelStorageSource.LevelStorageAccess $$1, final PackRepository $$2, final WorldStem $$3, final Proxy $$4,
@@ -487,13 +480,8 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
     }
 
     @Override
-    public @Nullable Integer getBlockDestructionId(BlockPos pos) {
-        return this.api$blockDestructionIdCache.getIfPresent(pos);
-    }
-
-    @Override
-    public int getOrCreateBlockDestructionId(BlockPos pos) {
-        return this.api$blockDestructionIdCache.get(pos, (blockPos) -> this.api$blockDestructionIdCounter.decrementAndGet());
+    public BlockDestructionIdCache getBlockDestructionIdCache() {
+        return this.api$blockDestructionIdCache;
     }
 
     @Override

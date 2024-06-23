@@ -22,12 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common;
+package org.spongepowered.common.util;
 
-import org.spongepowered.api.Engine;
-import org.spongepowered.common.util.BlockDestructionIdCache;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import net.minecraft.core.BlockPos;
 
-public interface SpongeEngine extends Engine {
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.IntSupplier;
+import java.util.function.ToIntFunction;
 
-    BlockDestructionIdCache getBlockDestructionIdCache();
+public final class BlockDestructionIdCache {
+
+    private final Cache<BlockPos, Integer> cache;
+    private final AtomicInteger counter;
+    private final IntSupplier idCreator;
+
+    public BlockDestructionIdCache(final int counterBase, final ToIntFunction<AtomicInteger> idFunction) {
+        this.cache = Caffeine.newBuilder()
+            .expireAfterAccess(1, TimeUnit.MINUTES)
+            .build();
+        this.counter = new AtomicInteger(counterBase);
+        this.idCreator = () -> idFunction.applyAsInt(this.counter);
+    }
+
+    public int getOrCreate(final BlockPos pos) {
+        return this.cache.get(pos, $ -> this.idCreator.getAsInt());
+    }
+
+    public Optional<Integer> get(final BlockPos pos) {
+        return Optional.ofNullable(this.cache.getIfPresent(pos));
+    }
 }

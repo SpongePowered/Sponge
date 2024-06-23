@@ -24,31 +24,19 @@
  */
 package org.spongepowered.vanilla.mixin.core.server.level;
 
-import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
-import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
-import org.spongepowered.common.network.packet.ChangeViewerEnvironmentPacket;
-import org.spongepowered.common.network.packet.SpongePacketHandler;
 import org.spongepowered.vanilla.mixin.core.world.entity.LivingEntityMixin_Vanilla;
 
 @Mixin(net.minecraft.server.level.ServerPlayer.class)
 public abstract class ServerPlayerMixin_Vanilla extends LivingEntityMixin_Vanilla implements ServerPlayerBridge {
-
-    @Override
-    public void bridge$sendViewerEnvironment(final DimensionType dimensionType) {
-        if (this.bridge$getClientType() == ClientType.SPONGE_VANILLA) {
-            SpongePacketHandler.getChannel().sendTo((ServerPlayer) this, new ChangeViewerEnvironmentPacket(dimensionType));
-        }
-    }
 
     // override from LivingEntityMixin_Vanilla
     @Override

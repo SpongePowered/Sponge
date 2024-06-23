@@ -25,7 +25,6 @@
 package org.spongepowered.common.bridge.server.level;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
@@ -34,7 +33,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -64,8 +62,6 @@ public interface ServerPlayerBridge extends ServerPlayerEntityHealthScaleBridge 
     Locale bridge$getLanguage();
 
     void bridge$setLanguage(Locale language);
-
-    void bridge$sendBlockChange(BlockPos pos, BlockState state);
 
     void bridge$initScoreboard();
 
@@ -98,9 +94,6 @@ public interface ServerPlayerBridge extends ServerPlayerEntityHealthScaleBridge 
             final GameType gameType, final GameType previousGameType, final boolean isDebug, final boolean isFlat, final byte dataToKeepMask) {
         ((ServerPlayer) this).connection.send(new ClientboundRespawnPacket(new CommonPlayerSpawnInfo(dimensionType, key, hashedSeed, gameType, previousGameType, isDebug,
                 isFlat, ((ServerPlayer) this).getLastDeathLocation(), ((ServerPlayer) this).getPortalCooldown()), dataToKeepMask));
-    }
-
-    default void bridge$sendViewerEnvironment(final DimensionType dimensionType) {
     }
 
     boolean bridge$kick(final Component message);

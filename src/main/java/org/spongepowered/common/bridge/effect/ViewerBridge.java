@@ -22,12 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common;
+package org.spongepowered.common.bridge.effect;
 
-import org.spongepowered.api.Engine;
-import org.spongepowered.common.util.BlockDestructionIdCache;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 
-public interface SpongeEngine extends Engine {
+public interface ViewerBridge {
 
-    BlockDestructionIdCache getBlockDestructionIdCache();
+    // Used to send sponge custom packets
+    default void bridge$sendSpongePacketToViewer(final org.spongepowered.api.network.channel.packet.Packet packet) {
+    }
+
+    default void bridge$sendToViewer(final Packet<ClientGamePacketListener> packet) {
+    }
+
 }

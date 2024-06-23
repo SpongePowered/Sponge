@@ -70,6 +70,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.authlib.GameProfileHolderBridge;
+import org.spongepowered.common.bridge.effect.ViewerBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
@@ -87,7 +88,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Mixin(net.minecraft.world.entity.player.Player.class)
-public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBridge, GameProfileHolderBridge {
+public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBridge, GameProfileHolderBridge, ViewerBridge {
 
     // @formatter: off
     @Shadow @Final protected static EntityDataAccessor<Byte> DATA_PLAYER_MODE_CUSTOMISATION;

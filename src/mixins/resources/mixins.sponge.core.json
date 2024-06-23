@@ -278,6 +278,7 @@
         "client.multiplayer.ClientLevelMixin",
         "client.network.chat.TranslatableContentsMixin",
         "client.player.AbstractClientPlayerMixin",
+        "client.player.LocalPlayerMixin",
         "client.server.IntegratedPlayerListMixin",
         "client.server.IntegratedServerMixin",
         "server.network.MemoryServerHandshakePacketListenerImplMixin"

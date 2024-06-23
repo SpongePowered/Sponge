@@ -37,6 +37,8 @@ import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.OutgoingChatMessage;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
@@ -133,6 +135,7 @@ import org.spongepowered.common.bridge.world.BossEventBridge;
 import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
 import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.type.SpongeSkinPart;
+import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -140,6 +143,7 @@ import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.entity.TeleportContext;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.mixin.core.world.entity.player.PlayerMixin;
+import org.spongepowered.common.network.packet.SpongePacketHandler;
 import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
@@ -370,6 +374,25 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Override
     public void bridge$setSleepingIgnored(final boolean sleepingIgnored) {
         this.impl$sleepingIgnored = sleepingIgnored;
+    }
+
+    @Override
+    public void bridge$sendSpongePacketToViewer(final org.spongepowered.api.network.channel.packet.Packet packet) {
+        if (this.impl$isFake) {
+            return;
+        }
+        final ClientType clientType = this.bridge$getClientType();
+        if (clientType == ClientType.SPONGE_VANILLA || clientType == ClientType.SPONGE_FORGE) {
+            SpongePacketHandler.getChannel().sendTo((ServerPlayer) this, packet);
+        }
+    }
+
+    @Override
+    public void bridge$sendToViewer(final Packet<ClientGamePacketListener> packet) {
+        if (this.impl$isFake) {
+            return;
+        }
+        this.connection.send(packet);
     }
 
     /*

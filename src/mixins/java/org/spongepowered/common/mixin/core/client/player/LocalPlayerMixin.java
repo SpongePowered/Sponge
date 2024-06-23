@@ -22,12 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common;
+package org.spongepowered.common.mixin.core.client.player;
 
-import org.spongepowered.api.Engine;
-import org.spongepowered.common.util.BlockDestructionIdCache;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-public interface SpongeEngine extends Engine {
+@Mixin(LocalPlayer.class)
+public abstract class LocalPlayerMixin extends AbstractClientPlayerMixin {
 
-    BlockDestructionIdCache getBlockDestructionIdCache();
+    @Shadow @Final public ClientPacketListener connection;
+
+    @Override
+    public void bridge$sendToViewer(final Packet<ClientGamePacketListener> packet) {
+        packet.handle(this.connection);
+    }
+
 }
