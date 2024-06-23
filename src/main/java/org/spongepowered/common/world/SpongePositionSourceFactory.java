@@ -22,39 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common;
+package org.spongepowered.common.world;
 
 import net.minecraft.core.BlockPos;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.Server;
-import org.spongepowered.common.command.manager.SpongeCommandManager;
-import org.spongepowered.common.profile.SpongeGameProfileManager;
-import org.spongepowered.common.scheduler.ServerScheduler;
-import org.spongepowered.common.user.SpongeUserManager;
-import org.spongepowered.common.util.UsernameCache;
-import org.spongepowered.common.world.server.SpongeWorldManager;
-import org.spongepowered.common.world.storage.SpongePlayerDataManager;
+import net.minecraft.world.level.gameevent.BlockPositionSource;
+import net.minecraft.world.level.gameevent.EntityPositionSource;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.world.PositionSource;
+import org.spongepowered.math.vector.Vector3i;
 
-public interface SpongeServer extends SpongeEngine, Server {
+import java.util.Objects;
+
+public final class SpongePositionSourceFactory implements PositionSource.Factory {
 
     @Override
-    ServerScheduler scheduler();
+    public PositionSource of(final Vector3i position) {
+        Objects.requireNonNull(position, "position");
+        return this.of(position.x(), position.y(), position.z());
+    }
 
     @Override
-    SpongeWorldManager worldManager();
-
-    SpongePlayerDataManager getPlayerDataManager();
-
-    SpongeGameProfileManager gameProfileManagerIfPresent();
-
-    UsernameCache getUsernameCache();
-
-    @Nullable Integer getBlockDestructionId(BlockPos pos);
-
-    int getOrCreateBlockDestructionId(BlockPos pos);
-
-    SpongeUserManager userManager();
+    public PositionSource of(final int x, final int y, final int z) {
+        return (PositionSource) new BlockPositionSource(new BlockPos(x, y, z));
+    }
 
     @Override
-    SpongeCommandManager commandManager();
+    public PositionSource of(final Entity entity) {
+        return this.of(entity, entity.eyeHeight().get());
+    }
+
+    @Override
+    public PositionSource of(final Entity entity, final double yOffset) {
+        Objects.requireNonNull(entity, "entity");
+        return (PositionSource) new EntityPositionSource((net.minecraft.world.entity.Entity) entity, (float) yOffset);
+    }
 }

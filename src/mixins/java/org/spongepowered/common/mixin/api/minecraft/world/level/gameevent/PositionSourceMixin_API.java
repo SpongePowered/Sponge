@@ -22,39 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common;
+package org.spongepowered.common.mixin.api.minecraft.world.level.gameevent;
 
-import net.minecraft.core.BlockPos;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.Server;
-import org.spongepowered.common.command.manager.SpongeCommandManager;
-import org.spongepowered.common.profile.SpongeGameProfileManager;
-import org.spongepowered.common.scheduler.ServerScheduler;
-import org.spongepowered.common.user.SpongeUserManager;
-import org.spongepowered.common.util.UsernameCache;
-import org.spongepowered.common.world.server.SpongeWorldManager;
-import org.spongepowered.common.world.storage.SpongePlayerDataManager;
+import org.spongepowered.api.world.PositionSource;
+import org.spongepowered.asm.mixin.Mixin;
 
-public interface SpongeServer extends SpongeEngine, Server {
-
-    @Override
-    ServerScheduler scheduler();
-
-    @Override
-    SpongeWorldManager worldManager();
-
-    SpongePlayerDataManager getPlayerDataManager();
-
-    SpongeGameProfileManager gameProfileManagerIfPresent();
-
-    UsernameCache getUsernameCache();
-
-    @Nullable Integer getBlockDestructionId(BlockPos pos);
-
-    int getOrCreateBlockDestructionId(BlockPos pos);
-
-    SpongeUserManager userManager();
-
-    @Override
-    SpongeCommandManager commandManager();
+@Mixin(net.minecraft.world.level.gameevent.PositionSource.class)
+public interface PositionSourceMixin_API extends PositionSource {
 }

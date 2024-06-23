@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.minecraft.world.level;
 import net.kyori.adventure.sound.Sound;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerChunkCache;
@@ -72,6 +73,7 @@ import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.server.level.ChunkMapAccessor;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.bridge.effect.ViewerBridge;
@@ -249,6 +251,35 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
     @Override
     public void resetBlockChange(final int x, final int y, final int z) {
         ((ViewerBridge) this).bridge$sendToViewer(ViewerPacketUtil.blockUpdate(x, y, z, this));
+    }
+
+    @Override
+    public void sendBlockProgress(final int x, final int y, final int z, final double progress) {
+        if (progress < 0 || progress > 1) {
+            throw new IllegalArgumentException("Progress must be between 0 and 1");
+        }
+
+        final BlockPos pos = new BlockPos(x, y, z);
+        final int id = ((SpongeServer) this.shadow$getServer()).getOrCreateBlockDestructionId(pos);
+        final int progressStage = progress == 1 ? 9 : (int) (progress * 10);
+        final ClientboundBlockDestructionPacket packet = new ClientboundBlockDestructionPacket(id, pos, progressStage);
+        ((net.minecraft.world.level.Level) (Object) this).players().stream()
+                .filter(ServerPlayer.class::isInstance)
+                .map(ServerPlayer.class::cast)
+                .forEach(p -> p.connection.send(packet));
+    }
+
+    @Override
+    public void resetBlockProgress(final int x, final int y, final int z) {
+        final BlockPos pos = new BlockPos(x, y, z);
+        final Integer id = ((SpongeServer) this.shadow$getServer()).getBlockDestructionId(pos);
+        if (id != null) {
+            final ClientboundBlockDestructionPacket packet =new ClientboundBlockDestructionPacket(id, pos, -1);
+            ((net.minecraft.world.level.Level) (Object) this).players().stream()
+                    .filter(ServerPlayer.class::isInstance)
+                    .map(ServerPlayer.class::cast)
+                    .forEach(p -> p.connection.send(packet));
+        }
     }
 
     // Audience
