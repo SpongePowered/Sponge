@@ -24,9 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.client;
 
+import com.github.benmanes.caffeine.cache.Cache;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.Connection;
 import net.minecraft.server.packs.repository.PackRepository;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -51,6 +53,7 @@ import org.spongepowered.common.util.LocaleCache;
 
 import java.util.Locale;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Mixin(Minecraft.class)
 public abstract class MinecraftMixin_API implements SpongeClient, SpongeRegistryHolder {
@@ -68,6 +71,8 @@ public abstract class MinecraftMixin_API implements SpongeClient, SpongeRegistry
 
     private final ClientScheduler api$scheduler = new ClientScheduler();
     private final RegistryHolderLogic api$registryHolder = new RegistryHolderLogic();
+    private final Cache<BlockPos, Integer> api$blockDestructionIdCache = this.createBlockDestructionIdCache();
+    private final AtomicInteger api$blockDestructionIdCounter = new AtomicInteger(Integer.MIN_VALUE);
 
     @Override
     public Optional<LocalPlayer> player() {
@@ -137,5 +142,15 @@ public abstract class MinecraftMixin_API implements SpongeClient, SpongeRegistry
     @Override
     public RegistryHolderLogic registryHolder() {
         return this.api$registryHolder;
+    }
+
+    @Override
+    public Cache<BlockPos, Integer> getBlockDestructionIdCache() {
+        return this.api$blockDestructionIdCache;
+    }
+
+    @Override
+    public int createBlockDestructionId() {
+        return this.api$blockDestructionIdCounter.incrementAndGet();
     }
 }

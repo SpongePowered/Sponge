@@ -24,7 +24,22 @@
  */
 package org.spongepowered.common;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import net.minecraft.core.BlockPos;
 import org.spongepowered.api.Engine;
 
+import java.util.concurrent.TimeUnit;
+
 public interface SpongeEngine extends Engine {
+
+    default Cache<BlockPos, Integer> createBlockDestructionIdCache() {
+        return Caffeine.newBuilder()
+            .expireAfterAccess(1, TimeUnit.MINUTES)
+            .build();
+    }
+
+    Cache<BlockPos, Integer> getBlockDestructionIdCache();
+
+    int createBlockDestructionId();
 }
