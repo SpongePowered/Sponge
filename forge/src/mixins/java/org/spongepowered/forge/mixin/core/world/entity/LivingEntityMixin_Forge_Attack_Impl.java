@@ -22,49 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.core.world.entity;
+package org.spongepowered.forge.mixin.core.world.entity;
 
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stat;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.TamableAnimal;
-import net.minecraft.world.entity.animal.Wolf;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Coerce;
-import org.spongepowered.asm.mixin.injection.Constant;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-
-@Mixin(value = LivingEntity.class, priority = 900)
-public abstract class LivingEntityMixin_Attack_impl {
-
-    @ModifyConstant(method = "hurt", constant = @Constant(classValue = Wolf.class, ordinal = 0))
-    private Class attackImpl$onWolfCast(Class constant) {
-        return TamableAnimal.class;
-    }
-
-    @Redirect(method = "hurt",
-        at = @At(value = "INVOKE" , target = "Lnet/minecraft/world/entity/animal/Wolf;isTame()Z"))
-    private boolean attackImpl$onWolfIsTame(@Coerce final Object instance) {
-        return ((TamableAnimal)instance).isTame();
-    }
-
-    @Redirect(method = "hurt",
-        at = @At(value = "INVOKE" , target = "Lnet/minecraft/world/entity/animal/Wolf;getOwner()Lnet/minecraft/world/entity/LivingEntity;"))
-    private LivingEntity attackImpl$onWolfGetOwner(@Coerce final Object instance) {
-        return ((TamableAnimal)instance).getOwner();
-    }
+@Mixin(LivingEntity.class)
+public class LivingEntityMixin_Forge_Attack_Impl {
 
     /**
      * Prevents {@link ServerPlayer#awardStat} from running before event
      */
     @Redirect(method = "getDamageAfterMagicAbsorb",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;awardStat(Lnet/minecraft/resources/ResourceLocation;I)V"))
-    public void attackImpl$onAwardStatDamageResist(final ServerPlayer instance, final ResourceLocation resourceLocation, final int i) {
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;awardStat(Lnet/minecraft/stats/Stat;I)V"))
+    public void attackImpl$onAwardStatDamageResist(final ServerPlayer instance, final Stat<?> resourceLocation, final int i) {
         // do nothing
     }
-
 
 }

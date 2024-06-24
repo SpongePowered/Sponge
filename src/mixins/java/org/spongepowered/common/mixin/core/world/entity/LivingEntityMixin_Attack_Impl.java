@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.entity;
 
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.Stats;
@@ -300,14 +299,6 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin
         }
     }
 
-    /**
-     * Prevents {@link ServerPlayer#awardStat} from running before event
-     */
-    @Redirect(method = "getDamageAfterMagicAbsorb",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;awardStat(Lnet/minecraft/resources/ResourceLocation;I)V"))
-    public void attackImpl$onAwardStatDamageResist(final ServerPlayer instance, final ResourceLocation resourceLocation, final int i) {
-        // do nothing
-    }
 
     /**
      * Captures the damage protection as a function
