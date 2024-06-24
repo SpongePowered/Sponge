@@ -28,6 +28,7 @@
         "server.network.ServerGamePacketListenerImplMixin_Forge",
         "server.network.ServerLoginPacketListenerImplMixin_Forge",
         "world.entity.LivingEntityMixin_Forge",
+        "world.entity.LivingEntityMixin_Forge_Attack_Impl",
         "world.entity.item.ItemEntityMixin_Forge",
         "world.entity.player.PlayerMixin_Forge",
         "world.entity.projectile.ThrownEnderpealMixin_Forge",
