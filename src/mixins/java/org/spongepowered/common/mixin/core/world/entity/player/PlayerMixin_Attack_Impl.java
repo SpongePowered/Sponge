@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.core.world.entity.player;
+package org.spongepowered.common.mixin.core.world.entity.player;
 
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -55,15 +55,15 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
 import org.spongepowered.common.hooks.PlatformHooks;
+import org.spongepowered.common.mixin.core.world.entity.LivingEntityMixin_Attack_Impl;
 import org.spongepowered.common.util.DamageEventUtil;
-import org.spongepowered.vanilla.mixin.core.world.entity.LivingEntityMixin_Attack_impl;
 
 import java.util.ArrayList;
 import java.util.Map;
 
 @SuppressWarnings("ConstantConditions")
 @Mixin(value = Player.class, priority = 900)
-public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin_Attack_impl {
+public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin_Attack_Impl {
 
     //@formatter:off
     @Shadow @Final public InventoryMenu inventoryMenu;
@@ -250,7 +250,6 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin_Attack_i
         }
     }
 
-
     /**
      * Call Sweep Attack Events
      */
@@ -300,19 +299,6 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin_Attack_i
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;knockback(DDD)V"))
     public void attackImpl$modifyKnockback(final LivingEntity instance, final double $$0, final double $$1, final double $$2) {
         instance.knockback($$0 * this.attackImpl$attackEvent.knockbackModifier(), $$1, $$2);
-    }
-
-
-    /**
-     * Prevent vanilla {@link net.minecraft.world.entity.boss.EnderDragonPart#parentMob} resolution
-     * We use {@link #attackImpl$parentPartsHook} instead
-     */
-    @Redirect(method = "attack",
-            slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;setLastHurtMob(Lnet/minecraft/world/entity/Entity;)V"),
-                           to = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/boss/EnderDragonPart;parentMob:Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;")),
-            at = @At(value = "CONSTANT", args = "classValue=net/minecraft/world/entity/boss/EnderDragonPart", ordinal = 0))
-    public boolean attackImpl$parentPartsHookInstanceOf(final Object instance, final Class<?> type) {
-        return false;
     }
 
     /**

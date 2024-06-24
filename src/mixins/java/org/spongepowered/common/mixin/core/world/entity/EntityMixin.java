@@ -181,7 +181,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract boolean shadow$onGround();
     @Shadow @Nullable protected abstract String shadow$getEncodeId();
     @Shadow @javax.annotation.Nullable public PortalProcessor portalProcess;
-
     // @formatter:on
 
     private boolean impl$isConstructing = true;

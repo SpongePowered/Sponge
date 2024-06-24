@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.core.world.entity;
+package org.spongepowered.common.mixin.core.world.entity;
 
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
@@ -37,7 +37,7 @@ import org.spongepowered.common.util.DamageEventUtil;
 import java.util.ArrayList;
 
 @Mixin(Mob.class)
-public abstract class MobMixin_Attack_Impl extends LivingEntityMixin_Attack_impl {
+public abstract class MobMixin_Attack_Impl extends LivingEntityMixin_Attack_Impl {
 
     private double impl$hurtTargetDamage;
     private double impl$knockbackModifier;
@@ -56,8 +56,8 @@ public abstract class MobMixin_Attack_Impl extends LivingEntityMixin_Attack_impl
 
         float knockbackModifier = this.shadow$getKnockback(targetEntity, damageSource);
 
-        var attack = new DamageEventUtil.Attack<>(thisEntity, targetEntity, thisEntity.getWeaponItem(), damageSource, 1, (float) this.impl$hurtTargetDamage, new ArrayList<>());
-        if (thisEntity.level() instanceof ServerLevel) {
+        var attack = new DamageEventUtil.Attack<>(thisEntity, targetEntity, this.shadow$getWeaponItem(), damageSource, 1, (float) this.impl$hurtTargetDamage, new ArrayList<>());
+        if (this.shadow$level() instanceof ServerLevel) {
             // baseDamage = EnchantmentHelper.modifyDamage(level, thisEntity.getWeaponItem(), targetEntity, damageSource, baseDamage);//
             attack.functions().addAll(DamageEventUtil.createAttackEnchantmentFunction(attack.weapon(), targetEntity, damageSource));
         }
