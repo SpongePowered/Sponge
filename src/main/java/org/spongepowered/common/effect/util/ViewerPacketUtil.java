@@ -132,15 +132,15 @@ public final class ViewerPacketUtil {
         }
 
         final BlockPos pos = new BlockPos(x, y, z);
-        final int id = ((SpongeEngine) engine).getBlockDestructionIdCache().get(pos, (blockPos) -> ((SpongeEngine) engine).createBlockDestructionId());
+        final int id = ((SpongeEngine) engine).getBlockDestructionIdCache().getOrCreate(pos);
         final int progressStage = progress == 1 ? 9 : (int) (progress * 10);
         return new ClientboundBlockDestructionPacket(id, pos, progressStage);
     }
 
     public static Optional<ClientboundBlockDestructionPacket> resetBlockProgress(final int x, final int y, final int z, final Engine engine) {
         final BlockPos pos = new BlockPos(x, y, z);
-        final Integer id = ((SpongeEngine) engine).getBlockDestructionIdCache().getIfPresent(pos);
-        return id == null ? Optional.empty() : Optional.of(new ClientboundBlockDestructionPacket(id, pos, -1));
+        return ((SpongeEngine) engine).getBlockDestructionIdCache().get(pos)
+                .map(id -> new ClientboundBlockDestructionPacket(id, pos, -1));
     }
 
     public static ClientboundSetActionBarTextPacket setActionBarText(final Component message) {

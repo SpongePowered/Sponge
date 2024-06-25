@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.server;
 
-import com.github.benmanes.caffeine.cache.Cache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.mojang.datafixers.DataFixer;
@@ -35,7 +34,6 @@ import net.kyori.adventure.resource.ResourcePackRequest;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.commands.Commands;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.MinecraftServer;
@@ -95,6 +93,7 @@ import org.spongepowered.common.registry.RegistryHolderLogic;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.scheduler.ServerScheduler;
 import org.spongepowered.common.user.SpongeUserManager;
+import org.spongepowered.common.util.BlockDestructionIdCache;
 import org.spongepowered.common.util.UsernameCache;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
@@ -162,8 +161,7 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
     private RegistryHolderLogic api$registryHolder;
     private SpongeUserManager api$userManager;
     private SpongeDataPackManager api$dataPackManager;
-    private final Cache<BlockPos, Integer> api$blockDestructionIdCache = this.createBlockDestructionIdCache();
-    private final AtomicInteger api$blockDestructionIdCounter = new AtomicInteger(0);
+    private final BlockDestructionIdCache api$blockDestructionIdCache = new BlockDestructionIdCache(0, AtomicInteger::decrementAndGet);
 
     @Inject(method = "<init>", at = @At("TAIL"))
     public void api$initializeSpongeFieldsfinal(final Thread $$0, final LevelStorageSource.LevelStorageAccess $$1, final PackRepository $$2, final WorldStem $$3, final Proxy $$4,
@@ -482,13 +480,8 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
     }
 
     @Override
-    public Cache<BlockPos, Integer> getBlockDestructionIdCache() {
+    public BlockDestructionIdCache getBlockDestructionIdCache() {
         return this.api$blockDestructionIdCache;
-    }
-
-    @Override
-    public int createBlockDestructionId() {
-        return this.api$blockDestructionIdCounter.decrementAndGet();
     }
 
     @Override
