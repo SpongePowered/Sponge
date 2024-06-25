@@ -96,7 +96,7 @@ public class PlayerInventoryLens extends AbstractLens {
             this.offhand = slots.getSlotLens(base);
 
             base += PlayerInventoryLens.OFFHAND;
-            equipmentLenses.put(EquipmentTypes.OFF_HAND.get(), this.offhand);
+            equipmentLenses.put(EquipmentTypes.OFFHAND.get(), this.offhand);
 
             this.addSpanningChild(this.armor);
             this.addSpanningChild(this.primary);
@@ -116,14 +116,14 @@ public class PlayerInventoryLens extends AbstractLens {
             this.offhand = slots.getSlotLens(base);
 
             base += PlayerInventoryLens.OFFHAND;
-            equipmentLenses.put(EquipmentTypes.OFF_HAND.get(), this.offhand);
+            equipmentLenses.put(EquipmentTypes.OFFHAND.get(), this.offhand);
 
             this.addSpanningChild(this.primary);
             this.addSpanningChild(this.armor);
             this.addSpanningChild(this.offhand);
         }
 
-        equipmentLenses.put(EquipmentTypes.MAIN_HAND.get(), new HeldHandSlotLens(this.primary.getHotbar()));
+        equipmentLenses.put(EquipmentTypes.MAINHAND.get(), new HeldHandSlotLens(this.primary.getHotbar()));
         this.equipment = new EquipmentInventoryLens(equipmentLenses);
 
         for (Map.Entry<EquipmentType, SlotLens> entry : equipmentLenses.entrySet()) {

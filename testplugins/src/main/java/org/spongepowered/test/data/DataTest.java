@@ -324,8 +324,8 @@ public final class DataTest  {
         armorStand.equip(EquipmentTypes.FEET.get(), ItemStack.of(ItemTypes.CHAINMAIL_BOOTS));
         armorStand.equip(EquipmentTypes.HEAD.get(), ItemStack.of(ItemTypes.GOLDEN_HELMET));
         armorStand.equip(EquipmentTypes.LEGS.get(), ItemStack.of(ItemTypes.DIAMOND_LEGGINGS));
-        armorStand.equip(EquipmentTypes.MAIN_HAND.get(), ItemStack.of(ItemTypes.DIAMOND));
-        armorStand.equip(EquipmentTypes.OFF_HAND.get(), ItemStack.of(ItemTypes.DIAMOND));
+        armorStand.equip(EquipmentTypes.MAINHAND.get(), ItemStack.of(ItemTypes.DIAMOND));
+        armorStand.equip(EquipmentTypes.OFFHAND.get(), ItemStack.of(ItemTypes.DIAMOND));
 
         armorStand.offer(Keys.BODY_ROTATIONS, Map.of(BodyParts.CHEST.get(), Vector3d.RIGHT));
 

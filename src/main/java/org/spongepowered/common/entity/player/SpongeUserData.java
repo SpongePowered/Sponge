@@ -317,9 +317,9 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
     @Override
     public ItemStack itemInHand(final HandType handType) {
         if (handType == HandTypes.MAIN_HAND.get()) {
-            this.equipped(EquipmentTypes.MAIN_HAND.get()).orElseThrow(IllegalStateException::new);
+            this.equipped(EquipmentTypes.MAINHAND.get()).orElseThrow(IllegalStateException::new);
         } else if (handType == HandTypes.OFF_HAND.get()) {
-            this.equipped(EquipmentTypes.OFF_HAND.get()).orElseThrow(IllegalStateException::new);
+            this.equipped(EquipmentTypes.OFFHAND.get()).orElseThrow(IllegalStateException::new);
         }
         throw new IllegalArgumentException("Invalid hand " + handType);
     }
@@ -367,9 +367,9 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
     @Override
     public void setItemInHand(final HandType handType, final @Nullable ItemStack itemInHand) {
         if (handType == HandTypes.MAIN_HAND.get()) {
-            this.setEquippedItem(EquipmentTypes.MAIN_HAND, itemInHand);
+            this.setEquippedItem(EquipmentTypes.MAINHAND, itemInHand);
         } else if (handType == HandTypes.OFF_HAND.get()) {
-            this.setEquippedItem(EquipmentTypes.OFF_HAND, itemInHand);
+            this.setEquippedItem(EquipmentTypes.OFFHAND, itemInHand);
         } else {
             throw new IllegalArgumentException("Invalid hand " + handType);
         }
