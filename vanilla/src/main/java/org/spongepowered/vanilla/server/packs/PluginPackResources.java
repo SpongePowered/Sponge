@@ -91,33 +91,16 @@ public final class PluginPackResources extends AbstractPackResources {
     public void listResources(final PackType type, final String namespace, final String path, final ResourceOutput out) {
         try {
             final Path root = this.typeRoot(type);
-            final Path namespaceDir = root.resolve(namespace).toAbsolutePath();
-            try (final Stream<Path> stream = Files.walk(namespaceDir)) {
+            final Path namespaceDir = root.resolve(namespace);
+            final Path resourcesDir = namespaceDir.resolve(path);
+            try (final Stream<Path> stream = Files.walk(resourcesDir)) {
                 stream.filter(Files::isRegularFile)
-                        .filter(s -> !s.getFileName().toString().endsWith(".mcmeta"))
+                        .filter(filePath -> !filePath.getFileName().toString().endsWith(".mcmeta"))
                         .map(namespaceDir::relativize)
-                        .map(Object::toString)
-// TODO filter needed?                   .filter(p -> filterValidPath(namespace, p, fileNameValidator))
-                        .map(s -> new ResourceLocation(namespace, s))
-                        .forEach(loc -> {
-                            out.accept(loc, this.getResource(type, loc));
-                        });
+                        .map(filePath -> new ResourceLocation(namespace, filePath.toString()))
+                        .forEach(loc -> out.accept(loc, this.getResource(type, loc)));
             }
         } catch (final IOException ignored) {
-        }
-    }
-
-    private boolean filterValidPath(final String namespace, final String path, final Predicate<ResourceLocation> fileNameValidator) {
-        try {
-            final ResourceLocation loc = ResourceLocation.tryBuild(namespace, path);
-            if (loc == null) {
-                // LOGGER.warn("Invalid path in datapack: {}:{}, ignoring", $$1, $$7);
-                return false;
-            }
-            return fileNameValidator.test(loc);
-        } catch (ResourceLocationException e) {
-            // LOGGER.error(var13.getMessage());
-            return false;
         }
     }
 
