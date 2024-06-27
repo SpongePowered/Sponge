@@ -172,6 +172,7 @@
         "minecraft.world.entity.animal.camel.CamelMixin_API",
         "minecraft.world.entity.animal.frog.FrogMixin_API",
         "minecraft.world.entity.animal.frog.TadpoleMixin_API",
+        "minecraft.world.entity.animal.goat.GoatMixin_API",
         "minecraft.world.entity.animal.horse.AbstractChestedHorseMixin_API",
         "minecraft.world.entity.animal.horse.AbstractHorseMixin_API",
         "minecraft.world.entity.animal.horse.DonkeyMixin_API",
