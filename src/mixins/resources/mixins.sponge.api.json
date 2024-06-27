@@ -169,6 +169,7 @@
         "minecraft.world.entity.animal.WaterAnimalMixin_API",
         "minecraft.world.entity.animal.WolfMixin_API",
         "minecraft.world.entity.animal.allay.AllayMixin_API",
+        "minecraft.world.entity.animal.axolotl.AxolotlMixin_API",
         "minecraft.world.entity.animal.armadillo.ArmadilloMixin_API",
         "minecraft.world.entity.animal.camel.CamelMixin_API",
         "minecraft.world.entity.animal.frog.FrogMixin_API",
