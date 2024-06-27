@@ -101,6 +101,7 @@
         "minecraft.world.entity.EntityTypeMixin_API",
         "minecraft.world.entity.ExperienceOrbMixin_API",
         "minecraft.world.entity.FlyingMobMixin_API",
+        "minecraft.world.entity.GlowSquidMixin_API",
         "minecraft.world.entity.HumanoidArmMixin_API",
         "minecraft.world.entity.InteractionMixin_API",
         "minecraft.world.entity.LightningBoltMixin_API",
