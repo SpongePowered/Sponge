@@ -116,10 +116,10 @@
             "description": "Testing recipes"
         },
         {
-            "id": "registrytest",
-            "name": "Registry Test",
-            "entrypoint": "org.spongepowered.test.registry.RegistryTest",
-            "description": "Testing registries"
+            "id": "validationtest",
+            "name": "Validation Test",
+            "entrypoint": "org.spongepowered.test.validation.ValidationTest",
+            "description": "Validate API classes"
         },
         {
             "id": "particletest",
