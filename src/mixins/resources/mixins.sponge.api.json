@@ -240,6 +240,7 @@
         "minecraft.world.entity.monster.SpellcasterIllagerMixin_API",
         "minecraft.world.entity.monster.SpiderMixin_API",
         "minecraft.world.entity.monster.StrayMixin_API",
+        "minecraft.world.entity.monster.StriderMixin_API",
         "minecraft.world.entity.monster.VexMixin_API",
         "minecraft.world.entity.monster.VindicatorMixin_API",
         "minecraft.world.entity.monster.WitchMixin_API",
