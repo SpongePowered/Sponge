@@ -24,6 +24,7 @@
  */
 package org.spongepowered.vanilla.server.packs;
 
+import com.mojang.logging.LogUtils;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -34,6 +35,7 @@ import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.resources.IoSupplier;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.slf4j.Logger;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -44,16 +46,14 @@ import java.net.URI;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class PluginPackResources extends AbstractPackResources {
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     private final PluginContainer container;
     private final PackMetadataSection metadata;
@@ -97,11 +97,21 @@ public final class PluginPackResources extends AbstractPackResources {
                 stream.filter(Files::isRegularFile)
                         .filter(filePath -> !filePath.getFileName().toString().endsWith(".mcmeta"))
                         .map(namespaceDir::relativize)
-                        .map(filePath -> new ResourceLocation(namespace, filePath.toString()))
+                        .map(filePath -> convertResourcePath(namespace, filePath))
+                        .filter(Objects::nonNull)
                         .forEach(loc -> out.accept(loc, this.getResource(type, loc)));
             }
         } catch (final IOException ignored) {
         }
+    }
+
+    @Nullable
+    private ResourceLocation convertResourcePath(final String namespace, final Path resourcePath) {
+        final String path = resourcePath.toString();
+        final ResourceLocation location = ResourceLocation.tryBuild(namespace, path);
+        if (location == null)
+            LOGGER.warn("Invalid path in plugin pack: {}:{}, ignoring", namespace, path);
+        return location;
     }
 
     @Nullable
