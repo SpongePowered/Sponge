@@ -24,7 +24,7 @@
  */
 package org.spongepowered.vanilla.server.packs;
 
-import net.minecraft.ResourceLocationException;
+import com.mojang.logging.LogUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.AbstractPackResources;
@@ -34,6 +34,7 @@ import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.resources.IoSupplier;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.slf4j.Logger;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -44,16 +45,13 @@ import java.net.URI;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Predicate;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class PluginPackResources extends AbstractPackResources {
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     private final PluginContainer container;
     private final PackMetadataSection metadata;
@@ -91,34 +89,27 @@ public final class PluginPackResources extends AbstractPackResources {
     public void listResources(final PackType type, final String namespace, final String path, final ResourceOutput out) {
         try {
             final Path root = this.typeRoot(type);
-            final Path namespaceDir = root.resolve(namespace).toAbsolutePath();
-            try (final Stream<Path> stream = Files.walk(namespaceDir)) {
+            final Path namespaceDir = root.resolve(namespace);
+            final Path resourcesDir = namespaceDir.resolve(path);
+            try (final Stream<Path> stream = Files.walk(resourcesDir)) {
                 stream.filter(Files::isRegularFile)
-                        .filter(s -> !s.getFileName().toString().endsWith(".mcmeta"))
+                        .filter(filePath -> !filePath.getFileName().toString().endsWith(".mcmeta"))
                         .map(namespaceDir::relativize)
-                        .map(Object::toString)
-// TODO filter needed?                   .filter(p -> filterValidPath(namespace, p, fileNameValidator))
-                        .map(s -> new ResourceLocation(namespace, s))
-                        .forEach(loc -> {
-                            out.accept(loc, this.getResource(type, loc));
-                        });
+                        .map(filePath -> convertResourcePath(namespace, filePath))
+                        .filter(Objects::nonNull)
+                        .forEach(loc -> out.accept(loc, this.getResource(type, loc)));
             }
         } catch (final IOException ignored) {
         }
     }
 
-    private boolean filterValidPath(final String namespace, final String path, final Predicate<ResourceLocation> fileNameValidator) {
-        try {
-            final ResourceLocation loc = ResourceLocation.tryBuild(namespace, path);
-            if (loc == null) {
-                // LOGGER.warn("Invalid path in datapack: {}:{}, ignoring", $$1, $$7);
-                return false;
-            }
-            return fileNameValidator.test(loc);
-        } catch (ResourceLocationException e) {
-            // LOGGER.error(var13.getMessage());
-            return false;
-        }
+    @Nullable
+    private ResourceLocation convertResourcePath(final String namespace, final Path resourcePath) {
+        final String path = resourcePath.toString();
+        final ResourceLocation location = ResourceLocation.tryBuild(namespace, path);
+        if (location == null)
+            LOGGER.warn("Invalid path in plugin pack: {}:{}, ignoring", namespace, path);
+        return location;
     }
 
     @Nullable
