@@ -116,9 +116,6 @@ public final class SpongeLifecycle implements Lifecycle {
         holder.setRootMinecraftRegistry((Registry<Registry<?>>) BuiltInRegistries.REGISTRY);
 
         SpongeRegistries.registerEarlyGlobalRegistries(holder);
-
-        // Plugin registries
-        this.game.eventManager().post(new AbstractRegisterRegistryEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
     }
 
     @Override
@@ -139,6 +136,9 @@ public final class SpongeLifecycle implements Lifecycle {
             // WORLDGEN ->
             case DIMENSIONS -> {
                 SpongeRegistries.registerGlobalRegistriesDimensionLayer((SpongeRegistryHolder) this.game, registryAccess, this.featureFlags);
+
+                // Plugin registries
+                this.game.eventManager().post(new AbstractRegisterRegistryEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
 
                 // Freeze Sponge Root - Registries are now available
                 holder.registryHolder().freezeSpongeRootRegistry();

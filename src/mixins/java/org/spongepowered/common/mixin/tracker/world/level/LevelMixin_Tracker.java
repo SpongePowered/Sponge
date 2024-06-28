@@ -29,7 +29,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -52,7 +51,6 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 @Mixin(Level.class)
@@ -63,13 +61,11 @@ public abstract class LevelMixin_Tracker implements LevelBridge, LevelAccessor {
     @Shadow @Final protected WritableLevelData levelData;
 
     @Shadow public abstract LevelChunk shadow$getChunkAt(BlockPos pos);
-    @Shadow public abstract void shadow$guardEntityTick(Consumer<Entity> p_217390_1_, Entity p_217390_2_);
     @Override
     @Shadow public boolean setBlock(final BlockPos pos, final BlockState state, final int flags, final int limit) { throw new IllegalStateException("Untransformed shadow!"); }
     @Shadow public void shadow$removeBlockEntity(final BlockPos pos) { } // shadowed
     @Shadow @Nullable public abstract BlockEntity shadow$getBlockEntity(BlockPos pos);
     @Shadow public void shadow$setBlockEntity(final BlockEntity tileEntity) { } // Shadowed
-    @Shadow public void shadow$neighborChanged(final BlockPos pos, final Block blockIn, final BlockPos fromPos) { } // Shadowed
     @Shadow public abstract BlockState shadow$getBlockState(BlockPos pos);
     @Shadow public abstract boolean shadow$isDebug();
     @Override

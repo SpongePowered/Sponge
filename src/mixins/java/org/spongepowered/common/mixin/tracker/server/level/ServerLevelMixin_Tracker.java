@@ -25,15 +25,9 @@
 package org.spongepowered.common.mixin.tracker.server.level;
 
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
-import net.minecraft.CrashReport;
-import net.minecraft.CrashReportCategory;
-import net.minecraft.ReportedException;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
-import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
@@ -50,7 +44,6 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.ticks.ScheduledTick;
 import net.minecraft.world.ticks.TickPriority;
-import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
@@ -77,17 +70,14 @@ import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge;
-import org.spongepowered.common.bridge.world.level.block.TrackableBlockBridge;
 import org.spongepowered.common.bridge.world.level.block.state.BlockStateBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.bridge.world.level.chunk.TrackedLevelChunkBridge;
-import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhasePrinter;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
@@ -112,11 +102,9 @@ import org.spongepowered.common.event.tracking.context.transaction.pipeline.Worl
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.mixin.tracker.world.level.LevelMixin_Tracker;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
-import org.spongepowered.common.world.volume.VolumeStreamUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -124,7 +112,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 @Mixin(ServerLevel.class)
 public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implements TrackedWorldBridge {
@@ -669,77 +656,6 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         }
 
         super.shadow$setBlockEntity(proposed);
-    }
-
-    @Override
-    public void shadow$neighborChanged(final BlockPos pos, final Block blockIn, final BlockPos fromPos) {
-        final BlockPos immutableTarget = pos.immutable();
-        final BlockPos immutableFrom = fromPos.immutable();
-        // Sponge Start - Check asynchronicity,
-        // if not on the server thread and we're a server world, we've got problems...
-        final PhaseTracker server = PhaseTracker.SERVER;
-        if (server.getSidedThread() != Thread.currentThread()) {
-            // lol no, report the block change properly
-            new PrettyPrinter(60).add("Illegal Async PhaseTracker Access").centre().hr()
-                .addWrapped(PhasePrinter.ASYNC_TRACKER_ACCESS)
-                .add()
-                // TODO - have the PhaseTracker of this particular thread print its stack
-                // since we're on that thread, maybe we might have some idea of who or what is calling it.
-                .add(new Exception("Async Block Notifcation Detected"))
-                .log(SpongeCommon.logger(), Level.ERROR);
-            // Maybe? I don't think this is wise to try and sync back a notification on the main thread.
-            return;
-        }
-        // But, sometimes we need to say that we're on the right thread, but it's a silly mod's specific
-        // world that Sponge isn't directly managing, so we'll just ignore trying to record on those.
-        if (this.bridge$isFake()) {
-            // If we're fake, well, we could effectively call this without recording on worlds we don't
-            // want to care about.
-            super.shadow$neighborChanged(immutableTarget, blockIn, immutableFrom);
-            return;
-        }
-        // Otherwise, we continue with recording, maybe.
-        final LevelChunk targetChunk = this.shadow$getChunkAt(immutableTarget);
-        final BlockState targetBlockState = targetChunk.getBlockState(immutableTarget);
-        // Sponge - Shortcircuit if the block has no neighbor logic
-        if (!((TrackableBlockBridge) targetBlockState.getBlock()).bridge$overridesNeighborNotificationLogic()) {
-            return;
-        }
-        // Sponge End
-
-        // Sponge start - prepare notification
-        final PhaseContext<@NonNull ?> peek = server.getPhaseContext();
-
-        //  try { // Vanilla - We need to push the effect transactor so that it always pops
-        try {
-            final Supplier<ServerLevel> worldSupplier = VolumeStreamUtils.createWeaklyReferencedSupplier((ServerLevel) (Object) this, "ServerWorld");
-            final net.minecraft.world.level.block.entity.@Nullable BlockEntity existingTile = targetChunk.getBlockEntity(
-                immutableTarget,
-                LevelChunk.EntityCreationType.CHECK
-            );
-            peek.getTransactor().logNeighborNotification(worldSupplier, immutableFrom, blockIn, immutableTarget, targetBlockState, existingTile);
-
-            peek.associateNeighborStateNotifier(immutableFrom, targetBlockState.getBlock(), immutableTarget, ((ServerLevel) (Object) this), PlayerTracker.Type.NOTIFIER);
-            // Sponge End
-
-            DebugPackets.sendNeighborsUpdatePacket(((ServerLevel) (Object) this), immutableTarget);
-            // TODO targetBlockState.neighborChanged(((ServerLevel) (Object) this), immutableTarget, blockIn, immutableFrom, false);
-
-        } catch (final Throwable throwable) {
-            final CrashReport crashreport = CrashReport.forThrowable(throwable, "Exception while updating neighbours");
-            final CrashReportCategory crashreportcategory = crashreport.addCategory("Block being updated");
-            crashreportcategory.setDetail("Source block type", () -> {
-                final Registry<Block> blockRegistry = SpongeCommon.vanillaRegistry(Registries.BLOCK);
-                try {
-                    return String.format("ID #%s (%s // %s)", blockRegistry.getKey(blockIn),
-                        blockIn.getDescriptionId(), blockIn.getClass().getCanonicalName());
-                } catch (final Throwable var2) {
-                    return "ID #" + blockRegistry.getKey(blockIn);
-                }
-            });
-            CrashReportCategory.populateBlockDetails(crashreportcategory, (ServerLevel) (Object) this, immutableTarget, targetBlockState);
-            throw new ReportedException(crashreport);
-        }
     }
 
     @Inject(

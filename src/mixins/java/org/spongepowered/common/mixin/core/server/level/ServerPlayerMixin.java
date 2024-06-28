@@ -451,19 +451,17 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                     return;
                 }
 
-                if (ShouldFire.MOVE_ENTITY_EVENT) {
-                    final MoveEntityEvent posEvent = SpongeEventFactory.createChangeEntityWorldEventReposition(frame.currentCause(),
-                            (org.spongepowered.api.entity.Entity) player, preEvent.originalWorld(), VecHelper.toVector3d(player.position()),
-                            new Vector3d(x, y, z), preEvent.originalDestinationWorld(), new Vector3d(x, y, z), preEvent.destinationWorld());
+                final MoveEntityEvent posEvent = SpongeEventFactory.createChangeEntityWorldEventReposition(frame.currentCause(),
+                        (org.spongepowered.api.entity.Entity) player, preEvent.originalWorld(), VecHelper.toVector3d(player.position()),
+                        new Vector3d(x, y, z), preEvent.originalDestinationWorld(), new Vector3d(x, y, z), preEvent.destinationWorld());
 
-                    if (SpongeCommon.post(posEvent)) {
-                        return;
-                    }
-
-                    actualX = posEvent.destinationPosition().x();
-                    actualY = posEvent.destinationPosition().y();
-                    actualZ = posEvent.destinationPosition().z();
+                if (SpongeCommon.post(posEvent)) {
+                    return;
                 }
+
+                actualX = posEvent.destinationPosition().x();
+                actualY = posEvent.destinationPosition().y();
+                actualZ = posEvent.destinationPosition().z();
                 this.shadow$setPos(actualX, actualY, actualZ);
 
                 if (ShouldFire.ROTATE_ENTITY_EVENT) {

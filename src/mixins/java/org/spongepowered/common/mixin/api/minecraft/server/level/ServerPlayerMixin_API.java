@@ -47,6 +47,7 @@ import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
 import net.minecraft.network.protocol.game.ClientboundDeleteChatPacket;
@@ -293,6 +294,27 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     @Override
     public void resetBlockChange(final int x, final int y, final int z) {
         this.connection.send(new ClientboundBlockUpdatePacket(this.shadow$getCommandSenderWorld(), new BlockPos(x, y, z)));
+    }
+
+    @Override
+    public void sendBlockProgress(final int x, final int y, final int z, final double progress) {
+        if (progress < 0 || progress > 1) {
+            throw new IllegalArgumentException("Progress must be between 0 and 1");
+        }
+
+        final BlockPos pos = new BlockPos(x, y, z);
+        final int id = ((SpongeServer) this.server).getOrCreateBlockDestructionId(pos);
+        final int progressStage = progress == 1 ? 9 : (int) (progress * 10);
+        this.connection.send(new ClientboundBlockDestructionPacket(id, pos, progressStage));
+    }
+
+    @Override
+    public void resetBlockProgress(final int x, final int y, final int z) {
+        final BlockPos pos = new BlockPos(x, y, z);
+        final Integer id = ((SpongeServer) this.server).getBlockDestructionId(pos);
+        if (id != null) {
+            this.connection.send(new ClientboundBlockDestructionPacket(id, pos, -1));
+        }
     }
 
     @Override

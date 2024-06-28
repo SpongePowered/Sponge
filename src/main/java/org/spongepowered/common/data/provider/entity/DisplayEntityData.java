@@ -34,6 +34,7 @@ import org.joml.Vector3f;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.display.BillboardType;
+import org.spongepowered.api.entity.display.DisplayEntity;
 import org.spongepowered.api.entity.display.ItemDisplayType;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Ticks;
@@ -91,6 +92,15 @@ public class DisplayEntityData {
                             h.invoker$setInterpolationDelay(SpongeTicks.toSaturatedIntOrInfinite(v));
                             return true;
                         })
+                    .create(Keys.TELEPORT_DURATION)
+                        .get(h -> Ticks.of(h.invoker$getPosRotInterpolationDuration()))
+                        .setAnd((h ,v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            h.invoker$setPosRotInterpolationDuration(SpongeTicks.toSaturatedIntOrInfinite(v));
+                            return true;
+                        })
                     .create(Keys.SHADOW_RADIUS)
                         .get(h -> (double) h.invoker$getShadowRadius())
                         .set((h ,v) -> h.invoker$setShadowRadius(v.floatValue()))
@@ -137,6 +147,7 @@ public class DisplayEntityData {
                         .get(h -> DisplayEntityData.colorFromInt(h.invoker$getBackgroundColor()))
                         .set((h, v) -> h.invoker$setBackgroundColor(DisplayEntityData.colorToInt(v)))
         ;
+        registrator.spongeDataStore(Keys.TELEPORT_DURATION.key(), DisplayEntity.class, Keys.TELEPORT_DURATION);
     }
     // @formatter:on
 

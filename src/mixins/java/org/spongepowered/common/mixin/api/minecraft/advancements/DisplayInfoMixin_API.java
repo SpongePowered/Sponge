@@ -116,4 +116,5 @@ public abstract class DisplayInfoMixin_API implements TreeLayoutElement, org.spo
     public boolean displayInfo$isHidden() {
         return this.shadow$isHidden();
     }
+
 }
