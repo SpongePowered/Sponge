@@ -206,6 +206,7 @@
         "minecraft.world.entity.item.ItemEntityMixin_API",
         "minecraft.world.entity.item.PrimedTntMixin_API",
         "minecraft.world.entity.monster.AbstractIllagerMixin_API",
+        "minecraft.world.entity.monster.AbstractPiglinMixin_API",
         "minecraft.world.entity.monster.AbstractSkeletonMixin_API",
         "minecraft.world.entity.monster.BlazeMixin_API",
         "minecraft.world.entity.monster.BoggedMixin_API",
