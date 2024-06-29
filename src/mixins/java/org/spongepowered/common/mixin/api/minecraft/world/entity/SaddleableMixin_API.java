@@ -22,35 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.mixin.api.minecraft.world.entity;
 
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.bridge.world.entity.animal.horse.AbstractHorseBridge;
-import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.api.entity.Saddleable;
+import org.spongepowered.asm.mixin.Mixin;
 
-public final class AbstractHorseData {
-
-    private AbstractHorseData() {
-    }
-
-    // @formatter:off
-    public static void register(final DataProviderRegistrator registrator) {
-        registrator
-                .asMutable(AbstractHorse.class)
-                    .create(Keys.IS_TAMED)
-                        .get(AbstractHorse::isTamed)
-                        .set(AbstractHorse::setTamed)
-                    .create(Keys.OWNER)
-                        .get(AbstractHorse::getOwnerUUID)
-                        .set((h, v) -> {
-                            h.setOwnerUUID(v);
-                            h.setTamed(v != null);
-                        })
-                .asMutable(AbstractHorseBridge.class)
-                    .create(Keys.IS_SADDLED)
-                        .get(AbstractHorseBridge::bridge$isSaddled)
-                        .set(AbstractHorseBridge::bridge$setSaddled);
-    }
-    // @formatter:on
+@Mixin(net.minecraft.world.entity.Saddleable.class)
+public interface SaddleableMixin_API extends Saddleable {
 }

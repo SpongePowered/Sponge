@@ -43,7 +43,7 @@ public abstract class AbstractHorseMixin_API extends AnimalMixin_API implements 
         values.add(this.requireValue(Keys.IS_SADDLED).asImmutable());
         values.add(this.requireValue(Keys.IS_TAMED).asImmutable());
 
-        this.getValue(Keys.TAMER).map(Value::asImmutable).ifPresent(values::add);
+        this.getValue(Keys.OWNER).map(Value::asImmutable).ifPresent(values::add);
 
         return values;
     }
