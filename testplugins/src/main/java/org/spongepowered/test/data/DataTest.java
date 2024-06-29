@@ -1257,10 +1257,10 @@ public final class DataTest  {
         this.checkOfferData(minecartEntity, Keys.VELOCITY, Vector3d.FORWARD);
         this.checkOfferData(minecartEntity, Keys.SWIFTNESS, 2.0);
 
-        this.checkOfferData(horse, Keys.TAMER, player.uniqueId());
-        this.checkOfferData(wolf, Keys.TAMER, player.uniqueId());
-        this.checkOfferData(parrot, Keys.TAMER, player.uniqueId());
-        this.checkOfferData(parrot, Keys.TAMER, null);
+        this.checkOfferData(horse, Keys.OWNER, player.uniqueId());
+        this.checkOfferData(wolf, Keys.OWNER, player.uniqueId());
+        this.checkOfferData(parrot, Keys.OWNER, player.uniqueId());
+        this.checkOfferData(parrot, Keys.OWNER, null);
 
         this.checkOfferData(zombifiedPiglin, Keys.TARGET_ENTITY, player);
         this.checkOfferData(shulkerBullet, Keys.TARGET_ENTITY, sheep);
