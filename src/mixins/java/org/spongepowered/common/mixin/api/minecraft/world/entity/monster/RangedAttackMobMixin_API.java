@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.world.entity.monster;
 
 import net.minecraft.world.entity.monster.RangedAttackMob;
-import org.spongepowered.api.entity.living.Ranger;
+import org.spongepowered.api.entity.Ranger;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(RangedAttackMob.class)

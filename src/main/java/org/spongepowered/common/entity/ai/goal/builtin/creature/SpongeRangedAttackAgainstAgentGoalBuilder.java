@@ -27,7 +27,7 @@ package org.spongepowered.common.entity.ai.goal.builtin.creature;
 import net.minecraft.world.entity.ai.goal.RangedAttackGoal;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.RangedAttackAgainstAgentGoal;
-import org.spongepowered.api.entity.living.Ranger;
+import org.spongepowered.api.entity.living.RangedAgent;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeTicks;
@@ -81,7 +81,7 @@ public final class SpongeRangedAttackAgainstAgentGoalBuilder implements RangedAt
     }
 
     @Override
-    public RangedAttackAgainstAgentGoal build(final Ranger owner) {
+    public RangedAttackAgainstAgentGoal build(final RangedAgent owner) {
         Objects.requireNonNull(owner);
         if (!(owner instanceof RangedAttackMob)) {
             throw new IllegalArgumentException("Ranger must be an IRangedAttackMob!");
