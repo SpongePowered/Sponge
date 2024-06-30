@@ -30,8 +30,8 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.target.FindNearestAttackableTargetGoal;
-import org.spongepowered.api.entity.living.PathfinderAgent;
 import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.api.entity.living.PathfinderAgent;
 
 import java.util.Objects;
 import java.util.function.Predicate;
