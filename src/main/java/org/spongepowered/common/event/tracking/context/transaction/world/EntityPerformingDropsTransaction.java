@@ -143,11 +143,12 @@ public final class EntityPerformingDropsTransaction extends WorldBasedTransactio
 
     @Override
     public void restore(PhaseContext<?> context, HarvestEntityEvent event) {
-        @Nullable final Entity spawn = this.destroyingEntity.getType()
-                .spawn(this.worldSupplier.get(), null, this.destroyingEntity.blockPosition(), MobSpawnType.COMMAND, false, false);
-        if (spawn != null) {
-            spawn.load(this.entityTag);
-        }
+        // TODO this is actually respawning the entity A LOT which is then dying immediately again
+//        @Nullable final Entity spawn = this.destroyingEntity.getType()
+//                .spawn(this.worldSupplier.get(), null, this.destroyingEntity.blockPosition(), MobSpawnType.COMMAND, false, false);
+//        if (spawn != null) {
+//            spawn.load(this.entityTag);
+//        }
     }
 
     @Override

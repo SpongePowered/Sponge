@@ -30,7 +30,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -55,7 +54,6 @@ import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.world.entity.TrackableEntityBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
@@ -138,7 +136,7 @@ public abstract class EntityMixin_Tracker implements DelegatingConfigTrackableBr
         final EntityTickContext context) {
     }
 
-    @Inject(method = "setRemoved", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;stopRiding()V"))
+    @Inject(method = "setRemoved", cancellable = true, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;stopRiding()V"))
     private void impl$createDestructionEventOnDeath(final CallbackInfo ci) {
         if (ShouldFire.DESTRUCT_ENTITY_EVENT && !((LevelBridge) this.shadow$level()).bridge$isFake()
                 && this.levelCallback != EntityInLevelCallback.NULL) {
@@ -155,8 +153,6 @@ public abstract class EntityMixin_Tracker implements DelegatingConfigTrackableBr
                     (org.spongepowered.api.entity.Entity) this,
                     false
                 ));
-            } else if ((Entity) (Object) this instanceof ArmorStand) {
-                SpongeCommonEventFactory.callDestructEntityEventDeath((ArmorStand) (Object) this, null);
             }
         }
     }

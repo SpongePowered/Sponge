@@ -28,6 +28,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity.RemovalReason;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.level.gameevent.GameEvent;
 import org.objectweb.asm.Opcodes;
@@ -39,6 +40,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
+import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.mixin.core.world.entity.LivingEntityMixin;
 import org.spongepowered.common.util.DamageEventUtil;
 
@@ -47,6 +53,8 @@ public abstract class ArmorStandMixin extends LivingEntityMixin {
 
     // @formatter:off
     @Shadow protected abstract void shadow$causeDamage(ServerLevel level, DamageSource damageSource, float damage); // damageArmorStand
+    @Shadow protected abstract void shadow$brokenByPlayer(final ServerLevel $$0, final DamageSource $$1);
+
     // @formatter:on
 
     /**
@@ -120,6 +128,27 @@ public abstract class ArmorStandMixin extends LivingEntityMixin {
         var event = DamageEventUtil.callSimpleDamageEntityEvent(source, (ArmorStand) (Object) this, 0);
         if (event.isCancelled()) {
             cir.setReturnValue(false);
+        }
+    }
+
+    @Inject(method = "hurt", cancellable = true, at = @At(value = "INVOKE",
+        target = "Lnet/minecraft/world/entity/decoration/ArmorStand;brokenByPlayer(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;)V"))
+    private void impl$beforeBrokenByPlayer(final DamageSource $$0, final float $$1, final CallbackInfoReturnable<Boolean> cir) {
+        if (ShouldFire.DESTRUCT_ENTITY_EVENT && !((LevelBridge) this.shadow$level()).bridge$isFake()) {
+            final var event = SpongeCommonEventFactory.callDestructEntityEventDeath((ArmorStand) (Object) this, null);
+            if (event.isCancelled()) {
+                cir.setReturnValue(false);
+            }
+            // TODO event.keepInventory() actually prevent inventory drops
+        }
+    }
+
+    @Redirect(method = "hurt", at = @At(value = "INVOKE",
+        target = "Lnet/minecraft/world/entity/decoration/ArmorStand;brokenByPlayer(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;)V"))
+    public void impl$onBrokenByPlayer(final ArmorStand instance, final ServerLevel $$0, final DamageSource $$1)
+    {
+        try (final EffectTransactor ignored = PhaseTracker.SERVER.getPhaseContext().getTransactor().ensureEntityDropTransactionEffect((LivingEntity) (Object) this)) {
+            this.shadow$brokenByPlayer($$0, $$1);
         }
     }
 
