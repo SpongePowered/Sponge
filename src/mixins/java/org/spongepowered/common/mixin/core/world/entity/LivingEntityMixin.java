@@ -118,6 +118,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Shadow public abstract float shadow$getMaxHealth();
     @Shadow public abstract AttributeMap shadow$getAttributes();
     @Shadow public abstract void shadow$clearSleepingPos();
+    @Shadow public abstract void shadow$setHealth(final float $$0);
 
     // @formatter:on
 
@@ -154,8 +155,8 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                 // ignore because some moron is not resetting the entity.
                 this.impl$deathEventsPosted++;
                 if (SpongeCommonEventFactory.callDestructEntityEventDeath((LivingEntity) (Object) this, cause).isCancelled()) {
-                    // Since the forge event is cancellable
                     ci.cancel();
+                    this.shadow$setHealth(this.shadow$getMaxHealth());
                 }
             }
         } else {
