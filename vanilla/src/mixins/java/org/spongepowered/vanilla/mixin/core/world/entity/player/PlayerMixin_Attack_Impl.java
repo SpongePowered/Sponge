@@ -380,31 +380,27 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin_Attack_i
         if (instance.isInvulnerableTo(damageSource)) {
             return true;
         }
+
+        var realOriginalDamage = originalDamage;
+        if (this.attackImpl$wasInInvulnerableTime) {
+            realOriginalDamage = Math.max(0, realOriginalDamage); // No negative damage because of invulnerableTime
+        }
+
         // Call platform hook for adjusting damage
-        final var modAdjustedDamage = this.bridge$applyModDamage(instance, damageSource, originalDamage);
+        final var modAdjustedDamage = this.bridge$applyModDamage(instance, damageSource, realOriginalDamage);
         // TODO check for direct call?
         this.attackImpl$actuallyHurt = new DamageEventUtil.ActuallyHurt(instance, new ArrayList<>(), damageSource, modAdjustedDamage);
         return false;
     }
 
     /**
-     * Set original damage after calling {@link Player#setAbsorptionAmount} in which we called the event
+     * Set final damage after calling {@link Player#setAbsorptionAmount} in which we called the event
+     * !!NOTE that var7 is actually decompiled incorrectly!!
+     * It is NOT the final damage value instead the method parameter is mutated
      */
     @ModifyVariable(method = "actuallyHurt", ordinal = 0,
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;setAbsorptionAmount(F)V",
             shift = At.Shift.AFTER), argsOnly = true)
-    public float attackImpl$setOriginalDamage(final float value) {
-        if (this.attackImpl$actuallyHurtResult.event().isCancelled()) {
-            return 0;
-        }
-        return value;
-    }
-
-    /**
-     * Set final damage after calling {@link Player#setAbsorptionAmount} in which we called the event
-     */
-    @ModifyVariable(method = "actuallyHurt", ordinal = 1,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;setAbsorptionAmount(F)V", shift = At.Shift.AFTER))
     public float attackImpl$setFinalDamage(final float value) {
         if (this.attackImpl$actuallyHurtResult.event().isCancelled()) {
             return 0;
