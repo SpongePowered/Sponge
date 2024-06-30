@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.monster;
 
-import org.spongepowered.api.entity.living.monster.Strider;
+import org.spongepowered.api.entity.living.animal.Strider;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(net.minecraft.world.entity.monster.Strider.class)

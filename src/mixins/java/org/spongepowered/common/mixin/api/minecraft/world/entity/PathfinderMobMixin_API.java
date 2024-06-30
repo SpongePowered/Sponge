@@ -25,10 +25,10 @@
 package org.spongepowered.common.mixin.api.minecraft.world.entity;
 
 import net.minecraft.world.entity.PathfinderMob;
-import org.spongepowered.api.entity.living.Creature;
+import org.spongepowered.api.entity.living.PathfinderAgent;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(PathfinderMob.class)
-public abstract class PathfinderMobMixin_API extends MobMixin_API implements Creature {
+public abstract class PathfinderMobMixin_API extends MobMixin_API implements PathfinderAgent {
 
 }

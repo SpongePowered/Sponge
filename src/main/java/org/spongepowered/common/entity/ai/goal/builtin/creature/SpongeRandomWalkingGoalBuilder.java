@@ -26,7 +26,7 @@ package org.spongepowered.common.entity.ai.goal.builtin.creature;
 
 import net.minecraft.world.entity.PathfinderMob;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.RandomWalkingGoal;
-import org.spongepowered.api.entity.living.Creature;
+import org.spongepowered.api.entity.living.PathfinderAgent;
 
 import java.util.Objects;
 
@@ -65,7 +65,7 @@ public final class SpongeRandomWalkingGoalBuilder implements RandomWalkingGoal.B
     }
 
     @Override
-    public RandomWalkingGoal build(Creature owner) {
+    public RandomWalkingGoal build(PathfinderAgent owner) {
         Objects.requireNonNull(owner);
         return (RandomWalkingGoal) new net.minecraft.world.entity.ai.goal.RandomStrollGoal((PathfinderMob) owner, this.speed, this.executionChance);
     }
