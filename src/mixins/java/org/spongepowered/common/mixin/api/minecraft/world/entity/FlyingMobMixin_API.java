@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.world.entity;
 
 import net.minecraft.world.entity.FlyingMob;
-import org.spongepowered.api.entity.living.Aerial;
+import org.spongepowered.api.entity.Aerial;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(FlyingMob.class)
