@@ -30,7 +30,7 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.target.FindNearestAttackableTargetGoal;
-import org.spongepowered.api.entity.living.Creature;
+import org.spongepowered.api.entity.living.PathfinderAgent;
 import org.spongepowered.api.entity.living.Living;
 
 import java.util.Objects;
@@ -89,7 +89,7 @@ public final class SpongeFindNearestAttackableTargetGoalBuilder extends SpongeTa
     }
 
     @Override
-    public FindNearestAttackableTargetGoal build(Creature owner) {
+    public FindNearestAttackableTargetGoal build(PathfinderAgent owner) {
         Objects.requireNonNull(owner);
         Objects.requireNonNull(this.targetClass);
 
