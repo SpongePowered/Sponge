@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.server.level;
 
 import com.google.common.collect.ImmutableList;
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.pointer.Pointers;
 import net.minecraft.core.BlockPos;
@@ -41,6 +42,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.storage.RegionFile;
 import net.minecraft.world.level.chunk.storage.RegionStorageInfo;
+import net.minecraft.world.level.dimension.end.EndDragonFight;
 import net.minecraft.world.level.entity.PersistentEntitySectionManager;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.LevelResource;
@@ -73,6 +75,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.entity.raid.RaidsAccessor;
+import org.spongepowered.common.accessor.world.level.dimension.end.EndDragonFightAccessor;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
 import org.spongepowered.common.bridge.world.level.chunk.storage.RegionFileBridge;
@@ -122,6 +126,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     @Shadow public abstract List<net.minecraft.server.level.ServerPlayer> shadow$players();
     @Shadow public abstract Raids shadow$getRaids();
     @Nullable @Shadow public abstract Raid shadow$getRaidAt(BlockPos p_217475_1_);
+    @Nullable @Shadow public abstract EndDragonFight shadow$getDragonFight();
     @Shadow public abstract long shadow$getSeed();
     // @formatter:on
 
@@ -256,6 +261,16 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     @Override
     public Optional<org.spongepowered.api.raid.Raid> raidAt(final Vector3i blockPosition) {
         return Optional.ofNullable((org.spongepowered.api.raid.Raid) this.shadow$getRaidAt(VecHelper.toBlockPos(Objects.requireNonNull(blockPosition, "blockPosition"))));
+    }
+
+    @Override
+    public Optional<BossBar> dragonFightBossBar() {
+        final @Nullable EndDragonFight fight = this.shadow$getDragonFight();
+        if (fight != null) {
+            return Optional.of(SpongeAdventure.asAdventure(((EndDragonFightAccessor) fight).accessor$dragonEvent()));
+        } else {
+            return Optional.empty();
+        }
     }
 
     // Volume
