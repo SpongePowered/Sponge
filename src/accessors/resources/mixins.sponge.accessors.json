@@ -194,6 +194,7 @@
         "world.level.chunk.storage.RegionFileAccessor",
         "world.level.chunk.storage.SimpleRegionStorageAccessor",
         "world.level.dimension.DimensionTypeAccessor",
+        "world.level.dimension.end.EndDragonFightAccessor",
         "world.level.entity.EntityTickListAccessor",
         "world.level.entity.PersistentEntitySectionManagerAccessor",
         "world.level.levelgen.NoiseSettingsAccessor",
