@@ -35,7 +35,6 @@ import org.spongepowered.api.raid.RaidWave;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.entity.raid.RaidBridge;
@@ -43,7 +42,6 @@ import org.spongepowered.common.bridge.world.entity.raid.RaidBridge;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -52,7 +50,7 @@ public abstract class RaidMixin_API implements org.spongepowered.api.raid.Raid {
 
     //@formatter:off
     @Shadow @Final private Map<Integer, Set<Raider>> groupRaiderMap;
-    @Shadow @Final @Mutable private ServerBossEvent raidEvent;
+    @Shadow @Final private ServerBossEvent raidEvent;
     @Shadow private Raid.RaidStatus status;
 
     @Shadow public abstract Level shadow$getLevel();
@@ -68,12 +66,6 @@ public abstract class RaidMixin_API implements org.spongepowered.api.raid.Raid {
     @Override
     public BossBar bossBar() {
         return SpongeAdventure.asAdventure(this.raidEvent);
-    }
-
-    @Override
-    public void setBossBar(final BossBar bossBar) {
-        Objects.requireNonNull(bossBar, "BossBar cannot be null.");
-        this.raidEvent = SpongeAdventure.asVanillaServer(bossBar);
     }
 
     @Override
