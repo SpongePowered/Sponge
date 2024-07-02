@@ -411,7 +411,7 @@ public final class SpongeChannelManager implements ChannelManager {
         // Normal handling
         final TransactionStore transactionStore = ConnectionUtil.getTransactionStore(connection);
         final TransactionStore.Entry entry = transactionStore.remove(transactionId);
-        if (entry == null) {
+        if (entry == null || entry.getData() == null) {
             return;
         }
         if (entry.getData() instanceof ClientTypeSyncFuture) {
