@@ -39,7 +39,6 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.OutgoingChatMessage;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
@@ -278,12 +277,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         if (this.connection != null) {
             final Channel channel = ((ConnectionAccessor) ((ServerCommonPacketListenerImplAccessor) this.connection).accessor$connection()).accessor$channel();
             channel.attr(SpongeAdventure.CHANNEL_LOCALE).set(language);
-
-            SpongeAdventure.forEachBossBar(bar -> {
-                if (bar.getPlayers().contains(this)) {
-                    this.connection.send(ClientboundBossEventPacket.createUpdateNamePacket(bar));
-                }
-            });
 
             this.containerMenu.broadcastFullState();
         }
