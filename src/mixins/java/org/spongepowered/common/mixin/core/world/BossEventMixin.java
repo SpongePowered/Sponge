@@ -33,6 +33,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.bridge.adventure.BossBarBridge;
 import org.spongepowered.common.bridge.world.BossEventBridge;
 
 @Mixin(BossEvent.class)
@@ -49,9 +50,7 @@ public abstract class BossEventMixin implements BossEventBridge {
     protected BossBar impl$adventure;
 
     @Override
-    public void bridge$copyAndAssign(final BossBar adventure) {
-        this.impl$adventure = adventure;
-        this.progress = adventure.progress();
+    public void bridge$copy(final BossBar adventure) {
         this.darkenScreen = adventure.hasFlag(BossBar.Flag.DARKEN_SCREEN);
         this.playBossMusic = adventure.hasFlag(BossBar.Flag.PLAY_BOSS_MUSIC);
         this.createWorldFog = adventure.hasFlag(BossBar.Flag.CREATE_WORLD_FOG);
@@ -67,6 +66,8 @@ public abstract class BossEventMixin implements BossEventBridge {
                 SpongeAdventure.asAdventure(this.overlay),
                 SpongeAdventure.asAdventureFlags(this.darkenScreen, this.playBossMusic, this.createWorldFog)
             ));
+            ((BossBarBridge) this.impl$adventure).bridge$setVanilla((BossEvent) (Object) this);
+            ((BossBarBridge) this.impl$adventure).bridge$assignImplementation();
         }
         return this.impl$adventure;
     }

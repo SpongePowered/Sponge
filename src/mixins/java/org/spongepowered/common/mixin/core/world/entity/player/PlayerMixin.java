@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.world.entity.player;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Either;
+import net.kyori.adventure.bossbar.BossBar;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -85,7 +86,9 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.ExperienceHolderUtil;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.player.Player.class)
 public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBridge, GameProfileHolderBridge, ViewerBridge {
@@ -119,6 +122,9 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
     private boolean impl$affectsSpawning = true;
     protected final boolean impl$isFake = this.bridge$isFakePlayer();
 
+    private final Set<BossBar> impl$activeBossBars = new HashSet<>();
+    private final Set<BossBar> impl$unmodifiableActiveBossBars = Collections.unmodifiableSet(this.impl$activeBossBars);
+
     @Override
     public boolean bridge$affectsSpawning() {
         return this.impl$affectsSpawning && !this.shadow$isSpectator() && !this.bridge$vanishState().untargetable();
@@ -143,6 +149,21 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
     public void bridge$setExperienceSinceLevel(final int experience) {
         this.totalExperience = ExperienceHolderUtil.xpAtLevel(this.experienceLevel) + experience;
         this.experienceProgress = (float) experience / this.shadow$getXpNeededForNextLevel();
+    }
+
+    @Override
+    public Iterable<? extends BossBar> bridge$getActiveBossBars() {
+        return this.impl$unmodifiableActiveBossBars;
+    }
+
+    @Override
+    public void bridge$addActiveBossBar(final BossBar bar) {
+        this.impl$activeBossBars.add(bar);
+    }
+
+    @Override
+    public void bridge$removeActiveBossBar(final BossBar bar) {
+        this.impl$activeBossBars.remove(bar);
     }
 
     @Redirect(
