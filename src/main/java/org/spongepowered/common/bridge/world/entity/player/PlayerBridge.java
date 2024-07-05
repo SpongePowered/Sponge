@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.bridge.world.entity.player;
 
+import net.kyori.adventure.bossbar.BossBar;
+
 public interface PlayerBridge {
 
     boolean bridge$affectsSpawning();
@@ -35,4 +37,10 @@ public interface PlayerBridge {
     int bridge$getExperienceSinceLevel();
 
     void bridge$setExperienceSinceLevel(int experience);
+
+    Iterable<? extends BossBar> bridge$getActiveBossBars();
+
+    void bridge$addActiveBossBar(BossBar bar);
+
+    void bridge$removeActiveBossBar(BossBar bar);
 }
