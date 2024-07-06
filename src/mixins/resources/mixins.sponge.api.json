@@ -273,6 +273,7 @@
         "minecraft.world.entity.projectile.FireballMixin_API",
         "minecraft.world.entity.projectile.FireworkRocketEntityMixin_API",
         "minecraft.world.entity.projectile.FishingHookMixin_API",
+        "minecraft.world.entity.projectile.ItemSupplierMixin_API",
         "minecraft.world.entity.projectile.LargeFireballMixin_API",
         "minecraft.world.entity.projectile.LlamaSpitMixin_API",
         "minecraft.world.entity.projectile.ProjectileMixin_API",
