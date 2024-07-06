@@ -27,13 +27,13 @@ package org.spongepowered.common.mixin.api.minecraft.world.entity.projectile;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.entity.projectile.arrow.ArrowEntity;
+import org.spongepowered.api.entity.projectile.arrow.ArrowLike;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Set;
 
 @Mixin(AbstractArrow.class)
-public abstract class AbstractArrowMixin_API extends ProjectileMixin_API implements ArrowEntity {
+public abstract class AbstractArrowMixin_API extends ProjectileMixin_API implements ArrowLike {
 
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
