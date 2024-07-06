@@ -56,7 +56,6 @@ import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.ArrayList;
