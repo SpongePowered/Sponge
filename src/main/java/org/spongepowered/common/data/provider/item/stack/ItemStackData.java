@@ -157,7 +157,7 @@ public final class ItemStackData {
                             }
                             return null;
                         })
-                        .set((h, v) -> h.set(DataComponents.CUSTOM_NAME, SpongeAdventure.asVanilla(v)))
+                        .set((h, v) -> h.set(DataComponents.CUSTOM_NAME, SpongeAdventure.asVanillaMutable(v)))
                         .delete(h -> h.remove(DataComponents.CUSTOM_NAME))
                     .create(Keys.IS_UNBREAKABLE)
                         .get(h -> h.has(DataComponents.UNBREAKABLE))
@@ -176,7 +176,7 @@ public final class ItemStackData {
                                 h.remove(DataComponents.LORE);
                                 return;
                             }
-                            h.set(DataComponents.LORE, new ItemLore(v.stream().map(SpongeAdventure::asVanilla).toList()));
+                            h.set(DataComponents.LORE, new ItemLore(v.stream().map(SpongeAdventure::asVanillaMutable).map(Component.class::cast).toList()));
                         })
                         .delete(h -> h.remove(DataComponents.LORE))
                     .create(Keys.MAX_DURABILITY)
@@ -274,7 +274,7 @@ public final class ItemStackData {
                             }
                             return SpongeAdventure.asAdventure(component);
                         })
-                        .set((h, value) -> h.set(DataComponents.ITEM_NAME, SpongeAdventure.asVanilla(value)))
+                        .set((h, value) -> h.set(DataComponents.ITEM_NAME, SpongeAdventure.asVanillaMutable(value)))
                         .delete(stack -> stack.remove(DataComponents.ITEM_NAME))
                     ;
     }
