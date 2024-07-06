@@ -33,9 +33,9 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
+import org.spongepowered.api.entity.Breedable;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ExperienceOrb;
-import org.spongepowered.api.entity.living.Ageable;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.entity.SpawnType;
@@ -94,7 +94,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         }
         final Entity source = context.getSource(Entity.class)
             .orElseThrow(() -> new IllegalStateException("Ticking over a non Entity"));
-        if (source instanceof Ageable) {
+        if (source instanceof Breedable) {
             if (source.getClass() == entityToSpawn.getClass()) {
                 return SpawnTypes.BREEDING;
             }

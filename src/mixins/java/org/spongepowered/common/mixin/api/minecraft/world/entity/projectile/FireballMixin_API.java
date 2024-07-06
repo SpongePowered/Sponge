@@ -25,10 +25,10 @@
 package org.spongepowered.common.mixin.api.minecraft.world.entity.projectile;
 
 import net.minecraft.world.entity.projectile.Fireball;
-import org.spongepowered.api.entity.projectile.explosive.fireball.FireballEntity;
+import org.spongepowered.api.entity.projectile.IgnitingProjectile;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(Fireball.class)
-public abstract class FireballMixin_API extends AbstractHurtingProjectileMixin_API implements FireballEntity {
+public abstract class FireballMixin_API extends AbstractHurtingProjectileMixin_API implements IgnitingProjectile {
 
 }
