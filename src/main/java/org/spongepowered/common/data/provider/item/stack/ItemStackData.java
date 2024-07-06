@@ -286,7 +286,7 @@ public final class ItemStackData {
         }
         var slots = contents.stream().map(ItemStackUtil::cloneDefensive).toList();
         if (slots.isEmpty()) {
-            return new EmptyInventoryImpl(null);
+            return null;
         }
         final Inventory inventory = Inventory.builder().slots(slots.size()).completeStructure()
                 .plugin(SpongeCommon.game().platform().container(Platform.Component.IMPLEMENTATION))
