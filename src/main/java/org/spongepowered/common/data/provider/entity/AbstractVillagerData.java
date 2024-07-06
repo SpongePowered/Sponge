@@ -26,6 +26,7 @@ package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.world.entity.npc.AbstractVillager;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class AbstractVillagerData {
@@ -37,8 +38,8 @@ public final class AbstractVillagerData {
     public static void register(final DataProviderRegistrator registrator) {
         registrator
                 .asMutable(AbstractVillager.class)
-                    .create(Keys.IS_TRADING)
-                        .get(AbstractVillager::isTrading);
+                    .create(Keys.CUSTOMER)
+                        .get(v -> (Player) v.getTradingPlayer());
     }
     // @formatter:on
 }
