@@ -59,6 +59,7 @@ public abstract class AttributeInstanceMixin_API implements Attribute {
     @Shadow public abstract double shadow$getValue();
     @Shadow protected abstract void shadow$addModifier(net.minecraft.world.entity.ai.attributes.AttributeModifier modifier);
     @Shadow public abstract void shadow$removeModifier(net.minecraft.world.entity.ai.attributes.AttributeModifier modifier);
+    @Shadow public abstract boolean shadow$removeModifier(ResourceLocation $$0);
     @Shadow abstract Map<UUID, net.minecraft.world.entity.ai.attributes.AttributeModifier> shadow$getModifiers(net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation p_225504_1_);
     @Shadow public abstract Set<net.minecraft.world.entity.ai.attributes.AttributeModifier> shadow$getModifiers();
     @Shadow public abstract boolean shadow$hasModifier(final ResourceLocation $$0);
@@ -109,6 +110,11 @@ public abstract class AttributeInstanceMixin_API implements Attribute {
     @Override
     public void removeModifier(final AttributeModifier modifier) {
         this.shadow$removeModifier((net.minecraft.world.entity.ai.attributes.AttributeModifier) (Object) Objects.requireNonNull(modifier, "modifier"));
+    }
+
+    @Override
+    public void removeModifier(ResourceKey key) {
+        this.shadow$removeModifier((ResourceLocation) (Object) key);
     }
 
     @Override
