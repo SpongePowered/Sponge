@@ -219,6 +219,7 @@
         "minecraft.world.entity.monster.ElderGuardianMixin_API",
         "minecraft.world.entity.monster.EnderManMixin_API",
         "minecraft.world.entity.monster.EndermiteMixin_API",
+        "minecraft.world.entity.monster.EnemyMixin_API",
         "minecraft.world.entity.monster.EvokerMixin_API",
         "minecraft.world.entity.monster.GhastMixin_API",
         "minecraft.world.entity.monster.GiantMixin_API",
