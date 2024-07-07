@@ -58,6 +58,7 @@ public final class LivingData {
                 .asMutable(LivingEntity.class)
                     .create(Keys.ABSORPTION)
                         .get(h -> (double) h.getAbsorptionAmount())
+                        .resetOnDelete(0.0)
                         .setAnd((h, v) -> {
                             if (v < 0) {
                                 return false;
