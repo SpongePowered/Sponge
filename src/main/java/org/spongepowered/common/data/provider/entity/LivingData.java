@@ -77,6 +77,7 @@ public final class LivingData {
                         .delete(LivingEntity::releaseUsingItem)
                     .create(Keys.AUTO_SPIN_ATTACK_TICKS)
                         .get(h -> Ticks.of(((LivingEntityAccessor)h).accessor$autoSpinAttackTicks()))
+                        .resetOnDelete(Ticks.zero())
                         .setAnd((h, v) -> {
                             if (v.isInfinite()) {
                                 return false;
@@ -87,7 +88,9 @@ public final class LivingData {
                                 p.startAutoSpinAttack(SpongeTicks.toSaturatedIntOrInfinite(v), dmg == 0 ? 8.0F : dmg, stack);
                                 return true;
                             }
-                            return false;
+                            ((LivingEntityAccessor) h).accessor$autoSpinAttackTicks(SpongeTicks.toSaturatedIntOrInfinite(v));
+                            ((LivingEntityAccessor) h).invoker$setLivingEntityFlag(4, true);
+                            return true;
                         })
                     .create(Keys.AUTO_SPIN_ATTACK_DAMAGE)
                         .get(h -> (double) ((LivingEntityAccessor)h).accessor$autoSpinAttackDmg())
