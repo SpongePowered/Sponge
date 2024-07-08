@@ -26,6 +26,8 @@ package org.spongepowered.common.data.value;
 
 import org.spongepowered.api.data.value.Value;
 
+import java.util.Objects;
+
 @SuppressWarnings("unchecked")
 final class CachedEnumValueConstructor<V extends Value<E>, E extends Enum<E>> implements ValueConstructor<V, E> {
 
@@ -48,6 +50,7 @@ final class CachedEnumValueConstructor<V extends Value<E>, E extends Enum<E>> im
 
     @Override
     public V getImmutable(final E element) {
+        Objects.requireNonNull(element, "element");
         return this.immutableValues[element.ordinal()];
     }
 
