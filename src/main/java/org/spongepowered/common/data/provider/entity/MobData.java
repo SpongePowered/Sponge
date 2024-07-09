@@ -29,7 +29,6 @@ import net.minecraft.world.entity.Mob;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandPreference;
 import org.spongepowered.api.data.type.HandPreferences;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.common.accessor.world.entity.MobAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -46,15 +45,6 @@ public final class MobData {
                     .create(Keys.DOMINANT_HAND)
                         .get(h -> (HandPreference) (Object) h.getMainArm())
                         .set((h, v) -> h.setLeftHanded(v.equals(HandPreferences.LEFT.get())))
-                    .create(Keys.LEASH_HOLDER)
-                        .get(h -> ((Entity) h.getLeashHolder()))
-                        .set((h, v) -> {
-                            if (v == null) {
-                                h.dropLeash(true, false);
-                            } else {
-                                h.setLeashedTo((net.minecraft.world.entity.Entity) v, true);
-                            }
-                        })
                     .create(Keys.TARGET_ENTITY)
                         .get(h -> (Living) h.getTarget())
                         .setAnd((h, v) -> {
