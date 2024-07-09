@@ -26,9 +26,10 @@ package org.spongepowered.common.mixin.core.adventure.bossbar;
 
 import net.kyori.adventure.bossbar.BossBar;
 import net.minecraft.server.level.ServerBossEvent;
+import net.minecraft.world.BossEvent;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.adventure.BossBarImplementationProviderImpl;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.adventure.VanillaBossBarListener;
 import org.spongepowered.common.bridge.adventure.BossBarBridge;
 import org.spongepowered.common.bridge.world.BossEventBridge;
 
@@ -43,9 +44,22 @@ public abstract class HackyBossBarPlatformBridgeMixin implements BossBarBridge {
             final BossBar $this = (BossBar) this;
             this.bridge$vanillaServerBar = new ServerBossEvent(SpongeAdventure.asVanilla($this.name()), SpongeAdventure.asVanilla($this.color()), SpongeAdventure.asVanilla($this.overlay()));
             final BossEventBridge bridge = (BossEventBridge) this.bridge$vanillaServerBar;
-            bridge.bridge$copyAndAssign($this);
-            $this.addListener(new VanillaBossBarListener(this.bridge$vanillaServerBar));
+            bridge.bridge$copy($this);
+            bridge.bridge$setAdventure($this);
+            this.bridge$assignImplementation();
         }
         return this.bridge$vanillaServerBar;
+    }
+
+    @Override
+    public void bridge$setVanilla(final BossEvent vanilla) {
+        if (vanilla instanceof final ServerBossEvent vanillaServer) {
+            this.bridge$vanillaServerBar = vanillaServer;
+        }
+    }
+
+    @Override
+    public void bridge$assignImplementation() {
+        BossBarImplementationProviderImpl.assignImplementation((BossBar) this);
     }
 }

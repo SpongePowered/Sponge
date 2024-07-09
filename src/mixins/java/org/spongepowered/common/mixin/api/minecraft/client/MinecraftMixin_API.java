@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.api.minecraft.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.network.Connection;
 import net.minecraft.server.packs.repository.PackRepository;
@@ -42,6 +43,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.client.MinecraftBridge;
+import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.client.SpongeClient;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.registry.RegistryHolderLogic;
@@ -66,6 +68,7 @@ public abstract class MinecraftMixin_API implements SpongeClient, SpongeRegistry
     @Shadow @Nullable public abstract IntegratedServer shadow$getSingleplayerServer();
     @Shadow public abstract PackRepository shadow$getResourcePackRepository();
     @Shadow public abstract net.minecraft.server.packs.resources.ResourceManager shadow$getResourceManager();
+    @Shadow @Nullable public abstract ClientPacketListener shadow$getConnection();
     // @formatter:on
 
     private final ClientScheduler api$scheduler = new ClientScheduler();
@@ -96,10 +99,11 @@ public abstract class MinecraftMixin_API implements SpongeClient, SpongeRegistry
 
     @Override
     public Optional<ClientSideConnection> connection() {
-        if (this.pendingConnection == null) {
+        final @Nullable ClientPacketListener connection = this.shadow$getConnection();
+        if (connection == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable((ClientSideConnection) this.pendingConnection.getPacketListener());
+        return Optional.ofNullable((ClientSideConnection) ((ConnectionBridge) connection.getConnection()).bridge$getEngineConnection());
     }
 
     @Override

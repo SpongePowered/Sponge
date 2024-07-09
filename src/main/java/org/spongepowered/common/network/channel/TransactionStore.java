@@ -47,7 +47,8 @@ public final class TransactionStore {
     private final ConcurrentMap<Integer, Entry> lookup = Caffeine.newBuilder()
             .expireAfterAccess(15, TimeUnit.SECONDS)
             .removalListener((RemovalListener<Integer, Entry>) (key, value, cause) -> {
-                if (cause == RemovalCause.EXPIRED && value != null) {
+                //The channel is null for few internal packets
+                if (cause == RemovalCause.EXPIRED && value != null && value.getChannel() != null) {
                     final EngineConnectionState state = (EngineConnectionState) ((SpongeEngineConnection) this.connection()).connection().getPacketListener();
                     value.getChannel().handleTransactionResponse(
                         this.connection(), state, value.getData(), TransactionResult.failure(new TimeoutException()));
@@ -57,19 +58,19 @@ public final class TransactionStore {
 
     public static class Entry {
 
-        private final SpongeChannel channel;
-        private final Object data;
+        private final @Nullable SpongeChannel channel;
+        private final @Nullable Object data;
 
-        public Entry(final SpongeChannel channel, final Object data) {
+        public Entry(final @Nullable SpongeChannel channel, final @Nullable Object data) {
             this.channel = channel;
             this.data = data;
         }
 
-        public SpongeChannel getChannel() {
+        public @Nullable SpongeChannel getChannel() {
             return this.channel;
         }
 
-        public Object getData() {
+        public @Nullable Object getData() {
             return this.data;
         }
     }
@@ -110,7 +111,7 @@ public final class TransactionStore {
      * @param channel The channel
      * @param stored The stored data
      */
-    public void put(final int transactionId, final SpongeChannel channel, final Object stored) {
+    public void put(final int transactionId, final @Nullable SpongeChannel channel, final @Nullable Object stored) {
         this.lookup.put(transactionId, new Entry(channel, stored));
     }
 

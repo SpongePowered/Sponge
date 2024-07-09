@@ -22,27 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.entity.npc;
+package org.spongepowered.common.mixin.api.minecraft.world.entity.monster;
 
-import net.minecraft.world.entity.npc.AbstractVillager;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.entity.living.trader.VillagerLike;
+import net.minecraft.world.entity.monster.Enemy;
+import org.spongepowered.api.entity.living.Hostile;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.api.minecraft.world.entity.AgeableMobMixin_API;
 
-import java.util.Set;
-
-@Mixin(AbstractVillager.class)
-public abstract class AbstractVillagerMixin_API extends AgeableMobMixin_API implements VillagerLike {
-
-    @Override
-    protected Set<Value.Immutable<?>> api$getVanillaValues() {
-        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
-
-        values.add(this.requireValue(Keys.CUSTOMER).asImmutable());
-
-        return values;
-    }
-
+@Mixin(Enemy.class)
+public interface EnemyMixin_API extends Hostile {
 }

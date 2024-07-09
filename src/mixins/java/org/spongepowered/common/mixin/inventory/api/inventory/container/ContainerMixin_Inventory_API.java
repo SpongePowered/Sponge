@@ -121,8 +121,8 @@ public abstract class ContainerMixin_Inventory_API implements org.spongepowered.
     }
 
     @Override
-    public ContainerType type() {
-        return ((ContainerType) this.menuType);
+    public Optional<ContainerType> type() {
+        return Optional.ofNullable((ContainerType) this.menuType);
     }
 
     private List<net.minecraft.server.level.ServerPlayer> listeners() {

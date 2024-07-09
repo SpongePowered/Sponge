@@ -946,7 +946,7 @@ public final class DataTest  {
         this.checkOfferData(wolf, Keys.IS_TAMED, true);
 
         final Entity villager = world.createEntity(EntityTypes.VILLAGER.get(), position);
-        this.checkGetData(villager, Keys.IS_TRADING, false);
+        this.checkGetData(villager, Keys.CUSTOMER, null);
 
         final Entity ocelot = world.createEntity(EntityTypes.OCELOT.get(), position);
         this.checkOfferData(ocelot, Keys.IS_TRUSTING, true);

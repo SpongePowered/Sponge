@@ -33,7 +33,7 @@ public interface BossEventBridge {
      *
      * @param adventure adventure boss bar
      */
-    void bridge$copyAndAssign(BossBar adventure);
+    void bridge$copy(BossBar adventure);
 
     BossBar bridge$asAdventure();
 

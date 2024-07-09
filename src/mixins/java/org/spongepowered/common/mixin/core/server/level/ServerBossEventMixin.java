@@ -39,6 +39,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
 import org.spongepowered.common.mixin.core.world.BossEventMixin;
 
 import java.util.Set;
@@ -57,28 +58,24 @@ public abstract class ServerBossEventMixin extends BossEventMixin implements Bos
 
     @Override
     public void bridge$setAdventure(final BossBar adventure) {
-        final BossBar oldAdventure = this.impl$adventure;
         super.bridge$setAdventure(adventure);
-        if (oldAdventure != adventure) {
-            if (oldAdventure != null) {
-                oldAdventure.removeListener(this); // TODO(adventure): how to update viewers?
-            }
-            adventure.addListener(this);
+        adventure.addListener(this);
 
-            // Apply invalid data where possible, avoid sameness checks
-            this.name = null;
-            this.progress = Float.MIN_VALUE;
-            this.color = null;
-            this.overlay = null;
-            // flags have to be done separately
-        }
+        // Apply invalid data where possible, avoid sameness checks
+        this.name = null;
+        this.progress = Float.MIN_VALUE;
+        this.color = null;
+        this.overlay = null;
+        // flags have to be done separately
     }
 
     @Override
     public void bridge$replacePlayer(final ServerPlayer oldPlayer, final ServerPlayer newPlayer) {
         super.bridge$replacePlayer(oldPlayer, newPlayer);
-        if(this.players.remove(oldPlayer)) {
+        if (this.players.remove(oldPlayer)) {
             this.players.add(newPlayer);
+            ((PlayerBridge) oldPlayer).bridge$removeActiveBossBar(this.bridge$asAdventure());
+            ((PlayerBridge) newPlayer).bridge$addActiveBossBar(this.bridge$asAdventure());
         }
     }
 
@@ -140,12 +137,20 @@ public abstract class ServerBossEventMixin extends BossEventMixin implements Bos
         if (!this.players.isEmpty() && this.visible) {
             SpongeAdventure.registerBossBar((ServerBossEvent) (Object) this);
         }
+
+        if (this.visible) {
+            ((PlayerBridge) player).bridge$addActiveBossBar(this.bridge$asAdventure());
+        }
     }
 
     @Inject(method = "removePlayer", at = @At("TAIL"))
     private void impl$removePlayer(final ServerPlayer player, final CallbackInfo ci) {
         if (this.players.isEmpty()) {
             SpongeAdventure.unregisterBossBar((ServerBossEvent) (Object) this);
+        }
+
+        if (this.visible) {
+            ((PlayerBridge) player).bridge$removeActiveBossBar(this.bridge$asAdventure());
         }
     }
 
@@ -157,10 +162,13 @@ public abstract class ServerBossEventMixin extends BossEventMixin implements Bos
     @Inject(method = "setVisible", at = @At("HEAD"))
     private void impl$setVisible(final boolean visible, final CallbackInfo ci) {
         if (!this.players.isEmpty()) {
+            final BossBar bar = this.bridge$asAdventure();
             if (visible) {
                 SpongeAdventure.registerBossBar((ServerBossEvent) (Object) this);
+                this.players.forEach(player -> ((PlayerBridge) player).bridge$addActiveBossBar(bar));
             } else {
                 SpongeAdventure.unregisterBossBar((ServerBossEvent) (Object) this);
+                this.players.forEach(player -> ((PlayerBridge) player).bridge$removeActiveBossBar(bar));
             }
         }
     }
