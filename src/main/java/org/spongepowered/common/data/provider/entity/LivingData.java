@@ -199,6 +199,7 @@ public final class LivingData {
                         .get(h -> (double) h.getScale())
                     .create(Keys.STUCK_ARROWS)
                         .get(LivingEntity::getArrowCount)
+                        .resetOnDelete(0)
                         .setAnd((h, v) -> {
                             if (v < 0 || v > Integer.MAX_VALUE) {
                                 return false;
