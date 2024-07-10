@@ -191,6 +191,7 @@ public final class EntityData {
                         .get(Entity::onGround)
                     .create(Keys.PASSENGERS)
                         .get(h -> h.getPassengers().stream().map(org.spongepowered.api.entity.Entity.class::cast).collect(Collectors.toList()))
+                        .delete(Entity::ejectPassengers)
                         .set((h, v) -> {
                             h.ejectPassengers();
                             v.forEach(v1 -> ((Entity) v1).startRiding(h, true));
