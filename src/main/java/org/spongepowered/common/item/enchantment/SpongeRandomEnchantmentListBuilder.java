@@ -135,7 +135,7 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
     }
 
     public static List<Enchantment> fromNative(final List<EnchantmentInstance> list) {
-        return list.stream().map(data -> Enchantment.of(((EnchantmentType) data.enchantment), data.level)).collect(Collectors.toList());
+        return list.stream().map(data -> Enchantment.of(((EnchantmentType) (Object) data.enchantment.value()), data.level)).collect(Collectors.toList());
     }
 
     public static List<EnchantmentInstance> toNative(final List<Enchantment> list) {
