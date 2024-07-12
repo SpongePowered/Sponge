@@ -153,6 +153,7 @@ public final class EntityData {
                         .get(h -> (double) h.getBbHeight())
                     .create(Keys.INVULNERABILITY_TICKS)
                         .get(h -> new SpongeTicks(h.invulnerableTime))
+                        .resetOnDelete(Ticks.zero())
                         .setAnd((h, v) -> {
                             final int ticks = SpongeTicks.toSaturatedIntOrInfinite(v);
                             if (v.isInfinite() || ticks < 0) {
