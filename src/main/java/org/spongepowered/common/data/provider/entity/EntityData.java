@@ -181,6 +181,7 @@ public final class EntityData {
                         .set((h, v) -> h.setNoGravity(!v))
                     .create(Keys.IS_SNEAKING)
                         .get(Entity::isShiftKeyDown)
+                        .resetOnDelete(false)
                         .set(Entity::setShiftKeyDown)
                     .create(Keys.IS_SPRINTING)
                         .get(Entity::isSprinting)
