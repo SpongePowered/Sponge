@@ -26,6 +26,8 @@ package org.spongepowered.common.data.value;
 
 import org.spongepowered.api.data.value.Value;
 
+import java.util.Objects;
+
 final class CachedBooleanValueConstructor implements ValueConstructor<Value<Boolean>, Boolean> {
 
     private final ValueConstructor<Value<Boolean>, Boolean> original;
@@ -45,6 +47,7 @@ final class CachedBooleanValueConstructor implements ValueConstructor<Value<Bool
 
     @Override
     public Value<Boolean> getImmutable(final Boolean element) {
+        Objects.requireNonNull(element, "element");
         return element ? this.immutableValueTrue : this.immutableValueFalse;
     }
 
