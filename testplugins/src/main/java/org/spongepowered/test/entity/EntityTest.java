@@ -30,20 +30,29 @@ import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.Command.Parameterized;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.config.ConfigDir;
+import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
+import java.nio.file.Path;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Plugin("entitytest")
@@ -53,12 +62,44 @@ public class EntityTest {
     private final Set<EntityType<@NonNull ?>> blockedSpawn = new HashSet<>();
 
     @Inject
-    public EntityTest(final PluginContainer plugin) {
+    public EntityTest(final PluginContainer plugin, @ConfigDir(sharedRoot = true) Path cfg) {
         this.plugin = plugin;
+        this.configFile =cfg.resolve("entitytest.conf");
+    }
+
+    private final Path configFile;
+
+    @Listener
+    public void onRegisterCommands(final RegisterCommandEvent<Command.Parameterized> event) {
+
     }
 
     @Listener
     public void onRegisterCommand(final RegisterCommandEvent<Parameterized> event) {
+
+
+        event.register(this.plugin, Command.builder()
+            .executor(ctx -> {
+                final var player = ctx.cause().first(ServerPlayer.class).orElseThrow();
+
+                try {
+                    final var loader = HoconConfigurationLoader.builder()
+                        .defaultOptions(opt -> opt.serializers(Sponge.configManager().serializers()))
+                        .path(configFile)
+                        .build();
+
+                    final var node = loader.load();
+
+                    final var item = Objects.requireNonNull(node.node("item").get(ItemStackSnapshot.class));
+
+                    player.setItemInHand(HandTypes.MAIN_HAND, item.createStack());
+                } catch (ConfigurateException e) {
+                    throw new RuntimeException(e);
+                }
+
+                return CommandResult.success();
+            })
+            .build(), "testload");
         final Parameter.Value<EntityType<@NonNull ?>> entityTypeParam =
                 Parameter.registryElement(new TypeToken<EntityType<@NonNull ? extends Entity>>() {}, RegistryTypes.ENTITY_TYPE, "minecraft").key("entityType").build();
         event.register(this.plugin, Command.builder()

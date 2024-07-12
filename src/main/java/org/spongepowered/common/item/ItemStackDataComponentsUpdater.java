@@ -32,6 +32,7 @@ import net.minecraft.util.datafix.fixes.References;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.util.Constants;
 
@@ -77,6 +78,7 @@ class ItemStackDataComponentsUpdater implements DataContentUpdater {
         });
 
         updated.set(Constants.ItemStack.COMPONENTS, components);
+        updated.set(Queries.CONTENT_VERSION, this.outputVersion());
 
         return updated;
     }
