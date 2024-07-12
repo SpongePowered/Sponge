@@ -175,6 +175,7 @@ public final class EntityData {
                         .supports(h -> !(h instanceof Player))
                     .create(Keys.IS_GLOWING)
                         .get(Entity::hasGlowingTag)
+                        .resetOnDelete(false)
                         .set(Entity::setGlowingTag)
                     .create(Keys.IS_GRAVITY_AFFECTED)
                         .get(h -> !h.isNoGravity())
