@@ -216,6 +216,7 @@ public final class EntityData {
                         .get(h -> 1d)
                     .create(Keys.SCOREBOARD_TAGS)
                         .get(Entity::getTags)
+                        .delete(h -> h.getTags().clear())
                         .set((h, v) -> {
                             h.getTags().clear();
                             h.getTags().addAll(v);
