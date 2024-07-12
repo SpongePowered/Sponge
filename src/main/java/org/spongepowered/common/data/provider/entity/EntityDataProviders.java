@@ -78,6 +78,7 @@ public final class EntityDataProviders extends DataProviderRegistratorBuilder {
         IronGolemData.register(this.registrator);
         ItemData.register(this.registrator);
         ItemFrameData.register(this.registrator);
+        LeashableData.register(this.registrator);
         LightningBoltData.register(this.registrator);
         LivingData.register(this.registrator);
         LlamaData.register(this.registrator);
