@@ -178,6 +178,7 @@ public final class EntityData {
                         .set(Entity::setGlowingTag)
                     .create(Keys.IS_GRAVITY_AFFECTED)
                         .get(h -> !h.isNoGravity())
+                        .resetOnDelete(false)
                         .set((h, v) -> h.setNoGravity(!v))
                     .create(Keys.IS_SNEAKING)
                         .get(Entity::isShiftKeyDown)
