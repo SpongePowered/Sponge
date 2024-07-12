@@ -645,11 +645,15 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             boundChatType = event.target().map(SpongeAdventure::asVanilla).map(boundChatType::withTargetName).orElse(boundChatType);
 
             filter = event.filter().map(f -> $$1.and((Predicate) f)).orElse($$1);
-            if (!isTrusted && event.message() != event.originalMessage()) {
+            if (event.message() != event.originalMessage()) {
                 final net.minecraft.network.chat.Component customMessage = SpongeAdventure.asVanilla(event.message());
-                // TODO does this work?
-                var systemMessage = PlayerChatMessage.system(customMessage.getString()).withUnsignedContent(customMessage);
-                this.shadow$broadcastChatMessage(systemMessage, filter, $$2, boundChatType);
+                // It works!
+                // If the message is changed, the player will be shown the standard message change notification for such situations.
+                // The value of `isTrusted` will always be `true` when `online-mode=true`.
+                // If `online-mode=false`, then `isTrusted` will also have a value of `false`.
+                // When `online-mode=false`, the player is not shown a notification when the server changes the message.
+                var modifiedMessage =  new PlayerChatMessage($$0.link(), $$0.signature(), $$0.signedBody(), customMessage, $$0.filterMask());
+                this.shadow$broadcastChatMessage(modifiedMessage, filter, $$2, boundChatType);
                 return;
             }
         }
