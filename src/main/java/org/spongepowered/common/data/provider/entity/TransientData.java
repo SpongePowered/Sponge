@@ -39,6 +39,7 @@ public final class TransientData {
                 .asMutable(TransientBridge.class)
                     .create(Keys.TRANSIENT)
                         .get(TransientBridge::bridge$isTransient)
+                        .resetOnDelete(false)
                         .set(TransientBridge::bridge$setTransient);
     }
     // @formatter:on
