@@ -184,6 +184,7 @@ public final class EntityData {
                         .set(Entity::setShiftKeyDown)
                     .create(Keys.IS_SPRINTING)
                         .get(Entity::isSprinting)
+                        .resetOnDelete(false)
                         .set(Entity::setSprinting)
                     .create(Keys.IS_SILENT)
                         .get(Entity::isSilent)
