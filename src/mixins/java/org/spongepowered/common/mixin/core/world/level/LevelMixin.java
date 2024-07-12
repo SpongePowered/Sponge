@@ -24,10 +24,15 @@
  */
 package org.spongepowered.common.mixin.core.world.level;
 
+import com.mojang.serialization.Dynamic;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.datafix.DataFixers;
+import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.Mob;
@@ -37,6 +42,7 @@ import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.ThrownEnderpearl;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
@@ -152,10 +158,11 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
         dataContainer.getView(Constants.Sponge.UNSAFE_NBT)
                 .map(NBTTranslator.INSTANCE::translate)
                 .ifPresent(x -> {
-                    final net.minecraft.world.entity.Entity e = ((net.minecraft.world.entity.Entity) createdEntity);
+                    final var dataFixed = DataFixers.getDataFixer().update(References.ENTITY, new Dynamic<>(NbtOps.INSTANCE, x), 3692, 3833);
+                    final var e = ((net.minecraft.world.entity.Entity) createdEntity);
                     // mimicing Entity#restoreFrom
-                    x.remove("Dimension");
-                    e.load(x);
+                    dataFixed.remove("Dimension");
+                    e.load((CompoundTag) dataFixed.getValue());
                     // position needs a reset
                     e.moveTo(proposedPosition.x(), proposedPosition.y(), proposedPosition.z());
                 });
