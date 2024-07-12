@@ -49,6 +49,7 @@ import org.spongepowered.common.entity.SpongeEntitySnapshot;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.math.vector.Vector3d;
 
 import java.util.stream.Collectors;
 
@@ -227,6 +228,7 @@ public final class EntityData {
                         .delete(h -> h.stopRiding())
                     .create(Keys.VELOCITY)
                         .get(h -> VecHelper.toVector3d(h.getDeltaMovement()))
+                        .resetOnDelete(Vector3d.ZERO)
                         .set((h, v) -> {
                             h.setDeltaMovement(VecHelper.toVanillaVector3d(v));
                             h.hurtMarked = true;
