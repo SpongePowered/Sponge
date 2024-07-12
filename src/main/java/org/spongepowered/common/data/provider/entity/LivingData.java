@@ -190,6 +190,7 @@ public final class LivingData {
                             final Collection<MobEffectInstance> effects = h.getActiveEffects();
                             return PotionEffectUtil.copyAsPotionEffects(effects);
                         })
+                        .delete(LivingEntity::removeAllEffects)
                         .set((h, v) -> {
                             h.removeAllEffects();
                             for (final PotionEffect effect : v) {
