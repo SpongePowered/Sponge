@@ -139,6 +139,7 @@ public final class EntityData {
                         })
                     .create(Keys.FROZEN_TIME)
                         .get(h -> Ticks.of(h.getTicksFrozen()))
+                        .resetOnDelete(Ticks.zero())
                         .setAnd((h, v) -> {
                             if (v.isInfinite()) {
                                 return false;
