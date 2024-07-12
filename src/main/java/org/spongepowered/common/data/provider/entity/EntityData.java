@@ -187,6 +187,7 @@ public final class EntityData {
                         .set(Entity::setSprinting)
                     .create(Keys.IS_SILENT)
                         .get(Entity::isSilent)
+                        .resetOnDelete(false)
                         .set(Entity::setSilent)
                     .create(Keys.IS_WET)
                         .get(Entity::isInWaterOrRain)
