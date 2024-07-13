@@ -424,6 +424,10 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Inject(method = "setAsInsidePortal", at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD, shift = At.Shift.AFTER,
             target = "Lnet/minecraft/world/entity/Entity;portalProcess:Lnet/minecraft/world/entity/PortalProcessor;"))
     public void impl$onCreatePortalProcessor(final Portal $$0, final BlockPos $$1, final CallbackInfo ci) {
+        if (this.shadow$level().isClientSide()) {
+            return;
+        }
+
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()){
             var be = this.shadow$level().getBlockEntity(this.portalProcess.getEntryPosition());
             if (be != null) {
