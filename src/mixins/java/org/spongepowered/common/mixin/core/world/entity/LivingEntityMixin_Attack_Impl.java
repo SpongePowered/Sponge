@@ -28,6 +28,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.CombatRules;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -36,6 +37,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.apache.logging.log4j.Level;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;
@@ -52,8 +54,6 @@ import org.spongepowered.common.util.PrettyPrinter;
 
 import java.util.ArrayList;
 
-import javax.annotation.Nonnull;
-
 @Mixin(value = LivingEntity.class, priority = 900)
 public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin
     implements LivingEntityBridge, PlatformLivingEntityBridge {
@@ -65,10 +65,10 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin
     @Shadow protected abstract void shadow$blockUsingShield(final LivingEntity $$0);
     @Shadow protected abstract void shadow$hurtArmor(DamageSource source, float damage);
     @Shadow protected abstract float shadow$getKnockback(final Entity $$0, final DamageSource $$1);
+    @Shadow public abstract ItemStack shadow$getItemInHand(final InteractionHand $$0);
     @Shadow public abstract float shadow$getAbsorptionAmount();
+    @Shadow public abstract @NonNull ItemStack shadow$getWeaponItem();
     @Shadow public abstract void setAbsorptionAmount(final float $$0);
-    @Shadow @Nonnull public abstract ItemStack shadow$getWeaponItem();
-
     @Shadow protected int attackStrengthTicker;
     @Shadow protected float lastHurt;
     private float attackImpl$baseDamage;
@@ -83,6 +83,7 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin
     protected float attackImpl$actuallyHurtFinalDamage;
     protected boolean attackImpl$actuallyHurtCancelled;
     protected float attackImpl$actuallyHurtBlockedDamage;
+    protected boolean attackImpl$wasInInvulnerableTime;
 
     /**
      * Forge onLivingAttack Hook
@@ -153,6 +154,7 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin
 
     /**
      * Capture the old values to reset if we end up cancelling or blocking.
+     * Also reset {@link #attackImpl$wasInInvulnerableTime}
      */
     @Inject(method = "hurt", at = @At(value = "FIELD",
         target = "Lnet/minecraft/world/entity/LivingEntity;walkAnimation:Lnet/minecraft/world/entity/WalkAnimationState;"))
@@ -161,15 +163,17 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin
         this.attackImpl$lastHurt = this.lastHurt;
         this.attackImpl$InvulnerableTime = this.invulnerableTime;
         this.attackImpl$actuallyHurtCancelled = false;
+        this.attackImpl$wasInInvulnerableTime = false;
     }
 
     /**
-     * Fake {@link #lastHurt} to be 0 so that we go to #actuallyHurt even if we are invulnerable.
+     * Fake {@link #lastHurt} to be 0 so that we go to #actuallyHurt even if we are invulnerable and remember that we did
      */
     @Redirect(method = "hurt",
         at = @At(value = "FIELD", ordinal = 0,
             target = "Lnet/minecraft/world/entity/LivingEntity;lastHurt:F"))
     private float attackImpl$afterActuallyHurt(final LivingEntity instance) {
+        this.attackImpl$wasInInvulnerableTime = true;
         return 0;
     }
 
@@ -265,8 +269,13 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin
         if (instance.isInvulnerableTo(damageSource)) {
             return true;
         }
+        var realOriginalDamage = originalDamage;
+        if (this.attackImpl$wasInInvulnerableTime) {
+            realOriginalDamage = Math.max(0, realOriginalDamage); // No negative damage because of invulnerableTime
+        }
+
         // Call platform hook for adjusting damage
-        final var modAdjustedDamage = this.bridge$applyModDamage(instance, damageSource, originalDamage);
+        final var modAdjustedDamage = this.bridge$applyModDamage(instance, damageSource, realOriginalDamage);
         // TODO check for direct call?
         this.attackImpl$actuallyHurt = new DamageEventUtil.ActuallyHurt(instance, new ArrayList<>(), damageSource, modAdjustedDamage);
         return false;
@@ -352,9 +361,12 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin
 
     /**
      * Set final damage after calling {@link LivingEntity#setAbsorptionAmount} in which we called the event
+     * !!NOTE that var9 is actually decompiled incorrectly!!
+     * It is NOT the final damage value instead the method parameter is mutated
      */
-    @ModifyVariable(method = "actuallyHurt", ordinal = 1,
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;setAbsorptionAmount(F)V", ordinal = 0, shift = At.Shift.AFTER))
+    @ModifyVariable(method = "actuallyHurt", ordinal = 0,
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;setAbsorptionAmount(F)V",
+            ordinal = 0, shift = At.Shift.AFTER), argsOnly = true)
     public float attackImpl$setFinalDamage(final float value) {
         if (this.attackImpl$actuallyHurtResult.event().isCancelled()) {
             return 0;
