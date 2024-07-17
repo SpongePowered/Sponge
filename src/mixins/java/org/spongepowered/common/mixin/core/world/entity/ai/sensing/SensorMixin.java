@@ -22,37 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.entity;
+package org.spongepowered.common.mixin.core.world.entity.ai.sensing;
 
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySelector;
-import net.minecraft.world.entity.player.Player;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.sensing.Sensor;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 
-import java.util.function.Predicate;
+@Mixin(Sensor.class)
+public class SensorMixin<E extends LivingEntity> {
 
-@Mixin(EntitySelector.class)
-public abstract class EntitySelectorMixin {
-
-    @Shadow @Final @Mutable public static Predicate<Entity> NO_SPECTATORS = entity -> {
-        if (entity instanceof VanishableBridge vb && vb.bridge$vanishState().invisible()) {
-            // Sponge: Count vanished entities as spectating
-            return false;
+    @Inject(method = {
+        "isEntityTargetable",
+        "isEntityAttackable",
+        "isEntityAttackableIgnoringLineOfSight"
+    }, at = @At("HEAD"), cancellable = true)
+    private static void impl$cancelForVanishedEntities(LivingEntity $$0, LivingEntity $$1, CallbackInfoReturnable<Boolean> cir) {
+        final var vs = ((VanishableBridge) $$0).bridge$vanishState();
+        if (vs.invisible() && vs.untargetable()) {
+            cir.setReturnValue(false);
         }
-        return !entity.isSpectator();
-    };
-
-    @Shadow @Final @Mutable public static Predicate<Entity> NO_CREATIVE_OR_SPECTATOR = $$0 -> {
-        if ($$0 instanceof VanishableBridge vb && vb.bridge$vanishState().invisible()) {
-            // Sponge: Count vanished entities as spectating
-            return false;
+        final var vsOther = ((VanishableBridge) $$1).bridge$vanishState();
+        if (vsOther.invisible() && vsOther.untargetable()) {
+            cir.setReturnValue(false);
         }
-        return !($$0 instanceof Player) || !$$0.isSpectator() && !((Player)$$0).isCreative();
-    };
-
+    }
 
 }
