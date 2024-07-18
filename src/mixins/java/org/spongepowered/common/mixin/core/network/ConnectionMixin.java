@@ -161,8 +161,8 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
         this.impl$version = new SpongeMinecraftVersion(String.valueOf(version), version);
     }
 
-    @Inject(method = "send(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;)V", at = @At(value = "HEAD"), cancellable = true)
-    private void impl$onSend(final Packet<?> $$0, final @Nullable PacketSendListener $$1, final CallbackInfo ci) {
+    @Inject(method = "send(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;Z)V", at = @At(value = "HEAD"), cancellable = true)
+    private void impl$onSend(final Packet<?> $$0, final @Nullable PacketSendListener $$1, final boolean $$2, final CallbackInfo ci) {
         if (this.disconnectionHandled) {
             if ($$1 instanceof final PacketSender.SpongePacketSendListener spongeListener) {
                 spongeListener.accept(new IOException("Connection has been closed."));
