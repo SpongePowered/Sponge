@@ -46,6 +46,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -84,6 +85,7 @@ public abstract class LivingEntityMixin_Attack_impl extends EntityMixin
 
     // @formatter:on
     private float attackImpl$lastHurt;
+    private float attackImpl$baseDamage;
     private int attackImpl$InvulnerableTime;
 
     protected DamageEventUtil.Hurt attackImpl$hurt;
@@ -114,6 +116,7 @@ public abstract class LivingEntityMixin_Attack_impl extends EntityMixin
         if (!this.bridge$onLivingAttack((LivingEntity) (Object) this, source, damageTaken)) {
             cir.setReturnValue(false);
         }
+        this.attackImpl$baseDamage = damageTaken;
     }
 
     /**
@@ -184,6 +187,16 @@ public abstract class LivingEntityMixin_Attack_impl extends EntityMixin
     private float attackImpl$afterActuallyHurt(final LivingEntity instance) {
         this.attackImpl$wasInInvulnerableTime = true;
         return 0;
+    }
+
+    @ModifyArg(method = "hurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;actuallyHurt(Lnet/minecraft/world/damagesource/DamageSource;F)V", ordinal = 0))
+    private float attackImp$useBaseDamage1(final float $$0) {
+        return this.attackImpl$baseDamage - this.attackImpl$lastHurt;
+    }
+
+    @ModifyArg(method = "hurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;actuallyHurt(Lnet/minecraft/world/damagesource/DamageSource;F)V", ordinal = 1))
+    private float attackImp$useBaseDamage2(final float $$0) {
+        return this.attackImpl$baseDamage;
     }
 
     /**
@@ -425,10 +438,9 @@ public abstract class LivingEntityMixin_Attack_impl extends EntityMixin
      *
      * And capture inventory changes if needed
      */
-    @Inject(method = "setHealth", at = @At("HEAD"))
-    public void attackImpl$afterActuallyHurtEvent(final float $$0, final CallbackInfo ci) {
+    protected void attackImpl$handlePostDamage() {
         final var result = this.attackImpl$actuallyHurtResult;
-        if (result != null) {
+        if (result != null && !this.attackImpl$actuallyHurtCancelled) {
             final var damageSource = result.source();
             result.damageToShield().ifPresent(dmg -> {
                 this.shadow$hurtCurrentlyUsedShield(dmg);
@@ -467,6 +479,7 @@ public abstract class LivingEntityMixin_Attack_impl extends EntityMixin
      */
     @Inject(method = "actuallyHurt", at = @At("RETURN"))
     public void attackImpl$cleanupActuallyHurt(final DamageSource $$0, final float $$1, final CallbackInfo ci) {
+        this.attackImpl$handlePostDamage();
         this.attackImpl$actuallyHurt = null;
         this.attackImpl$actuallyHurtResult = null;
         this.lastHurt = this.attackImpl$lastHurt;
