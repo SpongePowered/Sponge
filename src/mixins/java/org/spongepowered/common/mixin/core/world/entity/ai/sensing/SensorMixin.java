@@ -22,39 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common;
+package org.spongepowered.common.mixin.core.world.entity.ai.sensing;
 
-import net.minecraft.core.BlockPos;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.Server;
-import org.spongepowered.common.command.manager.SpongeCommandManager;
-import org.spongepowered.common.profile.SpongeGameProfileManager;
-import org.spongepowered.common.scheduler.ServerScheduler;
-import org.spongepowered.common.user.SpongeUserManager;
-import org.spongepowered.common.util.UsernameCache;
-import org.spongepowered.common.world.server.SpongeWorldManager;
-import org.spongepowered.common.world.storage.SpongePlayerDataManager;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.sensing.Sensor;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.bridge.data.VanishableBridge;
 
-public interface SpongeServer extends SpongeEngine, Server {
+@Mixin(Sensor.class)
+public class SensorMixin<E extends LivingEntity> {
 
-    @Override
-    ServerScheduler scheduler();
+    @Inject(method = {
+        "isEntityTargetable",
+        "isEntityAttackable",
+        "isEntityAttackableIgnoringLineOfSight"
+    }, at = @At("HEAD"), cancellable = true)
+    private static void impl$cancelForVanishedEntities(LivingEntity $$0, LivingEntity $$1, CallbackInfoReturnable<Boolean> cir) {
+        final var vs = ((VanishableBridge) $$0).bridge$vanishState();
+        if (vs.invisible() && vs.untargetable()) {
+            cir.setReturnValue(false);
+        }
+        final var vsOther = ((VanishableBridge) $$1).bridge$vanishState();
+        if (vsOther.invisible() && vsOther.untargetable()) {
+            cir.setReturnValue(false);
+        }
+    }
 
-    @Override
-    SpongeWorldManager worldManager();
-
-    SpongePlayerDataManager getPlayerDataManager();
-
-    SpongeGameProfileManager gameProfileManagerIfPresent();
-
-    UsernameCache getUsernameCache();
-
-    @Nullable Integer getBlockDestructionId(BlockPos pos);
-
-    int getOrCreateBlockDestructionId(BlockPos pos);
-
-    SpongeUserManager userManager();
-
-    @Override
-    SpongeCommandManager commandManager();
 }

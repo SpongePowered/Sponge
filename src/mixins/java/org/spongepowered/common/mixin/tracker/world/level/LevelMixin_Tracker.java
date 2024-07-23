@@ -89,7 +89,6 @@ public abstract class LevelMixin_Tracker implements LevelBridge, LevelAccessor {
         tileEntity.tick();
     }
 
-    @SuppressWarnings("InvalidInjectorMethodSignature")
     @Inject(method = {
         "getEntities(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/AABB;Ljava/util/function/Predicate;)Ljava/util/List;",
         "getEntities(Lnet/minecraft/world/level/entity/EntityTypeTest;Lnet/minecraft/world/phys/AABB;Ljava/util/function/Predicate;)Ljava/util/List;",

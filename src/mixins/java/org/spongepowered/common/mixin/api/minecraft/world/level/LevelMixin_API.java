@@ -27,15 +27,18 @@ package org.spongepowered.common.mixin.api.minecraft.world.level;
 import net.kyori.adventure.sound.Sound;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerChunkCache;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
@@ -261,6 +264,19 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
         ViewerPacketUtil.resetBlockProgress(x, y, z, this.engine()).ifPresent(((ViewerBridge) this)::bridge$sendToViewer);
     }
 
+    @Override
+    public void sendBlockChange(final int x, final int y, final int z, final org.spongepowered.api.block.BlockState state) {
+        Objects.requireNonNull(state, "state");
+
+        final ClientboundBlockUpdatePacket packet = new ClientboundBlockUpdatePacket(new BlockPos(x, y, z), (BlockState) state);
+
+        ((net.minecraft.world.level.Level) (Object) this).players()
+            .stream()
+            .filter(ServerPlayer.class::isInstance)
+            .map(ServerPlayer.class::cast)
+            .forEach(p -> p.connection.send(packet));
+    }
+
     // Audience
 
     @Override
@@ -289,7 +305,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
 
         // Retrieve a "blank" block entity from the one we just created (or already existed) through sponge.
         final net.minecraft.world.level.block.entity.BlockEntity mcNewBlockEntity = (net.minecraft.world.level.block.entity.BlockEntity) this.blockEntity(x, y, z)
-                .orElseThrow(() -> new IllegalStateException("Failed to create Block Entity at " + this.location(Vector3i.from(x, y, z))));
+            .orElseThrow(() -> new IllegalStateException("Failed to create Block Entity at " + this.location(Vector3i.from(x, y, z))));
 
         // Load the data into it.
         mcNewBlockEntity.loadWithComponents(tag, mcOriginalBlockEntity.getLevel().registryAccess());
@@ -381,7 +397,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
             Objects.requireNonNull(options, "options"));
 
         final boolean shouldCarbonCopy = options.carbonCopy();
-        final Vector3i size = max.sub(min).add(1, 1 ,1);
+        final Vector3i size = max.sub(min).add(1, 1, 1);
         final @MonotonicNonNull ObjectArrayMutableEntityBuffer backingVolume;
         if (shouldCarbonCopy) {
             backingVolume = new ObjectArrayMutableEntityBuffer(min, size);

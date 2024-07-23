@@ -34,10 +34,12 @@ import net.kyori.adventure.resource.ResourcePackRequest;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.PlayerChatMessage;
+import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket;
 import net.minecraft.network.protocol.game.ClientboundDeleteChatPacket;
 import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -115,7 +117,9 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     // @formatter:on
 
 
-    @Shadow @Nullable private Vec3 enteredLavaOnVehiclePosition;
+    @Shadow
+    @Nullable
+    private Vec3 enteredLavaOnVehiclePosition;
     private volatile Pointers api$pointers;
 
     private final TabList api$tabList = new SpongeTabList((net.minecraft.server.level.ServerPlayer) (Object) this);
@@ -152,7 +156,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     /**
      * @author Minecrell - August 22nd, 2016
      * @reason Use InetSocketAddress#getHostString() where possible (instead of
-     *     inspecting SocketAddress#toString()) to support IPv6 addresses
+     * inspecting SocketAddress#toString()) to support IPv6 addresses
      */
     @Overwrite
     public String getIpAddress() {
@@ -205,6 +209,27 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         final Instant now = Instant.now().truncatedTo(ChronoUnit.MINUTES);
         final Duration timeSinceFirstJoined = Duration.of(now.minusMillis(toTheMinute.toEpochMilli()).toEpochMilli(), ChronoUnit.MINUTES);
         return timeSinceFirstJoined.getSeconds() > 0;
+    }
+
+    @Override
+    public void sendBlockProgress(final int x, final int y, final int z, final double progress) {
+        if (progress < 0 || progress > 1) {
+            throw new IllegalArgumentException("Progress must be between 0 and 1");
+        }
+
+        final BlockPos pos = new BlockPos(x, y, z);
+        final int id = ((SpongeServer) this.server).getOrCreateBlockDestructionId(pos);
+        final int progressStage = progress == 1 ? 9 : (int) (progress * 10);
+        this.connection.send(new ClientboundBlockDestructionPacket(id, pos, progressStage));
+    }
+
+    @Override
+    public void resetBlockProgress(final int x, final int y, final int z) {
+        final BlockPos pos = new BlockPos(x, y, z);
+        final Integer id = ((SpongeServer) this.server).getBlockDestructionId(pos);
+        if (id != null) {
+            this.connection.send(new ClientboundBlockDestructionPacket(id, pos, -1));
+        }
     }
 
     @Override
@@ -275,8 +300,8 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
             return currentBorder; // do not fire an event since nothing would have changed
         }
         final ChangeWorldBorderEvent.Player event =
-                SpongeEventFactory.createChangeWorldBorderEventPlayer(PhaseTracker.getCauseStackManager().currentCause(),
-                        Optional.ofNullable(border), Optional.ofNullable(border), this, Optional.ofNullable(border));
+            SpongeEventFactory.createChangeWorldBorderEventPlayer(PhaseTracker.getCauseStackManager().currentCause(),
+                Optional.ofNullable(border), Optional.ofNullable(border), this, Optional.ofNullable(border));
         if (SpongeCommon.post(event)) {
             return currentBorder;
         }
@@ -284,12 +309,12 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         final net.minecraft.world.level.border.@Nullable WorldBorder oldWorldBorder = ((ServerPlayerBridge) this).bridge$getWorldBorder();
         if (oldWorldBorder != null) { // is the world border about to be unset?
             ((WorldBorderAccessor) oldWorldBorder).accessor$listeners().remove(
-                    ((ServerPlayerBridge) this).bridge$getWorldBorderListener()); // remove the listener, if so
+                ((ServerPlayerBridge) this).bridge$getWorldBorderListener()); // remove the listener, if so
         }
         final Optional<WorldBorder> toSet = event.newBorder();
         if (toSet.isPresent()) {
             final net.minecraft.world.level.border.WorldBorder mutableWorldBorder =
-                    new net.minecraft.world.level.border.WorldBorder();
+                new net.minecraft.world.level.border.WorldBorder();
             ((WorldBorderBridge) mutableWorldBorder).bridge$applyFrom(toSet.get());
             ((ServerPlayerBridge) this).bridge$replaceWorldBorder(mutableWorldBorder);
             mutableWorldBorder.addListener(((ServerPlayerBridge) this).bridge$getWorldBorderListener());
@@ -439,7 +464,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     }
 
     @Override
-    public void removeResourcePacks(final @NonNull UUID id, final @NonNull UUID @NonNull... others) {
+    public void removeResourcePacks(final @NonNull UUID id, final @NonNull UUID @NonNull ... others) {
         ((ServerCommonPacketListenerImplBridge) this.connection).bridge$removeResourcePacks(id, others);
     }
 
