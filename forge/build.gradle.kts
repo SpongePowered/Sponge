@@ -28,7 +28,7 @@ val projectUrl: String by project
 
 val testPluginsProject: Project? = rootProject.subprojects.find { "testplugins" == it.name }
 
-description = "The SpongeAPI implementation for MinecraftForge"
+description = "The SpongeAPI implementation for NeoForge"
 version = spongeImpl.generatePlatformBuildVersionString(apiVersion, minecraftVersion, recommendedVersion, forgeVersion)
 
 repositories {
