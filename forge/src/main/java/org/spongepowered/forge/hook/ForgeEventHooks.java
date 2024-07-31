@@ -28,9 +28,9 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.event.entity.player.CriticalHitEvent;
+// SPONGE-4113[REPLACEMENT NEEDED] import net.minecraftforge.common.ForgeHooks;
+// SPONGE-4113[REPLACEMENT NEEDED] import net.minecraftforge.event.ForgeEventFactory;
+import net.neoforged.neoforge.event.entity.player.CriticalHitEvent;
 import org.spongepowered.common.hooks.EventHooks;
 
 @SuppressWarnings("UnstableApiUsage")
