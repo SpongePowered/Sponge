@@ -36,6 +36,7 @@ version = spongeImpl.generatePlatformBuildVersionString(apiVersion, minecraftVer
 repositories {
     maven("https://repo.spongepowered.org/repository/maven-public/") {
         name = "sponge"
+    maven("https://maven.neoforged.net/releases")
     }
 }
 
