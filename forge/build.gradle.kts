@@ -6,6 +6,7 @@ buildscript {
         maven("https://repo.spongepowered.org/repository/maven-public") {
             name = "sponge"
         }
+        maven ("https://maven.neoforged.net/releases") 
         maven("https://maven.architectury.dev/")
     }
 }
@@ -15,6 +16,7 @@ plugins {
     id("implementation-structure")
     alias(libs.plugins.blossom)
     id("dev.architectury.loom") version "1.6-SNAPSHOT"
+    id("net.neoforged.gradle.userdev") version "7.0.120"
 }
 
 val commonProject = parent!!
@@ -181,8 +183,7 @@ extensions.configure(LoomGradleExtensionAPI::class) {
 }
 
 dependencies {
-    "minecraft"("com.mojang:minecraft:${minecraftVersion}")
-    "forge"("net.minecraftforge:forge:$minecraftVersion-$forgeVersion")
+    "forge"("net.neoforged:neoforge:$forgeVersion")
     "mappings"(loom.layered {
         officialMojangMappings {
             nameSyntheticMembers = true
