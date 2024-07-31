@@ -26,8 +26,8 @@ package org.spongepowered.forge.hook;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.entity.PartEntity;
+// SPONGE-4113[REPLACEMENT NEEDED] import net.minecraftforge.common.ForgeHooks;
+import net.neoforged.neoforge.entity.PartEntity;
 import org.spongepowered.common.hooks.EntityHooks;
 
 @SuppressWarnings("UnstableApiUsage")
