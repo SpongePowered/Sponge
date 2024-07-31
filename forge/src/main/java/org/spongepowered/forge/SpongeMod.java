@@ -24,7 +24,7 @@
  */
 package org.spongepowered.forge;
 
-import net.minecraftforge.fml.common.Mod;
+//// SPONGE-4113[REPLACEMENT NEEDED] import net.minecraftforge.fml.common.Mod;
 
 @Mod("sponge")
 public class SpongeMod {
