@@ -28,7 +28,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.common.ToolActions;
+// SPONGE-4113[REPLACEMENT NEEDED] import net.minecraftforge.common.ToolActions;
 import org.spongepowered.common.hooks.ItemHooks;
 
 public class ForgeItemHooks implements ItemHooks {
