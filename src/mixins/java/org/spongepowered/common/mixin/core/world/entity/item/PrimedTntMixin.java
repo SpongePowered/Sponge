@@ -85,6 +85,16 @@ public abstract class PrimedTntMixin extends EntityMixin implements PrimedTntBri
     }
 
     @Override
+    public boolean bridge$isPrimed() {
+        return true;
+    }
+
+    @Override
+    public boolean bridge$setPrimed(boolean primed) {
+        return false;
+    }
+
+    @Override
     public int bridge$getFuseDuration() {
         return this.bridge$fuseDuration;
     }

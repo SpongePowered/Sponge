@@ -61,6 +61,8 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
 
     // @formatter:off
     @Shadow private int fuse;
+    @Shadow public abstract boolean shadow$isPrimed();
+    @Shadow public abstract void shadow$primeFuse();
     // @formatter:on
 
     @Nullable private Integer impl$explosionRadius = null;
@@ -76,6 +78,20 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
     @Override
     public void bridge$setExplosionRadius(final @Nullable Integer radius) {
         this.impl$explosionRadius = radius;
+    }
+
+    @Override
+    public boolean bridge$isPrimed() {
+        return shadow$isPrimed();
+    }
+
+    @Override
+    public boolean bridge$setPrimed(boolean primed) {
+        if (primed) {
+            shadow$primeFuse();
+            return true;
+        }
+        return false;
     }
 
     @Override
