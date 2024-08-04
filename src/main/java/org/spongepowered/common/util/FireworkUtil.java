@@ -150,7 +150,7 @@ public final class FireworkUtil {
     }
 
     public static boolean updateFireworkRocketItem(final FireworkRocketEntity firework, final Function<ItemStack, Boolean> function) {
-        final ItemStack item = getItem(firework);
+        final ItemStack item = getItem(firework).copy();
         if (function.apply(item)) {
             firework.getEntityData().set(FireworkRocketEntityAccessor.accessor$DATA_ID_FIREWORKS_ITEM(), item);
             return true;
@@ -161,8 +161,7 @@ public final class FireworkUtil {
     public static ItemStack getItem(final FireworkRocketEntity firework) {
         ItemStack item = firework.getEntityData().get(FireworkRocketEntityAccessor.accessor$DATA_ID_FIREWORKS_ITEM());
         if (item.isEmpty()) {
-            item = (ItemStack) (Object) new SpongeItemStack.BuilderImpl().itemType(ItemTypes.FIREWORK_ROCKET).build();
-            firework.getEntityData().set(FireworkRocketEntityAccessor.accessor$DATA_ID_FIREWORKS_ITEM(), item);
+            return (ItemStack) (Object) new SpongeItemStack.BuilderImpl().itemType(ItemTypes.FIREWORK_ROCKET).build();
         }
         return item;
     }
