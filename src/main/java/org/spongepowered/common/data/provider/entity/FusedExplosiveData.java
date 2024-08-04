@@ -41,7 +41,6 @@ public final class FusedExplosiveData {
                 .asMutable(FusedExplosive.class)
                     .create(Keys.IS_PRIMED)
                         .get(h -> ((FusedExplosiveBridge) h).bridge$isPrimed())
-                        .setAnd((h, v) -> ((FusedExplosiveBridge) h).bridge$setPrimed(v))
                     .create(Keys.FUSE_DURATION)
                         .get(h -> new SpongeTicks(((FusedExplosiveBridge) h).bridge$getFuseDuration()))
                         .setAnd((h, v) -> {

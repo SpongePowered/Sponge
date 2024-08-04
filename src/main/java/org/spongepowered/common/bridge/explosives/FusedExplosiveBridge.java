@@ -36,8 +36,6 @@ public interface FusedExplosiveBridge {
 
     boolean bridge$isPrimed();
 
-    boolean bridge$setPrimed(boolean primed);
-
     int bridge$getFuseDuration();
 
     void bridge$setFuseDuration(int fuseTicks);

@@ -62,11 +62,6 @@ public abstract class FireworkRocketEntityMixin extends ProjectileMixin implemen
     }
 
     @Override
-    public boolean bridge$setPrimed(boolean primed) {
-        return false;
-    }
-
-    @Override
     public int bridge$getFuseDuration() {
         return this.lifetime;
     }

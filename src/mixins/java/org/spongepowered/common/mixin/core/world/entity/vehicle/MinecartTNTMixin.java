@@ -86,15 +86,6 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
     }
 
     @Override
-    public boolean bridge$setPrimed(boolean primed) {
-        if (primed) {
-            shadow$primeFuse();
-            return true;
-        }
-        return false;
-    }
-
-    @Override
     public int bridge$getFuseDuration() {
         return this.impl$fuseDuration;
     }

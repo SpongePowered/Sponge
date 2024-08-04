@@ -83,17 +83,6 @@ public abstract class CreeperMixin extends MonsterMixin implements FusedExplosiv
     }
 
     @Override
-    public boolean bridge$setPrimed(boolean primed) {
-        if (primed) {
-            if (!bridge$isPrimed() && bridge$shouldPrime()) {
-                shadow$ignite();
-            }
-            return true;
-        }
-        return false;
-    }
-
-    @Override
     public int bridge$getFuseDuration() {
         return this.maxSwell;
     }
