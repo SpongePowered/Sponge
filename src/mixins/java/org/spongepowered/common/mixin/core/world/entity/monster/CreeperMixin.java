@@ -57,10 +57,10 @@ public abstract class CreeperMixin extends MonsterMixin implements FusedExplosiv
     @Shadow private int explosionRadius;
 
     @Shadow public abstract void shadow$ignite();
+    @Shadow public abstract boolean shadow$isIgnited();
     @Shadow public abstract int shadow$getSwellDir();
     // @formatter:on
 
-    private int impl$fuseDuration = Constants.Entity.Creeper.FUSE_DURATION;
     private boolean impl$interactPrimeCancelled;
     private boolean impl$stateDirty;
     private boolean impl$detonationCancelled;
@@ -79,7 +79,7 @@ public abstract class CreeperMixin extends MonsterMixin implements FusedExplosiv
 
     @Override
     public boolean bridge$isPrimed() {
-        return shadow$getSwellDir() > 0;
+        return shadow$isIgnited() || shadow$getSwellDir() == Constants.Entity.Creeper.STATE_PRIMED;
     }
 
     @Override
@@ -95,12 +95,12 @@ public abstract class CreeperMixin extends MonsterMixin implements FusedExplosiv
 
     @Override
     public int bridge$getFuseDuration() {
-        return this.impl$fuseDuration;
+        return this.maxSwell;
     }
 
     @Override
     public void bridge$setFuseDuration(final int fuseTicks) {
-        this.impl$fuseDuration = fuseTicks;
+        this.maxSwell = fuseTicks;
     }
 
     @Override
@@ -123,9 +123,8 @@ public abstract class CreeperMixin extends MonsterMixin implements FusedExplosiv
         if (this.shadow$level().isClientSide) {
             return;
         }
-        this.bridge$setFuseDuration(this.impl$fuseDuration);
 
-        final boolean isPrimed = this.shadow$getSwellDir() == Constants.Entity.Creeper.STATE_PRIMED;
+        final boolean isPrimed = this.bridge$isPrimed();
 
         if (!isPrimed && state == Constants.Entity.Creeper.STATE_PRIMED && !this.bridge$shouldPrime()) {
             ci.cancel();
