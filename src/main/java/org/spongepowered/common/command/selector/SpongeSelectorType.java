@@ -40,7 +40,7 @@ public final class SpongeSelectorType implements SelectorType {
     public SpongeSelectorType(final String selectorToken) {
         this.selectorToken = selectorToken;
         try {
-            this.selector = (Selector) new EntitySelectorParser(new StringReader(this.selectorToken)).parse();
+            this.selector = (Selector) new EntitySelectorParser(new StringReader(this.selectorToken), true).parse();
         } catch (final CommandSyntaxException exception) {
             // This should never happen, if it does, it's a bug in our code.
             throw new RuntimeException(exception);
@@ -60,7 +60,7 @@ public final class SpongeSelectorType implements SelectorType {
     @SuppressWarnings("ConstantConditions")
     @Override
     public final Selector.@NonNull Builder toBuilder() {
-        final EntitySelectorParser parser = new EntitySelectorParser(new StringReader(this.selectorToken));
+        final EntitySelectorParser parser = new EntitySelectorParser(new StringReader(this.selectorToken), true);
         ((EntitySelectorParserAccessor) parser).invoker$parseSelector();
         return (Selector.Builder) parser;
     }
