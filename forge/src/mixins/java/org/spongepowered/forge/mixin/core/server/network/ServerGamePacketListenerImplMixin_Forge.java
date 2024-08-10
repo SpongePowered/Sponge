@@ -24,25 +24,33 @@
  */
 package org.spongepowered.forge.mixin.core.server.network;
 
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
+import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
+import org.spongepowered.common.network.channel.SpongeChannelManager;
+import org.spongepowered.common.network.channel.SpongeChannelPayload;
 
 @Mixin(ServerGamePacketListenerImpl.class)
-public abstract class ServerGamePacketListenerImplMixin_Forge implements ServerGamePacketListener {
+public abstract class ServerGamePacketListenerImplMixin_Forge extends ServerCommonPacketListenerImplMixin_Forge implements ServerGamePacketListener {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Redirect(method = "lambda$handlePlaceRecipe$10",
@@ -61,6 +69,15 @@ public abstract class ServerGamePacketListenerImplMixin_Forge implements ServerG
         try (final EffectTransactor ignored = transactor.logPlaceRecipe(shift, recipe, player, (CraftingInventory) craftInv)) {
             recipeBookMenu.handlePlacement(shift, recipe, player);
             player.containerMenu.broadcastChanges();
+        }
+    }
+
+    @Inject(method = "handleCustomPayload", cancellable = true, at = @At(value = "HEAD"), require = 0)
+    private void vanilla$onHandleCustomPayload(final ServerboundCustomPayloadPacket packet, final CallbackInfo ci) {
+        if (packet.payload() instanceof SpongeChannelPayload payload) {
+            final SpongeChannelManager channelRegistry = (SpongeChannelManager) Sponge.channelManager();
+            this.server.execute(() -> channelRegistry.handlePlayPayload(((ConnectionBridge) this.connection).bridge$getEngineConnection(), (EngineConnectionState) this, payload));
+            ci.cancel();
         }
     }
 }

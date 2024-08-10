@@ -22,10 +22,13 @@
     "minecraftforge.registries.RegistryManagerMixin_Forge",
     "minecraftforge.util.ITeleporterMixin_Forge",
     "network.ConnectionMixin_Forge",
+    "network.protocol.common.ClientboundCustomPayloadPacketMixin_Forge",
+    "network.protocol.common.ServerboundCustomPayloadPacketMixin_Forge",
     "server.BootstrapMixin_Forge",
     "server.MinecraftServerMixin_Forge",
     "server.commands.SpreadPlayersCommandMixin_Forge",
     "server.level.ServerPlayerMixin_Forge",
+    "server.network.ServerCommonPacketListenerImplMixin_Forge",
     "server.network.ServerGamePacketListenerImplMixin_Forge",
     "server.network.ServerLoginPacketListenerImplMixin_Forge",
     "world.entity.EntityMixin_Forge",
@@ -38,6 +41,7 @@
     "world.level.block.entity.AbstractFurnaceBlockEntityMixin_Forge"
   ],
   "client": [
+    "client.ClientPacketListenerMixin_Forge",
     "client.MinecraftMixin_Forge",
     "client.main.MainMixin_Forge"
   ],
