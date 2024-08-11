@@ -35,7 +35,7 @@
         "server.packs.repository.PackRepositoryMixin_Vanilla",
         "world.entity.EntityMixin_Vanilla",
         "world.entity.EntityTypeMixin_Vanilla",
-        "world.entity.LivingEntityMixin_Attack_impl",
+        "world.entity.LivingEntityMixin_Attack_Impl",
         "world.entity.LivingEntityMixin_Vanilla",
         "world.entity.ai.attributes.DefaultAttributesMixin",
         "world.entity.item.ItemEntityMixin_Vanilla",

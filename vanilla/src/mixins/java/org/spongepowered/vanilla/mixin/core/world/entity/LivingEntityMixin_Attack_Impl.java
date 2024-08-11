@@ -38,10 +38,11 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 
 @Mixin(value = LivingEntity.class, priority = 900)
-public abstract class LivingEntityMixin_Attack_impl {
+public abstract class LivingEntityMixin_Attack_Impl {
 
+    @SuppressWarnings("InvalidInjectorMethodSignature")
     @ModifyConstant(method = "hurt", constant = @Constant(classValue = Wolf.class, ordinal = 0))
-    private Class attackImpl$onWolfCast(Class constant) {
+    private Class attackImpl$onWolfCast(final Object entity, final Class wolf) {
         return TamableAnimal.class;
     }
 
