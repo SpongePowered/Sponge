@@ -34,7 +34,6 @@ import net.kyori.adventure.resource.ResourcePackRequest;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.commands.Commands;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.MinecraftServer;
@@ -52,7 +51,6 @@ import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
@@ -479,16 +477,6 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
         }
 
         return this.api$usernameCache;
-    }
-
-    @Override
-    public @Nullable Integer getBlockDestructionId(BlockPos pos) {
-        return this.api$blockDestructionIdCache.get(pos).orElse(null);
-    }
-
-    @Override
-    public int getOrCreateBlockDestructionId(BlockPos pos) {
-        return this.api$blockDestructionIdCache.getOrCreate(pos);
     }
 
     @Override
