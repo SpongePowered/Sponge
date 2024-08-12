@@ -66,20 +66,20 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
     @Override
     public TradeOffer.Builder firstBuyingItem(final ItemStack item) {
         Objects.requireNonNull(item, "Buying item cannot be null");
-        this.firstItem = item.createSnapshot();
+        this.firstItem = item.asImmutable();
         return this;
     }
 
     @SuppressWarnings("ConstantConditions")
     @Override
     public TradeOffer.Builder secondBuyingItem(final ItemStack item) {
-        this.secondItem = item != null ? item.createSnapshot() : ItemStackSnapshot.empty();
+        this.secondItem = item != null ? item.asImmutable() : ItemStackSnapshot.empty();
         return this;
     }
 
     @Override
     public TradeOffer.Builder sellingItem(final ItemStack item) {
-        this.sellingItem = item.createSnapshot();
+        this.sellingItem = item.asImmutable();
         return this;
     }
 

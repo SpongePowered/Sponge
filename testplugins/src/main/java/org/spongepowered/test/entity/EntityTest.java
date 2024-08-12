@@ -92,7 +92,7 @@ public class EntityTest {
 
                     final var item = Objects.requireNonNull(node.node("item").get(ItemStackSnapshot.class));
 
-                    player.setItemInHand(HandTypes.MAIN_HAND, item.createStack());
+                    player.setItemInHand(HandTypes.MAIN_HAND, item.asMutable());
                 } catch (ConfigurateException e) {
                     throw new RuntimeException(e);
                 }

@@ -150,7 +150,7 @@ public final class SpongeShapedCraftingRecipeBuilder extends AbstractResourceKey
     @Override
     public EndStep result(ItemStackSnapshot result) {
         Objects.requireNonNull(result, "result");
-        return this.result(result.createStack());
+        return this.result(result.asMutable());
     }
 
     @Override

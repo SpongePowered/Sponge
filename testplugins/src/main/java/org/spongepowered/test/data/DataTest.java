@@ -482,7 +482,7 @@ public final class DataTest  {
 
         this.checkGetData(jungleAxe, Keys.DISPLAY_NAME,
                 Component.translatable("chat.square_brackets").args(Component.empty().append(Component.text("Jungle Axe")).decorate(TextDecoration.ITALIC))
-                        .color(NamedTextColor.WHITE).hoverEvent(jungleAxe.createSnapshot().asHoverEvent()));
+                        .color(NamedTextColor.WHITE).hoverEvent(jungleAxe.asImmutable().asHoverEvent()));
         this.checkGetData(shulkerBullet, Keys.DISPLAY_NAME, Component.text("Angry Shulker Bullet")
                 .hoverEvent(HoverEvent.showEntity(ResourceKey.minecraft("shulker_bullet"), shulkerBullet.uniqueId(), Component.text("Angry Shulker Bullet")))
                 .insertion(shulkerBullet.uniqueId().toString()));
@@ -968,14 +968,14 @@ public final class DataTest  {
         this.checkGetData(jungleAxe, Keys.ITEM_RARITY, ItemRarities.COMMON.get());
         this.checkGetData(playerHeadStack, Keys.ITEM_RARITY, ItemRarities.UNCOMMON.get());
 
-        this.checkOfferData(itemEntity, Keys.ITEM_STACK_SNAPSHOT, jungleAxe.createSnapshot());
+        this.checkOfferData(itemEntity, Keys.ITEM_STACK_SNAPSHOT, jungleAxe.asImmutable());
 
         final Entity itemFrame = world.createEntity(EntityTypes.ITEM_FRAME.get(), position);
-        this.checkOfferData(itemFrame, Keys.ITEM_STACK_SNAPSHOT, stoneStack.createSnapshot());
+        this.checkOfferData(itemFrame, Keys.ITEM_STACK_SNAPSHOT, stoneStack.asImmutable());
         // TODO JukeBox
         // TODO Lectern
         final Entity potionEntity = world.createEntity(EntityTypes.POTION.get(), position);
-        this.checkOfferData(potionEntity, Keys.ITEM_STACK_SNAPSHOT, splashPotion.createSnapshot()); // TODO unset original value causes logging error
+        this.checkOfferData(potionEntity, Keys.ITEM_STACK_SNAPSHOT, splashPotion.asImmutable()); // TODO unset original value causes logging error
 
         // TODO Keys.KNOCKBACK_STRENGTH
 

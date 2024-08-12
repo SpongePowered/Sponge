@@ -110,7 +110,7 @@ public class InventoryEventFactory {
             final TransactionalCaptureSupplier transactor = context.getTransactor();
             try (final EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect(player, PlayerInventoryTransaction.EventCreator.PICKUP)) {
                 for (final ItemStackSnapshot item : list) {
-                    final org.spongepowered.api.item.inventory.ItemStack itemStack = item.createStack();
+                    final org.spongepowered.api.item.inventory.ItemStack itemStack = item.asMutable();
                     player.getInventory().add(ItemStackUtil.toNative(itemStack));
                     if (!itemStack.isEmpty()) {
                         // Modified pickup items do not fit inventory - pre-cancel ChangeInventoryEvent.Pickup

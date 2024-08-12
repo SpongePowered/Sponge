@@ -100,7 +100,7 @@ public final class SpongeCookingRecipeBuilder extends AbstractResourceKeyedBuild
 
     @Override
     public EndStep result(final ItemStackSnapshot result) {
-        return this.result(result.createStack());
+        return this.result(result.asMutable());
     }
 
     // currently unused

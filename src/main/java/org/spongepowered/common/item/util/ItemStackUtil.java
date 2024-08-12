@@ -142,11 +142,11 @@ public abstract class ItemStackUtil {
         if (itemStack == null) {
             return ItemStackSnapshot.empty();
         }
-        return itemStack.isEmpty() ? ItemStackSnapshot.empty() : ItemStackUtil.fromNative(itemStack).createSnapshot();
+        return itemStack.isEmpty() ? ItemStackSnapshot.empty() : ItemStackUtil.fromNative(itemStack).asImmutable();
     }
 
     public static ItemStackSnapshot snapshotOf(@Nullable ItemStack itemStack) {
-        return itemStack == null ? ItemStackSnapshot.empty() : itemStack.isEmpty() ? ItemStackSnapshot.empty() : itemStack.createSnapshot();
+        return itemStack == null ? ItemStackSnapshot.empty() : itemStack.isEmpty() ? ItemStackSnapshot.empty() : itemStack.asImmutable();
     }
 
     public static List<ItemStackSnapshot> snapshotOf(final List<net.minecraft.world.item.ItemStack> items) {
@@ -155,11 +155,11 @@ public abstract class ItemStackUtil {
 
     public static net.minecraft.world.item.ItemStack fromSnapshotToNative(@Nullable ItemStackSnapshot snapshot) {
         return snapshot == null ? ItemStackUtil.emptyNative() : snapshot == ItemStackSnapshot.empty() ? ItemStackUtil.emptyNative() : ItemStackUtil
-            .toNative(snapshot.createStack());
+            .toNative(snapshot.asMutable());
     }
 
     public static ItemStack fromSnapshot(@Nullable ItemStackSnapshot snapshot) {
-        return snapshot == null ? ItemStackUtil.empty() : snapshot.isEmpty() ? ItemStackUtil.empty() : snapshot.createStack();
+        return snapshot == null ? ItemStackUtil.empty() : snapshot.isEmpty() ? ItemStackUtil.empty() : snapshot.asMutable();
     }
 
     public static ItemStack empty() {

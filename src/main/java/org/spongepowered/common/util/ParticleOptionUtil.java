@@ -55,7 +55,7 @@ public final class ParticleOptionUtil {
                 || type == ParticleTypes.FALLING_DUST || type == ParticleTypes.DUST_PILLAR) {
             options.put(ParticleOptions.BLOCK_STATE.get(), BlockTypes.AIR.get().defaultState());
         } else if (type == ParticleTypes.ITEM) {
-            options.put(ParticleOptions.ITEM_STACK_SNAPSHOT.get(), ItemStack.of(ItemTypes.STONE).createSnapshot());
+            options.put(ParticleOptions.ITEM_STACK_SNAPSHOT.get(), ItemStack.of(ItemTypes.STONE).asImmutable());
         } else if (type == ParticleTypes.DUST) {
             options.put(ParticleOptions.COLOR.get(), Color.RED);
             options.put(ParticleOptions.SCALE.get(), 1.0d);

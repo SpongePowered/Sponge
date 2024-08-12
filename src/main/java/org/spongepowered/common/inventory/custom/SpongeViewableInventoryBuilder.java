@@ -215,7 +215,7 @@ public final class SpongeViewableInventoryBuilder implements ViewableInventory.B
     // dummy
     @Override
     public BuildingStep item(ItemStackSnapshot item) {
-        this.lastSlot.set(item.createStack());
+        this.lastSlot.set(item.asMutable());
         return this;
     }
 

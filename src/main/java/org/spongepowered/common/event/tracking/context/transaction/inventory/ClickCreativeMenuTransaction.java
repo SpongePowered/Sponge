@@ -74,7 +74,7 @@ public class ClickCreativeMenuTransaction extends ContainerBasedTransaction {
     ) {
         if (slotTransactions.isEmpty() && this.slotNum >= 0 && this.slot != null) {
             // No SlotTransaction was captured. So we add the clicked slot as a transaction with the creative stack
-            final ItemStackSnapshot item = this.slot.peek().createSnapshot();
+            final ItemStackSnapshot item = this.slot.peek().asImmutable();
             slotTransactions.add(new SlotTransaction(this.slot, item, this.creativeStack));
         }
 

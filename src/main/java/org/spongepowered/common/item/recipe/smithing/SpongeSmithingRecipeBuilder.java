@@ -99,7 +99,7 @@ public final class SpongeSmithingRecipeBuilder extends AbstractResourceKeyedBuil
 
     @Override
     public EndStep result(ItemStackSnapshot result) {
-        this.result = result.createStack();
+        this.result = result.asMutable();
         this.resultFunction = null;
         return this;
     }

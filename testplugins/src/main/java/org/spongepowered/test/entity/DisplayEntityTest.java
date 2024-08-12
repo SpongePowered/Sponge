@@ -94,7 +94,7 @@ public class DisplayEntityTest {
                         textDisplay.offer(Keys.BILLBOARD_TYPE, BillboardTypes.FIXED.get());
 
                         var itemDisplay = spawnEntity(player.world(), EntityTypes.ITEM_DISPLAY, centerPos, forwardDir, col2, 0);
-                        itemDisplay.offer(Keys.ITEM_STACK_SNAPSHOT, ItemStack.of(ItemTypes.NETHERITE_INGOT).createSnapshot());
+                        itemDisplay.offer(Keys.ITEM_STACK_SNAPSHOT, ItemStack.of(ItemTypes.NETHERITE_INGOT).asImmutable());
                         itemDisplay.offer(Keys.BILLBOARD_TYPE, BillboardTypes.FIXED.get());
 
                         textDisplay = spawnEntity(player.world(), EntityTypes.TEXT_DISPLAY, centerPos, forwardDir, col1, 0);
@@ -105,7 +105,7 @@ public class DisplayEntityTest {
                         textDisplay.offer(Keys.BILLBOARD_TYPE, BillboardTypes.CENTER.get());
 
                         itemDisplay = spawnEntity(player.world(), EntityTypes.ITEM_DISPLAY, centerPos, forwardDir, col2, 1);
-                        itemDisplay.offer(Keys.ITEM_STACK_SNAPSHOT, ItemStack.of(ItemTypes.DIAMOND).createSnapshot());
+                        itemDisplay.offer(Keys.ITEM_STACK_SNAPSHOT, ItemStack.of(ItemTypes.DIAMOND).asImmutable());
                         itemDisplay.offer(Keys.BLOCK_LIGHT, 15);
                         itemDisplay.offer(Keys.SKY_LIGHT, 15);
                         itemDisplay.offer(Keys.BILLBOARD_TYPE, BillboardTypes.CENTER.get());
@@ -118,7 +118,7 @@ public class DisplayEntityTest {
                         textDisplay.offer(Keys.BILLBOARD_TYPE, BillboardTypes.HORIZONTAL.get());
 
                         itemDisplay = spawnEntity(player.world(), EntityTypes.ITEM_DISPLAY, centerPos, forwardDir, col2, 2);
-                        itemDisplay.offer(Keys.ITEM_STACK_SNAPSHOT, ItemStack.of(ItemTypes.IRON_INGOT).createSnapshot());
+                        itemDisplay.offer(Keys.ITEM_STACK_SNAPSHOT, ItemStack.of(ItemTypes.IRON_INGOT).asImmutable());
                         itemDisplay.offer(Keys.BLOCK_LIGHT, 15);
                         itemDisplay.offer(Keys.SKY_LIGHT, 0);
                         itemDisplay.offer(Keys.BILLBOARD_TYPE, BillboardTypes.HORIZONTAL.get());
@@ -132,7 +132,7 @@ public class DisplayEntityTest {
                         textDisplay.offer(Keys.BILLBOARD_TYPE, BillboardTypes.VERTICAL.get());
 
                         itemDisplay = spawnEntity(player.world(), EntityTypes.ITEM_DISPLAY, centerPos, forwardDir, col2, 3);
-                        itemDisplay.offer(Keys.ITEM_STACK_SNAPSHOT, ItemStack.of(ItemTypes.GOLD_INGOT).createSnapshot());
+                        itemDisplay.offer(Keys.ITEM_STACK_SNAPSHOT, ItemStack.of(ItemTypes.GOLD_INGOT).asImmutable());
                         itemDisplay.offer(Keys.BLOCK_LIGHT, 0);
                         itemDisplay.offer(Keys.SKY_LIGHT, 15);
                         itemDisplay.offer(Keys.BILLBOARD_TYPE, BillboardTypes.VERTICAL.get());
@@ -144,7 +144,7 @@ public class DisplayEntityTest {
                         textDisplay.offer(Keys.DISPLAY_NAME, Component.text("Low\nViewRange"));
 
                         itemDisplay = spawnEntity(player.world(), EntityTypes.ITEM_DISPLAY, centerPos, forwardDir, col2, 4);
-                        itemDisplay.offer(Keys.ITEM_STACK_SNAPSHOT, ItemStack.of(ItemTypes.EMERALD).createSnapshot());
+                        itemDisplay.offer(Keys.ITEM_STACK_SNAPSHOT, ItemStack.of(ItemTypes.EMERALD).asImmutable());
                         itemDisplay.offer(Keys.VIEW_RANGE, 0.02); // 1 is supposed to be view range for fireballs in vanilla, 0.02 seems to be around a block
 
 

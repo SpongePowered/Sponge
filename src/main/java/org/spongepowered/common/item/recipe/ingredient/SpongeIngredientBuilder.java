@@ -84,7 +84,7 @@ public class SpongeIngredientBuilder implements Ingredient.Builder {
     @Override
     public Ingredient.Builder with(ItemStackSnapshot... types) {
         this.reset();
-        this.stacks = Arrays.stream(types).map(ItemStackSnapshot::createStack).toArray(ItemStack[]::new);
+        this.stacks = Arrays.stream(types).map(ItemStackSnapshot::asMutable).toArray(ItemStack[]::new);
         return this;
     }
 

@@ -102,7 +102,7 @@ public class SpongeShapelessCraftingRecipeBuilder extends AbstractResourceKeyedB
     @Override
     public EndStep result(final ItemStackSnapshot result) {
         Objects.requireNonNull(result, "result");
-        this.result = result.createStack();
+        this.result = result.asMutable();
         this.resultFunction = null;
         return this;
     }

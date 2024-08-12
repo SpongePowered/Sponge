@@ -75,7 +75,7 @@ public class InventoryTransactionResultImpl implements InventoryTransactionResul
     @Override
     public void revert() {
         for (SlotTransaction transaction : Lists.reverse(this.slotTransactions)) {
-            transaction.slot().set(transaction.original().createStack());
+            transaction.slot().set(transaction.original().asMutable());
         }
     }
 
@@ -142,7 +142,7 @@ public class InventoryTransactionResultImpl implements InventoryTransactionResul
             }
             for (ItemStack itemStack1 : itemStacks) {
                 if (!itemStack1.isEmpty()) {
-                    this.rejected.add(itemStack1.createSnapshot());
+                    this.rejected.add(itemStack1.asImmutable());
                 }
             }
             return this;
