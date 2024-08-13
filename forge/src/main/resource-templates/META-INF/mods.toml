@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[51,)"
+loaderVersion="[52,)"
 license="MIT License"
 
 issueTrackerURL="https://github.com/SpongePowered/Sponge/issues"
@@ -17,7 +17,7 @@ description = "{{ description }}"
 [[dependencies.spongeforge]]
 modId="forge"
 mandatory=true
-versionRange="[51,)"
+versionRange="[52,)"
 ordering="AFTER"
 side="BOTH"
 
