@@ -158,6 +158,10 @@ extensions.configure(LoomGradleExtensionAPI::class) {
         useLegacyMixinAp.set(false)
     }
 
+    forge {
+        useCustomMixin.set(false)
+    }
+
     mods {
         named("main") {
             sourceSet(forgeMixins)
