@@ -34,9 +34,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
-import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
-import net.minecraft.world.level.levelgen.structure.StructureSet;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.registry.RegistryReference;
@@ -49,6 +47,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 
 public final class SpongeFlatGeneratorConfig {
 
@@ -140,17 +139,11 @@ public final class SpongeFlatGeneratorConfig {
             }
             final Registry<Biome> biomeRegistry = SpongeCommon.vanillaRegistry(Registries.BIOME);
             final HolderLookup.RegistryLookup<PlacedFeature> placedFeatureRegistryLookup = SpongeCommon.vanillaRegistry(Registries.PLACED_FEATURE).asLookup();
-            final Optional<HolderSet<StructureSet>> defaultStructures = FlatLevelGeneratorSettings.getDefault(
-                    biomeRegistry.asLookup(),
-                    SpongeCommon.vanillaRegistry(Registries.STRUCTURE_SET).asLookup(),
-                    placedFeatureRegistryLookup
-            ).structureOverrides();
-
 
             final Holder.Reference<Biome> biome =
                     biomeRegistry.asLookup().getOrThrow(ResourceKey.create(Registries.BIOME, (ResourceLocation) (Object) this.biome.location()));
             return (FlatGeneratorConfig) FlatLevelGeneratorSettingsAccessor.invoker$new(
-                    defaultStructures,
+                    this.structureSets == null ? Optional.empty() : Optional.of(HolderSet.direct((Function) Holder::direct, this.structureSets)),
                     (List<FlatLayerInfo>) (Object) this.layers,
                     this.populateLakes,
                     this.performDecoration,
