@@ -147,16 +147,16 @@ public abstract class AbstractFurnaceBlockEntityMixin_Forge implements AbstractF
         final RegistryAccess registryAccess, final RecipeHolder<?> recipe,
         final NonNullList<ItemStack> slots, final int var2,
         final CallbackInfoReturnable<Boolean> cir,
-        final ItemStack $$4, final ItemStack $$5, final ItemStack $$6
+        final ItemStack itemIn, final ItemStack recipeResult, final ItemStack itemOut
     ) {
         final AbstractFurnaceBlockEntityMixin_Forge mixinSelf = MixinTargetHelper.cast(this);
         final FurnaceBlockEntity entity = (FurnaceBlockEntity) this;
 
         final List<SlotTransaction> transactions = new ArrayList<>();
-        $$4.grow(1);
-        final ItemStackSnapshot originalSmeltItem = ItemStackUtil.snapshotOf($$4);
-        $$4.shrink(1);
-        transactions.add(new SlotTransaction(entity.inventory().slot(0).get(), originalSmeltItem, ItemStackUtil.snapshotOf($$4)));
+        itemIn.grow(1);
+        final ItemStackSnapshot originalSmeltItem = ItemStackUtil.snapshotOf(itemIn);
+        itemIn.shrink(1);
+        transactions.add(new SlotTransaction(entity.inventory().slot(0).get(), originalSmeltItem, ItemStackUtil.snapshotOf(itemIn)));
 
         final boolean hasFuel = !mixinSelf.forgeImpl$filledWaterBucket;
         if (mixinSelf.forgeImpl$filledWaterBucket) {
@@ -164,17 +164,17 @@ public abstract class AbstractFurnaceBlockEntityMixin_Forge implements AbstractF
         }
         mixinSelf.forgeImpl$filledWaterBucket = false;
 
-        if ($$6.isEmpty()) {
-            transactions.add(new SlotTransaction(entity.inventory().slot(2).get(), ItemStackSnapshot.empty(), ItemStackUtil.snapshotOf($$5)));
-        } else if (ItemStack.isSameItemSameComponents($$6, $$5)) {
-            $$6.shrink(1);
-            final ItemStackSnapshot originalResult = ItemStackUtil.snapshotOf($$6);
-            $$6.grow(1);
-            transactions.add(new SlotTransaction(entity.inventory().slot(2).get(), originalResult, ItemStackUtil.snapshotOf($$6)));
+        if (itemOut.isEmpty()) {
+            transactions.add(new SlotTransaction(entity.inventory().slot(2).get(), ItemStackSnapshot.empty(), ItemStackUtil.snapshotOf(recipeResult)));
+        } else if (ItemStack.isSameItemSameComponents(itemOut, recipeResult)) {
+            itemOut.shrink(1);
+            final ItemStackSnapshot originalResult = ItemStackUtil.snapshotOf(itemOut);
+            itemOut.grow(1);
+            transactions.add(new SlotTransaction(entity.inventory().slot(2).get(), originalResult, ItemStackUtil.snapshotOf(itemOut)));
         }
         final Optional<ItemStackSnapshot> fuel = hasFuel && !slots.get(1).isEmpty() ? Optional.of(ItemStackUtil.snapshotOf(slots.get(1))) : Optional.empty();
         final CookingEvent.Finish event = SpongeEventFactory.createCookingEventFinish(PhaseTracker.getCauseStackManager().currentCause(), entity,
-            fuel, Optional.ofNullable((CookingRecipe) recipe.value()), Optional.of((ResourceKey) (Object) recipe.id()), Collections.unmodifiableList(transactions));
+            fuel, Optional.of((CookingRecipe) recipe.value()), Optional.of((ResourceKey) (Object) recipe.id()), Collections.unmodifiableList(transactions));
         SpongeCommon.post(event);
 
         for (final SlotTransaction transaction : transactions) {
