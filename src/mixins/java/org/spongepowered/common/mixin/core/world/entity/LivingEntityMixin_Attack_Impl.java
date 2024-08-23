@@ -243,7 +243,7 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin
      */
     @ModifyVariable(method = "hurt", ordinal = 2,
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/LivingEntity;actuallyHurt(Lnet/minecraft/world/damagesource/DamageSource;F)V",
+            target = "Lnet/minecraft/advancements/critereon/EntityHurtPlayerTrigger;trigger(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/world/damagesource/DamageSource;FFZ)V",
             shift = At.Shift.AFTER))
     private float attackImpl$modifyBlockedDamage(float damageBlocked) {
         return this.attackImpl$actuallyHurtBlockedDamage;
