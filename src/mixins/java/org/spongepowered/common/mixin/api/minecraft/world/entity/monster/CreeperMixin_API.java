@@ -36,13 +36,12 @@ import java.util.Set;
 public abstract class CreeperMixin_API extends MonsterMixin_API implements Creeper {
 
     // @formatter:off
-    @Shadow protected abstract void shadow$explodeCreeper();
+    @Shadow public void shadow$ignite() { } // explode
     // @formatter:on
-
 
     @Override
     public void detonate() {
-        this.shadow$explodeCreeper();
+        this.shadow$ignite();
     }
 
     @Override
