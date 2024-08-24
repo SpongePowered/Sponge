@@ -44,7 +44,7 @@ import java.util.function.Function;
 
 public final class FireworkUtil {
     public static boolean setFireworkEffects(final FireworkRocketEntity firework, final List<? extends FireworkEffect> effects) {
-        return updateFireworkRocketItem(firework, item -> setFireworkEffects(item, effects));
+        return FireworkUtil.updateFireworkRocketItem(firework, item -> FireworkUtil.setFireworkEffects(item, effects));
     }
 
     public static boolean setFireworkEffects(final ItemStack item, final List<? extends FireworkEffect> effects) {
@@ -69,7 +69,7 @@ public final class FireworkUtil {
     }
 
     public static Optional<List<FireworkEffect>> getFireworkEffects(final FireworkRocketEntity firework) {
-        return getFireworkEffects(getItem(firework));
+        return FireworkUtil.getFireworkEffects(FireworkUtil.getItem(firework));
     }
 
     public static Optional<List<FireworkEffect>> getFireworkEffects(final ItemStack item) {
@@ -94,7 +94,7 @@ public final class FireworkUtil {
     }
 
     public static boolean removeFireworkEffects(final FireworkRocketEntity firework) {
-        return updateFireworkRocketItem(firework, FireworkUtil::removeFireworkEffects);
+        return FireworkUtil.updateFireworkRocketItem(firework, FireworkUtil::removeFireworkEffects);
     }
 
     public static boolean removeFireworkEffects(final ItemStack item) {
@@ -117,7 +117,7 @@ public final class FireworkUtil {
     }
 
     public static boolean setFlightModifier(final FireworkRocketEntity firework, final int modifier) {
-        if (updateFireworkRocketItem(firework, item -> setFlightModifier(item, modifier))) {
+        if (FireworkUtil.updateFireworkRocketItem(firework, item -> FireworkUtil.setFlightModifier(item, modifier))) {
             int lifetime = 10 * modifier + ((EntityAccessor) firework).accessor$random().nextInt(6) + ((EntityAccessor) firework).accessor$random().nextInt(7);
             ((FireworkRocketEntityAccessor) firework).accessor$lifetime(lifetime);
             return true;
@@ -138,7 +138,7 @@ public final class FireworkUtil {
     }
 
     public static OptionalInt getFlightModifier(final FireworkRocketEntity firework) {
-        return getFlightModifier(getItem(firework));
+        return FireworkUtil.getFlightModifier(FireworkUtil.getItem(firework));
     }
 
     public static OptionalInt getFlightModifier(final ItemStack item) {
@@ -150,7 +150,7 @@ public final class FireworkUtil {
     }
 
     public static boolean updateFireworkRocketItem(final FireworkRocketEntity firework, final Function<ItemStack, Boolean> function) {
-        final ItemStack item = getItem(firework).copy();
+        final ItemStack item = FireworkUtil.getItem(firework).copy();
         if (function.apply(item)) {
             firework.getEntityData().set(FireworkRocketEntityAccessor.accessor$DATA_ID_FIREWORKS_ITEM(), item);
             return true;

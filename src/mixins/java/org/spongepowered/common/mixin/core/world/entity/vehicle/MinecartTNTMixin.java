@@ -82,7 +82,7 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
 
     @Override
     public boolean bridge$isPrimed() {
-        return shadow$isPrimed();
+        return this.shadow$isPrimed();
     }
 
     @Override
@@ -93,7 +93,7 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
     @Override
     public void bridge$setFuseDuration(final int fuseTicks) {
         this.impl$fuseDuration = fuseTicks;
-        if (shadow$isPrimed()) {
+        if (this.shadow$isPrimed()) {
             this.fuse = fuseTicks;
         }
     }
