@@ -117,12 +117,9 @@ public final class FireworkUtil {
     }
 
     public static boolean setFlightModifier(final FireworkRocketEntity firework, final int modifier) {
-        if (FireworkUtil.updateFireworkRocketItem(firework, item -> FireworkUtil.setFlightModifier(item, modifier))) {
-            int lifetime = 10 * modifier + ((EntityAccessor) firework).accessor$random().nextInt(6) + ((EntityAccessor) firework).accessor$random().nextInt(7);
-            ((FireworkRocketEntityAccessor) firework).accessor$lifetime(lifetime);
-            return true;
-        }
-        return false;
+        int lifetime = 10 * modifier + ((EntityAccessor) firework).accessor$random().nextInt(6) + ((EntityAccessor) firework).accessor$random().nextInt(7);
+        ((FireworkRocketEntityAccessor) firework).accessor$lifetime(lifetime);
+        return true;
     }
 
     public static boolean setFlightModifier(final ItemStack item, final int modifier) {
