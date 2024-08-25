@@ -337,8 +337,11 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin
                 this.attackImpl$actuallyHurt.functions().add(func);
             }
 
-            this.attackImpl$actuallyHurtResult = DamageEventUtil.callLivingDamageEntityEvent(this.attackImpl$hurt, this.attackImpl$actuallyHurt);
+            // Use local and clear the variable to prevent re-entry if a plugin modifies the absorption hearts inside the event.
+            final DamageEventUtil.ActuallyHurt actuallyHurt = this.attackImpl$actuallyHurt;
             this.attackImpl$actuallyHurt = null;
+
+            this.attackImpl$actuallyHurtResult = DamageEventUtil.callLivingDamageEntityEvent(this.attackImpl$hurt, actuallyHurt);
 
             if (this.attackImpl$actuallyHurtResult.event().isCancelled()) {
                 this.attackImpl$actuallyHurtCancelled = true;
