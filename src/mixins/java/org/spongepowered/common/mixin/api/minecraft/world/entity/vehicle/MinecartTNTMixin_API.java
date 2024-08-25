@@ -46,6 +46,7 @@ public abstract class MinecartTNTMixin_API extends AbstractMinecartMixin_API imp
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
         values.add(this.requireValue(Keys.FUSE_DURATION).asImmutable());
+        values.add(this.requireValue(Keys.IS_PRIMED).asImmutable());
         values.add(this.requireValue(Keys.TICKS_REMAINING).asImmutable());
 
         this.getValue(Keys.EXPLOSION_RADIUS).map(Value::asImmutable).ifPresent(values::add);
