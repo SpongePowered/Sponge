@@ -258,7 +258,7 @@ public final class TrackingUtil {
         try (final PhaseContext<?> context = phaseContext) {
             context.buildAndSwitch();
             PhaseTracker.LOGGER.trace(TrackingUtil.FLUID_TICK, () -> "Wrapping Fluid Tick: " + fluidState.toString());
-            fluidState.tick(world, pos);
+            fluidState.tick(world, pos, blockState);
         } catch (final Exception | NoClassDefFoundError e) {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, phaseContext);
 

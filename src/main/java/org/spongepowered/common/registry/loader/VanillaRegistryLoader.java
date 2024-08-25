@@ -58,7 +58,6 @@ import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.Rarity;
-import net.minecraft.world.item.Tiers;
 import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LightLayer;
@@ -165,15 +164,16 @@ public final class VanillaRegistryLoader {
         this.automaticName(RegistryTypes.DRIPSTONE_SEGMENT, DripstoneThickness.values());
         this.automaticName(RegistryTypes.EQUIPMENT_GROUP, EquipmentSlot.Type.values());
         this.automaticName(RegistryTypes.EQUIPMENT_TYPE, EquipmentSlot.values());
-        this.automaticName(RegistryTypes.FOX_TYPE, Fox.Type.values());
+        this.automaticName(RegistryTypes.FOX_TYPE, Fox.Variant.values());
         this.automaticName(RegistryTypes.GAME_MODE, GameType.values());
         this.automaticName(RegistryTypes.HAND_PREFERENCE, HumanoidArm.values());
         this.automaticName(RegistryTypes.HAND_TYPE, InteractionHand.values());
         this.automaticName(RegistryTypes.INSTRUMENT_TYPE, NoteBlockInstrument.values());
         this.automaticName(RegistryTypes.ITEM_RARITY, Rarity.values());
-        this.automaticName(RegistryTypes.ITEM_TIER, Tiers.values());
+        // TODO - Figure out if we should make a registry - Snapshot 24w34a
+//        this.automaticName(RegistryTypes.ITEM_TIER, ToolMaterial.values());
         this.automaticName(RegistryTypes.JIGSAW_BLOCK_ORIENTATION, FrontAndTop.values());
-        this.automaticName(RegistryTypes.MOOSHROOM_TYPE, MushroomCow.MushroomType.values());
+        this.automaticName(RegistryTypes.MOOSHROOM_TYPE, MushroomCow.Variant.values());
         this.automaticName(RegistryTypes.OBJECTIVE_DISPLAY_MODE, ObjectiveCriteria.RenderType.values());
         this.automaticName(RegistryTypes.PANDA_GENE, Panda.Gene.values());
         this.automaticName(RegistryTypes.PHANTOM_PHASE, Phantom.AttackPhase.values());
@@ -202,7 +202,6 @@ public final class VanillaRegistryLoader {
         this.automaticName(RegistryTypes.GRASS_COLOR_MODIFIER, BiomeSpecialEffects.GrassColorModifier.values());
         this.automaticName(RegistryTypes.PRECIPITATION, Biome.Precipitation.values());
         this.automaticName(RegistryTypes.TEMPERATURE_MODIFIER, Biome.TemperatureModifier.values());
-        this.automaticName(RegistryTypes.CARVING_STEP, GenerationStep.Carving.values());
         this.automaticName(RegistryTypes.DECORATION_STEP, GenerationStep.Decoration.values());
         this.automaticName(RegistryTypes.PARROT_TYPE, Parrot.Variant.values());
         this.automaticName(RegistryTypes.RABBIT_TYPE, Rabbit.Variant.values());

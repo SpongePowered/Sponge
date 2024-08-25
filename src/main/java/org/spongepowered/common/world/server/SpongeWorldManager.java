@@ -337,7 +337,7 @@ public abstract class SpongeWorldManager implements WorldManager {
                 hardcore == null ? defaultLevelData.isHardcore() : hardcore,
                 difficulty == null ? defaultLevelData.getDifficulty() : difficulty,
                 allowCommands == null ? defaultLevelData.isAllowCommands() : allowCommands,
-                defaultLevelData.getGameRules().copy(),
+                defaultLevelData.getGameRules().copy(defaultLevelData.enabledFeatures()),
                 defaultLevelData.getDataConfiguration());
     }
 

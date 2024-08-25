@@ -34,6 +34,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -242,7 +243,7 @@ public final class VolumeStreamUtils {
         return shouldCarbonCopy ? (pos, entity) -> {
             final CompoundTag nbt = new CompoundTag();
             entity.save(nbt);
-            final net.minecraft.world.entity.@Nullable Entity cloned = entity.getType().create(level);
+            final net.minecraft.world.entity.@Nullable Entity cloned = entity.getType().create(level, EntitySpawnReason.COMMAND);
             Objects.requireNonNull(
                 cloned,
                 () -> String.format(

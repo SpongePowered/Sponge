@@ -28,6 +28,6 @@ import net.minecraft.world.entity.animal.Fox;
 import org.spongepowered.api.data.type.FoxType;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(Fox.Type.class)
-public abstract class Fox_TypeMixin_API implements FoxType {
+@Mixin(Fox.Variant.class)
+public abstract class Fox_VariantMixin_API implements FoxType {
 }

@@ -63,23 +63,23 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
                             Codec.STRING.optionalFieldOf("group", "").forGetter(ShapelessRecipe::getGroup),
                             CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(ShapelessRecipe::category),
                             ItemStack.CODEC.fieldOf(Constants.Recipe.RESULT).forGetter($$0x -> ((RecipeResultBridge)$$0x).bridge$result()),
-                            Ingredient.CODEC_NONEMPTY
-                                    .listOf()
-                                    .fieldOf(Constants.Recipe.SHAPELESS_INGREDIENTS)
-                                    .flatXmap(
-                                            $$0x -> {
-                                                Ingredient[] $$1 = $$0x.stream().filter($$0xx -> !$$0xx.isEmpty()).toArray(Ingredient[]::new);
-                                                if ($$1.length == 0) {
-                                                    return DataResult.error(() -> "No ingredients for shapeless recipe");
-                                                } else {
-                                                    return $$1.length > 9
-                                                            ? DataResult.error(() -> "Too many ingredients for shapeless recipe")
-                                                            : DataResult.success(NonNullList.of(Ingredient.EMPTY, $$1));
-                                                }
-                                            },
-                                            DataResult::success
-                                    )
-                                    .forGetter(ShapelessRecipe::getIngredients),
+//                            Ingredient.CODEC_NONEMPTY
+//                                    .listOf()
+//                                    .fieldOf(Constants.Recipe.SHAPELESS_INGREDIENTS)
+//                                    .flatXmap(
+//                                            $$0x -> {
+//                                                Ingredient[] $$1 = $$0x.stream().filter($$0xx -> !$$0xx.isEmpty()).toArray(Ingredient[]::new);
+//                                                if ($$1.length == 0) {
+//                                                    return DataResult.error(() -> "No ingredients for shapeless recipe");
+//                                                } else {
+//                                                    return $$1.length > 9
+//                                                            ? DataResult.error(() -> "Too many ingredients for shapeless recipe")
+//                                                            : DataResult.success(NonNullList.of(Ingredient.EMPTY, $$1));
+//                                                }
+//                                            },
+//                                            DataResult::success
+//                                    )
+//                                    .forGetter(ShapelessRecipe::getIngredients),
                             IngredientResultUtil.CACHED_RESULT_FUNC_CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULTFUNCTION).forGetter(SpongeShapelessRecipe::resultFunctionId),
                             IngredientResultUtil.CACHED_REMAINING_FUNC_CODEC.optionalFieldOf(Constants.Recipe.SPONGE_REMAINING_ITEMS).forGetter(SpongeShapelessRecipe::remainingItemsFunctionId)
                     )

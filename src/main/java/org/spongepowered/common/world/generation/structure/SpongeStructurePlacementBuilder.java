@@ -154,7 +154,8 @@ public class SpongeStructurePlacementBuilder implements StructurePlacement.Build
     @Override
     public ConcentricRings preferredBiomes(final Tag<org.spongepowered.api.world.biome.Biome> preferredBiomes) {
         final Registry<Biome> registry = SpongeCommon.vanillaRegistry(Registries.BIOME);
-        this.preferredBiomes = registry.getOrCreateTag((TagKey<Biome>) (Object) preferredBiomes);
+        // TODO - Snapshot 24w34a
+//        this.preferredBiomes = registry.getOrCreateTag((TagKey<Biome>) (Object) preferredBiomes);
         return this;
     }
 

@@ -103,18 +103,17 @@ public final class TileEntityPipeline implements BlockPipeline {
                 final EffectResult result = effect.effect.processSideEffect(
                     this,
                     currentCursor,
-                    currentCursor.state,
+                    currentCursor.state(),
                     (SpongeBlockChangeFlag) BlockChangeFlags.NONE,
-                    currentCursor.limit
+                    currentCursor.limit()
                 );
-                if (result.resultingState != currentCursor.state) {
+                if (result.resultingState != currentCursor.state()) {
                     currentCursor = new PipelineCursor(
                         result.resultingState,
-                        currentCursor.opacity,
-                        currentCursor.pos,
-                        currentCursor.tileEntity,
-                        currentCursor.destroyer,
-                        currentCursor.limit
+                        currentCursor.pos(),
+                        currentCursor.tileEntity(),
+                        currentCursor.destroyer(),
+                        currentCursor.limit()
                     );
                 }
                 if (result.hasResult) {

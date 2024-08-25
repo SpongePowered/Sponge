@@ -38,7 +38,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.effect.particle.ParticleEffect;
@@ -158,7 +158,7 @@ public final class SpongeParticleHelper {
             final double opacity = effect.optionOrDefault(ParticleOptions.OPACITY).get();
             final ColorParticleOption particleData = ColorParticleOption.create(
                     (net.minecraft.core.particles.ParticleType<ColorParticleOption>) internalType,
-                    FastColor.ARGB32.color(FastColor.as8BitChannel((float) opacity), color.red(), color.green(), color.blue()));
+                    ARGB.color(ARGB.as8BitChannel((float) opacity), color.red(), color.green(), color.blue()));
             return new NamedCachedPacket(particleData, offset, quantity, velocity);
         }
 

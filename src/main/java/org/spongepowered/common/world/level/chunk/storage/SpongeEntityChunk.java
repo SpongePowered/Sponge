@@ -76,7 +76,7 @@ public final class SpongeEntityChunk implements EntityChunk {
     public Vector3i min() {
         if (this.blockMin == null) {
             if (this.chunkLayout == null) {
-                this.chunkLayout = new SpongeChunkLayout(this.level.getMinBuildHeight(), this.level.getHeight());
+                this.chunkLayout = new SpongeChunkLayout(this.level.getMinY(), this.level.getHeight());
             }
             this.blockMin = this.chunkLayout.forceToWorld(this.chunkPosition);
         }
@@ -87,7 +87,7 @@ public final class SpongeEntityChunk implements EntityChunk {
     public Vector3i max() {
         if (this.blockMax == null) {
             if (this.chunkLayout == null) {
-                this.chunkLayout = new SpongeChunkLayout(this.level.getMinBuildHeight(), this.level.getHeight());
+                this.chunkLayout = new SpongeChunkLayout(this.level.getMinY(), this.level.getHeight());
             }
             this.blockMax = this.min().add(this.chunkLayout.chunkSize()).sub(1, 1, 1);
         }

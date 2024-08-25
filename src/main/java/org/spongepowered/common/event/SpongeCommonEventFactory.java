@@ -527,7 +527,7 @@ public final class SpongeCommonEventFactory {
             return false;
         }
 
-        if (world.isClientSide() || pos.getY() < world.getMinBuildHeight()) {
+        if (world.isClientSide() || pos.getY() < world.getMinY()) {
             return false;
         }
 
@@ -591,7 +591,7 @@ public final class SpongeCommonEventFactory {
             if (movingObjectType == HitResult.Type.BLOCK) {
                 final BlockHitResult blockMovingObjectPosition = (BlockHitResult) movingObjectPosition;
                 final BlockPos blockPos = blockMovingObjectPosition.getBlockPos();
-                if (blockPos.getY() < projectile.level().getMinBuildHeight()) {
+                if (blockPos.getY() < projectile.level().getMinY()) {
                     return false;
                 }
 

@@ -22,15 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.entity.animal;
+package org.spongepowered.common.mixin.api.minecraft.world.item;
 
-import net.minecraft.world.entity.animal.MushroomCow;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import org.spongepowered.api.data.type.ItemTier;
+import org.spongepowered.api.item.recipe.crafting.Ingredient;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
 
-@Mixin(MushroomCow.MushroomType.class)
-public interface MushroomCow_MushroomTypeAccessor {
+@Mixin(net.minecraft.world.item.ToolMaterial.class)
+public abstract class ToolMaterialMixin_API implements ItemTier {
 
-    @Accessor("type") String accessor$type();
+    // @formatter:off
+    @Shadow @Final private TagKey<Item> repairItems;
+    // @formatter:on
 
+    @Override
+    public Ingredient repairIngredient() {
+        HolderGetter<Item> holder = BuiltInRegistries.acquireBootstrapRegistrationLookup(BuiltInRegistries.ITEM);
+        final var items = holder.getOrThrow(this.repairItems);
+        return (Ingredient) (Object) SpongeIngredient.of(items);
+    }
 }

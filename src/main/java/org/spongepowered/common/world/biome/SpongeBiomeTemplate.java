@@ -63,7 +63,6 @@ import org.spongepowered.api.world.biome.climate.TemperatureModifiers;
 import org.spongepowered.api.world.biome.spawner.NaturalSpawnCost;
 import org.spongepowered.api.world.biome.spawner.NaturalSpawner;
 import org.spongepowered.api.world.generation.carver.Carver;
-import org.spongepowered.api.world.generation.carver.CarvingStep;
 import org.spongepowered.api.world.generation.feature.DecorationStep;
 import org.spongepowered.api.world.generation.feature.PlacedFeature;
 import org.spongepowered.common.SpongeCommon;
@@ -185,7 +184,7 @@ public record SpongeBiomeTemplate(ResourceKey key, Biome representedBiome, DataP
             final Map<EntityType<?>, NaturalSpawnCost> spawnerCosts = this.manipulator.getOrElse(Keys.NATURAL_SPAWNER_COST, Map.of());
 
             final Map<DecorationStep, List<PlacedFeature>> features = this.manipulator.getOrElse(Keys.FEATURES, Map.of());
-            final Map<CarvingStep, List<Carver>> carvers = this.manipulator.getOrElse(Keys.CARVERS, Map.of());
+            final List<Carver> carvers = this.manipulator.getOrElse(Keys.CARVERS, List.of());
 
             final BiomeSpecialEffects.Builder effectsBuilder = new BiomeSpecialEffects.Builder()
                     .fogColor(fogColor.rgb())
@@ -214,8 +213,7 @@ public record SpongeBiomeTemplate(ResourceKey key, Biome representedBiome, DataP
             final BiomeGenerationSettings.Builder generationBuilder = new BiomeGenerationSettings.Builder(placedFeatureRegistry.asLookup(), configuredWorldCarverRegistry.asLookup());
             features.forEach((step, list) -> list.forEach(feature -> generationBuilder.addFeature((GenerationStep.Decoration) (Object) step,
                     Holder.direct((net.minecraft.world.level.levelgen.placement.PlacedFeature) (Object) feature))));
-            carvers.forEach((step, list) -> list.forEach(carver -> generationBuilder.addCarver((GenerationStep.Carving) (Object) step,
-                    Holder.direct((ConfiguredWorldCarver<?>) (Object) carver))));
+            carvers.forEach((carver) -> generationBuilder.addCarver(Holder.direct((ConfiguredWorldCarver<?>) (Object) carver)));
 
             final Biome.BiomeBuilder vanillaBuilder = new Biome.BiomeBuilder()
                     .hasPrecipitation(precipitation)

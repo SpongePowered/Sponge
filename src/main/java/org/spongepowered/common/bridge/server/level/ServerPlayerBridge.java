@@ -92,8 +92,18 @@ public interface ServerPlayerBridge extends ServerPlayerEntityHealthScaleBridge 
 
     default void bridge$sendChangeDimension(final Holder<DimensionType> dimensionType, final ResourceKey<Level> key, final long hashedSeed,
             final GameType gameType, final GameType previousGameType, final boolean isDebug, final boolean isFlat, final byte dataToKeepMask) {
-        ((ServerPlayer) this).connection.send(new ClientboundRespawnPacket(new CommonPlayerSpawnInfo(dimensionType, key, hashedSeed, gameType, previousGameType, isDebug,
-                isFlat, ((ServerPlayer) this).getLastDeathLocation(), ((ServerPlayer) this).getPortalCooldown()), dataToKeepMask));
+        ((ServerPlayer) this).connection.send(new ClientboundRespawnPacket(new CommonPlayerSpawnInfo(
+            dimensionType,
+            key,
+            hashedSeed,
+            gameType,
+            previousGameType,
+            isDebug,
+            isFlat,
+            ((ServerPlayer) this).getLastDeathLocation(),
+            ((ServerPlayer) this).getPortalCooldown(),
+            ((ServerPlayer) this).serverLevel().getSeaLevel()
+        ), dataToKeepMask));
     }
 
     boolean bridge$kick(final Component message);

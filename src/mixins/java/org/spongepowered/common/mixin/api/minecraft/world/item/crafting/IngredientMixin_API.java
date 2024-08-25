@@ -24,9 +24,13 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.item.crafting;
 
+import net.minecraft.core.Holder;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Interface.Remap;
@@ -43,13 +47,12 @@ import java.util.stream.Collectors;
 public abstract class IngredientMixin_API {
 
     // @formatter:off
-    @Shadow public abstract ItemStack[] shadow$getItems();
     @Shadow public abstract boolean shadow$test(@Nullable ItemStack p_test_1_);
+    @Shadow public abstract List<Holder<Item>> shadow$items();
     // @formatter:on
 
-
-    public List<org.spongepowered.api.item.inventory.ItemStackSnapshot> ingredient$displayedItems() {
-        return Arrays.stream(this.shadow$getItems()).map(ItemStackUtil::snapshotOf).collect(Collectors.toList());
+    public List<ItemType> ingredient$displayedItems() {
+        return this.shadow$items().stream().map((holder) -> (ItemType) holder.value()).toList();
     }
 
     public boolean ingredient$test(final org.spongepowered.api.item.inventory.ItemStack itemStack) {

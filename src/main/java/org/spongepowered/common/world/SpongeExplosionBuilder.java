@@ -25,10 +25,12 @@
 package org.spongepowered.common.world;
 
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Explosion.BlockInteraction;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.world.World;
@@ -155,8 +157,8 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
 
         final World<?, ?> world = this.location.world();
         final Vector3d origin = this.location.position();
-        final net.minecraft.world.level.Explosion explosion = new net.minecraft.world.level.Explosion((Level) world,
-                (Entity) this.sourceExplosive, null, null, origin.x(), origin.y(), origin.z(), this.radius,
+        final net.minecraft.world.level.Explosion explosion = new net.minecraft.world.level.ServerExplosion((ServerLevel) world,
+                (Entity) this.sourceExplosive, null, null, new Vec3(origin.x(), origin.y(), origin.z()), this.radius,
                 this.canCauseFire, this.shouldBreakBlocks ? BlockInteraction.DESTROY : BlockInteraction.KEEP,
                 // TODO configurable explosion particles & sound?
                 ParticleTypes.EXPLOSION,

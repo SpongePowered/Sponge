@@ -61,6 +61,7 @@ import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.util.Codec;
 import net.kyori.adventure.util.TriState;
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.arguments.selector.SelectorPattern;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -264,7 +265,7 @@ public final class SpongeAdventure {
             return net.minecraft.network.chat.Component.score($this.name(), $this.objective());
         }
         if (component instanceof final SelectorComponent $this) {
-            return net.minecraft.network.chat.Component.selector($this.pattern(), SpongeAdventure.asVanillaOpt($this.separator()));
+            return net.minecraft.network.chat.Component.selector($this, SpongeAdventure.asVanillaOpt($this.separator()));
         }
         if (component instanceof NBTComponent<?, ?>) {
             if (component instanceof final BlockNBTComponent $this) {
@@ -320,11 +321,11 @@ public final class SpongeAdventure {
             return Component.keybind().keybind(kc.getName());
         }
         if (contents instanceof final ScoreContents sc) {
-            return Component.score().name(sc.getName()).objective(sc.getObjective());
+            return Component.score().name(sc.name().mapLeft(SelectorPattern::pattern).orThrow()).objective(sc.objective());
         }
         if (contents instanceof final SelectorContents sc) {
-            return Component.selector().pattern(sc.getPattern())
-                                              .separator(SpongeAdventure.asAdventure(sc.getSeparator()));
+            return Component.selector().pattern(sc.selector().pattern())
+                                              .separator(SpongeAdventure.asAdventure(sc.separator()));
         }
         if (contents instanceof final NbtContents nc) {
             NBTComponentBuilder<?, ?> nbtBuilder;

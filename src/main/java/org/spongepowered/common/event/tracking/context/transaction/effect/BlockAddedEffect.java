@@ -53,7 +53,7 @@ public final class BlockAddedEffect implements ProcessingSideEffect {
         // so we wrap the onPlace with the flag check (also, we're always on the
         // server in this context).
         if (flag.performBlockPhysics()) {
-            newState.onPlace(pipeline.getServerWorld(), oldState.pos, oldState.state, flag.movingBlocks());
+            newState.onPlace(pipeline.getServerWorld(), oldState.pos(), oldState.state(), flag.movingBlocks());
         }
         return EffectResult.NULL_PASS;
     }

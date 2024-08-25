@@ -38,6 +38,7 @@ import org.spongepowered.api.item.recipe.smithing.SmithingRecipe;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 public class SpongeSmithingRecipeRegistration extends SpongeRecipeRegistration<SmithingTransformRecipe> implements
@@ -68,7 +69,7 @@ public class SpongeSmithingRecipeRegistration extends SpongeRecipeRegistration<S
     public Recipe recipe() {
         this.ensureCached();
         if (SpongeRecipeRegistration.isVanillaSerializer(this.spongeResult, this.resultFunction, null, List.of(this.template, this.base, this.addition))) {
-            return (SmithingRecipe) new SmithingTransformRecipe(this.template, this.base, this.addition, this.spongeResult);
+            return (SmithingRecipe) new SmithingTransformRecipe(Optional.of(this.template), Optional.of(this.base), Optional.of(this.addition), this.spongeResult);
 
         }
         return (SmithingRecipe) new SpongeSmithingRecipe(this.template, this.base, this.addition, this.spongeResult, this.resultFunction == null ? null : this.key.toString());

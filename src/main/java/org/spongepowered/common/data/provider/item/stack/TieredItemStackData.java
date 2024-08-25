@@ -24,12 +24,8 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Tier;
-import net.minecraft.world.item.TieredItem;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.type.ItemTier;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class TieredItemStackData {
@@ -41,18 +37,21 @@ public final class TieredItemStackData {
     public static void register(final DataProviderRegistrator registrator) {
         registrator
                 .asMutable(ItemStack.class)
-                    .create(Keys.TOOL_TYPE)
-                        .get(h -> {
-                            final Item item = h.getItem();
-                            if (item instanceof TieredItem) {
-                                final Tier tier = ((TieredItem) item).getTier();
-                                if (tier instanceof ItemTier) {
-                                    return (ItemTier) tier;
-                                }
-                            }
-                            return null;
-                        })
-                        .supports(h -> h.getItem() instanceof TieredItem);
+                    .create(Keys.TOOL_TYPE);
+        // TODO - snapshot 24w34a changes away from the enum to a record and data components
+//                        .get(h -> {
+//                            h.is(ItemTags.WOODEN_TOOL_MATERIALS)
+//                            final Item item = h.getItem();
+//                            final Tool tool = h.get(DataComponents.TOOL);
+//                            if (item instanceof ToolItem) {
+//                                final Tier tier = ((TieredItem) item).getTier();
+//                                if (tier instanceof ItemTier) {
+//                                    return (ItemTier) tier;
+//                                }
+//                            }
+//                            return null;
+//                        })
+//                        .supports(h -> h.getItem() instanceof TieredItem);
     }
     // @formatter:on
 }

@@ -73,7 +73,6 @@
         "world.entity.animal.AnimalAccessor",
         "world.entity.animal.CatAccessor",
         "world.entity.animal.FoxAccessor",
-        "world.entity.animal.MushroomCow_MushroomTypeAccessor",
         "world.entity.animal.OcelotAccessor",
         "world.entity.animal.PandaAccessor",
         "world.entity.animal.PigAccessor",

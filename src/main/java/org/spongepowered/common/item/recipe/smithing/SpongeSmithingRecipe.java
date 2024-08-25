@@ -66,7 +66,7 @@ public class SpongeSmithingRecipe extends SmithingTransformRecipe implements Res
 
     public SpongeSmithingRecipe(final Ingredient template, final Ingredient base,
             final Ingredient addition, final ItemStack spongeResult, final String resultFunctionId) {
-        super(template, base, addition, spongeResult);
+        super(Optional.of(template), Optional.ofNullable(base), Optional.ofNullable(addition), spongeResult);
         this.resultFunctionId = resultFunctionId;
     }
 

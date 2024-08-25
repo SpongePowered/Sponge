@@ -28,7 +28,9 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.apache.commons.lang3.NotImplementedException;
@@ -82,8 +84,8 @@ public class SpongeIngredient extends Ingredient {
                 if (predicate == null) {
                     return DataResult.error(() -> "Could not find predicate for custom ingredient with id " + raw.predicateId.get());
                 }
-                final SpongeIngredient ingredient = new SpongeIngredient(raw.type,
-                        new SpongePredicateItemList(raw.predicateId.get(), predicate, raw.stacks.toArray(new ItemStack[0])), raw.predicateId.orElse(null));
+                final var predicateList = new SpongePredicateItemList(raw.predicateId.get(), predicate, raw.stacks.toArray(new ItemStack[0]));
+                final SpongeIngredient ingredient = new SpongeIngredient(raw.type, predicateList, raw.predicateId.orElse(null));
                 return DataResult.success(ingredient);
             }
             default -> {
@@ -93,7 +95,7 @@ public class SpongeIngredient extends Ingredient {
     }, spongeIngredient -> {
         switch (spongeIngredient.type) {
             case SpongeStackItemList.TYPE_STACK -> {
-                var stacks = Arrays.stream(spongeIngredient.values).flatMap(v -> v.getItems().stream()).toList();
+                final var stacks = Arrays.asList(spongeIngredient.list.stacks);
                 return DataResult.success(new SpongeRawIngredient(spongeIngredient.type, stacks, Optional.empty()));
             }
             case SpongePredicateItemList.TYPE_PREDICATE -> {
@@ -104,18 +106,19 @@ public class SpongeIngredient extends Ingredient {
     });
     public final String type;
     public final String predicateId;
+    private final SpongeItemList list;
 
     record SpongeRawIngredient(String type, List<ItemStack> stacks, Optional<String> predicateId) {
 
     }
 
-    public SpongeIngredient(final String type, final Stream<? extends Ingredient.Value> values, final String predicateId) {
+    public SpongeIngredient(final String type, final  HolderSet<Item> values, final String predicateId) {
         super(values);
         this.type = type;
         this.predicateId = predicateId;
     }
 
-    public SpongeIngredient(final String type, final Ingredient.Value value, final String predicateId) {
+    public SpongeIngredient(final String type, final HolderSet<Item> value, final String predicateId) {
         this(type, Stream.of(value), predicateId);
     }
 
@@ -129,7 +132,7 @@ public class SpongeIngredient extends Ingredient {
             return false;
         }
 
-        for (final Value acceptedItem : this.values) {
+        for (final Value acceptedItem : this.list) {
             if (acceptedItem instanceof SpongeItemList) {
                 if (((SpongeItemList) acceptedItem).test(testStack)) {
                     return true;
