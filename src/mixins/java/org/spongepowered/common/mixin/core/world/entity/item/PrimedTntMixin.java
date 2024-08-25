@@ -63,6 +63,7 @@ public abstract class PrimedTntMixin extends EntityMixin implements PrimedTntBri
     @Nullable private LivingEntity impl$detonator;
     private int bridge$explosionRadius = Constants.Entity.PrimedTNT.DEFAULT_EXPLOSION_RADIUS;
     private int bridge$fuseDuration = Constants.Entity.PrimedTNT.DEFAULT_FUSE_DURATION;
+    private boolean impl$postPrimeTriggered = false;
 
     @Override
     public void bridge$setDetonator(final LivingEntity detonator) {
@@ -135,7 +136,8 @@ public abstract class PrimedTntMixin extends EntityMixin implements PrimedTntBri
 
     @Inject(method = "tick()V", at = @At("RETURN"))
     private void impl$updateTNTPushPrime(final CallbackInfo ci) {
-        if (this.shadow$getFuse() == this.bridge$fuseDuration - 1 && !this.shadow$level().isClientSide) {
+        if (!this.impl$postPrimeTriggered && !this.shadow$level().isClientSide) {
+            this.impl$postPrimeTriggered = true;
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 if (this.impl$detonator != null) {
                     frame.pushCause(this.impl$detonator);
