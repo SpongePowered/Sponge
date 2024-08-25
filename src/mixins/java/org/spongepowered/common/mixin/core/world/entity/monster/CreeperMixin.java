@@ -79,7 +79,7 @@ public abstract class CreeperMixin extends MonsterMixin implements FusedExplosiv
 
     @Override
     public boolean bridge$isPrimed() {
-        return shadow$isIgnited() || shadow$getSwellDir() == Constants.Entity.Creeper.STATE_PRIMED;
+        return this.shadow$isIgnited() || this.shadow$getSwellDir() == Constants.Entity.Creeper.STATE_PRIMED;
     }
 
     @Override
