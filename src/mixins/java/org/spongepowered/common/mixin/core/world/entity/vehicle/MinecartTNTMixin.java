@@ -92,10 +92,10 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
 
     @Override
     public void bridge$setFuseDuration(final int fuseTicks) {
-        this.impl$fuseDuration = fuseTicks;
         if (this.shadow$isPrimed()) {
-            this.fuse = fuseTicks;
+            this.fuse = Math.max(this.fuse + fuseTicks - this.impl$fuseDuration, 0);
         }
+        this.impl$fuseDuration = fuseTicks;
     }
 
     @Override
