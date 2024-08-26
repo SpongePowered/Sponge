@@ -24,25 +24,12 @@
  */
 package org.spongepowered.common.mixin.tracker.world.level.chunk.storage;
 
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.ai.village.poi.PoiManager;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelHeightAccessor;
-import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.chunk.storage.RegionStorageInfo;
 import net.minecraft.world.level.chunk.storage.SerializableChunkData;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.bridge.world.level.chunk.storage.SerializableChunkDataBridge;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -55,22 +42,11 @@ import java.util.function.BiConsumer;
 @Mixin(SerializableChunkData.class)
 public abstract class SerializableChunkDataMixin_Tracker implements SerializableChunkDataBridge {
 
-
-    @Shadow @Final private boolean lightCorrect;
     private Map<Short, PlayerTracker> tracker$shortPlayerPos = null;
     private Map<Integer, PlayerTracker> tracker$intPlayerPos = null;
 
-    @Inject(method = "copyOf", at = @At(value = "RETURN"))
-    private static void impl$copySpongeLevelData(final ServerLevel $$0, final ChunkAccess $$1, final CallbackInfoReturnable<SerializableChunkData> cir) {
-        final var chunkData = cir.getReturnValue();
-        ((SerializableChunkDataBridge) (Object) chunkData).bridge$copySpongeData($$1);
-    }
-
     @Override
-    public void bridge$copySpongeData(final ChunkAccess chunkAccess) {
-        if (!(chunkAccess instanceof LevelChunk)) {
-            return;
-        }
+    public void bridge$setTrackerData(final LevelChunk chunkAccess) {
         final LevelChunkBridge chunk = (LevelChunkBridge) chunkAccess;
         if (!chunk.bridge$getTrackedShortPlayerPositions().isEmpty() || !chunk.bridge$getTrackedIntPlayerPositions().isEmpty()) {
             this.tracker$shortPlayerPos = chunk.bridge$getTrackedShortPlayerPositions();
@@ -78,12 +54,11 @@ public abstract class SerializableChunkDataMixin_Tracker implements Serializable
         }
     }
 
-    @Inject(method = "write", at = @At(value = "RETURN"))
-    private void tracker$writeSpongeLevelData(final CallbackInfoReturnable<CompoundTag> cir) {
+    @Override
+    public void bridge$writeTrackerData(final CompoundTag level) {
         if (this.tracker$intPlayerPos == null && this.tracker$shortPlayerPos == null) {
             return;
         }
-        final CompoundTag level = cir.getReturnValue();
         final CompoundTag trackedNbt = new CompoundTag();
         final ListTag positions = new ListTag();
         trackedNbt.put(Constants.Sponge.SPONGE_BLOCK_POS_TABLE, positions);
@@ -92,6 +67,7 @@ public abstract class SerializableChunkDataMixin_Tracker implements Serializable
         SerializableChunkDataMixin_Tracker.tracker$writeMap(positions, this.tracker$shortPlayerPos, (nbt, pos) -> nbt.putShort("pos", pos));
         SerializableChunkDataMixin_Tracker.tracker$writeMap(positions, this.tracker$intPlayerPos, (nbt, pos) -> nbt.putInt("ipos", pos));
     }
+
 
     private static <T> void tracker$writeMap(final ListTag positions, final Map<T, PlayerTracker> map, final BiConsumer<CompoundTag, T> consumer) {
         for (final Map.Entry<T, PlayerTracker> mapEntry : map.entrySet()) {
@@ -106,15 +82,8 @@ public abstract class SerializableChunkDataMixin_Tracker implements Serializable
         }
     }
 
-
-    @Inject(method = "parse", at = @At(value = "RETURN"))
-    private static void impl$parseSpongeLevelData(LevelHeightAccessor $$0, RegistryAccess $$1, CompoundTag $$2, final CallbackInfoReturnable<SerializableChunkData> cir) {
-        final var chunkData = cir.getReturnValue();
-        ((SerializableChunkDataBridge) (Object) chunkData).bridge$parseSpongeData();
-    }
-
     @Override
-    public void bridge$parseSpongeData(final CompoundTag fullTag) {
+    public void bridge$parseTrackerData(final CompoundTag fullTag) {
         final CompoundTag spongeData = fullTag.getCompound(Constants.Sponge.Data.V2.SPONGE_DATA);
         if (spongeData.isEmpty()) {
             return;
@@ -143,16 +112,11 @@ public abstract class SerializableChunkDataMixin_Tracker implements Serializable
         }
     }
 
-    @Redirect(method = "read",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/ChunkAccess;setLightCorrect(Z)V"))
-    private void impl$readSpongeLevelData(final ChunkAccess chunkAccess, final boolean lightCorrect) {
-        chunkAccess.setLightCorrect(lightCorrect);
-        if (!(chunkAccess instanceof LevelChunk)) {
-            return;
-        }
-
-        final LevelChunkBridge chunk = (LevelChunkBridge) chunkAccess;
+    @Override
+    public void bridge$readTrackerDataFrom(final LevelChunk levelChunk) {
+        final LevelChunkBridge chunk = (LevelChunkBridge) levelChunk;
         chunk.bridge$setTrackedIntPlayerPositions(this.tracker$intPlayerPos);
         chunk.bridge$setTrackedShortPlayerPositions(this.tracker$shortPlayerPos);
     }
+
 }

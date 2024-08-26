@@ -25,10 +25,23 @@
 package org.spongepowered.common.bridge.world.level.chunk.storage;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 public interface SerializableChunkDataBridge {
 
-    void bridge$copySpongeData(ChunkAccess chunkAccess);
-    void bridge$parseSpongeData(CompoundTag tag);
+    void bridge$setTrackerData(LevelChunk chunkAccess);
+
+    void bridge$writeTrackerData(CompoundTag level);
+
+    void bridge$parseTrackerData(CompoundTag tag);
+
+    void bridge$writeDataHolderData(CompoundTag level);
+
+    void bridge$setDataHolderData(LevelChunk levelChunk);
+
+    void bridge$parseDataHolderData(CompoundTag tag);
+
+    void bridge$readTrackerDataFrom(LevelChunk levelChunk);
+
+    void bridge$readDataHolderDataFrom(LevelChunk levelChunk);
 }

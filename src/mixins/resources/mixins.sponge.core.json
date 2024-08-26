@@ -250,7 +250,7 @@
         "world.level.block.state.BlockStateMixin",
         "world.level.border.WorldBorderMixin",
         "world.level.chunk.ChunkGeneratorMixin",
-        "world.level.chunk.ChunkSerializerMixin",
+        "world.level.chunk.SerializableChunkDataMixin",
         "world.level.chunk.ChunkStatusTasksMixin",
         "world.level.chunk.LevelChunkMixin",
         "world.level.chunk.storage.EntityStorageMixin",
