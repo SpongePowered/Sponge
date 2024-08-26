@@ -29,6 +29,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.AdventureModePredicate;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
@@ -78,7 +79,8 @@ public final class BlockTypeItemStackData {
         }
 
         final AdventureModePredicate prev = stack.get(component);
-        final BlockPredicate blockPredicate = BlockPredicate.Builder.block().of(value.stream().map(Block.class::cast).toList()).build();
+        final var holderGetter = BuiltInRegistries.BLOCK.asLookup();
+        final BlockPredicate blockPredicate = BlockPredicate.Builder.block().of(holderGetter, value.stream().map(Block.class::cast).toList()).build();
         final AdventureModePredicate predicate = new AdventureModePredicate(List.of(blockPredicate), prev == null || prev.showInTooltip());
         stack.set(component, predicate);
         return true;
