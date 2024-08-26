@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.world.item;
 
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ChorusFruitItem;
+import net.minecraft.world.item.consume_effects.TeleportRandomlyConsumeEffect;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
@@ -34,10 +34,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
-@Mixin(ChorusFruitItem.class)
-public abstract class ChorusFruitItemMixin {
+@Mixin(TeleportRandomlyConsumeEffect.class)
+public abstract class TeleportRandomlyConsumeEffectMixin {
 
-    @Redirect(method = "finishUsingItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;randomTeleport(DDDZ)Z"))
+    @Redirect(method = "apply", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;randomTeleport(DDDZ)Z"))
     private boolean impl$createCauseFrameForTeleport(final LivingEntity entity, final double x, final double y, final double z,
                                                      final boolean p_213373_7_) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {

@@ -188,7 +188,7 @@
         "world.entity.vehicle.VehicleEntityMixin",
         "world.food.FoodDataMixin",
         "world.inventory.StonecutterMenuMixin",
-        "world.item.ChorusFruitItemMixin",
+        "world.item.TeleportRandomlyConsumeEffectMixin",
         "world.item.EnderEyeItemMixin",
         "world.item.FireworkRocketItemMixin",
         "world.item.FishingRodItemMixin",
