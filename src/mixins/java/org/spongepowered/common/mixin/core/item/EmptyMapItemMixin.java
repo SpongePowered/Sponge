@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.item;
 import com.google.common.collect.Sets;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.EmptyMapItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -110,11 +110,11 @@ public abstract class EmptyMapItemMixin {
     private void impl$returnFailResultIfMapWasNotCreated(final Level level,
                                                          final net.minecraft.world.entity.player.Player playerIn,
                                                          final InteractionHand handIn,
-                                                         final CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir,
+                                                         final CallbackInfoReturnable<InteractionResult> cir,
                                                          final ItemStack itemstack) {
         if (itemstack.isEmpty()) {
             cir.cancel();
-            cir.setReturnValue(InteractionResultHolder.fail(playerIn.getItemInHand(handIn)));
+            cir.setReturnValue(InteractionResult.FAIL);
         }
     }
 
