@@ -53,6 +53,7 @@ import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.function.Function;
 
 public abstract class SpongeRecipeRegistration<R extends Recipe<? extends RecipeInput>> implements RecipeRegistration {
@@ -101,12 +102,7 @@ public abstract class SpongeRecipeRegistration<R extends Recipe<? extends Recipe
         if (!resultStack.getComponents().isEmpty() || resultFunction != null || remainingItemsFunction != null) {
             return false;
         }
-        for (final Ingredient value : ingredients) {
-            if (value instanceof SpongeIngredient) {
-                return false;
-            }
-        }
-        return true;
+        return ingredients.stream().noneMatch(value -> value instanceof SpongeIngredient);
     }
 
     @Override
