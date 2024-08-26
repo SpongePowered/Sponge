@@ -265,7 +265,7 @@ public final class SpongeAdventure {
             return net.minecraft.network.chat.Component.score($this.name(), $this.objective());
         }
         if (component instanceof final SelectorComponent $this) {
-            return net.minecraft.network.chat.Component.selector($this, SpongeAdventure.asVanillaOpt($this.separator()));
+            return net.minecraft.network.chat.Component.selector(SelectorPattern.parse($this.pattern()).getOrThrow(), SpongeAdventure.asVanillaOpt($this.separator()));
         }
         if (component instanceof NBTComponent<?, ?>) {
             if (component instanceof final BlockNBTComponent $this) {
