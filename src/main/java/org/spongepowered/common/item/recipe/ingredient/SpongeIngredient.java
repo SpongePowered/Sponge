@@ -30,7 +30,6 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.apache.commons.lang3.NotImplementedException;
@@ -45,7 +44,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 public class SpongeIngredient extends Ingredient {
 
@@ -95,7 +93,7 @@ public class SpongeIngredient extends Ingredient {
     }, spongeIngredient -> {
         switch (spongeIngredient.type) {
             case SpongeStackItemList.TYPE_STACK -> {
-                final var stacks = Arrays.asList(spongeIngredient.list.stacks);
+                final var stacks = Arrays.asList(spongeIngredient.itemList.stacks);
                 return DataResult.success(new SpongeRawIngredient(spongeIngredient.type, stacks, Optional.empty()));
             }
             case SpongePredicateItemList.TYPE_PREDICATE -> {
@@ -106,20 +104,17 @@ public class SpongeIngredient extends Ingredient {
     });
     public final String type;
     public final String predicateId;
-    private final SpongeItemList list;
+    private final SpongeItemList itemList;
 
     record SpongeRawIngredient(String type, List<ItemStack> stacks, Optional<String> predicateId) {
 
     }
 
-    public SpongeIngredient(final String type, final  HolderSet<Item> values, final String predicateId) {
-        super(values);
+    public SpongeIngredient(final String type, final SpongeItemList itemList, final String predicateId) {
+        super(HolderSet.direct(itemList.stream().toList()));
         this.type = type;
         this.predicateId = predicateId;
-    }
-
-    public SpongeIngredient(final String type, final HolderSet<Item> value, final String predicateId) {
-        this(type, Stream.of(value), predicateId);
+        this.itemList = itemList;
     }
 
     public static void clearCache() {
@@ -132,22 +127,7 @@ public class SpongeIngredient extends Ingredient {
             return false;
         }
 
-        for (final Value acceptedItem : this.list) {
-            if (acceptedItem instanceof SpongeItemList) {
-                if (((SpongeItemList) acceptedItem).test(testStack)) {
-                    return true;
-                }
-            } else {
-                // TODO caching (relevant for TagList)
-                for (final ItemStack stack : acceptedItem.getItems()) {
-                    if (stack.getItem() == testStack.getItem()) {
-                        return true;
-                    }
-                }
-            }
-        }
-
-        return false;
+        return this.itemList.test(testStack);
     }
 
     public static SpongeIngredient spongeFromStacks(net.minecraft.world.item.ItemStack... stacks) {
