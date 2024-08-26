@@ -28,7 +28,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.EnderEyeItem;
@@ -90,14 +89,14 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
         cancellable = true
     )
     private void impl$ThrowForPreEvent(final Level worldIn, final Player playerIn, final InteractionHand handIn,
-        final CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir, final ItemStack used, final BlockHitResult rayTraceResult, final ServerLevel world, final BlockPos targetPos) {
+        final CallbackInfoReturnable<InteractionResult> cir, final ItemStack used, final BlockHitResult rayTraceResult, final ServerLevel world, final BlockPos targetPos) {
         if (targetPos != null && !((LevelBridge) worldIn).bridge$isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
             final ConstructEntityEvent.Pre event =
                     SpongeEventFactory.createConstructEntityEventPre(PhaseTracker.getCauseStackManager().currentCause(),
                             ServerLocation.of((ServerWorld) worldIn, playerIn.getX(), playerIn.getY() + (double) (playerIn.getDimensions(playerIn
                                     .getPose()).height() / 2.0F), playerIn.getZ()), new Vector3d(0, 0, 0), EntityTypes.EYE_OF_ENDER.get());
             if (SpongeCommon.post(event)) {
-                cir.setReturnValue(new InteractionResultHolder<>(InteractionResult.SUCCESS, used));
+                cir.setReturnValue(InteractionResult.SUCCESS_SERVER);
             }
         }
     }
@@ -108,14 +107,14 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
     @SuppressWarnings("Duplicates")
     @Surrogate
     private void impl$ThrowForPreEvent(final Level worldIn, final Player playerIn, final InteractionHand handIn,
-        final CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir, final ItemStack used, @Nullable final BlockPos targetPos) {
+        final CallbackInfoReturnable<InteractionResult> cir, final ItemStack used, @Nullable final BlockPos targetPos) {
         if (targetPos != null && !((LevelBridge) worldIn).bridge$isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
             final ConstructEntityEvent.Pre event =
                     SpongeEventFactory.createConstructEntityEventPre(PhaseTracker.getCauseStackManager().currentCause(),
                             ServerLocation.of((ServerWorld) worldIn, playerIn.getX(), playerIn.getY() + (double) (playerIn.getDimensions(playerIn
                                     .getPose()).height() / 2.0F), playerIn.getZ()), new Vector3d(0, 0, 0), EntityTypes.EYE_OF_ENDER.get());
             if (SpongeCommon.post(event)) {
-                cir.setReturnValue(new InteractionResultHolder<>(InteractionResult.SUCCESS, used));
+                cir.setReturnValue(InteractionResult.SUCCESS_SERVER);
             }
         }
     }
