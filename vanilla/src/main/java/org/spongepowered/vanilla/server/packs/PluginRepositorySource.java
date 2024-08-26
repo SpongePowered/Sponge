@@ -33,19 +33,17 @@ import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.repository.RepositorySource;
-import org.apache.commons.io.FilenameUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.PluginResource;
-import org.spongepowered.plugin.builtin.jvm.locator.JVMPluginResource;
+import org.spongepowered.plugin.builtin.jvm.JVMPluginResource;
 import org.spongepowered.vanilla.bridge.server.packs.repository.PackRepositoryBridge_Vanilla;
 import org.spongepowered.vanilla.launch.plugin.VanillaPluginManager;
 
-import java.nio.file.FileSystem;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public final class PluginRepositorySource implements RepositorySource {
 
@@ -67,17 +65,13 @@ public final class PluginRepositorySource implements RepositorySource {
             final String id = "plugin-" + pluginContainer.metadata().id();
             final PluginResource resource = pluginManager.resource(pluginContainer);
             // TODO: provide hook in the resource to return the file system for all resource types?
-            //  Also -- can we fake a FileSystem for a non-Jar (needs thinking about)....
-            @Nullable Supplier<FileSystem> fileSystemSupplier = null;
-            if (resource instanceof JVMPluginResource) {
-                final String extension = FilenameUtils.getExtension(resource.path().getFileName().toString());
-                if ("jar".equals(extension)) {
-                    fileSystemSupplier = ((JVMPluginResource) resource)::fileSystem;
-                }
+            @Nullable Path pluginRoot = null;
+            if (resource instanceof JVMPluginResource jvmResource) {
+                pluginRoot = jvmResource.resourcesRoot();
             }
 
             final PackLocationInfo info = new PackLocationInfo(id, Component.literal(id), PackSource.DEFAULT, Optional.empty());
-            final PluginPackResources packResources = new PluginPackResources(info, pluginContainer, fileSystemSupplier);
+            final PluginPackResources packResources = new PluginPackResources(info, pluginContainer, pluginRoot);
             final Pack.ResourcesSupplier packSupplier = new Pack.ResourcesSupplier() {
 
                 @Override

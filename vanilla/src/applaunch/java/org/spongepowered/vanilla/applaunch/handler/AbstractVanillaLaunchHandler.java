@@ -28,6 +28,7 @@ import cpw.mods.modlauncher.api.ILaunchHandlerService;
 import cpw.mods.modlauncher.api.ServiceRunner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.vanilla.applaunch.AppLaunchTarget;
 
 /**
  * The common Sponge {@link ILaunchHandlerService launch handler} for development
@@ -37,20 +38,27 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
     protected final Logger logger = LogManager.getLogger("launch");
 
     @Override
+    public String name() {
+        return this.target().getLaunchTarget();
+    }
+
+    @Override
     public ServiceRunner launchService(final String[] arguments, final ModuleLayer gameLayer) {
         this.logger.info("Transitioning to Sponge launch, please wait...");
-        return () -> this.launchService0(arguments, gameLayer);
+        return () -> this.launchSponge(gameLayer.findModule("spongevanilla").orElseThrow(), arguments);
     }
+
+    public abstract AppLaunchTarget target();
 
     /**
      * Launch the service (Minecraft).
      * <p>
      * <strong>Take care</strong> to <strong>ONLY</strong> load classes on the provided
-     * {@link ModuleLayer layer}.
+     * {@link Module module}.
      *
+     * @param module The sponge module to load classes with
      * @param arguments The arguments to launch the service with
-     * @param gameLayer The game layer to load classes with
      * @throws Exception This can be any exception that occurs during the launch process
      */
-    protected abstract void launchService0(final String[] arguments, final ModuleLayer gameLayer) throws Exception;
+    protected abstract void launchSponge(final Module module, final String[] arguments) throws Exception;
 }

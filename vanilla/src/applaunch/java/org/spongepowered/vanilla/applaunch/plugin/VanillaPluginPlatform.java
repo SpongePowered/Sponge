@@ -24,6 +24,8 @@
  */
 package org.spongepowered.vanilla.applaunch.plugin;
 
+import cpw.mods.modlauncher.Launcher;
+import cpw.mods.modlauncher.api.IModuleLayerManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.plugin.PluginCandidate;
@@ -32,7 +34,7 @@ import org.spongepowered.plugin.PluginResource;
 import org.spongepowered.plugin.PluginResourceLocatorService;
 import org.spongepowered.plugin.blackboard.Keys;
 import org.spongepowered.plugin.builtin.StandardEnvironment;
-import org.spongepowered.plugin.builtin.jvm.JVMKeys;
+import org.spongepowered.vanilla.applaunch.plugin.locator.SecureJarPluginResource;
 
 import java.nio.file.Path;
 import java.util.Collections;
@@ -100,12 +102,12 @@ public final class VanillaPluginPlatform implements PluginPlatform {
 
     @Override
     public String metadataFilePath() {
-        return this.standardEnvironment.blackboard().get(JVMKeys.METADATA_FILE_PATH);
+        return this.standardEnvironment.blackboard().get(Keys.METADATA_FILE_PATH);
     }
 
     @Override
     public void setMetadataFilePath(final String metadataFilePath) {
-        this.standardEnvironment.blackboard().getOrCreate(JVMKeys.METADATA_FILE_PATH, () -> metadataFilePath);
+        this.standardEnvironment.blackboard().getOrCreate(Keys.METADATA_FILE_PATH, () -> metadataFilePath);
     }
 
     public StandardEnvironment getStandardEnvironment() {
@@ -128,15 +130,15 @@ public final class VanillaPluginPlatform implements PluginPlatform {
         return Collections.unmodifiableMap(this.pluginCandidates);
     }
 
-    public void initialize() {
+    public void initializeLanguageServices() {
         for (final Map.Entry<String, PluginLanguageService<PluginResource>> entry : this.languageServices.entrySet()) {
             entry.getValue().initialize(this.standardEnvironment);
         }
     }
 
     public void discoverLocatorServices() {
-        final ServiceLoader<PluginResourceLocatorService<PluginResource>> serviceLoader = (ServiceLoader<PluginResourceLocatorService<PluginResource>>) (Object) ServiceLoader.load(
-                PluginResourceLocatorService.class, null);
+        final ModuleLayer serviceLayer = Launcher.INSTANCE.environment().findModuleLayerManager().flatMap(lm -> lm.getLayer(IModuleLayerManager.Layer.SERVICE)).orElseThrow();
+        final var serviceLoader = (ServiceLoader<PluginResourceLocatorService<PluginResource>>) (Object) ServiceLoader.load(serviceLayer, PluginResourceLocatorService.class);
 
         for (final Iterator<PluginResourceLocatorService<PluginResource>> iter = serviceLoader.iterator(); iter.hasNext(); ) {
             final PluginResourceLocatorService<PluginResource> next;
@@ -153,8 +155,8 @@ public final class VanillaPluginPlatform implements PluginPlatform {
     }
 
     public void discoverLanguageServices() {
-        final ServiceLoader<PluginLanguageService<PluginResource>> serviceLoader = (ServiceLoader<PluginLanguageService<PluginResource>>) (Object) ServiceLoader.load(
-                PluginLanguageService.class, VanillaPluginPlatform.class.getClassLoader());
+        final ModuleLayer pluginLayer = Launcher.INSTANCE.environment().findModuleLayerManager().flatMap(lm -> lm.getLayer(IModuleLayerManager.Layer.PLUGIN)).orElseThrow();
+        final var serviceLoader = (ServiceLoader<PluginLanguageService<PluginResource>>) (Object) ServiceLoader.load(pluginLayer, PluginLanguageService.class);
 
         for (final Iterator<PluginLanguageService<PluginResource>> iter = serviceLoader.iterator(); iter.hasNext(); ) {
             final PluginLanguageService<PluginResource> next;
@@ -181,18 +183,23 @@ public final class VanillaPluginPlatform implements PluginPlatform {
     }
 
     public void createPluginCandidates() {
-        for (final Map.Entry<String, PluginLanguageService<PluginResource>> languageEntry : this.languageServices.entrySet()) {
-            final PluginLanguageService<PluginResource> languageService = languageEntry.getValue();
-            for (final Map.Entry<String, Set<PluginResource>> resourcesEntry : this.locatorResources.entrySet()) {
+        for (final PluginLanguageService<PluginResource> languageService : this.languageServices.values()) {
+            for (final Set<PluginResource> resources : this.locatorResources.values()) {
+                for (final PluginResource pluginResource : resources) {
+                    if (ResourceType.of(pluginResource) != ResourceType.PLUGIN) {
+                        continue;
+                    }
 
-                for (final PluginResource pluginResource : resourcesEntry.getValue()) {
                     try {
-                        final List<PluginCandidate<PluginResource>> candidates = languageService.createPluginCandidates(this.standardEnvironment,
-                                pluginResource);
+                        final List<PluginCandidate<PluginResource>> candidates = languageService.createPluginCandidates(this.standardEnvironment, pluginResource);
                         if (candidates.isEmpty()) {
                             continue;
                         }
                         this.pluginCandidates.computeIfAbsent(languageService, k -> new LinkedList<>()).addAll(candidates);
+
+                        if (pluginResource instanceof SecureJarPluginResource jarResource) {
+                            jarResource.addCandidates((List) candidates);
+                        }
                     } catch (final Exception ex) {
                         this.standardEnvironment.logger().error("Failed to create plugin candidates", ex);
                     }

@@ -26,79 +26,14 @@ package org.spongepowered.vanilla.launch.plugin;
 
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.plugin.DummyPluginContainer;
-import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.metadata.PluginMetadata;
+import org.spongepowered.plugin.PluginCandidate;
+import org.spongepowered.plugin.PluginResource;
+import org.spongepowered.plugin.builtin.StandardPluginContainer;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.StringJoiner;
+public final class VanillaDummyPluginContainer extends StandardPluginContainer implements DummyPluginContainer {
 
-public final class VanillaDummyPluginContainer implements PluginContainer, DummyPluginContainer {
-
-    private final PluginMetadata metadata;
-    private final Logger logger;
-    private final Object instance;
-
-    public VanillaDummyPluginContainer(final PluginMetadata metadata, final Logger logger, final Object instance) {
-        this.metadata = metadata;
-        this.logger = logger;
-        this.instance = instance;
-    }
-
-    @Override
-    public PluginMetadata metadata() {
-        return this.metadata;
-    }
-
-    @Override
-    public Logger logger() {
-        return this.logger;
-    }
-
-    @Override
-    public Object instance() {
-        return this.instance;
-    }
-
-    @Override
-    public Optional<URI> locateResource(final URI relative) {
-        final ClassLoader classLoader = this.getClass().getClassLoader();
-        final URL resolved = classLoader.getResource(relative.getPath());
-        try {
-            if (resolved == null) {
-                return Optional.empty();
-            }
-            return Optional.of(resolved.toURI());
-        } catch (final URISyntaxException ignored) {
-            return Optional.empty();
-        }
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.metadata().id());
-    }
-
-    @Override
-    public boolean equals(final Object that) {
-        if (that == this) {
-            return true;
-        }
-
-        if (!(that instanceof PluginContainer)) {
-            return false;
-        }
-
-        return this.metadata().id().equals(((PluginContainer) that).metadata().id());
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", VanillaDummyPluginContainer.class.getSimpleName() + "[", "]")
-                .add("metadata= " + this.metadata)
-                .toString();
+    public VanillaDummyPluginContainer(final PluginCandidate<? extends PluginResource> candidate, final Logger logger, final Object instance) {
+        super(candidate, logger);
+        this.initializeInstance(instance);
     }
 }
