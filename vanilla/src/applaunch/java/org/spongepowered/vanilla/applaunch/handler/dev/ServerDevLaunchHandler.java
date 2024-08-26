@@ -25,20 +25,20 @@
 package org.spongepowered.vanilla.applaunch.handler.dev;
 
 import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.vanilla.applaunch.AppLaunchTargets;
+import org.spongepowered.vanilla.applaunch.AppLaunchTarget;
 import org.spongepowered.vanilla.applaunch.handler.AbstractVanillaLaunchHandler;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 
 public final class ServerDevLaunchHandler extends AbstractVanillaLaunchHandler {
 
     @Override
-    public String name() {
-        return AppLaunchTargets.SERVER_DEVELOPMENT.getLaunchTarget();
+    public AppLaunchTarget target() {
+        return AppLaunchTarget.SERVER_DEVELOPMENT;
     }
 
     @Override
-    protected void launchService0(final String[] arguments, final ModuleLayer gameLayer) throws Exception {
-        Class.forName(gameLayer.findModule("sponge").orElseThrow(), "org.spongepowered.vanilla.launch.DedicatedServerLaunch")
+    protected void launchSponge(final Module module, final String[] arguments) throws Exception {
+        Class.forName(module, "org.spongepowered.vanilla.launch.DedicatedServerLaunch")
                 .getMethod("launch", VanillaPluginPlatform.class, Boolean.class, String[].class)
                 .invoke(null, AppLaunch.pluginPlatform(), Boolean.TRUE, arguments);
     }

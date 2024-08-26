@@ -72,11 +72,11 @@ public class ForgePluginContainer implements PluginContainer {
     }
 
     @Override
-    public Optional<URI> locateResource(URI relative) {
+    public Optional<URI> locateResource(String relative) {
         Objects.requireNonNull(relative, "relative");
 
         final ClassLoader classLoader = this.modContainer.getMod().getClass().getClassLoader();
-        final URL resolved = classLoader.getResource(relative.getPath());
+        final URL resolved = classLoader.getResource(relative);
         try {
             if (resolved == null) {
                 return Optional.empty();

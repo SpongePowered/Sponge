@@ -58,18 +58,15 @@ import java.util.stream.Collectors;
 
 @Singleton
 public final class VanillaPluginManager implements SpongePluginManager {
-
     private final Map<String, PluginContainer> plugins;
     private final Map<Object, PluginContainer> instancesToPlugins;
     private final List<PluginContainer> sortedPlugins;
-    private final Map<String, Set<PluginResource>> locatedResources;
     private final Map<PluginContainer, PluginResource> containerToResource;
 
     public VanillaPluginManager() {
         this.plugins = new Object2ObjectOpenHashMap<>();
         this.instancesToPlugins = new IdentityHashMap<>();
         this.sortedPlugins = new ArrayList<>();
-        this.locatedResources = new Object2ObjectOpenHashMap<>();
         this.containerToResource = new Object2ObjectOpenHashMap<>();
     }
 
@@ -88,10 +85,7 @@ public final class VanillaPluginManager implements SpongePluginManager {
         return Collections.unmodifiableCollection(this.sortedPlugins);
     }
 
-    @SuppressWarnings("unchecked")
     public void loadPlugins(final VanillaPluginPlatform platform) {
-        this.locatedResources.putAll(platform.getResources());
-
         final Map<PluginCandidate<PluginResource>, PluginLanguageService<PluginResource>> pluginLanguageLookup = new HashMap<>();
         final Map<PluginLanguageService<PluginResource>, PluginLoader<PluginResource, PluginContainer>> pluginLoaders = new HashMap<>();
 
@@ -174,10 +168,6 @@ public final class VanillaPluginManager implements SpongePluginManager {
         if (!(plugin instanceof VanillaDummyPluginContainer)) {
             this.instancesToPlugins.put(plugin.instance(), plugin);
         }
-    }
-
-    public Map<String, Set<PluginResource>> locatedResources() {
-        return Collections.unmodifiableMap(this.locatedResources);
     }
 
     @Nullable

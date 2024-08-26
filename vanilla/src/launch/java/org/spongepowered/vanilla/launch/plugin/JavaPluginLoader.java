@@ -33,15 +33,11 @@ import org.spongepowered.plugin.Environment;
 import org.spongepowered.plugin.InvalidPluginException;
 import org.spongepowered.plugin.PluginCandidate;
 import org.spongepowered.plugin.builtin.jvm.JVMPluginLoader;
-import org.spongepowered.plugin.builtin.jvm.locator.JVMPluginResource;
+import org.spongepowered.plugin.builtin.jvm.JVMPluginResource;
 
-import java.lang.invoke.MethodHandles;
-
-public final class JavaPluginLoader extends JVMPluginLoader<JVMPluginResource, VanillaJavaPluginContainer> {
+public final class JavaPluginLoader implements JVMPluginLoader<JVMPluginResource, VanillaJavaPluginContainer> {
 
     private final ArtifactVersion version = new DefaultArtifactVersion("1.0");
-
-    private static final MethodHandles.Lookup SPONGE_LOOKUP = MethodHandles.lookup();
 
     @Override
     public ArtifactVersion version() {
@@ -55,7 +51,6 @@ public final class JavaPluginLoader extends JVMPluginLoader<JVMPluginResource, V
         try {
             final String mainClass = container.metadata().entrypoint();
             final Class<?> pluginClass = Class.forName(mainClass, true, targetClassLoader);
-            container.initializeLookup(MethodHandles.privateLookupIn(pluginClass, JavaPluginLoader.SPONGE_LOOKUP));
 
             final Injector parentInjector = Launch.instance().lifecycle().platformInjector();
             final Object plugin;

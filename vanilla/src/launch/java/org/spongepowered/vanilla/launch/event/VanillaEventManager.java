@@ -28,7 +28,6 @@ import com.google.inject.Singleton;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.event.manager.SpongeEventManager;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.vanilla.launch.plugin.VanillaJavaPluginContainer;
 
 import java.lang.invoke.MethodHandles;
 
@@ -37,9 +36,6 @@ public final class VanillaEventManager extends SpongeEventManager {
 
     @Override
     protected MethodHandles.@Nullable Lookup getLookup(final PluginContainer plugin, final Class<?> handle) {
-        if (plugin instanceof VanillaJavaPluginContainer vanilla) {
-            return vanilla.lookup();
-        }
         return null;
     }
 

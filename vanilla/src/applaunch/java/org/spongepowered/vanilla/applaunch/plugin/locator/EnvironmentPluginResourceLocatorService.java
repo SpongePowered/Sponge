@@ -22,42 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.applaunch.loading.moddiscovery.locator;
+package org.spongepowered.vanilla.applaunch.plugin.locator;
 
-import net.minecraftforge.fml.loading.moddiscovery.AbstractModProvider;
-import net.minecraftforge.forgespi.locating.IModLocator;
-import org.spongepowered.forge.applaunch.loading.moddiscovery.ModFileParsers;
+import org.spongepowered.plugin.Environment;
+import org.spongepowered.plugin.PluginResourceLocatorService;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
-public final class EnvironmentPluginLocator extends AbstractModProvider implements IModLocator {
-
-    @Override
-    public List<ModFileOrException> scanMods() {
-        final List<ModFileOrException> modFiles = new ArrayList<>();
-        for (final Path[] paths : EnvironmentPluginLocator.getPluginsPaths()) {
-            modFiles.add(new ModFileOrException(ModFileParsers.newPluginInstance(this, paths), null));
-        }
-        return modFiles;
-    }
-
-    @Override
-    protected ModFileOrException createMod(Path path) {
-        return new ModFileOrException(ModFileParsers.newPluginInstance(this, path), null);
-    }
+public final class EnvironmentPluginResourceLocatorService implements PluginResourceLocatorService<SecureJarPluginResource> {
 
     @Override
     public String name() {
-        return "environment plugin";
+        return "environment_plugin";
     }
 
     @Override
-    public void initArguments(final Map<String, ?> arguments) {
+    public Set<SecureJarPluginResource> locatePluginResources(Environment environment) {
+        final Set<SecureJarPluginResource> resources = new HashSet<>();
+        for (final Path[] paths : EnvironmentPluginResourceLocatorService.getPluginsPaths()) {
+            resources.add(new SecureJarPluginResource(this.name(), paths));
+        }
+        return resources;
     }
 
     private static List<Path[]> getPluginsPaths() {

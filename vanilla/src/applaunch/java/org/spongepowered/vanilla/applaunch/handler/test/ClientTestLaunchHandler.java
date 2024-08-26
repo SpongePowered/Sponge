@@ -25,20 +25,20 @@
 package org.spongepowered.vanilla.applaunch.handler.test;
 
 import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.vanilla.applaunch.AppLaunchTargets;
+import org.spongepowered.vanilla.applaunch.AppLaunchTarget;
 import org.spongepowered.vanilla.applaunch.handler.AbstractVanillaLaunchHandler;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 
 public class ClientTestLaunchHandler extends AbstractVanillaLaunchHandler {
 
     @Override
-    public String name() {
-        return AppLaunchTargets.CLIENT_INTEGRATION_TEST.getLaunchTarget();
+    public AppLaunchTarget target() {
+        return AppLaunchTarget.CLIENT_INTEGRATION_TEST;
     }
 
     @Override
-    protected void launchService0(final String[] arguments, final ModuleLayer gameLayer) throws Exception {
-        Class.forName(gameLayer.findModule("sponge").orElseThrow(), "org.spongepowered.vanilla.launch.IntegrationTestLaunch")
+    protected void launchSponge(final Module module, final String[] arguments) throws Exception {
+        Class.forName(module, "org.spongepowered.vanilla.launch.IntegrationTestLaunch")
                 .getMethod("launch", VanillaPluginPlatform.class, Boolean.class, String[].class)
                 .invoke(null, AppLaunch.pluginPlatform(), /* isServer = */ Boolean.FALSE, arguments);
     }

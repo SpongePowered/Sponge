@@ -1,0 +1,24 @@
+{
+    "loader": {
+        "name": "java_plain",
+        "version": "1.0"
+    },
+    "license": "Mojang Studios, All Rights Reserved",
+    "plugins": [
+        {
+            "id": "minecraft",
+            "name": "Minecraft",
+            "version": "{{ minecraftVersion }}",
+            "entrypoint": "org.spongepowered.common.launcher.Launcher",
+            "links": {
+                "homepage": "https://www.minecraft.net"
+            },
+            "contributors": [
+                {
+                    "name": "Mojang Studios",
+                    "description": "Lead Developer"
+                }
+            ]
+        }
+    ]
+}

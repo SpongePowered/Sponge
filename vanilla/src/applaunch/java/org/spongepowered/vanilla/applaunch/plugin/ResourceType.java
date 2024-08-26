@@ -22,22 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.launch.plugin;
+package org.spongepowered.vanilla.applaunch.plugin;
 
-import org.spongepowered.api.Sponge;
-import org.spongepowered.plugin.PluginCandidate;
+import cpw.mods.jarhandling.SecureJar;
 import org.spongepowered.plugin.PluginResource;
-import org.spongepowered.plugin.builtin.StandardPluginContainer;
 
-public final class VanillaJavaPluginContainer extends StandardPluginContainer {
+import java.util.Locale;
 
-    public VanillaJavaPluginContainer(final PluginCandidate<? extends PluginResource> candidate) {
-        super(candidate);
+public enum ResourceType {
+    SERVICE, // service layer
+    LANGUAGE, // plugin layer
+    PLUGIN; // game layer
+
+    public static final String PROPERTY_NAME = "Resource-Type";
+
+    public static ResourceType of(final PluginResource resource) {
+        return ResourceType.fromName(resource.property(PROPERTY_NAME).orElse(null));
     }
 
-    @Override
-    protected void initializeInstance(final Object instance) {
-        super.initializeInstance(instance);
-        Sponge.eventManager().registerListeners(this, instance);
+    public static ResourceType of(final SecureJar jar) {
+        return ResourceType.fromName(jar.moduleDataProvider().getManifest().getMainAttributes().getValue(PROPERTY_NAME));
+    }
+
+    public static ResourceType fromName(final String name) {
+        return name == null ? ResourceType.PLUGIN : ResourceType.valueOf(name.toUpperCase(Locale.ROOT));
     }
 }

@@ -22,36 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.launch.plugin;
+package org.spongepowered.vanilla.applaunch;
 
-import org.spongepowered.plugin.Environment;
-import org.spongepowered.plugin.builtin.jvm.JVMPluginLanguageService;
-import org.spongepowered.plugin.metadata.Container;
-import org.spongepowered.plugin.metadata.builtin.MetadataParser;
+public enum AppLaunchTarget {
+    CLIENT_DEVELOPMENT("sponge_client_dev"),
+    CLIENT_PRODUCTION("sponge_client_prod"),
+    SERVER_DEVELOPMENT("sponge_server_dev"),
+    SERVER_PRODUCTION("sponge_server_prod"),
+    CLIENT_INTEGRATION_TEST("sponge_client_it"),
+    SERVER_INTEGRATION_TEST("sponge_server_it");
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+    private final String launchTarget;
 
-public final class JavaPluginLanguageService extends JVMPluginLanguageService {
-
-    private final static String NAME = "java_plain";
-
-    @Override
-    public String name() {
-        return JavaPluginLanguageService.NAME;
+    AppLaunchTarget(final String launchTarget) {
+        this.launchTarget = launchTarget;
     }
 
-    @Override
-    public String pluginLoader() {
-        return "org.spongepowered.vanilla.launch.plugin.JavaPluginLoader";
+    public String getLaunchTarget() {
+        return this.launchTarget;
     }
 
-    @Override
-    public Container loadMetadataContainer(final Environment environment, final InputStream stream) throws Exception {
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
-        return MetadataParser.read(reader, MetadataParser.gsonBuilder().create());
+    public static AppLaunchTarget from(final String launchTarget) {
+        return switch (launchTarget) {
+            case "sponge_client_dev" -> AppLaunchTarget.CLIENT_DEVELOPMENT;
+            case "sponge_client_prod" -> AppLaunchTarget.CLIENT_PRODUCTION;
+            case "sponge_server_dev" -> AppLaunchTarget.SERVER_DEVELOPMENT;
+            case "sponge_server_prod" -> AppLaunchTarget.SERVER_PRODUCTION;
+            case "sponge_client_it" -> AppLaunchTarget.CLIENT_INTEGRATION_TEST;
+            case "sponge_server_it" -> AppLaunchTarget.SERVER_INTEGRATION_TEST;
+            default -> null;
+        };
     }
-
 }

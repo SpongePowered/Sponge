@@ -38,15 +38,12 @@ import org.slf4j.Logger;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.plugin.PluginContainer;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -55,15 +52,13 @@ public final class PluginPackResources extends AbstractPackResources {
 
     private final PluginContainer container;
     private final PackMetadataSection metadata;
-    private final @Nullable Supplier<FileSystem> fileSystem;
-    private final File file;
+    private final @Nullable Path pluginRoot;
 
-    public PluginPackResources(final PackLocationInfo info, final PluginContainer container, final @Nullable Supplier<FileSystem> fileSystem) {
+    public PluginPackResources(final PackLocationInfo info, final PluginContainer container, final @Nullable Path pluginRoot) {
         super(info);
-        this.file = new File("sponge_plugin_pack");
         this.container = container;
         this.metadata = new PackMetadataSection(Component.literal("Plugin Resources"), 6, Optional.empty());
-        this.fileSystem = fileSystem;
+        this.pluginRoot = pluginRoot;
     }
 
     @Override
@@ -73,7 +68,7 @@ public final class PluginPackResources extends AbstractPackResources {
     }
 
     private IoSupplier<InputStream> getResource(final String rawPath) {
-        final Optional<URI> uri = this.container.locateResource(URI.create(rawPath));
+        final Optional<URI> uri = this.container.locateResource(rawPath);
         if (uri.isEmpty()) {
             return null;
         }
@@ -153,10 +148,10 @@ public final class PluginPackResources extends AbstractPackResources {
     }
 
     private @Nullable Path typeRoot(final PackType type) throws IOException {
-        if (this.fileSystem == null) {
+        if (this.pluginRoot == null) {
             return null;
         }
-        return this.fileSystem.get().getPath(type.getDirectory());
+        return this.pluginRoot.resolve(type.getDirectory());
     }
 
 }

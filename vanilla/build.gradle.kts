@@ -22,10 +22,11 @@ version = spongeImpl.generatePlatformBuildVersionString(apiVersion, minecraftVer
 
 // SpongeVanilla libraries
 val installerLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeInstallerLibraries")
-val bootstrapLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeBootstrapModules") // JVM initial classpath
-val launcherLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeLauncherLibraries") // ModLauncher boot
-val serviceLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeServiceLibraries")
-val gameLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeGameLibraries")
+val initLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeInitLibraries") // JVM initial classpath
+val bootLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeBootLibraries")
+val gameLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeGameLibraries") {
+    extendsFrom(configurations.minecraft.get())
+}
 
 val gameManagedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeGameManagedLibraries")
 
@@ -35,21 +36,12 @@ val runTaskOnlyConfig: NamedDomainObjectProvider<Configuration> = configurations
 
 // ModLauncher layers
 val bootLayerConfig: NamedDomainObjectProvider<Configuration> = configurations.register("bootLayer") {
-    extendsFrom(bootstrapLibrariesConfig.get())
-    extendsFrom(launcherLibrariesConfig.get())
-}
-val serviceLayerConfig: NamedDomainObjectProvider<Configuration> = configurations.register("serviceLayer") {
-    extendsFrom(bootLayerConfig.get())
-    extendsFrom(serviceLibrariesConfig.get())
-}
-val langLayerConfig: NamedDomainObjectProvider<Configuration> = configurations.register("langLayer") {
-    extendsFrom(bootLayerConfig.get())
+    extendsFrom(initLibrariesConfig.get())
+    extendsFrom(bootLibrariesConfig.get())
 }
 val gameLayerConfig: NamedDomainObjectProvider<Configuration> = configurations.register("gameLayer") {
-    extendsFrom(serviceLayerConfig.get())
-    extendsFrom(langLayerConfig.get())
+    extendsFrom(bootLayerConfig.get())
     extendsFrom(gameLibrariesConfig.get())
-    extendsFrom(configurations.minecraft.get())
 }
 
 // SpongeCommon source sets
@@ -113,7 +105,7 @@ val vanillaMixins by sourceSets.register("mixins") {
 }
 val vanillaLang by sourceSets.register("lang") {
     configurations.named(implementationConfigurationName) {
-        extendsFrom(langLayerConfig.get())
+        extendsFrom(bootLayerConfig.get())
     }
 }
 val vanillaAppLaunch by sourceSets.register("applaunch") {
@@ -122,7 +114,7 @@ val vanillaAppLaunch by sourceSets.register("applaunch") {
     spongeImpl.applyNamedDependencyOnOutput(project, this, vanillaLaunch, project, vanillaLaunch.implementationConfigurationName)
 
     configurations.named(implementationConfigurationName) {
-        extendsFrom(serviceLayerConfig.get())
+        extendsFrom(bootLayerConfig.get())
     }
 }
 
@@ -189,13 +181,28 @@ minecraft {
                 )
 
                 // Merge applaunch sourcesets in a single module
-                val applaunchOutputs = arrayOf(applaunch.get().output, vanillaAppLaunch.output)
-                val applaunchDirs: MutableList<File> = mutableListOf()
-                applaunchOutputs.forEach {
-                    applaunchDirs.add(it.resourcesDir!!)
-                    applaunchDirs.addAll(it.classesDirs)
+                val applaunchOutputs = files(applaunch.get().output, vanillaAppLaunch.output)
+                dependsOn(applaunchOutputs)
+                environment("MOD_CLASSES", applaunchOutputs.joinToString(";") { "applaunch%%$it" })
+
+                // Configure GAME and LANG resources
+                val resources = mutableListOf<FileCollection>()
+                resources.addAll(gameManagedLibrariesConfig.get().files.map { files(it) })
+
+                resources.add(files(
+                    main.get().output, vanillaMain.output,
+                    mixins.get().output, vanillaMixins.output,
+                    accessors.get().output, vanillaAccessors.output,
+                    launch.get().output, vanillaLaunch.output,
+                    gameShadedLibrariesConfig.get()
+                ))
+
+                testPluginsProject?.also {
+                    //resources.add(it.sourceSets.getByName("main").output)
                 }
-                environment("MOD_CLASSES", applaunchDirs.joinToString(";") { "applaunch%%$it" })
+
+                dependsOn(resources)
+                environment("SPONGE_PLUGINS", resources.joinToString(";") { it.joinToString("&") })
             }
         }
     }
@@ -249,56 +256,59 @@ dependencies {
         isTransitive = false
     }
 
-    val bootstrap = bootstrapLibrariesConfig.name
-    bootstrap(libs.bootstrap)
-    bootstrap(libs.securemodules)
-    bootstrap(libs.asm.commons)
-    bootstrap(libs.asm.util)
+    val init = initLibrariesConfig.name
+    init(libs.bootstrap)
+    init(libs.securemodules)
+    init(libs.asm.commons)
+    init(libs.asm.util)
 
-    val launcher = launcherLibrariesConfig.name
-    launcher(libs.modlauncher) {
+    val boot = bootLibrariesConfig.name
+    boot(libs.modlauncher) {
         exclude(group = "org.apache.logging.log4j")
     }
-    launcher(apiLibs.pluginSpi) {
+    boot(apiLibs.pluginSpi) {
         exclude(group = "org.checkerframework", module = "checker-qual")
-        exclude(group = "com.google.code.gson", module = "gson")
+        // exclude(group = "com.google.code.gson", module = "gson")
         exclude(group = "org.apache.logging.log4j", module = "log4j-api")
-        exclude(group = "org.apache.commons", module = "commons-lang3")
+        // exclude(group = "org.apache.commons", module = "commons-lang3")
     }
-    launcher(libs.lmaxDisruptor)
-    launcher(apiLibs.checkerQual)
+    boot(libs.lmaxDisruptor)
+    boot(apiLibs.checkerQual)
 
-    launcher(libs.terminalConsoleAppender) {
+    boot(libs.terminalConsoleAppender) {
         exclude(group = "org.jline", module = "jline-reader")
         exclude(group = "org.apache.logging.log4j", module = "log4j-core")
     }
-    launcher(libs.jline.terminal)
-    launcher(libs.jline.reader)
-    launcher(libs.jline.terminalJansi)
+    boot(libs.jline.terminal)
+    boot(libs.jline.reader)
+    boot(libs.jline.terminalJansi)
 
-    launcher(libs.log4j.jpl)
-    launcher(libs.log4j.api)
-    launcher(libs.log4j.core)
-    launcher(libs.log4j.slf4j2)
+    boot(libs.log4j.jpl)
+    boot(libs.log4j.api)
+    boot(libs.log4j.core)
+    boot(libs.log4j.slf4j2)
 
-    launcher(platform(apiLibs.configurate.bom))
-    launcher(apiLibs.configurate.core) {
+    boot(platform(apiLibs.configurate.bom))
+    boot(apiLibs.configurate.core) {
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
-    launcher(apiLibs.configurate.hocon) {
+    boot(apiLibs.configurate.hocon) {
         exclude(group = "org.spongepowered", module = "configurate-core")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
 
-    launcher(libs.mixin)
-    launcher(libs.asm.tree)
-    launcher(libs.guava) {
+    boot(libs.mixin)
+    boot(libs.asm.tree)
+    boot(libs.guava) {
         exclude(group = "com.google.errorprone", module = "error_prone_annotations")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
 
-    val service = serviceLibrariesConfig.name
-    service(project(transformersProject.path))
+    boot("com.mojang:authlib:6.0.54") {
+        exclude(group = "com.google.guava", module = "guava")
+    }
+
+    boot(project(transformersProject.path))
 
     val game = gameLibrariesConfig.name
     game("org.spongepowered:spongeapi:$apiVersion")
@@ -318,7 +328,12 @@ dependencies {
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
 
-    // TODO list shaded / managed libraries
+    val gameShadedLibraries = gameShadedLibrariesConfig.name
+    gameShadedLibraries("org.spongepowered:spongeapi:$apiVersion") { isTransitive = false }
+
+    afterEvaluate {
+        spongeImpl.copyModulesExcludingProvided(gameLibrariesConfig.get(), bootLayerConfig.get(), gameManagedLibrariesConfig.get())
+    }
 
     val runTaskOnly = runTaskOnlyConfig.name
     // Allow boot layer manipulation such as merging applaunch sourcesets
@@ -339,6 +354,11 @@ val vanillaManifest = java.manifest {
     System.getenv()["GIT_BRANCH"]?.apply { attributes("Git-Branch" to this) }
 }
 
+vanillaAppLaunch.apply {
+    blossom.resources {
+        property("minecraftVersion", minecraftVersion)
+    }
+}
 vanillaLaunch.apply {
     blossom.resources {
         property("apiVersion", apiVersion)
@@ -402,7 +422,7 @@ tasks {
 
     val emitDependencies by registering(org.spongepowered.gradle.impl.OutputDependenciesToJson::class) {
         group = "sponge"
-        this.dependencies("bootstrap", launcherLibrariesConfig)
+        this.dependencies("bootstrap", bootLibrariesConfig)
         this.dependencies("main", gameManagedLibrariesConfig)
         this.excludedDependencies(gameShadedLibrariesConfig)
 
