@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.item.recipe.ingredient;
 
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -34,6 +37,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.Arrays;
@@ -58,7 +62,8 @@ public class IngredientUtil {
 
     public static org.spongepowered.api.item.recipe.crafting.@Nullable Ingredient of(ResourceKey tagKey) {
         final TagKey<Item> key = TagKey.create(Registries.ITEM, (ResourceLocation) (Object) tagKey);
-        return IngredientUtil.fromNative(Ingredient.of(key));
+        var holderset = BuiltInRegistries.ITEM.getTag(key).map(hs -> (HolderSet<Item>) hs).orElse(HolderSet.empty());
+        return IngredientUtil.fromNative(Ingredient.of(holderset));
     }
 
     private static net.minecraft.world.item.ItemStack[] toNativeStacks(ItemStack[] stacks) {
