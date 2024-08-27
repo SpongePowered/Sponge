@@ -41,6 +41,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.MoverType;
@@ -300,7 +301,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         this.bridge$revive();
         level.addDuringTeleport((Entity) (Object) this);
          */
-        var entity = this.shadow$getType().create(level);
+        var entity = this.shadow$getType().create(level, EntitySpawnReason.DIMENSION_TRAVEL);
         if (entity == null) {
             return false;
         }
@@ -515,7 +516,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
         oldLevel.getProfiler().push("changeDimension");
 
-        var newEntity = oldLevel.dimension() == newLevel.dimension() ? thisEntity : thisEntity.getType().create(newLevel);
+        var newEntity = oldLevel.dimension() == newLevel.dimension() ? thisEntity : thisEntity.getType().create(newLevel, EntitySpawnReason.DIMENSION_TRAVEL);
         if (newEntity != null) {
             if (thisEntity != newEntity) {
                 newEntity.restoreFrom(thisEntity);
