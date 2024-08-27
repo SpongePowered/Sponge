@@ -34,6 +34,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.decoration.ArmorStand;
@@ -41,7 +42,9 @@ import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.ThrownEnderpearl;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
@@ -195,7 +198,7 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
         final net.minecraft.world.level.Level thisWorld = (net.minecraft.world.level.Level) (Object) this;
         // Not all entities have a single World parameter as their constructor
         if (type == net.minecraft.world.entity.EntityType.LIGHTNING_BOLT) {
-            entity = net.minecraft.world.entity.EntityType.LIGHTNING_BOLT.create(thisWorld);
+            entity = net.minecraft.world.entity.EntityType.LIGHTNING_BOLT.create(thisWorld, EntitySpawnReason.EVENT);
             entity.moveTo(x, y, z);
             ((LightningBolt) entity).setVisualOnly(false);
         }
@@ -203,7 +206,7 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
         if (type == net.minecraft.world.entity.EntityType.ENDER_PEARL) {
             final ArmorStand tempEntity = new ArmorStand(thisWorld, x, y, z);
             tempEntity.setPos(tempEntity.getX(), tempEntity.getY() - tempEntity.getEyeHeight(), tempEntity.getZ());
-            entity = new ThrownEnderpearl(thisWorld, tempEntity);
+            entity = new ThrownEnderpearl(thisWorld, tempEntity, Items.ENDER_PEARL.getDefaultInstance());
             ((EnderPearl) entity).offer(Keys.SHOOTER, UnknownProjectileSource.UNKNOWN);
         }
         // Some entities need to have non-null fields (and the easiest way to
@@ -218,7 +221,7 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
         if (entity == null) {
             final ResourceKey key = (ResourceKey) (Object) SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE).getKey((net.minecraft.world.entity.EntityType<?>) type);
             try {
-                entity = ((net.minecraft.world.entity.EntityType) type).create(thisWorld);
+                entity = ((net.minecraft.world.entity.EntityType) type).create(thisWorld, EntitySpawnReason.EVENT);
                 entity.moveTo(x, y, z);
             } catch (final Exception e) {
                 throw new RuntimeException("There was an issue attempting to construct " + key, e);
