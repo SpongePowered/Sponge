@@ -31,7 +31,6 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundExplodePacket;
-import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.sounds.SoundEvent;
@@ -417,19 +416,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;send(Lnet/minecraft/network/protocol/Packet;)V"))
     private void tracker$onClientboundExplodePacket(final ServerGamePacketListenerImpl instance, final Packet packet) {
         final var originalPacket = (ClientboundExplodePacket) packet;
-        var particle = originalPacket.explosionParticle();
-        var sound = originalPacket.explosionSound();
-        if (this.tracker$apiExplosion.shouldPlaySmoke()) {
-            // TODO no sound?
-            // TODO control which particle is used (API)
-            // TODO control sound? (ViewerPacketUtil.resolveEvent)
-            var newPacket = new ClientboundExplodePacket(originalPacket.center(), originalPacket.playerKnockback(), particle, sound);
-            instance.send(newPacket);
-        }
-        else {
-            originalPacket.playerKnockback().ifPresent(kb -> instance.send(new ClientboundSetEntityMotionPacket(instance.player.getId(), kb)));
-            // TODO play sound?
-        }
+        ((ServerLevelBridge) this).bridge$handleExplosionPacket(instance, this.tracker$apiExplosion, originalPacket);
     }
 
     @Inject(method = "explode", at = @At(value = "RETURN"))

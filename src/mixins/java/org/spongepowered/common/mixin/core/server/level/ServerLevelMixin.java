@@ -27,14 +27,21 @@ package org.spongepowered.common.mixin.core.server.level;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundExplodePacket;
+import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.bossevents.CustomBossEvents;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.server.level.progress.ChunkProgressListener;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.ProgressListener;
 import net.minecraft.world.RandomSequences;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
@@ -43,6 +50,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerExplosion;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
@@ -137,6 +145,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
     @Shadow public abstract void levelEvent(@Nullable Player $$0, int $$1, BlockPos $$2, int $$3);
     @Shadow @Nullable private EndDragonFight dragonFight;
+    @Shadow @Final private List<ServerPlayer> players;
 
     // @formatter:on
 
@@ -229,40 +238,54 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
     @Override
     public void bridge$triggerExplosion(Explosion explosion) {
-        // Sponge start
         // Set up the pre event
         if (ShouldFire.EXPLOSION_EVENT_PRE) {
-            final ExplosionEvent.Pre
-                    event =
-                    SpongeEventFactory.createExplosionEventPre(PhaseTracker.getCauseStackManager().currentCause(),
-                            explosion, (org.spongepowered.api.world.server.ServerWorld) this);
+            final var cause = PhaseTracker.getCauseStackManager().currentCause();
+            final ExplosionEvent.Pre event = SpongeEventFactory.createExplosionEventPre(cause, explosion, (ServerWorld) this);
             if (SpongeCommon.post(event)) {
                 return;
             }
             explosion = event.explosion();
         }
 
-        final net.minecraft.world.level.Explosion mcExplosion = (net.minecraft.world.level.Explosion) explosion;
+        final ServerExplosion mcExplosion = (ServerExplosion) explosion;
 
         try (final PhaseContext<?> ignored = GeneralPhase.State.EXPLOSION.createPhaseContext(PhaseTracker.SERVER)
                 .explosion((net.minecraft.world.level.Explosion) explosion)
                 .source(explosion.sourceExplosive().isPresent() ? explosion.sourceExplosive() : this)) {
             ignored.buildAndSwitch();
-            final boolean shouldBreakBlocks = explosion.shouldBreakBlocks();
-            // Sponge End
 
             mcExplosion.explode();
-            mcExplosion.finalizeExplosion(explosion.shouldPlaySmoke());
 
-            if (!shouldBreakBlocks) {
-                mcExplosion.clearToBlow();
+            // see ServerLevel#explode/Level#explode
+            ParticleOptions particle = mcExplosion.isSmall() ? ParticleTypes.EXPLOSION : ParticleTypes.EXPLOSION_EMITTER;
+            var sound = SoundEvents.GENERIC_EXPLODE;
+            for (ServerPlayer player : this.players) {
+                if (player.distanceToSqr(mcExplosion.center()) < 4096.0) {
+                    Optional<Vec3> kb = Optional.ofNullable(mcExplosion.getHitPlayers().get(player));
+                    final var packet = new ClientboundExplodePacket(mcExplosion.center(), kb, particle, sound);
+                    this.bridge$handleExplosionPacket(player.connection, explosion, packet);
+                    player.connection.send(packet);
+                }
             }
-
-            // Sponge Start - end processing
         }
-        // Sponge End
     }
 
+    @Override
+    public void bridge$handleExplosionPacket(final ServerGamePacketListenerImpl instance, Explosion apiExplosion,
+        final ClientboundExplodePacket packet) {
+        if (apiExplosion.shouldPlaySmoke()) {
+            // TODO no sound?
+            // TODO control which particle is used (API)
+            // TODO control sound? (ViewerPacketUtil.resolveEvent)
+            var newPacket = new ClientboundExplodePacket(packet.center(), packet.playerKnockback(), packet.explosionParticle(), packet.explosionSound());
+            instance.send(newPacket);
+        }
+        else {
+            packet.playerKnockback().ifPresent(kb -> instance.send(new ClientboundSetEntityMotionPacket(instance.player.getId(), kb)));
+            // TODO play sound?
+        }
+    }
     @Override
     public void bridge$setManualSave(final boolean state) {
         this.impl$isManualSave = state;
