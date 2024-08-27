@@ -28,9 +28,11 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.projectile.explosive.FireworkRocket;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -40,7 +42,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 
@@ -106,8 +107,13 @@ public abstract class FireworkRocketEntityMixin extends ProjectileMixin implemen
                 .sourceExplosive(((FireworkRocket) this))
                 .location(((FireworkRocket) this).serverLocation())
                 .radius(this.impl$explosionRadius);
-            SpongeCommonEventFactory.detonateExplosive(this, explosionBuilder)
-                .ifPresent(explosion -> world.broadcastEntityEvent(self, state));
+
+            final var detonateEvent = SpongeEventFactory.createDetonateExplosiveEvent(PhaseTracker.getCauseStackManager().currentCause(),
+                explosionBuilder, (FireworkRocket) this, explosionBuilder.build());
+            if (Sponge.eventManager().post(detonateEvent)) {
+                return;
+            }
+            world.broadcastEntityEvent(self, state);
         }
     }
 

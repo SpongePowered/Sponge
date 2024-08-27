@@ -193,6 +193,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     @Shadow public abstract Level level();
 
+    @Shadow public abstract boolean startRiding(final Entity $$0);
+
     private boolean impl$isConstructing = true;
     private VanishState impl$vanishState = VanishState.unvanished();
     protected boolean impl$transient = false;
