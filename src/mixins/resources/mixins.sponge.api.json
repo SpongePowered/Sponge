@@ -116,7 +116,6 @@
         "minecraft.world.entity.OwnableEntityMixin_API",
         "minecraft.world.entity.PathfinderMobMixin_API",
         "minecraft.world.entity.PortalProcessorMixin_API",
-        "minecraft.world.entity.PowerableMobMixin_API",
         "minecraft.world.entity.SaddleableMixin_API",
         "minecraft.world.entity.TamableAnimalMixin_API",
         "minecraft.world.entity.TargetingMixin_API",
