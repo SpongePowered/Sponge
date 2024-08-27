@@ -723,7 +723,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     }
 
     @Redirect(
-            method = "move",
+            method = "applyEffectsFromBlocks",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/world/level/block/Block;stepOn(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/entity/Entity;)V"
