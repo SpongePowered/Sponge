@@ -85,6 +85,7 @@
         "impl.world.inventory.AbstractContainerMenuMixin_Bridge_Inventory",
         "impl.world.inventory.AbstractContainerMenuMixin_Fabric_Inventory",
         "impl.world.inventory.AbstractContainerMenuMixin_Menu_Inventory",
+        "impl.world.inventory.AbstractCraftingMenuMixin_TrackedMenuBridge_Inventory",
         "impl.world.inventory.AbstractFurnaceMenuMixin_TrackedMenuBridge_Inventory",
         "impl.world.inventory.BeaconMenuMixin_TrackedMenuBridge_Inventory",
         "impl.world.inventory.BrewingStandMenuMixin_TrackedMenuBridge_Inventory",

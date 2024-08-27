@@ -27,24 +27,15 @@ package org.spongepowered.common.mixin.inventory.impl.world.inventory;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.CraftingMenu;
-import net.minecraft.world.inventory.ResultContainer;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedMenuBridge;
 
 @Mixin(CraftingMenu.class)
-public abstract class CraftingMenuMixin_TrackedMenuBridge_Inventory {
-
-    // @formatter:off
-    @Shadow @Final private CraftingContainer craftSlots;
-    @Shadow @Final private ResultContainer resultSlots;
-    // @formatter:on
+public abstract class CraftingMenuMixin_TrackedMenuBridge_Inventory extends AbstractCraftingMenuMixin_TrackedMenuBridge_Inventory {
 
     @Inject(method = "<init>(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/inventory/ContainerLevelAccess;)V", at = @At("RETURN"))
     private void inventory$attachContainerMenu(final int $$0, final Inventory $$1, final ContainerLevelAccess $$2, final CallbackInfo ci) {
