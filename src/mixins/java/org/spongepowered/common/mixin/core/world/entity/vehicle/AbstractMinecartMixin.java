@@ -88,15 +88,6 @@ public abstract class AbstractMinecartMixin extends VehicleEntityMixin implement
         return vec3d.multiply(this.impl$airborneMod.x(), this.impl$airborneMod.y(), this.impl$airborneMod.z());
     }
 
-    @Redirect(method = "applyNaturalSlowdown",
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/vehicle/AbstractMinecart;isVehicle()Z"
-        )
-    )
-    private boolean impl$applyDragIfEmpty(final AbstractMinecart self) {
-        return !this.impl$slowWhenEmpty || this.shadow$isVehicle();
-    }
-
     @Override
     public double bridge$getMaxSpeed() {
         return this.impl$maxSpeed;
