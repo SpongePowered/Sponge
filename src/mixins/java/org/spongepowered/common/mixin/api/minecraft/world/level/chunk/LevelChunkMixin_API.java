@@ -377,7 +377,7 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
     public Vector3i min() {
         if (this.api$blockMin == null) {
             if (this.api$chunkLayout == null) {
-                this.api$chunkLayout = new SpongeChunkLayout(this.level.getMinBuildHeight(), this.level.getHeight());
+                this.api$chunkLayout = new SpongeChunkLayout(this.level.getMinY(), this.level.getHeight());
             }
             this.api$blockMin = this.api$chunkLayout.forceToWorld(this.chunkPosition());
         }
@@ -388,7 +388,7 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
     public Vector3i max() {
         if (this.api$blockMax == null) {
             if (this.api$chunkLayout == null) {
-                this.api$chunkLayout = new SpongeChunkLayout(this.level.getMinBuildHeight(), this.level.getHeight());
+                this.api$chunkLayout = new SpongeChunkLayout(this.level.getMinY(), this.level.getHeight());
             }
             this.api$blockMax = this.min().add(this.api$chunkLayout.chunkSize()).sub(1, 1, 1);
         }
@@ -398,7 +398,7 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
     @Override
     public Vector3i size() {
         if (this.api$chunkLayout == null) {
-            this.api$chunkLayout = new SpongeChunkLayout(this.level.getMinBuildHeight(), this.level.getHeight());
+            this.api$chunkLayout = new SpongeChunkLayout(this.level.getMinY(), this.level.getHeight());
         }
         return this.api$chunkLayout.chunkSize();
     }

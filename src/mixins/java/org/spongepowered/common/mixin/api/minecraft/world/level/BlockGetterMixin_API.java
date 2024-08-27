@@ -71,7 +71,7 @@ public interface BlockGetterMixin_API extends PrimitiveGameVolume {
 
     @Override
     default int height() {
-        return ((LevelHeightAccessor) this).getMaxBuildHeight();
+        return ((LevelHeightAccessor) this).getHeight();
     }
 
     @Override

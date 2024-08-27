@@ -70,7 +70,7 @@ public abstract class ClientLevelMixin_API extends LevelMixin_API<ClientWorld, C
     public ChunkLayout chunkLayout() {
         if (this.api$chunkLayout == null) {
             final var height = ((ClientLevel) (Object) this).getHeight();
-            final var min = ((ClientLevel) (Object) this).getMinBuildHeight();
+            final var min = ((ClientLevel) (Object) this).getMinY();
             this.api$chunkLayout = new SpongeChunkLayout(min, height);
         }
         return this.api$chunkLayout;
