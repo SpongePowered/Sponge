@@ -336,11 +336,11 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
         final Difficulty difficulty = ((LevelData) this).getDifficulty();
 
         if (difficulty == Difficulty.HARD) {
-            world.setSpawnSettings(true, true);
+            world.setSpawnSettings(true); // set spawn enemies true
         } else if (server.isSingleplayer()) {
-            world.setSpawnSettings(difficulty != Difficulty.PEACEFUL, true);
+            world.setSpawnSettings(difficulty != Difficulty.PEACEFUL);
         } else {
-            world.setSpawnSettings(((MinecraftServerAccessor) server).invoker$isSpawningMonsters(), server.isSpawningAnimals());
+            world.setSpawnSettings(((MinecraftServerAccessor) server).invoker$isSpawningMonsters());
         }
 
         world.players().forEach(player -> player.connection.send(new ClientboundChangeDifficultyPacket(difficulty, isLocked)));
