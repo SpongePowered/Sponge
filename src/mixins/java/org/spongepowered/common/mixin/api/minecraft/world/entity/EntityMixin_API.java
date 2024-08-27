@@ -35,6 +35,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -300,10 +301,11 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
             final CompoundTag compound = new CompoundTag();
             compound.putString("id", entityTypeRegistry.getKey((net.minecraft.world.entity.EntityType<?>) this.type()).toString());
             this.shadow$saveWithoutId(compound);
-            final Entity entity = net.minecraft.world.entity.EntityType.loadEntityRecursive(compound, this.shadow$getCommandSenderWorld(), (createdEntity) -> {
-                createdEntity.setUUID(UUID.randomUUID());
-                return createdEntity;
-            });
+            final Entity entity = net.minecraft.world.entity.EntityType.loadEntityRecursive(compound, this.shadow$getCommandSenderWorld(), EntitySpawnReason.COMMAND,
+                (createdEntity) -> {
+                    createdEntity.setUUID(UUID.randomUUID());
+                    return createdEntity;
+                });
             return (org.spongepowered.api.entity.Entity) entity;
         } catch (final Exception e) {
             throw new IllegalArgumentException("Could not copy the entity:", e);
