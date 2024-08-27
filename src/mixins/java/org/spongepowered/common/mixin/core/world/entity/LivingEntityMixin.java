@@ -376,7 +376,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Inject(method = "completeUsingItem",
         cancellable = true,
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/LivingEntity;triggerItemUseEffects(Lnet/minecraft/world/item/ItemStack;I)V"))
+            target = "Lnet/minecraft/world/item/ItemStack;finishUsingItem(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/LivingEntity;)Lnet/minecraft/world/item/ItemStack;"))
     private void impl$onUpdateItemUse(final CallbackInfo ci) {
         if (this.shadow$level().isClientSide) {
             return;
