@@ -44,6 +44,7 @@ import net.minecraft.world.item.crafting.SmokingRecipe;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.world.item.crafting.CookingRecipeBridge;
 import org.spongepowered.common.bridge.world.item.crafting.RecipeResultBridge;
 import org.spongepowered.common.item.recipe.ResultFunctionRecipe;
 import org.spongepowered.common.item.recipe.cooking.CookingRecipeFactory;
@@ -125,7 +126,7 @@ public abstract class SimpleCookingSerializerMixin<T extends AbstractCookingReci
                                Codec.STRING.fieldOf(SPONGE_TYPE).forGetter(a -> "custom"),
                                Codec.STRING.optionalFieldOf("group", "").forGetter(AbstractCookingRecipe::getGroup),
                                CookingBookCategory.CODEC.fieldOf("category").orElse(CookingBookCategory.MISC).forGetter(AbstractCookingRecipe::category),
-                               Ingredient.CODEC_NONEMPTY.fieldOf(Constants.Recipe.COOKING_INGREDIENT).forGetter($$0x -> $$0x.getIngredients().get(0)),
+                               Ingredient.CODEC.fieldOf(Constants.Recipe.COOKING_INGREDIENT).forGetter($$0x -> ((CookingRecipeBridge) $$0x).bridge$ingredient()),
                                BuiltInRegistries.ITEM.byNameCodec().xmap(ItemStack::new, ItemStack::getItem).fieldOf(Constants.Recipe.RESULT).forGetter($$0x -> ((RecipeResultBridge)$$0x).bridge$result()),
                                Codec.FLOAT.fieldOf(Constants.Recipe.COOKING_EXP).orElse(0.0F).forGetter(AbstractCookingRecipe::getExperience),
                                Codec.INT.fieldOf(Constants.Recipe.COOKING_TIME).orElse(defaultCookingTime).forGetter(AbstractCookingRecipe::getCookingTime),
