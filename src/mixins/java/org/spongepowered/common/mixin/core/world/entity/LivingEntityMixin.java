@@ -191,14 +191,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         }
     }
 
-    @Redirect(method = "triggerItemUseEffects",
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/LivingEntity;spawnItemParticles(Lnet/minecraft/world/item/ItemStack;I)V"))
-    private void impl$hideItemParticlesIfVanished(final LivingEntity livingEntity, final ItemStack stack, final int count) {
-        if (this.bridge$vanishState().createsParticles()) {
-            this.shadow$spawnItemParticles(stack, count);
-        }
-    }
+
 
     @Inject(method = "randomTeleport", at = @At("HEAD"))
     private void impl$snapshotPositionBeforeVanillaTeleportLogic(final double x, final double y, final double z, final boolean changeState,
@@ -247,23 +240,6 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         if (this.bridge$vanishState().ignoresCollisions()) {
             cir.setReturnValue(false);
         }
-    }
-
-    @Redirect(
-        method = "eat(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/food/FoodProperties;)Lnet/minecraft/world/item/ItemStack;",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/level/Level;playSound(Lnet/minecraft/world/entity/player/Player;DDDLnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FF)V"
-        )
-    )
-    private void impl$ignoreExperienceLevelSoundsWhileVanished(final net.minecraft.world.level.Level world,
-        final net.minecraft.world.entity.player.Player player, final double x, final double y, final double z,
-        final SoundEvent sound, final SoundSource category, final float volume, final float pitch
-    ) {
-        if (!this.bridge$vanishState().createsSounds()) {
-            return;
-        }
-        world.playSound(player, x, y, z, sound, category, volume, pitch);
     }
 
     @Redirect(method = "checkFallDamage",
