@@ -59,6 +59,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.FireworkExplosion;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
@@ -218,6 +219,7 @@ public final class VanillaRegistryLoader {
         this.automaticName(RegistryTypes.PUSH_REACTION, PushReaction.values());
         this.automaticName(RegistryTypes.TRIAL_SPAWNER_STATE, TrialSpawnerState.values());
         this.automaticName(RegistryTypes.VAULT_STATE, VaultState.values());
+        this.automaticName(RegistryTypes.EXPLOSION_BLOCK_INTERACTION, Explosion.BlockInteraction.values());
     }
 
     private static RegistryLoader<Criterion> criterion() {

@@ -67,6 +67,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.FireworkExplosion;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.block.entity.trialspawner.TrialSpawnerState;
@@ -377,6 +378,13 @@ public final class GeneratorMain {
                  TropicalFish.Pattern.class,
                  "getSerializedName",
                  "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                "world.explosion",
+                "BlockInteractions",
+                Explosion.BlockInteraction.class,
+                "name",
+                "sponge"
             ),
             new RegistryEntriesGenerator<>(
                 "data.type",

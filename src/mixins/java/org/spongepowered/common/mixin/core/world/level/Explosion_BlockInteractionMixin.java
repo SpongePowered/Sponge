@@ -22,32 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.level;
+package org.spongepowered.common.mixin.core.world.level;
 
-import org.spongepowered.api.world.explosion.Explosion;
+import net.minecraft.world.level.Explosion;
+import org.spongepowered.api.world.explosion.ExplosionBlockInteraction;
+import org.spongepowered.asm.mixin.Mixin;
 
-public interface ExplosionBridge {
-
-
-
-    boolean bridge$getShouldPlaySmoke();
-
-    void bridge$setShouldPlaySmoke(boolean shouldPlaySmoke);
-
-    boolean bridge$getShouldDamageEntities();
-
-    void bridge$setShouldDamageEntities(boolean shouldDamageEntities);
-
-    void bridge$setResolution(int resolution);
-
-    int bridge$getResolution();
-
-    void bridge$setRandomness(float randomness);
-
-    float bridge$getRandomness();
-
-    void bridge$setKnockback(double knockback);
-
-    double bridge$getKnockback();
+@Mixin(Explosion.BlockInteraction.class)
+public interface Explosion_BlockInteractionMixin extends ExplosionBlockInteraction {
 
 }

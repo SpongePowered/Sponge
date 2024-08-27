@@ -89,7 +89,10 @@ public abstract class ServerExplosionMixin_API implements Explosion {
 
     @Override
     public boolean shouldBreakBlocks() {
-        return ((ExplosionBridge) this).bridge$getShouldDamageBlocks();
+        return switch (this.blockInteraction) {
+            case KEEP, TRIGGER_BLOCK -> false;
+            case DESTROY, DESTROY_WITH_DECAY -> true;
+        };
     }
 
     @Override

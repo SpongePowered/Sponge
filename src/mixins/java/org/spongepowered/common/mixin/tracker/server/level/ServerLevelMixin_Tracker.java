@@ -26,17 +26,22 @@ package org.spongepowered.common.mixin.tracker.server.level;
 
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundExplodePacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockEventData;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.ExplosionDamageCalculator;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerExplosion;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
@@ -60,11 +65,8 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -77,7 +79,6 @@ import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.entity.GrieferBridge;
-import org.spongepowered.common.bridge.world.level.ExplosionBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge;
 import org.spongepowered.common.bridge.world.level.block.state.BlockStateBridge;
@@ -122,18 +123,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 @Mixin(ServerLevel.class)
 public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implements TrackedWorldBridge {
 
-    // @formatting:off
-    @Shadow @Final List<ServerPlayer> players;
-    // @formatting:on
-
-    @Shadow public abstract boolean isFlat();
-
-    @Shadow public abstract void resetEmptyTime();
 
     @Redirect(
             // This normally would target this.entityTickList.forEach((var2x) ->
@@ -358,6 +351,8 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         return new ServerExplosion($$0, entity, $$2, $$3, $$4, finalRadius, $$6, cannotGrief ? Explosion.BlockInteraction.KEEP : blockInteraction);
     }
 
+    private org.spongepowered.api.world.explosion.Explosion tracker$apiExplosion;
+
     @Redirect(method = "explode", at = @At(value = "INVOKE",
         target = "Lnet/minecraft/world/level/ServerExplosion;explode()V"))
     private void tracker$onExplode(final ServerExplosion instance) {
@@ -366,7 +361,8 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         // TODO entity can be null, what is our API explosive then?
         // TODO API explosive can be smth. that is not an entity?
         final var thisWorld = (ServerWorld) this;
-        final var explosionBuilder = ((ExplosionBridge)mcExplosion).bridge$asBuilder();
+
+        final var explosionBuilder = org.spongepowered.api.world.explosion.Explosion.builder().from((org.spongepowered.api.world.explosion.Explosion) mcExplosion);
 
         Explosive apiExplosive = (Explosive) entity;
         final var detonateEvent = SpongeEventFactory.createDetonateExplosiveEvent(PhaseTracker.getCauseStackManager().currentCause(),
@@ -411,9 +407,37 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
             mcExplosion.explode();
         }
 
-        // TODO handle sending (or not) ClientboundExplodePacket
-        // TODO particle/sound?
+        this.tracker$apiExplosion = apiExplosion;
+    }
 
+    /**
+     * See {@link net.minecraft.client.multiplayer.ClientPacketListener#handleExplosion} for client side handling
+     */
+    @Redirect(method = "explode", at = @At(value = "INVOKE",
+        target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;send(Lnet/minecraft/network/protocol/Packet;)V"))
+    private void tracker$onClientboundExplodePacket(final ServerGamePacketListenerImpl instance, final Packet packet) {
+        final var originalPacket = (ClientboundExplodePacket) packet;
+        var particle = originalPacket.explosionParticle();
+        var sound = originalPacket.explosionSound();
+        if (this.tracker$apiExplosion.shouldPlaySmoke()) {
+            // TODO no sound?
+            // TODO control which particle is used (API)
+            // TODO control sound? (ViewerPacketUtil.resolveEvent)
+            var newPacket = new ClientboundExplodePacket(originalPacket.center(), originalPacket.playerKnockback(), particle, sound);
+            instance.send(newPacket);
+        }
+        else {
+            originalPacket.playerKnockback().ifPresent(kb -> instance.send(new ClientboundSetEntityMotionPacket(instance.player.getId(), kb)));
+            // TODO play sound?
+        }
+    }
+
+    @Inject(method = "explode", at = @At(value = "RETURN"))
+    private void tracker$afterExplodeCleanup(final Entity $$0, final DamageSource $$1,
+        final ExplosionDamageCalculator $$2, final double $$3, final double $$4, final double $$5, final float $$6,
+        final boolean $$7, final Level.ExplosionInteraction $$8, final ParticleOptions $$9, final ParticleOptions $$10,
+        final Holder<SoundEvent> $$11, final CallbackInfo ci) {
+        this.tracker$apiExplosion = null;
     }
 
     private void tracker$cancelExplosionEffects(final Entity entity) {

@@ -26,15 +26,16 @@ package org.spongepowered.common.world;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Explosion.BlockInteraction;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.ServerExplosion;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.explosion.ExplosionBlockInteraction;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.bridge.world.level.ExplosionBridge;
 import org.spongepowered.common.util.Preconditions;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Objects;
@@ -45,12 +46,13 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
     @Nullable private Explosive sourceExplosive;
     private float radius;
     private boolean canCauseFire;
-    private boolean shouldBreakBlocks = true;
+    private net.minecraft.world.level.Explosion.BlockInteraction blockInteraction;
     private boolean shouldSmoke;
     private boolean shouldDamageEntities = true;
     private int resolution = 16;
     private float randomness = 1.0F;
     private double knockback = 1;
+
 
     public SpongeExplosionBuilder() {
         this.reset();
@@ -93,10 +95,11 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
     }
 
     @Override
-    public Explosion.Builder shouldBreakBlocks(boolean destroy) {
-        this.shouldBreakBlocks = destroy;
+    public Explosion.Builder blockInteraction(final ExplosionBlockInteraction interaction) {
+        this.blockInteraction = (net.minecraft.world.level.Explosion.BlockInteraction) (Object) interaction;
         return this;
     }
+
 
     @Override
     public Explosion.Builder resolution(int resolution) {
@@ -123,7 +126,7 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
         this.sourceExplosive = value.sourceExplosive().orElse(null);
         this.radius = value.radius();
         this.canCauseFire = value.canCauseFire();
-        this.shouldBreakBlocks = value.shouldBreakBlocks();
+        this.blockInteraction = ((ServerExplosion) value).getBlockInteraction();
         this.shouldSmoke = value.shouldPlaySmoke();
         this.shouldDamageEntities = value.shouldDamageEntities();
         this.resolution = value.resolution();
@@ -135,10 +138,10 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
     @Override
     public SpongeExplosionBuilder reset() {
         this.location = null;
+        this.blockInteraction = null;
         this.sourceExplosive = null;
         this.radius = 0;
         this.canCauseFire = false;
-        this.shouldBreakBlocks = true;
         this.shouldSmoke = false;
         this.shouldDamageEntities = true;
         this.resolution = 16;
@@ -154,10 +157,9 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
 
         final World<?, ?> world = this.location.world();
         final Vector3d origin = this.location.position();
-        final net.minecraft.world.level.Explosion explosion = new net.minecraft.world.level.ServerExplosion((ServerLevel) world,
-                (Entity) this.sourceExplosive, null, null, new Vec3(origin.x(), origin.y(), origin.z()), this.radius,
-                this.canCauseFire, this.shouldBreakBlocks ? BlockInteraction.DESTROY : BlockInteraction.KEEP);
-        ((ExplosionBridge) explosion).bridge$setShouldBreakBlocks(this.shouldBreakBlocks);
+        final var explosion = new net.minecraft.world.level.ServerExplosion((ServerLevel) world,
+                (Entity) this.sourceExplosive, null, null, VecHelper.toVanillaVector3d(origin), this.radius,
+                this.canCauseFire, this.blockInteraction);
         ((ExplosionBridge) explosion).bridge$setShouldDamageEntities(this.shouldDamageEntities);
         ((ExplosionBridge) explosion).bridge$setShouldPlaySmoke(this.shouldSmoke);
         ((ExplosionBridge) explosion).bridge$setResolution(this.resolution);
