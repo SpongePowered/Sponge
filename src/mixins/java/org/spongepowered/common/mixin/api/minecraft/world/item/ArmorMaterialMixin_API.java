@@ -24,30 +24,29 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.item;
 
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.data.type.ArmorMaterial;
-import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.item.util.ItemStackUtil;
 
-import java.util.Optional;
-import java.util.function.Supplier;
+import java.util.function.Predicate;
 
 @Mixin(net.minecraft.world.item.ArmorMaterial.class)
 @Implements(@Interface(iface = ArmorMaterial.class, prefix = "armorMaterial$"))
 public abstract class ArmorMaterialMixin_API implements ArmorMaterial {
 
     // @formatter:off
-    @Shadow @Final private Supplier<net.minecraft.world.item.crafting.Ingredient> repairIngredient;
+    @Shadow @Final private Predicate<ItemStack> repairIngredient;
 
     // @formatter:on
 
     @Override
-    public Optional<Ingredient> repairIngredient() {
-        final net.minecraft.world.item.crafting.Ingredient repairMaterial = this.repairIngredient.get();
-        return Optional.ofNullable(((Ingredient) (Object) repairMaterial));
+    public Predicate<org.spongepowered.api.item.inventory.ItemStack> repairIngredient() {
+        return (spongeStack) -> this.repairIngredient.test(ItemStackUtil.toNative(spongeStack));
     }
 
 }
