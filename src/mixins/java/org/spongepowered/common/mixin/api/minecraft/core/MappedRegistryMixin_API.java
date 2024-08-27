@@ -73,7 +73,7 @@ public abstract class MappedRegistryMixin_API<T> implements Registry<T> {
     }
 
     private Stream<TagKey<T>> impl$getTagNames() {
-        return ((net.minecraft.core.Registry) this).getTagNames();
+        return ((net.minecraft.core.Registry<T>) this).getTags().map(HolderSet.Named::key);
     }
 
     @Override
