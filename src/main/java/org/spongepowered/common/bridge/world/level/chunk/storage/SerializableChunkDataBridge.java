@@ -26,6 +26,7 @@ package org.spongepowered.common.bridge.world.level.chunk.storage;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.chunk.LevelChunk;
+import org.spongepowered.api.world.SerializationBehavior;
 
 public interface SerializableChunkDataBridge {
 
@@ -44,4 +45,6 @@ public interface SerializableChunkDataBridge {
     void bridge$readTrackerDataFrom(LevelChunk levelChunk);
 
     void bridge$readDataHolderDataFrom(LevelChunk levelChunk);
+
+    void bridge$setSerializationBehavior(SerializationBehavior serializationBehavior);
 }

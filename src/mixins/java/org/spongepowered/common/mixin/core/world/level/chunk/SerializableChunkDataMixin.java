@@ -31,6 +31,7 @@ import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.storage.SerializableChunkData;
+import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -38,20 +39,33 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.world.level.chunk.storage.SerializableChunkDataBridge;
+import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.data.DataUtil;
 
 @Mixin(SerializableChunkData.class)
 public abstract class SerializableChunkDataMixin implements SerializableChunkDataBridge {
 
     private CompoundTag impl$tag;
+    private SerializationBehavior impl$serializationBehavior;
+
 
     @Inject(method = "copyOf", at = @At(value = "RETURN"))
-    private static void impl$copyOfSpongeData(final ServerLevel $$0, final ChunkAccess chunkAccess, final CallbackInfoReturnable<SerializableChunkData> cir) {
+    private static void impl$copyOfSpongeData(final ServerLevel level, final ChunkAccess chunkAccess, final CallbackInfoReturnable<SerializableChunkData> cir) {
+        final var bridge = (SerializableChunkDataBridge) (Object) cir.getReturnValue();
+        if (level.getLevelData() instanceof PrimaryLevelDataBridge levelBridge) {
+            final var behavior = levelBridge.bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
+            bridge.bridge$setSerializationBehavior(behavior);
+        }
         if (chunkAccess instanceof LevelChunk levelChunk) {
-            final var bridge = (SerializableChunkDataBridge) (Object) cir.getReturnValue();
+
             bridge.bridge$setTrackerData(levelChunk);
             bridge.bridge$setDataHolderData(levelChunk);
         }
+    }
+
+    @Override
+    public void bridge$setSerializationBehavior(final SerializationBehavior serializationBehavior) {
+        this.impl$serializationBehavior = serializationBehavior;
     }
 
     @Override
@@ -60,6 +74,15 @@ public abstract class SerializableChunkDataMixin implements SerializableChunkDat
         if (DataUtil.syncDataToTag(levelChunk)) {
             this.impl$tag = ((DataCompoundHolder) levelChunk).data$getCompound();
         }
+    }
+
+    @Inject(method = "write", at = @At(value = "HEAD"), cancellable = true)
+    private void tracker$beforeWrite(final CallbackInfoReturnable<CompoundTag> cir) {
+        switch (this.impl$serializationBehavior) {
+            case AUTOMATIC, MANUAL -> {} // write normally
+            default -> cir.setReturnValue(null);
+        }
+
     }
 
     @Inject(method = "write", at = @At(value = "RETURN"))
