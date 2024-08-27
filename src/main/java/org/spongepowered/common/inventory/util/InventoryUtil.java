@@ -51,7 +51,7 @@ import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.item.recipe.crafting.RecipeInput;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.world.inventory.CraftingMenuAccessor;
+import org.spongepowered.common.accessor.world.inventory.AbstractCraftingMenuAccessor;
 import org.spongepowered.common.accessor.world.inventory.SmithingMenuAccessor;
 import org.spongepowered.common.accessor.world.inventory.StonecutterMenuAccessor;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
@@ -97,7 +97,7 @@ public final class InventoryUtil {
             case AbstractFurnaceBlockEntity furnace -> new SingleRecipeInput(furnace.getItem(0));
             case CampfireBlockEntity campfire -> campfire.getItems().stream().filter(stack -> !stack.isEmpty()).findFirst()
                     .map(SingleRecipeInput::new).orElse(null);
-            case CraftingMenuAccessor menu -> menu.accessor$craftSlots().asCraftInput();
+            case AbstractCraftingMenuAccessor menu -> menu.accessor$craftSlots().asCraftInput();
             case InventoryMenu menu -> menu.getCraftSlots().asCraftInput();
             case StonecutterMenu menu -> StonecutterMenuAccessor.invoker$createRecipeInput(menu.container);
             case SmithingMenuAccessor menu -> menu.invoker$createRecipeInput();

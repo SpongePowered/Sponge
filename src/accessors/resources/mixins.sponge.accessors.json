@@ -125,7 +125,7 @@
         "world.inventory.AbstractFurnaceMenuAccessor",
         "world.inventory.BeaconMenuAccessor",
         "world.inventory.BrewingStandMenuAccessor",
-        "world.inventory.CraftingMenuAccessor",
+        "world.inventory.AbstractCraftingMenuAccessor",
         "world.inventory.DispenserMenuAccessor",
         "world.inventory.HopperMenuAccessor",
         "world.inventory.HorseInventoryMenuAccessor",
