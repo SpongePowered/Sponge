@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
+import net.minecraft.data.loot.packs.LootData;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.common.accessor.world.entity.animal.SheepAccessor;
@@ -42,7 +44,7 @@ public final class WoolData {
                 .asImmutable(Block.class)
                     .create(Keys.DYE_COLOR)
                         .get(h -> (DyeColor) (Object) DyeColorUtil.COLOR_BY_WOOL.get(h))
-                        .supports(h -> SheepAccessor.accessor$ITEM_BY_DYE().containsValue(h));
+                        .supports(LootData.WOOL_ITEM_BY_DYE::containsValue);
     }
     // @formatter:on
 }
