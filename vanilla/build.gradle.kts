@@ -198,7 +198,7 @@ minecraft {
                 ))
 
                 testPluginsProject?.also {
-                    //resources.add(it.sourceSets.getByName("main").output)
+                    resources.add(it.sourceSets.getByName("main").output)
                 }
 
                 dependsOn(resources)

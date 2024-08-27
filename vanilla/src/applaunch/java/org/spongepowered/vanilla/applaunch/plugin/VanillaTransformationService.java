@@ -27,7 +27,10 @@ package org.spongepowered.vanilla.applaunch.plugin;
 import com.google.common.collect.ImmutableList;
 import cpw.mods.jarhandling.SecureJar;
 import cpw.mods.modlauncher.Launcher;
-import cpw.mods.modlauncher.api.*;
+import cpw.mods.modlauncher.api.IEnvironment;
+import cpw.mods.modlauncher.api.IModuleLayerManager;
+import cpw.mods.modlauncher.api.ITransformationService;
+import cpw.mods.modlauncher.api.ITransformer;
 import cpw.mods.modlauncher.serviceapi.ILaunchPluginService;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -51,15 +54,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public final class VanillaPlatformService implements ITransformationService {
-
-    private static final String NAME = "vanilla_platform";
-
+public final class VanillaTransformationService implements ITransformationService {
     private @MonotonicNonNull VanillaPluginPlatform pluginPlatform;
 
     @Override
     public @NonNull String name() {
-        return VanillaPlatformService.NAME;
+        return "spongevanilla";
     }
 
     @Override
@@ -188,7 +188,7 @@ public final class VanillaPlatformService implements ITransformationService {
 
                 // Log warning about plugin using Mixin
                 if (mixin != null && resource.property(org.spongepowered.asm.util.Constants.ManifestAttributes.MIXINCONFIGS).isPresent()) {
-                    if (!VanillaPlatformService.isSponge(resource)) {
+                    if (!VanillaTransformationService.isSponge(resource)) {
                         this.pluginPlatform.logger().warn("Plugin from {} uses Mixins to modify the Minecraft Server. If something breaks, remove it before reporting the problem to Sponge!", resource.path());
                     }
                 }

@@ -36,9 +36,7 @@ import org.spongepowered.common.event.manager.RegisteredListener;
 import org.spongepowered.common.event.manager.SpongeEventManager;
 import org.spongepowered.forge.launch.bridge.event.ForgeEventBridge_Forge;
 import org.spongepowered.forge.launch.bridge.event.SpongeEventBridge_Forge;
-import org.spongepowered.plugin.PluginContainer;
 
-import java.lang.invoke.MethodHandles;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -138,11 +136,6 @@ public final class ForgeEventManager extends SpongeEventManager implements IEven
     }
 
     // EventManager
-
-    @Override
-    protected MethodHandles.@Nullable Lookup getLookup(final PluginContainer plugin, final Class<?> handle) {
-        return ListenerLookups.get(handle);
-    }
 
     @Override
     public boolean post(final org.spongepowered.api.event.Event event) {

@@ -24,10 +24,6 @@
  */
 package org.spongepowered.forge.applaunch.transformation;
 
-import static org.objectweb.asm.Opcodes.ACC_STATIC;
-import static org.objectweb.asm.Opcodes.INVOKESTATIC;
-import static org.objectweb.asm.Opcodes.RETURN;
-
 import cpw.mods.modlauncher.api.ITransformer;
 import cpw.mods.modlauncher.api.ITransformerActivity;
 import cpw.mods.modlauncher.api.ITransformerVotingContext;
@@ -38,11 +34,7 @@ import net.minecraftforge.forgespi.language.ModFileScanData;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.LdcInsnNode;
-import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MethodNode;
+import org.spongepowered.transformers.modlauncher.ListenerTransformerHelper;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -52,28 +44,7 @@ public class ListenerTransformer implements ITransformer<ClassNode> {
     @NonNull
     @Override
     public ClassNode transform(final ClassNode input, final ITransformerVotingContext context) {
-        MethodNode clinit = null;
-        for (final MethodNode method : input.methods) {
-            if (method.name.equals("<clinit>") && method.desc.equals("()V")) {
-                clinit = method;
-                break;
-            }
-        }
-
-        if (clinit == null) {
-            clinit = new MethodNode(ACC_STATIC, "<clinit>", "()V", null, null);
-            clinit.instructions.add(new InsnNode(RETURN));
-            input.methods.add(clinit);
-        }
-
-
-        final InsnList list = new InsnList();
-        list.add(new LdcInsnNode(Type.getObjectType(input.name)));
-        list.add(new MethodInsnNode(INVOKESTATIC, "java/lang/invoke/MethodHandles", "lookup", "()Ljava/lang/invoke/MethodHandles$Lookup;", false));
-        list.add(new MethodInsnNode(INVOKESTATIC, "org/spongepowered/forge/launch/event/ListenerLookups", "set", "(Ljava/lang/Class;Ljava/lang/invoke/MethodHandles$Lookup;)V"));
-
-        clinit.instructions.insert(list);
-
+        ListenerTransformerHelper.transform(input);
         return input;
     }
 
@@ -86,7 +57,7 @@ public class ListenerTransformer implements ITransformer<ClassNode> {
     @NonNull
     @Override
     public Set<Target> targets() {
-        final Type listenerType = Type.getType("Lorg/spongepowered/api/event/Listener;");
+        final Type listenerType = Type.getType(ListenerTransformerHelper.LISTENER_DESC);
 
         final Set<Type> listenerClasses = new HashSet<>();
         for (ModFileInfo fileInfo : LoadingModList.get().getModFiles()) {

@@ -22,22 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.launch.event;
+package org.spongepowered.vanilla.applaunch.plugin;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import cpw.mods.modlauncher.serviceapi.ILaunchPluginService;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.ClassNode;
+import org.spongepowered.transformers.modlauncher.ListenerTransformerHelper;
 
-import java.lang.invoke.MethodHandles;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.EnumSet;
 
-public class ListenerLookups {
-    private static final Map<Class<?>, MethodHandles.Lookup> lookups = new ConcurrentHashMap<>();
+public class ListenerPluginService implements ILaunchPluginService {
+    private static final EnumSet<Phase> YAY = EnumSet.of(Phase.AFTER);
+    private static final EnumSet<Phase> NAY = EnumSet.noneOf(Phase.class);
 
-    public static MethodHandles.@Nullable Lookup get(final Class<?> listenerClass) {
-        return ListenerLookups.lookups.get(listenerClass);
+    @Override
+    public String name() {
+        return "listener";
     }
 
-    public static void set(final Class<?> listenerClass, final MethodHandles.Lookup lookup) {
-        ListenerLookups.lookups.put(listenerClass, lookup);
+    @Override
+    public EnumSet<Phase> handlesClass(Type classType, boolean isEmpty) {
+        return isEmpty ? NAY : YAY;
+    }
+
+    @Override
+    public int processClassWithFlags(final Phase phase, final ClassNode classNode, final Type classType, final String reason) {
+        if (ListenerTransformerHelper.shouldTransform(classNode)) {
+            ListenerTransformerHelper.transform(classNode);
+            return ComputeFlags.COMPUTE_FRAMES;
+        }
+        return ComputeFlags.NO_REWRITE;
     }
 }
