@@ -169,7 +169,7 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin_Attack_I
      */
     @ModifyVariable(method = "attack", ordinal = 2,
             slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;isSprinting()Z", ordinal = 1),
-                           to = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/player/Player;walkDist:F")),
+                           to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getKnownMovement()Lnet/minecraft/world/phys/Vec3;")),
             at = @At(value = "JUMP", opcode = Opcodes.IFEQ)
     )
     public boolean attackImpl$critHook(final boolean isCrit) {
