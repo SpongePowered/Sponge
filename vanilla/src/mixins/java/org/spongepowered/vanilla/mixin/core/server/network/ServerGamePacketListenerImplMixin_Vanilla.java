@@ -26,6 +26,7 @@ package org.spongepowered.vanilla.mixin.core.server.network;
 
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -53,21 +54,23 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla extends ServerCo
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Redirect(method = "lambda$handlePlaceRecipe$10",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/RecipeBookMenu;handlePlacement(ZLnet/minecraft/world/item/crafting/RecipeHolder;Lnet/minecraft/server/level/ServerPlayer;)V"))
-    private void vanilla$onPlaceRecipe(final RecipeBookMenu recipeBookMenu, final boolean shift, final RecipeHolder<?> recipe, final net.minecraft.server.level.ServerPlayer player) {
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/RecipeBookMenu;handlePlacement(ZZLnet/minecraft/world/item/crafting/RecipeHolder;Lnet/minecraft/world/entity/player/Inventory;)Lnet/minecraft/world/inventory/RecipeBookMenu$PostPlaceAction;"))
+    private RecipeBookMenu.PostPlaceAction vanilla$onPlaceRecipe(final RecipeBookMenu recipeBookMenu, final boolean shift, final boolean creative, final RecipeHolder<?> recipe, final net.minecraft.world.entity.player.Inventory playerInventory) {
+        final var player = playerInventory.player;
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
 
         final Inventory craftInv = ((Inventory) player.containerMenu).query(QueryTypes.INVENTORY_TYPE.get().of(CraftingInventory.class));
         if (!(craftInv instanceof CraftingInventory)) {
-            recipeBookMenu.handlePlacement(shift, recipe, player);
+            final var postPlaceAction = recipeBookMenu.handlePlacement(shift, creative, recipe, playerInventory);
             SpongeCommon.logger().warn("Detected crafting without a InventoryCrafting!? Crafting Event will not fire.");
-            return;
+            return postPlaceAction;
         }
 
-        try (final EffectTransactor ignored = transactor.logPlaceRecipe(shift, (RecipeHolder) recipe, player, (CraftingInventory) craftInv)) {
-            recipeBookMenu.handlePlacement(shift, recipe, player);
+        try (final EffectTransactor ignored = transactor.logPlaceRecipe(shift, (RecipeHolder) recipe, (ServerPlayer) player, (CraftingInventory) craftInv)) {
+            final var postPlaceAction = recipeBookMenu.handlePlacement(shift, creative, recipe, playerInventory);
             player.containerMenu.broadcastChanges();
+            return postPlaceAction;
         }
     }
 
