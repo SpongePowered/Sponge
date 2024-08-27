@@ -230,12 +230,10 @@ public final class TrackingUtil {
     }
 
     public static void updateTickFluid(
-        final TrackedWorldBridge mixinWorld, final FluidState fluidState, final BlockPos pos
-    ) {
+        final TrackedWorldBridge mixinWorld, final FluidState fluidState, final BlockPos pos, final net.minecraft.world.level.block.state.BlockState blockState) {
         final ServerLevel world = (ServerLevel) mixinWorld;
         final org.spongepowered.api.world.server.ServerWorld apiWorld = (org.spongepowered.api.world.server.ServerWorld) world;
 
-        final net.minecraft.world.level.block.state.BlockState blockState = fluidState.createLegacyBlock();
         if (ShouldFire.TICK_BLOCK_EVENT) {
             final BlockSnapshot snapshot = mixinWorld.bridge$createSnapshot(blockState, pos, BlockChangeFlags.NONE);
             final TickBlockEvent event = SpongeEventFactory.createTickBlockEventScheduled(PhaseTracker.getCauseStackManager().currentCause(), snapshot);

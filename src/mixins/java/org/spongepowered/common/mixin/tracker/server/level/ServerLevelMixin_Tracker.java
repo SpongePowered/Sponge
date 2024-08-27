@@ -162,9 +162,9 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
 
     @Redirect(method = "tickFluid(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/material/Fluid;)V",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/level/material/FluidState;tick(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)V"))
-    private void tracker$wrapFluidTick(final FluidState fluidState, final net.minecraft.world.level.Level level, final BlockPos pos) {
-        TrackingUtil.updateTickFluid(this, fluidState, pos);
+            target = "Lnet/minecraft/world/level/material/FluidState;tick(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)V"))
+    private void tracker$wrapFluidTick(final FluidState fluidState, final net.minecraft.world.level.Level level, final BlockPos pos, final BlockState blockState) {
+        TrackingUtil.updateTickFluid(this, fluidState, pos, blockState);
     }
 
     private <T> ScheduledTick<T> tracker$createTick(final BlockPos pos, final T type, final int triggerTick, final TickPriority priority) {
