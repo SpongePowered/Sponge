@@ -22,12 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.launch.event;
+package org.spongepowered.common.event;
 
-import com.google.inject.Singleton;
-import org.spongepowered.common.event.manager.SpongeEventManager;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-@Singleton
-public final class VanillaEventManager extends SpongeEventManager {
+import java.lang.invoke.MethodHandles;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+public class ListenerLookups {
+    private static final Map<Class<?>, MethodHandles.Lookup> lookups = new ConcurrentHashMap<>();
+
+    public static MethodHandles.@Nullable Lookup get(final Class<?> listenerClass) {
+        return ListenerLookups.lookups.get(listenerClass);
+    }
+
+    public static void set(final Class<?> listenerClass, final MethodHandles.Lookup lookup) {
+        ListenerLookups.lookups.put(listenerClass, lookup);
+    }
 }
