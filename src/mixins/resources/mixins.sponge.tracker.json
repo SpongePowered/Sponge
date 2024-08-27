@@ -32,7 +32,7 @@
         "world.item.BoneMealItemMixin_Tracker",
         "world.item.ItemStackMixin_Tracker",
         "world.level.BlockEventDataMixin_Tracker",
-        "world.level.ExplosionMixin_Tracker",
+        "world.level.ServerExplosionMixin_Tracker",
         "world.level.LevelAccessorMixin_Tracker",
         "world.level.LevelHeightAccessorMixin_Tracker",
         "world.level.LevelMixin_Tracker",
