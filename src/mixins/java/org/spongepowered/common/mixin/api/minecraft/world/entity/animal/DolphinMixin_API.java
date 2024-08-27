@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.animal.Dolphin.class)
-public abstract class DolphinMixin_API extends WaterAnimalMixin_API implements Dolphin {
+public abstract class DolphinMixin_API extends AgeableWaterCreatureMixin_API implements Dolphin {
 
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
