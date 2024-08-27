@@ -140,7 +140,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     @Shadow private int emptyTime;
 
     @Shadow @NonNull public abstract MinecraftServer shadow$getServer();
-    @Shadow protected abstract void shadow$saveLevelData();
+    @Shadow protected abstract void shadow$saveLevelData(final boolean $$0);
     @Shadow @Final private MinecraftServer server;
 
     @Shadow public abstract void levelEvent(@Nullable Player $$0, int $$1, BlockPos $$2, int $$3);
@@ -373,7 +373,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
             // We always save the metadata unless it is NONE
             if (behavior != SerializationBehavior.NONE) {
 
-                this.shadow$saveLevelData();
+                this.shadow$saveLevelData(flush);
 
                 // Sponge Start - We do per-world WorldInfo/WorldBorders/BossBars
 
