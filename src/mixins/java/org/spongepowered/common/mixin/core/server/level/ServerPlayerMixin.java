@@ -175,6 +175,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Shadow protected abstract void shadow$triggerDimensionChangeTriggers(ServerLevel serverworld);
     @Shadow public abstract void shadow$doCloseContainer();
     @Shadow public abstract boolean shadow$setGameMode(GameType param0);
+    @Shadow public abstract void shadow$setCamera(@org.jetbrains.annotations.Nullable final Entity $$0);
     // @formatter:on
 
     private net.minecraft.network.chat.@Nullable Component impl$connectionMessage;
@@ -400,7 +401,10 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
      * @reason Redirect all teleports through {@link #bridge$changeDimension} to fire our move/rotate/teleport events
      */
     @Overwrite
-    public void teleportTo(final ServerLevel world, final double x, final double y, final double z, final float yaw, final float pitch) {
+    public void teleportTo(final ServerLevel world, final double x, final double y, final double z, final float yaw, final float pitch, final boolean setCamera) {
+        if (setCamera) {
+            this.shadow$setCamera((net.minecraft.server.level.ServerPlayer) (Object) this);
+        }
         final boolean hasMovementContext = PhaseTracker.getCauseStackManager().currentContext().containsKey(EventContextKeys.MOVEMENT_TYPE);
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             if (!hasMovementContext) {
