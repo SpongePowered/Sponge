@@ -47,6 +47,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -69,18 +70,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
 
-@Mixin(net.minecraft.world.level.Explosion.class)
-public abstract class ExplosionMixin implements ExplosionBridge {
+@Mixin(net.minecraft.world.level.ServerExplosion.class)
+public abstract class ServerExplosionMixin implements ExplosionBridge {
 
     // @formatter:off
     @Shadow @Final private ExplosionDamageCalculator damageCalculator;
-    @Shadow @Final private ObjectArrayList<BlockPos> toBlow;
     @Shadow @Final private Map<Player, Vec3> hitPlayers;
     @Shadow @Final private boolean fire;
     @Shadow @Final private net.minecraft.world.level.Level level;
-    @Shadow @Final private double x;
-    @Shadow @Final private double y;
-    @Shadow @Final private double z;
     @Shadow @Final private Entity source;
     @Shadow @Final private float radius;
     @Shadow @Final private net.minecraft.world.level.Explosion.BlockInteraction blockInteraction;
@@ -88,6 +85,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
     @Shadow @Final private DamageSource damageSource;
     // @formatter:on
 
+    @Shadow @Final private Vec3 center;
     private boolean impl$shouldBreakBlocks;
     private boolean impl$shouldDamageEntities;
     private boolean impl$shouldPlaySmoke;
@@ -338,8 +336,18 @@ public abstract class ExplosionMixin implements ExplosionBridge {
     }
 
     @Override
+    public Explosion.Builder bridge$asBuilder() {
+        var builder = org.spongepowered.api.world.explosion.Explosion.builder();
+        // TODO finish building
+        builder.location(ServerLocation.of((ServerWorld) this.level, VecHelper.toVector3d(this.center)))
+            .radius(this.radius);
+
+        return builder;
+    }
+
+    @Override
     public String toString() {
-        return new StringJoiner(", ", ExplosionMixin.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", ServerExplosionMixin.class.getSimpleName() + "[", "]")
             .add("causesFire=" + this.fire)
             .add("mode=" + this.blockInteraction)
             .add("world=" + this.level)

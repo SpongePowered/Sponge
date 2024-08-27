@@ -25,25 +25,20 @@
 package org.spongepowered.common.mixin.core.world.entity.projectile;
 
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.projectile.WitherSkull;
 import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.projectile.Projectile;
-import org.spongepowered.api.entity.projectile.explosive.WitherSkull;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.api.world.server.ServerLocation;
-import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.accessor.world.entity.projectile.ProjectileAccessor;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
-import org.spongepowered.common.bridge.world.entity.GrieferBridge;
 import org.spongepowered.common.bridge.world.entity.projectile.WitherSkullBridge;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 
@@ -52,7 +47,7 @@ import java.util.Optional;
 @Mixin(net.minecraft.world.entity.projectile.WitherSkull.class)
 public abstract class WitherSkullMixin extends AbstractHurtingProjectileMixin implements WitherSkullBridge, ExplosiveBridge {
 
-    private int impl$explosionRadius = Constants.Entity.WitherSkull.DEFAULT_EXPLOSION_RADIUS;
+    private float impl$explosionRadius = Constants.Entity.WitherSkull.DEFAULT_EXPLOSION_RADIUS;
 
     // TODO Key not implemented
     private float impl$damage = 0.0f;
@@ -72,41 +67,31 @@ public abstract class WitherSkullMixin extends AbstractHurtingProjectileMixin im
 
     // Explosive Impl
     @Override
-    public Optional<Integer> bridge$getExplosionRadius() {
+    public Optional<Float> bridge$getExplosionRadius() {
         return Optional.of(this.impl$explosionRadius);
     }
 
     @Override
-    public void bridge$setExplosionRadius(final @Nullable Integer explosionRadius) {
+    public void bridge$setExplosionRadius(final @Nullable Float explosionRadius) {
         this.impl$explosionRadius = explosionRadius == null ? Constants.Entity.WitherSkull.DEFAULT_EXPLOSION_RADIUS : explosionRadius;
     }
 
     @Redirect(method = "onHit", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/level/Level;explode(Lnet/minecraft/world/entity/Entity;DDDFZLnet/minecraft/world/level/Level$ExplosionInteraction;)Lnet/minecraft/world/level/Explosion;"))
-    public net.minecraft.world.level.@Nullable Explosion impl$CreateAndProcessExplosionEvent(final net.minecraft.world.level.Level worldObj, final Entity self,
-            final double x, final double y, final double z, final float strength, final boolean flaming, final Level.ExplosionInteraction mode) {
-        return this.bridge$throwExplosionEventAndExplosde(worldObj, self, x, y, z, strength, flaming, mode);
+            target = "Lnet/minecraft/world/level/Level;explode(Lnet/minecraft/world/entity/Entity;DDDFZLnet/minecraft/world/level/Level$ExplosionInteraction;)V"))
+    public void impl$onHitExplode(final net.minecraft.world.level.Level worldObj, final Entity self,
+            final double x, final double y, final double z, final float explosionRadius, final boolean causesFire, final Level.ExplosionInteraction mode) {
+        this.bridge$wrappedExplode(x, y, z, explosionRadius, causesFire, mode);
     }
 
     @Override
-    public net.minecraft.world.level.Explosion bridge$throwExplosionEventAndExplosde(
-            final net.minecraft.world.level.Level worldObj, final Entity self,
-            final double x, final double y, final double z, final float strength, final boolean flaming, final Level.ExplosionInteraction mode) {
-        final boolean griefer = ((GrieferBridge) this).bridge$canGrief();
+    public void bridge$wrappedExplode(final double x, final double y, final double z, final float explosionRadius, final boolean causesFire, final Level.ExplosionInteraction mode) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
             ((Projectile) this).get(Keys.SHOOTER).ifPresent(shooter -> {
                 frame.addContext(EventContextKeys.PROJECTILE_SOURCE, shooter);
                 frame.pushCause(shooter);
             });
-            return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
-                    .location(ServerLocation.of((ServerWorld) worldObj, x, y, z))
-                    .sourceExplosive(((WitherSkull) this))
-                    .radius(this.impl$explosionRadius)
-                    .canCauseFire(flaming)
-                    .shouldPlaySmoke(mode != Level.ExplosionInteraction.NONE && griefer)
-                    .shouldBreakBlocks(mode != Level.ExplosionInteraction.NONE && griefer))
-                    .orElse(null);
+            this.level().explode((WitherSkull) (Object) this, x, y, z, explosionRadius, causesFire, mode);
         }
     }
 }

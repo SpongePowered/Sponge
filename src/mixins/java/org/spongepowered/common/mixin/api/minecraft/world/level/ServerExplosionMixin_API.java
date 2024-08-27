@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level;
 
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -34,21 +35,22 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.level.ExplosionBridge;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
 
-@Mixin(net.minecraft.world.level.Explosion.class)
-public abstract class ExplosionMixin_API implements Explosion {
+@Mixin(net.minecraft.world.level.ServerExplosion.class)
+public abstract class ServerExplosionMixin_API implements Explosion {
 
     //@formatter:off
     @Shadow @Final private boolean fire;
     @Shadow @Final private net.minecraft.world.level.Level level;
-    @Shadow @Final private double x;
-    @Shadow @Final private double y;
-    @Shadow @Final private double z;
+
     @Shadow @Final private Entity source;
     @Shadow @Final private float radius;
     @Shadow @Final private net.minecraft.world.level.Explosion.BlockInteraction blockInteraction;
+    @Shadow @Final private Vec3 center;
+
     //@formatter:on
 
     @Nullable private ServerLocation api$location;
@@ -56,7 +58,7 @@ public abstract class ExplosionMixin_API implements Explosion {
     @Override
     public ServerLocation location() {
         if (this.api$location == null) {
-            this.api$location = ServerLocation.of((ServerWorld) this.level, this.x, this.y, this.z);
+            this.api$location = ServerLocation.of((ServerWorld) this.level, VecHelper.toVector3d(this.center));
         }
         return this.api$location;
     }

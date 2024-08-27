@@ -59,18 +59,18 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
     @Shadow private int fuse;
     // @formatter:on
 
-    @Nullable private Integer impl$explosionRadius = null;
+    @Nullable private Float impl$explosionRadius = null; // override for fixed radius
     private int impl$fuseDuration = Constants.Entity.Minecart.DEFAULT_FUSE_DURATION;
     private boolean impl$detonationCancelled;
     @Nullable private Object impl$primeCause;
 
     @Override
-    public Optional<Integer> bridge$getExplosionRadius() {
+    public Optional<Float> bridge$getExplosionRadius() {
         return Optional.ofNullable(this.impl$explosionRadius);
     }
 
     @Override
-    public void bridge$setExplosionRadius(final @Nullable Integer radius) {
+    public void bridge$setExplosionRadius(final @Nullable Float radius) {
         this.impl$explosionRadius = radius;
     }
 
@@ -130,28 +130,9 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
         }
     }
 
-    @Redirect(
-        method = "explode(Lnet/minecraft/world/damagesource/DamageSource;D)V",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/level/Level;explode(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;Lnet/minecraft/world/level/ExplosionDamageCalculator;DDDFZLnet/minecraft/world/level/Level$ExplosionInteraction;)Lnet/minecraft/world/level/Explosion;"
-        )
-    )
-    private net.minecraft.world.level.@Nullable Explosion impl$useSpongeExplosion(final net.minecraft.world.level.Level world, final Entity entityIn,
-        final DamageSource damageSource, final ExplosionDamageCalculator calculator,
-        final double xIn, final double yIn, final double zIn, final float explosionRadius, final boolean fire, final Level.ExplosionInteraction modeIn) {
-        // TODO ExplosionDamageCalculator & fire
-        return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
-                .location(ServerLocation.of((ServerWorld) world, xIn, yIn, zIn))
-                .sourceExplosive((TNTMinecart) this)
-                .radius(this.impl$explosionRadius != null ? this.impl$explosionRadius : explosionRadius)
-                .shouldPlaySmoke(modeIn.ordinal() > Level.ExplosionInteraction.NONE.ordinal())
-                .shouldBreakBlocks(modeIn.ordinal() > Level.ExplosionInteraction.NONE.ordinal()))
-                .orElseGet(() -> {
-                            this.impl$detonationCancelled = true;
-                            return null;
-                        }
-                );
+    @Override
+    public void bridge$cancelExplosion() {
+        this.impl$detonationCancelled = true;
     }
 
     @Inject(method = "explode(Lnet/minecraft/world/damagesource/DamageSource;D)V", at = @At("RETURN"))

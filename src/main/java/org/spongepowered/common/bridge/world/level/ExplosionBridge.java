@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.bridge.world.level;
 
+import org.spongepowered.api.world.explosion.Explosion;
+
 public interface ExplosionBridge {
 
     boolean bridge$getShouldDamageBlocks();
@@ -50,4 +52,5 @@ public interface ExplosionBridge {
 
     double bridge$getKnockback();
 
+    Explosion.Builder bridge$asBuilder();
 }

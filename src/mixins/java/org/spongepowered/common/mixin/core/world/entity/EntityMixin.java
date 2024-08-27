@@ -43,6 +43,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.PortalProcessor;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -182,6 +183,14 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow @Nullable protected abstract String shadow$getEncodeId();
     @Shadow @javax.annotation.Nullable public PortalProcessor portalProcess;
     // @formatter:on
+
+    @Shadow public abstract void move(final MoverType $$0, final Vec3 $$1);
+
+    @Shadow public abstract boolean save(final CompoundTag $$0);
+
+    @Shadow public abstract Vec3 calculateViewVector(final float $$0, final float $$1);
+
+    @Shadow public abstract Level level();
 
     private boolean impl$isConstructing = true;
     private VanishState impl$vanishState = VanishState.unvanished();

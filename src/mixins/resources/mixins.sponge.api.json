@@ -342,7 +342,7 @@
         "minecraft.world.item.trading.MerchantOfferMixin_API",
         "minecraft.world.level.BlockGetterMixin_API",
         "minecraft.world.level.EntityGetterMixin_API",
-        "minecraft.world.level.ExplosionMixin_API",
+        "minecraft.world.level.ServerExplosionMixin_API",
         "minecraft.world.level.GameRules_KeyMixin_API",
         "minecraft.world.level.GameTypeMixin_API",
         "minecraft.world.level.LevelAccessorMixin_API",

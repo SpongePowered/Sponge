@@ -28,16 +28,12 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
-import net.minecraft.world.level.Explosion.BlockInteraction;
 import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.explosive.fused.PrimedTNT;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.api.world.server.ServerLocation;
-import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -47,7 +43,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.bridge.world.entity.item.PrimedTntBridge;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
@@ -60,10 +55,11 @@ public abstract class PrimedTntMixin extends EntityMixin implements PrimedTntBri
     // @formatter:off
     @Shadow public abstract int shadow$getFuse();
     @Shadow public abstract void shadow$setFuse(int var1);
+    @Shadow private float explosionPower;
+
     // @formatter:on
 
     @Nullable private LivingEntity impl$detonator;
-    private int bridge$explosionRadius = Constants.Entity.PrimedTNT.DEFAULT_EXPLOSION_RADIUS;
     private int bridge$fuseDuration = Constants.Entity.PrimedTNT.DEFAULT_FUSE_DURATION;
 
     @Override
@@ -77,13 +73,13 @@ public abstract class PrimedTntMixin extends EntityMixin implements PrimedTntBri
     }
 
     @Override
-    public Optional<Integer> bridge$getExplosionRadius() {
-        return Optional.of(this.bridge$explosionRadius);
+    public Optional<Float> bridge$getExplosionRadius() {
+        return Optional.of(this.explosionPower);
     }
 
     @Override
-    public void bridge$setExplosionRadius(@Nullable final Integer radius) {
-        this.bridge$explosionRadius = radius == null ? Constants.Entity.PrimedTNT.DEFAULT_EXPLOSION_RADIUS : radius;
+    public void bridge$setExplosionRadius(final @Nullable Float radius) {
+        this.explosionPower = radius == null ? Constants.Entity.PrimedTNT.DEFAULT_EXPLOSION_RADIUS : radius;
     }
 
     @Override
@@ -105,34 +101,6 @@ public abstract class PrimedTntMixin extends EntityMixin implements PrimedTntBri
     public void bridge$setFuseTicksRemaining(final int fuseTicks) {
         this.shadow$setFuse(fuseTicks);
     }
-
-    @Redirect(
-        method = "explode",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/level/Level;explode(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;Lnet/minecraft/world/level/ExplosionDamageCalculator;DDDFZLnet/minecraft/world/level/Level$ExplosionInteraction;)Lnet/minecraft/world/level/Explosion;"
-        )
-    )
-    private net.minecraft.world.level.@Nullable Explosion impl$useSpongeExplosion(final Level world,
-            final Entity entityIn,
-            final DamageSource damageSource,
-            final ExplosionDamageCalculator explosionDamageCalculator,
-            final double xIn, final double yIn, final double zIn, final
-            float explosionRadius,
-            final boolean falseValue,
-            final Level.ExplosionInteraction modeIn) {
-        return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
-            .location(ServerLocation.of((ServerWorld) world, xIn, yIn, zIn))
-            .sourceExplosive((PrimedTNT) this)
-            .radius(this.bridge$explosionRadius)
-            .shouldPlaySmoke(modeIn.ordinal() > BlockInteraction.KEEP.ordinal())
-            .shouldBreakBlocks(modeIn.ordinal() > BlockInteraction.KEEP.ordinal()))
-            .orElseGet(() -> {
-                ((PrimedTNT) this).offer(Keys.IS_PRIMED, false);
-                return null;
-            });
-    }
-
 
     @Inject(method = "tick()V", at = @At("RETURN"))
     private void impl$updateTNTPushPrime(final CallbackInfo ci) {

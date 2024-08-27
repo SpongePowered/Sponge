@@ -103,7 +103,6 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.map.MapIdTrackerBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
@@ -624,24 +623,6 @@ public final class SpongeCommonEventFactory {
         final SetAITargetEvent event = SpongeEventFactory.createSetAITargetEvent(PhaseTracker.getCauseStackManager().currentCause(), agent, Optional.ofNullable(target));
         SpongeCommon.post(event);
         return event;
-    }
-
-    public static Optional<net.minecraft.world.level.Explosion> detonateExplosive(final ExplosiveBridge explosiveBridge, final Explosion.Builder builder) {
-        final DetonateExplosiveEvent event = SpongeEventFactory.createDetonateExplosiveEvent(
-                PhaseTracker.getCauseStackManager().currentCause(), builder, (Explosive) explosiveBridge, builder.build()
-        );
-        if (!Sponge.eventManager().post(event)) {
-            final Explosion explosion = event.explosionBuilder().build();
-            if (explosion.radius() > 0) {
-                ((TrackedWorldBridge) ((Explosive) explosiveBridge).world())
-                    .tracker$triggerInternalExplosion(
-                        explosion,
-                        e -> GeneralPhase.State.EXPLOSION.createPhaseContext(PhaseTracker.SERVER).explosion(e)
-                    );
-            }
-            return Optional.of((net.minecraft.world.level.Explosion) explosion);
-        }
-        return Optional.empty();
     }
 
     /**

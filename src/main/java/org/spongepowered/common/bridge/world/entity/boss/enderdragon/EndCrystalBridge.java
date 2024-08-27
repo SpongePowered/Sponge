@@ -25,13 +25,10 @@
 package org.spongepowered.common.bridge.world.entity.boss.enderdragon;
 
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Explosion;
-import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface EndCrystalBridge {
 
-    @Nullable Explosion bridge$throwExplosionEventAndExplode(Level world, @Nullable Entity nil, double x,
-        double y, double z, boolean smoking, @Nullable DamageSource source);
+    void bridge$wrappedExplode(double x,
+        double y, double z, @Nullable DamageSource source, final DamageSource causeSource);
 }

@@ -213,7 +213,7 @@
         "world.item.enchantment.EnchantmentMixin",
         "world.level.BaseSpawnerMixin",
         "world.level.BlockGetterMixin",
-        "world.level.ExplosionMixin",
+        "world.level.ServerExplosionMixin",
         "world.level.LevelMixin",
         "world.level.NaturalSpawner_SpawnStateMixin",
         "world.level.NaturalSpawnerMixin",

@@ -54,7 +54,7 @@ public abstract class FireworkRocketEntityMixin extends ProjectileMixin implemen
     @Shadow private int lifetime;
     // @formatter:on
 
-    private int impl$explosionRadius = Constants.Entity.Firework.DEFAULT_EXPLOSION_RADIUS;
+    private float impl$explosionRadius = Constants.Entity.Firework.DEFAULT_EXPLOSION_RADIUS;
 
     @Override
     public int bridge$getFuseDuration() {
@@ -78,12 +78,12 @@ public abstract class FireworkRocketEntityMixin extends ProjectileMixin implemen
     }
 
     @Override
-    public Optional<Integer> bridge$getExplosionRadius() {
+    public Optional<Float> bridge$getExplosionRadius() {
         return Optional.of(this.impl$explosionRadius);
     }
 
     @Override
-    public void bridge$setExplosionRadius(final @Nullable Integer radius) {
+    public void bridge$setExplosionRadius(final @Nullable Float radius) {
         this.impl$explosionRadius = radius == null ? Constants.Entity.Firework.DEFAULT_EXPLOSION_RADIUS : radius;
     }
 
@@ -102,10 +102,11 @@ public abstract class FireworkRocketEntityMixin extends ProjectileMixin implemen
             // won't be triggered (the default behavior).
             frame.pushCause(this);
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, this.impl$getProjectileSource());
-            SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
+            final var explosionBuilder = Explosion.builder()
                 .sourceExplosive(((FireworkRocket) this))
                 .location(((FireworkRocket) this).serverLocation())
-                .radius(this.impl$explosionRadius))
+                .radius(this.impl$explosionRadius);
+            SpongeCommonEventFactory.detonateExplosive(this, explosionBuilder)
                 .ifPresent(explosion -> world.broadcastEntityEvent(self, state));
         }
     }

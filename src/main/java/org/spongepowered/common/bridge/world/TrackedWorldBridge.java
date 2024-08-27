@@ -55,9 +55,6 @@ public interface TrackedWorldBridge {
 
     boolean bridge$forceSpawnEntity(Entity entity);
 
-    net.minecraft.world.level.Explosion tracker$triggerInternalExplosion(Explosion explosion, Function<? super net.minecraft.world.level.Explosion,
-        ? extends PhaseContext<?>> contextCreator);
-
     Optional<WorldPipeline.Builder> bridge$startBlockChange(BlockPos pos, BlockState state, int rawFlags);
 
     /**

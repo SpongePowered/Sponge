@@ -39,14 +39,12 @@ import java.util.Set;
 @Mixin(LargeFireball.class)
 public abstract class LargeFireballMixin_API extends FireballMixin_API implements ExplosiveFireball {
 
-    @Shadow public int explosionPower;
+    @Shadow private int explosionPower;
 
     @Override
     public void detonate() {
-        final boolean flag = this.shadow$getCommandSenderWorld().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
-        final Level.ExplosionInteraction mode = flag ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE;
-        ((LargeFireballBridge) this).bridge$throwExplosionEventAndExplode(this.shadow$getCommandSenderWorld(), null, this.shadow$getX(),
-                this.shadow$getY(), this.shadow$getZ(), this.explosionPower, flag, mode);
+        final boolean causesFire = this.shadow$getCommandSenderWorld().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
+        ((LargeFireballBridge) this).bridge$wrappedExplode(this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), this.explosionPower, causesFire, Level.ExplosionInteraction.MOB);
         this.shadow$discard();
     }
 

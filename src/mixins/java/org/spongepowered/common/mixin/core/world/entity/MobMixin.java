@@ -27,8 +27,10 @@ package org.spongepowered.common.mixin.core.world.entity;
 import net.minecraft.world.entity.Leashable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.Entity;
@@ -67,6 +69,10 @@ public abstract class MobMixin extends LivingEntityMixin {
     @Shadow protected abstract void shadow$registerGoals();
     // @formatter:on
 
+
+    @Shadow public abstract boolean wantsToPickUp(final ItemStack $$0);
+
+    @Shadow protected MoveControl moveControl;
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Mob;registerGoals()V"))
     private void impl$registerGoals(final Mob this$0) {
