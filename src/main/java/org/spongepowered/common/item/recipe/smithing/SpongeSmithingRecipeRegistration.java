@@ -72,7 +72,8 @@ public class SpongeSmithingRecipeRegistration extends SpongeRecipeRegistration<S
             return (SmithingRecipe) new SmithingTransformRecipe(Optional.of(this.template), Optional.of(this.base), Optional.of(this.addition), this.spongeResult);
 
         }
-        return (SmithingRecipe) new SpongeSmithingRecipe(this.template, this.base, this.addition, this.spongeResult, this.resultFunction == null ? null : this.key.toString());
+        return (SmithingRecipe) new SpongeSmithingRecipe(Optional.ofNullable(this.template), Optional.ofNullable(this.base), Optional.ofNullable(this.addition),
+            this.spongeResult, this.resultFunction == null ? null : this.key.toString());
     }
 
     @Override

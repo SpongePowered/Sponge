@@ -47,9 +47,9 @@ public class SpongeSmithingRecipe extends SmithingTransformRecipe implements Res
     public static final MapCodec<SpongeSmithingRecipe> SPONGE_CODEC =  RecordCodecBuilder.mapCodec(
             $$0 -> $$0.group(
                             Codec.STRING.fieldOf(SPONGE_TYPE).forGetter(a -> "custom"),
-                            Ingredient.CODEC.fieldOf("template").forGetter($$0x -> ((SmithingRecipeBridge) $$0x).bridge$template()),
-                            Ingredient.CODEC.fieldOf(Constants.Recipe.SMITHING_BASE_INGREDIENT).forGetter($$0x -> ((SmithingRecipeBridge) $$0x).bridge$base()),
-                            Ingredient.CODEC.fieldOf(Constants.Recipe.SMITHING_ADDITION_INGREDIENT).forGetter($$0x -> ((SmithingRecipeBridge) $$0x).bridge$addition()),
+                            Ingredient.CODEC.optionalFieldOf(Constants.Recipe.SMITHING_TEMPLATE_INGREDIENT).forGetter($$0x -> ((SmithingRecipeBridge) $$0x).bridge$template()),
+                            Ingredient.CODEC.optionalFieldOf(Constants.Recipe.SMITHING_BASE_INGREDIENT).forGetter($$0x -> ((SmithingRecipeBridge) $$0x).bridge$base()),
+                            Ingredient.CODEC.optionalFieldOf(Constants.Recipe.SMITHING_ADDITION_INGREDIENT).forGetter($$0x -> ((SmithingRecipeBridge) $$0x).bridge$addition()),
                             ItemStack.CODEC.fieldOf(Constants.Recipe.RESULT).forGetter($$0x -> ((RecipeResultBridge) $$0x).bridge$result()),
                             IngredientResultUtil.CACHED_RESULT_FUNC_CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULTFUNCTION).forGetter(ResultFunctionRecipe::resultFunctionId)
                     )
@@ -58,15 +58,15 @@ public class SpongeSmithingRecipe extends SmithingTransformRecipe implements Res
 
     private final String resultFunctionId;
 
-    public static SpongeSmithingRecipe of(final String spongeType, final Ingredient template, final Ingredient base,
-            final Ingredient addition, final ItemStack resultIn, final Optional<String> resultFunctionId)
+    public static SpongeSmithingRecipe of(final String spongeType, final Optional<Ingredient> template, final Optional<Ingredient> base,
+            final Optional<Ingredient> addition, final ItemStack resultIn, final Optional<String> resultFunctionId)
     {
         return new SpongeSmithingRecipe(template, base, addition, resultIn, resultFunctionId.orElse(null));
     }
 
-    public SpongeSmithingRecipe(final Ingredient template, final Ingredient base,
-            final Ingredient addition, final ItemStack spongeResult, final String resultFunctionId) {
-        super(Optional.of(template), Optional.ofNullable(base), Optional.ofNullable(addition), spongeResult);
+    public SpongeSmithingRecipe(final Optional<Ingredient> template, final Optional<Ingredient> base,
+            final Optional<Ingredient> addition, final ItemStack spongeResult, final String resultFunctionId) {
+        super(template, base, addition, spongeResult);
         this.resultFunctionId = resultFunctionId;
     }
 
