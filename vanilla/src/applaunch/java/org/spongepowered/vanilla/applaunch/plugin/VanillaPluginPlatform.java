@@ -74,7 +74,7 @@ public final class VanillaPluginPlatform implements PluginPlatform {
 
     @Override
     public void setVersion(final String version) {
-        this.standardEnvironment.blackboard().getOrCreate(Keys.VERSION, () -> version);
+        this.standardEnvironment.blackboard().set(Keys.VERSION, version);
     }
 
     @Override
@@ -89,7 +89,7 @@ public final class VanillaPluginPlatform implements PluginPlatform {
 
     @Override
     public void setBaseDirectory(final Path baseDirectory) {
-        this.standardEnvironment.blackboard().getOrCreate(Keys.BASE_DIRECTORY, () -> baseDirectory);
+        this.standardEnvironment.blackboard().set(Keys.BASE_DIRECTORY, baseDirectory);
     }
 
     @Override
@@ -99,7 +99,7 @@ public final class VanillaPluginPlatform implements PluginPlatform {
 
     @Override
     public void setPluginDirectories(final List<Path> pluginDirectories) {
-        this.standardEnvironment.blackboard().getOrCreate(Keys.PLUGIN_DIRECTORIES, () -> pluginDirectories);
+        this.standardEnvironment.blackboard().set(Keys.PLUGIN_DIRECTORIES, pluginDirectories);
     }
 
     @Override
@@ -109,7 +109,7 @@ public final class VanillaPluginPlatform implements PluginPlatform {
 
     @Override
     public void setMetadataFilePath(final String metadataFilePath) {
-        this.standardEnvironment.blackboard().getOrCreate(Keys.METADATA_FILE_PATH, () -> metadataFilePath);
+        this.standardEnvironment.blackboard().set(Keys.METADATA_FILE_PATH, metadataFilePath);
     }
 
     public StandardEnvironment getStandardEnvironment() {
@@ -140,8 +140,8 @@ public final class VanillaPluginPlatform implements PluginPlatform {
 
     public void discoverLocatorServices() {
         final Blackboard blackboard = this.standardEnvironment.blackboard();
-        blackboard.getOrCreate(JVMKeys.ENVIRONMENT_LOCATOR_VARIABLE_NAME, () -> "SPONGE_PLUGINS");
-        blackboard.getOrCreate(JVMKeys.JVM_PLUGIN_RESOURCE_FACTORY, () -> SecureJarPluginResource::new);
+        blackboard.set(JVMKeys.ENVIRONMENT_LOCATOR_VARIABLE_NAME, "SPONGE_PLUGINS");
+        blackboard.set(JVMKeys.JVM_PLUGIN_RESOURCE_FACTORY, SecureJarPluginResource::new);
 
         final ModuleLayer serviceLayer = Launcher.INSTANCE.environment().findModuleLayerManager().flatMap(lm -> lm.getLayer(IModuleLayerManager.Layer.SERVICE)).orElseThrow();
         final var serviceLoader = (ServiceLoader<PluginResourceLocatorService<PluginResource>>) (Object) ServiceLoader.load(serviceLayer, PluginResourceLocatorService.class);
