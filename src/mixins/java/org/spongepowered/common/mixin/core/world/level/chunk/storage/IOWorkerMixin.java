@@ -60,6 +60,7 @@ import org.spongepowered.math.vector.Vector3i;
 
 import java.util.BitSet;
 import java.util.Map;
+import java.util.SequencedMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
@@ -73,7 +74,7 @@ public abstract class IOWorkerMixin implements IOWorkerBridge {
     @Shadow @Final private AtomicBoolean shutdownRequested;
     @Shadow @Final private ProcessorMailbox<StrictQueue.IntRunnable> mailbox;
     @Shadow @Final private RegionFileStorage storage;
-    @Shadow @Final private Map<ChunkPos, IOWorker$PendingStoreAccessor> pendingWrites;
+    @Shadow @Final private SequencedMap<ChunkPos, IOWorker$PendingStoreAccessor> pendingWrites;
 
     @Shadow protected abstract boolean shadow$isOldChunk(CompoundTag $$0);
     @Shadow protected abstract void shadow$tellStorePending();
