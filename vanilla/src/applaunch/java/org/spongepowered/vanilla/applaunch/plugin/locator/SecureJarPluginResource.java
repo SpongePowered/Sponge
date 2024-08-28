@@ -44,7 +44,14 @@ public final class SecureJarPluginResource implements JVMPluginResource {
     private PluginJarMetadata pluginJarMetadata;
     private List<PluginCandidate<SecureJarPluginResource>> candidates;
 
-    public SecureJarPluginResource(final String locator, final Path... paths) {
+    public SecureJarPluginResource(final String locator, final Path[] paths) {
+        Objects.requireNonNull(locator, "locator");
+        Objects.requireNonNull(paths, "paths");
+
+        if (paths.length == 0) {
+            throw new IllegalArgumentException("Need at least one path");
+        }
+
         this.locator = locator;
         this.jar = SecureJar.from(jar -> {
             if (ResourceType.of(jar) == ResourceType.PLUGIN) {

@@ -32,8 +32,10 @@ import org.spongepowered.plugin.PluginCandidate;
 import org.spongepowered.plugin.PluginLanguageService;
 import org.spongepowered.plugin.PluginResource;
 import org.spongepowered.plugin.PluginResourceLocatorService;
+import org.spongepowered.plugin.blackboard.Blackboard;
 import org.spongepowered.plugin.blackboard.Keys;
 import org.spongepowered.plugin.builtin.StandardEnvironment;
+import org.spongepowered.plugin.builtin.jvm.JVMKeys;
 import org.spongepowered.vanilla.applaunch.plugin.locator.SecureJarPluginResource;
 
 import java.nio.file.Path;
@@ -137,6 +139,10 @@ public final class VanillaPluginPlatform implements PluginPlatform {
     }
 
     public void discoverLocatorServices() {
+        final Blackboard blackboard = this.standardEnvironment.blackboard();
+        blackboard.getOrCreate(JVMKeys.ENVIRONMENT_LOCATOR_VARIABLE_NAME, () -> "SPONGE_PLUGINS");
+        blackboard.getOrCreate(JVMKeys.JVM_PLUGIN_RESOURCE_FACTORY, () -> SecureJarPluginResource::new);
+
         final ModuleLayer serviceLayer = Launcher.INSTANCE.environment().findModuleLayerManager().flatMap(lm -> lm.getLayer(IModuleLayerManager.Layer.SERVICE)).orElseThrow();
         final var serviceLoader = (ServiceLoader<PluginResourceLocatorService<PluginResource>>) (Object) ServiceLoader.load(serviceLayer, PluginResourceLocatorService.class);
 
