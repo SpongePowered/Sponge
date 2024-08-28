@@ -85,11 +85,12 @@ public abstract class SerializableChunkDataMixin_Tracker implements Serializable
     @Override
     public void bridge$parseTrackerData(final CompoundTag fullTag) {
         final CompoundTag spongeData = fullTag.getCompound(Constants.Sponge.Data.V2.SPONGE_DATA);
+        this.tracker$intPlayerPos = new HashMap<>();
+        this.tracker$shortPlayerPos = new HashMap<>();
+
         if (spongeData.isEmpty()) {
             return;
         }
-        this.tracker$intPlayerPos = new HashMap<>();
-        this.tracker$shortPlayerPos = new HashMap<>();
 
         final ListTag list = spongeData.getList(Constants.Sponge.SPONGE_BLOCK_POS_TABLE, 10);
         for (final Tag tag : list) {
