@@ -56,6 +56,7 @@ import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectProxy;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.asm.mixin.Debug;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -64,6 +65,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
@@ -228,8 +230,10 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         ci.cancel();
     }
 
-    @ModifyConstant(method = "tickServer", constant = @Constant(intValue = 0, ordinal = 0))
-    private int getSaveTickInterval(final int zero) {
+    @ModifyConstant(method = "tickServer",
+        slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/server/MinecraftServer;ticksUntilAutosave:I", ordinal = 0)),
+        constant = @Constant(intValue = 0, ordinal = 0, expandZeroConditions = Constant.Condition.LESS_THAN_OR_EQUAL_TO_ZERO))
+    private int impl$getSaveTickInterval(final int zero) {
         if (!this.shadow$isDedicatedServer()) {
             return zero;
         } else if (!this.shadow$isRunning()) {
