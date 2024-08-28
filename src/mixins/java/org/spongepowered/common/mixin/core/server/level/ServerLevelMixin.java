@@ -251,7 +251,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         final ServerExplosion mcExplosion = (ServerExplosion) explosion;
 
         try (final PhaseContext<?> ignored = GeneralPhase.State.EXPLOSION.createPhaseContext(PhaseTracker.SERVER)
-                .explosion((net.minecraft.world.level.Explosion) explosion)
+                .explosion(mcExplosion)
                 .source(explosion.sourceExplosive().isPresent() ? explosion.sourceExplosive() : this)) {
             ignored.buildAndSwitch();
 

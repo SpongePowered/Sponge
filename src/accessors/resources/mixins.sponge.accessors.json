@@ -143,7 +143,7 @@
         "world.item.trading.MerchantOfferAccessor",
         "world.level.BaseCommandBlockAccessor",
         "world.level.BaseSpawnerAccessor",
-        "world.level.ExplosionAccessor",
+        "world.level.ServerExplosionAccessor",
         "world.level.GameRules_ValueAccessor",
         "world.level.GameRulesAccessor",
         "world.level.LevelAccessor",

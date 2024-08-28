@@ -24,23 +24,18 @@
  */
 package org.spongepowered.common.accessor.world.level;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Explosion;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerExplosion;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(Explosion.class)
-public interface ExplosionAccessor {
+@Mixin(ServerExplosion.class)
+public interface ServerExplosionAccessor {
 
     @Accessor("blockInteraction") Explosion.BlockInteraction accessor$blockInteraction();
 
-    @Accessor("level") Level accessor$level();
-
-    @Accessor("x") double accessor$x();
-
-    @Accessor("y") double accessor$y();
-
-    @Accessor("z") double accessor$z();
+    @Accessor("level") ServerLevel accessor$level();
 
     @Accessor("radius") float accessor$radius();
 

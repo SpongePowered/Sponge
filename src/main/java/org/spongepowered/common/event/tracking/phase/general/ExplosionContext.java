@@ -27,16 +27,17 @@ package org.spongepowered.common.event.tracking.phase.general;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.ServerExplosion;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.accessor.world.level.ExplosionAccessor;
+import org.spongepowered.common.accessor.world.level.ServerExplosionAccessor;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.PrettyPrinter;
 
 public final class ExplosionContext extends GeneralPhaseContext<ExplosionContext> {
 
-    private Explosion explosion;
+    private ServerExplosion explosion;
 
     public ExplosionContext(PhaseTracker tracker) {
         super(GeneralPhase.State.EXPLOSION, tracker);
@@ -57,12 +58,12 @@ public final class ExplosionContext extends GeneralPhaseContext<ExplosionContext
         return this;
     }
 
-    public ExplosionContext explosion(final Explosion explosion) {
+    public ExplosionContext explosion(final ServerExplosion explosion) {
         this.explosion = explosion;
         return this;
     }
 
-    public Explosion getExplosion() {
+    public ServerExplosion getExplosion() {
         return this.explosion;
     }
 
@@ -88,12 +89,10 @@ public final class ExplosionContext extends GeneralPhaseContext<ExplosionContext
         if (phaseContext.getClass() != ExplosionContext.class) {
             return false;
         }
-        final ExplosionAccessor otherExplosion = (ExplosionAccessor) ((ExplosionContext) phaseContext).explosion;
-        final ExplosionAccessor thisExplosion = (ExplosionAccessor) this.explosion;
+        final ServerExplosionAccessor otherExplosion = (ServerExplosionAccessor) ((ExplosionContext) phaseContext).explosion;
+        final ServerExplosionAccessor thisExplosion = (ServerExplosionAccessor) this.explosion;
 
         return otherExplosion.accessor$level() == thisExplosion.accessor$level()
-               && otherExplosion.accessor$x() == thisExplosion.accessor$x()
-               && otherExplosion.accessor$y() == thisExplosion.accessor$y()
-               && otherExplosion.accessor$z() == thisExplosion.accessor$z();
+               && ((ExplosionContext) phaseContext).explosion.center().equals(this.explosion.center());
     }
 }
