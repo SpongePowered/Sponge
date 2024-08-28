@@ -34,12 +34,10 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.Recipe;
 import org.spongepowered.api.item.recipe.RecipeType;
-import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.List;
@@ -55,7 +53,6 @@ public interface RecipeMixin_API<I extends RecipeInput, I2 extends org.spongepow
     @Shadow boolean shadow$matches(I inv, net.minecraft.world.level.Level worldIn);
     @Shadow NonNullList<ItemStack> shadow$getRemainingItems(I inv);
     @Shadow net.minecraft.world.item.crafting.RecipeType<?> shadow$getType();
-    @Shadow NonNullList<net.minecraft.world.item.crafting.Ingredient> shadow$getIngredients();
     // @formatter:on
 
     @NonNull
@@ -82,11 +79,6 @@ public interface RecipeMixin_API<I extends RecipeInput, I2 extends org.spongepow
         return nonNullList.stream()
                 .map(ItemStackUtil::snapshotOf)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    default List<Ingredient> ingredients() {
-        return this.shadow$getIngredients().stream().map(IngredientUtil::fromNative).collect(Collectors.toList());
     }
 
     @Override
