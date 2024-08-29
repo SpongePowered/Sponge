@@ -81,7 +81,7 @@ public abstract class SpongeImplementationExtension {
 
                 final String providedVersion = providedModuleVersions.get(module);
                 if (providedVersion == null) {
-                    ModuleDependency dep = (ModuleDependency) deps.create(id.getDisplayName());
+                    ModuleDependency dep = (ModuleDependency) deps.create(module.getGroup() + ":" + module.getName() + ":" + version);
                     dep.setTransitive(false);
                     target.getDependencies().add(dep);
                 } else if (!providedVersion.equals(version)) {
