@@ -62,7 +62,7 @@ public class IngredientUtil {
 
     public static org.spongepowered.api.item.recipe.crafting.@Nullable Ingredient of(ResourceKey tagKey) {
         final TagKey<Item> key = TagKey.create(Registries.ITEM, (ResourceLocation) (Object) tagKey);
-        var holderset = BuiltInRegistries.ITEM.getTag(key).map(hs -> (HolderSet<Item>) hs).orElse(HolderSet.empty());
+        var holderset = BuiltInRegistries.ITEM.get(key).map(hs -> (HolderSet<Item>) hs).orElse(HolderSet.empty());
         return IngredientUtil.fromNative(Ingredient.of(holderset));
     }
 

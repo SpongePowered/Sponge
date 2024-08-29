@@ -131,7 +131,7 @@ public record SpongePlacedFeatureTemplate(ResourceKey key, net.minecraft.world.l
             if (key == null) {
                 this.feature = Holder.direct((ConfiguredFeature<?, ?>) (Object) feature);
             } else {
-                this.feature = registry.getHolderOrThrow(net.minecraft.resources.ResourceKey.create(Registries.CONFIGURED_FEATURE, key));
+                this.feature = registry.getOrThrow(net.minecraft.resources.ResourceKey.create(Registries.CONFIGURED_FEATURE, key));
             }
             return this;
         }
@@ -141,7 +141,7 @@ public record SpongePlacedFeatureTemplate(ResourceKey key, net.minecraft.world.l
             final Registry<ConfiguredFeature<?, ?>> registry = SpongeCommon.vanillaRegistry(Registries.CONFIGURED_FEATURE);
             final net.minecraft.resources.ResourceKey<ConfiguredFeature<?, ?>> key =
                     net.minecraft.resources.ResourceKey.create(Registries.CONFIGURED_FEATURE, ((ResourceLocation) (Object) feature.key()));
-            this.feature = Holder.Reference.createStandAlone(registry.asLookup(), key);
+            this.feature = Holder.Reference.createStandAlone(registry, key);
             return this;
         }
 

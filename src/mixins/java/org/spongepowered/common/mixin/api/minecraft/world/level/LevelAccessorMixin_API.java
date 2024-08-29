@@ -82,7 +82,7 @@ public interface LevelAccessorMixin_API<P extends WorldLike<P>> extends WorldLik
         return PaletteWrapper.of(
             PaletteTypes.BLOCK_STATE_PALETTE.get(),
             Block.BLOCK_STATE_REGISTRY,
-            (org.spongepowered.api.registry.Registry<BlockType>) ((LevelAccessor) (Object) this).registryAccess().registryOrThrow(Registries.BLOCK)
+            (org.spongepowered.api.registry.Registry<BlockType>) ((LevelAccessor) (Object) this).registryAccess().lookupOrThrow(Registries.BLOCK)
         );
     }
 

@@ -66,7 +66,7 @@ public final class ConfigTeleportHelperFilter implements TeleportHelperFilter {
             final TeleportHelperCategory teleportHelperCat = SpongeConfigs.getCommon().get().teleportHelper;
             ConfigTeleportHelperFilter.floorBlockTypes = teleportHelperCat.unsafeFloorBlocks.stream()
                     .map(x -> ResourceKey.resolve(x.toLowerCase(Locale.ENGLISH)))
-                    .map(x -> (BlockType) blockRegistry.get((ResourceLocation) (Object) x))
+                    .map(x -> (BlockType) blockRegistry.getValue((ResourceLocation) (Object) x))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
@@ -79,7 +79,7 @@ public final class ConfigTeleportHelperFilter implements TeleportHelperFilter {
 
             ConfigTeleportHelperFilter.bodyBlockTypes = teleportHelperCat.unsafeBlockBlocks.stream()
                     .map(x -> ResourceKey.resolve(x.toLowerCase(Locale.ENGLISH)))
-                    .map(x -> (BlockType) blockRegistry.get((ResourceLocation) (Object) x))
+                    .map(x -> (BlockType) blockRegistry.getValue((ResourceLocation) (Object) x))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 

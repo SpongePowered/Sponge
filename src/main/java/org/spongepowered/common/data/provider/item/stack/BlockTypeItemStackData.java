@@ -79,7 +79,7 @@ public final class BlockTypeItemStackData {
         }
 
         final AdventureModePredicate prev = stack.get(component);
-        final var holderGetter = BuiltInRegistries.BLOCK.asLookup();
+        final var holderGetter = BuiltInRegistries.BLOCK;
         final BlockPredicate blockPredicate = BlockPredicate.Builder.block().of(holderGetter, value.stream().map(Block.class::cast).toList()).build();
         final AdventureModePredicate predicate = new AdventureModePredicate(List.of(blockPredicate), prev == null || prev.showInTooltip());
         stack.set(component, predicate);

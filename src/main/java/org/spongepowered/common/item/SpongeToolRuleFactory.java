@@ -50,7 +50,7 @@ public class SpongeToolRuleFactory implements ToolRule.Factory {
     @Override
     public ToolRule minesAndDrops(final Tag<BlockType> blockTypeTag, final double speed) {
         final var tag = (TagKey<Block>) (Object) blockTypeTag;
-        final var holderSet = BuiltInRegistries.BLOCK.getTag(tag).map(hs -> (HolderSet<Block>) hs).orElse(HolderSet.empty());
+        final var holderSet = BuiltInRegistries.BLOCK.get(tag).map(hs -> (HolderSet<Block>) hs).orElse(HolderSet.empty());
         return (ToolRule) (Object) Tool.Rule.minesAndDrops(holderSet, (float) speed);
     }
 
@@ -64,7 +64,7 @@ public class SpongeToolRuleFactory implements ToolRule.Factory {
     @Override
     public ToolRule deniesDrops(final Tag<BlockType> blockTypeTag) {
         final var tag = (TagKey<Block>) (Object) blockTypeTag;
-        final var holderSet = BuiltInRegistries.BLOCK.getTag(tag).map(hs -> (HolderSet<Block>) hs).orElse(HolderSet.empty());
+        final var holderSet = BuiltInRegistries.BLOCK.get(tag).map(hs -> (HolderSet<Block>) hs).orElse(HolderSet.empty());
         return (ToolRule) (Object) Tool.Rule.deniesDrops(holderSet);
     }
 
@@ -77,7 +77,7 @@ public class SpongeToolRuleFactory implements ToolRule.Factory {
     @Override
     public ToolRule overrideSpeed(final Tag<BlockType> blockTypeTag, final double speed) {
         final var tag = (TagKey<Block>) (Object) blockTypeTag;
-        final var holderSet = BuiltInRegistries.BLOCK.getTag(tag).map(hs -> (HolderSet<Block>) hs).orElse(HolderSet.empty());
+        final var holderSet = BuiltInRegistries.BLOCK.get(tag).map(hs -> (HolderSet<Block>) hs).orElse(HolderSet.empty());
         return (ToolRule) (Object) Tool.Rule.overrideSpeed(holderSet, (float) speed);
     }
 
@@ -92,7 +92,7 @@ public class SpongeToolRuleFactory implements ToolRule.Factory {
     public ToolRule forTag(final Tag<BlockType> blockTypeTag, @Nullable final Double speed, @Nullable final Boolean drops) {
         // See Tool#forTag
         final var tag = (TagKey<Block>) (Object) blockTypeTag;
-        final var holderSet = BuiltInRegistries.BLOCK.getTag(tag).map(hs -> (HolderSet<Block>) hs).orElse(HolderSet.empty());
+        final var holderSet = BuiltInRegistries.BLOCK.get(tag).map(hs -> (HolderSet<Block>) hs).orElse(HolderSet.empty());
         return (ToolRule) (Object) new Tool.Rule(holderSet, Optional.ofNullable(speed).map(Double::floatValue), Optional.ofNullable(drops));
     }
 }

@@ -548,7 +548,7 @@ public final class SpongeAdventure {
             return new net.minecraft.network.chat.HoverEvent(
                 Action.SHOW_ENTITY,
                 new net.minecraft.network.chat.HoverEvent.EntityTooltipInfo(
-                    entityTypeRegistry.get(SpongeAdventure.asVanilla(value.type())),
+                    entityTypeRegistry.getValue(SpongeAdventure.asVanilla(value.type())),
                     value.id(),
                     SpongeAdventure.asVanillaNullable(value.name())
                 )
@@ -559,7 +559,7 @@ public final class SpongeAdventure {
             return new net.minecraft.network.chat.HoverEvent(
                 Action.SHOW_ITEM,
                 HoverEvent_ItemStackInfoAccessor.invoker$new(
-                    Holder.direct(itemRegistry.get(SpongeAdventure.asVanilla(value.item()))),
+                    Holder.direct(itemRegistry.getValue(SpongeAdventure.asVanilla(value.item()))),
                     value.count(),
                     SpongeAdventure.asVanilla(value.dataComponents())
                 )
@@ -731,12 +731,11 @@ public final class SpongeAdventure {
             return DataComponentPatch.EMPTY;
         }
         final DataComponentPatch.Builder builder = DataComponentPatch.builder();
-        componentMap.forEach((key, value) -> {
-            final DataComponentType type = BuiltInRegistries.DATA_COMPONENT_TYPE.get(SpongeAdventure.asVanilla(key));
-            if (type != null && value instanceof SpongeDataComponentValue dcv) {
-                builder.set(type, dcv.value.orElse(null));
+        componentMap.forEach((key, value) -> BuiltInRegistries.DATA_COMPONENT_TYPE.getOptional(SpongeAdventure.asVanilla(key)).ifPresent(type -> {
+            if (value instanceof SpongeDataComponentValue dcv) {
+                builder.set((DataComponentType) type, dcv.value.orElse(null));
             }
-        });
+        }));
         return builder.build();
     }
 

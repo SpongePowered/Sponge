@@ -275,7 +275,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
 
         return Optional.of(SpongeBlockEntityArchetypeBuilder.pooled()
                 .state(this.state())
-                .blockEntity((BlockEntityType) SpongeCommon.vanillaRegistry(Registries.BLOCK_ENTITY_TYPE).get(ResourceLocation.tryParse(blockEntityId)))
+                .blockEntity((BlockEntityType) SpongeCommon.vanillaRegistry(Registries.BLOCK_ENTITY_TYPE).getOptional(ResourceLocation.tryParse(blockEntityId)).orElse(null))
                 .blockEntityData(NBTTranslator.INSTANCE.translate(compound))
                 .build());
     }

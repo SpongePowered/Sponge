@@ -293,7 +293,7 @@ public final class CommandRegistryLoader {
     // Helper
 
     static ArgumentType<?> argumentTypeFromKey(ResourceKey key, CommandBuildContext ctx) {
-        final ArgumentTypeInfo<?,?> argumentTypeInfo = BuiltInRegistries.COMMAND_ARGUMENT_TYPE.get((ResourceLocation) (Object) key);
+        final ArgumentTypeInfo<?,?> argumentTypeInfo = BuiltInRegistries.COMMAND_ARGUMENT_TYPE.getValue((ResourceLocation) (Object) key);
         if (argumentTypeInfo instanceof SingletonArgumentInfo<?> s) {
             return s.unpack(null).instantiate(ctx);
         }

@@ -58,7 +58,7 @@ public abstract class MappedRegistryMixin_API<T> implements Registry<T> {
     @Shadow public abstract Holder.Reference<T> shadow$register(final net.minecraft.resources.ResourceKey<T> $$0, final T $$1, final RegistrationInfo $$2);
 
     @Shadow public abstract net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<T>> shadow$key();
-    @Shadow @Nullable public abstract T shadow$get(@Nullable ResourceLocation var1);
+    @Shadow @Nullable public abstract T shadow$getValue(@Nullable ResourceLocation var1);
 
     private ResourceLocation impl$getKey(final T value) {
         return ((net.minecraft.core.Registry) this).getKey(value);
@@ -69,7 +69,7 @@ public abstract class MappedRegistryMixin_API<T> implements Registry<T> {
     }
 
     private Optional<HolderSet.Named<T>> impl$getTag(TagKey<T> var1) {
-        return ((net.minecraft.core.Registry) this).getTag(var1);
+        return ((net.minecraft.core.Registry) this).get(var1);
     }
 
     private Stream<TagKey<T>> impl$getTagNames() {
@@ -114,7 +114,7 @@ public abstract class MappedRegistryMixin_API<T> implements Registry<T> {
 
     @Override
     public <V extends T> V value(final ResourceKey key) {
-        final V value = (V) this.shadow$get((ResourceLocation) (Object) Objects.requireNonNull(key, "key"));
+        final V value = (V) this.shadow$getValue((ResourceLocation) (Object) Objects.requireNonNull(key, "key"));
         if (value != null) {
             return value;
         }

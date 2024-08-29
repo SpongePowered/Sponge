@@ -109,7 +109,7 @@ public final class ViewerPacketUtil {
 
     public static ClientboundLevelEventPacket playMusicDisc(final int x, final int y, final int z, final MusicDisc musicDisc, final RegistryAccess registryAccess) {
         Objects.requireNonNull(musicDisc, "musicDisc");
-        final int songId = registryAccess.registryOrThrow(Registries.JUKEBOX_SONG).getId((JukeboxSong) (Object) musicDisc);
+        final int songId = registryAccess.lookupOrThrow(Registries.JUKEBOX_SONG).getId((JukeboxSong) (Object) musicDisc);
         return new ClientboundLevelEventPacket(1010, new BlockPos(x, y, z), songId, false);
     }
 

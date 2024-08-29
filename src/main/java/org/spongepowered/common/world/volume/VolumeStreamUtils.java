@@ -509,7 +509,7 @@ public final class VolumeStreamUtils {
         final Vector3i size = max.sub(min).add(1, 1 ,1);
         final @MonotonicNonNull ObjectArrayMutableBiomeBuffer backingVolume;
         if (shouldCarbonCopy) {
-            final Registry<Biome> biomeRegistry = reader.registryAccess().registryOrThrow(Registries.BIOME);
+            final Registry<Biome> biomeRegistry = reader.registryAccess().lookupOrThrow(Registries.BIOME);
             backingVolume = new ObjectArrayMutableBiomeBuffer(min, size, VolumeStreamUtils.nativeToSpongeRegistry(biomeRegistry));
         } else {
             backingVolume = null;

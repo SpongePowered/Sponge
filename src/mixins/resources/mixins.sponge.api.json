@@ -18,7 +18,7 @@
         "minecraft.advancements.CriterionTriggerInstanceMixin_API",
         "minecraft.advancements.CriterionTriggerMixin_API",
         "minecraft.advancements.DisplayInfoMixin_API",
-        "minecraft.block.AbstractBlockMixin_API",
+        "minecraft.block.BlockBehaviourMixin_API",
         "minecraft.block.BlockMixin_API",
         "minecraft.block.BlockSoundGroupMixin_API",
         "minecraft.commands.CommandSourceStackMixin_API",

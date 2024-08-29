@@ -210,7 +210,7 @@ public record SpongeBiomeTemplate(ResourceKey key, Biome representedBiome, DataP
 
             final Registry<net.minecraft.world.level.levelgen.placement.PlacedFeature> placedFeatureRegistry = SpongeCommon.vanillaRegistry(Registries.PLACED_FEATURE);
             final Registry<ConfiguredWorldCarver<?>> configuredWorldCarverRegistry = SpongeCommon.vanillaRegistry(Registries.CONFIGURED_CARVER);
-            final BiomeGenerationSettings.Builder generationBuilder = new BiomeGenerationSettings.Builder(placedFeatureRegistry.asLookup(), configuredWorldCarverRegistry.asLookup());
+            final BiomeGenerationSettings.Builder generationBuilder = new BiomeGenerationSettings.Builder(placedFeatureRegistry, configuredWorldCarverRegistry);
             features.forEach((step, list) -> list.forEach(feature -> generationBuilder.addFeature((GenerationStep.Decoration) (Object) step,
                     Holder.direct((net.minecraft.world.level.levelgen.placement.PlacedFeature) (Object) feature))));
             carvers.forEach((carver) -> generationBuilder.addCarver(Holder.direct((ConfiguredWorldCarver<?>) (Object) carver)));

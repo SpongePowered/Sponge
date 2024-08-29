@@ -129,7 +129,7 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
         return PaletteWrapper.of(
             PaletteTypes.BLOCK_STATE_PALETTE.get(),
             Block.BLOCK_STATE_REGISTRY,
-            (org.spongepowered.api.registry.Registry<BlockType>) this.level.registryAccess().registry(Registries.BLOCK).get()
+            (org.spongepowered.api.registry.Registry<BlockType>) this.level.registryAccess().lookupOrThrow(Registries.BLOCK)
         );
     }
 
@@ -339,7 +339,7 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
         final Vector3i size = max.sub(min).add(1, 1 ,1);
         final @MonotonicNonNull ObjectArrayMutableBiomeBuffer backingVolume;
         if (shouldCarbonCopy) {
-            final Registry<net.minecraft.world.level.biome.Biome> biomeRegistry = this.level.registryAccess().registryOrThrow(Registries.BIOME);
+            final Registry<net.minecraft.world.level.biome.Biome> biomeRegistry = this.level.registryAccess().lookupOrThrow(Registries.BIOME);
             backingVolume = new ObjectArrayMutableBiomeBuffer(min, size, VolumeStreamUtils.nativeToSpongeRegistry(biomeRegistry));
         } else {
             backingVolume = null;

@@ -43,7 +43,7 @@ public final class BlockStateSerializerDeserializer {
     public static Optional<BlockState> deserialize(final String string) {
         final String state = Objects.requireNonNull(string, "Id cannot be null!").toLowerCase(Locale.ENGLISH);
         try {
-            final BlockStateParser.BlockResult result = BlockStateParser.parseForBlock(SpongeCommon.vanillaRegistry(Registries.BLOCK).asLookup(), state, true);
+            final BlockStateParser.BlockResult result = BlockStateParser.parseForBlock(SpongeCommon.vanillaRegistry(Registries.BLOCK), state, true);
             return Optional.of((BlockState) result.blockState());
         } catch (final CommandSyntaxException e) {
             return Optional.empty();

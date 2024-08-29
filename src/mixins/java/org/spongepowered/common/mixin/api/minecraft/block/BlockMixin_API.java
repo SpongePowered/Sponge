@@ -51,13 +51,12 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Mixin(value = Block.class, priority = 999)
-public abstract class BlockMixin_API extends AbstractBlockMixin_API implements SpongeImmutableDataHolder<BlockType> {
+public abstract class BlockMixin_API extends BlockBehaviourMixin_API implements SpongeImmutableDataHolder<BlockType> {
 
     // @formatter:off
     @Shadow @Final protected StateDefinition<Block, net.minecraft.world.level.block.state.BlockState> stateDefinition;
     @Shadow @Final private Holder.Reference<Block> builtInRegistryHolder;
 
-    @Shadow public abstract String shadow$getDescriptionId();
     @Shadow public abstract net.minecraft.world.level.block.state.BlockState shadow$defaultBlockState();
     // @formatter:on
 
