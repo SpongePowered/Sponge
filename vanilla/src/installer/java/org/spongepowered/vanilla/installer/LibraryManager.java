@@ -87,7 +87,7 @@ public final class LibraryManager {
         return Collections.unmodifiableSet(this.libraries.getOrDefault(collection, Collections.emptySet()));
     }
 
-    protected void addLibrary(final String set, final Library library) {
+    void addLibrary(final String set, final Library library) {
         this.libraries.computeIfAbsent(set, $ -> Collections.synchronizedSet(new LinkedHashSet<>())).add(library);
     }
 
@@ -244,24 +244,7 @@ public final class LibraryManager {
         }
     }
 
-    public static class Library {
-
-        private final String name;
-        private final Path file;
-
-        public Library(final String name, final Path file) {
-            this.name = name;
-            this.file = file;
-        }
-
-        public String getName() {
-            return this.name;
-        }
-
-        public Path getFile() {
-            return this.file;
-        }
-    }
+    public record Library(String name, Path file) {}
 
     private static String asId(final Dependency dep) {
         return dep.group + ':' + dep.module + ':' + dep.version;

@@ -30,6 +30,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.vanilla.applaunch.AppLaunchTarget;
 
+import java.util.NoSuchElementException;
+
 /**
  * The common Sponge {@link ILaunchHandlerService launch handler} for development
  * and production environments.
@@ -45,7 +47,10 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
     @Override
     public ServiceRunner launchService(final String[] arguments, final ModuleLayer gameLayer) {
         this.logger.info("Transitioning to Sponge launch, please wait...");
-        return () -> this.launchSponge(gameLayer.findModule("spongevanilla").orElseThrow(), arguments);
+        return () -> {
+            final Module module = gameLayer.findModule("spongevanilla").orElseThrow(() -> new NoSuchElementException("Module spongevanilla"));
+            this.launchSponge(module, arguments);
+        };
     }
 
     public abstract AppLaunchTarget target();

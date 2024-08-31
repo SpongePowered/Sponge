@@ -43,9 +43,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URI;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.net.URLConnection;
 import java.nio.file.AccessDeniedException;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -63,12 +68,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 
 public final class InstallerMain {
 
-    private static final String COLLECTION_BOOTSTRAP = "bootstrap"; // goes on app
-    private static final String COLLECTION_MAIN = "main"; // goes on TCL
+    private static final String COLLECTION_BOOTSTRAP = "bootstrap"; // boot layer
+    private static final String COLLECTION_MAIN = "main"; // game layer
     private static final int MAX_TRIES = 2;
 
     private final Installer installer;
@@ -126,41 +132,72 @@ public final class InstallerMain {
         }
         assert remappedMinecraftJar != null; // always assigned or thrown
 
-        // MC itself and mojang dependencies are on the main layer, other libs are only on the bootstrap layer
+        // Minecraft itself is on the main layer
         libraryManager.addLibrary(InstallerMain.COLLECTION_MAIN, new LibraryManager.Library("minecraft", remappedMinecraftJar.server()));
-        for (final Map.Entry<GroupArtifactVersion, Path> library : remappedMinecraftJar.libraries().entrySet()) {
-            if (library.getKey().group().equals("com.mojang") || library.getKey().group().equals("net.minecraft")) {
-                libraryManager.addLibrary(InstallerMain.COLLECTION_MAIN, new LibraryManager.Library(library.getKey().toString(), library.getValue()));
-            } else {
-                libraryManager.addLibrary(InstallerMain.COLLECTION_BOOTSTRAP, new LibraryManager.Library(library.getKey().toString(), library.getValue()));
-            }
+
+        // Other libs are on the bootstrap layer
+        for (final Map.Entry<GroupArtifactVersion, Path> entry : remappedMinecraftJar.libraries().entrySet()) {
+            final GroupArtifactVersion artifact = entry.getKey();
+            final Path path = entry.getValue();
+
+            libraryManager.addLibrary(InstallerMain.COLLECTION_BOOTSTRAP, new LibraryManager.Library(artifact.toString(), path));
         }
+
         this.installer.getLibraryManager().finishedProcessing();
 
         Logger.info("Environment has been verified.");
 
         final Set<String> seenLibs = new HashSet<>();
-        this.installer.getLibraryManager().getAll(InstallerMain.COLLECTION_BOOTSTRAP).stream()
-            .peek(lib -> seenLibs.add(lib.getName()))
-            .map(LibraryManager.Library::getFile)
-            .forEach(path -> {
-                Logger.debug("Adding jar {} to bootstrap classpath", path);
-                Agent.addJarToClasspath(path);
-            });
-
-        final Path[] transformableLibs = this.installer.getLibraryManager().getAll(InstallerMain.COLLECTION_MAIN).stream()
-            .filter(lib -> !seenLibs.contains(lib.getName()))
-            .map(LibraryManager.Library::getFile)
+        final Path[] bootLibs = this.installer.getLibraryManager().getAll(InstallerMain.COLLECTION_BOOTSTRAP).stream()
+            .peek(lib -> seenLibs.add(lib.name()))
+            .map(LibraryManager.Library::file)
             .toArray(Path[]::new);
 
+        final Path[] gameLibs = this.installer.getLibraryManager().getAll(InstallerMain.COLLECTION_MAIN).stream()
+            .filter(lib -> !seenLibs.contains(lib.name()))
+            .map(LibraryManager.Library::file)
+            .toArray(Path[]::new);
+
+        final URL rootJar = InstallerMain.class.getProtectionDomain().getCodeSource().getLocation();
+        final URI fsURI = new URI("jar", rootJar.toString(), null);
+        System.setProperty("sponge.rootJarFS", fsURI.toString());
+
+        final FileSystem fs = FileSystems.newFileSystem(fsURI, Map.of());
+        final Path spongeBoot = newJarInJar(fs.getPath("jars", "spongevanilla-boot.jar"));
+
+        String launchTarget = LauncherCommandLine.launchTarget;
+        if (launchTarget == null) {
+            final Path manifestFile = fs.getPath("META-INF", "MANIFEST.MF");
+            try (final InputStream stream = Files.newInputStream(manifestFile)) {
+                final Manifest manifest = new Manifest(stream);
+                launchTarget = manifest.getMainAttributes().getValue(Constants.ManifestAttributes.LAUNCH_TARGET);
+            }
+        }
+
+        final StringBuilder gameLibsEnv = new StringBuilder();
+        for (final Path lib : gameLibs) {
+            gameLibsEnv.append(lib.toAbsolutePath()).append(';');
+        }
+        gameLibsEnv.setLength(gameLibsEnv.length() - 1);
+        System.setProperty("sponge.gameResources", gameLibsEnv.toString());
+
         final List<String> gameArgs = new ArrayList<>(LauncherCommandLine.remainingArgs);
+        gameArgs.add("--launchTarget");
+        gameArgs.add(launchTarget);
         Collections.addAll(gameArgs, this.installer.getLauncherConfig().args.split(" "));
 
-        // Suppress illegal reflection warnings on newer java
-        Agent.crackModules();
+        InstallerMain.bootstrap(bootLibs, spongeBoot, gameArgs.toArray(new String[0]));
+    }
 
-        final String className = "org.spongepowered.vanilla.applaunch.Main";
-        InstallerMain.invokeMain(className, gameArgs.toArray(new String[0]), transformableLibs);
+    private static Path newJarInJar(final Path jar) {
+        try {
+            URI jij = new URI("jij:" + jar.toAbsolutePath().toUri().getRawSchemeSpecificPart()).normalize();
+            final Map<String, ?> env = Map.of("packagePath", jar);
+            FileSystem jijFS = FileSystems.newFileSystem(jij, env);
+            return jijFS.getPath("/"); // root of the archive to load
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private <T extends Throwable> ServerAndLibraries recoverFromMinecraftDownloadError(final T ex) throws T {
@@ -175,17 +212,33 @@ public final class InstallerMain {
         }
     }
 
-    private static void invokeMain(final String className, final String[] args, final Path[] extraCpEntries) {
+    private static void bootstrap(final Path[] bootLibs, final Path spongeBoot, final String[] args) throws Exception {
+        final URL[] urls = new URL[bootLibs.length];
+        for (int i = 0; i < bootLibs.length; i++) {
+            urls[i] = bootLibs[i].toAbsolutePath().toUri().toURL();
+        }
+
+        final List<Path[]> classpath = new ArrayList<>();
+        for (final Path lib : bootLibs) {
+            classpath.add(new Path[] { lib });
+        }
+        classpath.add(new Path[] { spongeBoot });
+
+        URLClassLoader loader = new URLClassLoader(urls, ClassLoader.getPlatformClassLoader());
+        ClassLoader previousLoader = Thread.currentThread().getContextClassLoader();
         try {
-            Class.forName(className)
-                .getMethod("main", String[].class, Path[].class)
-                .invoke(null, args, extraCpEntries);
-        } catch (final InvocationTargetException ex) {
-            Logger.error(ex.getCause(), "Failed to invoke main class {} due to an error", className);
+            Thread.currentThread().setContextClassLoader(loader);
+            final Class<?> cl = Class.forName("net.minecraftforge.bootstrap.Bootstrap", false, loader);
+            final Object instance = cl.getDeclaredConstructor().newInstance();
+            final Method m = cl.getDeclaredMethod("bootstrapMain", String[].class, List.class);
+            m.setAccessible(true);
+            m.invoke(instance, args, classpath);
+        } catch (final Exception ex) {
+            final Throwable cause = ex instanceof InvocationTargetException ? ex.getCause() : ex;
+            Logger.error(cause, "Failed to invoke bootstrap main due to an error");
             System.exit(1);
-        } catch (final ClassNotFoundException | NoSuchMethodException | IllegalAccessException ex) {
-            Logger.error(ex, "Failed to invoke main class {} due to an error", className);
-            System.exit(1);
+        } finally {
+            Thread.currentThread().setContextClassLoader(previousLoader);
         }
     }
 
@@ -391,47 +444,46 @@ public final class InstallerMain {
         final Renamer.Builder renamerBuilder = Renamer.builder()
             .add(Transformer.parameterAnnotationFixerFactory())
             .add(ctx -> {
-              final Transformer backing = Transformer.renamerFactory(mappings, false).create(ctx);
-              return new Transformer() {
-
-                @Override
-                public ClassEntry process(final ClassEntry entry) {
-                    final String name = entry.getName();
-                    if (name.startsWith("it/unimi")
-                        || name.startsWith("com/google")
-                        || name.startsWith("com/mojang/datafixers")
-                        || name.startsWith("com/mojang/brigadier")
-                        || name.startsWith("org/apache")) {
-                        return entry;
+                final Transformer backing = Transformer.renamerFactory(mappings, false).create(ctx);
+                return new Transformer() {
+                    @Override
+                    public ClassEntry process(final ClassEntry entry) {
+                        final String name = entry.getName();
+                        if (name.startsWith("it/unimi")
+                            || name.startsWith("com/google")
+                            || name.startsWith("com/mojang/datafixers")
+                            || name.startsWith("com/mojang/brigadier")
+                            || name.startsWith("org/apache")) {
+                            return entry;
+                        }
+                        return backing.process(entry);
                     }
-                    return backing.process(entry);
-                }
 
-                @Override
-                public ManifestEntry process(final ManifestEntry entry) {
-                    return backing.process(entry);
-                }
+                    @Override
+                    public ManifestEntry process(final ManifestEntry entry) {
+                        return backing.process(entry);
+                    }
 
-                @Override
-                public ResourceEntry process(final ResourceEntry entry) {
-                    return backing.process(entry);
-                }
+                    @Override
+                    public ResourceEntry process(final ResourceEntry entry) {
+                        return backing.process(entry);
+                    }
 
-                @Override
-                public Collection<? extends Entry> getExtras() {
-                    return backing.getExtras();
-                }
-
-              };
+                    @Override
+                    public Collection<? extends Entry> getExtras() {
+                        return backing.getExtras();
+                    }
+                };
             })
             .add(Transformer.recordFixerFactory())
             .add(Transformer.parameterAnnotationFixerFactory())
             .add(Transformer.sourceFixerFactory(SourceFixerConfig.JAVA))
             .add(Transformer.signatureStripperFactory(SignatureStripperConfig.ALL))
             .logger(Logger::debug); // quiet
-            try (final Renamer ren = renamerBuilder.build()) {
-                ren.run(minecraft.server.toFile(), tempOutput.toFile());
-            }
+
+        try (final Renamer ren = renamerBuilder.build()) {
+            ren.run(minecraft.server.toFile(), tempOutput.toFile());
+        }
 
         // Restore file
         try {
