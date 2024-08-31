@@ -1,3 +1,5 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     id("org.spongepowered.gradle.vanilla")
     alias(libs.plugins.shadow)
@@ -30,6 +32,7 @@ val gameLibrariesConfig: NamedDomainObjectProvider<Configuration> = configuratio
 
 val gameManagedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeGameManagedLibraries")
 
+val bootShadedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeBootShadedLibraries")
 val gameShadedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeGameShadedLibraries")
 
 val runTaskOnlyConfig: NamedDomainObjectProvider<Configuration> = configurations.register("runTaskOnly")
@@ -185,11 +188,11 @@ minecraft {
                 dependsOn(applaunchOutputs)
                 environment("MOD_CLASSES", applaunchOutputs.joinToString(";") { "applaunch%%$it" })
 
-                // Configure GAME and LANG resources
-                val resources = mutableListOf<FileCollection>()
-                resources.addAll(gameManagedLibrariesConfig.get().files.map { files(it) })
+                // Configure resources
+                val gameResources = mutableListOf<FileCollection>()
+                gameResources.addAll(gameManagedLibrariesConfig.get().files.map { files(it) })
 
-                resources.add(files(
+                gameResources.add(files(
                     main.get().output, vanillaMain.output,
                     mixins.get().output, vanillaMixins.output,
                     accessors.get().output, vanillaAccessors.output,
@@ -197,12 +200,14 @@ minecraft {
                     gameShadedLibrariesConfig.get()
                 ))
 
-                testPluginsProject?.also {
-                    resources.add(it.sourceSets.getByName("main").output)
-                }
+                dependsOn(gameResources)
+                jvmArgs("-Dsponge.gameResources=" + gameResources.joinToString(";") { it.joinToString("&") })
 
-                dependsOn(resources)
-                environment("SPONGE_PLUGINS", resources.joinToString(";") { it.joinToString("&") })
+                testPluginsProject?.also {
+                    val plugins: FileCollection = it.sourceSets.getByName("main").output
+                    dependsOn(plugins)
+                    environment("SPONGE_PLUGINS", plugins.joinToString("&"))
+                }
             }
         }
     }
@@ -237,32 +242,29 @@ dependencies {
     installer(platform(apiLibs.configurate.bom))
     installer(apiLibs.configurate.hocon)
     installer(apiLibs.configurate.core)
-    installer(libs.configurate.jackson)
     installer(libs.joptSimple)
     installer(libs.tinylog.api)
     installer(libs.tinylog.impl)
-    // Override ASM versions, and explicitly declare dependencies so ASM is excluded from the manifest.
-    val asmExclusions = sequenceOf(libs.asm.asProvider(), libs.asm.commons, libs.asm.tree, libs.asm.analysis)
-            .onEach {
-                installer(it)
-            }.toSet()
+
+    installer(libs.asm.commons)
+    installer(libs.asm.tree)
     installer(libs.forgeAutoRenamingTool) {
         exclude(group = "net.sf.jopt-simple")
-        asmExclusions.forEach { exclude(group = it.get().group, module = it.get().name) } // Use our own ASM version
-    }
-
-    // Add the API as a runtime dependency, just so it gets shaded into the jar
-    add(vanillaInstaller.runtimeOnlyConfigurationName, "org.spongepowered:spongeapi:$apiVersion") {
-        isTransitive = false
+        exclude(group = "org.ow2.asm")
     }
 
     val init = initLibrariesConfig.name
-    init(libs.bootstrap)
     init(libs.securemodules)
     init(libs.asm.commons)
     init(libs.asm.util)
+    init(libs.jarjar.fs)
 
     val boot = bootLibrariesConfig.name
+    boot(libs.securemodules)
+    boot(libs.asm.commons)
+    boot(libs.asm.util)
+    boot(libs.bootstrap)
+
     boot(libs.modlauncher) {
         exclude(group = "org.apache.logging.log4j")
     }
@@ -270,7 +272,6 @@ dependencies {
         exclude(group = "org.checkerframework", module = "checker-qual")
         // exclude(group = "com.google.code.gson", module = "gson")
         exclude(group = "org.apache.logging.log4j", module = "log4j-api")
-        // exclude(group = "org.apache.commons", module = "commons-lang3")
     }
     boot(libs.lmaxDisruptor)
     boot(apiLibs.checkerQual)
@@ -296,6 +297,10 @@ dependencies {
         exclude(group = "org.spongepowered", module = "configurate-core")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
+    boot(libs.configurate.jackson) {
+        exclude(group = "org.spongepowered", module = "configurate-core")
+        exclude(group = "org.checkerframework", module = "checker-qual")
+    }
 
     boot(libs.mixin)
     boot(libs.asm.tree)
@@ -304,9 +309,11 @@ dependencies {
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
 
-    boot("com.mojang:authlib:6.0.54") {
-        exclude(group = "com.google.guava", module = "guava")
-    }
+    // All minecraft deps except itself
+    configurations.minecraft.get().resolvedConfiguration.resolvedArtifacts
+        .map { it.id.componentIdentifier.toString() }
+        .filter { !it.startsWith("net.minecraft:joined") }
+        .forEach { boot(it) { isTransitive = false } }
 
     boot(project(transformersProject.path))
 
@@ -319,14 +326,13 @@ dependencies {
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
     game(libs.javaxInject)
-    game(libs.configurate.jackson) {
-        exclude(group = "org.spongepowered", module = "configurate-core")
-        exclude(group = "org.checkerframework", module = "checker-qual")
-    }
     game(libs.adventure.serializerAnsi) {
         exclude(group = "org.jetbrains", module = "annotations")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
+
+    val bootShadedLibraries = bootShadedLibrariesConfig.name
+    bootShadedLibraries(project(transformersProject.path)) { isTransitive = false }
 
     val gameShadedLibraries = gameShadedLibrariesConfig.name
     gameShadedLibraries("org.spongepowered:spongeapi:$apiVersion") { isTransitive = false }
@@ -382,15 +388,12 @@ tasks {
         manifest{
             from(vanillaManifest)
             attributes(
-                    "Premain-Class" to "org.spongepowered.vanilla.installer.Agent",
-                    "Agent-Class" to "org.spongepowered.vanilla.installer.Agent",
-                    "Launcher-Agent-Class" to "org.spongepowered.vanilla.installer.Agent",
-                    "Multi-Release" to true
+                "Main-Class" to "org.spongepowered.vanilla.installer.InstallerMain",
+                "Multi-Release" to true
             )
         }
         from(vanillaInstaller.output)
     }
-
     val vanillaAppLaunchJar by registering(Jar::class) {
         archiveClassifier.set("applaunch")
         manifest.from(vanillaManifest)
@@ -420,11 +423,16 @@ tasks {
     val installerResources = project.layout.buildDirectory.dir("generated/resources/installer")
     vanillaInstaller.resources.srcDir(installerResources)
 
+    val downloadNotNeeded = configurations.register("downloadNotNeeded") {
+        extendsFrom(configurations.minecraft.get())
+        extendsFrom(gameShadedLibrariesConfig.get())
+    }
+
     val emitDependencies by registering(org.spongepowered.gradle.impl.OutputDependenciesToJson::class) {
         group = "sponge"
         this.dependencies("bootstrap", bootLibrariesConfig)
         this.dependencies("main", gameManagedLibrariesConfig)
-        this.excludedDependencies(gameShadedLibrariesConfig)
+        this.excludedDependencies(downloadNotNeeded)
 
         outputFile.set(installerResources.map { it.file("libraries.json") })
     }
@@ -432,54 +440,91 @@ tasks {
         dependsOn(emitDependencies)
     }
 
-    shadowJar {
+    val vanillaBootShadowJar by register("bootShadowJar", ShadowJar::class) {
+        group = "shadow"
+        archiveClassifier.set("boot")
+
         mergeServiceFiles()
+        configurations = listOf(bootShadedLibrariesConfig.get())
 
-        configurations = listOf(project.configurations.getByName(vanillaInstaller.runtimeClasspathConfigurationName))
-
-        archiveClassifier.set("universal")
         manifest {
-            attributes(mapOf(
-                    "Superclass-Transformer" to "common.superclasschange,vanilla.superclasschange",
-                    "Access-Widener" to "common.accesswidener",
-                    "MixinConfigs" to mixinConfigs.joinToString(","),
-                    "Main-Class" to "org.spongepowered.vanilla.installer.InstallerMain",
-                    "Launch-Target" to "sponge_server_prod",
-                    "Multi-Release" to true,
-                    "Premain-Class" to "org.spongepowered.vanilla.installer.Agent",
-                    "Agent-Class" to "org.spongepowered.vanilla.installer.Agent",
-                    "Launcher-Agent-Class" to "org.spongepowered.vanilla.installer.Agent"
-            ))
-            attributes(
-                mapOf("Implementation-Version" to libs.versions.asm.get()),
-                "org/objectweb/asm/"
-            )
             from(vanillaManifest)
+            attributes("Automatic-Module-Name" to "spongevanilla.boot")
         }
-        from(commonProject.sourceSets.main.map { it.output })
-        from(commonProject.sourceSets.named("mixins").map {it.output })
-        from(commonProject.sourceSets.named("accessors").map {it.output })
-        from(commonProject.sourceSets.named("launch").map {it.output })
-        from(commonProject.sourceSets.named("applaunch").map {it.output })
-        from(sourceSets.main.map {it.output })
-        from(vanillaInstaller.output)
+
+        from(commonProject.sourceSets.named("applaunch").map { it.output })
         from(vanillaAppLaunch.output)
+    }
+
+    val installerShadowJar by register("installerShadowJar", ShadowJar::class) {
+        group = "shadow"
+        archiveClassifier.set("installer-shadow")
+
+        mergeServiceFiles()
+        configurations = listOf(installerLibrariesConfig.get(), initLibrariesConfig.get())
+        exclude("META-INF/INDEX.LIST", "META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA", "module-info.class")
+
+        manifest {
+            from(vanillaManifest)
+            attributes(
+                "Main-Class" to "org.spongepowered.vanilla.installer.InstallerMain",
+                "Automatic-Module-Name" to "spongevanilla.installer",
+                "Launch-Target" to "sponge_server_prod",
+                "Multi-Release" to true
+            )
+            attributes(mapOf("Implementation-Version" to libs.versions.asm.get()), "org/objectweb/asm/")
+        }
+
+        from(vanillaInstaller.output)
+    }
+
+    shadowJar {
+        group = "shadow"
+        archiveClassifier.set("mod")
+
+        mergeServiceFiles()
+        configurations = listOf(gameShadedLibrariesConfig.get())
+
+        manifest {
+            from(vanillaManifest)
+            attributes(
+                "Superclass-Transformer" to "common.superclasschange,vanilla.superclasschange",
+                "Access-Widener" to "common.accesswidener",
+                "MixinConfigs" to mixinConfigs.joinToString(","),
+                "Multi-Release" to true
+            )
+        }
+
+        from(commonProject.sourceSets.main.map { it.output })
+        from(commonProject.sourceSets.named("mixins").map { it.output })
+        from(commonProject.sourceSets.named("accessors").map { it.output })
+        from(commonProject.sourceSets.named("launch").map { it.output })
+
         from(vanillaLaunch.output)
         from(vanillaAccessors.output)
         from(vanillaMixins.output)
-        /*dependencies {
-            // include(project(":"))
-            include("org.spongepowered:spongeapi:$apiVersion")
-        } */
-
-        // We cannot have modules in a shaded jar
-        exclude("META-INF/versions/*/module-info.class")
-        exclude("module-info.class")
     }
+
+    val universalJar = register("universalJar", Jar::class) {
+        group = "build"
+        archiveClassifier.set("universal")
+
+        manifest.from(installerShadowJar.manifest)
+
+        from(installerShadowJar.archiveFile.map { zipTree(it) })
+
+        into("jars") {
+            from(shadowJar)
+            rename("spongevanilla-(.*)-mod.jar", "spongevanilla-mod.jar")
+
+            from(vanillaBootShadowJar)
+            rename("spongevanilla-(.*)-boot.jar", "spongevanilla-boot.jar")
+        }
+    }
+
     assemble {
-        dependsOn(shadowJar)
+        dependsOn(universalJar)
     }
-
 }
 
 indraSpotlessLicenser {

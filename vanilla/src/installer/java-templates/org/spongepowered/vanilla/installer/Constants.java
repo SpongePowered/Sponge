@@ -24,8 +24,6 @@
  */
 package org.spongepowered.vanilla.installer;
 
-import org.objectweb.asm.Opcodes;
-
 public final class Constants {
 
     public static final class Libraries {
@@ -39,5 +37,9 @@ public final class Constants {
 
         public static final String SPONGE_NEXUS_DOWNLOAD_URL = "https://repo.spongepowered.org/service/rest/v1/search/assets?md5=%s&maven"
             + ".groupId=%s&maven.artifactId=%s&maven.baseVersion=%s&maven.extension=jar";
+    }
+
+    public static final class ManifestAttributes {
+        public static final String LAUNCH_TARGET = "Launch-Target";
     }
 }

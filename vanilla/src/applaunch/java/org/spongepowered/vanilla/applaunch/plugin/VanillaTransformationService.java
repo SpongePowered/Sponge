@@ -43,7 +43,7 @@ import org.spongepowered.plugin.builtin.StandardEnvironment;
 import org.spongepowered.transformers.modlauncher.AccessWidenerTransformationService;
 import org.spongepowered.transformers.modlauncher.SuperclassChanger;
 import org.spongepowered.vanilla.applaunch.Constants;
-import org.spongepowered.vanilla.applaunch.plugin.locator.SecureJarPluginResource;
+import org.spongepowered.vanilla.applaunch.plugin.resource.SecureJarPluginResource;
 
 import java.io.IOException;
 import java.nio.file.Files;

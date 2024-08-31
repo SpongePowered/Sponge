@@ -36,7 +36,7 @@ import org.spongepowered.plugin.blackboard.Blackboard;
 import org.spongepowered.plugin.blackboard.Keys;
 import org.spongepowered.plugin.builtin.StandardEnvironment;
 import org.spongepowered.plugin.builtin.jvm.JVMKeys;
-import org.spongepowered.vanilla.applaunch.plugin.locator.SecureJarPluginResource;
+import org.spongepowered.vanilla.applaunch.plugin.resource.SecureJarPluginResource;
 
 import java.nio.file.Path;
 import java.util.Collections;

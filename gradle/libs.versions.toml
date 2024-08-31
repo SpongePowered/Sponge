@@ -11,6 +11,7 @@ mixin = "0.8.7"
 bootstrap = "2.1.1"
 modlauncher = "10.2.1"
 securemodules = "2.2.20"
+jarjar = "0.3.26"
 guava = "32.1.2-jre"
 mockito = "5.11.0"
 jline = "3.25.1"
@@ -55,6 +56,7 @@ mockito-junitJupiter = { module = "org.mockito:mockito-junit-jupiter", version.r
 
 # vanilla
 forgeAutoRenamingTool = { module = "net.minecraftforge:ForgeAutoRenamingTool", version.ref = "forgeAutoRenamingTool" }
+jarjar-fs = { module = "net.minecraftforge:JarJarFileSystems", version.ref = "jarjar" }
 jline-reader = { module = "org.jline:jline-reader", version.ref = "jline" }
 jline-terminal = { module = "org.jline:jline-terminal", version.ref = "jline" }
 jline-terminalJansi = { module = "org.jline:jline-terminal-jansi", version.ref = "jline" }
