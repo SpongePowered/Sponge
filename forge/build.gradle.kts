@@ -355,7 +355,7 @@ tasks {
 
         mergeServiceFiles()
         configurations = listOf(serviceShadedLibrariesConfig.get())
-        exclude("META-INF/INDEX.LIST", "META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA", "module-info.class")
+        exclude("META-INF/INDEX.LIST", "META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA", "**/module-info.class")
 
         manifest {
             attributes("Automatic-Module-Name" to "spongeforge.services")

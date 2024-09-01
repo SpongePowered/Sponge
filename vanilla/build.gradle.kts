@@ -462,7 +462,7 @@ tasks {
 
         mergeServiceFiles()
         configurations = listOf(installerLibrariesConfig.get(), initLibrariesConfig.get())
-        exclude("META-INF/INDEX.LIST", "META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA", "module-info.class")
+        exclude("META-INF/INDEX.LIST", "META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA", "**/module-info.class")
 
         manifest {
             from(vanillaManifest)
