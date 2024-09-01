@@ -114,14 +114,20 @@ public final class VanillaPluginManager implements SpongePluginManager {
         final Map<PluginCandidate<PluginResource>, String> consequentialFailedInstances = new HashMap<>();
         final ClassLoader launchClassloader = VanillaLaunch.instance().getClass().getClassLoader();
         for (final PluginCandidate<PluginResource> candidate : resolutionResult.sortedSuccesses()) {
-            final PluginContainer plugin = this.plugins.get(candidate.metadata().id());
+            final String id = candidate.metadata().id();
+            if (id.indexOf('-') >= 0) {
+                platform.logger().warn("The dash character (-) is no longer supported in plugin ids.\n" +
+                    "Plugin {} is still using it. If you are the developer of this plugin, please change the id.", id);
+            }
+
+            final PluginContainer plugin = this.plugins.get(id);
             if (plugin != null) {
                 if (plugin instanceof VanillaDummyPluginContainer) {
                     continue;
                 }
                 // If we get here, we screwed up - duplicate IDs should have been detected earlier.
                 // Place it in the resolution result... it'll then get picked up in the big error message
-                resolutionResult.duplicateIds().add(candidate.metadata().id());
+                resolutionResult.duplicateIds().add(id);
 
                 // but this is our screw up, let's also make a big point of it
                 final PrettyPrinter prettyPrinter = new PrettyPrinter(120)
@@ -129,8 +135,7 @@ public final class VanillaPluginManager implements SpongePluginManager {
                         .hr()
                         .addWrapped("Sponge attempted to create a second plugin with ID '%s'. This is not allowed - all plugins must have a unique "
                                         + "ID. Usually, Sponge will catch this earlier -- but in this case Sponge has validated two plugins with "
-                                        + "the same ID. Please report this error to Sponge.",
-                                candidate.metadata().id())
+                                        + "the same ID. Please report this error to Sponge.", id)
                         .add()
                         .add("Technical Details:")
                         .add("Plugins to load:", 4);
@@ -152,7 +157,7 @@ public final class VanillaPluginManager implements SpongePluginManager {
                     this.containerToResource.put(container, candidate.resource());
                 } catch (final InvalidPluginException e) {
                     failedInstances.put(candidate, "Failed to construct: see stacktrace(s) above this message for details.");
-                    platform.logger().error("Failed to construct plugin {}", candidate.metadata().id(), e);
+                    platform.logger().error("Failed to construct plugin {}", id, e);
                 }
             }
         }

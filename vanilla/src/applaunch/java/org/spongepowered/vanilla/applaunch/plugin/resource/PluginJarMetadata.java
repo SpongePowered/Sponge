@@ -39,6 +39,7 @@ public class PluginJarMetadata implements JarMetadata {
     private PluginMetadata plugin;
     private JarMetadata fallback;
 
+    private String name;
     private ModuleDescriptor descriptor;
 
     public PluginJarMetadata(final SecureJar jar, final Path[] paths) {
@@ -53,8 +54,10 @@ public class PluginJarMetadata implements JarMetadata {
         this.initialized = true;
         if (plugin == null) {
             this.fallback = JarMetadata.from(this.jar, this.paths);
+            this.name = this.fallback.name();
         } else {
             this.plugin = plugin;
+            this.name = this.plugin.id().replace('-', '_');
         }
     }
 
@@ -67,10 +70,7 @@ public class PluginJarMetadata implements JarMetadata {
     @Override
     public String name() {
         checkInitialized();
-        if (this.plugin == null) {
-            return this.fallback.name();
-        }
-        return this.plugin.id();
+        return this.name;
     }
 
     @Override

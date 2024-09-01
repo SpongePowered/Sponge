@@ -26,7 +26,10 @@ package org.spongepowered.forge.applaunch.loading.metadata;
 
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import net.minecraftforge.forgespi.language.IModInfo;
+import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
+import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.plugin.metadata.PluginMetadata;
+import org.spongepowered.plugin.metadata.builtin.MetadataContainer;
 import org.spongepowered.plugin.metadata.builtin.StandardPluginMetadata;
 import org.spongepowered.plugin.metadata.builtin.model.StandardPluginContributor;
 import org.spongepowered.plugin.metadata.builtin.model.StandardPluginDependency;
@@ -34,12 +37,52 @@ import org.spongepowered.plugin.metadata.builtin.model.StandardPluginLinks;
 import org.spongepowered.plugin.metadata.model.PluginDependency;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-/**
- * ModInfo cannot be mixed into as it is on the app class loader so this somewhat hacky util class will do...
- */
 public final class PluginMetadataUtils {
+    private static final Set<String> invalidPluginIds = new HashSet<>();
+
+    public static MetadataContainer fixPluginIds(final MetadataContainer container) {
+        boolean modified = false;
+        final List<StandardPluginMetadata> metadata = new ArrayList<>();
+
+        for (final PluginMetadata plugin : container.metadata()) {
+            final String id = plugin.id();
+            if (id.indexOf('-') >= 0) {
+                final String newId = id.replace('-', '_');
+                if (PluginMetadataUtils.invalidPluginIds.add(id)) {
+                    AppLaunch.pluginPlatform().logger().warn("The dash character (-) is no longer supported in plugin ids.\n" +
+                            "Plugin {} will be loaded as {}. If you are the developer of this plugin, please change the id.", id, newId);
+                }
+
+                final StandardPluginMetadata.Builder pluginBuilder = StandardPluginMetadata.builder()
+                        .from((StandardPluginMetadata) plugin).id(newId).entrypoint(plugin.entrypoint());
+                plugin.name().ifPresent(pluginBuilder::name);
+                plugin.description().ifPresent(pluginBuilder::description);
+
+                metadata.add(pluginBuilder.build());
+                modified = true;
+            } else {
+                metadata.add((StandardPluginMetadata) plugin);
+            }
+        }
+
+        if (!modified) {
+            return container;
+        }
+
+        final MetadataContainer.Builder builder = container.toBuilder();
+        builder.metadata(metadata);
+
+        try {
+            return builder.build();
+        } catch (InvalidVersionSpecificationException e) {
+            // This should not happen since we never modify the version.
+            throw new RuntimeException(e);
+        }
+    }
 
     public static PluginMetadata modToPlugin(final ModInfo info) {
         final StandardPluginMetadata.Builder builder = StandardPluginMetadata.builder();
