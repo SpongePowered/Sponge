@@ -467,6 +467,7 @@ tasks {
         manifest {
             from(vanillaManifest)
             attributes(
+                "Premain-Class" to "org.spongepowered.vanilla.installer.Agent",
                 "Main-Class" to "org.spongepowered.vanilla.installer.InstallerMain",
                 "Automatic-Module-Name" to "spongevanilla.installer",
                 "Launch-Target" to "sponge_server_prod",
@@ -535,7 +536,7 @@ indraSpotlessLicenser {
     property("url", projectUrl)
 }
 
-val shadowJar by tasks.existing
+val universalJar by tasks.existing
 val vanillaInstallerJar by tasks.existing
 val vanillaAppLaunchJar by tasks.existing
 val vanillaLaunchJar by tasks.existing
@@ -546,16 +547,18 @@ publishing {
     publications {
         register("sponge", MavenPublication::class) {
 
-            artifact(shadowJar.get())
+            artifact(universalJar.get())
             artifact(vanillaInstallerJar.get())
             artifact(vanillaAppLaunchJar.get())
             artifact(vanillaLaunchJar.get())
             artifact(vanillaAccessorsJar.get())
             artifact(vanillaMixinsJar.get())
+
             artifact(tasks["applaunchSourcesJar"])
             artifact(tasks["launchSourcesJar"])
             artifact(tasks["accessorsSourcesJar"])
             artifact(tasks["mixinsSourcesJar"])
+
             pom {
                 artifactId = project.name.lowercase()
                 this.name.set(project.name)
