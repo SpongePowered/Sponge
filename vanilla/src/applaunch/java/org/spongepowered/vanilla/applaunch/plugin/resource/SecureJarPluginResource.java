@@ -42,7 +42,7 @@ public final class SecureJarPluginResource implements JVMPluginResource {
     private final SecureJar jar;
 
     private PluginJarMetadata pluginJarMetadata;
-    private List<PluginCandidate<SecureJarPluginResource>> candidates;
+    private List<PluginCandidate> candidates;
 
     public SecureJarPluginResource(final String locator, final Path[] paths) {
         Objects.requireNonNull(locator, "locator");
@@ -87,7 +87,7 @@ public final class SecureJarPluginResource implements JVMPluginResource {
         return this.jar.getRootPath();
     }
 
-    public void addCandidates(Collection<PluginCandidate<SecureJarPluginResource>> candidates) {
+    public void addCandidates(Collection<PluginCandidate> candidates) {
         if (this.candidates != null) {
             this.candidates.addAll(candidates);
         }

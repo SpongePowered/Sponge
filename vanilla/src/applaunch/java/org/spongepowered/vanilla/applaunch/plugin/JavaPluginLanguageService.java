@@ -51,14 +51,14 @@ public final class JavaPluginLanguageService extends StandardPluginLanguageServi
     }
 
     @Override
-    public List<PluginCandidate<PluginResource>> createPluginCandidates(final Environment environment, final PluginResource resource) throws Exception {
+    public List<PluginCandidate> createPluginCandidates(final Environment environment, final PluginResource resource) throws Exception {
         if (resource instanceof JVMPluginResource jvmResource && Files.exists(jvmResource.resourcesRoot().resolve("net/minecraft/server/MinecraftServer.class"))) {
             this.logger.debug("Container in path '{}' has been detected as Minecraft.", resource.path());
 
-            final List<PluginCandidate<PluginResource>> candidates = new LinkedList<>();
+            final List<PluginCandidate> candidates = new LinkedList<>();
             try (final InputStream stream = JavaPluginLanguageService.class.getClassLoader().getResourceAsStream("META-INF/minecraft_sponge_plugins.json")) {
                 for (final PluginMetadata metadata : loadMetadataContainer(environment, stream).metadata()) {
-                    candidates.add(new StandardPluginCandidate<>(metadata, resource));
+                    candidates.add(new StandardPluginCandidate(metadata, resource));
                 }
             }
 

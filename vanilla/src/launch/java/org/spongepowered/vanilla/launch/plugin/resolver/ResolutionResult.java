@@ -29,7 +29,6 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.plugin.PluginCandidate;
-import org.spongepowered.plugin.PluginResource;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -38,14 +37,14 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public final class ResolutionResult<T extends PluginResource> {
+public final class ResolutionResult {
 
-    private final LinkedHashSet<PluginCandidate<T>> sortedSuccesses;
+    private final LinkedHashSet<PluginCandidate> sortedSuccesses;
     private final Collection<String> duplicateIds;
-    private final Map<PluginCandidate<T>, Collection<String>> missingDependencies;
-    private final Map<PluginCandidate<T>, Collection<Tuple<String, PluginCandidate<T>>>> versionMismatch;
-    private final Map<PluginCandidate<T>, Collection<PluginCandidate<T>>> cyclicDependency;
-    private final Map<PluginCandidate<T>, Collection<PluginCandidate<T>>> cascadedFailure;
+    private final Map<PluginCandidate, Collection<String>> missingDependencies;
+    private final Map<PluginCandidate, Collection<Tuple<String, PluginCandidate>>> versionMismatch;
+    private final Map<PluginCandidate, Collection<PluginCandidate>> cyclicDependency;
+    private final Map<PluginCandidate, Collection<PluginCandidate>> cascadedFailure;
 
     public ResolutionResult() {
         this.sortedSuccesses = new LinkedHashSet<>();
@@ -56,7 +55,7 @@ public final class ResolutionResult<T extends PluginResource> {
         this.cascadedFailure = new HashMap<>();
     }
 
-    public Collection<PluginCandidate<T>> sortedSuccesses() {
+    public Collection<PluginCandidate> sortedSuccesses() {
         return this.sortedSuccesses;
     }
 
@@ -64,25 +63,25 @@ public final class ResolutionResult<T extends PluginResource> {
         return this.duplicateIds;
     }
 
-    public Map<PluginCandidate<T>, Collection<String>> missingDependencies() {
+    public Map<PluginCandidate, Collection<String>> missingDependencies() {
         return this.missingDependencies;
     }
 
-    public Map<PluginCandidate<T>, Collection<Tuple<String, PluginCandidate<T>>>> versionMismatch() {
+    public Map<PluginCandidate, Collection<Tuple<String, PluginCandidate>>> versionMismatch() {
         return this.versionMismatch;
     }
 
-    public Map<PluginCandidate<T>, Collection<PluginCandidate<T>>> cyclicDependency() {
+    public Map<PluginCandidate, Collection<PluginCandidate>> cyclicDependency() {
         return this.cyclicDependency;
     }
 
-    public Map<PluginCandidate<T>, Collection<PluginCandidate<T>>> cascadedFailure() {
+    public Map<PluginCandidate, Collection<PluginCandidate>> cascadedFailure() {
         return this.cascadedFailure;
     }
 
     public void printErrorsIfAny(
-            final Map<PluginCandidate<T>, String > failedInstance,
-            final Map<PluginCandidate<T>, String> consequentialFailedInstance,
+            final Map<PluginCandidate, String> failedInstance,
+            final Map<PluginCandidate, String> consequentialFailedInstance,
             final Logger logger) {
         final int noOfFailures = this.numberOfFailures() + failedInstance.size() + consequentialFailedInstance.size();
         if (noOfFailures == 0) {
@@ -106,7 +105,7 @@ public final class ResolutionResult<T extends PluginResource> {
         if (!this.missingDependencies.isEmpty()) {
             errorPrinter.add();
             errorPrinter.add("The following plugins are missing dependencies:");
-            for (final Map.Entry<PluginCandidate<T>, Collection<String>> entry : this.missingDependencies.entrySet()) {
+            for (final Map.Entry<PluginCandidate, Collection<String>> entry : this.missingDependencies.entrySet()) {
                 errorPrinter.add(" * %s requires [ %s ]",
                         entry.getKey().metadata().id(),
                         String.join(", ", entry.getValue()));
@@ -116,9 +115,9 @@ public final class ResolutionResult<T extends PluginResource> {
         if (!this.versionMismatch.isEmpty()) {
             errorPrinter.add();
             errorPrinter.add("The following plugins require different version(s) of dependencies you have installed:");
-            for (final Map.Entry<PluginCandidate<T>, Collection<Tuple<String, PluginCandidate<T>>>> entry : this.versionMismatch.entrySet()) {
-                final PluginCandidate<T> candidate = entry.getKey();
-                final Collection<Tuple<String, PluginCandidate<T>>> mismatchedDeps = entry.getValue();
+            for (final Map.Entry<PluginCandidate, Collection<Tuple<String, PluginCandidate>>> entry : this.versionMismatch.entrySet()) {
+                final PluginCandidate candidate = entry.getKey();
+                final Collection<Tuple<String, PluginCandidate>> mismatchedDeps = entry.getValue();
                 final String errorString = mismatchedDeps.stream()
                         .map(x -> String.format("%s version %s (currently version %s)",
                                 x.second().metadata().id(), x.first(), x.second().metadata().version()))
@@ -132,7 +131,7 @@ public final class ResolutionResult<T extends PluginResource> {
         if (!this.cyclicDependency.isEmpty()) {
             errorPrinter.add();
             errorPrinter.add("The following plugins were found to have cyclic dependencies:");
-            for (final Map.Entry<PluginCandidate<T>, Collection<PluginCandidate<T>>> node : this.cyclicDependency.entrySet()) {
+            for (final Map.Entry<PluginCandidate, Collection<PluginCandidate>> node : this.cyclicDependency.entrySet()) {
                 errorPrinter.add(" * %s has dependency cycle [ ... -> %s -> ... ]",
                         node.getKey().metadata().id(),
                         node.getValue().stream().map(x -> x.metadata().id()).collect(Collectors.joining(" -> ")));
@@ -142,7 +141,7 @@ public final class ResolutionResult<T extends PluginResource> {
         if (!failedInstance.isEmpty()) {
             errorPrinter.add();
             errorPrinter.add("The following plugins threw exceptions when being created (report these to the plugin authors):");
-            for (final Map.Entry<PluginCandidate<T>, String> node : failedInstance.entrySet()) {
+            for (final Map.Entry<PluginCandidate, String> node : failedInstance.entrySet()) {
                 errorPrinter.add(" * %s with the error message \"%s\"",
                         node.getKey().metadata().id(),
                         node.getValue());
@@ -150,15 +149,15 @@ public final class ResolutionResult<T extends PluginResource> {
         }
 
         if (!this.cascadedFailure.isEmpty() || !consequentialFailedInstance.isEmpty()) {
-            final Map<PluginCandidate<T>, String> mergedFailures = new HashMap<>(consequentialFailedInstance);
-            for (final Map.Entry<PluginCandidate<T>, Collection<PluginCandidate<T>>> entry : this.cascadedFailure.entrySet()) {
+            final Map<PluginCandidate, String> mergedFailures = new HashMap<>(consequentialFailedInstance);
+            for (final Map.Entry<PluginCandidate, Collection<PluginCandidate>> entry : this.cascadedFailure.entrySet()) {
                 final String error = entry.getValue().stream().map(x -> x.metadata().id()).collect(Collectors.joining(", "));
                 mergedFailures.merge(entry.getKey(), error, (old, incoming) -> old + ", " + incoming);
             }
 
             errorPrinter.add();
             errorPrinter.add("The following plugins are not loading because they depend on plugins that will not load:");
-            for (final Map.Entry<PluginCandidate<T>, String> node : mergedFailures.entrySet()) {
+            for (final Map.Entry<PluginCandidate, String> node : mergedFailures.entrySet()) {
                 errorPrinter.add(" * %s depends on [ %s ]",
                         node.getKey().metadata().id(),
                         // nothing wrong with this plugin other than the other plugins,

@@ -32,10 +32,9 @@ import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.Environment;
 import org.spongepowered.plugin.InvalidPluginException;
 import org.spongepowered.plugin.PluginCandidate;
-import org.spongepowered.plugin.builtin.jvm.JVMPluginLoader;
-import org.spongepowered.plugin.builtin.jvm.JVMPluginResource;
+import org.spongepowered.plugin.PluginLoader;
 
-public final class JavaPluginLoader implements JVMPluginLoader<JVMPluginResource, VanillaJavaPluginContainer> {
+public final class JavaPluginLoader implements PluginLoader<VanillaJavaPluginContainer> {
 
     private final ArtifactVersion version = new DefaultArtifactVersion("1.0");
 
@@ -45,7 +44,7 @@ public final class JavaPluginLoader implements JVMPluginLoader<JVMPluginResource
     }
 
     @Override
-    public VanillaJavaPluginContainer loadPlugin(final Environment environment, final PluginCandidate<JVMPluginResource> candidate, final ClassLoader targetClassLoader)
+    public VanillaJavaPluginContainer loadPlugin(final Environment environment, final PluginCandidate candidate, final ClassLoader targetClassLoader)
             throws InvalidPluginException {
         final VanillaJavaPluginContainer container = new VanillaJavaPluginContainer(candidate);
         try {
