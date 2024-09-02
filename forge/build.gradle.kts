@@ -38,13 +38,13 @@ repositories {
 }
 
 // SpongeForge libraries
-val serviceLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeServiceLibraries")
-val gameLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeGameLibraries")
+val serviceLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("serviceLibraries")
+val gameLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("gameLibraries")
 
-val gameManagedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeGameManagedLibraries")
+val gameManagedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("gameManagedLibraries")
 
-val serviceShadedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeServiceShadedLibraries")
-val gameShadedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeGameShadedLibraries")
+val serviceShadedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("serviceShadedLibraries")
+val gameShadedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("gameShadedLibraries")
 
 val runTaskOnlyConfig: NamedDomainObjectProvider<Configuration> = configurations.register("runTaskOnly")
 
@@ -206,27 +206,27 @@ dependencies {
 
     forgeMixins.implementationConfigurationName(project(commonProject.path))
 
-    val serviceLibraries = serviceLibrariesConfig.name
-    serviceLibraries(apiLibs.pluginSpi)
-    serviceLibraries(project(transformersProject.path))
-    serviceLibraries(platform(apiLibs.configurate.bom))
-    serviceLibraries(apiLibs.configurate.core) {
+    val service = serviceLibrariesConfig.name
+    service(apiLibs.pluginSpi)
+    service(project(transformersProject.path))
+    service(platform(apiLibs.configurate.bom))
+    service(apiLibs.configurate.core) {
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
-    serviceLibraries(apiLibs.configurate.hocon) {
+    service(apiLibs.configurate.hocon) {
         exclude(group = "org.spongepowered", module = "configurate-core")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
-    serviceLibraries(libs.configurate.jackson) {
+    service(libs.configurate.jackson) {
         exclude(group = "org.spongepowered", module = "configurate-core")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
 
-    val gameLibraries = gameLibrariesConfig.name
-    gameLibraries("org.spongepowered:spongeapi:$apiVersion")
-    gameLibraries(libs.javaxInject)
-    gameLibraries(platform(apiLibs.adventure.bom))
-    gameLibraries(libs.adventure.serializerConfigurate4)
+    val game = gameLibrariesConfig.name
+    game("org.spongepowered:spongeapi:$apiVersion")
+    game(libs.javaxInject)
+    game(platform(apiLibs.adventure.bom))
+    game(libs.adventure.serializerConfigurate4)
 
     val serviceShadedLibraries = serviceShadedLibrariesConfig.name
     serviceShadedLibraries(project(transformersProject.path)) { isTransitive = false }
@@ -293,7 +293,7 @@ tasks {
         from(forgeLang.output)
     }
 
-    val forgeServicesDevJar by registering(Jar::class) {
+    val forgeServicesJar by registering(Jar::class) {
         archiveClassifier.set("services")
         manifest.from(forgeManifest)
 
@@ -308,7 +308,7 @@ tasks {
             // Default classpath is a mess, we better start a new one from scratch
             classpath = files(
                     configurations.getByName("forgeRuntimeLibrary"),
-                    forgeServicesDevJar, forgeLangJar, runTaskOnlyConfig
+                    forgeServicesJar, forgeLangJar, runTaskOnlyConfig
             )
 
             testPluginsProject?.also {
@@ -327,7 +327,7 @@ tasks {
                         .toList()
             }
 
-            jvmArguments.add("-Dbsl.debug=true") // Uncomment to debug bootstrap classpath
+            // jvmArguments.add("-Dbsl.debug=true") // Uncomment to debug bootstrap classpath
 
             sourceSets.forEach {
                 dependsOn(it.classesTaskName)
@@ -427,21 +427,6 @@ sourceSets {
     }
 }
 
-afterEvaluate {
-    sourceSets.configureEach {
-        // Don't apply Mixin AP
-        configurations.named(annotationProcessorConfigurationName) {
-            exclude(group = "org.spongepowered", module = "mixin")
-            exclude(group = "net.fabricmc", module = "fabric-mixin-compile-extensions")
-        }
-        // And don't pass AP parameters
-        tasks.named(compileJavaTaskName, JavaCompile::class) {
-            val mixinApArgs = setOf("outRefMapFile", "defaultObfuscationEnv", "outMapFileNamedIntermediary", "inMapFileNamedIntermediary")
-            options.compilerArgs.removeIf { mixinApArgs.any { mixin -> it.contains(mixin)} }
-        }
-    }
-}
-
 indraSpotlessLicenser {
     licenseHeaderFile(rootProject.file("HEADER.txt"))
 
@@ -457,6 +442,9 @@ publishing {
 
             artifact(tasks["jar"])
             artifact(tasks["sourcesJar"])
+
+            artifact(tasks["forgeLangJar"])
+            artifact(tasks["langSourcesJar"])
 
             artifact(tasks["forgeMixinsJar"])
             artifact(tasks["mixinsSourcesJar"])
@@ -488,24 +476,6 @@ publishing {
                     this.url.set(projectUrl)
                 }
             }
-        }
-    }
-}
-
-tasks.register("printRunTasks") {
-    group = "debug"
-    doLast {
-        tasks.withType(net.fabricmc.loom.task.AbstractRunTask::class) {
-            println()
-            println("Task ${this.name}:")
-            println("mainClass: " + this.mainClass.orNull)
-            println("mainModule: " + this.mainModule.orNull)
-            println("allJvmArgs: " + this.allJvmArgs)
-            println("jvmArgs: " + this.jvmArgs)
-            println("args: " + this.args)
-            println("commandLine: " + this.commandLine)
-            println("environment: " + this.environment)
-            println("classpath: " + this.classpath.files)
         }
     }
 }

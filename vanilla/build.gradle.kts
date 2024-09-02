@@ -23,17 +23,17 @@ description = "The SpongeAPI implementation for Vanilla Minecraft"
 version = spongeImpl.generatePlatformBuildVersionString(apiVersion, minecraftVersion, recommendedVersion)
 
 // SpongeVanilla libraries
-val installerLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeInstallerLibraries")
-val initLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeInitLibraries") // JVM initial classpath
-val bootLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeBootLibraries")
-val gameLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeGameLibraries") {
+val installerLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("installerLibraries")
+val initLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("initLibraries") // JVM initial classpath
+val bootLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("bootLibraries")
+val gameLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("gameLibraries") {
     extendsFrom(configurations.minecraft.get())
 }
 
-val gameManagedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeGameManagedLibraries")
+val gameManagedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("gameManagedLibraries")
 
-val bootShadedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeBootShadedLibraries")
-val gameShadedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeGameShadedLibraries")
+val bootShadedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("bootShadedLibraries")
+val gameShadedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("gameShadedLibraries")
 
 val runTaskOnlyConfig: NamedDomainObjectProvider<Configuration> = configurations.register("runTaskOnly")
 
@@ -159,7 +159,7 @@ minecraft {
             )
 
             // ModLauncher
-            jvmArgs("-Dbsl.debug=true") // Uncomment to debug bootstrap classpath
+            // jvmArgs("-Dbsl.debug=true") // Uncomment to debug bootstrap classpath
             mainClass("net.minecraftforge.bootstrap.ForgeBootstrap")
 
             allArgumentProviders += CommandLineArgumentProvider {
@@ -270,7 +270,6 @@ dependencies {
     }
     boot(apiLibs.pluginSpi) {
         exclude(group = "org.checkerframework", module = "checker-qual")
-        // exclude(group = "com.google.code.gson", module = "gson")
         exclude(group = "org.apache.logging.log4j", module = "log4j-api")
     }
     boot(libs.lmaxDisruptor)
@@ -546,18 +545,25 @@ val vanillaMixinsJar by tasks.existing
 publishing {
     publications {
         register("sponge", MavenPublication::class) {
+            artifact(tasks["universalJar"])
 
-            artifact(universalJar.get())
-            artifact(vanillaInstallerJar.get())
-            artifact(vanillaAppLaunchJar.get())
-            artifact(vanillaLaunchJar.get())
-            artifact(vanillaAccessorsJar.get())
-            artifact(vanillaMixinsJar.get())
+            artifact(tasks["jar"])
+            artifact(tasks["sourcesJar"])
 
-            artifact(tasks["applaunchSourcesJar"])
-            artifact(tasks["launchSourcesJar"])
-            artifact(tasks["accessorsSourcesJar"])
+            artifact(tasks["vanillaInstallerJar"])
+            artifact(tasks["installerSourcesJar"])
+
+            artifact(tasks["vanillaMixinsJar"])
             artifact(tasks["mixinsSourcesJar"])
+
+            artifact(tasks["vanillaAccessorsJar"])
+            artifact(tasks["accessorsSourcesJar"])
+
+            artifact(tasks["vanillaLaunchJar"])
+            artifact(tasks["launchSourcesJar"])
+
+            artifact(tasks["vanillaAppLaunchJar"])
+            artifact(tasks["applaunchSourcesJar"])
 
             pom {
                 artifactId = project.name.lowercase()
