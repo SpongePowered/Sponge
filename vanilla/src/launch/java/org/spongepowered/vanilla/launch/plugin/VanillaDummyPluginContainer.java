@@ -27,12 +27,11 @@ package org.spongepowered.vanilla.launch.plugin;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.plugin.DummyPluginContainer;
 import org.spongepowered.plugin.PluginCandidate;
-import org.spongepowered.plugin.PluginResource;
 import org.spongepowered.plugin.builtin.StandardPluginContainer;
 
 public final class VanillaDummyPluginContainer extends StandardPluginContainer implements DummyPluginContainer {
 
-    public VanillaDummyPluginContainer(final PluginCandidate<? extends PluginResource> candidate, final Logger logger, final Object instance) {
+    public VanillaDummyPluginContainer(final PluginCandidate candidate, final Logger logger, final Object instance) {
         super(candidate, logger);
         this.initializeInstance(instance);
     }

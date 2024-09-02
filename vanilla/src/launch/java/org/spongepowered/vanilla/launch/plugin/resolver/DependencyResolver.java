@@ -30,7 +30,6 @@ import org.apache.maven.artifact.versioning.VersionRange;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.plugin.PluginCandidate;
-import org.spongepowered.plugin.PluginResource;
 import org.spongepowered.plugin.metadata.model.PluginDependency;
 
 import java.util.ArrayList;
@@ -47,26 +46,26 @@ import java.util.stream.Collectors;
 
 public final class DependencyResolver {
 
-    public static <T extends PluginResource> ResolutionResult<T> resolveAndSortCandidates(final Collection<PluginCandidate<T>> candidates,
+    public static ResolutionResult resolveAndSortCandidates(final Collection<PluginCandidate> candidates,
             final Logger logger) {
-        final Map<String, Node<T>> nodes = new HashMap<>();
-        final ResolutionResult<T> resolutionResult = new ResolutionResult<>();
-        for (final PluginCandidate<T> candidate : candidates) {
+        final Map<String, Node> nodes = new HashMap<>();
+        final ResolutionResult resolutionResult = new ResolutionResult();
+        for (final PluginCandidate candidate : candidates) {
             final String id = candidate.metadata().id();
             // If we already have an entry, this is now a duplicate ID situation.
             if (nodes.containsKey(id)) {
                 resolutionResult.duplicateIds().add(id);
             } else {
-                nodes.put(id, new Node<>(candidate));
+                nodes.put(id, new Node(candidate));
             }
         }
 
-        for (final Map.Entry<String, Node<T>> entry : nodes.entrySet()) {
+        for (final Map.Entry<String, Node> entry : nodes.entrySet()) {
             // Attach deps, invalid deps will appear at this point.
-            final Node<T> node = entry.getValue();
+            final Node node = entry.getValue();
             for (final PluginDependency pd : node.candidate.metadata().dependencies()) {
                 final boolean isOptional = pd.optional();
-                final Node<T> dep = nodes.get(pd.id());
+                final Node dep = nodes.get(pd.id());
 
                 if (dep == null) {
                     if (isOptional) {
@@ -113,21 +112,21 @@ public final class DependencyResolver {
 
         // Check for invalid deps
         DependencyResolver.checkCyclic(nodes.values(), resolutionResult);
-        for (final Node<T> node : nodes.values()) {
+        for (final Node node : nodes.values()) {
             DependencyResolver.calculateSecondaryFailures(node, resolutionResult);
         }
 
         // Now to sort them.
-        final List<Node<T>> original = nodes.values().stream().filter(x -> !x.invalid).collect(Collectors.toCollection(ArrayList::new));
-        final List<Node<T>> toLoad = new ArrayList<>(original);
-        final LinkedHashSet<Node<T>> sorted = new LinkedHashSet<>();
+        final List<Node> original = nodes.values().stream().filter(x -> !x.invalid).collect(Collectors.toCollection(ArrayList::new));
+        final List<Node> toLoad = new ArrayList<>(original);
+        final LinkedHashSet<Node> sorted = new LinkedHashSet<>();
         toLoad.stream().filter(x -> x.dependencies.isEmpty() && x.optionalDependencies.isEmpty()).forEach(sorted::add);
         toLoad.removeIf(sorted::contains);
         int size = toLoad.size();
         boolean excludeOptionals = false;
         while (!toLoad.isEmpty()) {
             boolean containsOptionalDeps = false;
-            for (final Node<T> node : toLoad) {
+            for (final Node node : toLoad) {
                 if (sorted.containsAll(node.dependencies) && DependencyResolver.checkOptionalDependencies(excludeOptionals, sorted, node)) {
                     final boolean hasOptionalDeps = !node.optionalDependencies.isEmpty();
                     containsOptionalDeps |= hasOptionalDeps;
@@ -162,15 +161,15 @@ public final class DependencyResolver {
             }
         }
 
-        final Collection<PluginCandidate<T>> sortedSuccesses = resolutionResult.sortedSuccesses();
-        for (final Node<T> x : sorted) {
+        final Collection<PluginCandidate> sortedSuccesses = resolutionResult.sortedSuccesses();
+        for (final Node x : sorted) {
             sortedSuccesses.add(x.candidate);
         }
         return resolutionResult;
     }
 
-    private static <T extends PluginResource> boolean checkOptionalDependencies(
-            final boolean excludeOptionals, final Collection<Node<T>> sorted, final Node<T> node) {
+    private static boolean checkOptionalDependencies(
+            final boolean excludeOptionals, final Collection<Node> sorted, final Node node) {
         if (excludeOptionals) {
             // We need to make sure we filter out any deps that have "before" requirements - so we load those with all required deps met.
             return node.optionalDependencies.stream().flatMap(x -> x.beforeRequiredDependency.stream()).distinct().allMatch(sorted::contains);
@@ -178,7 +177,7 @@ public final class DependencyResolver {
         return sorted.containsAll(node.optionalDependencies);
     }
 
-    private static <T extends PluginResource> void setDependency(final Node<T> before, final Node<T> after, final boolean optional) {
+    private static void setDependency(final Node before, final Node after, final boolean optional) {
         if (optional) {
             before.optionalDependencies.add(after);
         } else {
@@ -203,24 +202,24 @@ public final class DependencyResolver {
         return Objects.equals(requestedVersion.getRecommendedVersion(), dependencyVersion) || requestedVersion.containsVersion(dependencyVersion);
     }
 
-    private static <T extends PluginResource> void checkCyclic(final Collection<Node<T>> nodes, final ResolutionResult<T> resolutionResult) {
-        for (final Node<T> node : nodes) {
+    private static void checkCyclic(final Collection<Node> nodes, final ResolutionResult resolutionResult) {
+        for (final Node node : nodes) {
             if (!node.checked) {
-                final LinkedHashSet<Node<T>> nodeSet = new LinkedHashSet<>();
+                final LinkedHashSet<Node> nodeSet = new LinkedHashSet<>();
                 nodeSet.add(node);
                 DependencyResolver.checkCyclic(node, resolutionResult, nodeSet);
             }
         }
     }
 
-    private static <T extends PluginResource> void checkCyclic(final Node<T> node, final ResolutionResult<T> resolutionResult,
-            final LinkedHashSet<Node<T>> dependencyPath) {
+    private static void checkCyclic(final Node node, final ResolutionResult resolutionResult,
+            final LinkedHashSet<Node> dependencyPath) {
         if (node.invalid) {
             return;
         }
 
         // We're doing depth first.
-        for (final Node<T> dependency : node.dependencies) {
+        for (final Node dependency : node.dependencies) {
             // We've already done this. Consequential failures will be handled later.
             if (dependency.checked) {
                 continue;
@@ -232,8 +231,8 @@ public final class DependencyResolver {
                 node.invalid = true;
                 // We create the dependency path for printing later.
                 boolean append = false;
-                final List<PluginCandidate<T>> candidatePath = new LinkedList<>();
-                for (final Node<T> depInCycle : dependencyPath) {
+                final List<PluginCandidate> candidatePath = new LinkedList<>();
+                for (final Node depInCycle : dependencyPath) {
                     append |= depInCycle == dependency;
                     // all candidates from here are in the loop.
                     if (append) {
@@ -243,7 +242,7 @@ public final class DependencyResolver {
                 }
 
                 // We'll only care about the one.
-                for (final PluginCandidate<T> dep : candidatePath) {
+                for (final PluginCandidate dep : candidatePath) {
                     resolutionResult.cyclicDependency().put(dep, candidatePath);
                 }
             } else {
@@ -254,7 +253,7 @@ public final class DependencyResolver {
         }
     }
 
-    private static <T extends PluginResource> boolean calculateSecondaryFailures(final Node<T> node, final ResolutionResult<T> resolutionResult) {
+    private static boolean calculateSecondaryFailures(final Node node, final ResolutionResult resolutionResult) {
         if (node.secondaryChecked) {
             return node.invalid;
         }
@@ -266,14 +265,14 @@ public final class DependencyResolver {
             return false;
         }
 
-        for (final Node<T> depNode : node.dependencies) {
+        for (final Node depNode : node.dependencies) {
             if (DependencyResolver.calculateSecondaryFailures(depNode, resolutionResult)) {
                 node.invalid = true;
                 resolutionResult.cascadedFailure().computeIfAbsent(node.candidate, k -> new HashSet<>()).add(depNode.candidate);
             }
         }
 
-        for (final Node<T> depNode : node.beforeRequiredDependency) {
+        for (final Node depNode : node.beforeRequiredDependency) {
             if (DependencyResolver.calculateSecondaryFailures(depNode, resolutionResult)) {
                 node.invalid = true;
                 resolutionResult.cascadedFailure().computeIfAbsent(node.candidate, k -> new HashSet<>()).add(depNode.candidate);
@@ -282,17 +281,17 @@ public final class DependencyResolver {
         return node.invalid;
     }
 
-    static class Node<T extends PluginResource> {
+    static class Node {
 
-        final PluginCandidate<T> candidate;
-        final Set<Node<T>> beforeRequiredDependency = new HashSet<>();
-        final Set<Node<T>> dependencies = new HashSet<>();
-        final Set<Node<T>> optionalDependencies = new HashSet<>();
+        final PluginCandidate candidate;
+        final Set<Node> beforeRequiredDependency = new HashSet<>();
+        final Set<Node> dependencies = new HashSet<>();
+        final Set<Node> optionalDependencies = new HashSet<>();
         boolean invalid = false;
         boolean checked = false;
         boolean secondaryChecked = false;
 
-        public Node(final PluginCandidate<T> candidate) {
+        public Node(final PluginCandidate candidate) {
             this.candidate = candidate;
         }
 

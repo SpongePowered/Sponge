@@ -26,12 +26,11 @@ package org.spongepowered.vanilla.launch.plugin;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.plugin.PluginCandidate;
-import org.spongepowered.plugin.PluginResource;
 import org.spongepowered.plugin.builtin.StandardPluginContainer;
 
 public final class VanillaJavaPluginContainer extends StandardPluginContainer {
 
-    public VanillaJavaPluginContainer(final PluginCandidate<? extends PluginResource> candidate) {
+    public VanillaJavaPluginContainer(final PluginCandidate candidate) {
         super(candidate);
     }
 

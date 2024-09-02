@@ -42,7 +42,6 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -53,11 +52,11 @@ import java.util.Set;
 public final class VanillaPluginPlatform implements PluginPlatform {
 
     private final StandardEnvironment standardEnvironment;
-    private final Map<String, PluginResourceLocatorService<PluginResource>> locatorServices;
-    private final Map<String, PluginLanguageService<PluginResource>> languageServices;
+    private final Map<String, PluginResourceLocatorService<?>> locatorServices;
+    private final Map<String, PluginLanguageService> languageServices;
 
-    private final Map<String, Set<PluginResource>> locatorResources;
-    private final Map<PluginLanguageService<PluginResource>, List<PluginCandidate<PluginResource>>> pluginCandidates;
+    private final Map<String, Set<? extends PluginResource>> locatorResources;
+    private final Map<PluginLanguageService, List<PluginCandidate>> pluginCandidates;
 
     public VanillaPluginPlatform(final StandardEnvironment standardEnvironment) {
         this.standardEnvironment = standardEnvironment;
@@ -116,24 +115,24 @@ public final class VanillaPluginPlatform implements PluginPlatform {
         return this.standardEnvironment;
     }
 
-    public Map<String, PluginResourceLocatorService<PluginResource>> getLocatorServices() {
+    public Map<String, PluginResourceLocatorService<?>> getLocatorServices() {
         return Collections.unmodifiableMap(this.locatorServices);
     }
 
-    public Map<String, PluginLanguageService<PluginResource>> getLanguageServices() {
+    public Map<String, PluginLanguageService> getLanguageServices() {
         return Collections.unmodifiableMap(this.languageServices);
     }
 
-    public Map<String, Set<PluginResource>> getResources() {
+    public Map<String, Set<? extends PluginResource>> getResources() {
         return Collections.unmodifiableMap(this.locatorResources);
     }
 
-    public Map<PluginLanguageService<PluginResource>, List<PluginCandidate<PluginResource>>> getCandidates() {
+    public Map<PluginLanguageService, List<PluginCandidate>> getCandidates() {
         return Collections.unmodifiableMap(this.pluginCandidates);
     }
 
     public void initializeLanguageServices() {
-        for (final Map.Entry<String, PluginLanguageService<PluginResource>> entry : this.languageServices.entrySet()) {
+        for (final Map.Entry<String, PluginLanguageService> entry : this.languageServices.entrySet()) {
             entry.getValue().initialize(this.standardEnvironment);
         }
     }
@@ -144,10 +143,10 @@ public final class VanillaPluginPlatform implements PluginPlatform {
         blackboard.set(JVMKeys.JVM_PLUGIN_RESOURCE_FACTORY, SecureJarPluginResource::new);
 
         final ModuleLayer serviceLayer = Launcher.INSTANCE.environment().findModuleLayerManager().flatMap(lm -> lm.getLayer(IModuleLayerManager.Layer.SERVICE)).orElseThrow();
-        final var serviceLoader = (ServiceLoader<PluginResourceLocatorService<PluginResource>>) (Object) ServiceLoader.load(serviceLayer, PluginResourceLocatorService.class);
+        final var serviceLoader = ServiceLoader.load(serviceLayer, PluginResourceLocatorService.class);
 
-        for (final Iterator<PluginResourceLocatorService<PluginResource>> iter = serviceLoader.iterator(); iter.hasNext(); ) {
-            final PluginResourceLocatorService<PluginResource> next;
+        for (final var iter = serviceLoader.iterator(); iter.hasNext(); ) {
+            final PluginResourceLocatorService<?> next;
 
             try {
                 next = iter.next();
@@ -162,10 +161,10 @@ public final class VanillaPluginPlatform implements PluginPlatform {
 
     public void discoverLanguageServices() {
         final ModuleLayer pluginLayer = Launcher.INSTANCE.environment().findModuleLayerManager().flatMap(lm -> lm.getLayer(IModuleLayerManager.Layer.PLUGIN)).orElseThrow();
-        final var serviceLoader = (ServiceLoader<PluginLanguageService<PluginResource>>) (Object) ServiceLoader.load(pluginLayer, PluginLanguageService.class);
+        final var serviceLoader = ServiceLoader.load(pluginLayer, PluginLanguageService.class);
 
-        for (final Iterator<PluginLanguageService<PluginResource>> iter = serviceLoader.iterator(); iter.hasNext(); ) {
-            final PluginLanguageService<PluginResource> next;
+        for (final var iter = serviceLoader.iterator(); iter.hasNext(); ) {
+            final PluginLanguageService next;
 
             try {
                 next = iter.next();
@@ -179,9 +178,9 @@ public final class VanillaPluginPlatform implements PluginPlatform {
     }
 
     public void locatePluginResources() {
-        for (final Map.Entry<String, PluginResourceLocatorService<PluginResource>> locatorEntry : this.locatorServices.entrySet()) {
-            final PluginResourceLocatorService<PluginResource> locatorService = locatorEntry.getValue();
-            final Set<PluginResource> resources = locatorService.locatePluginResources(this.standardEnvironment);
+        for (final Map.Entry<String, PluginResourceLocatorService<?>> locatorEntry : this.locatorServices.entrySet()) {
+            final PluginResourceLocatorService<?> locatorService = locatorEntry.getValue();
+            final Set<? extends PluginResource> resources = locatorService.locatePluginResources(this.standardEnvironment);
             if (!resources.isEmpty()) {
                 this.locatorResources.put(locatorEntry.getKey(), resources);
             }
@@ -189,22 +188,22 @@ public final class VanillaPluginPlatform implements PluginPlatform {
     }
 
     public void createPluginCandidates() {
-        for (final PluginLanguageService<PluginResource> languageService : this.languageServices.values()) {
-            for (final Set<PluginResource> resources : this.locatorResources.values()) {
+        for (final PluginLanguageService languageService : this.languageServices.values()) {
+            for (final Set<? extends PluginResource> resources : this.locatorResources.values()) {
                 for (final PluginResource pluginResource : resources) {
                     if (ResourceType.of(pluginResource) != ResourceType.PLUGIN) {
                         continue;
                     }
 
                     try {
-                        final List<PluginCandidate<PluginResource>> candidates = languageService.createPluginCandidates(this.standardEnvironment, pluginResource);
+                        final List<PluginCandidate> candidates = languageService.createPluginCandidates(this.standardEnvironment, pluginResource);
                         if (candidates.isEmpty()) {
                             continue;
                         }
                         this.pluginCandidates.computeIfAbsent(languageService, k -> new LinkedList<>()).addAll(candidates);
 
                         if (pluginResource instanceof SecureJarPluginResource jarResource) {
-                            jarResource.addCandidates((List) candidates);
+                            jarResource.addCandidates(candidates);
                         }
                     } catch (final Exception ex) {
                         this.standardEnvironment.logger().error("Failed to create plugin candidates", ex);

@@ -109,7 +109,7 @@ public final class VanillaTransformationService implements ITransformationServic
 
         final List<SecureJar> languageResources = new ArrayList<>();
 
-        for (final Set<PluginResource> resources : this.pluginPlatform.getResources().values()) {
+        for (final Set<? extends PluginResource> resources : this.pluginPlatform.getResources().values()) {
             for (final PluginResource resource : resources) {
                 if (resource instanceof SecureJarPluginResource secureJarResource) {
                     if (ResourceType.of(resource) == ResourceType.LANGUAGE) {
@@ -136,7 +136,7 @@ public final class VanillaTransformationService implements ITransformationServic
 
         final List<SecureJar> gameResources = new ArrayList<>();
 
-        for (final Set<PluginResource> resources : this.pluginPlatform.getResources().values()) {
+        for (final Set<? extends PluginResource> resources : this.pluginPlatform.getResources().values()) {
             for (final PluginResource resource : resources) {
                 if (resource instanceof SecureJarPluginResource secureJarResource) {
                     // Build jar metadata from first candidate, or fallback to standard
