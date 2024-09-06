@@ -1,0 +1,56 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="MIT License"
+
+issueTrackerURL="https://github.com/SpongePowered/Sponge/issues"
+
+
+[[mods]]
+modId="spongeneo"
+version="{{ version }}"
+displayName="SpongeNeo"
+displayTest="IGNORE_SERVER_VERSION"
+credits="SpongePowered and Contributors"
+authors="SpongePowered"
+description = "{{ description }}"
+
+[[dependencies.spongeneo]]
+modId="neoforge"
+mandatory=true
+versionRange="[{{ neoForgeVersion }},)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.spongeneo]]
+modId="sponge"
+mandatory=true
+versionRange="[{{ version }}]"
+ordering="AFTER"
+side="BOTH"
+
+
+[[mods]]
+modId="sponge"
+version="{{ version }}"
+displayName="Sponge"
+displayTest="IGNORE_SERVER_VERSION"
+credits="SpongePowered and Contributors"
+authors="SpongePowered"
+description="The SpongeAPI implementation targeting vanilla Minecraft and 3rd party platforms"
+
+[[dependencies.sponge]]
+modId="spongeapi"
+mandatory=true
+versionRange="[12.0.0,)"
+ordering="AFTER"
+side="BOTH"
+
+
+[[mods]]
+modId="spongeapi"
+version="12.0.0"
+displayName="SpongeAPI"
+displayTest="IGNORE_SERVER_VERSION"
+credits="SpongePowered and Contributors"
+authors="SpongePowered"
+description="A Minecraft plugin API"

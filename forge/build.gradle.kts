@@ -208,7 +208,9 @@ dependencies {
 
     val service = serviceLibrariesConfig.name
     service(apiLibs.pluginSpi)
-    service(project(transformersProject.path))
+    service(project(transformersProject.path)) {
+        exclude(group = "cpw.mods", module = "modlauncher")
+    }
     service(platform(apiLibs.configurate.bom))
     service(apiLibs.configurate.core) {
         exclude(group = "org.checkerframework", module = "checker-qual")
@@ -288,14 +290,21 @@ tasks {
         archiveClassifier.set("lang")
         manifest {
             from(forgeManifest)
-            attributes("FMLModType" to "LANGPROVIDER")
+            attributes(
+                "Automatic-Module-Name" to "spongeforge.lang",
+                "FMLModType" to "LANGPROVIDER"
+            )
         }
         from(forgeLang.output)
     }
 
     val forgeServicesJar by registering(Jar::class) {
         archiveClassifier.set("services")
-        manifest.from(forgeManifest)
+
+        manifest {
+            from(forgeManifest)
+            attributes("Automatic-Module-Name" to "spongeforge.services")
+        }
 
         from(commonProject.sourceSets.named("applaunch").map { it.output })
         from(forgeAppLaunch.output)
@@ -358,9 +367,11 @@ tasks {
         exclude("META-INF/INDEX.LIST", "META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA", "**/module-info.class")
 
         manifest {
-            attributes("Automatic-Module-Name" to "spongeforge.services")
-            attributes("Multi-Release" to true)
             from(forgeManifest)
+            attributes(
+                "Automatic-Module-Name" to "spongeforge.services",
+                "Multi-Release" to true
+            )
         }
 
         from(commonProject.sourceSets.named("applaunch").map { it.output })

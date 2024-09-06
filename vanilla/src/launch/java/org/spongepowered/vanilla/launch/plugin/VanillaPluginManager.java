@@ -62,6 +62,7 @@ public final class VanillaPluginManager implements SpongePluginManager {
     private final Map<Object, PluginContainer> instancesToPlugins;
     private final List<PluginContainer> sortedPlugins;
     private final Map<PluginContainer, PluginResource> containerToResource;
+    private boolean ready = false;
 
     public VanillaPluginManager() {
         this.plugins = new Object2ObjectOpenHashMap<>();
@@ -163,6 +164,8 @@ public final class VanillaPluginManager implements SpongePluginManager {
 
         resolutionResult.printErrorsIfAny(failedInstances, consequentialFailedInstances, platform.logger());
         platform.logger().info("Loaded plugin(s): {}", this.sortedPlugins.stream().map(p -> p.metadata().id()).collect(Collectors.toList()));
+
+        this.ready = true;
     }
 
     public void addPlugin(final PluginContainer plugin) {
@@ -199,5 +202,10 @@ public final class VanillaPluginManager implements SpongePluginManager {
         }
 
         return true;
+    }
+
+    @Override
+    public boolean isReady() {
+        return this.ready;
     }
 }

@@ -27,12 +27,16 @@ package org.spongepowered.common.network.channel;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.protocol.login.custom.CustomQueryPayload;
 import net.minecraft.resources.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.network.EngineConnection;
+import org.spongepowered.api.network.EngineConnectionSide;
 import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.api.network.channel.Channel;
 import org.spongepowered.api.network.channel.ChannelBuf;
@@ -233,7 +237,15 @@ public final class SpongeChannelManager implements ChannelManager {
     }
 
     public void sendChannelRegistrations(final EngineConnection connection) {
-        final Packet<?> mcPacket = PlatformHooks.INSTANCE.getChannelHooks().createRegisterPayload(RegisterChannelUtil.encodePayload(this.channels.keySet()), connection.side());
+        final CustomPacketPayload payload = PlatformHooks.INSTANCE.getChannelHooks().createRegisterPayload(this.channels.keySet());
+        final Packet<?> mcPacket;
+        if (connection.side() == EngineConnectionSide.CLIENT) {
+            mcPacket = new ServerboundCustomPayloadPacket(payload);
+        } else if (connection.side() == EngineConnectionSide.SERVER) {
+            mcPacket = new ClientboundCustomPayloadPacket(payload);
+        } else {
+            throw new UnsupportedOperationException();
+        }
         PacketSender.sendTo(connection, mcPacket);
     }
 

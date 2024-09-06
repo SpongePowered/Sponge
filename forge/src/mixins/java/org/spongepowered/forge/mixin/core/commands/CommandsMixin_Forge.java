@@ -57,7 +57,7 @@ public abstract class CommandsMixin_Forge {
     private WeakHashMap<ServerPlayer, Map<CommandNode<CommandSourceStack>, List<CommandNode<SharedSuggestionProvider>>>> impl$playerNodeCache;
     private SpongeCommandManager impl$commandManager;
 
-    // The event fired by Forge is fired in SpongeForgeCommandManager at the appropriate time.
+    // The event fired by Forge is fired in ForgeCommandManager at the appropriate time.
     @Redirect(method = "performCommand",
         at = @At(value = "INVOKE", target = "Lnet/minecraftforge/eventbus/api/IEventBus;post(Lnet/minecraftforge/eventbus/api/Event;)Z"))
     private boolean forge$redirectToSpongeCommandManager(IEventBus instance, Event event) {

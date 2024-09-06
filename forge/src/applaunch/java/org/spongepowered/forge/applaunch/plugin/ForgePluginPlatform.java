@@ -103,7 +103,6 @@ public final class ForgePluginPlatform implements PluginPlatform {
         // NOOP
     }
 
-    // TODO: Zidane, how will this work with SF?
     @Override
     public String metadataFilePath() {
         return null;

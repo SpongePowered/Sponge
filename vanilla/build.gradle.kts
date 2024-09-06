@@ -320,7 +320,9 @@ dependencies {
         .filter { !it.startsWith("net.minecraft:joined") }
         .forEach { boot(it) { isTransitive = false } }
 
-    boot(project(transformersProject.path))
+    boot(project(transformersProject.path)) {
+        exclude(group = "cpw.mods", module = "modlauncher")
+    }
 
     val game = gameLibrariesConfig.name
     game("org.spongepowered:spongeapi:$apiVersion")

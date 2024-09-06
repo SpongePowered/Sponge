@@ -36,7 +36,6 @@ import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.common.inject.SpongeCommonModule;
 import org.spongepowered.common.inject.SpongeModule;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.common.launch.mapping.SpongeMappingManager;
 import org.spongepowered.forge.applaunch.loading.metadata.PluginMetadataUtils;
 import org.spongepowered.forge.launch.inject.SpongeForgeModule;
 import org.spongepowered.forge.launch.plugin.ForgePluginManager;
@@ -49,7 +48,6 @@ public final class ForgeLaunch extends Launch {
 
     private final ForgePluginManager pluginManager;
     private PluginContainer spongeForgePlugin;
-    private final ForgeMappingManager mappings = new ForgeMappingManager();
 
     public ForgeLaunch(final PluginPlatform platform) {
         super(platform);
@@ -64,11 +62,6 @@ public final class ForgeLaunch extends Launch {
     @Override
     public ForgePluginManager pluginManager() {
         return this.pluginManager;
-    }
-
-    @Override
-    public SpongeMappingManager mappingManager() {
-        return this.mappings;
     }
 
     @Override

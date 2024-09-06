@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.hooks;
 
-import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import org.spongepowered.api.network.EngineConnectionSide;
-import org.spongepowered.api.network.channel.ChannelBuf;
-import org.spongepowered.common.network.PacketUtil;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.common.network.channel.ChannelUtils;
+import org.spongepowered.common.network.channel.RegisterChannelUtil;
 import org.spongepowered.common.network.channel.SpongeChannelPayload;
 
+import java.util.Set;
 import java.util.function.Consumer;
 
 public interface ChannelHooks {
@@ -40,7 +40,7 @@ public interface ChannelHooks {
         consumer.accept(ChannelUtils.REGISTER);
     }
 
-    default Packet<?> createRegisterPayload(final ChannelBuf payload, final EngineConnectionSide<?> side) {
-        return PacketUtil.createPlayPayload(ChannelUtils.REGISTER, payload, side);
+    default CustomPacketPayload createRegisterPayload(final Set<ResourceKey> channels) {
+        return new SpongeChannelPayload(ChannelUtils.REGISTER, (FriendlyByteBuf) RegisterChannelUtil.encodePayload(channels));
     }
 }

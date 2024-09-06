@@ -25,18 +25,16 @@
 package org.spongepowered.forge.hook;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
-import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.ForgePayload;
-import org.spongepowered.api.network.EngineConnectionSide;
-import org.spongepowered.api.network.channel.ChannelBuf;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.common.hooks.ChannelHooks;
+import org.spongepowered.common.network.channel.RegisterChannelUtil;
 import org.spongepowered.common.network.channel.SpongeChannelPayload;
 import org.spongepowered.common.util.Constants;
 
+import java.util.Set;
 import java.util.function.Consumer;
 
 public final class ForgeChannelHooks implements ChannelHooks {
@@ -46,13 +44,8 @@ public final class ForgeChannelHooks implements ChannelHooks {
     }
 
     @Override
-    public Packet<?> createRegisterPayload(final ChannelBuf payload, final EngineConnectionSide<?> side) {
-        if (side == EngineConnectionSide.CLIENT) {
-            return new ServerboundCustomPayloadPacket(new ForgePayload((ResourceLocation) (Object) Constants.Channels.REGISTER_KEY, null, b -> b.writeBytes((FriendlyByteBuf) payload)));
-        } else if (side == EngineConnectionSide.SERVER) {
-            return new ClientboundCustomPayloadPacket(new ForgePayload((ResourceLocation) (Object) Constants.Channels.REGISTER_KEY, null, b -> b.writeBytes((FriendlyByteBuf) payload)));
-        } else {
-            throw new UnsupportedOperationException();
-        }
+    public CustomPacketPayload createRegisterPayload(final Set<ResourceKey> channels) {
+        final FriendlyByteBuf payload = (FriendlyByteBuf) RegisterChannelUtil.encodePayload(channels);
+        return new ForgePayload((ResourceLocation) (Object) Constants.Channels.REGISTER_KEY, null, b -> b.writeBytes(payload));
     }
 }
