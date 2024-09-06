@@ -91,7 +91,7 @@ public final class PluginMetadataUtils {
                 .name(info.getDisplayName())
                 .version(info.getVersion().toString())
                 .description(info.getDescription())
-                .entrypoint("unknown") // TODO Map main class to mod id
+                .entrypoint("unknown")
                 .addContributor(StandardPluginContributor.builder()
                         .name(info.getConfigElement("authors").orElse("unknown").toString())
                         .build());

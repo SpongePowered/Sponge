@@ -39,7 +39,6 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.launch.Launch;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -119,8 +118,6 @@ public final class ReflectionUtil {
         final Class<?>[] methodParameters,
         final Class<?> returnType
     ) {
-        final String targetMethodForEnvironment = Launch.instance().mappingManager().toRuntimeMethodName(targetClass, methodName, methodParameters);
-
         try {
 
             Class<?> clazz = targetClass;
@@ -134,7 +131,7 @@ public final class ReflectionUtil {
                     return true;
                 }
                 final ClassReader reader = new ClassReader(targetClassStream);
-                final MethodCheckerClassVisitor visitor = new MethodCheckerClassVisitor(targetMethodForEnvironment, methodParameters, returnType);
+                final MethodCheckerClassVisitor visitor = new MethodCheckerClassVisitor(methodName, methodParameters, returnType);
                 reader.accept(visitor, ClassReader.SKIP_CODE | ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
                 final boolean declared  = visitor.wasMethodDeclared();
                 if (declared) {
@@ -144,10 +141,10 @@ public final class ReflectionUtil {
             }
             return false;
         } catch (final NoClassDefFoundError e) {
-            SpongeCommon.logger().fatal(ReflectionUtil.REFLECTION_SCANNING, String.format("Failed to load class in %s while scanning desired method %s under environment method name %s", targetClass, methodName, targetMethodForEnvironment), e);
+            SpongeCommon.logger().fatal(ReflectionUtil.REFLECTION_SCANNING, String.format("Failed to load class in %s while scanning desired method %s", targetClass, methodName), e);
             return true;
         } catch (final IOException e) {
-            SpongeCommon.logger().fatal(ReflectionUtil.REFLECTION_SCANNING, String.format("Class file exception while trying to load %s looking for method %s (%s in targeted environment)", targetClass, methodName, targetMethodForEnvironment), e);
+            SpongeCommon.logger().fatal(ReflectionUtil.REFLECTION_SCANNING, String.format("Class file exception while trying to load %s looking for method %s", targetClass, methodName), e);
             return true;
         }
     }

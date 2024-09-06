@@ -29,6 +29,7 @@ import cpw.mods.modlauncher.api.ITransformationService;
 import cpw.mods.modlauncher.api.ITransformer;
 import cpw.mods.modlauncher.api.ITransformerActivity;
 import cpw.mods.modlauncher.api.ITransformerVotingContext;
+import cpw.mods.modlauncher.api.TargetType;
 import cpw.mods.modlauncher.api.TransformerVoteResult;
 import cpw.mods.modlauncher.api.TypesafeMap;
 import io.leangen.geantyref.TypeToken;
@@ -113,8 +114,7 @@ public class SuperclassChanger implements ITransformationService {
     }
 
     @Override
-    @SuppressWarnings("rawtypes") // :(
-    public @NonNull List<ITransformer> transformers() {
+    public @NonNull List<ITransformer<?>> transformers() {
         return Collections.singletonList(
             new SuperclassTransformer(new ConcurrentHashMap<>(this.superclassTargets)));
     }
@@ -144,7 +144,6 @@ public class SuperclassChanger implements ITransformationService {
     }
 
     static class SuperclassTransformer implements ITransformer<ClassNode> {
-
         private final ConcurrentHashMap<String, String> superclassTargets;
 
         public SuperclassTransformer(final ConcurrentHashMap<String, String> superclassTargets) {
@@ -189,23 +188,25 @@ public class SuperclassChanger implements ITransformationService {
 
         @Override
         public @NonNull TransformerVoteResult castVote(final ITransformerVotingContext context) {
-            switch (context.getReason()) {
-                case ITransformerActivity.CLASSLOADING_REASON:
-                case SuperclassChanger.MIXIN_PLUGIN_REASON:
-                    return TransformerVoteResult.YES;
-                default:
-                    return TransformerVoteResult.NO;
-            }
+            return switch (context.getReason()) {
+                case ITransformerActivity.CLASSLOADING_REASON, SuperclassChanger.MIXIN_PLUGIN_REASON -> TransformerVoteResult.YES;
+                default -> TransformerVoteResult.NO;
+            };
         }
 
         @Override
-        public @NonNull Set<Target> targets() {
+        public @NonNull Set<Target<ClassNode>> targets() {
             return this.superclassTargets
                 .keySet()
                 .stream()
                 .map(s -> s.replace('.', '/'))
                 .map(Target::targetClass)
                 .collect(Collectors.toSet());
+        }
+
+        @Override
+        public @NonNull TargetType<ClassNode> getTargetType() {
+            return TargetType.CLASS;
         }
     }
 

@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "org.spongepowered.neoforge.mixin.tracker",
+  "target": "@env(DEFAULT)",
+  "compatibilityLevel": "JAVA_8",
+  "priority": 1302,
+  "mixins": [
+      "server.level.ServerPlayerGameModeMixin_Neo_Tracker",
+      "world.level.block.BlockMixin_Neo_Tracker",
+      "world.level.block.state.BlockBehaviorMixin_Neo_Tracker"
+  ]
+}

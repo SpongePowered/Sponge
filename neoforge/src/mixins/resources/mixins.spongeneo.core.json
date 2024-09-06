@@ -1,0 +1,44 @@
+{
+    "required": true,
+    "minVersion": "0.8",
+    "package": "org.spongepowered.neoforge.mixin.core",
+    "target": "@env(DEFAULT)",
+    "compatibilityLevel": "JAVA_8",
+    "priority": 1301,
+    "mixins": [
+        "api.event.EventMixin_Neo",
+        "api.event.block.ChangeBlockEvent_AllMixin_Neo",
+        "api.event.entity.ChangeEntityWorldEvent_PreMixin_Neo",
+        "api.event.entity.ChangeEventWorldEvent_PostMixin_Neo",
+        "commands.CommandsMixin_Neo",
+        "neoforge.NeoForgeMixin_Neo",
+        "neoforge.event.entity.EntityTravelToDimensionEventMixin_Neo",
+        "neoforge.event.entity.player.PlayerEvent_PlayerChangedDimensionEventMixin_Neo",
+        "neoforge.event.world.BlockEvent_BreakEventMixin_Neo",
+        "neoforge.event.world.BlockEventMixin_Neo",
+        "neoforge.internal.BrandingControlMixin_Neo",
+        "neoforge.registries.RegistryManagerMixin_Neo",
+        "network.ConnectionMixin_Neo",
+        "server.BootstrapMixin_Neo",
+        "server.MinecraftServerMixin_Neo",
+        "server.commands.SpreadPlayersCommandMixin_Neo",
+        "server.level.ServerPlayerMixin_Neo",
+        "server.network.ServerGamePacketListenerImplMixin_Neo",
+        "server.network.ServerLoginPacketListenerImplMixin_Neo",
+        "world.entity.LivingEntityMixin_Neo",
+        "world.entity.LivingEntityMixin_Neo_Attack_Impl",
+        "world.entity.item.ItemEntityMixin_Neo",
+        "world.entity.player.PlayerMixin_Neo",
+        "world.entity.projectile.ThrownEnderpealMixin_Neo",
+        "world.entity.vehicle.BoatMixin_Neo",
+        "world.level.block.FireBlockMixin_Neo",
+        "world.level.block.entity.AbstractFurnaceBlockEntityMixin_Neo"
+    ],
+    "client": [
+        "client.MinecraftMixin_Neo",
+        "client.main.MainMixin_Neo"
+    ],
+    "server": [
+        "server.MainMixin_Neo"
+  ]
+}

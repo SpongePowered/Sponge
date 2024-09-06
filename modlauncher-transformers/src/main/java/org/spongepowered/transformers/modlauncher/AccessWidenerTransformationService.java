@@ -29,6 +29,7 @@ import cpw.mods.modlauncher.api.ITransformationService;
 import cpw.mods.modlauncher.api.ITransformer;
 import cpw.mods.modlauncher.api.ITransformerActivity;
 import cpw.mods.modlauncher.api.ITransformerVotingContext;
+import cpw.mods.modlauncher.api.TargetType;
 import cpw.mods.modlauncher.api.TransformerVoteResult;
 import cpw.mods.modlauncher.api.TypesafeMap;
 import joptsimple.OptionSpec;
@@ -107,8 +108,7 @@ public class AccessWidenerTransformationService implements ITransformationServic
     }
 
     @Override
-    @SuppressWarnings("rawtypes") // :(
-    public @NonNull List<ITransformer> transformers() {
+    public @NonNull List<ITransformer<?>> transformers() {
         return Collections.singletonList(new AWTransformer(this.widener));
     }
 
@@ -151,13 +151,18 @@ public class AccessWidenerTransformationService implements ITransformationServic
         }
 
         @Override
-        public @NonNull Set<Target> targets() {
+        public @NonNull Set<Target<ClassNode>> targets() {
             final Set<String> classNames = this.widener.getTargets();
-            final Set<Target> targets = new HashSet<>(classNames.size());
+            final Set<Target<ClassNode>> targets = new HashSet<>(classNames.size());
             for (final String clazz : classNames) {
                 targets.add(Target.targetClass(clazz.replace('.', '/')));
             }
             return targets;
+        }
+
+        @Override
+        public @NonNull TargetType<ClassNode> getTargetType() {
+            return TargetType.CLASS;
         }
     }
 }

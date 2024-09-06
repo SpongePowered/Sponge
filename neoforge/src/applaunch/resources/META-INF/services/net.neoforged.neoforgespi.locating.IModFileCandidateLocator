@@ -1,0 +1,3 @@
+org.spongepowered.neoforge.applaunch.loading.moddiscovery.SpongeNeoModLocator
+org.spongepowered.neoforge.applaunch.loading.moddiscovery.locator.EnvironmentPluginLocator
+org.spongepowered.neoforge.applaunch.loading.moddiscovery.locator.PluginsDirectoryLocator

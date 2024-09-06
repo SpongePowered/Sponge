@@ -116,8 +116,6 @@ public final class PluginFileConfigurable implements IConfigurable {
         }
 
         if ("dependencies".equals(query)) {
-
-            // TODO Should we inject a dependency on SpongeForge?
             final Set<PluginDependency> dependencies = metadata.dependencies();
             if (dependencies.isEmpty()) {
                 return Collections.emptyList();

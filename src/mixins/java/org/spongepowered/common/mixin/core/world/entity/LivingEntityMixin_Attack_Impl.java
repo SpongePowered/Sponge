@@ -362,19 +362,6 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin
     }
 
     /**
-     * Set absorbed damage after calling {@link LivingEntity#setAbsorptionAmount} in which we called the event
-     */
-    @ModifyVariable(method = "actuallyHurt", ordinal = 2,
-        slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;setAbsorptionAmount(F)V", ordinal = 0)),
-        at = @At(value = "STORE", ordinal = 0))
-    public float attackImpl$setAbsorbed(final float value) {
-        if (this.attackImpl$actuallyHurtResult.event().isCancelled()) {
-            return 0;
-        }
-        return this.attackImpl$actuallyHurtResult.damageAbsorbed().orElse(0f);
-    }
-
-    /**
      * Replay prevented
      * {@link #shadow$hurtCurrentlyUsedShield} and {@link #shadow$blockUsingShield}
      * {@link #shadow$hurtHelmet}
