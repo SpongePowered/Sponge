@@ -10,6 +10,7 @@ forgeAutoRenamingTool = "1.0.6"
 mixin = "0.8.7"
 bootstrap = "2.1.1"
 modlauncher = "10.2.1"
+neo-modlauncher = "11.0.3"
 securemodules = "2.2.20"
 jarjar = "0.3.26"
 guava = "32.1.2-jre"
@@ -32,6 +33,7 @@ log4j-jpl = { module = "org.apache.logging.log4j:log4j-jpl", version.ref = "log4
 log4j-slf4j2 = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version.ref = "log4j" }
 bootstrap = { module = "net.minecraftforge:bootstrap", version.ref = "bootstrap" }
 modlauncher = { module = "net.minecraftforge:modlauncher", version.ref = "modlauncher" }
+neo-modlauncher = { module = "cpw.mods:modlauncher", version.ref = "neo-modlauncher" }
 securemodules = { module = "net.minecraftforge:securemodules", version.ref = "securemodules" }
 tinylog-api = { module = "org.tinylog:tinylog-api", version.ref = "tinylog" }
 tinylog-impl = { module = "org.tinylog:tinylog-impl", version.ref = "tinylog" }
