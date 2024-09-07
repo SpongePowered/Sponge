@@ -27,7 +27,7 @@ dependencies {
     // ModLauncher inherited dependencies - strictly should be provided by
     //  the platform making use of this project
     compileOnly(libs.log4j.api)
-    compileOnly("cpw.mods:modlauncher:11.0.3") { // libs.modlauncher
+    compileOnly(libs.neo.modlauncher) {
         exclude(group = "org.ow2.asm")
         exclude(group = "org.apache.logging.log4j")
     }
