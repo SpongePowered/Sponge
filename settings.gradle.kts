@@ -20,7 +20,7 @@ plugins {
 }
 
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT) // needed for forge-loom, unfortunately
+    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT) // needed for arch-loom, unfortunately
     repositories {
         maven("https://repo.spongepowered.org/repository/maven-public/") {
             name = "sponge"
@@ -42,9 +42,10 @@ extensions.configure(MinecraftRepositoryExtension::class) {
     injectRepositories(false)
 }
 
-// Set up project structure
+// Required projects
 
-if (!file("SpongeAPI/gradle.properties").exists()) {
+val apiPropsFile = file("SpongeAPI/gradle.properties")
+if (!apiPropsFile.exists()) {
     throw InvalidUserDataException("""
         The SpongeAPI submodule required to build does not appear to be set up.
 
@@ -60,63 +61,70 @@ includeBuild("SpongeAPI") {
         substitute(module("org.spongepowered:spongeapi")).using(project(":"))
     }
 }
-include(":SpongeVanilla")
-project(":SpongeVanilla").projectDir = file("vanilla")
 include("modlauncher-transformers")
 include("generator")
 
-val testPlugins = file("testplugins.settings.gradle.kts")
-if (testPlugins.exists()) {
-    apply(from = testPlugins)
+// Optional projects
+
+var projects: List<String>
+val projectsArg: String? = startParameter.projectProperties["projects"]
+if (projectsArg == null) {
+    val projectsPropsFile = file("projects.properties")
+    if (!projectsPropsFile.exists()) {
+        file("gradle/projects-default.properties").copyTo(projectsPropsFile)
+    }
+
+    val projectsProps = java.util.Properties()
+    projectsPropsFile.bufferedReader(Charsets.UTF_8).use {
+        projectsProps.load(it)
+    }
+
+    projects = projectsProps.entries.filter { it.value.equals("true") }.map { it.key.toString() }
+    println("Projects selected in config file: " + projects.joinToString(","))
 } else {
-    testPlugins.writeText(listOf(
-        "// Uncomment to enable client module for debugging",
-        "//include(\":testplugins\")"
-    ).joinToString(separator = System.lineSeparator(), postfix = System.lineSeparator()))
-}
-val testPluginsEnabledInCi: String = startParameter.projectProperties.getOrDefault("enableTestPlugins", "false")
-if (testPluginsEnabledInCi.toBoolean()) {
-    include(":testplugins")
+    projects = projectsArg.split(",")
+    println("Projects selected in start parameter: " + projects.joinToString(","))
 }
 
-val spongeForge = file("spongeforge.settings.gradle.kts")
-if (spongeForge.exists()) {
-    apply(from = spongeForge)
-} else {
-    spongeForge.writeText(listOf(
-        "// Uncomment to enable SpongeForge module.",
-        "// By default only Sponge and SpongeVanilla are made available",
-        "//include(\":SpongeForge\")",
-        "//project(\":SpongeForge\").projectDir = file(\"forge\")"
-    ).joinToString(separator = System.lineSeparator(), postfix = System.lineSeparator()))
+if (projects.contains("vanilla")) {
+    include(":SpongeVanilla")
+    project(":SpongeVanilla").projectDir = file("vanilla")
 }
-val spongeForgeEnabledInCi: String = startParameter.projectProperties.getOrDefault("enableSpongeForge", "false")
-if (spongeForgeEnabledInCi.toBoolean()) {
+
+if (projects.contains("forge")) {
     include(":SpongeForge")
     project(":SpongeForge").projectDir = file("forge")
 }
 
-// Include properties from API project (with api prefix)
-val apiProps = file("SpongeAPI/gradle.properties")
-if (apiProps.exists()) {
-    val props = java.util.Properties()
-    apiProps.bufferedReader(Charsets.UTF_8).use {
-        props.load(it)
-    }
-    val extraProperties = mutableMapOf<String, String>()
-    props.stringPropertyNames().forEach { key ->
-        val value = props.getProperty(key)
-        if (value != null) {
-            if (key.startsWith("api")) {
-                extraProperties[key] = value
-            } else {
-                extraProperties["api${key.replaceFirstChar { it.uppercase() }}"] = value
-            }
+if (projects.contains("neoforge")) {
+    include(":SpongeNeo")
+    project(":SpongeNeo").projectDir = file("neoforge")
+}
+
+if (projects.contains("testplugins")) {
+    include(":testplugins")
+}
+
+// API properties
+
+val apiProps = java.util.Properties()
+apiPropsFile.bufferedReader(Charsets.UTF_8).use {
+    apiProps.load(it)
+}
+
+val extraProperties = mutableMapOf<String, String>()
+apiProps.stringPropertyNames().forEach { key ->
+    val value = apiProps.getProperty(key)
+    if (value != null) {
+        if (key.startsWith("api")) {
+            extraProperties[key] = value
+        } else {
+            extraProperties["api${key.replaceFirstChar { it.uppercase() }}"] = value
         }
     }
+}
 
-    gradle.beforeProject {
-        val extraExt = project.extensions.extraProperties
-        extraProperties.forEach { (k, v) -> extraExt.set(k, v) }
-    }
+gradle.beforeProject {
+    val extraExt = project.extensions.extraProperties
+    extraProperties.forEach { (k, v) -> extraExt.set(k, v) }
 }

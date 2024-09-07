@@ -84,3 +84,4 @@ buildSrc/src/api
 # the test plugins themselves can be committed as examples.
 testplugins.settings.gradle.kts
 spongeforge.settings.gradle.kts
+projects.properties
