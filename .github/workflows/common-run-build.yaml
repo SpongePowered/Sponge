@@ -33,7 +33,7 @@ jobs:
           echo "GIT_BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
           echo "BUILD_NUMBER=${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
       - name: build with Gradle
-        run: ./gradlew -PenableTestPlugins=true -PenableSpongeForge=true build --stacktrace
+        run: ./gradlew -Pprojects=vanilla,forge,neoforge,testplugins build --stacktrace
         env:
           CI_SYSTEM: Github Actions
       - name: Archive artifacts for build
@@ -45,6 +45,7 @@ jobs:
             ${{ github.workspace }}/build/libs/*.jar
             ${{ github.workspace }}/vanilla/build/libs/*.jar
             ${{ github.workspace }}/forge/build/libs/*.jar
+            ${{ github.workspace }}/neoforge/build/libs/*.jar
       - name: SpongeVanilla Production Jar
         uses: "actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3" # v4.3.1
         with:
@@ -55,6 +56,11 @@ jobs:
         with:
           name: SpongeForge Production Jar
           path: "${{ github.workspace }}/forge/build/libs/*-universal.jar"
+      - name: SpongeNeo Production Jar
+        uses: "actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3" # v4.3.1
+        with:
+          name: SpongeNeo Production Jar
+          path: "${{ github.workspace }}/neoforge/build/libs/*-universal.jar"
       - name: SpongeVanilla libraries
         uses: "actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3" # v4.3.1
         with:
