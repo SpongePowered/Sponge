@@ -41,6 +41,7 @@ public interface ChannelHooks {
     }
 
     default CustomPacketPayload createRegisterPayload(final Set<ResourceKey> channels) {
-        return new SpongeChannelPayload(ChannelUtils.REGISTER, (FriendlyByteBuf) RegisterChannelUtil.encodePayload(channels));
+        final FriendlyByteBuf payload = (FriendlyByteBuf) RegisterChannelUtil.encodePayload(channels);
+        return SpongeChannelPayload.fromType(ChannelUtils.REGISTER, b -> b.writeBytes(payload));
     }
 }

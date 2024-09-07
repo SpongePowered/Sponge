@@ -29,7 +29,6 @@ import io.netty.channel.Channel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ServerboundClientInformationPacket;
-import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.configuration.ServerboundFinishConfigurationPacket;
 import net.minecraft.server.network.ConfigurationTask;
 import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
@@ -168,9 +167,7 @@ public abstract class ServerConfigurationPacketListenerImplMixin extends ServerC
     }
 
     @Override
-    public void shadow$handleCustomPayload(final ServerboundCustomPayloadPacket $$0) {
-        super.shadow$handleCustomPayload($$0);
-
+    protected void impl$onCustomPayload() {
         if (this.currentTask == null || this.currentTask.type() != ServerConfigurationPacketListenerImplMixin.impl$SPONGE_CONFIGURATION_TYPE) {
             return;
         }

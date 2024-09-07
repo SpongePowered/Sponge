@@ -79,7 +79,6 @@ public abstract class ServerCommonPacketListenerImplMixin implements ServerCommo
     @Shadow @Final protected MinecraftServer server;
     @Shadow public abstract void shadow$send(final Packet<?> $$0);
     @Shadow public abstract void shadow$disconnect(Component reason);
-    @Shadow public void shadow$handleCustomPayload(final ServerboundCustomPayloadPacket $$0) { }
     @Shadow protected abstract GameProfile shadow$playerProfile();
     // @formatter:on
 
@@ -98,6 +97,10 @@ public abstract class ServerCommonPacketListenerImplMixin implements ServerCommo
         if (packet instanceof ClientboundResourcePackPushPacket packPacket) {
             this.impl$resourcePackInfos.put(packPacket.id(), ((ClientboundResourcePackPacketBridge) (Object) packPacket).bridge$getPackInfo());
         }
+    }
+
+    protected void impl$onCustomPayload() {
+        // nothing here, see subclasses
     }
 
     @Inject(method = "handleResourcePackResponse", at = @At(
@@ -184,6 +187,8 @@ public abstract class ServerCommonPacketListenerImplMixin implements ServerCommo
 
     @Inject(method = "handleCustomPayload", at = @At(value = "HEAD"), cancellable = true)
     private void impl$onHandleCustomPayload(final ServerboundCustomPayloadPacket packet, final CallbackInfo ci) {
+        this.impl$onCustomPayload();
+
         if (!(packet.payload() instanceof final SpongeChannelPayload payload)) {
             return;
         }
