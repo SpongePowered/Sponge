@@ -31,8 +31,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.visitors.CollectFields;
 import net.minecraft.nbt.visitors.FieldSelector;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.util.thread.ProcessorMailbox;
-import net.minecraft.util.thread.StrictQueue;
+import net.minecraft.util.thread.PriorityConsecutiveExecutor;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.storage.IOWorker;
@@ -45,6 +44,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -59,7 +59,6 @@ import org.spongepowered.common.world.level.chunk.storage.SpongeIOWorkerType;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.BitSet;
-import java.util.Map;
 import java.util.SequencedMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -72,7 +71,7 @@ public abstract class IOWorkerMixin implements IOWorkerBridge {
     @Shadow @Final private static Logger LOGGER;
 
     @Shadow @Final private AtomicBoolean shutdownRequested;
-    @Shadow @Final private ProcessorMailbox<StrictQueue.IntRunnable> mailbox;
+    @Shadow @Final private PriorityConsecutiveExecutor consecutiveExecutor;
     @Shadow @Final private RegionFileStorage storage;
     @Shadow @Final private SequencedMap<ChunkPos, IOWorker$PendingStoreAccessor> pendingWrites;
 
@@ -164,16 +163,20 @@ public abstract class IOWorkerMixin implements IOWorkerBridge {
         });
     }
 
+    @Unique
     private <T> CompletableFuture<T> impl$submitTaskCancellable(final Supplier<Either<T, Exception>> supplier) {
-        final CompletableFuture<T> future = this.mailbox.askEither(processor -> new StrictQueue.IntRunnable(0, () -> {
+        final CompletableFuture<T> future = this.consecutiveExecutor.scheduleWithResult(0, f -> {
             if (!this.shutdownRequested.get()) {
-                processor.tell(supplier.get());
+                supplier.get()
+                    .ifLeft(f::complete)
+                    .ifRight(f::completeExceptionally);
+                f.complete(supplier.get().orThrow());
             } else {
-                processor.tell(Either.right(SpongeUnloadedChunkException.INSTANCE)); //Sponge: Complete exceptionally if shutdown was requested
+                f.completeExceptionally(SpongeUnloadedChunkException.INSTANCE); //Sponge: Complete exceptionally if shutdown was requested
             }
 
             this.shadow$tellStorePending();
-        }));
+        });
 
         //Sponge start: Complete exceptionally if shutdown was requested
         if (this.shutdownRequested.get()) {

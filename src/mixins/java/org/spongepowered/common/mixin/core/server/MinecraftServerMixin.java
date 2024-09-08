@@ -129,7 +129,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         //MinecraftServer Executor to prevent changes in timings.
 
         @Override
-        protected @NonNull Runnable wrapRunnable(@NonNull Runnable runnable) {
+        public Runnable wrapRunnable(Runnable runnable) {
             return runnable;
         }
 

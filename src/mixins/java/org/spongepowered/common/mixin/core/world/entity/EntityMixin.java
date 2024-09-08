@@ -525,8 +525,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                 this.shadow$removeAfterChangingDimensions();
             }
 
-            newEntity.moveTo(transition.pos().x, transition.pos().y, transition.pos().z, transition.yRot(), newEntity.getXRot());
-            newEntity.setDeltaMovement(transition.speed());
+            newEntity.moveTo(transition.position().x, transition.position().y, transition.position().z, transition.yRot(), newEntity.getXRot());
+            newEntity.setDeltaMovement(transition.deltaMovement());
             if (thisEntity != newEntity) {
                 newLevel.addDuringTeleport(newEntity);
             }

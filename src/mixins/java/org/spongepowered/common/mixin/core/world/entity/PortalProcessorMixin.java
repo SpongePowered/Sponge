@@ -29,6 +29,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PortalProcessor;
+import net.minecraft.world.entity.Relative;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Portal;
@@ -51,6 +52,8 @@ import org.spongepowered.common.event.tracking.phase.entity.TeleportContext;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
+
+import java.util.EnumSet;
 
 @Mixin(PortalProcessor.class)
 public abstract class PortalProcessorMixin implements PortalProcessorBridge {
@@ -128,10 +131,10 @@ public abstract class PortalProcessorMixin implements PortalProcessorBridge {
                     spongEntity.position(),
                     spongEntity.rotation(),
                     (ServerWorld) transition.newLevel(),
-                    VecHelper.toVector3d(transition.pos()),
-                    VecHelper.toVector3d(transition.pos()),
+                    VecHelper.toVector3d(transition.position()),
+                    VecHelper.toVector3d(transition.position()),
                     preWorldChangeEvent.destinationWorld(), // with modified preWorldChangeEvent destination world
-                    VecHelper.toVector3d(transition.speed()),
+                    VecHelper.toVector3d(transition.deltaMovement()),
                     (PortalLogic) finalPortal);
             if (SpongeCommon.post(tpEvent)) {
                 wrapperTransaction.markCancelled();
@@ -145,6 +148,7 @@ public abstract class PortalProcessorMixin implements PortalProcessorBridge {
                     (float) tpEvent.toRotation().x(),
                     (float) tpEvent.toRotation().y(),
                     transition.missingRespawnBlock(),
+                    EnumSet.noneOf(Relative.class),
                     transition.postDimensionTransition());
         }
     }

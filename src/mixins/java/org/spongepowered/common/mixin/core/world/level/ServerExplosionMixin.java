@@ -61,10 +61,9 @@ import java.util.StringJoiner;
 public abstract class ServerExplosionMixin implements ExplosionBridge {
 
     // @formatter:off
-    @Shadow @Final private ExplosionDamageCalculator damageCalculator;
     @Shadow @Final private Map<Player, Vec3> hitPlayers;
     @Shadow @Final private boolean fire;
-    @Shadow @Final private net.minecraft.world.level.Level level;
+    @Shadow @Final private ServerLevel level;
     @Shadow @Final private Entity source;
     @Shadow @Final private float radius;
     @Shadow @Final private Vec3 center;

@@ -142,6 +142,17 @@ public final class VanillaRegistryLoader {
             map.put(EnderDragonPhase.HOVERING, "hover");
         }, phase -> CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, ((EnderDragonPhaseAccessor) phase).accessor$name()));
         this.holder.createRegistry(RegistryTypes.FIREWORK_SHAPE, VanillaRegistryLoader.fireworkShape());
+//        final var materials = new HashMap<ArmorMaterial, String>();
+//        materials.put(ArmorMaterials.LEATHER, ArmorMaterials.LEATHER.modelId().toString());
+//        materials.put(ArmorMaterials.CHAIN, ArmorMaterials.CHAIN.modelId().toString());
+//        materials.put(ArmorMaterials.IRON, ArmorMaterials.IRON.modelId().toString());
+//        materials.put(ArmorMaterials.GOLD, ArmorMaterials.GOLD.modelId().toString());
+//        materials.put(ArmorMaterials.DIAMOND, ArmorMaterials.DIAMOND.modelId().toString());
+//        materials.put(ArmorMaterials.TURTLE_SCUTE, ResourceKey.minecraft("turtle").toString());
+//        materials.put(ArmorMaterials.NETHERITE, ArmorMaterials.NETHERITE.modelId().toString());
+//        materials.put(ArmorMaterials.ARMADILLO_SCUTE, ArmorMaterials.ARMADILLO_SCUTE.modelId().toString());
+//
+//        this.naming(RegistryTypes.ARMOR_MATERIAL, materials.keySet().toArray(new ArmorMaterial[]{}), materials);
         this.knownName(RegistryTypes.GAME_RULE, GameRulesAccessor.accessor$GAME_RULE_TYPES().keySet(), rule -> CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, rule.getId()));
     }
 

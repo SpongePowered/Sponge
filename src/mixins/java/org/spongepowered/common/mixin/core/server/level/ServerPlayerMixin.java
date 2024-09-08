@@ -62,6 +62,8 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.PositionMoveRotation;
+import net.minecraft.world.entity.Relative;
 import net.minecraft.world.entity.animal.AbstractFish;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -148,6 +150,7 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
 import org.spongepowered.math.vector.Vector3d;
 
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Objects;
@@ -230,7 +233,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         }
 
         if (!isChangeOfWorld) {
-            this.connection.teleport(pos.x(), pos.y(), pos.z(), this.shadow$getYRot(), this.shadow$getXRot(), new HashSet<>());
+            this.connection.teleport(new PositionMoveRotation(VecHelper.toVanillaVector3d(pos), Vec3.ZERO, this.shadow$getYRot(), this.shadow$getXRot()), new HashSet<>());
             this.connection.resetPosition();
         } else {
             this.bridge$changeDimension(new DimensionTransition(level, VecHelper.toVanillaVector3d(pos), thisPlayer.getKnownMovement(),
@@ -401,7 +404,14 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
      * @reason Redirect all teleports through {@link #bridge$changeDimension} to fire our move/rotate/teleport events
      */
     @Overwrite
-    public void teleportTo(final ServerLevel world, final double x, final double y, final double z, final float yaw, final float pitch, final boolean setCamera) {
+    public boolean teleportTo(final ServerLevel world,
+                              final double x,
+                              final double y,
+                              final double z,
+                              Set<Relative> relative,
+                              final float yaw,
+                              final float pitch,
+                              final boolean setCamera) {
         if (setCamera) {
             this.shadow$setCamera((net.minecraft.server.level.ServerPlayer) (Object) this);
         }
@@ -412,8 +422,8 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
             }
 
             final var thisPlayer = (net.minecraft.server.level.ServerPlayer) (Object) this;
-            this.bridge$changeDimension(new DimensionTransition(world, new Vec3(x, y, z), Vec3.ZERO, yaw, pitch,
-                    e -> world.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, e.chunkPosition(), 1, thisPlayer.getId())));
+            return this.bridge$changeDimension(new DimensionTransition(world, new Vec3(x, y, z), Vec3.ZERO, yaw, pitch, relative,
+                    e -> world.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, e.chunkPosition(), 1, thisPlayer.getId()))) != null;
         }
     }
 
@@ -450,7 +460,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         // Sponge End
 
         if (newLevel.dimension() == oldLevel.dimension()) { // actually no dimension change
-             this.connection.teleport(transition.pos().x, transition.pos().y, transition.pos().z, transition.yRot(), transition.xRot());
+             this.connection.teleport(transition.position().x, transition.position().y, transition.position().z, transition.yRot(), transition.xRot());
              this.connection.resetPosition();
             transition.postDimensionTransition().onTransition(thisPlayer);
             // TODO setYHeadRot after would rotate event result
@@ -473,7 +483,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
         oldLevel.getProfiler().push("placing");
         thisPlayer.setServerLevel(newLevel);
-        this.connection.teleport(transition.pos().x, transition.pos().y, transition.pos().z, transition.yRot(), transition.xRot());
+        this.connection.teleport(transition.position().x, transition.position().y, transition.position().z, transition.yRot(), transition.xRot());
         this.connection.resetPosition();
         newLevel.addDuringTeleport(thisPlayer);
         oldLevel.getProfiler().pop();
@@ -522,7 +532,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                     frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
                 }
 
-                final var originalDest = VecHelper.toVector3d(transition.pos());
+                final var originalDest = VecHelper.toVector3d(transition.position());
                 final @Nullable Vector3d newDest;
 
                 if (isDimensionChange) {
@@ -533,10 +543,11 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                         }
                         if (preEvent.destinationWorld() != preEvent.originalDestinationWorld()) {
                             transition = new DimensionTransition((ServerLevel) preEvent.destinationWorld(),
-                                    transition.pos(),
-                                    transition.speed(),
+                                    transition.position(),
+                                    transition.deltaMovement(),
                                     transition.yRot(), transition.xRot(),
                                     transition.missingRespawnBlock(),
+                                EnumSet.noneOf(Relative.class),
                                     transition.postDimensionTransition());
                         }
                     }
@@ -560,9 +571,10 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                     // if changed override the DimensionTransition
                     transition = new DimensionTransition(transition.newLevel(),
                             VecHelper.toVanillaVector3d(newDest),
-                            transition.speed(),
+                            transition.deltaMovement(),
                             transition.yRot(), transition.xRot(),
                             transition.missingRespawnBlock(),
+                        EnumSet.noneOf(Relative.class),
                             transition.postDimensionTransition());
                 }
 
@@ -575,10 +587,11 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                 }
                 if (toRot != newToRot) {
                     transition = new DimensionTransition(transition.newLevel(),
-                            transition.pos(),
-                            transition.speed(),
+                            transition.position(),
+                            transition.deltaMovement(),
                             (float) newToRot.y(), (float) newToRot.x(),
                             transition.missingRespawnBlock(),
+                        EnumSet.noneOf(Relative.class),
                             transition.postDimensionTransition());
                 }
 

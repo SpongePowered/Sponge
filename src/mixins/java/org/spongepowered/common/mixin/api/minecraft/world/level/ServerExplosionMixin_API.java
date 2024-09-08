@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -44,7 +45,7 @@ public abstract class ServerExplosionMixin_API implements Explosion {
 
     //@formatter:off
     @Shadow @Final private boolean fire;
-    @Shadow @Final private net.minecraft.world.level.Level level;
+    @Shadow @Final private ServerLevel level;
 
     @Shadow @Final private Entity source;
     @Shadow @Final private float radius;

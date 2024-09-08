@@ -35,8 +35,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.RelativeMovement;
+import net.minecraft.world.entity.PositionMoveRotation;
+import net.minecraft.world.entity.Relative;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.CauseStackManager;
@@ -68,7 +70,7 @@ public abstract class TeleportCommandMixin {
     @Overwrite
     // TODO check if this is still correct - check if we can get rid of the overwrite
     private static void performTeleport(CommandSourceStack source, Entity entityIn, ServerLevel worldIn, double x, double y, double z,
-            Set<RelativeMovement> relativeList, float yaw, float pitch, TeleportCommand.@Nullable LookAt facing) {
+            Set<Relative> relativeList, float yaw, float pitch, TeleportCommand.@Nullable LookAt facing) {
 
         double actualX = x;
         double actualY = y;
@@ -112,18 +114,19 @@ public abstract class TeleportCommandMixin {
                     actualPitch = rotateEvent.isCancelled() ? entityIn.getXRot() : rotateEvent.toRotation().x();
                 }
 
-                if (entityIn instanceof ServerPlayer) {
+                if (entityIn instanceof ServerPlayer sp) {
 
                     ChunkPos chunkpos = new ChunkPos(new BlockPos((int) actualX, (int) actualY, (int) actualZ));
                     worldIn.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkpos, 1, entityIn.getId());
 
                     entityIn.stopRiding();
 
-                    if (((ServerPlayer)entityIn).isSleeping()) {
-                        ((ServerPlayer)entityIn).stopSleepInBed(true, true);
+                    if (sp.isSleeping()) {
+                        sp.stopSleepInBed(true, true);
                     }
 
-                    ((ServerPlayer)entityIn).connection.teleport(actualX, actualY, actualZ, (float) actualYaw, (float) actualPitch, relativeList);
+                    sp.connection.teleport(
+                        new PositionMoveRotation(new Vec3( actualX, actualY, actualZ), Vec3.ZERO, (float) actualYaw, (float) actualPitch), relativeList);
                 } else {
                     entityIn.moveTo(actualX, actualY, actualZ, (float) actualYaw, (float) actualPitch);
                 }
@@ -131,12 +134,12 @@ public abstract class TeleportCommandMixin {
                 entityIn.setYHeadRot((float) actualYaw);
             }
         } else {
-            if (entityIn instanceof ServerPlayer) {
+            if (entityIn instanceof ServerPlayer sp) {
                 // To ensure mod code is caught, handling the world change for players happens in teleport
                 // Teleport will create a frame but we want to ensure it'll be the command movement type
                 // TODO check if this is still correct
                 PhaseTracker.getCauseStackManager().addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.COMMAND);
-                ((ServerPlayer) entityIn).teleportTo(worldIn, x, y, z, yaw, pitch, true);
+                sp.teleportTo(worldIn, x, y, z, relativeList, yaw, pitch, true);
                 PhaseTracker.getCauseStackManager().removeContext(EventContextKeys.MOVEMENT_TYPE);
             } else {
                 try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
