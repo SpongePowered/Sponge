@@ -45,11 +45,8 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.inject.plugin.PluginModule;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.neoforge.launch.event.NeoEventManager;
-import org.spongepowered.plugin.PluginContainer;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
 
 // Spongified FMLModContainer
 public final class PluginModContainer extends ModContainer {
@@ -57,12 +54,12 @@ public final class PluginModContainer extends ModContainer {
 
     private final ModFileScanData scanResults;
     private final IEventBus eventBus;
-    private final List<Class<?>> modClasses;
+    private final Class<?> modClass;
     private final Module module;
 
-    public PluginModContainer(IModInfo info, List<String> entrypoints, ModFileScanData modFileScanResults, ModuleLayer gameLayer) {
+    public PluginModContainer(IModInfo info, String className, ModFileScanData modFileScanResults, ModuleLayer gameLayer) {
         super(info);
-        LOGGER.debug(Logging.LOADING, "Creating PluginModContainer instance for {}", entrypoints);
+        LOGGER.debug(Logging.LOADING, "Creating PluginModContainer instance for {}", className);
         this.scanResults = modFileScanResults;
         this.eventBus = BusBuilder.builder()
             .setExceptionHandler(this::onEventFailed)
@@ -74,18 +71,11 @@ public final class PluginModContainer extends ModContainer {
         ModLoadingContext context = ModLoadingContext.get();
         try {
             context.setActiveContainer(this);
-
-            modClasses = new ArrayList<>();
-            for (String entrypoint : entrypoints) {
-                try {
-                    Class<?> modClass = Class.forName(this.module, entrypoint);
-                    modClasses.add(modClass);
-                    LOGGER.trace(Logging.LOADING, "Loaded plugin class {} with {}", modClass.getName(), modClass.getClassLoader());
-                } catch (Throwable e) {
-                    LOGGER.error(Logging.LOADING, "Failed to load class {}", entrypoint, e);
-                    throw new ModLoadingException(ModLoadingIssue.error("fml.modloadingissue.failedtoloadmodclass").withCause(e).withAffectedMod(info));
-                }
-            }
+            this.modClass = Class.forName(this.module, className);
+            LOGGER.trace(Logging.LOADING, "Loaded plugin class {} with {}", this.modClass.getName(), this.modClass.getClassLoader());
+        } catch (Throwable e) {
+            LOGGER.error(Logging.LOADING, "Failed to load class {}", className, e);
+            throw new ModLoadingException(ModLoadingIssue.error("fml.modloadingissue.failedtoloadmodclass").withCause(e).withAffectedMod(info));
         } finally {
             context.setActiveContainer(null);
         }
@@ -97,23 +87,22 @@ public final class PluginModContainer extends ModContainer {
 
     @Override
     protected void constructMod() {
-        for (Class<?> modClass : this.modClasses) {
-            try {
-                LOGGER.trace(Logging.LOADING, "Loading plugin instance {} of type {}", getModId(), modClass.getName());
+        try {
+            LOGGER.trace(Logging.LOADING, "Loading plugin instance {} of type {}", getModId(), this.modClass.getName());
 
-                final PluginContainer pluginContainer = NeoPluginContainer.of(this);
-                final Injector childInjector = Launch.instance().lifecycle().platformInjector().createChildInjector(new PluginModule(pluginContainer, modClass));
-                final Object modInstance = childInjector.getInstance(modClass);
-                ((NeoEventManager) NeoForge.EVENT_BUS).registerListeners(pluginContainer, modInstance);
+            final NeoPluginContainer pluginContainer = NeoPluginContainer.of(this);
+            final Injector childInjector = Launch.instance().lifecycle().platformInjector().createChildInjector(new PluginModule(pluginContainer, this.modClass));
+            final Object modInstance = childInjector.getInstance(this.modClass);
+            ((NeoEventManager) NeoForge.EVENT_BUS).registerListeners(pluginContainer, modInstance);
+            pluginContainer.setInstance(modInstance);
 
-                LOGGER.trace(Logging.LOADING, "Loaded plugin instance {} of type {}", getModId(), modClass.getName());
-            } catch (Throwable e) {
-                if (e instanceof InvocationTargetException) {
-                    e = e.getCause();
-                }
-                LOGGER.error(Logging.LOADING, "Failed to create plugin instance. PluginID: {}, class {}", getModId(), modClass.getName(), e);
-                throw new ModLoadingException(ModLoadingIssue.error("fml.modloadingissue.failedtoloadmod").withCause(e).withAffectedMod(modInfo));
+            LOGGER.trace(Logging.LOADING, "Loaded plugin instance {} of type {}", getModId(), this.modClass.getName());
+        } catch (Throwable e) {
+            if (e instanceof InvocationTargetException) {
+                e = e.getCause();
             }
+            LOGGER.error(Logging.LOADING, "Failed to create plugin instance. PluginID: {}, class {}", getModId(), this.modClass.getName(), e);
+            throw new ModLoadingException(ModLoadingIssue.error("fml.modloadingissue.failedtoloadmod").withCause(e).withAffectedMod(modInfo));
         }
 
         try {

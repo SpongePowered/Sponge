@@ -37,7 +37,6 @@ import org.objectweb.asm.Type;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 public final class JavaPluginLanguageProvider extends BuiltInLanguageLoader {
@@ -50,22 +49,26 @@ public final class JavaPluginLanguageProvider extends BuiltInLanguageLoader {
     }
 
     @Override
-    public ModContainer loadMod(IModInfo info, ModFileScanData modFileScanResults, ModuleLayer layer) {
+    public ModContainer loadMod(final IModInfo info, final ModFileScanData modFileScanResults, final ModuleLayer layer) {
         final var modClasses = modFileScanResults.getAnnotations().stream()
             .filter(ad -> ad.annotationType().equals(JavaPluginLanguageProvider.PLUGIN_ANNOTATION))
             .peek(ad -> LOGGER.debug(Logging.SCAN, "Found @Plugin class {} with id {}", ad.clazz().getClassName(), ad.annotationData().get("value")))
             .filter(data -> JavaPluginLanguageProvider.fixPluginId((String) data.annotationData().get("value")).equals(info.getModId()))
             .map(ad -> ad.clazz().getClassName())
             .toList();
-        return JavaPluginLanguageProvider.newPluginModContainer(info, modClasses, modFileScanResults, layer);
+
+        if (modClasses.size() != 1) {
+            throw new ModLoadingException(ModLoadingIssue.error("Found {0} plugin entrypoints", modClasses.size()));
+        }
+        return JavaPluginLanguageProvider.newPluginModContainer(info, modClasses.get(0), modFileScanResults, layer);
     }
 
-    private static ModContainer newPluginModContainer(IModInfo info, List<String> modClasses, ModFileScanData modFileScanData, ModuleLayer gameLayer) {
+    private static ModContainer newPluginModContainer(final IModInfo info, final String className, final ModFileScanData modFileScanData, final ModuleLayer gameLayer) {
         try {
             final Module module = gameLayer.findModule("spongeneo").orElseThrow(() -> new NoSuchElementException("Module spongeneo"));
             final Class<?> containerClass = Class.forName(module, "org.spongepowered.neoforge.launch.plugin.PluginModContainer");
-            final Constructor<?> constructor = containerClass.getConstructor(IModInfo.class, List.class, ModFileScanData.class, ModuleLayer.class);
-            return (ModContainer) constructor.newInstance(info, modClasses, modFileScanData, gameLayer);
+            final Constructor<?> constructor = containerClass.getConstructor(IModInfo.class, String.class, ModFileScanData.class, ModuleLayer.class);
+            return (ModContainer) constructor.newInstance(info, className, modFileScanData, gameLayer);
         } catch (final InvocationTargetException e) {
             LOGGER.fatal(Logging.LOADING, "Failed to build plugin", e);
             throw new ModLoadingException(ModLoadingIssue.error("Failed to build plugin"));

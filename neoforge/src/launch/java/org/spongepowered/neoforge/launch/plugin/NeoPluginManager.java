@@ -26,6 +26,7 @@ package org.spongepowered.neoforge.launch.plugin;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Singleton;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import org.spongepowered.common.launch.plugin.SpongePluginManager;
 import org.spongepowered.plugin.PluginContainer;
@@ -39,7 +40,13 @@ public final class NeoPluginManager implements SpongePluginManager {
 
     @Override
     public Optional<PluginContainer> fromInstance(final Object instance) {
-        return Optional.empty(); // TODO NeoForge: remove from API?
+        for (final ModContainer mod : ModList.get().getSortedMods()) {
+            final NeoPluginContainer plugin = NeoPluginContainer.of(mod);
+            if (plugin.instance() == instance) {
+                return Optional.of(plugin);
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
