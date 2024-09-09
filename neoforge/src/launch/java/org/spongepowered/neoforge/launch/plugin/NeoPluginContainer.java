@@ -29,8 +29,6 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.loading.moddiscovery.ModInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.common.launch.Launch;
-import org.spongepowered.neoforge.launch.NeoLaunch;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 
@@ -58,7 +56,7 @@ public class NeoPluginContainer implements PluginContainer {
     @Override
     public PluginMetadata metadata() {
         if (this.pluginMetadata == null) {
-            this.pluginMetadata = ((NeoLaunch) Launch.instance()).metadataForMod((ModInfo) this.modContainer.getModInfo());
+            this.pluginMetadata = PluginMetadataConverter.modToPlugin((ModInfo) this.modContainer.getModInfo());
         }
         return this.pluginMetadata;
     }

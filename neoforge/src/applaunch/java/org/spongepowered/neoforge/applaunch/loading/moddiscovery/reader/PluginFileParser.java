@@ -34,9 +34,9 @@ import net.neoforged.neoforgespi.locating.IModFile;
 import net.neoforged.neoforgespi.locating.InvalidModFileException;
 import net.neoforged.neoforgespi.locating.ModFileDiscoveryAttributes;
 import org.spongepowered.common.applaunch.AppLaunch;
+import org.spongepowered.common.applaunch.metadata.PluginMetadataFixer;
 import org.spongepowered.common.applaunch.plugin.PluginPlatformConstants;
 import org.spongepowered.neoforge.applaunch.loading.metadata.PluginFileConfigurable;
-import org.spongepowered.neoforge.applaunch.loading.metadata.PluginMetadataUtils;
 import org.spongepowered.plugin.metadata.builtin.MetadataContainer;
 import org.spongepowered.plugin.metadata.builtin.MetadataParser;
 
@@ -48,7 +48,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
-public final class ModFileParsers {
+public final class PluginFileParser {
 
     @SuppressWarnings("UnstableApiUsage")
     private static IModFileInfo parsePluginMetadata(final IModFile modFile) throws InvalidModFileException {
@@ -60,7 +60,7 @@ public final class ModFileParsers {
                 container = MetadataParser.read(reader);
             }
 
-            final PluginFileConfigurable config = new PluginFileConfigurable(PluginMetadataUtils.fixPluginIds(container));
+            final PluginFileConfigurable config = new PluginFileConfigurable(PluginMetadataFixer.fixPluginIds(container));
             return new ModFileInfo((ModFile) modFile, config, (info) -> {}, List.of());
         } catch (final Exception e) {
             AppLaunch.logger().warn("Could not read metadata for plugin file '{}'", modFile, e);
@@ -78,11 +78,11 @@ public final class ModFileParsers {
         }
 
         final ModJarMetadata mjm = new ModJarMetadata(contents);
-        final IModFile modFile = IModFile.create(SecureJar.from(contents, mjm), ModFileParsers::parsePluginMetadata, attributes);
+        final IModFile modFile = IModFile.create(SecureJar.from(contents, mjm), PluginFileParser::parsePluginMetadata, attributes);
         mjm.setModFile(modFile);
         return modFile;
     }
 
-    private ModFileParsers() {
+    private PluginFileParser() {
     }
 }

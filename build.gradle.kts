@@ -155,6 +155,11 @@ dependencies {
     }
     applaunchConfig(libs.log4j.core)
     applaunchConfig(libs.log4j.jpl)
+    applaunchConfig(apiLibs.pluginSpi) {
+        exclude(group = "org.checkerframework", module = "checker-qual")
+        exclude(group = "com.google.code.gson", module = "gson")
+        exclude(group = "org.apache.logging.log4j", module = "log4j-api")
+    }
 
     add(mixins.get().implementationConfigurationName, "org.spongepowered:spongeapi:$apiVersion")
 

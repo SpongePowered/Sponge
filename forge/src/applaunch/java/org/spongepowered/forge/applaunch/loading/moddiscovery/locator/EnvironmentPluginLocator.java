@@ -26,7 +26,7 @@ package org.spongepowered.forge.applaunch.loading.moddiscovery.locator;
 
 import net.minecraftforge.fml.loading.moddiscovery.AbstractModProvider;
 import net.minecraftforge.forgespi.locating.IModLocator;
-import org.spongepowered.forge.applaunch.loading.moddiscovery.ModFileParsers;
+import org.spongepowered.forge.applaunch.loading.moddiscovery.PluginFileParser;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -41,14 +41,14 @@ public final class EnvironmentPluginLocator extends AbstractModProvider implemen
     public List<ModFileOrException> scanMods() {
         final List<ModFileOrException> modFiles = new ArrayList<>();
         for (final Path[] paths : EnvironmentPluginLocator.getPluginsPaths()) {
-            modFiles.add(new ModFileOrException(ModFileParsers.newPluginInstance(this, paths), null));
+            modFiles.add(new ModFileOrException(PluginFileParser.newPluginInstance(this, paths), null));
         }
         return modFiles;
     }
 
     @Override
     protected ModFileOrException createMod(Path path) {
-        return new ModFileOrException(ModFileParsers.newPluginInstance(this, path), null);
+        return new ModFileOrException(PluginFileParser.newPluginInstance(this, path), null);
     }
 
     @Override

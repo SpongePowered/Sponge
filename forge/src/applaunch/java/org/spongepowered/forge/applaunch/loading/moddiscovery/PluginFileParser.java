@@ -33,9 +33,9 @@ import net.minecraftforge.forgespi.locating.IModFile;
 import net.minecraftforge.forgespi.locating.IModLocator;
 import net.minecraftforge.forgespi.locating.ModFileFactory;
 import org.spongepowered.common.applaunch.AppLaunch;
+import org.spongepowered.common.applaunch.metadata.PluginMetadataFixer;
 import org.spongepowered.common.applaunch.plugin.PluginPlatformConstants;
 import org.spongepowered.forge.applaunch.loading.metadata.PluginFileConfigurable;
-import org.spongepowered.forge.applaunch.loading.metadata.PluginMetadataUtils;
 import org.spongepowered.plugin.metadata.builtin.MetadataContainer;
 import org.spongepowered.plugin.metadata.builtin.MetadataParser;
 
@@ -46,19 +46,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-public final class ModFileParsers {
+public final class PluginFileParser {
     private static Constructor<ModJarMetadata> modJarMetadataConstructor;
 
     static {
         try {
-            ModFileParsers.modJarMetadataConstructor = ModJarMetadata.class.getDeclaredConstructor();
-            ModFileParsers.modJarMetadataConstructor.setAccessible(true);
+            PluginFileParser.modJarMetadataConstructor = ModJarMetadata.class.getDeclaredConstructor();
+            PluginFileParser.modJarMetadataConstructor.setAccessible(true);
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static IModFileInfo parsePluginMetadata(final IModFile iModFile) {
+    private static IModFileInfo parsePluginMetadata(final IModFile iModFile) {
         final ModFile modFile = (ModFile) iModFile;
         AppLaunch.logger().debug("Considering plugin file candidate {}", modFile.getFilePath());
 
@@ -74,7 +74,7 @@ public final class ModFileParsers {
                 container = MetadataParser.read(reader);
             }
 
-            final PluginFileConfigurable config = new PluginFileConfigurable(PluginMetadataUtils.fixPluginIds(container));
+            final PluginFileConfigurable config = new PluginFileConfigurable(PluginMetadataFixer.fixPluginIds(container));
             return new ModFileInfo(modFile, config, (info) -> {}, List.of());
         } catch (final Exception e) {
             AppLaunch.logger().warn("Could not read metadata for plugin file '{}'", modFile, e);
@@ -92,11 +92,11 @@ public final class ModFileParsers {
 
     public static ModFile newPluginInstance(final IModLocator locator, final Path... path) {
         ModJarMetadata mjm = newModJarMetadata();
-        ModFile modFile = (ModFile) ModFileFactory.FACTORY.build(SecureJar.from(jar -> mjm, path), locator, ModFileParsers::parsePluginMetadata);
+        ModFile modFile = (ModFile) ModFileFactory.FACTORY.build(SecureJar.from(jar -> mjm, path), locator, PluginFileParser::parsePluginMetadata);
         mjm.setModFile(modFile);
         return modFile;
     }
 
-    private ModFileParsers() {
+    private PluginFileParser() {
     }
 }

@@ -22,26 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.neoforge.applaunch.loading.metadata;
+package org.spongepowered.common.applaunch.metadata;
 
-import net.neoforged.fml.loading.moddiscovery.ModInfo;
-import net.neoforged.neoforgespi.language.IModInfo;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.plugin.metadata.builtin.MetadataContainer;
 import org.spongepowered.plugin.metadata.builtin.StandardPluginMetadata;
-import org.spongepowered.plugin.metadata.builtin.model.StandardPluginContributor;
-import org.spongepowered.plugin.metadata.builtin.model.StandardPluginDependency;
-import org.spongepowered.plugin.metadata.builtin.model.StandardPluginLinks;
-import org.spongepowered.plugin.metadata.model.PluginDependency;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public final class PluginMetadataUtils {
+public class PluginMetadataFixer {
     private static final Set<String> invalidPluginIds = new HashSet<>();
 
     public static MetadataContainer fixPluginIds(final MetadataContainer container) {
@@ -52,13 +46,13 @@ public final class PluginMetadataUtils {
             final String id = plugin.id();
             if (id.indexOf('-') >= 0) {
                 final String newId = id.replace('-', '_');
-                if (PluginMetadataUtils.invalidPluginIds.add(id)) {
+                if (PluginMetadataFixer.invalidPluginIds.add(id)) {
                     AppLaunch.pluginPlatform().logger().warn("The dash character (-) is no longer supported in plugin ids.\n" +
-                            "Plugin {} will be loaded as {}. If you are the developer of this plugin, please change the id.", id, newId);
+                        "Plugin {} will be loaded as {}. If you are the developer of this plugin, please change the id.", id, newId);
                 }
 
                 final StandardPluginMetadata.Builder pluginBuilder = StandardPluginMetadata.builder()
-                        .from((StandardPluginMetadata) plugin).id(newId).entrypoint(plugin.entrypoint());
+                    .from((StandardPluginMetadata) plugin).id(newId).entrypoint(plugin.entrypoint());
                 plugin.name().ifPresent(pluginBuilder::name);
                 plugin.description().ifPresent(pluginBuilder::description);
 
@@ -82,44 +76,5 @@ public final class PluginMetadataUtils {
             // This should not happen since we never modify the version.
             throw new RuntimeException(e);
         }
-    }
-
-    public static PluginMetadata modToPlugin(final ModInfo info) {
-        final StandardPluginMetadata.Builder builder = StandardPluginMetadata.builder();
-        builder
-                .id(info.getModId())
-                .name(info.getDisplayName())
-                .version(info.getVersion().toString())
-                .description(info.getDescription())
-                .entrypoint("unknown")
-                .addContributor(StandardPluginContributor.builder()
-                        .name(info.getConfigElement("authors").orElse("unknown").toString())
-                        .build());
-        builder.links(StandardPluginLinks.builder().issues(info.getOwningFile().getIssueURL()).build());
-
-        final List<StandardPluginDependency> dependencies = new ArrayList<>();
-        for (final IModInfo.ModVersion dependency : info.getDependencies()) {
-            final StandardPluginDependency.Builder depBuilder = StandardPluginDependency.builder();
-            depBuilder
-                    .id(dependency.getModId())
-                    .loadOrder(PluginMetadataUtils.orderingToLoad(dependency.getOrdering()))
-                    .version(dependency.getVersionRange().toString())
-            ;
-
-            dependencies.add(depBuilder.build());
-        }
-
-        if (!dependencies.isEmpty()) {
-            builder.dependencies(dependencies);
-        }
-
-        return builder.build();
-    }
-
-    private static PluginDependency.LoadOrder orderingToLoad(final IModInfo.Ordering ordering) {
-        if (ordering == IModInfo.Ordering.AFTER) {
-            return PluginDependency.LoadOrder.AFTER;
-        }
-        return PluginDependency.LoadOrder.UNDEFINED;
     }
 }
