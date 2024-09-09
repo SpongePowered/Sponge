@@ -33,7 +33,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class PluginFileReader implements IModFileReader {
     @Override
     public @Nullable IModFile read(final JarContents jar, final ModFileDiscoveryAttributes attributes) {
-        return ModFileParsers.newPluginInstance(jar, attributes.withReader(this));
+        return PluginFileParser.newPluginInstance(jar, attributes.withReader(this));
     }
 
     @Override

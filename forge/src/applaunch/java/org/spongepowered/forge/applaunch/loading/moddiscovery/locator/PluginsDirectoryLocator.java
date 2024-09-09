@@ -33,7 +33,7 @@ import net.minecraftforge.forgespi.locating.IModLocator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.forge.applaunch.loading.moddiscovery.ModFileParsers;
+import org.spongepowered.forge.applaunch.loading.moddiscovery.PluginFileParser;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -54,18 +54,18 @@ public final class PluginsDirectoryLocator extends AbstractModProvider implement
 
         for (final Path pluginDirectory : pluginDirectories) {
             PluginsDirectoryLocator.LOGGER.debug("Scanning plugins directory '{}' for plugins", pluginDirectory);
-            this.scanForModsIn(pluginDirectory).map((f) -> new ModFileOrException(f, null)).forEach(modFiles::add);
+            this.scanForPluginsIn(pluginDirectory).map((f) -> new ModFileOrException(f, null)).forEach(modFiles::add);
         }
 
         return modFiles;
     }
 
-    private Stream<ModFile> scanForModsIn(final Path pluginsDirectory) {
+    private Stream<ModFile> scanForPluginsIn(final Path pluginsDirectory) {
         final List<Path> excluded = ModDirTransformerDiscoverer.allExcluded();
         return LamdbaExceptionUtils.uncheck(() -> Files.list(pluginsDirectory))
             .filter((p) -> !excluded.contains(p) && StringUtils.toLowerCase(p.getFileName().toString()).endsWith(".jar"))
             .sorted(Comparator.comparing((path) -> StringUtils.toLowerCase(path.getFileName().toString())))
-            .map((p) -> ModFileParsers.newPluginInstance(this, p))
+            .map((p) -> PluginFileParser.newPluginInstance(this, p))
             .filter(ModFile::identifyMods);
     }
 

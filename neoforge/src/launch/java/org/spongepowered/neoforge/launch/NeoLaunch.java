@@ -31,16 +31,13 @@ import com.google.inject.Module;
 import com.google.inject.Stage;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLLoader;
-import net.neoforged.fml.loading.moddiscovery.ModInfo;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.common.inject.SpongeCommonModule;
 import org.spongepowered.common.inject.SpongeModule;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.neoforge.applaunch.loading.metadata.PluginMetadataUtils;
 import org.spongepowered.neoforge.launch.inject.SpongeNeoModule;
 import org.spongepowered.neoforge.launch.plugin.NeoPluginManager;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.metadata.PluginMetadata;
 
 import java.util.List;
 
@@ -90,9 +87,5 @@ public final class NeoLaunch extends Launch {
         }
 
         return this.spongeNeoPlugin;
-    }
-
-    public PluginMetadata metadataForMod(final ModInfo info) {
-        return PluginMetadataUtils.modToPlugin(info);
     }
 }

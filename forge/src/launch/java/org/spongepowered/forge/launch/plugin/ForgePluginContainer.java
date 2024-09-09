@@ -31,8 +31,6 @@ import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.inject.SpongePluginInjectorProvider;
-import org.spongepowered.common.launch.Launch;
-import org.spongepowered.forge.launch.ForgeLaunch;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 
@@ -65,7 +63,7 @@ public class ForgePluginContainer implements PluginContainer, SpongePluginInject
     @Override
     public PluginMetadata metadata() {
         if (this.pluginMetadata == null) {
-            this.pluginMetadata = ((ForgeLaunch) Launch.instance()).metadataForMod((ModInfo) this.modContainer.getModInfo());
+            this.pluginMetadata = PluginMetadataConverter.modToPlugin((ModInfo) this.modContainer.getModInfo());
         }
         return this.pluginMetadata;
     }
