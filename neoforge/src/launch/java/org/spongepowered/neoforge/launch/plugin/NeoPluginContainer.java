@@ -44,8 +44,9 @@ public class NeoPluginContainer implements PluginContainer {
 
     private Logger logger;
     private PluginMetadata pluginMetadata;
+    private Object instance = new Object();
 
-    NeoPluginContainer(final ModContainer modContainer) {
+    private NeoPluginContainer(final ModContainer modContainer) {
         this.modContainer = modContainer;
     }
 
@@ -77,8 +78,11 @@ public class NeoPluginContainer implements PluginContainer {
 
     @Override
     public Object instance() {
-        // TODO NeoForge: remove from API?
-        return null;
+        return this.instance;
+    }
+
+    public void setInstance(final Object instance) {
+        this.instance = instance;
     }
 
     private static final Map<ModContainer, NeoPluginContainer> containers = new MapMaker().weakKeys().makeMap();
