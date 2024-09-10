@@ -72,7 +72,6 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.world.entity.LivingEntityBridge;
-import org.spongepowered.common.bridge.world.entity.PlatformLivingEntityBridge;
 import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.entity.living.human.HumanEntity;
@@ -90,7 +89,7 @@ import java.util.Optional;
 
 @SuppressWarnings("ConstantConditions")
 @Mixin(LivingEntity.class)
-public abstract class LivingEntityMixin extends EntityMixin implements LivingEntityBridge, PlatformLivingEntityBridge {
+public abstract class LivingEntityMixin extends EntityMixin implements LivingEntityBridge {
 
     // @formatter:off
     @Shadow protected int useItemRemaining;

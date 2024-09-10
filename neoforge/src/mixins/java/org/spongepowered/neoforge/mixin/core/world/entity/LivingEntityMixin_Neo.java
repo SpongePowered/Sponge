@@ -29,10 +29,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.world.entity.PlatformLivingEntityBridge;
 
 @Mixin(value = LivingEntity.class)
-public abstract class LivingEntityMixin_Neo implements PlatformLivingEntityBridge {
+public abstract class LivingEntityMixin_Neo {
 
     @Inject(
             method = "updateFallFlying",
@@ -44,20 +43,4 @@ public abstract class LivingEntityMixin_Neo implements PlatformLivingEntityBridg
     )
     protected void forge$onElytraUse(final CallbackInfo ci) {
     }
-
-    // TODO NeoForge
-    /*@Override
-    public boolean bridge$onLivingAttack(final LivingEntity entity, final DamageSource source, final float amount) {
-        return ForgeHooks.onLivingAttack(entity, source, amount);
-    }
-
-    @Override
-    public float bridge$applyModDamage(final LivingEntity entity, final DamageSource source, final float damage) {
-        return ForgeHooks.onLivingHurt(entity, source, damage);
-    }
-
-    @Override
-    public float bridge$applyModDamageBeforeFunctions(final LivingEntity entity, final DamageSource source, final float damage) {
-        return ForgeHooks.onLivingDamagePre(entity, source, damage);
-    }*/
 }
