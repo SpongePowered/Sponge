@@ -14,7 +14,7 @@ plugins {
     alias(libs.plugins.shadow)
     id("implementation-structure")
     alias(libs.plugins.blossom)
-    id("dev.architectury.loom") version "1.6-SNAPSHOT"
+    id("dev.architectury.loom") version "1.6.411"
 }
 
 val commonProject = parent!!
@@ -158,6 +158,10 @@ extensions.configure(LoomGradleExtensionAPI::class) {
         useLegacyMixinAp.set(false)
     }
 
+    forge {
+        useCustomMixin.set(false)
+    }
+
     mods {
         named("main") {
             sourceSet(forgeMixins)
@@ -236,7 +240,7 @@ dependencies {
 
     val runTaskOnly = runTaskOnlyConfig.name
     // Arch-loom bug, fix support of MOD_CLASSES
-    runTaskOnly("net.minecraftforge:bootstrap-dev:2.1.1")
+    runTaskOnly("net.minecraftforge:bootstrap-dev:2.1.3")
 }
 
 val forgeManifest = java.manifest {

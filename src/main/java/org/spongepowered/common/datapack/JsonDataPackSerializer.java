@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.datapack;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import org.spongepowered.api.ResourceKey;
@@ -38,6 +40,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class JsonDataPackSerializer<T extends DataPackEntry<T>> extends DataPackSerializer<JsonElement, T> {
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     public JsonDataPackSerializer(final DataPackEncoder<JsonElement, T> encoder, final DataPackDecoder<JsonElement, T> decoder) {
         super(encoder, decoder);
@@ -86,9 +89,8 @@ public class JsonDataPackSerializer<T extends DataPackEntry<T>> extends DataPack
     }
 
     public static void writeFile(final Path file, final JsonElement object) throws IOException {
-        Files.deleteIfExists(file);
-        try (BufferedWriter bufferedwriter = Files.newBufferedWriter(file)) {
-            bufferedwriter.write(object.toString());
+        try (BufferedWriter writer = Files.newBufferedWriter(file)) {
+            JsonDataPackSerializer.GSON.toJson(object, writer);
         }
     }
 

@@ -1,9 +1,6 @@
 {
     "pack": {
-        "description": {
-            "text": "Resources for SpongeForge"
-        },
-        "forge:server_data_pack_format": 12,
-        "pack_format": 13
+        "description": "Resources for SpongeForge",
+        "pack_format": 34
     }
 }

@@ -32,13 +32,13 @@ import org.spongepowered.api.command.selector.Selector;
 public final class SpongeSelectorFactory implements Selector.Factory {
 
     public static Selector.Builder createBuilder() {
-        return (Selector.Builder) new EntitySelectorParser(new StringReader(""));
+        return (Selector.Builder) new EntitySelectorParser(new StringReader(""), true);
     }
 
     @Override
     public @NonNull Selector parse(final @NonNull String string) throws IllegalArgumentException {
         try {
-            return (Selector) new EntitySelectorParser(new StringReader(string)).parse();
+            return (Selector) new EntitySelectorParser(new StringReader(string), true).parse();
         } catch (final Exception ex) {
             throw new IllegalArgumentException(ex.getMessage(), ex);
         }

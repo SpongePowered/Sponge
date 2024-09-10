@@ -34,12 +34,10 @@ import net.kyori.adventure.resource.ResourcePackRequest;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.PlayerChatMessage;
-import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket;
 import net.minecraft.network.protocol.game.ClientboundDeleteChatPacket;
 import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -209,27 +207,6 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         final Instant now = Instant.now().truncatedTo(ChronoUnit.MINUTES);
         final Duration timeSinceFirstJoined = Duration.of(now.minusMillis(toTheMinute.toEpochMilli()).toEpochMilli(), ChronoUnit.MINUTES);
         return timeSinceFirstJoined.getSeconds() > 0;
-    }
-
-    @Override
-    public void sendBlockProgress(final int x, final int y, final int z, final double progress) {
-        if (progress < 0 || progress > 1) {
-            throw new IllegalArgumentException("Progress must be between 0 and 1");
-        }
-
-        final BlockPos pos = new BlockPos(x, y, z);
-        final int id = ((SpongeServer) this.server).getOrCreateBlockDestructionId(pos);
-        final int progressStage = progress == 1 ? 9 : (int) (progress * 10);
-        this.connection.send(new ClientboundBlockDestructionPacket(id, pos, progressStage));
-    }
-
-    @Override
-    public void resetBlockProgress(final int x, final int y, final int z) {
-        final BlockPos pos = new BlockPos(x, y, z);
-        final Integer id = ((SpongeServer) this.server).getBlockDestructionId(pos);
-        if (id != null) {
-            this.connection.send(new ClientboundBlockDestructionPacket(id, pos, -1));
-        }
     }
 
     @Override

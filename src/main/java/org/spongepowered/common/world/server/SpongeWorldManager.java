@@ -544,6 +544,16 @@ public abstract class SpongeWorldManager implements WorldManager {
             loadedWorld.noSave = disableLevelSaving;
         }
 
+        final Path configFile = this.getConfigFile(key);
+        final Path copyConfigFile = this.getConfigFile(copyKey);
+
+        try {
+            Files.createDirectories(copyConfigFile.getParent());
+            Files.copy(configFile, copyConfigFile, StandardCopyOption.REPLACE_EXISTING);
+        } catch (final IOException e) {
+            return FutureUtil.completedWithException(e);
+        }
+
         try {
             this.server().dataPackManager().copy(this.findPack(key), key, copyKey);
         } catch (final IOException e) {

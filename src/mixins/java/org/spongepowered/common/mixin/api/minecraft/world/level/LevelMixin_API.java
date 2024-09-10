@@ -27,18 +27,15 @@ package org.spongepowered.common.mixin.api.minecraft.world.level;
 import net.kyori.adventure.sound.Sound;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerChunkCache;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
@@ -262,19 +259,6 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
     @Override
     public void resetBlockProgress(final int x, final int y, final int z) {
         ViewerPacketUtil.resetBlockProgress(x, y, z, this.engine()).ifPresent(((ViewerBridge) this)::bridge$sendToViewer);
-    }
-
-    @Override
-    public void sendBlockChange(final int x, final int y, final int z, final org.spongepowered.api.block.BlockState state) {
-        Objects.requireNonNull(state, "state");
-
-        final ClientboundBlockUpdatePacket packet = new ClientboundBlockUpdatePacket(new BlockPos(x, y, z), (BlockState) state);
-
-        ((net.minecraft.world.level.Level) (Object) this).players()
-            .stream()
-            .filter(ServerPlayer.class::isInstance)
-            .map(ServerPlayer.class::cast)
-            .forEach(p -> p.connection.send(packet));
     }
 
     // Audience

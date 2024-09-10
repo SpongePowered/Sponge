@@ -24,26 +24,23 @@
  */
 package org.spongepowered.forge.mixin.core.world.entity;
 
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
-import net.minecraftforge.common.util.ITeleporter;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stat;
+import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.common.bridge.world.entity.EntityBridge;
-import org.spongepowered.common.world.portal.PortalLogic;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(Entity.class)
-public abstract class EntityMixin_Forge {
+@Mixin(LivingEntity.class)
+public class LivingEntityMixin_Forge_Attack_Impl {
 
     /**
-     * @author dualspiral - 8th August 2021, Minecraft 1.16.5
-     * @reason Redirects to our handling so we have common logic with Vanilla.
+     * Prevents {@link ServerPlayer#awardStat} from running before event
      */
-    @Overwrite
-    @Nullable
-    public Entity changeDimension(final ServerLevel level, final ITeleporter teleporter) {
-        return ((EntityBridge) this).bridge$changeDimension(level, (PortalLogic) teleporter);
+    @Redirect(method = "getDamageAfterMagicAbsorb",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;awardStat(Lnet/minecraft/stats/Stat;I)V"))
+    public void attackImpl$onAwardStatDamageResist(final ServerPlayer instance, final Stat<?> resourceLocation, final int i) {
+        // do nothing
     }
 
 }

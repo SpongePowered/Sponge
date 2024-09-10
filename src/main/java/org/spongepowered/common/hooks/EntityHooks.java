@@ -26,13 +26,8 @@ package org.spongepowered.common.hooks;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.boss.EnderDragonPart;
-import net.minecraft.world.entity.player.Player;
 
 public interface EntityHooks {
-
-    default boolean checkAttackEntity(final Player player, final Entity victim) {
-        return true;
-    }
 
     default Entity getParentPart(final Entity entity) {
         if (entity instanceof EnderDragonPart edp) {

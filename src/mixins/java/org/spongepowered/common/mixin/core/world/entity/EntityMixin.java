@@ -181,7 +181,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract boolean shadow$onGround();
     @Shadow @Nullable protected abstract String shadow$getEncodeId();
     @Shadow @javax.annotation.Nullable public PortalProcessor portalProcess;
-
     // @formatter:on
 
     private boolean impl$isConstructing = true;
@@ -424,6 +423,10 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Inject(method = "setAsInsidePortal", at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD, shift = At.Shift.AFTER,
             target = "Lnet/minecraft/world/entity/Entity;portalProcess:Lnet/minecraft/world/entity/PortalProcessor;"))
     public void impl$onCreatePortalProcessor(final Portal $$0, final BlockPos $$1, final CallbackInfo ci) {
+        if (((LevelBridge) this.shadow$level()).bridge$isFake()) {
+            return;
+        }
+
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()){
             var be = this.shadow$level().getBlockEntity(this.portalProcess.getEntryPosition());
             if (be != null) {

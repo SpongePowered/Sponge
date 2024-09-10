@@ -311,7 +311,11 @@ public final class SpongeDataPackManager implements DataPackManager {
         final SpongeDataPackType<?, T> implType = (SpongeDataPackType<?, T>) packType;
         final ResourceLocation compareLoc = implType.packSerializer().location(implType, key);
         for (final Resource resource : this.server.getResourceManager().listResources(((SpongeDataPackType) packType).dir(), loc -> loc.equals(compareLoc)).values()) {
-            return Optional.of(packType.pack(resource.sourcePackId(), "N/A"));
+            String name = resource.sourcePackId();
+            if (name.startsWith("file/")) {
+                name = name.substring(5);
+            }
+            return Optional.of(packType.pack(name, "N/A"));
         }
         return Optional.empty();
     }
