@@ -25,6 +25,9 @@
 package org.spongepowered.neoforge;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
@@ -130,18 +133,16 @@ public final class SpongeNeoMod {
     }
 
     public void onRegister(RegisterEvent event) {
-        // TODO NeoForge
-        /* if (event.getRegistryKey() == NeoForgeRegistries.Keys.ENTITY_TYPES) {
+        if (event.getRegistryKey() == Registries.ENTITY_TYPE) {
             SpongeEntityTypes.HUMAN = EntityType.Builder.of(HumanEntity::new, MobCategory.MISC)
-                    .noSave()
-                    .sized(0.6F, 1.8F)
-                    .clientTrackingRange(org.spongepowered.common.util.Constants.Entity.Player.TRACKING_RANGE)
-                    .updateInterval(2)
-                    .build("sponge:human")
-            ;
+                .noSave()
+                .sized(0.6F, 1.8F)
+                .clientTrackingRange(org.spongepowered.common.util.Constants.Entity.Player.TRACKING_RANGE)
+                .updateInterval(2)
+                .build("sponge:human");
 
-            event.register(NeoForgeRegistries.Keys.ENTITY_TYPES, helper -> helper.register(HumanEntity.KEY, SpongeEntityTypes.HUMAN));
-        } */
+            event.register(Registries.ENTITY_TYPE, helper -> helper.register(HumanEntity.KEY, SpongeEntityTypes.HUMAN));
+        }
     }
 
     public void onEntityAttributeCreationEvent(final EntityAttributeCreationEvent event) {
