@@ -25,36 +25,59 @@
 package org.spongepowered.test.damage;
 
 import com.google.inject.Inject;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
+import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.cause.entity.damage.DamageScalings;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypeTemplate;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
+import org.spongepowered.api.event.entity.AttackEntityEvent;
+import org.spongepowered.api.event.entity.DamageEntityEvent;
+import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.lifecycle.RegisterDataPackValueEvent;
 import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.tag.DamageTypeTags;
 import org.spongepowered.api.tag.TagTemplate;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
+import org.spongepowered.test.LoadableModule;
+
+import java.util.Map;
 
 @Plugin("damagetest")
-public class DamageTest {
+public class DamageTest implements LoadableModule {
+    private static final ResourceKey EXHAUSTING_DAMAGE = ResourceKey.of("damagetest", "test");
 
     private final PluginContainer plugin;
-
-    private final ResourceKey EXHAUSTING_DAMAGE = ResourceKey.of("damagetest", "test");
+    private final DamageListener listener = new DamageListener();
 
     @Inject
     public DamageTest(final PluginContainer plugin) {
         this.plugin = plugin;
+    }
+
+    @Override
+    public void enable(CommandContext ctx) {
+        Sponge.eventManager().registerListeners(this.plugin, this.listener);
+    }
+
+    @Override
+    public void disable(CommandContext ctx) {
+        Sponge.eventManager().unregisterListeners(this.listener);
     }
 
     @Listener
@@ -86,5 +109,41 @@ public class DamageTest {
         final TagTemplate<DamageType> template = TagTemplate.builder(DataPacks.DAMAGE_TYPE_TAG).key(DamageTypeTags.BYPASSES_INVULNERABILITY.key())
                 .addValue(RegistryKey.of(RegistryTypes.DAMAGE_TYPE, EXHAUSTING_DAMAGE)).build();
         event.register(template);
+    }
+
+    private static class DamageListener {
+        @Listener
+        private void onAttack(final AttackEntityEvent event, @Root DamageSource damageSource) {
+            final Audience audience = Sponge.server();
+            audience.sendMessage(Component.text("------------AttackEntityEvent------------"));
+            audience.sendMessage(Component.text().content("entity: ").append(event.entity().displayName().get()).build());
+            audience.sendMessage(Component.text("damage type: " + damageSource.type().key(RegistryTypes.DAMAGE_TYPE)));
+            audience.sendMessage(Component.text("damage: " + event.originalDamage()));
+            audience.sendMessage(Component.text("modifiers:"));
+            for (final DamageFunction f : event.originalFunctions()) {
+                final DamageModifier modifier = f.modifier();
+                final Tuple<Double, Double> tuple = event.originalModifierDamage(modifier);
+                audience.sendMessage(Component.text(" " + ResourceKey.resolve(modifier.group()).value() + "/" + modifier.type().key(RegistryTypes.DAMAGE_MODIFIER_TYPE).value() + ": " + tuple.first() + " -> " + tuple.second()));
+            }
+            audience.sendMessage(Component.text("final damage: " + event.originalFinalDamage()));
+            audience.sendMessage(Component.text("-----------------------------------------"));
+        }
+
+        @Listener
+        private void onDamage(final DamageEntityEvent event, @Root DamageSource damageSource) {
+            final Audience audience = Sponge.server();
+            audience.sendMessage(Component.text("------------DamageEntityEvent------------"));
+            audience.sendMessage(Component.text().content("entity: ").append(event.entity().displayName().get()).build());
+            audience.sendMessage(Component.text("damage type: " + damageSource.type().key(RegistryTypes.DAMAGE_TYPE)));
+            audience.sendMessage(Component.text("damage: " + event.originalDamage()));
+            audience.sendMessage(Component.text("modifiers:"));
+            for (final DamageFunction f : event.originalFunctions()) {
+                final DamageModifier modifier = f.modifier();
+                final Tuple<Double, Double> tuple = event.originalModifierDamage(modifier);
+                audience.sendMessage(Component.text(" " + ResourceKey.resolve(modifier.group()).value() + "/" + modifier.type().key(RegistryTypes.DAMAGE_MODIFIER_TYPE).value() + ": " + tuple.first() + " -> " + tuple.second()));
+            }
+            audience.sendMessage(Component.text("final damage: " + event.originalFinalDamage()));
+            audience.sendMessage(Component.text("-----------------------------------------"));
+        }
     }
 }
