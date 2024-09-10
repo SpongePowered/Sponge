@@ -316,18 +316,10 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin_Attack_I
         this.inventoryMenu.broadcastChanges();
     }
 
-    @Redirect(method = "actuallyHurt", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/player/Player;isInvulnerableTo(Lnet/minecraft/world/damagesource/DamageSource;)Z"))
-    public boolean attackImpl$startActuallyHurt(final Player instance, final DamageSource damageSource, final DamageSource $$0, final float originalDamage) {
-        if (instance.isInvulnerableTo(damageSource)) {
-            return true;
-        }
-
-        // Call platform hook for adjusting damage
-        final var modAdjustedDamage = this.bridge$applyModDamage(instance, damageSource, originalDamage);
+    @Inject(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getDamageAfterArmorAbsorb(Lnet/minecraft/world/damagesource/DamageSource;F)F"))
+    public void attackImpl$startActuallyHurt(DamageSource damageSource, float originalDamage, CallbackInfo ci) {
         // TODO check for direct call?
-        this.attackImpl$actuallyHurt = new DamageEventUtil.ActuallyHurt(instance, new ArrayList<>(), damageSource, modAdjustedDamage);
-        return false;
+        this.attackImpl$actuallyHurt = new DamageEventUtil.ActuallyHurt((LivingEntity) (Object) this, new ArrayList<>(), damageSource, originalDamage);
     }
 
     /**
