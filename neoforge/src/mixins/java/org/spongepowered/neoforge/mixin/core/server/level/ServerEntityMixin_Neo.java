@@ -22,13 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.server.level;
+package org.spongepowered.neoforge.mixin.core.server.level;
 
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.server.level.ServerEntity;
 import net.minecraft.world.entity.Entity;
+import net.neoforged.neoforge.network.bundle.PacketAndPayloadAcceptor;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -38,11 +39,9 @@ import org.spongepowered.common.entity.living.human.HumanEntity;
 
 import java.util.EnumSet;
 import java.util.List;
-import java.util.function.Consumer;
 
-// Forge and Vanilla
 @Mixin(ServerEntity.class)
-public class ServerEntityMixin_Shared {
+public class ServerEntityMixin_Neo {
     @Shadow @Final private Entity entity;
 
     /**
@@ -53,17 +52,16 @@ public class ServerEntityMixin_Shared {
      */
     @Redirect(
         method = "sendPairingData",
-        at = @At(value = "INVOKE", target = "Ljava/util/function/Consumer;accept(Ljava/lang/Object;)V", ordinal = 0)
+        at = @At(value = "INVOKE", target = "Lnet/neoforged/neoforge/network/bundle/PacketAndPayloadAcceptor;accept(Lnet/minecraft/network/protocol/Packet;)Lnet/neoforged/neoforge/network/bundle/PacketAndPayloadAcceptor;", ordinal = 0)
     )
-    public void impl$sendHumanSpawnPacket(final Consumer<Packet<?>> consumer, final Object spawnPacket) {
+    public PacketAndPayloadAcceptor impl$sendHumanSpawnPacket(PacketAndPayloadAcceptor consumer, Packet spawnPacket) {
         if (!(this.entity instanceof final HumanEntity human)) {
-            consumer.accept((Packet<?>) spawnPacket);
-            return;
+            return consumer.accept(spawnPacket);
         }
         // Adds the GameProfile to the client
         consumer.accept(human.createPlayerListPacket(EnumSet.of(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER)));
         // Actually spawn the human (a player)
-        consumer.accept((Packet<?>) spawnPacket);
+        consumer.accept(spawnPacket);
         // Remove from the player map
         final ClientboundPlayerInfoRemovePacket removePacket = new ClientboundPlayerInfoRemovePacket(List.of(human.getUUID()));
         if (human.canRemoveFromListImmediately()) {
@@ -72,5 +70,6 @@ public class ServerEntityMixin_Shared {
             // Human is a Player entity on the client and needs to tick once for the skin to render
             human.removeFromTabListDelayed(null, removePacket);
         }
+        return consumer;
     }
 }
