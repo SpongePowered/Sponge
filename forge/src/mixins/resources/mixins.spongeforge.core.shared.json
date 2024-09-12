@@ -4,6 +4,7 @@
     "package": "org.spongepowered.common.mixin.core",
     "priority": 1301,
     "mixins": [
+        "server.level.ServerEntityMixin_Shared",
         "world.entity.projectile.FishingHookMixin_Shared"
     ],
     "overwrites": {
