@@ -83,7 +83,6 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin
     protected float attackImpl$actuallyHurtFinalDamage;
     protected boolean attackImpl$actuallyHurtCancelled;
     protected float attackImpl$actuallyHurtBlockedDamage;
-    protected boolean attackImpl$wasInInvulnerableTime;
 
     /**
      * Forge onLivingAttack Hook
@@ -163,18 +162,6 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin
         this.attackImpl$lastHurt = this.lastHurt;
         this.attackImpl$InvulnerableTime = this.invulnerableTime;
         this.attackImpl$actuallyHurtCancelled = false;
-        this.attackImpl$wasInInvulnerableTime = false;
-    }
-
-    /**
-     * Fake {@link #lastHurt} to be 0 so that we go to #actuallyHurt even if we are invulnerable and remember that we did
-     */
-    @Redirect(method = "hurt",
-        at = @At(value = "FIELD", ordinal = 0,
-            target = "Lnet/minecraft/world/entity/LivingEntity;lastHurt:F"))
-    private float attackImpl$afterActuallyHurt(final LivingEntity instance) {
-        this.attackImpl$wasInInvulnerableTime = true;
-        return 0;
     }
 
     @ModifyArg(method = "hurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;actuallyHurt(Lnet/minecraft/world/damagesource/DamageSource;F)V", ordinal = 0))
@@ -269,13 +256,9 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin
         if (instance.isInvulnerableTo(damageSource)) {
             return true;
         }
-        var realOriginalDamage = originalDamage;
-        if (this.attackImpl$wasInInvulnerableTime) {
-            realOriginalDamage = Math.max(0, realOriginalDamage); // No negative damage because of invulnerableTime
-        }
 
         // Call platform hook for adjusting damage
-        final var modAdjustedDamage = this.bridge$applyModDamage(instance, damageSource, realOriginalDamage);
+        final var modAdjustedDamage = this.bridge$applyModDamage(instance, damageSource, originalDamage);
         // TODO check for direct call?
         this.attackImpl$actuallyHurt = new DamageEventUtil.ActuallyHurt(instance, new ArrayList<>(), damageSource, modAdjustedDamage);
         return false;
