@@ -22,31 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.entity.projectile;
+package org.spongepowered.neoforge.mixin.core.world.entity.projectile;
 
 import net.minecraft.world.entity.projectile.FishingHook;
-import net.minecraft.world.entity.projectile.ProjectileDeflection;
 import net.minecraft.world.phys.HitResult;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.mixin.core.world.entity.projectile.ProjectileMixin;
 
-// Forge and Vanilla
 @Mixin(FishingHook.class)
-public abstract class FishingHookMixin_Shared extends ProjectileMixin {
+public abstract class FishingHookMixin_Neo extends ProjectileMixin {
 
-    @Redirect(method = "checkCollision", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/FishingHook;hitTargetOrDeflectSelf(Lnet/minecraft/world/phys/HitResult;)Lnet/minecraft/world/entity/projectile/ProjectileDeflection;"))
-    private ProjectileDeflection impl$callCollideImpactEvent(final FishingHook self, final HitResult hitResult) {
+    @Redirect(method = "checkCollision", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/FishingHook;onHit(Lnet/minecraft/world/phys/HitResult;)V"))
+    private void impl$callCollideImpactEvent(final FishingHook self, final HitResult hitResult) {
         if (hitResult.getType() == HitResult.Type.MISS || ((LevelBridge) this.shadow$level()).bridge$isFake()) {
-            return ProjectileDeflection.NONE;
+            return;
         }
 
         if (SpongeCommonEventFactory.handleCollideImpactEvent(self, this.impl$getProjectileSource(), hitResult)) {
             this.shadow$discard();
-            return ProjectileDeflection.NONE;
+        } else {
+            this.onHit(hitResult);
         }
-        return this.hitTargetOrDeflectSelf(hitResult);
     }
 }
