@@ -1,0 +1,12 @@
+{
+    "required": true,
+    "parent": "mixins.sponge.parent.json",
+    "package": "org.spongepowered.common.mixin.inventory",
+    "priority": 1300,
+    "mixins": [
+        "event.server.level.ServerPlayerMixin_Shared_Inventory"
+    ],
+    "overwrites": {
+        "conformVisibility": true
+    }
+}

@@ -22,8 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.inventory.event.server.level;
+package org.spongepowered.neoforge.mixin.inventory.event.server.level;
 
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
@@ -39,14 +40,14 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 
 import java.util.OptionalInt;
+import java.util.function.Consumer;
 
-// Forge and Vanilla
 @Mixin(ServerPlayer.class)
-public class ServerPlayerMixin_Shared_Inventory {
+public class ServerPlayerMixin_Inventory_Neo {
     @Nullable private Object inventory$menuProvider;
 
     @Inject(
-        method = "openMenu",
+        method = "openMenu(Lnet/minecraft/world/MenuProvider;Ljava/util/function/Consumer;)Ljava/util/OptionalInt;",
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/server/level/ServerPlayer;containerMenu:Lnet/minecraft/world/inventory/AbstractContainerMenu;",
@@ -58,13 +59,13 @@ public class ServerPlayerMixin_Shared_Inventory {
         PhaseTracker.SERVER.getPhaseContext().getTransactor().logContainerSet((ServerPlayer) (Object) this);
     }
 
-    @Inject(method = "openMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;initMenu(Lnet/minecraft/world/inventory/AbstractContainerMenu;)V"))
-    private void impl$onOpenMenu(final MenuProvider menuProvider, final CallbackInfoReturnable<OptionalInt> cir) {
+    @Inject(method = "openMenu(Lnet/minecraft/world/MenuProvider;Ljava/util/function/Consumer;)Ljava/util/OptionalInt;", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;initMenu(Lnet/minecraft/world/inventory/AbstractContainerMenu;)V"))
+    private void impl$onOpenMenu(MenuProvider menuProvider, Consumer<RegistryFriendlyByteBuf> extraDataWriter, CallbackInfoReturnable<OptionalInt> cir) {
         this.inventory$menuProvider = menuProvider;
     }
 
     @Redirect(
-        method = "openMenu",
+        method = "openMenu(Lnet/minecraft/world/MenuProvider;Ljava/util/function/Consumer;)Ljava/util/OptionalInt;",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/MenuProvider;createMenu(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/entity/player/Player;)Lnet/minecraft/world/inventory/AbstractContainerMenu;"
