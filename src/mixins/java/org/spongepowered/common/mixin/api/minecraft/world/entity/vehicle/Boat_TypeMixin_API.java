@@ -37,12 +37,4 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(Boat.Type.class)
 public abstract class Boat_TypeMixin_API implements BoatType {
 
-    // @formatter:off
-    @Shadow @Final private Item planks;
-    // @formatter:on
-
-    @Override
-    public BlockType representedBlock() {
-        return (BlockType) ((BlockItem) this.planks).getBlock();
-    }
 }

@@ -27,10 +27,15 @@ package org.spongepowered.common.data.provider.item.stack;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.StringUtil;
 import net.minecraft.util.Unit;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageSources;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUseAnimation;
@@ -39,6 +44,7 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.ChargedProjectiles;
 import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.CustomModelData;
+import net.minecraft.world.item.component.DamageResistant;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.component.Unbreakable;
@@ -49,6 +55,7 @@ import net.minecraft.world.item.consume_effects.ConsumeEffect;
 import net.minecraft.world.item.consume_effects.PlaySoundConsumeEffect;
 import net.minecraft.world.item.consume_effects.RemoveStatusEffectsConsumeEffect;
 import net.minecraft.world.item.consume_effects.TeleportRandomlyConsumeEffect;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.ItemRarity;
@@ -244,18 +251,26 @@ public final class ItemStackData {
                         })
                         .delete(stack -> stack.remove(DataComponents.CONTAINER))
                     .create(Keys.FIRE_RESISTANT)
-                        .get(h -> h.get(DataComponents.FIRE_RESISTANT) != null)
+                        .get(h -> {
+                            final @Nullable DamageResistant resist = h.get(DataComponents.DAMAGE_RESISTANT);
+                            if (resist == null) {
+                                return false;
+                            }
+                            return resist.types().location().equals(DamageTypes.IN_FIRE.location());
+                        })
                         .set((h, value) -> {
                             if (value) {
-                                h.set(DataComponents.FIRE_RESISTANT, Unit.INSTANCE);
+                                h.applyComponents(DataComponentPatch.builder()
+                                    .set(DataComponents.DAMAGE_RESISTANT, new DamageResistant(DamageTypeTags.IS_FIRE))
+                                    .build());
                             } else {
-                                h.remove(DataComponents.FIRE_RESISTANT);
+                                h.remove(DataComponents.DAMAGE_RESISTANT);
                             }
                         })
-                        .delete(stack -> stack.remove(DataComponents.FIRE_RESISTANT))
+                        .delete(stack -> stack.remove(DataComponents.DAMAGE_RESISTANT))
                     .create(Keys.ITEM_NAME)
                         .get(h -> {
-                            final Component component = h.get(DataComponents.ITEM_NAME);
+                            final @Nullable Component component = h.get(DataComponents.ITEM_NAME);
                             if (component == null) {
                                 return null;
                             }

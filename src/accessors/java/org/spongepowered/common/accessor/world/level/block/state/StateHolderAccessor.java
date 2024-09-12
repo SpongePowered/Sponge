@@ -30,11 +30,12 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
 
 import java.util.Collection;
+import java.util.List;
 
 @Mixin(StateHolder.class)
 public interface StateHolderAccessor {
 
-    @Invoker("findNextInCollection") static <T> T invoker$findNextInCollection(final Collection<T> collection, final T element) {
+    @Invoker("findNextInCollection")  static <T> T invoker$findNextInCollection(final List<T> $$0, final T $$1) {
         throw new UntransformedInvokerError();
     }
 }

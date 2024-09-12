@@ -56,6 +56,8 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Unit;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -475,18 +477,19 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         oldLevel.removePlayerImmediately(thisPlayer, Entity.RemovalReason.CHANGED_DIMENSION);
         this.shadow$unsetRemoved();
 
-        oldLevel.getProfiler().push("moving");
+        final ProfilerFiller filler = Profiler.get();
+        filler.push("moving");
         if (oldLevel.dimension() == Level.OVERWORLD && newLevel.dimension() == Level.NETHER) {
             this.enteredNetherPosition = thisPlayer.position();
         }
-        oldLevel.getProfiler().pop();
+        filler.pop();
 
-        oldLevel.getProfiler().push("placing");
+        filler.push("placing");
         thisPlayer.setServerLevel(newLevel);
         this.connection.teleport(transition.position().x, transition.position().y, transition.position().z, transition.yRot(), transition.xRot());
         this.connection.resetPosition();
         newLevel.addDuringTeleport(thisPlayer);
-        oldLevel.getProfiler().pop();
+        filler.pop();
 
         this.shadow$triggerDimensionChangeTriggers(oldLevel); // TODO old sponge EntityUtil#performPostChangePlayerWorldLogic this was only done when using a portal
         this.connection.send(new ClientboundPlayerAbilitiesPacket(thisPlayer.getAbilities()));

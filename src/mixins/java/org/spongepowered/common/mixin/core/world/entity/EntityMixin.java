@@ -38,6 +38,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerPlayerConnection;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
@@ -516,7 +518,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             }
         }
 
-        oldLevel.getProfiler().push("changeDimension");
+        ProfilerFiller filler = Profiler.get();
+        filler.push("changeDimension");
 
         var newEntity = oldLevel.dimension() == newLevel.dimension() ? thisEntity : thisEntity.getType().create(newLevel, EntitySpawnReason.DIMENSION_TRAVEL);
         if (newEntity != null) {
@@ -543,7 +546,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
         // TODO impl$fireMoveEvent when not changing dimensions (e.g. EndGateways)
 
-        oldLevel.getProfiler().pop();
+        filler.pop();
         return newEntity;
     }
 
@@ -723,7 +726,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     }
 
     @Redirect(
-            method = "applyEffectsFromBlocks",
+            method = "applyEffectsFromBlocks(Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec3;)V",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/world/level/block/Block;stepOn(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/entity/Entity;)V"
@@ -743,7 +746,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     }
 
-    @Redirect(method = "checkInsideBlocks(Ljava/util/Set;)V",
+    @Redirect(method = "applyEffectsFromBlocks(Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec3;)V",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/level/block/state/BlockState;entityInside(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;)V"
             )
