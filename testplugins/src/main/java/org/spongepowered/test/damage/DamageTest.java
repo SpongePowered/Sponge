@@ -56,7 +56,6 @@ import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 import org.spongepowered.test.LoadableModule;
 
-import java.util.Map;
 
 @Plugin("damagetest")
 public class DamageTest implements LoadableModule {
