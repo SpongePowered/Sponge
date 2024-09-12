@@ -24,28 +24,8 @@
  */
 package org.spongepowered.neoforge.hook;
 
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.CommonHooks;
-import net.neoforged.neoforge.event.entity.player.CriticalHitEvent;
 import org.spongepowered.common.hooks.EventHooks;
 
 public final class NeoEventHooks implements EventHooks {
 
-    @Override
-    public void callItemDestroyedEvent(
-        final Player player, final ItemStack stack, final InteractionHand hand
-    ) {
-        net.neoforged.neoforge.event.EventHooks.onPlayerDestroyItem(player, stack, InteractionHand.MAIN_HAND);
-    }
-
-    @Override
-    public CriticalHitResult callCriticalHitEvent(
-        final Player player, final Entity targetEntity, final boolean isCriticalAttack, final float v
-    ) {
-        final CriticalHitEvent hitEvent = CommonHooks.fireCriticalHit(player, targetEntity, isCriticalAttack, v + 1.0F);
-        return new CriticalHitResult(hitEvent.isCriticalHit(), hitEvent.getDamageMultiplier() - 1.0F);
-    }
 }

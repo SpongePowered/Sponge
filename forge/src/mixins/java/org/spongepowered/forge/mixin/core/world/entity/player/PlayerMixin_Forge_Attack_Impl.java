@@ -22,26 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.hooks;
+package org.spongepowered.forge.mixin.core.world.entity.player;
 
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.event.tracking.PhaseTracker;
+import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.event.entity.player.CriticalHitEvent;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.util.DamageEventUtil;
 
-/**
- * Event hooks for when there is no specific event translation between Sponge
- * and the platform.
- */
-public interface EventHooks {
+@Mixin(Player.class)
+public class PlayerMixin_Forge_Attack_Impl {
+    private DamageEventUtil.Attack<Player> attackImpl$attack;
 
-    default ChangeEntityWorldEvent.Pre callChangeEntityWorldEventPre(final Entity entity, final ServerLevel toWorld) {
-        final ChangeEntityWorldEvent.Pre event = SpongeEventFactory.createChangeEntityWorldEventPre(PhaseTracker.getCauseStackManager().currentCause(),
-                (org.spongepowered.api.entity.Entity) entity, (org.spongepowered.api.world.server.ServerWorld) entity.getCommandSenderWorld(),
-                (org.spongepowered.api.world.server.ServerWorld) toWorld, (org.spongepowered.api.world.server.ServerWorld) toWorld);
-        SpongeCommon.post(event);
+    @Redirect(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/common/ForgeHooks;getCriticalHit(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/entity/Entity;ZF)Lnet/minecraftforge/event/entity/player/CriticalHitEvent;"))
+    private CriticalHitEvent attackImpl$critHook(final Player player, final Entity target, final boolean vanillaCritical, final float damageModifier) {
+        final CriticalHitEvent event = ForgeHooks.getCriticalHit(player, target, vanillaCritical, damageModifier);
+        if (event != null) {
+            this.attackImpl$attack.functions().add(DamageEventUtil.provideCriticalAttackFunction(this.attackImpl$attack.sourceEntity(), event.getDamageModifier()));
+        }
         return event;
     }
 }

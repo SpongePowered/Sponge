@@ -27,6 +27,7 @@
         "world.entity.LivingEntityMixin_Neo",
         "world.entity.LivingEntityMixin_Neo_Attack_Impl",
         "world.entity.item.ItemEntityMixin_Neo",
+        "world.entity.player.PlayerMixin_Neo_Attack_Impl",
         "world.entity.projectile.ThrownEnderpealMixin_Neo",
         "world.entity.vehicle.BoatMixin_Neo",
         "world.level.block.FireBlockMixin_Neo",
