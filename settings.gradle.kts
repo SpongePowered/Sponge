@@ -89,7 +89,7 @@ if (spongeForge.exists()) {
     ).joinToString(separator = System.lineSeparator(), postfix = System.lineSeparator()))
 }
 val spongeForgeEnabledInCi: String = startParameter.projectProperties.getOrDefault("enableSpongeForge", "false")
-if (spongeForgeEnabledInCi.toBoolean()) {
+if (false && spongeForgeEnabledInCi.toBoolean()) {
     include(":SpongeForge")
     project(":SpongeForge").projectDir = file("forge")
 }
