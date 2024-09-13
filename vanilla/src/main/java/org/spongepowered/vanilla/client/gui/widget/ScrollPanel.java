@@ -190,7 +190,7 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
             (int) (this.height * scale));
 
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-        RenderSystem.setShaderTexture(0, Screen.BACKGROUND_LOCATION);
+        RenderSystem.setShaderTexture(0, Screen.MENU_BACKGROUND);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         final float texScale = 32.0F;
         worldr.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);

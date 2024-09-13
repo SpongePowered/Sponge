@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world.entity.monster;
 
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -46,7 +47,6 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
-import java.util.function.Consumer;
 
 @Mixin(net.minecraft.world.entity.monster.Creeper.class)
 public abstract class CreeperMixin extends MonsterMixin implements FusedExplosiveBridge, ExplosiveBridge {
@@ -57,10 +57,10 @@ public abstract class CreeperMixin extends MonsterMixin implements FusedExplosiv
     @Shadow private int explosionRadius;
 
     @Shadow public abstract void shadow$ignite();
+    @Shadow public abstract boolean shadow$isIgnited();
     @Shadow public abstract int shadow$getSwellDir();
     // @formatter:on
 
-    private int impl$fuseDuration = Constants.Entity.Creeper.FUSE_DURATION;
     private boolean impl$interactPrimeCancelled;
     private boolean impl$stateDirty;
     private boolean impl$detonationCancelled;
@@ -78,13 +78,18 @@ public abstract class CreeperMixin extends MonsterMixin implements FusedExplosiv
     }
 
     @Override
+    public boolean bridge$isPrimed() {
+        return this.shadow$isIgnited() || this.shadow$getSwellDir() == Constants.Entity.Creeper.STATE_PRIMED;
+    }
+
+    @Override
     public int bridge$getFuseDuration() {
-        return this.impl$fuseDuration;
+        return this.maxSwell;
     }
 
     @Override
     public void bridge$setFuseDuration(final int fuseTicks) {
-        this.impl$fuseDuration = fuseTicks;
+        this.maxSwell = fuseTicks;
     }
 
     @Override
@@ -107,9 +112,8 @@ public abstract class CreeperMixin extends MonsterMixin implements FusedExplosiv
         if (this.shadow$level().isClientSide) {
             return;
         }
-        this.bridge$setFuseDuration(this.impl$fuseDuration);
 
-        final boolean isPrimed = this.shadow$getSwellDir() == Constants.Entity.Creeper.STATE_PRIMED;
+        final boolean isPrimed = this.bridge$isPrimed();
 
         if (!isPrimed && state == Constants.Entity.Creeper.STATE_PRIMED && !this.bridge$shouldPrime()) {
             ci.cancel();
@@ -168,12 +172,12 @@ public abstract class CreeperMixin extends MonsterMixin implements FusedExplosiv
 
     @Redirect(method = "mobInteract",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/item/ItemStack;hurtAndBreak(ILnet/minecraft/world/entity/LivingEntity;Ljava/util/function/Consumer;)V"
+            target = "Lnet/minecraft/world/item/ItemStack;hurtAndBreak(ILnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/entity/EquipmentSlot;)V"
         )
     )
-    private void impl$onDamageFlintAndSteel(ItemStack fas, int amount, LivingEntity player, Consumer<LivingEntity> onBroken) {
+    private void impl$onDamageFlintAndSteel(final ItemStack fas, final int amount, final LivingEntity player, final EquipmentSlot slot) {
         if (!this.impl$interactPrimeCancelled) {
-            fas.hurtAndBreak(amount, player, onBroken);
+            fas.hurtAndBreak(amount, player, slot);
         }
         this.impl$interactPrimeCancelled = false;
     }

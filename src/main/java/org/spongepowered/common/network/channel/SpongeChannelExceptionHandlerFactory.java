@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.network.channel;
 
-import org.spongepowered.api.network.EngineConnection;
+import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.api.network.channel.ChannelExceptionHandler;
 
 public final class SpongeChannelExceptionHandlerFactory implements ChannelExceptionHandler.Factory {
 
-    private final ChannelExceptionHandler<EngineConnection> logEverything;
+    private final ChannelExceptionHandler<EngineConnectionState> logEverything;
 
     public SpongeChannelExceptionHandlerFactory() {
         this.logEverything = (connection, channel, exception, future) -> {
@@ -42,7 +42,7 @@ public final class SpongeChannelExceptionHandlerFactory implements ChannelExcept
 
 
     @Override
-    public ChannelExceptionHandler<EngineConnection> logEverything() {
+    public ChannelExceptionHandler<EngineConnectionState> logEverything() {
         return this.logEverything;
     }
 }

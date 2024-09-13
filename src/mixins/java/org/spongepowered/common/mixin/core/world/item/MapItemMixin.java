@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.world.item;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -38,7 +39,9 @@ import org.spongepowered.common.bridge.world.storage.MapItemSavedDataBridge;
 @Mixin(MapItem.class)
 public class MapItemMixin {
 
-    @Inject(method = "createNewSavedData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;setMapData(Ljava/lang/String;Lnet/minecraft/world/level/saveddata/maps/MapItemSavedData;)V"), locals = LocalCapture.CAPTURE_FAILHARD)
+    @Inject(method = "createNewSavedData", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/level/Level;setMapData(Lnet/minecraft/world/level/saveddata/maps/MapId;Lnet/minecraft/world/level/saveddata/maps/MapItemSavedData;)V"),
+            locals = LocalCapture.CAPTURE_FAILHARD)
     private static void impl$storeMapId(
         final Level level,
         final int x,
@@ -49,9 +52,9 @@ public class MapItemMixin {
         final ResourceKey<Level> dimension,
         final CallbackInfoReturnable<Integer> cir,
         final MapItemSavedData data,
-        final int id
+        final MapId id
     ) {
-        ((MapItemSavedDataBridge) data).bridge$initMapId(id);
+        ((MapItemSavedDataBridge) data).bridge$initMapId(id.id());
     }
 
 }

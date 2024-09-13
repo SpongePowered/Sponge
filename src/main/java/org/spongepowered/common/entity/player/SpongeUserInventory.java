@@ -32,6 +32,7 @@ import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import org.spongepowered.common.SpongeCommon;
 
 import java.util.Arrays;
 import java.util.List;
@@ -138,7 +139,7 @@ public class SpongeUserInventory implements Container {
             if (!this.mainInventory.get(i).isEmpty()) {
                 final CompoundTag nbttagcompound = new CompoundTag();
                 nbttagcompound.putByte("Slot", (byte) i);
-                this.mainInventory.get(i).save(nbttagcompound);
+                this.mainInventory.get(i).save(SpongeCommon.server().registryAccess(), nbttagcompound);
                 nbtTagListIn.add(nbttagcompound);
             }
         }
@@ -147,7 +148,7 @@ public class SpongeUserInventory implements Container {
             if (!this.armorInventory.get(j).isEmpty()) {
                 final CompoundTag nbttagcompound1 = new CompoundTag();
                 nbttagcompound1.putByte("Slot", (byte) (j + 100));
-                this.armorInventory.get(j).save(nbttagcompound1);
+                this.armorInventory.get(j).save(SpongeCommon.server().registryAccess(), nbttagcompound1);
                 nbtTagListIn.add(nbttagcompound1);
             }
         }
@@ -156,7 +157,7 @@ public class SpongeUserInventory implements Container {
             if (!this.offHandInventory.get(k).isEmpty()) {
                 final CompoundTag nbttagcompound2 = new CompoundTag();
                 nbttagcompound2.putByte("Slot", (byte) (k + 150));
-                this.offHandInventory.get(k).save(nbttagcompound2);
+                this.offHandInventory.get(k).save(SpongeCommon.server().registryAccess(), nbttagcompound2);
                 nbtTagListIn.add(nbttagcompound2);
             }
         }
@@ -177,7 +178,7 @@ public class SpongeUserInventory implements Container {
         for (int i = 0; i < nbtTagListIn.size(); ++i) {
             final CompoundTag nbttagcompound = nbtTagListIn.getCompound(i);
             final int j = nbttagcompound.getByte("Slot") & 255;
-            final ItemStack itemstack = ItemStack.of(nbttagcompound);
+            final ItemStack itemstack = ItemStack.parse(SpongeCommon.server().registryAccess(), nbttagcompound).get();
 
             if (!itemstack.isEmpty()) {
                 if (j >= 0 && j < this.mainInventory.size()) {

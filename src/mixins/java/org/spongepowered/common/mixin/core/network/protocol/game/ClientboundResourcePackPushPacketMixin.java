@@ -24,48 +24,41 @@
  */
 package org.spongepowered.common.mixin.core.network.protocol.game;
 
-import net.minecraft.network.chat.Component;
+import net.kyori.adventure.resource.ResourcePackInfo;
+import net.kyori.adventure.text.Component;
 import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
-import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.network.protocol.game.ClientboundResourcePackPacketBridge;
-import org.spongepowered.common.resourcepack.SpongeResourcePack;
 
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Optional;
 import java.util.UUID;
 
 @Mixin(ClientboundResourcePackPushPacket.class)
 public abstract class ClientboundResourcePackPushPacketMixin implements ClientboundResourcePackPacketBridge {
 
-    @Shadow private String url;
-    @Shadow private String hash;
+    private ResourcePackInfo impl$pack;
 
-    private ResourcePack impl$pack;
-
-    @Inject(method = "<init>(Ljava/util/UUID;Ljava/lang/String;Ljava/lang/String;ZLnet/minecraft/network/chat/Component;)V", at = @At("RETURN") , remap = false)
-    private void impl$setResourcePackOrThrowException(final UUID uuid, final String url, final String hash, final boolean required, final Component prompt, final CallbackInfo ci) {
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void impl$setResourcePackOrThrowException(final UUID uuid, final String url, final String hash, final boolean required, final Optional<Component> prompt, final CallbackInfo ci) {
         try {
-            this.impl$pack = SpongeResourcePack.create(url, hash, prompt == null ? net.kyori.adventure.text.Component.empty() : SpongeAdventure.asAdventure(prompt));
+            this.impl$pack = ResourcePackInfo.resourcePackInfo(uuid, new URI(url), hash);
         } catch (final URISyntaxException e) {
             throw new IllegalArgumentException(e);
         }
     }
 
     @Override
-    public void bridge$setSpongePack(final ResourcePack pack) {
-        this.impl$pack = pack;
-        this.url = ((SpongeResourcePack) pack).getUrlString();
-        this.hash = pack.hash().orElse("");
+    public void bridge$setPackInfo(final ResourcePackInfo resourcePackInfo) {
+        this.impl$pack = resourcePackInfo;
     }
 
     @Override
-    public ResourcePack bridge$getSpongePack() {
+    public ResourcePackInfo bridge$getPackInfo() {
         return this.impl$pack;
     }
-
 }

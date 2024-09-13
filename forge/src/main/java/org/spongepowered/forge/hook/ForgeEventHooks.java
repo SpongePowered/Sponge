@@ -33,6 +33,7 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import org.spongepowered.common.hooks.EventHooks;
 
+@SuppressWarnings("UnstableApiUsage")
 public final class ForgeEventHooks implements EventHooks {
 
     @Override

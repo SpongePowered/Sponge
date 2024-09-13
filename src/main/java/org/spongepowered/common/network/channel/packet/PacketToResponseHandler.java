@@ -24,23 +24,23 @@
  */
 package org.spongepowered.common.network.channel.packet;
 
-import org.spongepowered.api.network.EngineConnection;
+import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.api.network.channel.packet.Packet;
 import org.spongepowered.api.network.channel.packet.PacketHandler;
 import org.spongepowered.api.network.channel.packet.RequestPacket;
 import org.spongepowered.api.network.channel.packet.ResponsePacketHandler;
 
-public final class PacketToResponseHandler<P extends RequestPacket<R>, R extends Packet, C extends EngineConnection>
-        implements ResponsePacketHandler<P, R, C> {
+public final class PacketToResponseHandler<P extends RequestPacket<R>, R extends Packet, S extends EngineConnectionState>
+        implements ResponsePacketHandler<P, R, S> {
 
-    private final PacketHandler<? super R, ? super C> handler;
+    private final PacketHandler<? super R, ? super S> handler;
 
-    public PacketToResponseHandler(final PacketHandler<? super R, ? super C> handler) {
+    public PacketToResponseHandler(final PacketHandler<? super R, ? super S> handler) {
         this.handler = handler;
     }
 
     @Override
-    public void handleResponse(final R responsePacket, final P requestPacket, final C connection) {
-        this.handler.handle(responsePacket, connection);
+    public void handleResponse(final R responsePacket, final P requestPacket, final S state) {
+        this.handler.handle(responsePacket, state);
     }
 }

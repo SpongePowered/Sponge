@@ -24,18 +24,24 @@
  */
 package org.spongepowered.common.hooks;
 
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.enchantment.Enchantment;
-import org.spongepowered.api.data.persistence.DataContainer;
+import net.minecraft.world.phys.AABB;
 
 public interface ItemHooks {
-
-    default void setCapabilitiesFromSpongeBuilder(final ItemStack stack, final CompoundTag compound) { }
 
     default boolean canEnchantmentBeAppliedToItem(final Enchantment enchantment, final ItemStack stack) {
         return enchantment.canEnchant(stack);
     }
 
-    default void writeItemStackCapabilitiesToDataView(final DataContainer container, final ItemStack stack) { }
+    default boolean canPerformSweepAttack(ItemStack heldItem) {
+        return heldItem.getItem() instanceof SwordItem;
+    }
+
+    default AABB getSweepingHitBox(Player player, ItemStack itemStack, Entity targetEntity) {
+        return targetEntity.getBoundingBox().inflate(1.0D, 0.25D, 1.0D);
+    }
 }

@@ -30,18 +30,27 @@ import org.spongepowered.api.world.server.TicketType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.util.Constants;
 
 @Mixin(net.minecraft.server.level.TicketType.class)
 public abstract class TicketTypeMixin_API<T> implements TicketType<T> {
 
     // @formatter:off
+    @Shadow @Final private String name;
     @Shadow @Final private long timeout;
+
     // @formatter:on
+
+    @Override
+    public String name() {
+        return this.name;
+    }
 
     @Override
     @NonNull
     public Ticks lifetime() {
-        return Ticks.of(this.timeout);
+        return this.timeout == Constants.ChunkTicket.INFINITE_TIMEOUT
+                ? Ticks.infinite()
+                : Ticks.of(this.timeout);
     }
-
 }

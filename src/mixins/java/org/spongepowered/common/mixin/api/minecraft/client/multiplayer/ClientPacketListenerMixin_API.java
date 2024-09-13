@@ -26,11 +26,24 @@ package org.spongepowered.common.mixin.api.minecraft.client.multiplayer;
 
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import org.spongepowered.api.entity.living.player.client.LocalPlayer;
-import org.spongepowered.api.network.LocalPlayerConnection;
+import org.spongepowered.api.network.EngineConnectionState;
+import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.profile.SpongeGameProfile;
 
 @Mixin(ClientPacketListener.class)
-public abstract class ClientPacketListenerMixin_API extends ClientCommonPacketListenerImpl_API implements LocalPlayerConnection {
+public class ClientPacketListenerMixin_API extends ClientCommonPacketListenerImplMixin_API implements EngineConnectionState.Game {
+
+    // @formatter:off
+    @Shadow @Final private com.mojang.authlib.GameProfile localGameProfile;
+    // @formatter:on
+
+    @Override
+    public GameProfile profile() {
+        return SpongeGameProfile.of(this.localGameProfile);
+    }
 
     @Override
     public LocalPlayer player() {

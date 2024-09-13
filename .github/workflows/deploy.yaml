@@ -27,7 +27,7 @@ jobs:
         id: setup
         uses: SpongePowered/.github/.github/actions/setup-java-env@master
         with:
-          runtime_version: 17
+          runtime_version: 21
       - name: setup / minecraft cache
         uses: "actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9" # v4.0.2
         with:
@@ -44,8 +44,8 @@ jobs:
           echo "GIT_BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
           echo "BUILD_NUMBER=${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
       - name: Publish to Sponge Maven & GitHub Packages
-        # run: ./gradlew -s -PenableSpongeForge=true :publish :SpongeVanilla:publish :SpongeForge:publish
-        run: ./gradlew -s -PenableSpongeForge=true :publish :SpongeVanilla:publish
+        run: ./gradlew -s -PenableSpongeForge=true :publish :SpongeVanilla:publish :SpongeForge:publish
+        # run: ./gradlew -s -PenableSpongeForge=true :publish :SpongeVanilla:publish
         env:
           CI_SYSTEM: Github Actions
           GITHUB_USERNAME: "${{ github.actor }}"

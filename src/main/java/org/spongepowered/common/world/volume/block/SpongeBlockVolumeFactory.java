@@ -88,7 +88,7 @@ public class SpongeBlockVolumeFactory implements BlockVolumeFactory {
 
     private ArrayImmutableBlockBuffer createImmutableFromBufferData(final ArrayMutableBlockBuffer arrayBuffer) {
         final BlockBackingData data = arrayBuffer.getCopiedBackingData();
-        final Palette.Immutable<BlockState, BlockType> immutablePalette = arrayBuffer.getPalette().asImmutable();
+        final Palette.Immutable<BlockState, BlockType> immutablePalette = arrayBuffer.blockPalette().asImmutable();
         return new ArrayImmutableBlockBuffer(immutablePalette, arrayBuffer.min(), arrayBuffer.size(), data);
     }
 

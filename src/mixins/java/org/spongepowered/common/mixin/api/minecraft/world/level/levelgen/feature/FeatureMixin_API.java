@@ -26,8 +26,8 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.featur
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
@@ -46,7 +46,7 @@ import java.io.IOException;
 public abstract class FeatureMixin_API<FC extends FeatureConfiguration> implements FeatureType {
 
     //@formatter:off
-    @Shadow @Final private Codec<ConfiguredFeature<FC, net.minecraft.world.level.levelgen.feature.Feature<FC>>> configuredCodec;
+    @Shadow @Final private MapCodec<ConfiguredFeature<FC, net.minecraft.world.level.levelgen.feature.Feature<FC>>> configuredCodec;
     //@formatter:on
 
     @Override
@@ -54,7 +54,7 @@ public abstract class FeatureMixin_API<FC extends FeatureConfiguration> implemen
         try {
             final JsonElement json = JsonParser.parseString(DataFormats.JSON.get().write(config));
             final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, SpongeCommon.server().registryAccess());
-            return (Feature) (Object) this.configuredCodec.parse(ops, json).getOrThrow(false, e -> {});
+            return (Feature) (Object) this.configuredCodec.codec().parse(ops, json).getOrThrow();
 
         } catch (IOException e) {
             throw new IllegalStateException("Could not read configuration: " + config, e);

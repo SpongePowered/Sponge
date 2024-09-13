@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.common.entity.living;
 
-import com.mojang.authlib.GameProfile;
+import net.minecraft.world.item.component.ResolvableProfile;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.Human;
@@ -40,11 +40,11 @@ import java.util.UUID;
 @Mixin(value = HumanEntity.class, remap = false)
 public abstract class HumanEntityMixin_API extends PathfinderMobMixin_API implements Human {
 
-    @Shadow private GameProfile fakeProfile;
+    @Shadow private ResolvableProfile fakeProfile;
 
     @Override
     public String name() {
-        return this.fakeProfile.getName();
+        return this.fakeProfile.name().orElse("");
     }
 
     @Override

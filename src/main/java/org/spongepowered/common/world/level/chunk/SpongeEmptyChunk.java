@@ -56,6 +56,7 @@ import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.chunk.ChunkState;
 import org.spongepowered.api.world.chunk.ChunkStates;
 import org.spongepowered.api.world.chunk.WorldChunk;
+import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
 import org.spongepowered.common.util.VecHelper;
@@ -85,8 +86,13 @@ public final class SpongeEmptyChunk implements WorldChunk {
     private @Nullable Vector3i blockMax;
 
     @Override
+    public Palette<BlockState, BlockType> blockPalette() {
+        return ((World<?, ?>) this.level).blockPalette();
+    }
+
+    @Override
     public World<?, ?> world() {
-        return (World) this.level;
+        return (World<?, ?>) this.level;
     }
 
     @Override

@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.bridge.network.protocol.game;
 
-import org.spongepowered.api.resourcepack.ResourcePack;
+import net.kyori.adventure.resource.ResourcePackInfo;
 
 public interface ClientboundResourcePackPacketBridge {
 
-    ResourcePack bridge$getSpongePack();
+    void bridge$setPackInfo(ResourcePackInfo resourcePackInfo);
 
-    void bridge$setSpongePack(ResourcePack pack);
+    ResourcePackInfo bridge$getPackInfo();
 }

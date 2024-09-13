@@ -54,7 +54,7 @@ public abstract class StructureProcessorMixin_API implements Processor {
     @Override
     public DataContainer toContainer() {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, SpongeCommon.server().registryAccess());
-        final JsonElement serialized = this.shadow$getType().codec().encodeStart(ops, (StructureProcessor) (Object) this).getOrThrow(false, e -> {});
+        final JsonElement serialized = this.shadow$getType().codec().codec().encodeStart(ops, (StructureProcessor) (Object) this).getOrThrow();
         try {
             return DataFormats.JSON.get().read(serialized.toString());
         } catch (IOException e) {

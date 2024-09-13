@@ -24,33 +24,19 @@
  */
 package org.spongepowered.common.mixin.core.world.level.block.entity;
 
-import com.mojang.authlib.GameProfile;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.level.block.entity.SkullBlockEntityBridge;
 
 @Mixin(SkullBlockEntity.class)
-public abstract class SkullBlockEntityMixin extends BlockEntity implements SkullBlockEntityBridge {
+public abstract class SkullBlockEntityMixin extends BlockEntity {
 
-    @Shadow private GameProfile owner;
-
-    private SkullBlockEntityMixin(
-        final BlockEntityType<?> var1, final BlockPos var2, final BlockState var3
-    ) {
+    private SkullBlockEntityMixin(final BlockEntityType<?> var1, final BlockPos var2, final BlockState var3) {
         super(var1, var2, var3);
     }
 
-    @Override
-    public void bridge$setUnresolvedPlayerProfile(final @Nullable GameProfile owner) {
-        // TODO: cancel existing resolve future from authlib callback
-        this.owner = owner;
-        this.setChanged();
-    }
 
 }

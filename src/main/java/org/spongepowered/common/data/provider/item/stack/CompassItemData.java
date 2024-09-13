@@ -25,11 +25,11 @@
 package org.spongepowered.common.data.provider.item.stack;
 
 import net.minecraft.core.GlobalPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.NbtUtils;
-import net.minecraft.world.item.CompassItem;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.LodestoneTracker;
 import net.minecraft.world.level.Level;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.world.server.ServerLocation;
@@ -38,41 +38,49 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.VecHelper;
 
+import java.util.Optional;
+
 final class CompassItemData {
+
     private CompassItemData() {
     }
 
     static void register(final DataProviderRegistrator registrator) {
+        // TODO support target without dimension
         registrator
             .asMutable(ItemStack.class)
                 .create(Keys.LODESTONE)
                     .get(stack -> {
-                        if (CompassItem.isLodestoneCompass(stack)) {
-                            final CompoundTag tag = stack.getOrCreateTag();
-                            final GlobalPos pos = CompassItem.getLodestonePosition(tag);
-                            if (pos != null) {
-                                return ServerLocation.of(
-                                    (ServerWorld) SpongeCommon.server().getLevel(pos.dimension()),
-                                    VecHelper.toVector3d(pos.pos())
-                                );
-                            }
+                        final LodestoneTracker component = stack.get(DataComponents.LODESTONE_TRACKER);
+                        if (component == null) {
+                            return null;
                         }
-                        return null;
+                        final GlobalPos globalPos = component.target().get();
+                        return ServerLocation.of((ServerWorld) SpongeCommon.server().getLevel(globalPos.dimension()),
+                                VecHelper.toVector3d(globalPos.pos()));
                     })
                     .set((stack, location) -> {
-                        final CompoundTag tag = stack.getOrCreateTag();
-                        tag.put("LodestonePos", NbtUtils.writeBlockPos(VecHelper.toBlockPos(location)));
-                        Level.RESOURCE_KEY_CODEC.encodeStart(NbtOps.INSTANCE, ((net.minecraft.server.level.ServerLevel) location.world()).dimension())
-                            .resultOrPartial(SpongeCommon.logger()::error).ifPresent(dimension -> tag.put("LodestoneDimension", dimension));
-                        tag.putBoolean("LodestoneTracked", true);
+                        final ResourceKey<Level> dim = ((ServerLevel) location.world()).dimension();
+                        stack.set(DataComponents.LODESTONE_TRACKER, new LodestoneTracker(Optional.of(new GlobalPos(dim, VecHelper.toBlockPos(location))), true));
+                    })
+                .create(Keys.LODESTONE_TRACKED)
+                    .delete(stack -> stack.remove(DataComponents.LODESTONE_TRACKER))
+                    .get(stack -> {
+                        final LodestoneTracker tracker = stack.get(DataComponents.LODESTONE_TRACKER);
+                        return tracker != null && tracker.tracked();
+                    })
+                    .set((stack, isTracked) -> {
+                        var oldTarget = Optional.ofNullable(stack.get(DataComponents.LODESTONE_TRACKER)).flatMap(LodestoneTracker::target);
+                        stack.set(DataComponents.LODESTONE_TRACKER, new LodestoneTracker(oldTarget, isTracked));
                     })
                     .delete(stack -> {
-                        final CompoundTag tag = stack.getTag();
-                        if (tag != null) {
-                            tag.remove("LodestoneDimension");
-                            tag.remove("LodestonePos");
-                            tag.remove("LodestoneTracked");
+                        var oldTarget = Optional.ofNullable(stack.get(DataComponents.LODESTONE_TRACKER)).flatMap(LodestoneTracker::target);
+                        if (oldTarget.isPresent()) {
+                            stack.set(DataComponents.LODESTONE_TRACKER, new LodestoneTracker(oldTarget, false));
+                        } else {
+                            stack.remove(DataComponents.LODESTONE_TRACKER);
                         }
-                    });
+                    })
+                ;
     }
 }

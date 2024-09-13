@@ -36,6 +36,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.RelativeMovement;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
@@ -80,17 +81,17 @@ import java.util.function.UnaryOperator;
 public abstract class EntityMixin_API implements org.spongepowered.api.entity.Entity {
 
     // @formatter:off
-    @Shadow public float yRot;
-    @Shadow public float xRot;
+    @Shadow private float yRot;
+    @Shadow private float xRot;
     @Shadow @Final protected net.minecraft.util.RandomSource random;
     @Shadow protected UUID uuid;
     @Shadow @Final private net.minecraft.world.entity.EntityType<?> type;
-    @Shadow public net.minecraft.world.level.Level level;
+    @Shadow private Level level;
 
     @Shadow public abstract double shadow$getX();
     @Shadow public abstract double shadow$getY();
     @Shadow public abstract double shadow$getZ();
-    @Shadow public abstract net.minecraft.world.level.Level shadow$getCommandSenderWorld();
+    @Shadow public abstract Level shadow$getCommandSenderWorld();
     @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract boolean shadow$isRemoved();
     @Shadow public abstract UUID shadow$getUUID();
@@ -101,6 +102,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow public abstract void shadow$discard();
     @Shadow public abstract void shadow$lookAt(EntityAnchorArgument.Anchor param0, Vec3 param1);
     @Shadow public abstract CompoundTag shadow$saveWithoutId(CompoundTag $$0);
+    @Shadow public abstract Level shadow$level();
     // @formatter:on
 
     @Override

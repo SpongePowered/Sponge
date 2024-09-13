@@ -60,7 +60,9 @@ public class HeldHandSlotLens extends AbstractLens implements SlotLens {
     }
 
     private net.minecraft.world.entity.player.Inventory getInventoryPlayer(Fabric fabric) {
-        return (net.minecraft.world.entity.player.Inventory) fabric.fabric$get(0); // Only players have this lens
+        return fabric.fabric$allInventories().stream()
+                .filter(inv -> inv instanceof net.minecraft.world.entity.player.Inventory)
+                .map(net.minecraft.world.entity.player.Inventory.class::cast).findFirst().get();
     }
 
     @Override

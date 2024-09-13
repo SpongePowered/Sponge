@@ -356,7 +356,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
                 levelData.setWorldBorder(this.getWorldBorder().createSettings());
 
-                levelData.setCustomBossEvents(((ServerLevelBridge) this).bridge$getBossBarManager().save());
+                levelData.setCustomBossEvents(((ServerLevelBridge) this).bridge$getBossBarManager().save(SpongeCommon.server().registryAccess()));
 
                 ((ServerLevelBridge) this).bridge$getLevelSave().saveDataTag(SpongeCommon.server().registryAccess()
                     , (PrimaryLevelData) this.shadow$getLevelData(), this.shadow$dimension() == Level.OVERWORLD ? SpongeCommon.server().getPlayerList()
@@ -486,7 +486,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     }
 
     @Inject(method = "gameEvent", at = @At("HEAD"), cancellable = true)
-    private void impl$ignoreGameEventsForVanishedEntities(final GameEvent $$0, final Vec3 $$1, final GameEvent.Context $$2, final CallbackInfo ci) {
+    private void impl$ignoreGameEventsForVanishedEntities(final Holder<GameEvent> $$0, final Vec3 $$1, final GameEvent.Context $$2, final CallbackInfo ci) {
         if ($$2.sourceEntity() instanceof VanishableBridge bridge && !bridge.bridge$vanishState().triggerVibrations()) {
             ci.cancel();
         }

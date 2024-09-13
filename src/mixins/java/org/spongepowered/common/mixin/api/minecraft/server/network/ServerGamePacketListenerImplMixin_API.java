@@ -26,14 +26,17 @@ package org.spongepowered.common.mixin.api.minecraft.server.network;
 
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.network.ServerPlayerConnection;
+import org.spongepowered.api.network.ServerConnectionState;
 import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
 @Mixin(ServerGamePacketListenerImpl.class)
-public abstract class ServerGamePacketListenerImplMixin_API extends ServerCommonPacketListenerImplMixin_API implements ServerPlayerConnection {
+@Implements(@Interface(iface = ServerConnectionState.Game.class, prefix = "api$", remap = Interface.Remap.NONE))
+public abstract class ServerGamePacketListenerImplMixin_API extends ServerCommonPacketListenerImplMixin_API implements ServerConnectionState.Game {
 
     // @formatter:off
     @Shadow public net.minecraft.server.level.ServerPlayer player;
@@ -41,7 +44,7 @@ public abstract class ServerGamePacketListenerImplMixin_API extends ServerCommon
 
     @Override
     public GameProfile profile() {
-        return SpongeGameProfile.of(this.player.getGameProfile());
+        return SpongeGameProfile.of(this.shadow$playerProfile());
     }
 
     @Override
@@ -49,4 +52,9 @@ public abstract class ServerGamePacketListenerImplMixin_API extends ServerCommon
         return (ServerPlayer) this.player;
     }
 
+    //TODO: Fix me
+    /*@Intrinsic
+    public int api$latency() {
+        return this.shadow$latency();
+    }*/
 }

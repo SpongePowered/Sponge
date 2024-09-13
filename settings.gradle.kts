@@ -5,6 +5,7 @@ pluginManagement {
         maven("https://repo.spongepowered.org/repository/maven-public/") {
             name = "sponge"
         }
+        maven("https://maven.architectury.dev/")
     }
 
     plugins {
@@ -88,7 +89,7 @@ if (spongeForge.exists()) {
     ).joinToString(separator = System.lineSeparator(), postfix = System.lineSeparator()))
 }
 val spongeForgeEnabledInCi: String = startParameter.projectProperties.getOrDefault("enableSpongeForge", "false")
-if (false && spongeForgeEnabledInCi.toBoolean()) {
+if (spongeForgeEnabledInCi.toBoolean()) {
     include(":SpongeForge")
     project(":SpongeForge").projectDir = file("forge")
 }

@@ -31,7 +31,6 @@ import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.util.ExtraCodecs;
 
 import java.util.Optional;
 
@@ -49,7 +48,7 @@ public final class SpongeDummyTrigger extends SimpleCriterionTrigger<SpongeDummy
 
     public record TriggerInstance(Optional<ContextAwarePredicate> player) implements SimpleCriterionTrigger.SimpleInstance {
 
-        public static final Codec<TriggerInstance> CODEC = RecordCodecBuilder.create(($$0) -> $$0.group(ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(TriggerInstance::player)).apply($$0, TriggerInstance::new));
+        public static final Codec<TriggerInstance> CODEC = RecordCodecBuilder.create(($$0) -> $$0.group(EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(TriggerInstance::player)).apply($$0, TriggerInstance::new));
 
 
         public static TriggerInstance dummy() {

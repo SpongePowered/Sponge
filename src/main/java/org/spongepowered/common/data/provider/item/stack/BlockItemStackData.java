@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.LockCode;
 import net.minecraft.world.item.BannerItem;
 import net.minecraft.world.item.BlockItem;
@@ -36,7 +36,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.util.Constants;
 
 public final class BlockItemStackData {
 
@@ -55,23 +54,17 @@ public final class BlockItemStackData {
                         .supports(h -> h.getItem() instanceof BlockItem && !(h.getItem() instanceof BannerItem))
                     .create(Keys.LOCK_TOKEN)
                         .get(h -> {
-                            final CompoundTag tag = h.getTagElement(Constants.Item.BLOCK_ENTITY_TAG);
-                            if (tag != null) {
-                                final String lock = tag.getString(Constants.Item.LOCK);
-                                if (!lock.isEmpty()) {
-                                    return lock;
-                                }
-                            }
-                            return null;
+                            var component = h.getOrDefault(DataComponents.LOCK, LockCode.NO_LOCK);
+                            return component.key().isEmpty() ? null : component.key();
                         })
                         .set((h, v) -> {
                             if (v.isEmpty()) {
-                                BlockItemStackData.deleteLockToken(h);
+                                h.remove(DataComponents.LOCK);
                                 return;
                             }
-                            new LockCode(v).addToTag(h.getOrCreateTagElement(Constants.Item.BLOCK_ENTITY_TAG));
+                            h.set(DataComponents.LOCK, new LockCode(v));
                         })
-                        .delete(BlockItemStackData::deleteLockToken)
+                        .delete(h -> h.remove(DataComponents.LOCK))
                         .supports(h -> {
                             if (!(h.getItem() instanceof BlockItem)) {
                                 return false;
@@ -90,10 +83,4 @@ public final class BlockItemStackData {
     }
     // @formatter:on
 
-    private static void deleteLockToken(final ItemStack stack) {
-        final CompoundTag tag = stack.getTagElement(Constants.Item.BLOCK_ENTITY_TAG);
-        if (tag != null) {
-            tag.remove(Constants.Item.LOCK);
-        }
-    }
 }

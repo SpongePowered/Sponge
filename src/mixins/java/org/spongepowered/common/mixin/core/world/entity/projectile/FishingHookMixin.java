@@ -110,7 +110,7 @@ public abstract class FishingHookMixin extends ProjectileMixin {
                         .withParameter(LootContextParams.TOOL, stack)
                         .withParameter(LootContextParams.THIS_ENTITY, (FishingHook) (Object) this)
                         .withLuck((float)this.luck + playerEntity.getLuck());
-                final LootTable lootTable = this.shadow$level().getServer().getLootData().getLootTable(BuiltInLootTables.FISHING);
+                final LootTable lootTable = this.shadow$level().getServer().reloadableRegistries().getLootTable(BuiltInLootTables.FISHING);
                 final List<ItemStack> list = lootTable.getRandomItems(lootcontext$builder.create(LootContextParamSets.FISHING));
                 transactions = list.stream().map(ItemStackUtil::snapshotOf)
                         .map(snapshot -> new Transaction<>(snapshot, snapshot))
@@ -180,7 +180,7 @@ public abstract class FishingHookMixin extends ProjectileMixin {
     }
 
     @Inject(method = "checkCollision", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/FishingHook;onHit(Lnet/minecraft/world/phys/HitResult;)V"))
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/FishingHook;hitTargetOrDeflectSelf(Lnet/minecraft/world/phys/HitResult;)Lnet/minecraft/world/entity/projectile/ProjectileDeflection;"))
     private void impl$callCollideImpactEvent(final CallbackInfo ci, final HitResult hitResult) {
         if (hitResult.getType() == HitResult.Type.MISS || ((LevelBridge) this.shadow$level()).bridge$isFake()) {
             return;

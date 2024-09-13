@@ -127,10 +127,10 @@ public final class SpongeBlockEntityArchetypeBuilder extends AbstractDataBuilder
 
     @Override
     public BlockEntityArchetype.Builder blockEntity(final BlockEntity blockEntity) {
-        if (!(Objects.requireNonNull(blockEntity, "BlockEntity cannot be null!") instanceof net.minecraft.world.level.block.entity.BlockEntity)) {
+        if (!(Objects.requireNonNull(blockEntity, "BlockEntity cannot be null!") instanceof net.minecraft.world.level.block.entity.BlockEntity mcBlockEntity)) {
             throw new IllegalArgumentException("BlockEntity is not compatible with this implementation!");
         }
-        final CompoundTag compound = ((net.minecraft.world.level.block.entity.BlockEntity) blockEntity).saveWithFullMetadata();
+        final CompoundTag compound = mcBlockEntity.saveWithFullMetadata(mcBlockEntity.getLevel().registryAccess());
         compound.remove(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_X);
         compound.remove(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_Y);
         compound.remove(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_Z);

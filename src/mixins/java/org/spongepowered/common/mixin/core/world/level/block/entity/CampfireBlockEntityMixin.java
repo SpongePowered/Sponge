@@ -40,6 +40,7 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.entity.CookingEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.recipe.cooking.CookingRecipe;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -53,6 +54,7 @@ import org.spongepowered.common.MixinTargetHelper;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.level.block.entity.CampfireBlockEntityBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
@@ -70,6 +72,7 @@ public abstract class CampfireBlockEntityMixin implements CampfireBlockEntityBri
 
     private final RecipeHolder[] impl$cookingRecipe = new RecipeHolder[4];
     private int impl$currentIndex;
+    private SlotTransaction impl$pendingSlotTransaction;
 
     // Tick up
     @Inject(method = "cookTick", locals = LocalCapture.CAPTURE_FAILEXCEPTION,
@@ -100,12 +103,22 @@ public abstract class CampfireBlockEntityMixin implements CampfireBlockEntityBri
         final ItemStack itemStack, final Container iInventory, final ItemStack itemStack1) {
         final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
         final CampfireBlockEntityMixin mixinSelf = MixinTargetHelper.cast(self);
-        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack1);
+        final SlotTransaction transaction = new SlotTransaction(((Campfire) self).inventory().slot(i).get(), ItemStackUtil.snapshotOf(itemStack1), ItemStackSnapshot.empty());
         final RecipeHolder<?> recipe = mixinSelf.impl$cookingRecipe[i];
         final CookingEvent.Finish event = SpongeEventFactory.createCookingEventFinish(cause, (Campfire) self,
-            Collections.singletonList(snapshot), Optional.empty(), Optional.ofNullable(recipe).map(r -> (CookingRecipe) r.value()), Optional.ofNullable(recipe).map(r -> (ResourceKey) (Object) r.id()));
+            Optional.empty(), Optional.ofNullable(recipe).map(r -> (CookingRecipe) r.value()), Optional.ofNullable(recipe).map(r -> (ResourceKey) (Object) r.id()),
+            Collections.singletonList(transaction));
         SpongeCommon.post(event);
         mixinSelf.impl$cookingRecipe[i] = null;
+        mixinSelf.impl$pendingSlotTransaction = transaction;
+    }
+
+    @Inject(method = "cookTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;sendBlockUpdated(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/state/BlockState;I)V"))
+    private static void impl$setCookingEventFinishResult(final Level $$0, final BlockPos $$1, final BlockState $$2, final CampfireBlockEntity $$3, final CallbackInfo ci) {
+        final CampfireBlockEntityMixin mixinSelf = MixinTargetHelper.cast($$3);
+        mixinSelf.impl$pendingSlotTransaction.custom().ifPresent(item ->
+            mixinSelf.items.set(((SlotAdapter) mixinSelf.impl$pendingSlotTransaction.slot()).getOrdinal(), ItemStackUtil.fromSnapshotToNative(item)));
+        mixinSelf.impl$pendingSlotTransaction = null;
     }
 
     @Override

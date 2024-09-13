@@ -25,6 +25,7 @@
 package org.spongepowered.common.effect.potion;
 
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -147,7 +148,8 @@ public final class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect>
         if (!this.duration.isInfinite() && this.duration.ticks() <= 0) {
             throw new IllegalStateException("Duration has not been set");
         }
-        return (PotionEffect) new MobEffectInstance((MobEffect) this.potionType,
+
+        return (PotionEffect) new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder((MobEffect) this.potionType),
                 SpongeTicks.toSaturatedIntOrInfinite(this.duration),
                 this.amplifier,
                 this.isAmbient,

@@ -144,18 +144,22 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
         }
         this.position = new Vector3d(mcEntity.getX(), mcEntity.getY(), mcEntity.getZ());
         SpongeEntityArchetypeBuilder.stripCompound(compound);
-        compound.putBoolean(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN, true);
         this.position = entity.position();
         this.compound = compound;
         return this;
+    }
+
+    public void entityData(final CompoundTag tag) {
+        Objects.requireNonNull(tag, "Provided CompoundTag cannot be null!");
+        this.compound = tag.copy();
+        SpongeEntityArchetypeBuilder.stripCompound(this.compound);
     }
 
     @Override
     public EntityArchetype.Builder entityData(final DataView view) {
         final DataContainer container = Objects.requireNonNull(view, "Provided DataView cannot be null!").copy();
         new DelegateDataValidator(SpongeEntityArchetype.VALIDATORS, ValidationTypes.ENTITY.get()).validate(container);
-        this.compound = NBTTranslator.INSTANCE.translate(container);
-        SpongeEntityArchetypeBuilder.stripCompound(this.compound);
+        this.entityData(NBTTranslator.INSTANCE.translate(container));
         return this;
     }
 
@@ -188,4 +192,6 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
         compound.remove(Constants.UUID_LEAST);
         compound.remove(Constants.Entity.ENTITY_POSITION);
     }
+
+
 }

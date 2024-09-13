@@ -51,6 +51,8 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.general.CommandPhaseContext;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 
+import java.util.Optional;
+
 @Mixin(ExecuteCommand.class)
 public abstract class ExecuteCommandMixin {
 
@@ -103,6 +105,14 @@ public abstract class ExecuteCommandMixin {
                         CommandResult.builder().result(result).build()
                 ));
                 return result;
+            }
+            catch (Exception e) {
+                var owner = Optional.ofNullable(mapping)
+                        .flatMap(CommandMapping::plugin)
+                        .map(pc -> pc.metadata().id())
+                        .orElse("UNKNOWN");
+                SpongeCommon.logger().error("Could not execute command '{}' from plugin '{}'", this.commandInput, owner, e);
+                throw e;
             }
         }
     }

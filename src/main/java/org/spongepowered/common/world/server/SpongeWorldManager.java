@@ -335,7 +335,7 @@ public abstract class SpongeWorldManager implements WorldManager {
                 gameType == null ? defaultLevelData.getGameType() : gameType,
                 hardcore == null ? defaultLevelData.isHardcore() : hardcore,
                 difficulty == null ? defaultLevelData.getDifficulty() : difficulty,
-                allowCommands == null ? defaultLevelData.getAllowCommands() : allowCommands,
+                allowCommands == null ? defaultLevelData.isAllowCommands() : allowCommands,
                 defaultLevelData.getGameRules().copy(),
                 defaultLevelData.getDataConfiguration());
     }
@@ -543,6 +543,16 @@ public abstract class SpongeWorldManager implements WorldManager {
             loadedWorld.noSave = disableLevelSaving;
         }
 
+        final Path configFile = this.getConfigFile(key);
+        final Path copyConfigFile = this.getConfigFile(copyKey);
+
+        try {
+            Files.createDirectories(copyConfigFile.getParent());
+            Files.copy(configFile, copyConfigFile, StandardCopyOption.REPLACE_EXISTING);
+        } catch (final IOException e) {
+            return FutureUtil.completedWithException(e);
+        }
+
         try {
             this.server().dataPackManager().copy(this.findPack(key), key, copyKey);
         } catch (final IOException e) {
@@ -735,6 +745,8 @@ public abstract class SpongeWorldManager implements WorldManager {
                     this.prepareWorld(world);
                 } catch (final IOException e) {
                     throw new RuntimeException(String.format("Failed to create level data for world '%s'!", worldKey), e);
+                } catch (final Exception e) {
+                    throw new IllegalStateException(String.format("Failed to create level data for world '%s'!", worldKey), e);
                 }
             }
         }
@@ -755,9 +767,13 @@ public abstract class SpongeWorldManager implements WorldManager {
 
     private PrimaryLevelData getOrCreateLevelData(final Dynamic<?> dynamicLevelData, final LevelStem levelStem, final String directoryName) {
         final PrimaryLevelData defaultLevelData = (PrimaryLevelData) this.server.getWorldData();
-        @Nullable PrimaryLevelData levelData = this.loadLevelData(this.server.registryAccess(), defaultLevelData.getDataConfiguration(), dynamicLevelData);
-        if (levelData != null) {
-            return levelData;
+        try {
+            @Nullable PrimaryLevelData levelData = this.loadLevelData(this.server.registryAccess(), defaultLevelData.getDataConfiguration(), dynamicLevelData);
+            if (levelData != null) {
+                return levelData;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load level data from " + directoryName, e);
         }
 
         if (this.server.isDemo()) {
@@ -864,7 +880,7 @@ public abstract class SpongeWorldManager implements WorldManager {
                         levelData.setSpawn(ServerLevel.END_SPAWN_POINT, 0);
                     }
                 } else if (levelData.worldGenOptions().generateBonusChest()) {
-                    final BlockPos pos = new BlockPos(levelData.getXSpawn(), levelData.getYSpawn(), levelData.getZSpawn());
+                    final BlockPos pos = levelData.getSpawnPos();
                     final ConfiguredFeature<?, ?> bonusChestFeature = SpongeCommon.vanillaRegistry(Registries.CONFIGURED_FEATURE).get(MiscOverworldFeatures.BONUS_CHEST);
                     bonusChestFeature.place(world, world.getChunkSource().getGenerator(), world.random, pos);
                 }
@@ -889,7 +905,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         this.server.getPlayerList().addWorldborderListener(world);
 
         if (levelData.getCustomBossEvents() != null) {
-            ((ServerLevelBridge) world).bridge$getBossBarManager().load(levelData.getCustomBossEvents());
+            ((ServerLevelBridge) world).bridge$getBossBarManager().load(levelData.getCustomBossEvents(), world.registryAccess());
         }
 
         return world;

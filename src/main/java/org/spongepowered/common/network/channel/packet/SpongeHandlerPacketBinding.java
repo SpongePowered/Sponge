@@ -24,8 +24,7 @@
  */
 package org.spongepowered.common.network.channel.packet;
 
-import org.spongepowered.api.network.EngineConnection;
-import org.spongepowered.api.network.EngineConnectionSide;
+import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.api.network.channel.packet.HandlerPacketBinding;
 import org.spongepowered.api.network.channel.packet.Packet;
 import org.spongepowered.api.network.channel.packet.PacketBinding;
@@ -45,45 +44,31 @@ public final class SpongeHandlerPacketBinding<P extends Packet> extends SpongePa
         super(opcode, packetType);
     }
 
-    public <C extends EngineConnection> Collection<PacketHandler<? super P, ? super C>> getHandlers(final C connection) {
-        return (Collection) SpongeChannel.getResponseHandlers(connection, this.handlers.get());
+    public <S extends EngineConnectionState> Collection<PacketHandler<? super P, ? super S>> getHandlers(final S state) {
+        return (Collection) SpongeChannel.getResponseHandlers(state, this.handlers.get());
     }
 
     @Override
-    public <C extends EngineConnection> PacketBinding<P> addHandler(final EngineConnectionSide<C> side,
-            final PacketHandler<? super P, ? super C> handler) {
-        Objects.requireNonNull(side, "side");
-        return this.addHandler(SpongeChannel.getConnectionClass(side), handler);
-    }
-
-    @Override
-    public <C extends EngineConnection> PacketBinding<P> addHandler(final Class<C> connectionType,
-            final PacketHandler<? super P, ? super C> handler) {
-        Objects.requireNonNull(connectionType, "connectionType");
+    public <S extends EngineConnectionState> PacketBinding<P> addHandler(final Class<S> connectionState,
+            final PacketHandler<? super P, ? super S> handler) {
+        Objects.requireNonNull(connectionState, "connectionType");
         Objects.requireNonNull(handler, "handler");
-        this.handlers.modify(map -> map.put(connectionType, handler));
+        this.handlers.modify(map -> map.put(connectionState, handler));
         return this;
     }
 
     @Override
-    public PacketBinding<P> addHandler(final PacketHandler<? super P, EngineConnection> handler) {
-        return this.addHandler(EngineConnection.class, handler);
+    public PacketBinding<P> addHandler(final PacketHandler<? super P, EngineConnectionState> handler) {
+        return this.addHandler(EngineConnectionState.class, handler);
     }
 
     @Override
-    public <C extends EngineConnection> PacketBinding<P> removeHandler(final EngineConnectionSide<C> side,
-            final PacketHandler<? super P, ? super C> handler) {
-        Objects.requireNonNull(side, "side");
-        return this.removeHandler(SpongeChannel.getConnectionClass(side), handler);
-    }
-
-    @Override
-    public <C extends EngineConnection> PacketBinding<P> removeHandler(final Class<C> connectionType,
-            final PacketHandler<? super P, ? super C> handler) {
-        Objects.requireNonNull(connectionType, "connectionType");
+    public <S extends EngineConnectionState> PacketBinding<P> removeHandler(final Class<S> connectionState,
+            final PacketHandler<? super P, ? super S> handler) {
+        Objects.requireNonNull(connectionState, "connectionType");
         Objects.requireNonNull(handler, "handler");
         this.handlers.modify(map -> map.entries()
-                .removeIf(entry -> entry.getKey().isAssignableFrom(connectionType) && entry.getValue() == handler));
+                .removeIf(entry -> entry.getKey().isAssignableFrom(connectionState) && entry.getValue() == handler));
         return this;
     }
 

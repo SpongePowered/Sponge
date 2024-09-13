@@ -25,12 +25,11 @@
 package org.spongepowered.common.event.tracking.phase.packet;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ServerboundClientInformationPacket;
-import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
-import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
@@ -67,6 +66,7 @@ import org.spongepowered.common.accessor.world.entity.animal.PigAccessor;
 import org.spongepowered.common.accessor.world.entity.animal.SheepAccessor;
 import org.spongepowered.common.accessor.world.entity.animal.WolfAccessor;
 import org.spongepowered.common.accessor.world.inventory.SlotAccessor;
+import org.spongepowered.common.bridge.network.protocol.PacketBridge;
 import org.spongepowered.common.bridge.world.level.block.TrackableBlockBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -202,11 +202,8 @@ public final class PacketPhaseUtil {
     public static void onProcessPacket(final Packet packetIn, final PacketListener netHandler) {
         if (netHandler instanceof ServerGamePacketListenerImpl) {
             net.minecraft.server.level.ServerPlayer packetPlayer = ((ServerGamePacketListenerImpl) netHandler).player;
-            // Only process the CustomPayload & Respawn packets from players if they are dead.
-            if (!packetPlayer.isAlive()
-                    && (!(packetIn instanceof ServerboundCustomPayloadPacket)
-                    && (!(packetIn instanceof ServerboundClientCommandPacket)
-                    || ((ServerboundClientCommandPacket) packetIn).getAction() != ServerboundClientCommandPacket.Action.PERFORM_RESPAWN))) {
+            // Only process the CustomPayload, Respawn & ChunkBatchReceived packets from players if they are dead.
+            if (!packetPlayer.isAlive() && !((PacketBridge) packetIn).bridge$canProcessWhenDead()) {
                 return;
             }
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
@@ -302,7 +299,7 @@ public final class PacketPhaseUtil {
 
         if (item == Items.NAME_TAG) {
             // ItemNameTag.itemInteractionForEntity
-            return entity instanceof LivingEntity && !(entity instanceof Player) && stack.hasCustomHoverName() ? EntityAccessor.accessor$DATA_CUSTOM_NAME() : null;
+            return entity instanceof LivingEntity && !(entity instanceof Player) && stack.has(DataComponents.CUSTOM_NAME) ? EntityAccessor.accessor$DATA_CUSTOM_NAME() : null;
         }
 
         if (item == Items.SADDLE) {

@@ -25,73 +25,30 @@
 package org.spongepowered.common.mixin.core.world.level.block.entity;
 
 
-import com.google.common.collect.Lists;
-import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BannerBlockEntity;
-import org.spongepowered.api.data.meta.BannerPatternLayer;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.CustomNameableBridge;
 import org.spongepowered.common.bridge.world.level.block.entity.BannerBlockEntityBridge;
-import org.spongepowered.common.data.provider.item.stack.ShieldItemStackData;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
+
+import javax.annotation.Nullable;
 
 @Mixin(BannerBlockEntity.class)
 public abstract class BannerBlockEntityMixin extends BlockEntityMixin implements BannerBlockEntityBridge, CustomNameableBridge {
 
     @Shadow private net.minecraft.world.item.DyeColor baseColor;
-    @Shadow private ListTag itemPatterns;
-
-    private List<BannerPatternLayer> impl$patternLayers = Lists.newArrayList();
-
-    @Inject(method = "load", at = @At("RETURN"))
-    private void onSetItemValues(final CallbackInfo ci) {
-        this.impl$updatePatterns();
-    }
+    @Shadow @Nullable private Component name;
 
     private void impl$markDirtyAndUpdate() {
         this.shadow$setChanged();
         if (this.level != null && !this.level.isClientSide) {
             ((ServerLevel) this.level).getChunkSource().blockChanged(this.shadow$getBlockPos());
         }
-    }
-
-    private void impl$updatePatterns() {
-        this.impl$patternLayers.clear();
-        if (this.itemPatterns != null) {
-            for (final Tag pattern : this.itemPatterns) {
-                this.impl$patternLayers.add(ShieldItemStackData.layerFromNbt((CompoundTag) pattern));
-            }
-        }
-        this.impl$markDirtyAndUpdate();
-    }
-
-    @Override
-    public List<BannerPatternLayer> bridge$getLayers() {
-        return new ArrayList<>(this.impl$patternLayers);
-    }
-
-    @Override
-    public void bridge$setLayers(final List<BannerPatternLayer> layers) {
-        this.impl$patternLayers = NonNullList.create();
-        this.impl$patternLayers.addAll(layers);
-        this.itemPatterns = new ListTag();
-        for (final BannerPatternLayer layer : this.impl$patternLayers) {
-            this.itemPatterns.add(ShieldItemStackData.layerToNbt(layer));
-        }
-        this.impl$markDirtyAndUpdate();
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -114,6 +71,6 @@ public abstract class BannerBlockEntityMixin extends BlockEntityMixin implements
 
     @Override
     public void bridge$setCustomDisplayName(final Component customName) {
-        ((BannerBlockEntity) (Object) this).setCustomName(customName);
+        this.name = customName;
     }
 }

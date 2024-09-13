@@ -24,17 +24,19 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.animal;
 
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.entity.living.animal.Wolf;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.entity.AggressiveEntityBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -47,7 +49,9 @@ public abstract class WolfMixin extends AgableMobMixin implements AggressiveEnti
 
     // @formatter:off
     @Shadow public abstract void shadow$startPersistentAngerTimer();
+    @Shadow protected abstract void shadow$tryToTame(final Player $$0);
     // @formatter:on
+
 
     @Override
     public boolean bridge$isAngry() {
@@ -59,25 +63,36 @@ public abstract class WolfMixin extends AgableMobMixin implements AggressiveEnti
         this.shadow$startPersistentAngerTimer();
     }
 
+
     @Redirect(method = "mobInteract",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/util/RandomSource;nextInt(I)I"))
-    private int impl$ChangeRandomForTameEvent(final RandomSource rand, final int bound, final Player player, final InteractionHand hand) {
-        int random = rand.nextInt(bound);
-        ItemStack stack = player.getItemInHand(hand);
-        if (random == 0) {
-            stack.shrink(1);
-            try {
-                PhaseTracker.getCauseStackManager().pushCause(ItemStackUtil.fromNative(stack).createSnapshot());
-                PhaseTracker.getCauseStackManager().pushCause(player);
-                if (!SpongeCommon.post(SpongeEventFactory.createTameEntityEvent(PhaseTracker.getCauseStackManager().currentCause(), (Wolf) this))) {
-                    stack.grow(1);
-                    return random;
-                }
-            } finally {
-                PhaseTracker.getCauseStackManager().popCauses(2);
-            }
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/Wolf;tryToTame(Lnet/minecraft/world/entity/player/Player;)V"))
+    private void impl$onTame(final net.minecraft.world.entity.animal.Wolf instance, final Player player, final Player $$0, final InteractionHand $$1) {
+        try {
+            final ItemStack handStack = player.getItemInHand($$1);
+            handStack.grow(1);
+            final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(handStack);
+            handStack.shrink(1);
+            PhaseTracker.getCauseStackManager().pushCause(snapshot);
+            this.shadow$tryToTame(player);
+        } finally {
+            PhaseTracker.getCauseStackManager().popCause();
         }
-        return 1;
+    }
+
+    @Inject(method = "tryToTame",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/Wolf;tame(Lnet/minecraft/world/entity/player/Player;)V"),
+        cancellable = true)
+    private void impl$onTame(final Player player, final CallbackInfo ci) {
+        try {
+
+            PhaseTracker.getCauseStackManager().pushCause(player);
+            if (SpongeCommon.post(SpongeEventFactory.createTameEntityEvent(PhaseTracker.getCauseStackManager().currentCause(), (Wolf) this))) {
+                this.shadow$level().broadcastEntityEvent((net.minecraft.world.entity.animal.Wolf) (Object) this, (byte)6);
+                ci.cancel();
+            }
+        } finally {
+            PhaseTracker.getCauseStackManager().popCause();
+        }
     }
 
 }

@@ -24,11 +24,14 @@
  */
 package org.spongepowered.test.customregistry;
 
+import org.spongepowered.api.Client;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterRegistryEvent;
 import org.spongepowered.api.event.lifecycle.RegisterRegistryValueEvent;
+import org.spongepowered.api.event.lifecycle.StartingEngineEvent;
 import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.api.registry.DefaultedRegistryType;
 import org.spongepowered.api.registry.RegistryKey;
@@ -37,23 +40,61 @@ import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 @Plugin("customregistrytest")
-public class CustomRegistryTest {
+public final class CustomRegistryTest {
 
+    public static final ResourceKey GAME_REG_KEY = ResourceKey.of("customregistrytest", "game_registry");
+    public static final ResourceKey SERVER_REG_KEY = ResourceKey.of("customregistrytest", "server_registry");
+    public static final ResourceKey CLIENT_REG_KEY = ResourceKey.of("customregistrytest", "client_registry");
 
-    public static final ResourceKey REG_KEY = ResourceKey.of("customregistrytest", "key");
     public static final ResourceKey REG_VALUE = ResourceKey.of("customregistrytest", "value");
 
-    public static final DefaultedRegistryType<Integer> CUSTOM_REGISTRY = RegistryType.of(RegistryRoots.SPONGE, REG_KEY).asDefaultedType(Sponge::game);
-    public static final DefaultedRegistryReference<Integer> CUSTOM_VALUE = RegistryKey.of(CUSTOM_REGISTRY, REG_VALUE).asDefaultedReference(Sponge::game);
+    public static final DefaultedRegistryType<Integer> GAME_CUSTOM_REGISTRY = RegistryType.of(RegistryRoots.SPONGE, GAME_REG_KEY).asDefaultedType(Sponge::game);
+    public static final DefaultedRegistryReference<Integer> GAME_CUSTOM_VALUE = RegistryKey.of(GAME_CUSTOM_REGISTRY, REG_VALUE).asDefaultedReference(Sponge::game);
 
+    public static final DefaultedRegistryType<Integer> SERVER_CUSTOM_REGISTRY = RegistryType.of(RegistryRoots.SPONGE, SERVER_REG_KEY).asDefaultedType(Sponge::server);
+    public static final DefaultedRegistryReference<Integer> SERVER_CUSTOM_VALUE = RegistryKey.of(SERVER_CUSTOM_REGISTRY, REG_VALUE).asDefaultedReference(Sponge::server);
+
+    public static final DefaultedRegistryType<Integer> CLIENT_CUSTOM_REGISTRY = RegistryType.of(RegistryRoots.SPONGE, CLIENT_REG_KEY).asDefaultedType(Sponge::client);
+    public static final DefaultedRegistryReference<Integer> CLIENT_CUSTOM_VALUE = RegistryKey.of(CLIENT_CUSTOM_REGISTRY, REG_VALUE).asDefaultedReference(Sponge::client);
 
     @Listener
-    public void onRegisterRegistry(RegisterRegistryEvent.GameScoped event) {
-        event.register(REG_KEY, true);
-    }
-    @Listener
-    public void onRegisterRegistryValues(RegisterRegistryValueEvent.GameScoped event) {
-        event.registry(CUSTOM_REGISTRY).register(CUSTOM_VALUE.location(), 10);
+    public void onRegisterRegistryGameScoped(final RegisterRegistryEvent.GameScoped event) {
+        event.register(GAME_REG_KEY, true);
     }
 
+    @Listener
+    public void onRegisterRegistryValuesGameScoped(final RegisterRegistryValueEvent.GameScoped event) {
+        event.registry(GAME_CUSTOM_REGISTRY).register(GAME_CUSTOM_VALUE.location(), 10);
+    }
+
+    @Listener
+    public void onRegisterRegistryServerScoped(final RegisterRegistryEvent.EngineScoped<Server> event) {
+        event.register(SERVER_REG_KEY, true);
+    }
+
+    @Listener
+    public void onRegisterRegistryValuesServerScoped(final RegisterRegistryValueEvent.EngineScoped<Server> event) {
+        event.registry(SERVER_CUSTOM_REGISTRY).register(SERVER_CUSTOM_VALUE.location(), 5);
+    }
+
+    @Listener
+    public void onRegisterRegistryClientScoped(final RegisterRegistryEvent.EngineScoped<Client> event) {
+        event.register(CLIENT_REG_KEY, true);
+    }
+
+    @Listener
+    public void onRegisterRegistryValuesClientScoped(final RegisterRegistryValueEvent.EngineScoped<Client> event) {
+        event.registry(CLIENT_CUSTOM_REGISTRY).register(CLIENT_CUSTOM_VALUE.location(), 3);
+    }
+
+    @Listener
+    public void onServerStarting(final StartingEngineEvent<Server> event) {
+        final int gameValue = GAME_CUSTOM_VALUE.get();
+        final int serverValue = SERVER_CUSTOM_VALUE.get();
+    }
+
+    @Listener
+    public void onClientStarting(final StartingEngineEvent<Client> event) {
+        final int clientValue = CLIENT_CUSTOM_VALUE.get();
+    }
 }

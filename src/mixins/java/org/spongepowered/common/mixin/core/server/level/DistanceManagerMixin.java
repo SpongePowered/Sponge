@@ -43,7 +43,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.accessor.server.level.TicketAccessor;
 import org.spongepowered.common.bridge.world.DistanceManagerBridge;
 import org.spongepowered.common.bridge.world.server.TicketBridge;
-import org.spongepowered.common.bridge.world.server.TicketTypeBridge;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.VecHelper;
@@ -102,12 +101,8 @@ public abstract class DistanceManagerMixin implements DistanceManagerBridge {
             final ServerWorld world, final org.spongepowered.api.world.server.TicketType<T> ticketType,
             final Vector3i pos, final T value, final int distanceLimit) {
         final int distance = Mth.clamp(Constants.ChunkTicket.MAX_FULL_CHUNK_DISTANCE - distanceLimit, 0, Constants.ChunkTicket.MAX_FULL_CHUNK_TICKET_LEVEL);
-        final TicketType<S> type = (net.minecraft.server.level.TicketType<S>) ticketType;
-        final net.minecraft.server.level.Ticket<S> ticketToRequest =
-                TicketAccessor.accessor$createInstance(
-                        type,
-                        distance,
-                        ((TicketTypeBridge<S, T>) ticketType).bridge$convertToNativeType(value));
+        final TicketType<T> type = (net.minecraft.server.level.TicketType<T>) ticketType;
+        final net.minecraft.server.level.Ticket<T> ticketToRequest = TicketAccessor.accessor$createInstance(type, distance, value);
         this.shadow$addTicket(VecHelper.toChunkPos(pos).toLong(), ticketToRequest);
         return Optional.of(((TicketBridge) (Object) ticketToRequest).bridge$retrieveAppropriateTicket());
     }
@@ -127,7 +122,7 @@ public abstract class DistanceManagerMixin implements DistanceManagerBridge {
     @Override
     public <T> Collection<Ticket<T>> bridge$tickets(final org.spongepowered.api.world.server.TicketType<T> ticketType) {
         return this.tickets.values().stream()
-                .flatMap(x -> x.stream().filter(ticket -> ticket.getType().equals(ticketType)))
+                .flatMap(x -> x.stream().filter(ticket -> ticket.getType() == ticketType))
                 .map(x -> (Ticket<T>) (Object) x)
                 .collect(Collectors.toList());
     }

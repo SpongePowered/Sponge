@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.block.state;
 
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.StateHolder;
 import net.minecraft.world.level.block.state.properties.BedPart;
@@ -58,7 +57,7 @@ public abstract class StateHolderMixin_API<S extends State<S>, C> implements Sta
     @Shadow public abstract <T extends Comparable<T>> T shadow$getValue(Property<T> property);
     @Shadow public abstract <T extends Comparable<T>, V extends T> C shadow$setValue(Property<T> property, V value);
     @Shadow public abstract <T extends Comparable<T>> C shadow$cycle(Property<T> property);
-    @Shadow public abstract ImmutableMap<Property<?>, Comparable<?>> shadow$getValues();
+    @Shadow public abstract Map<Property<?>, Comparable<?>> shadow$getValues();
     // @formatter:on
 
     @SuppressWarnings("unchecked")

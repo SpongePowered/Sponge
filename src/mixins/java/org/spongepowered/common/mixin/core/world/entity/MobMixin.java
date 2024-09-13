@@ -31,7 +31,6 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -78,9 +77,10 @@ public abstract class MobMixin extends LivingEntityMixin {
     @Shadow @Nullable private LivingEntity target;
     @Shadow public abstract net.minecraft.world.entity.@Nullable Entity  shadow$getLeashHolder();
     @Shadow protected abstract void shadow$registerGoals();
-    @Shadow protected abstract void shadow$maybeDisableShield(Player p_233655_1_, ItemStack p_233655_2_, ItemStack p_233655_3_);
     // @formatter:on
 
+
+    @Shadow @Final protected float[] handDropChances;
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Mob;registerGoals()V"))
     private void impl$registerGoals(final Mob this$0) {
@@ -216,7 +216,7 @@ public abstract class MobMixin extends LivingEntityMixin {
         if (targetEntity instanceof LivingEntity) {
             // Sponge Start - Gather modifiers
             originalFunctions.addAll(DamageEventUtil
-                .createAttackEnchantmentFunction(this.shadow$getMainHandItem(), ((LivingEntity) targetEntity).getMobType(), 1.0F)); // 1.0F is for full attack strength since mobs don't have the concept
+                .createAttackEnchantmentFunction(this.shadow$getMainHandItem(), targetEntity.getType(), 1.0F)); // 1.0F is for full attack strength since mobs don't have the concept
             // baseDamage += EnchantmentHelper.getModifierForCreature(this.getHeldItem(), ((EntityLivingBase) targetEntity).getCreatureAttribute());
             knockbackModifier += EnchantmentHelper.getKnockbackBonus((Mob) (Object) this);
         }
@@ -245,14 +245,7 @@ public abstract class MobMixin extends LivingEntityMixin {
             final int j = EnchantmentHelper.getFireAspect((Mob) (Object) this);
 
             if (j > 0) {
-                targetEntity.setSecondsOnFire(j * 4);
-            }
-
-            if (targetEntity instanceof Player) {
-                final Player playerentity = (Player) targetEntity;
-                final ItemStack mainHandItem = this.shadow$getMainHandItem();
-                final ItemStack useItem = playerentity.isUsingItem() ? playerentity.getUseItem() : ItemStack.EMPTY;
-                this.shadow$maybeDisableShield(playerentity, mainHandItem, useItem);
+                targetEntity.igniteForSeconds(j * 4);
             }
 
             this.shadow$doEnchantDamageEffects((Mob) (Object) this, targetEntity);

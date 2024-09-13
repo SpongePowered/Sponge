@@ -28,6 +28,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.PlayerDataStorage;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -39,6 +40,7 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.GameProfileCache;
 import org.spongepowered.api.user.UserManager;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.accessor.server.players.PlayerListAccessor;
 import org.spongepowered.common.accessor.world.level.storage.PlayerDataStorageAccessor;
 import org.spongepowered.common.entity.player.SpongeUserData;
@@ -335,25 +337,25 @@ public final class SpongeUserManager implements UserManager {
         this.userCache.invalidateAll();
 
         // Add all known profiles from the data files
-        final String[] uuids = this.getSaveHandler().getSeenPlayers();
-        for (final String playerUuid : uuids) {
-
-            // If the filename contains a period, we can fail fast. Vanilla code fixes the Strings that have ".dat" to strip that out
-            // before passing that back in getAvailablePlayerDat. It doesn't remove non ".dat" filenames from the list.
-            if (playerUuid.contains(".")) {
-                continue;
+        final Path playerDataDir = ((MinecraftServerAccessor) this.server).accessor$storageSource().getLevelPath(LevelResource.PLAYER_DATA_DIR);
+        if (Files.isDirectory(playerDataDir)) {
+            try (Stream<Path> list = Files.list(playerDataDir)) {
+                list.map(Path::toString)
+                        .filter(file -> file.endsWith(".dat")) // only .dat files
+                        .map(file -> file.substring(0, file.length() - 4))
+                        .filter(uuid -> !uuid.contains(".")) // fail fast for invalid uuid
+                        .map(playerUuid -> {
+                            try {
+                                return UUID.fromString(playerUuid);
+                            } catch (final Exception ex) {
+                                return null;
+                            }
+                        })
+                        .filter(Objects::nonNull)
+                        .forEach(this.knownUUIDs::add);
+            } catch (IOException e) {
+                SpongeCommon.logger().error("Failed to get player files");
             }
-
-            // At this point, we have a filename who has no extension. This doesn't mean it is actually a UUID. We trap the exception and ignore
-            // any filenames that fail the UUID check.
-            final UUID uuid;
-            try {
-                uuid = UUID.fromString(playerUuid);
-            } catch (final Exception ex) {
-                continue;
-            }
-
-            this.knownUUIDs.add(uuid);
         }
     }
 

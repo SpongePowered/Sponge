@@ -23,8 +23,8 @@
  * THE SOFTWARE.
  */
 package org.spongepowered.common.mixin.core.block;
+
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -45,8 +45,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(BedBlock.class)
 public class BedBlockMixin {
 
-    @Inject(method = "use", at = @At(value = "HEAD"), cancellable = true)
-    private void impl$onUseBed(final BlockState param0, final Level param1, final BlockPos param2, final Player param3, final InteractionHand param4, final BlockHitResult param5,
+    @Inject(method = "useWithoutItem", at = @At(value = "HEAD"), cancellable = true)
+    private void impl$onUseBed(final BlockState param0, final Level param1, final BlockPos param2, final Player param3, final BlockHitResult param5,
             final CallbackInfoReturnable<InteractionResult> cir) {
         if (!param1.isClientSide) {
             final Cause currentCause = Sponge.server().causeStackManager().currentCause();
@@ -58,8 +58,8 @@ public class BedBlockMixin {
         }
     }
 
-    @Inject(method = "use", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;removeBlock(Lnet/minecraft/core/BlockPos;Z)Z"), cancellable = true)
-    private void impl$onExplodeBed(final BlockState param0, final Level param1, final BlockPos param2, final Player param3, final InteractionHand param4, final BlockHitResult param5,
+    @Inject(method = "useWithoutItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;removeBlock(Lnet/minecraft/core/BlockPos;Z)Z"), cancellable = true)
+    private void impl$onExplodeBed(final BlockState param0, final Level param1, final BlockPos param2, final Player param3, final BlockHitResult param5,
             final CallbackInfoReturnable<InteractionResult> cir) {
         final Cause currentCause = Sponge.server().causeStackManager().currentCause();
         final BlockPos bedLocation = param5.getBlockPos();

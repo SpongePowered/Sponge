@@ -32,7 +32,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.api.network.EngineConnectionSide;
-import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
+import org.spongepowered.common.network.SpongeEngineConnection;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -45,7 +45,7 @@ public final class PacketSender {
     }
 
     public static void sendTo(final EngineConnection connection, final Packet<?> packet, final @Nullable Consumer<@Nullable Throwable> listener) {
-        final Connection networkManager = ((ConnectionHolderBridge) connection).bridge$getConnection();
+        final Connection networkManager = ((SpongeEngineConnection) connection).connection();
         networkManager.send(packet, listener == null ? null : new SpongePacketSendListener(connection.side(), listener));
     }
 

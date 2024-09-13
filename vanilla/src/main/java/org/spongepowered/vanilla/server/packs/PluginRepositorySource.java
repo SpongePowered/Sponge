@@ -25,7 +25,9 @@
 package org.spongepowered.vanilla.server.packs;
 
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.PackSelectionConfig;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
@@ -41,11 +43,13 @@ import org.spongepowered.vanilla.bridge.server.packs.repository.PackRepositoryBr
 import org.spongepowered.vanilla.launch.plugin.VanillaPluginManager;
 
 import java.nio.file.FileSystem;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public final class PluginRepositorySource implements RepositorySource {
 
+    public static final PackSelectionConfig PLUGIN_SELECTION_CONFIG = new PackSelectionConfig(false, Pack.Position.BOTTOM, false);
     private final PackRepository repository;
 
     public PluginRepositorySource(final PackRepository repository) {
@@ -72,19 +76,21 @@ public final class PluginRepositorySource implements RepositorySource {
                 }
             }
 
-            final PluginPackResources packResources = new PluginPackResources(id, pluginContainer, fileSystemSupplier);
+            final PackLocationInfo info = new PackLocationInfo(id, Component.literal(id), PackSource.DEFAULT, Optional.empty());
+            final PluginPackResources packResources = new PluginPackResources(info, pluginContainer, fileSystemSupplier);
             final Pack.ResourcesSupplier packSupplier = new Pack.ResourcesSupplier() {
+
                 @Override
-                public PackResources openPrimary(String var1) {
+                public PackResources openPrimary(final PackLocationInfo var1) {
                     return packResources;
                 }
 
                 @Override
-                public PackResources openFull(String var1, Pack.Info var2) {
+                public PackResources openFull(final PackLocationInfo var1, final Pack.Metadata var2) {
                     return packResources;
                 }
             };
-            final Pack pack = Pack.readMetaAndCreate(id, Component.literal(id), true, packSupplier, PackType.SERVER_DATA, Pack.Position.BOTTOM, PackSource.DEFAULT);
+            final Pack pack = Pack.readMetaAndCreate(info, packSupplier, PackType.SERVER_DATA, PLUGIN_SELECTION_CONFIG);
             ((PackRepositoryBridge_Vanilla) this.repository).bridge$registerResourcePack(pluginContainer, pack);
             callback.accept(pack);
         }

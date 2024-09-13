@@ -24,22 +24,15 @@
  */
 package org.spongepowered.vanilla.mixin.core.server.network;
 
-import net.minecraft.network.chat.LastSeenMessages;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
-import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
-import net.minecraft.network.protocol.game.ServerboundInteractPacket;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
@@ -47,15 +40,9 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
-import org.spongepowered.common.hooks.PlatformHooks;
 
 @Mixin(value = ServerGamePacketListenerImpl.class, priority = 999)
 public abstract class ServerGamePacketListenerImplMixin_Vanilla extends ServerCommonPacketListenerImplMixin_Vanilla implements ServerGamePacketListener {
-
-    // @formatter:off
-    @Shadow public ServerPlayer player;
-    @Shadow protected abstract void shadow$performChatCommand(final ServerboundChatCommandPacket $$0, final LastSeenMessages $$1);
-    //@formatter:on
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Redirect(method = "lambda$handlePlaceRecipe$10",
@@ -81,19 +68,11 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla extends ServerCo
      * Specifically hooks the reach distance to use the forge hook. SpongeForge does not need this hook as forge already
      * replaces this logic with an equivalent.
      */
-    @Redirect(
-        method = "handleInteract",
-        at = @At(value = "FIELD", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;MAX_INTERACTION_DISTANCE:D"))
-    private double vanilla$getPlatformReach(final ServerboundInteractPacket packet) {
-        return PlatformHooks.INSTANCE.getGeneralHooks().getEntityReachDistanceSq(this.player, packet.getTarget(this.player.serverLevel()));
-    }
-
-    @Redirect(method = "lambda$handleChatCommand$8", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;performChatCommand(Lnet/minecraft/network/protocol/game/ServerboundChatCommandPacket;Lnet/minecraft/network/chat/LastSeenMessages;)V"))
-    private void vanilla$onPerformChatCommand(final ServerGamePacketListenerImpl instance, final ServerboundChatCommandPacket $$0, final LastSeenMessages $$1) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(this.player);
-            frame.addContext(EventContextKeys.COMMAND, $$0.command());
-            this.shadow$performChatCommand($$0, $$1);
-        }
-    }
+    // TODO fix me
+//    @Redirect(
+//        method = "handleInteract",
+//        at = @At(value = "FIELD", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;MAX_INTERACTION_DISTANCE:D"))
+//    private double vanilla$getPlatformReach(final ServerboundInteractPacket packet) {
+//        return PlatformHooks.INSTANCE.getGeneralHooks().getEntityReachDistanceSq(this.player, packet.getTarget(this.player.serverLevel()));
+//    }
 }

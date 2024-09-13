@@ -63,6 +63,8 @@ public abstract class LivingEntityMixin_Inventory extends Entity {
     @Shadow protected abstract ItemStack shadow$getLastHandItem(EquipmentSlot p_241347_1_);
     @Shadow protected abstract ItemStack shadow$getLastArmorItem(EquipmentSlot p_241346_1_);
     @Shadow protected abstract void shadow$completeUsingItem();
+
+    @Shadow private ItemStack lastBodyItemStack;
     // @formatter:on
 
     protected LivingEntityMixin_Inventory(final EntityType<?> param0, final Level param1) {
@@ -86,15 +88,11 @@ public abstract class LivingEntityMixin_Inventory extends Entity {
     protected void inventory$onHandleEquipmentChanges(final Map<EquipmentSlot, ItemStack> map, final CallbackInfo ci) {
         map.entrySet().forEach(entry -> {
             final Slot slotAdapter = this.impl$getSpongeSlot(entry.getKey());
-            ItemStack oldStack = null;
-            switch (entry.getKey().getType()) {
-                case HAND:
-                    oldStack = this.shadow$getLastHandItem(entry.getKey());
-                    break;
-                case ARMOR:
-                    oldStack = this.shadow$getLastArmorItem(entry.getKey());
-                    break;
-            }
+            final ItemStack oldStack = switch (entry.getKey().getType()) {
+                case HAND -> this.shadow$getLastHandItem(entry.getKey());
+                case ARMOR -> this.shadow$getLastArmorItem(entry.getKey());
+                case BODY -> this.lastBodyItemStack;
+            };
             entry.setValue(this.impl$callEquipmentEvent(entry.getKey(), slotAdapter, entry.getValue(), oldStack));
         });
     }

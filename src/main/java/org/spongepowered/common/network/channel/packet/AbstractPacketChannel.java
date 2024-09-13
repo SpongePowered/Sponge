@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableList;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.EngineConnection;
+import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.api.network.channel.ChannelBuf;
 import org.spongepowered.api.network.channel.ChannelException;
 import org.spongepowered.api.network.channel.ChannelIOException;
@@ -210,36 +211,39 @@ public abstract class AbstractPacketChannel extends SpongeChannel implements Tra
         return Optional.ofNullable(this.byOpcode.get(opcode));
     }
 
-    protected <P extends RequestPacket<R>, R extends Packet, C extends EngineConnection> void handleResponse(final C connection,
+    protected <P extends RequestPacket<R>, R extends Packet, S extends EngineConnectionState> void handleResponse(
+            final EngineConnection connection, final S state,
             final TransactionalPacketBinding<P, R> binding, final P request, final R response) {
-        for (final ResponsePacketHandler<? super P, ? super R, ? super C> handler :
-                ((SpongeTransactionalPacketBinding<P, R>) binding).getResponseHandlers(connection)) {
+        for (final ResponsePacketHandler<? super P, ? super R, ? super S> handler :
+                ((SpongeTransactionalPacketBinding<P, R>) binding).getResponseHandlers(state)) {
             try {
-                handler.handleResponse(response, request, connection);
+                handler.handleResponse(response, request, state);
             } catch (final Throwable t) {
-                this.handleException(connection, new ChannelException("Failed to handle packet", t), null);
+                this.handleException(connection, state, new ChannelException("Failed to handle packet", t), null);
             }
         }
     }
 
-    protected <P extends RequestPacket<R>, R extends Packet, C extends EngineConnection> void handleResponseFailure(final C connection,
-            final TransactionalPacketBinding<P, R> binding, final P request, final ChannelException response) {
-        for (final ResponsePacketHandler<? super P, ? super R, ? super C> handler :
-                ((SpongeTransactionalPacketBinding<P, R>) binding).getResponseHandlers(connection)) {
+    protected <P extends RequestPacket<R>, R extends Packet, S extends EngineConnectionState> void handleResponseFailure(
+            final EngineConnection connection, final S state, final TransactionalPacketBinding<P, R> binding,
+            final P request, final ChannelException response) {
+        for (final ResponsePacketHandler<? super P, ? super R, ? super S> handler :
+                ((SpongeTransactionalPacketBinding<P, R>) binding).getResponseHandlers(state)) {
             try {
-                handler.handleFailure(response, request, connection);
+                handler.handleFailure(response, request, state);
             } catch (final Throwable t) {
-                this.handleException(connection, new ChannelException("Failed to handle packet failure", t), null);
+                this.handleException(connection, state, new ChannelException("Failed to handle packet failure", t), null);
             }
         }
     }
 
-    protected <P extends Packet, C extends EngineConnection> void handle(final C connection, final HandlerPacketBinding<P> binding, final P packet) {
-        for (final PacketHandler<? super P, ? super C> handler : ((SpongeHandlerPacketBinding<P>) binding).getHandlers(connection)) {
+    protected <P extends Packet, S extends EngineConnectionState> void handle(final EngineConnection connection, final S state,
+                                                                              final HandlerPacketBinding<P> binding, final P packet) {
+        for (final PacketHandler<? super P, ? super S> handler : ((SpongeHandlerPacketBinding<P>) binding).getHandlers(state)) {
             try {
-                handler.handle(packet, connection);
+                handler.handle(packet, state);
             } catch (final Throwable t) {
-                this.handleException(connection, new ChannelException("Failed to handle packet", t), null);
+                this.handleException(connection, state, new ChannelException("Failed to handle packet", t), null);
             }
         }
     }

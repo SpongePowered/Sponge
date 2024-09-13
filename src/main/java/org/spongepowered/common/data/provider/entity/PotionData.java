@@ -24,15 +24,14 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.projectile.ThrownPotion;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
+import org.apache.commons.lang3.stream.Streams;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.util.Constants;
-
-import java.util.stream.Collectors;
 
 public final class PotionData {
 
@@ -44,12 +43,10 @@ public final class PotionData {
         registrator
                 .asMutable(ThrownPotion.class)
                     .create(Keys.POTION_EFFECTS)
-                        .get(h -> PotionUtils.getMobEffects(h.getItem()).stream().map(PotionEffect.class::cast).collect(Collectors.toList()))
+                        .get(h -> Streams.of(h.getItem().getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).getAllEffects()).map(PotionEffect.class::cast).toList())
                         .set((h, v) -> {
-                            h.getItem().removeTagKey(Constants.Item.CUSTOM_POTION_EFFECTS);
-                            PotionUtils.setCustomEffects(h.getItem(), v.stream()
-                                    .map(MobEffectInstance.class::cast)
-                                    .collect(Collectors.toList()));
+                            final var mcEffects = v.stream().map(MobEffectInstance.class::cast).toList();
+                            h.getItem().update(DataComponents.POTION_CONTENTS, PotionContents.EMPTY, contents -> new PotionContents(contents.potion(), contents.customColor(), mcEffects));
                         });
     }
     // @formatter:on

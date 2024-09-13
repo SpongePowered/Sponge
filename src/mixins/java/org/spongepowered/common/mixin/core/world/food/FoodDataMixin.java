@@ -66,7 +66,7 @@ public abstract class FoodDataMixin implements FoodDataBridge {
         this.foodLevel = this.impl$fireEventAndGetValue(Keys.FOOD_LEVEL, this.foodLevel, value);
     }
 
-    @Redirect(method = "eat(IF)V", at = @At(value = "FIELD", target = "Lnet/minecraft/world/food/FoodData;foodLevel:I", opcode = Opcodes.PUTFIELD))
+    @Redirect(method = "add", at = @At(value = "FIELD", target = "Lnet/minecraft/world/food/FoodData;foodLevel:I", opcode = Opcodes.PUTFIELD))
     private void impl$eatSetFoodLevel(final FoodData self, final int value) {
         this.foodLevel = this.impl$fireEventAndGetValue(Keys.FOOD_LEVEL, this.foodLevel, value);
     }
@@ -81,7 +81,7 @@ public abstract class FoodDataMixin implements FoodDataBridge {
         this.saturationLevel = this.impl$fireEventAndGetValue(Keys.SATURATION, (double) this.saturationLevel, (double) value).floatValue();
     }
 
-    @Redirect(method = "eat(IF)V", at = @At(value = "FIELD", target = "Lnet/minecraft/world/food/FoodData;saturationLevel:F", opcode = Opcodes.PUTFIELD))
+    @Redirect(method = "add", at = @At(value = "FIELD", target = "Lnet/minecraft/world/food/FoodData;saturationLevel:F", opcode = Opcodes.PUTFIELD))
     private void impl$eatSetSaturationLevel(final FoodData self, final float value) {
         this.saturationLevel = this.impl$fireEventAndGetValue(Keys.SATURATION, (double) this.saturationLevel, (double) value).floatValue();
     }

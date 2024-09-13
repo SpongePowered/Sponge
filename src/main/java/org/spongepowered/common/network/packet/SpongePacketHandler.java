@@ -27,18 +27,19 @@ package org.spongepowered.common.network.packet;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.DimensionSpecialEffects;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.network.ClientSideConnection;
-import org.spongepowered.api.network.EngineConnectionTypes;
+import org.spongepowered.api.network.ClientConnectionState;
+import org.spongepowered.api.network.EngineConnectionStates;
 import org.spongepowered.api.network.channel.packet.PacketChannel;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.client.multiplayer.ClientLevelAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
 
@@ -54,7 +55,7 @@ public final class SpongePacketHandler {
     public static void init(final SpongeChannelManager registry) {
         SpongePacketHandler.channel = registry.createChannel(ResourceKey.sponge("default"), PacketChannel.class);
         SpongePacketHandler.channel.registerTransactional(RequestBlockTrackerDataPacket.class, TrackerDataResponsePacket.class, 0)
-                .setRequestHandler(EngineConnectionTypes.SERVER_PLAYER, (requestPacket, connection, response) -> {
+                .setRequestHandler(EngineConnectionStates.SERVER_GAME, (requestPacket, connection, response) -> {
                     final ServerPlayer player = connection.player();
                     if (!player.hasPermission("sponge.debug.block-tracking")) {
                         return;
@@ -73,7 +74,7 @@ public final class SpongePacketHandler {
                     response.success(SpongePacketHandler.createTrackerDataResponse(owner, notifier));
                 });
         SpongePacketHandler.channel.registerTransactional(RequestEntityTrackerDataPacket.class, TrackerDataResponsePacket.class, 1)
-                .setRequestHandler(EngineConnectionTypes.SERVER_PLAYER, (requestPacket, connection, response) -> {
+                .setRequestHandler(EngineConnectionStates.SERVER_GAME, (requestPacket, connection, response) -> {
                     final ServerPlayer player = connection.player();
                     if (!player.hasPermission("sponge.debug.entity-tracking")) {
                         return;
@@ -91,7 +92,7 @@ public final class SpongePacketHandler {
 
                     response.success(SpongePacketHandler.createTrackerDataResponse(owner, notifier));
                 });
-        SpongePacketHandler.channel.register(ChangeViewerEnvironmentPacket.class, 3).addHandler(ClientSideConnection.class,
+        SpongePacketHandler.channel.register(ChangeViewerEnvironmentPacket.class, 3).addHandler(ClientConnectionState.class,
                 (packet, connection) -> {
                     final ClientLevel world = Minecraft.getInstance().level;
                     if (world == null) {
@@ -99,7 +100,7 @@ public final class SpongePacketHandler {
                     }
 
                     final DimensionType dimensionType = SpongeCommon.vanillaRegistry(Registries.DIMENSION_TYPE).get(packet.dimensionLogic);
-                    ((LevelBridge) world).bridge$adjustDimensionLogic(dimensionType);
+                    ((ClientLevelAccessor) world).accessor$effects(DimensionSpecialEffects.forType(dimensionType));
                 }
         );
     }

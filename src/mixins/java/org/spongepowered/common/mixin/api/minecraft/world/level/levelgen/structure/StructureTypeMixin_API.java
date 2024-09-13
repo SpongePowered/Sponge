@@ -26,8 +26,8 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.struct
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.resources.RegistryOps;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataView;
@@ -41,7 +41,7 @@ import java.io.IOException;
 @Mixin(net.minecraft.world.level.levelgen.structure.StructureType.class)
 public interface StructureTypeMixin_API<S extends net.minecraft.world.level.levelgen.structure.Structure> extends org.spongepowered.api.world.generation.structure.StructureType {
     // @formatter:off
-    @Shadow Codec<S> codec();
+    @Shadow MapCodec<S> codec();
     // @formatter:on
 
     @Override
@@ -50,7 +50,7 @@ public interface StructureTypeMixin_API<S extends net.minecraft.world.level.leve
         try {
             final JsonElement json = JsonParser.parseString(DataFormats.JSON.get().write(config));
             final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, SpongeCommon.server().registryAccess());
-            return (Structure) (Object) this.codec().parse(ops, json).getOrThrow(false, e -> {});
+            return (Structure) (Object) this.codec().codec().parse(ops, json).getOrThrow();
 
         } catch (IOException e) {
             throw new IllegalStateException("Could not read configuration: " + config, e);

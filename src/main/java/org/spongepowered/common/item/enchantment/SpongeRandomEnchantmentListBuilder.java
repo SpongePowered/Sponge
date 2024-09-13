@@ -35,6 +35,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.List;
@@ -97,8 +98,8 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
         if (this.pool == null || this.pool.isEmpty()) {
             Objects.requireNonNull(this.item, "The item cannot be null");
             this.randomSource.setSeed(this.seed + this.option);
-            enchantments = EnchantmentHelper.selectEnchantment(this.randomSource,
-                                        ItemStackUtil.toNative(this.item), this.level, this.treasure);
+            enchantments = EnchantmentHelper.selectEnchantment(SpongeCommon.server().getWorldData().enabledFeatures(),
+                    this.randomSource, ItemStackUtil.toNative(this.item), this.level, this.treasure);
 
 
         } else {

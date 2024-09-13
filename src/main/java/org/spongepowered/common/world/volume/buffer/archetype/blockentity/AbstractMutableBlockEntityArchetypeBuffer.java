@@ -79,8 +79,8 @@ public abstract class AbstractMutableBlockEntityArchetypeBuffer extends Abstract
 
 
     @Override
-    public Palette<BlockState, BlockType> getPalette() {
-        return this.blockBuffer.getPalette();
+    public Palette<BlockState, BlockType> blockPalette() {
+        return this.blockBuffer.blockPalette();
     }
 
     @Override

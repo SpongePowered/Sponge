@@ -33,6 +33,7 @@ import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.scores.PlayerTeam;
+import net.minecraft.world.scores.ScoreAccess;
 import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
@@ -41,11 +42,11 @@ import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.objective.Objective;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.accessor.world.scores.PlayerTeamAccessor;
 import org.spongepowered.common.accessor.world.scores.ScoreboardAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
@@ -53,7 +54,6 @@ import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.world.scores.ObjectiveBridge;
 import org.spongepowered.common.scoreboard.SpongeObjective;
 import org.spongepowered.common.scoreboard.SpongeScore;
-import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -67,6 +67,9 @@ import java.util.stream.Collectors;
 @Mixin(ServerScoreboard.class)
 public abstract class ServerScoreboardMixin extends Scoreboard implements ServerScoreboardBridge {
 
+    // @formatter:off
+    @Shadow @Final private Set<net.minecraft.world.scores.Objective> trackedObjectives;
+    // @formatter:on
 
     private final List<ServerPlayer> impl$players = new ArrayList<>();
 
@@ -88,6 +91,11 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
             this.impl$apiCall = false;
             ((ObjectiveBridge) mcObjective).bridge$setSpongeObjective(so);
             so.register(this);
+            for (final Score score : objective.scores().values()) {
+                final SpongeScore spongeScore = (SpongeScore) score;
+                final ScoreAccess accessor = this.getOrCreatePlayerScore(spongeScore.holder, mcObjective);
+                spongeScore.registerAndUpdate(mcObjective, accessor);
+            }
         }
     }
 
@@ -191,7 +199,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
                 player.connection.send(ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(team, true));
             }
 
-            for (final net.minecraft.world.scores.Objective objective : this.getObjectives()) {
+            for (final net.minecraft.world.scores.Objective objective : this.trackedObjectives) {
                 player.connection.send(new ClientboundSetObjectivePacket(objective, 0));
                 ((ScoreboardAccessor) this).accessor$displayObjectives().forEach((displaySlot, objective1) -> {
                     if (objective1 == objective) {
@@ -203,8 +211,8 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
                             score.owner(),
                             objective.getName(),
                             score.value(),
-                            score.display(),
-                            score.numberFormatOverride());
+                            Optional.ofNullable(score.display()),
+                            Optional.ofNullable(score.numberFormatOverride()));
                     player.connection.send(packetIn);
                 }
             }
@@ -231,11 +239,6 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
         this.bridge$sendToPlayers(packet);
     }
 
-    @Redirect(method = "onScoreChanged", at = @At(value = "INVOKE", target = "Ljava/util/Set;contains(Ljava/lang/Object;)Z", remap = false))
-    private boolean onUpdateScoreValue(final Set<?> set, final Object object) {
-        return true;
-    }
-
     @Redirect(method = "onPlayerRemoved",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastAll(Lnet/minecraft/network/protocol/Packet;)V"))
     private void impl$updatePlayersOnRemoval(final PlayerList manager, final Packet<?> packet) {
@@ -248,14 +251,10 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
         this.bridge$sendToPlayers(packet);
     }
 
-    //@Redirect(method = "setObjectiveInDisplaySlot", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
-    /*public void onSetObjectiveInDisplaySlot(PlayerList manager, Packet<?> packet) {
-        this.sendToPlayers(packet);
-    }*/
-
-    @Inject(method = "onObjectiveAdded", at = @At("RETURN"))
-    private void impl$UpdatePlayersScoreObjective(final net.minecraft.world.scores.Objective objective, final CallbackInfo ci) {
-        this.bridge$sendToPlayers(new ClientboundSetObjectivePacket(objective, Constants.Scoreboards.OBJECTIVE_PACKET_ADD));
+    @Redirect(method = "setDisplayObjective",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastAll(Lnet/minecraft/network/protocol/Packet;)V"))
+    private void impl$updatePlayersOnSetDisplayObjective(final PlayerList manager, final Packet<?> packet) {
+        this.bridge$sendToPlayers(packet);
     }
 
     @Redirect(method = "addPlayerToTeam",
@@ -274,18 +273,6 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
         at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastAll(Lnet/minecraft/network/protocol/Packet;)V"))
     private void impl$updatePlayersOnObjectiveDisplay(final PlayerList manager, final Packet<?> packet) {
         this.bridge$sendToPlayers(packet);
-    }
-
-    @Redirect(method = "onObjectiveChanged",
-        at = @At(value = "INVOKE", target = "Ljava/util/Set;contains(Ljava/lang/Object;)Z", remap = false))
-    private boolean impl$alwaysReturnTrueForObjectivesDisplayName(final Set<net.minecraft.world.scores.Objective> set, final Object object) {
-        return true;
-    }
-
-    @Redirect(method = "onObjectiveRemoved",
-        at = @At(value = "INVOKE", target = "Ljava/util/Set;contains(Ljava/lang/Object;)Z", remap = false))
-    private boolean impl$alwaysReturnTrueForObjectiveRemoval(final Set<net.minecraft.world.scores.Objective> set, final Object object) {
-        return true;
     }
 
     @Redirect(method = "onTeamAdded",

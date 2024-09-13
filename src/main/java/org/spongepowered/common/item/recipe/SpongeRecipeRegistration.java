@@ -82,7 +82,7 @@ public abstract class SpongeRecipeRegistration<R extends Recipe<? extends Contai
             final Function<net.minecraft.world.inventory.CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction,
             final Collection<Ingredient> ingredients,
             final RecipeSerializer<R> vanilla, final RecipeSerializer<? extends R> sponge) {
-        if (resultStack.hasTag() || resultFunction != null || remainingItemsFunction != null) {
+        if (!resultStack.getComponents().isEmpty() || resultFunction != null || remainingItemsFunction != null) {
             return sponge;
         }
         for (final Ingredient value : ingredients) {
@@ -97,7 +97,7 @@ public abstract class SpongeRecipeRegistration<R extends Recipe<? extends Contai
             final Function<C, ItemStack> resultFunction,
             final Function<net.minecraft.world.inventory.CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction,
             final Collection<Ingredient> ingredients) {
-        if (resultStack.hasTag() || resultFunction != null || remainingItemsFunction != null) {
+        if (!resultStack.getComponents().isEmpty() || resultFunction != null || remainingItemsFunction != null) {
             return false;
         }
         for (final Ingredient value : ingredients) {
@@ -156,7 +156,7 @@ public abstract class SpongeRecipeRegistration<R extends Recipe<? extends Contai
             if (encoded.result().isPresent()) {
                 return encoded.result().get().getAsJsonObject();
             }
-            final DataResult.PartialResult<JsonElement> error = encoded.error().get();
+            final var error = encoded.error().get();
             throw new RuntimeException(error.message());
         } catch (Exception e) {
             throw new RuntimeException("Could not encode recipe " + template.key(), e);

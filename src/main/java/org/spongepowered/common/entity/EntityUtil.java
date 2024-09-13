@@ -124,7 +124,7 @@ public final class EntityUtil {
         playerlist.sendAllPlayerInfo(player);
 
         for (final MobEffectInstance effectinstance : player.getActiveEffects()) {
-            player.connection.send(new ClientboundUpdateMobEffectPacket(player.getId(), effectinstance));
+            player.connection.send(new ClientboundUpdateMobEffectPacket(player.getId(), effectinstance, false));
         }
 
         if (isPortal) {

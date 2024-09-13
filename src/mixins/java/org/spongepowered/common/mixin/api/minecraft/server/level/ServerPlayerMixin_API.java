@@ -31,6 +31,7 @@ import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.permission.PermissionChecker;
 import net.kyori.adventure.pointer.Pointers;
+import net.kyori.adventure.resource.ResourcePackRequest;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.sound.SoundStop;
 import net.kyori.adventure.text.Component;
@@ -41,11 +42,12 @@ import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.Connection;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
+import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
 import net.minecraft.network.protocol.game.ClientboundDeleteChatPacket;
@@ -85,9 +87,8 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.message.PlayerChatEvent;
 import org.spongepowered.api.event.world.ChangeWorldBorderEvent;
-import org.spongepowered.api.network.ServerPlayerConnection;
+import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.border.WorldBorder;
@@ -102,9 +103,11 @@ import org.spongepowered.common.accessor.server.network.ServerCommonPacketListen
 import org.spongepowered.common.accessor.server.network.ServerGamePacketListenerImplAccessor;
 import org.spongepowered.common.accessor.world.level.border.WorldBorderAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.bridge.server.PlayerAdvancementsBridge;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
+import org.spongepowered.common.bridge.server.network.ServerCommonPacketListenerImplBridge;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeMusicDisc;
@@ -113,13 +116,11 @@ import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.api.minecraft.world.entity.player.PlayerMixin_API;
 import org.spongepowered.common.profile.SpongeGameProfile;
-import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.util.BookUtil;
 import org.spongepowered.common.util.NetworkUtil;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -212,8 +213,9 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     }
 
     @Override
-    public ServerPlayerConnection connection() {
-        return (ServerPlayerConnection) this.connection;
+    public ServerSideConnection connection() {
+        final Connection connection = ((ServerCommonPacketListenerImplAccessor) this.connection).accessor$connection();
+        return (ServerSideConnection) ((ConnectionBridge) connection).bridge$getEngineConnection();
     }
 
     /**
@@ -271,13 +273,6 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     }
 
     @Override
-    public void sendResourcePack(final ResourcePack pack) {
-        Objects.requireNonNull(pack, "pack");
-        final UUID uuid = UUID.nameUUIDFromBytes(pack.name().getBytes(StandardCharsets.UTF_8));
-        this.connection.send(new ClientboundResourcePackPushPacket(uuid, ((SpongeResourcePack) pack).getUrlString(), pack.hash().orElse(""), false, SpongeAdventure.asVanilla(pack.prompt())));
-    }
-
-    @Override
     public TabList tabList() {
         return this.api$tabList;
     }
@@ -299,6 +294,27 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     @Override
     public void resetBlockChange(final int x, final int y, final int z) {
         this.connection.send(new ClientboundBlockUpdatePacket(this.shadow$getCommandSenderWorld(), new BlockPos(x, y, z)));
+    }
+
+    @Override
+    public void sendBlockProgress(final int x, final int y, final int z, final double progress) {
+        if (progress < 0 || progress > 1) {
+            throw new IllegalArgumentException("Progress must be between 0 and 1");
+        }
+
+        final BlockPos pos = new BlockPos(x, y, z);
+        final int id = ((SpongeServer) this.server).getOrCreateBlockDestructionId(pos);
+        final int progressStage = progress == 1 ? 9 : (int) (progress * 10);
+        this.connection.send(new ClientboundBlockDestructionPacket(id, pos, progressStage));
+    }
+
+    @Override
+    public void resetBlockProgress(final int x, final int y, final int z) {
+        final BlockPos pos = new BlockPos(x, y, z);
+        final Integer id = ((SpongeServer) this.server).getBlockDestructionId(pos);
+        if (id != null) {
+            this.connection.send(new ClientboundBlockDestructionPacket(id, pos, -1));
+        }
     }
 
     @Override
@@ -465,7 +481,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         if (this.impl$isFake) {
             return;
         }
-        this.connection.sendDisguisedChatMessage(SpongeAdventure.asVanilla(message), SpongeAdventure.asVanilla(this.level.registryAccess(), boundChatType));
+        this.connection.sendDisguisedChatMessage(SpongeAdventure.asVanilla(message), SpongeAdventure.asVanilla(this.shadow$level().registryAccess(), boundChatType));
     }
 
     @Override
@@ -476,7 +492,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         // TODO: implement once we actually expose a way to get signed messages in-api
         this.connection.sendDisguisedChatMessage(
             SpongeAdventure.asVanilla(Objects.requireNonNullElse(signedMessage.unsignedContent(), Component.text(signedMessage.message()))),
-            SpongeAdventure.asVanilla(this.level.registryAccess(), boundChatType)
+            SpongeAdventure.asVanilla(this.shadow$level().registryAccess(), boundChatType)
         );
     }
 
@@ -656,5 +672,20 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
 
     private int api$durationToTicks(final Duration duration) {
         return (int) (duration.toMillis() / 50L);
+    }
+
+    @Override
+    public void sendResourcePacks(final @NonNull ResourcePackRequest request) {
+        ((ServerCommonPacketListenerImplBridge) this.connection).bridge$sendResourcePacks(request);
+    }
+
+    @Override
+    public void removeResourcePacks(final @NonNull UUID id, final @NonNull UUID @NonNull... others) {
+        ((ServerCommonPacketListenerImplBridge) this.connection).bridge$removeResourcePacks(id, others);
+    }
+
+    @Override
+    public void clearResourcePacks() {
+        ((ServerCommonPacketListenerImplBridge) this.connection).bridge$clearResourcePacks();
     }
 }

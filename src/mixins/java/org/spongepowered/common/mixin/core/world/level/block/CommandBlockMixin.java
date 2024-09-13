@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.world.level.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundContainerClosePacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.CommandBlock;
@@ -43,8 +42,8 @@ import org.spongepowered.common.service.server.permission.SpongePermissionServic
 @Mixin(CommandBlock.class)
 public abstract class CommandBlockMixin {
 
-    @Inject(method = "use", at = @At(value = "RETURN", ordinal = 1))
-    private void impl$checkCommandBlockPermission(final BlockState state, final Level world, final BlockPos pos, final Player player, final InteractionHand hand,
+    @Inject(method = "useWithoutItem", at = @At(value = "RETURN", ordinal = 1))
+    private void impl$checkCommandBlockPermission(final BlockState state, final Level world, final BlockPos pos, final Player player,
             final BlockHitResult hit, final CallbackInfoReturnable<Boolean> cir) {
         // In Vanilla, the command block will never even open, since the client will do the permission check.
         // However, when a plugin provides a permission service, we have to force the op level to 0 on the client, since

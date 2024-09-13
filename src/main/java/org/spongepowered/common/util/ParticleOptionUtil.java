@@ -25,10 +25,8 @@
 package org.spongepowered.common.util;
 
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.particles.ParticleTypes;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.api.effect.particle.ParticleOptions;
@@ -50,11 +48,12 @@ public final class ParticleOptionUtil {
         options.put(ParticleOptions.OFFSET.get(), Vector3d.ZERO);
         options.put(ParticleOptions.QUANTITY.get(), 1);
 
-        if (type.getDeserializer() == BlockParticleOption.DESERIALIZER) {
+        if (type == ParticleTypes.BLOCK || type == ParticleTypes.BLOCK_MARKER
+                || type == ParticleTypes.FALLING_DUST || type == ParticleTypes.DUST_PILLAR) {
             options.put(ParticleOptions.BLOCK_STATE.get(), BlockTypes.AIR.get().defaultState());
-        } else if (type.getDeserializer() == ItemParticleOption.DESERIALIZER) {
+        } else if (type == ParticleTypes.ITEM) {
             options.put(ParticleOptions.ITEM_STACK_SNAPSHOT.get(), ItemStackSnapshot.empty());
-        } else if (type.getDeserializer() == DustParticleOptions.DESERIALIZER) {
+        } else if (type == ParticleTypes.DUST) {
             options.put(ParticleOptions.COLOR.get(), Color.RED);
             options.put(ParticleOptions.SCALE.get(), 1.0d);
         }

@@ -31,5 +31,4 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(Display.class)
 public abstract class DisplayMixin_API extends EntityMixin_API implements DisplayEntity {
 
-
 }

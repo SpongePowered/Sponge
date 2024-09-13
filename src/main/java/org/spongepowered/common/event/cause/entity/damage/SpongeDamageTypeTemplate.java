@@ -72,14 +72,12 @@ public record SpongeDamageTypeTemplate(ResourceKey key, DamageType representedTy
 
     public static JsonElement encode(final DamageTypeTemplate template, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        return DamageType.CODEC.encodeStart(ops, (DamageType) (Object) template.type()).getOrThrow(false, e -> {
-        });
+        return DamageType.DIRECT_CODEC.encodeStart(ops, (DamageType) (Object) template.type()).getOrThrow();
     }
 
     public static DamageType decode(final JsonElement json, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        return DamageType.CODEC.parse(ops, json).getOrThrow(false, e -> {
-        });
+        return DamageType.DIRECT_CODEC.parse(ops, json).getOrThrow();
     }
 
     public static DamageTypeTemplate decode(final DataPack<DamageTypeTemplate> pack, final ResourceKey key, final JsonElement packEntry,

@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.world.entity;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -38,11 +39,20 @@ import java.util.function.Predicate;
 public abstract class EntitySelectorMixin {
 
     @Shadow @Final @Mutable public static Predicate<Entity> NO_SPECTATORS = entity -> {
-        if (entity instanceof VanishableBridge && ((VanishableBridge) entity).bridge$vanishState().invisible()) {
+        if (entity instanceof VanishableBridge vb && vb.bridge$vanishState().invisible()) {
             // Sponge: Count vanished entities as spectating
             return false;
         }
         return !entity.isSpectator();
     };
+
+    @Shadow @Final @Mutable public static Predicate<Entity> NO_CREATIVE_OR_SPECTATOR = $$0 -> {
+        if ($$0 instanceof VanishableBridge vb && vb.bridge$vanishState().invisible()) {
+            // Sponge: Count vanished entities as spectating
+            return false;
+        }
+        return !($$0 instanceof Player) || !$$0.isSpectator() && !((Player)$$0).isCreative();
+    };
+
 
 }

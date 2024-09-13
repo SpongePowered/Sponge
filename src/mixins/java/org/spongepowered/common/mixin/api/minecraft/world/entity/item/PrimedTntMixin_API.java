@@ -43,8 +43,8 @@ public abstract class PrimedTntMixin_API extends EntityMixin_API implements Prim
 
     @Override
     public void detonate() {
-        this.shadow$discard();
         this.shadow$explode();
+        this.shadow$discard();
     }
 
     @Override

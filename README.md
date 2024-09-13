@@ -1,4 +1,4 @@
-Sponge ![Java CI with Gradle](https://github.com/SpongePowered/Sponge/workflows/Java%20CI%20with%20Gradle/badge.svg?branch=api-8&event=push)
+Sponge ![Java CI with Gradle](https://github.com/SpongePowered/Sponge/workflows/Java%20CI%20with%20Gradle/badge.svg?branch=api-11&event=push)
 =============
 
 The SpongeAPI implementation targeting vanilla Minecraft and 3rd party platforms. It is licensed under the [MIT License].
@@ -25,7 +25,7 @@ The SpongeAPI implementation targeting vanilla Minecraft and 3rd party platforms
 
 
 ## Prerequisites
-* [Java] 8
+* [Java] 21
 
 ## Clone
 The following steps will ensure your project is cloned properly.

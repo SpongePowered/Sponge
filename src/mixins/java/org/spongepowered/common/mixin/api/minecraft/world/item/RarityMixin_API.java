@@ -39,8 +39,8 @@ public abstract class RarityMixin_API implements ItemRarity {
     private TextColor api$color;
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
-    private void api$setColor(final String enumName, final int ordinal, final ChatFormatting param0, final CallbackInfo ci) {
-        this.api$color = SpongeAdventure.asAdventure(param0);
+    private void api$setColor(final String $$0, final int $$1, final int $$2, final String par4, final ChatFormatting par5, final CallbackInfo ci) {
+        this.api$color = SpongeAdventure.asAdventure(par5);
     }
 
     @Override

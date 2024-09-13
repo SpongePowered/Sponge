@@ -31,9 +31,9 @@ import org.spongepowered.api.item.inventory.ItemStackComparators;
 import org.spongepowered.api.registry.RegistryTypes;
 
 import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class SpongeItemStackComparatorFactory implements ItemStackComparators.Factory {
 
@@ -92,21 +92,21 @@ public class SpongeItemStackComparatorFactory implements ItemStackComparators.Fa
 
         @Override
         public int compare(ItemStack o1, ItemStack o2) {
-            final Set<Value.Immutable<?>> values = new HashSet<>(o2.getValues());
+            final Map<? extends Key<? extends Value<?>>, ?> map = o2.getValues().stream().collect(Collectors.toMap(Value::key, Value::get));
             for (Value.Immutable<?> value : o1.getValues()) {
-                if (values.contains(value)) {
-                    values.remove(value);
-                } else if (!this.isIgnored(values, value)) {
+                if (map.containsKey(value.key()) && map.get(value.key()).equals(value.get())) {
+                    map.remove(value.key());
+                } else if (!this.isIgnored(map, value)) {
                     return -1;
                 }
             }
-            return values.size();
+            return map.size();
         }
 
-        private boolean isIgnored(Set<Value.Immutable<?>> list, Value.Immutable<?> toCheck) {
+        private boolean isIgnored(Map<? extends Key<? extends Value<?>>, ?> map, Value.Immutable<?> toCheck) {
             for (Key<? extends Value<?>> ignore : this.ignored) {
                 if (toCheck.key().equals(ignore)) {
-                    list.removeIf(val -> ignore.equals(val.key()));
+                    map.remove(ignore);
                     return true;
                 }
             }

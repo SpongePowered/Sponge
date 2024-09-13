@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import com.google.common.collect.Streams;
 import net.minecraft.world.entity.AreaEffectCloud;
+import net.minecraft.world.item.alchemy.PotionContents;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.accessor.world.entity.AreaEffectCloudAccessor;
@@ -32,6 +34,8 @@ import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.util.PotionEffectUtil;
 import org.spongepowered.common.util.SpongeTicks;
+
+import java.util.Optional;
 
 public final class AreaEffectCloudData {
 
@@ -43,8 +47,11 @@ public final class AreaEffectCloudData {
         registrator
                 .asMutable(AreaEffectCloud.class)
                     .create(Keys.COLOR)
-                        .get(h -> Color.ofRgb(h.getColor()))
-                        .set((h, v) -> h.setFixedColor(v.rgb()))
+                        .get(h -> Color.ofRgb(((AreaEffectCloudAccessor) h).accessor$potionContents().getColor()))
+                        .set((h, v) -> {
+                            var contents = ((AreaEffectCloudAccessor) h).accessor$potionContents();
+                            h.setPotionContents(new PotionContents(contents.potion(), Optional.of(v.rgb()), contents.customEffects()));
+                        })
                     .create(Keys.DURATION)
                         .get(x -> new SpongeTicks(x.getDuration()))
                         .setAnd((h, v) -> {
@@ -87,8 +94,11 @@ public final class AreaEffectCloudData {
                             return true;
                         })
                     .create(Keys.POTION_EFFECTS)
-                        .get(h -> PotionEffectUtil.copyAsPotionEffects(h.accessor$effects()))
-                        .set((h, v) -> h.accessor$effects(PotionEffectUtil.copyAsEffectInstances(v)))
+                        .get(h -> PotionEffectUtil.copyAsPotionEffects(Streams.stream(h.accessor$potionContents().getAllEffects()).toList()))
+                        .set((h, v) -> {
+                            final PotionContents contents = h.accessor$potionContents();
+                            ((AreaEffectCloud) h).setPotionContents(new PotionContents(contents.potion(), contents.customColor(), PotionEffectUtil.copyAsEffectInstances(v)));
+                        })
                     .create(Keys.REAPPLICATION_DELAY)
                         .get(h -> new SpongeTicks(h.accessor$reapplicationDelay()))
                         .setAnd((h, v) -> {

@@ -75,12 +75,12 @@ public record SpongeJigsawPoolTemplate(ResourceKey key, StructureTemplatePool re
 
     public static JsonElement encode(final JigsawPoolTemplate template, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        return StructureTemplatePool.DIRECT_CODEC.encodeStart(ops, (StructureTemplatePool) template.jigsawPool()).getOrThrow(false, e -> {});
+        return StructureTemplatePool.DIRECT_CODEC.encodeStart(ops, (StructureTemplatePool) template.jigsawPool()).getOrThrow();
     }
 
     public static StructureTemplatePool decode(final JsonElement json, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        return StructureTemplatePool.DIRECT_CODEC.parse(ops, json).getOrThrow(false, e -> {});
+        return StructureTemplatePool.DIRECT_CODEC.parse(ops, json).getOrThrow();
     }
 
     public static SpongeJigsawPoolTemplate decode(final DataPack<JigsawPoolTemplate> pack, final ResourceKey key, final JsonElement packEntry, final RegistryAccess registryAccess) {

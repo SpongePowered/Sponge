@@ -201,7 +201,7 @@ public final class SpongeDataManager implements DataManager {
         if (fromVersion == toVersion) {
             throw new IllegalArgumentException("Attempting to convert to the same version!");
         }
-        if (fromVersion < toVersion) {
+        if (fromVersion > toVersion) {
             throw new IllegalArgumentException("Attempting to backwards convert data! This isn't supported!");
         }
         final List<DataContentUpdater> updaters = this.updatersMap.get(clazz);

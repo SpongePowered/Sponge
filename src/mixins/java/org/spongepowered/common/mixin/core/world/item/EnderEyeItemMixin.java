@@ -95,7 +95,7 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
             final ConstructEntityEvent.Pre event =
                     SpongeEventFactory.createConstructEntityEventPre(PhaseTracker.getCauseStackManager().currentCause(),
                             ServerLocation.of((ServerWorld) worldIn, playerIn.getX(), playerIn.getY() + (double) (playerIn.getDimensions(playerIn
-                                    .getPose()).height / 2.0F), playerIn.getZ()), new Vector3d(0, 0, 0), EntityTypes.EYE_OF_ENDER.get());
+                                    .getPose()).height() / 2.0F), playerIn.getZ()), new Vector3d(0, 0, 0), EntityTypes.EYE_OF_ENDER.get());
             if (SpongeCommon.post(event)) {
                 cir.setReturnValue(new InteractionResultHolder<>(InteractionResult.SUCCESS, used));
             }
@@ -113,7 +113,7 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
             final ConstructEntityEvent.Pre event =
                     SpongeEventFactory.createConstructEntityEventPre(PhaseTracker.getCauseStackManager().currentCause(),
                             ServerLocation.of((ServerWorld) worldIn, playerIn.getX(), playerIn.getY() + (double) (playerIn.getDimensions(playerIn
-                                    .getPose()).height / 2.0F), playerIn.getZ()), new Vector3d(0, 0, 0), EntityTypes.EYE_OF_ENDER.get());
+                                    .getPose()).height() / 2.0F), playerIn.getZ()), new Vector3d(0, 0, 0), EntityTypes.EYE_OF_ENDER.get());
             if (SpongeCommon.post(event)) {
                 cir.setReturnValue(new InteractionResultHolder<>(InteractionResult.SUCCESS, used));
             }

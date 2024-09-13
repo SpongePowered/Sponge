@@ -77,7 +77,7 @@ public record SpongeWorldTypeTemplate(
 
     public static DimensionType decode(final JsonElement json, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        return SpongeDimensionTypes.DIRECT_CODEC.parse(ops, json).getOrThrow(false, e -> {});
+        return SpongeDimensionTypes.DIRECT_CODEC.parse(ops, json).getOrThrow();
     }
 
     public static WorldTypeTemplate decode(final DataPack<WorldTypeTemplate> pack, final ResourceKey key, final JsonElement packEntry, final RegistryAccess registryAccess) {
@@ -88,7 +88,7 @@ public record SpongeWorldTypeTemplate(
     public static JsonElement encode(final WorldTypeTemplate template, final RegistryAccess registryAccess) {
         if (template instanceof final SpongeWorldTypeTemplate t) {
             final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-            return SpongeDimensionTypes.DIRECT_CODEC.encodeStart(ops, t.dimensionType).getOrThrow(false, e -> {});
+            return SpongeDimensionTypes.DIRECT_CODEC.encodeStart(ops, t.dimensionType).getOrThrow();
         }
         throw new IllegalArgumentException("WorldTypeTemplate is not a SpongeWorldTypeTemplate");
     }
@@ -121,6 +121,11 @@ public record SpongeWorldTypeTemplate(
         }
 
         @Override
+        public Function<WorldTypeTemplate, WorldType> valueExtractor() {
+            return (w) -> (WorldType) (Object) ((SpongeWorldTypeTemplate) w).dimensionType;
+        }
+
+        @Override
         public <V> WorldTypeTemplate.Builder add(final Key<? extends Value<V>> key, final V value) {
             if (!PROVIDER_LOOKUP.getProvider(key).isSupported(DimensionType.class)) {
                 throw new IllegalArgumentException(key + " is not supported for world types");
@@ -149,7 +154,7 @@ public record SpongeWorldTypeTemplate(
         public Builder fromDataPack(final DataView pack) throws IOException {
             final JsonElement json = JsonParser.parseString(DataFormats.JSON.get().write(pack));
             final DataResult<Holder<DimensionType>> parsed = DimensionType.CODEC.parse(JsonOps.INSTANCE, json);
-            final DimensionType dimensionType = parsed.getOrThrow(false, e -> {}).value();
+            final DimensionType dimensionType = parsed.getOrThrow().value();
 
             this.fromValue((WorldType) (Object) dimensionType);
             return this;
@@ -159,11 +164,6 @@ public record SpongeWorldTypeTemplate(
         public Builder from(WorldType type) {
             this.data.set(type.getValues());
             return this;
-        }
-
-        @Override
-        public Function<WorldTypeTemplate, WorldType> valueExtractor() {
-            return value -> (WorldType) (Object) ((SpongeWorldTypeTemplate) value).dimensionType;
         }
 
         @Override

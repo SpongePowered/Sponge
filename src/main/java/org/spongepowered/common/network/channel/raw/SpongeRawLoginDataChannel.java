@@ -30,7 +30,7 @@ import net.minecraft.network.protocol.login.custom.CustomQueryPayload;
 import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.EngineConnection;
-import org.spongepowered.api.network.EngineConnectionSide;
+import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.api.network.channel.ChannelBuf;
 import org.spongepowered.api.network.channel.ChannelException;
 import org.spongepowered.api.network.channel.raw.RawDataChannel;
@@ -38,6 +38,7 @@ import org.spongepowered.api.network.channel.raw.handshake.RawHandshakeDataChann
 import org.spongepowered.api.network.channel.raw.handshake.RawHandshakeDataRequestHandler;
 import org.spongepowered.api.network.channel.raw.handshake.RawHandshakeDataRequestResponse;
 import org.spongepowered.common.network.PacketUtil;
+import org.spongepowered.common.network.SpongeEngineConnection;
 import org.spongepowered.common.network.channel.ConnectionUtil;
 import org.spongepowered.common.network.channel.PacketSender;
 import org.spongepowered.common.network.channel.SpongeChannel;
@@ -61,8 +62,8 @@ public class SpongeRawLoginDataChannel implements RawHandshakeDataChannel {
         this.parent = parent;
     }
 
-    private <C extends EngineConnection> RawHandshakeDataRequestHandler<? super C> getRequestHandler(final C connection) {
-        return (RawHandshakeDataRequestHandler<? super C>) SpongeChannel.getRequestHandler(connection, this.requestHandlers);
+    private <S extends EngineConnectionState> RawHandshakeDataRequestHandler<? super S> getRequestHandler(final S state) {
+        return (RawHandshakeDataRequestHandler<? super S>) SpongeChannel.getRequestHandler(state, this.requestHandlers);
     }
 
     @Override
@@ -71,27 +72,20 @@ public class SpongeRawLoginDataChannel implements RawHandshakeDataChannel {
     }
 
     @Override
-    public <C extends EngineConnection> void setRequestHandler(final EngineConnectionSide<C> side,
-            final RawHandshakeDataRequestHandler<? super C> handler) {
-        Objects.requireNonNull(side, "side");
-        this.setRequestHandler(SpongeChannel.getConnectionClass(side), handler);
+    public void setRequestHandler(final RawHandshakeDataRequestHandler<EngineConnectionState> handler) {
+        this.setRequestHandler(EngineConnectionState.class, handler);
     }
 
     @Override
-    public void setRequestHandler(final RawHandshakeDataRequestHandler<EngineConnection> handler) {
-        this.setRequestHandler(EngineConnection.class, handler);
-    }
-
-    @Override
-    public <C extends EngineConnection> void setRequestHandler(final Class<C> connectionType,
-            final RawHandshakeDataRequestHandler<? super C> handler) {
-        Objects.requireNonNull(connectionType, "connectionType");
+    public <S extends EngineConnectionState> void setRequestHandler(final Class<S> state,
+            final RawHandshakeDataRequestHandler<? super S> handler) {
+        Objects.requireNonNull(state, "connectionType");
         Objects.requireNonNull(handler, "handler");
-        this.requestHandlers.put(connectionType, handler);
+        this.requestHandlers.put(state, handler);
     }
 
-    <C extends EngineConnection> void handleRequestPayload(final C connection, final ChannelBuf payload, final int transactionId) {
-        final RawHandshakeDataRequestHandler<? super C> handler = this.getRequestHandler(connection);
+    <S extends EngineConnectionState> void handleRequestPayload(final EngineConnection connection, final S state, final ChannelBuf payload, final int transactionId) {
+        final RawHandshakeDataRequestHandler<? super S> handler = this.getRequestHandler(state);
         final RawHandshakeDataRequestResponse response = new RawHandshakeDataRequestResponse() {
             private boolean completed;
 
@@ -117,7 +111,7 @@ public class SpongeRawLoginDataChannel implements RawHandshakeDataChannel {
                 try {
                     payload = SpongeRawLoginDataChannel.this.parent.encodePayload(response);
                 } catch (final Throwable t) {
-                    SpongeRawLoginDataChannel.this.parent.handleException(connection, new ChannelException("Failed to encode login data response", t), null);
+                    SpongeRawLoginDataChannel.this.parent.handleException(connection, state, new ChannelException("Failed to encode login data response", t), null);
                     PacketSender.sendTo(connection, PacketUtil.createLoginPayloadResponse(null, transactionId));
                     return;
                 }
@@ -129,10 +123,10 @@ public class SpongeRawLoginDataChannel implements RawHandshakeDataChannel {
         boolean success = false;
         if (handler != null) {
             try {
-                handler.handleRequest(payload, connection, response);
+                handler.handleRequest(payload, state, response);
                 success = true;
             } catch (final Throwable t) {
-                this.parent.handleException(connection, new ChannelException("Failed to handle login data request", t), null);
+                this.parent.handleException(connection, state, new ChannelException("Failed to handle login data request", t), null);
             }
         }
         if (!success) {
@@ -151,12 +145,14 @@ public class SpongeRawLoginDataChannel implements RawHandshakeDataChannel {
     public CompletableFuture<ChannelBuf> sendTo(final EngineConnection connection, final Consumer<ChannelBuf> payload) {
         ConnectionUtil.checkHandshakePhase(connection);
 
+        final EngineConnectionState state = (EngineConnectionState) ((SpongeEngineConnection) connection).connection().getPacketListener();
+
         final CompletableFuture<ChannelBuf> future = new CompletableFuture<>();
         final ChannelBuf buf;
         try {
             buf = this.parent.encodePayload(payload);
         } catch (final Throwable t) {
-            this.parent.handleException(connection, t, future);
+            this.parent.handleException(connection, state, t, future);
             return future;
         }
 
@@ -167,7 +163,7 @@ public class SpongeRawLoginDataChannel implements RawHandshakeDataChannel {
             if (result.isSuccess()) {
                 future.complete(result.getPayload());
             } else {
-                this.parent.handleException(connection, result.getCause(), future);
+                this.parent.handleException(connection, state, result.getCause(), future);
             }
         };
 

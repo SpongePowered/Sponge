@@ -29,6 +29,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.resources.ResourceKey;
@@ -48,9 +49,9 @@ import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.storage.LevelData;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -84,6 +85,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.server.level.ChunkMapAccessor;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
@@ -135,7 +137,6 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
             EntityTypeTest<net.minecraft.world.entity.Entity, T> entityTypeTest,
             net.minecraft.world.phys.AABB param1,
             @Nullable Predicate<? super T> param2);
-    @Shadow public abstract ResourceKey<Level> dimension();
 
     // @formatter:on
 
@@ -302,6 +303,35 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
                 .forEach(p -> p.connection.send(packet));
     }
 
+    @Override
+    public void sendBlockProgress(final int x, final int y, final int z, final double progress) {
+        if (progress < 0 || progress > 1) {
+            throw new IllegalArgumentException("Progress must be between 0 and 1");
+        }
+
+        final BlockPos pos = new BlockPos(x, y, z);
+        final int id = ((SpongeServer) this.shadow$getServer()).getOrCreateBlockDestructionId(pos);
+        final int progressStage = progress == 1 ? 9 : (int) (progress * 10);
+        final ClientboundBlockDestructionPacket packet = new ClientboundBlockDestructionPacket(id, pos, progressStage);
+        ((net.minecraft.world.level.Level) (Object) this).players().stream()
+                .filter(ServerPlayer.class::isInstance)
+                .map(ServerPlayer.class::cast)
+                .forEach(p -> p.connection.send(packet));
+    }
+
+    @Override
+    public void resetBlockProgress(final int x, final int y, final int z) {
+        final BlockPos pos = new BlockPos(x, y, z);
+        final Integer id = ((SpongeServer) this.shadow$getServer()).getBlockDestructionId(pos);
+        if (id != null) {
+            final ClientboundBlockDestructionPacket packet =new ClientboundBlockDestructionPacket(id, pos, -1);
+            ((net.minecraft.world.level.Level) (Object) this).players().stream()
+                    .filter(ServerPlayer.class::isInstance)
+                    .map(ServerPlayer.class::cast)
+                    .forEach(p -> p.connection.send(packet));
+        }
+    }
+
     // ArchetypeVolumeCreator
 
     // Audience
@@ -337,7 +367,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
         // would cause unexpected bugs.
         final net.minecraft.world.level.block.entity.BlockEntity mcOriginalBlockEntity = (net.minecraft.world.level.block.entity.BlockEntity) Objects.requireNonNull(blockEntity, "blockEntity");
         // Save the nbt so we can copy it, specifically wout the metadata of x,y,z coordinates
-        final CompoundTag tag = mcOriginalBlockEntity.saveWithId();
+        final CompoundTag tag = mcOriginalBlockEntity.saveWithId(mcOriginalBlockEntity.getLevel().registryAccess());
         // Ensure that where we are placing this blockentity is the right blockstate, so that minecraft will actually accept it.
         this.world().setBlock(x, y, z, (org.spongepowered.api.block.BlockState) mcOriginalBlockEntity.getBlockState());
 
@@ -346,7 +376,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
                 .orElseThrow(() -> new IllegalStateException("Failed to create Block Entity at " + this.location(Vector3i.from(x, y, z))));
 
         // Load the data into it.
-        mcNewBlockEntity.load(tag);
+        mcNewBlockEntity.loadWithComponents(tag, mcOriginalBlockEntity.getLevel().registryAccess());
         // Finally, inform minecraft about our actions.
         this.shadow$setBlockEntity(mcNewBlockEntity);
     }

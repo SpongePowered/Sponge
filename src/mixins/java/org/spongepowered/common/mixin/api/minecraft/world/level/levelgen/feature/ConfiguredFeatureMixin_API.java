@@ -69,7 +69,7 @@ public abstract class ConfiguredFeatureMixin_API<
     @Override
     public DataView toContainer() {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, SpongeCommon.server().registryAccess());
-        final JsonElement serialized = this.feature.configuredCodec().encodeStart(ops, (ConfiguredFeature<FC, net.minecraft.world.level.levelgen.feature.Feature<FC>>) (Object) this).getOrThrow(false, e -> {});
+        final JsonElement serialized = this.feature.configuredCodec().codec().encodeStart(ops, (ConfiguredFeature<FC, net.minecraft.world.level.levelgen.feature.Feature<FC>>) (Object) this).getOrThrow();
         try {
             return DataFormats.JSON.get().read(serialized.toString());
         } catch (IOException e) {

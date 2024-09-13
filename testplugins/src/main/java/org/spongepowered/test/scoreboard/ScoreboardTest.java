@@ -31,6 +31,7 @@ import net.kyori.adventure.text.format.Style;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
@@ -44,6 +45,8 @@ import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
+import java.util.List;
+
 @Plugin("scoreboardtest")
 public final class ScoreboardTest {
 
@@ -56,12 +59,14 @@ public final class ScoreboardTest {
 
     @Listener
     private void registerCommands(final RegisterCommandEvent<Command.Parameterized> event) {
+        final Parameter.Value<Boolean> freshParameter = Parameter.bool().key("fresh").optional().build();
         event.register(this.pluginContainer, Command.builder()
-                .executor(this::doScoreboardStuff)
+                .addParameter(freshParameter)
+                .executor(ctx -> this.doScoreboardStuff(ctx, ctx.one(freshParameter).orElse(false)))
                 .build(), "scoreboardtest");
     }
 
-    public CommandResult doScoreboardStuff(CommandContext ctx) {
+    public CommandResult doScoreboardStuff(final CommandContext ctx, final boolean fresh) {
         try {
             ctx.cause().first(ServerPlayer.class).ifPresent(player -> {
                 final Scoreboard scoreboard = player.scoreboard();
@@ -71,8 +76,10 @@ public final class ScoreboardTest {
                 }, () -> {
                     final Objective test = Objective.builder().criterion(Criteria.DUMMY).name("testObjective").displayName(Component.text("testObjectiveDisplay")).build();
 
-                    scoreboard.addObjective(test);
-                    scoreboard.updateDisplaySlot(test, DisplaySlots.SIDEBAR);
+                    if (!fresh) {
+                        scoreboard.addObjective(test);
+                        scoreboard.updateDisplaySlot(test, DisplaySlots.SIDEBAR);
+                    }
 
                     final Score score1 = test.findOrCreateScore("testScore");
                     score1.setScore(1);
@@ -103,9 +110,20 @@ public final class ScoreboardTest {
                         score6.setDisplay(Component.text( "Entity " + score6.name()));
                     });
 
+                    if (fresh) {
+                        final Scoreboard freshScoreboard = Scoreboard.builder()
+                                .objectives(List.of(test))
+                                .build();
+                        freshScoreboard.updateDisplaySlot(test, DisplaySlots.SIDEBAR);
+
+                        player.setScoreboard(freshScoreboard);
+                    }
+
                     ctx.sendMessage(Component.text("Objective set"));
                 });
-                player.setScoreboard(scoreboard);
+                if (!fresh) {
+                    player.setScoreboard(scoreboard);
+                }
             });
         } catch (Exception e) {
             e.printStackTrace();

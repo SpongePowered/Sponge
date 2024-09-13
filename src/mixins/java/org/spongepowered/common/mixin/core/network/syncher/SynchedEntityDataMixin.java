@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.network.syncher;
 
 import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.SyncedDataHolder;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.Entity;
 import org.apache.commons.lang3.ObjectUtils;
@@ -47,7 +48,7 @@ import java.util.Optional;
 @Mixin(SynchedEntityData.class)
 public abstract class SynchedEntityDataMixin {
 
-    @Shadow @Final private Entity entity;
+    @Shadow @Final private SyncedDataHolder entity;
     @Shadow private boolean isDirty;
 
     @Shadow protected abstract <T> SynchedEntityData.DataItem<T> getItem(final EntityDataAccessor<T> key);
@@ -74,12 +75,12 @@ public abstract class SynchedEntityDataMixin {
             // Client side can have an entity, because reasons.......
             // Really silly reasons......
             // I don't know, ask Grum....
-            if (this.entity != null && this.entity.level() != null && !this.entity.level().isClientSide && !((EntityBridge) this.entity).bridge$isConstructing()) { // We only want to spam the server world ;)
-                final Optional<DataParameterConverter<T>> converter = ((EntityDataAccessorBridge) key).bridge$getDataConverter();
+            if (this.entity != null && ((Entity) this.entity).level() != null && !((Entity) this.entity).level().isClientSide && !((EntityBridge) this.entity).bridge$isConstructing()) { // We only want to spam the server world ;)
+                final Optional<DataParameterConverter<T>> converter = ((EntityDataAccessorBridge) (Object) key).bridge$getDataConverter();
                 // At this point it is changing
                 if (converter.isPresent()) {
                     // Ok, we have a key ready to use the converter
-                    final Optional<DataTransactionResult> optional = converter.get().createTransaction(this.entity, currentValue, value);
+                    final Optional<DataTransactionResult> optional = converter.get().createTransaction(((Entity) this.entity), currentValue, value);
                     if (optional.isPresent()) {
                         // Only need to make a transaction if there are actual changes necessary.
                         final DataTransactionResult transaction = optional.get();

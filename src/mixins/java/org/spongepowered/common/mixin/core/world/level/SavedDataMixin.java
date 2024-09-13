@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.level;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.saveddata.SavedData;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,10 +40,10 @@ import java.io.File;
 @Mixin(SavedData.class)
 public abstract class SavedDataMixin {
 
-    @Inject(method = "save(Ljava/io/File;)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/saveddata/SavedData;save(Lnet/minecraft/nbt/CompoundTag;)Lnet/minecraft/nbt/CompoundTag;"),
+    @Inject(method = "save(Ljava/io/File;Lnet/minecraft/core/HolderLookup$Provider;)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/saveddata/SavedData;save(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/core/HolderLookup$Provider;)Lnet/minecraft/nbt/CompoundTag;"),
             locals = LocalCapture.CAPTURE_FAILHARD)
-    public void impl$writeAdditionalMapNBT(File file, final CallbackInfo cir, CompoundTag compound) {
+    public void impl$writeAdditionalMapNBT(File file, HolderLookup.Provider registry, final CallbackInfo cir, CompoundTag compound) {
         if (this instanceof DataCompoundHolder) {
             if (DataUtil.syncDataToTag(this)) {
                 compound.merge(((DataCompoundHolder) this).data$getCompound());

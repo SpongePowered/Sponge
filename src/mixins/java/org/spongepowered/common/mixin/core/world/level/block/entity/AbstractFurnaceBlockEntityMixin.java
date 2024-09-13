@@ -37,11 +37,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.entity.carrier.furnace.FurnaceBlockEntity;
-import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.entity.CookingEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.recipe.cooking.CookingRecipe;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -80,7 +80,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
         final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(itemStack);
         final ItemStackSnapshot shrinkedFuel = ItemStackUtil.snapshotOf(ItemStackUtil.cloneDefensive(itemStack, itemStack.getCount() - 1));
 
-        final Transaction<ItemStackSnapshot> transaction = new Transaction<>(fuel, shrinkedFuel);
+        final SlotTransaction transaction = new SlotTransaction(((FurnaceBlockEntity) entity).inventory().slot(1).get(), fuel, shrinkedFuel);
         final var recipe = ((AbstractFurnaceBlockEntityMixin) (Object) entity).bridge$getCurrentRecipe();
         final CookingEvent.ConsumeFuel event = SpongeEventFactory.createCookingEventConsumeFuel(cause, (FurnaceBlockEntity) entity, Optional.of(fuel),
                 recipe.map(r -> (CookingRecipe) r.value()), recipe.map(r -> (ResourceKey) (Object) r.id()), Collections.singletonList(transaction));

@@ -26,10 +26,14 @@ package org.spongepowered.test.channel;
 
 import com.google.inject.Inject;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterChannelEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
+import org.spongepowered.api.network.ClientConnectionState;
 import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.api.network.EngineConnectionSide;
+import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.api.network.channel.Channel;
 import org.spongepowered.api.network.channel.NoResponseException;
@@ -44,154 +48,170 @@ import java.util.concurrent.CompletionException;
 @Plugin("channeltest")
 public final class ChannelTest {
 
-    private final PluginContainer plugin;
+    private static final boolean ENABLED = Boolean.getBoolean("sponge.channelTest");
 
-    private PacketChannel channel;
-    private BasicPacketChannel basicChannel;
-    private RawDataChannel rawChannel;
+    private final PluginContainer plugin;
 
     @Inject
     public ChannelTest(final PluginContainer plugin) {
         this.plugin = plugin;
+        if (ChannelTest.ENABLED) {
+            Sponge.game().eventManager().registerListeners(this.plugin, new Listeners());
+        }
     }
 
-//    @Listener
-    private void onRegisterChannel(final RegisterChannelEvent event) {
-        this.channel = event.register(ResourceKey.of("channeltest", "default"), PacketChannel.class);
-        this.channel.register(PrintTextPacket.class, 0)
-                .addHandler((packet, connection) -> {
-                    this.logReceived(this.channel, packet, connection);
-                    this.plugin.logger().info(packet.getText());
-                });
-        this.channel.registerTransactional(PingPacket.class, PongPacket.class, 1)
-                .setRequestHandler((requestPacket, connection, response) -> {
-                    this.logReceived(this.channel, requestPacket, connection);
-                    response.success(new PongPacket(requestPacket.getId()));
-                });
+    final class Listeners {
 
-        this.basicChannel = event.register(ResourceKey.of("channeltest", "basic"), BasicPacketChannel.class);
-        this.basicChannel.register(PrintTextPacket.class, 0)
-                .addHandler((packet, connection) -> {
-                    this.logReceived(this.basicChannel, packet, connection);
-                    this.plugin.logger().info(packet.getText());
-                });
-        this.basicChannel.registerTransactional(PingPacket.class, PongPacket.class, 1)
-                .setRequestHandler((requestPacket, connection, response) -> {
-                    this.logReceived(this.basicChannel, requestPacket, connection);
-                    response.success(new PongPacket(requestPacket.getId()));
-                });
+        private PacketChannel channel;
+        private BasicPacketChannel basicChannel;
+        private RawDataChannel rawChannel;
 
-        this.rawChannel = event.register(ResourceKey.of("channeltest", "raw"), RawDataChannel.class);
-        this.rawChannel.handshake()
-                .setRequestHandler((request, connection, response) -> {
-                    final int value = request.readVarInt();
-                    this.logReceived(this.rawChannel, value, connection);
-                    if (value == 0) {
-                        response.fail(new NoResponseException());
-                    } else {
-                        response.success(buf -> buf.writeVarInt(value * 2));
-                    }
-                });
-    }
+        @Listener
+        private void onRegisterChannel(final RegisterChannelEvent event) {
+            this.channel = event.register(ResourceKey.of("channeltest", "default"), PacketChannel.class);
+            this.channel.register(PrintTextPacket.class, 0)
+                    .addHandler((packet, connection) -> {
+                        this.logReceived(this.channel, packet, connection);
+                        ChannelTest.this.plugin.logger().info(packet.getText());
+                    });
+            this.channel.registerTransactional(PingPacket.class, PongPacket.class, 1)
+                    .setRequestHandler((requestPacket, connection, response) -> {
+                        this.logReceived(this.channel, requestPacket, connection);
+                        response.success(new PongPacket(requestPacket.getId()));
+                    });
 
-//    @Listener
-    private void onConnectionHandshake(final ServerSideConnectionEvent.Handshake event) {
-        this.plugin.logger().info("Starting handshake phase.");
-        final PingPacket pingPacket1 = new PingPacket(123);
-        final ServerSideConnection connection = event.connection();
-        this.channel.sendTo(connection, pingPacket1)
-                .thenAccept(response1 -> {
-                    this.logReceived(this.channel, response1, connection);
-                    final PingPacket pingPacket2 = new PingPacket(456);
-                    this.channel.sendTo(connection, pingPacket2)
-                            .thenAccept(response2 -> {
-                                this.logReceived(this.channel, response2, connection);
-                                this.channel.sendTo(connection, new PrintTextPacket("Finished handshake phase."));
-                                this.plugin.logger().info("Finished handshake phase.");
-                            })
-                            .exceptionally(cause -> {
-                                this.plugin.logger().error("Failed to get a response to {}", pingPacket2, cause);
-                                return null;
-                            });
-                })
-                .exceptionally(cause -> {
-                    this.plugin.logger().error("Failed to get a response to {}", pingPacket1, cause);
-                    return null;
-                });
+            this.basicChannel = event.register(ResourceKey.of("channeltest", "basic"), BasicPacketChannel.class);
+            this.basicChannel.register(PrintTextPacket.class, 0)
+                    .addHandler((packet, connection) -> {
+                        this.logReceived(this.basicChannel, packet, connection);
+                        ChannelTest.this.plugin.logger().info(packet.getText());
+                    });
+            this.basicChannel.registerTransactional(PingPacket.class, PongPacket.class, 1)
+                    .setRequestHandler((requestPacket, connection, response) -> {
+                        this.logReceived(this.basicChannel, requestPacket, connection);
+                        response.success(new PongPacket(requestPacket.getId()));
+                    });
 
-        final PingPacket basicPingPacket1 = new PingPacket(1123);
-        this.basicChannel.handshake().sendTo(connection, basicPingPacket1)
-                .thenAccept(response1 -> {
-                    this.logReceived(this.basicChannel, response1, connection);
-                    final PingPacket basicPingPacket2 = new PingPacket(1456);
-                    this.basicChannel.handshake().sendTo(connection, basicPingPacket2)
-                            .thenAccept(response2 -> {
-                                this.logReceived(this.channel, response2, connection);
-                                this.basicChannel.handshake().sendTo(connection, new PrintTextPacket("Finished handshake phase for basic channel."));
-                                this.plugin.logger().info("Finished handshake phase for basic channel.");
-                            })
-                            .exceptionally(cause -> {
-                                this.plugin.logger().error("Failed to get a response to {}", basicPingPacket2, cause);
-                                return null;
-                            });
-                })
-                .exceptionally(cause -> {
-                    this.plugin.logger().error("Failed to get a response to {}", pingPacket1, cause);
-                    return null;
-                });
+            this.rawChannel = event.register(ResourceKey.of("channeltest", "raw"), RawDataChannel.class);
+            this.rawChannel.handshake()
+                    .setRequestHandler((request, connection, response) -> {
+                        final int value = request.readVarInt();
+                        this.logReceived(this.rawChannel, value, connection);
+                        if (value == 0) {
+                            response.fail(new NoResponseException());
+                        } else {
+                            response.success(buf -> buf.writeVarInt(value * 2));
+                        }
+                    });
+        }
 
-        this.rawChannel.handshake().sendTo(connection, buf -> buf.writeVarInt(200))
-                .thenAccept(response -> this.logReceived(this.rawChannel, response.readVarInt(), connection))
-                .exceptionally(cause -> {
-                    this.plugin.logger().error("Failed to get a response to raw 200 value", cause);
-                    return null;
-                });
+        @Listener
+        private void onConnectionHandshake(final ServerSideConnectionEvent.Handshake event) {
+            ChannelTest.this.plugin.logger().info("Starting handshake phase.");
+            final PingPacket pingPacket1 = new PingPacket(123);
+            final ServerSideConnection connection = event.connection();
+            this.channel.sendTo(connection, pingPacket1)
+                    .thenAccept(response1 -> {
+                        this.logReceived(this.channel, response1, connection);
+                        final PingPacket pingPacket2 = new PingPacket(456);
+                        this.channel.sendTo(connection, pingPacket2)
+                                .thenAccept(response2 -> {
+                                    this.logReceived(this.channel, response2, connection);
+                                    this.channel.sendTo(connection, new PrintTextPacket("Finished handshake phase."));
+                                    ChannelTest.this.plugin.logger().info("Finished handshake phase.");
+                                })
+                                .exceptionally(cause -> {
+                                    ChannelTest.this.plugin.logger().error("Failed to get a response to {}", pingPacket2, cause);
+                                    return null;
+                                });
+                    })
+                    .exceptionally(cause -> {
+                        ChannelTest.this.plugin.logger().error("Failed to get a response to {}", pingPacket1, cause);
+                        return null;
+                    });
 
-        this.rawChannel.handshake().sendTo(connection, buf -> buf.writeVarInt(0))
-                .thenAccept(response -> this.logReceived(this.rawChannel, response.readVarInt(), connection))
-                .exceptionally(cause -> {
-                    if (cause instanceof CompletionException) {
-                        cause = cause.getCause();
-                    }
-                    if (cause instanceof NoResponseException) {
-                        this.plugin.logger().error("Successfully received no response exception");
-                    } else {
-                        this.plugin.logger().error("Failed to get a response to raw 0 value", cause);
-                    }
-                    return null;
-                });
-    }
+            final PingPacket basicPingPacket1 = new PingPacket(1123);
+            this.basicChannel.handshake().sendTo(connection, basicPingPacket1)
+                    .thenAccept(response1 -> {
+                        this.logReceived(this.basicChannel, response1, connection);
+                        final PingPacket basicPingPacket2 = new PingPacket(1456);
+                        this.basicChannel.handshake().sendTo(connection, basicPingPacket2)
+                                .thenAccept(response2 -> {
+                                    this.logReceived(this.channel, response2, connection);
+                                    this.basicChannel.handshake().sendTo(connection, new PrintTextPacket("Finished handshake phase for basic channel."));
+                                    ChannelTest.this.plugin.logger().info("Finished handshake phase for basic channel.");
+                                })
+                                .exceptionally(cause -> {
+                                    ChannelTest.this.plugin.logger().error("Failed to get a response to {}", basicPingPacket2, cause);
+                                    return null;
+                                });
+                    })
+                    .exceptionally(cause -> {
+                        ChannelTest.this.plugin.logger().error("Failed to get a response to {}", pingPacket1, cause);
+                        return null;
+                    });
 
-//    @Listener
-    private void onConnectionLogin(final ServerSideConnectionEvent.Login event) {
-        this.plugin.logger().info("Player \"" + event.profile().name().orElse("unknown") + "\" is logging in.");
-    }
+            this.rawChannel.handshake().sendTo(connection, buf -> buf.writeVarInt(200))
+                    .thenAccept(response -> this.logReceived(this.rawChannel, response.readVarInt(), connection))
+                    .exceptionally(cause -> {
+                        ChannelTest.this.plugin.logger().error("Failed to get a response to raw 200 value", cause);
+                        return null;
+                    });
 
-//    @Listener
-    private void onConnectionJoin(final ServerSideConnectionEvent.Join event) {
-        this.plugin.logger().info("Player \"" + event.player().name() + "\" joined.");
+            this.rawChannel.handshake().sendTo(connection, buf -> buf.writeVarInt(0))
+                    .thenAccept(response -> this.logReceived(this.rawChannel, response.readVarInt(), connection))
+                    .exceptionally(cause -> {
+                        if (cause instanceof CompletionException) {
+                            cause = cause.getCause();
+                        }
+                        if (cause instanceof NoResponseException) {
+                            ChannelTest.this.plugin.logger().error("Successfully received no response exception");
+                        } else {
+                            ChannelTest.this.plugin.logger().error("Failed to get a response to raw 0 value", cause);
+                        }
+                        return null;
+                    });
+        }
 
-        final ServerSideConnection connection = event.connection();
-        final PingPacket pingPacket1 = new PingPacket(789);
-        this.channel.sendTo(connection, pingPacket1)
-                .thenAccept(response1 -> this.logReceived(this.channel, response1, connection))
-                .exceptionally(cause -> {
-                    this.plugin.logger().error("Failed to get a response to {}", pingPacket1, cause);
-                    return null;
-                });
+        @Listener
+        private void onConnectionLogin(final ServerSideConnectionEvent.Login event) {
+            ChannelTest.this.plugin.logger().info("Player \"" + event.user().profile().name().orElse("unknown") + "\" is logging in.");
+        }
 
-        this.basicChannel.play().sendTo(connection, new PrintTextPacket("You successfully joined the server."))
-                .exceptionally(cause -> {
-                    this.plugin.logger().error(cause);
-                    return null;
-                });
-    }
+        @Listener
+        private void onConnectionJoin(final ServerSideConnectionEvent.Join event) {
+            ChannelTest.this.plugin.logger().info("Player \"" + event.player().name() + "\" joined.");
 
-    private static String getName(final EngineConnectionSide<?> side) {
-        return side == EngineConnectionSide.CLIENT ? "client" : "server";
-    }
+            final ServerSideConnection connection = event.connection();
+            final PingPacket pingPacket1 = new PingPacket(789);
+            this.channel.sendTo(connection, pingPacket1)
+                    .thenAccept(response1 -> this.logReceived(this.channel, response1, connection))
+                    .exceptionally(cause -> {
+                        ChannelTest.this.plugin.logger().error("Failed to get a response to {}", pingPacket1, cause);
+                        return null;
+                    });
 
-    private void logReceived(final Channel channel, final Object packet, final EngineConnection connection) {
-        this.plugin.logger().info("Received {} through {} on the {} side.", packet, channel.key(), ChannelTest.getName(connection.side()));
+            this.basicChannel.play().sendTo(connection, new PrintTextPacket("You successfully joined the server."))
+                    .exceptionally(cause -> {
+                        ChannelTest.this.plugin.logger().error(cause);
+                        return null;
+                    });
+        }
+
+        private static String getName(final EngineConnectionSide side) {
+            return side == EngineConnectionSide.CLIENT ? "client" : "server";
+        }
+
+        private static String getName(final EngineConnectionState side) {
+            return side instanceof ClientConnectionState ? "client" : "server";
+        }
+
+        private void logReceived(final Channel channel, final Object packet, final EngineConnection connection) {
+            ChannelTest.this.plugin.logger().info("Received {} through {} on the {} side.", packet, channel.key(), Listeners.getName(connection.side()));
+        }
+
+        private void logReceived(final Channel channel, final Object packet, final EngineConnectionState connection) {
+            ChannelTest.this.plugin.logger().info("Received {} through {} on the {} side.", packet, channel.key(), Listeners.getName(connection));
+        }
     }
 }

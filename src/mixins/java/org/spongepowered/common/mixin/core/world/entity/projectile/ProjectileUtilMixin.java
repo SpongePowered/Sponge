@@ -28,16 +28,24 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.util.DirectionUtil;
 
 import java.util.function.Predicate;
@@ -64,6 +72,23 @@ public abstract class ProjectileUtilMixin {
 
                 cir.setReturnValue(BlockHitResult.miss(to, Direction.getNearest(direction.x, direction.y, direction.z), BlockPos.containing(to)));
             }
+        }
+    }
+
+    @Redirect(method = {
+            "getHitResult(Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/entity/Entity;Ljava/util/function/Predicate;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/level/Level;FLnet/minecraft/world/level/ClipContext$Block;)Lnet/minecraft/world/phys/HitResult;",
+            "getEntityHitResult(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/AABB;Ljava/util/function/Predicate;)Lnet/minecraft/world/phys/EntityHitResult;"
+    }, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/ProjectileUtil;getEntityHitResult(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/AABB;Ljava/util/function/Predicate;F)Lnet/minecraft/world/phys/EntityHitResult;"))
+    private static EntityHitResult impl$onGetEntityHitResult(final Level $$0, final Entity $$1, final Vec3 $$2, final Vec3 $$3, final AABB $$4, final Predicate<Entity> $$5, final float $$6) {
+        if ($$0.isClientSide) {
+            return ProjectileUtil.getEntityHitResult($$0, $$1, $$2, $$3, $$4, $$5, $$6);
+        }
+        try (final PhaseContext<@NonNull ?> context = EntityPhase.State.COLLISION
+                .createPhaseContext(PhaseTracker.SERVER)
+                .source($$1)
+        ) {
+            context.buildAndSwitch();
+            return ProjectileUtil.getEntityHitResult($$0, $$1, $$2, $$3, $$4, $$5, $$6);
         }
     }
 }

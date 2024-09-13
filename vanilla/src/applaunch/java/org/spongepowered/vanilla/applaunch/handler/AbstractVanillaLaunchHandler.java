@@ -109,7 +109,9 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
             "net.minecrell.terminalconsole.",
             "org.slf4j.",
             // Maven artifacts -- specifically for versioning
-            "org.apache.maven.artifact."
+            "org.apache.maven.artifact.",
+            // HotswapAgent
+            "org.hotswap.agent."
     };
 
     private static final String[] EXCLUSION_EXCEPTIONS = {

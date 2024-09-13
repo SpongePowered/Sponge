@@ -52,17 +52,16 @@ import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.animal.Fox;
 import net.minecraft.world.entity.animal.TropicalFish;
+import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.animal.horse.Markings;
 import net.minecraft.world.entity.animal.horse.Variant;
 import net.minecraft.world.entity.vehicle.Boat;
-import net.minecraft.world.flag.FeatureFlags;
-import net.minecraft.world.item.ArmorMaterials;
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.item.FireworkRocketItem;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.Rarity;
-import net.minecraft.world.level.DataPackConfig;
+import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.block.state.properties.BambooLeaves;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import org.tinylog.Logger;
@@ -147,7 +146,7 @@ public final class GeneratorMain {
         // and call to WorldStem.load in net.minecraft.server.Main
         // We don't currently try to load any datapacks here
         final var packRepository = ServerPacksSource.createVanillaTrustedRepository();
-        MinecraftServer.configurePackRepository(packRepository, DataPackConfig.DEFAULT, /* safeMode = */ false, FeatureFlags.DEFAULT_FLAGS);
+        MinecraftServer.configurePackRepository(packRepository, WorldDataConfiguration.DEFAULT, /* safeMode = */ false, true);
         final CloseableResourceManager resourceManager = new MultiPackResourceManager(PackType.SERVER_DATA, packRepository.openAllSelected());
 
         // WorldLoader.load
@@ -165,7 +164,7 @@ public final class GeneratorMain {
         final RegistryAccess.Frozen compositeRegistries = withDimensions.getAccessForLoading(RegistryLayer.RELOADABLE);
         final var resourcesFuture = ReloadableServerResources.loadResources(
             resourceManager,
-            compositeRegistries,
+            withDimensions,
             packRepository.getRequestedFeatureFlags(),
             CommandSelection.ALL,
             2, // functionPermissionLevel
@@ -176,7 +175,7 @@ public final class GeneratorMain {
                 resourceManager.close();
             }
         }).thenApply(resources -> {
-            resources.updateRegistryTags(compositeRegistries);
+            resources.updateRegistryTags();
             return resources;
         });
 
@@ -221,8 +220,8 @@ public final class GeneratorMain {
             new EnumEntriesValidator<>(
                  "item",
                  "FireworkShapes",
-                  FireworkRocketItem.Shape.class,
-                 "getName",
+                  FireworkExplosion.Shape.class,
+                 "getSerializedName",
                  "sponge"
             ),
             new EnumEntriesValidator<>(
@@ -239,12 +238,12 @@ public final class GeneratorMain {
                  "getName",
                  "sponge"
             ),
-            new EnumEntriesValidator<>(
+            new RegistryEntriesGenerator<>(
                  "data.type",
                  "ArmorMaterials",
-                 ArmorMaterials.class,
-                 "getName",
-                 "sponge"
+                 "ARMOR_MATERIAL",
+                 context.relativeClass("data.type", "ArmorMaterial"),
+                 Registries.ARMOR_MATERIAL
             ),
             new EnumEntriesValidator<>(
                  "data.type",
@@ -264,6 +263,13 @@ public final class GeneratorMain {
                  "data.type",
                  "FoxTypes",
                  Fox.Type.class,
+                 "getSerializedName",
+                 "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                 "data.type",
+                 "LlamaTypes",
+                 Llama.Variant.class,
                  "getSerializedName",
                  "sponge"
             ),
@@ -462,7 +468,9 @@ public final class GeneratorMain {
                 "BannerPatternShapes",
                 "BANNER_PATTERN_SHAPE",
                 context.relativeClass("data.type", "BannerPatternShape"),
-                Registries.BANNER_PATTERN
+                Registries.BANNER_PATTERN,
+                $ -> true,
+                RegistryScope.SERVER
             ),
             new RegistryEntriesGenerator<>(
                 "data.type",
@@ -576,7 +584,8 @@ public final class GeneratorMain {
             ),
             new BlockStateDataProviderGenerator(),
             new BlockStatePropertiesGenerator(),
-            new BlockStatePropertyKeysGenerator(),
+            // TODO fix me
+            //new BlockStatePropertyKeysGenerator(),
             new RegistryEntriesGenerator<>(
                     "world.generation.feature",
                     "PlacedFeatures",

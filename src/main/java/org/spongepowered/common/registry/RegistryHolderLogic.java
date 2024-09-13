@@ -27,6 +27,7 @@ package org.spongepowered.common.registry;
 import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.core.registries.Registries;
@@ -83,7 +84,7 @@ public final class RegistryHolderLogic implements RegistryHolder {
         final WritableRegistry root = (WritableRegistry) this.roots.get(new ResourceLocation("minecraft", "root"));
         // Add the dynamic registries. These are server-scoped in Vanilla
 
-        dynamicAccess.registries().forEach(entry -> root.register(entry.key(), entry.value(), Lifecycle.stable()));
+        dynamicAccess.registries().forEach(entry -> root.register(entry.key(), entry.value(), RegistrationInfo.BUILT_IN));
         root.freeze();
     }
 
@@ -180,17 +181,16 @@ public final class RegistryHolderLogic implements RegistryHolder {
             final MappedRegistry<T> mr = (MappedRegistry<T>) registry;
             defaultValues.forEach((vk, vi, vv) -> {
                 if (vi.isPresent()) {
-                    mr.registerMapping(
-                        vi.getAsInt(),
+                    mr.register(
                         net.minecraft.resources.ResourceKey.create(key, (ResourceLocation) (Object) vk),
                         vv,
-                        Lifecycle.stable()
+                        RegistrationInfo.BUILT_IN
                     );
                 } else {
                     mr.register(
                         net.minecraft.resources.ResourceKey.create(key, (ResourceLocation) (Object) vk),
                         vv,
-                        Lifecycle.stable()
+                        RegistrationInfo.BUILT_IN
                     );
                 }
             });
@@ -204,11 +204,10 @@ public final class RegistryHolderLogic implements RegistryHolder {
             ((MappedRegistryBridge<T>) root).bridge$forceRemoveValue(key);
         }
 
-        ((WritableRegistry) root).register(key, registry, Lifecycle.stable());
+        ((WritableRegistry) root).register(key, registry, RegistrationInfo.BUILT_IN);
         if (registry instanceof CallbackRegistry) {
             ((CallbackRegistry<?>) registry).setCallbackEnabled(true);
         }
-
         ((MappedRegistryAccessor<T>) root).accessor$frozen(frozen);
 
         return (Registry<T>) registry;
