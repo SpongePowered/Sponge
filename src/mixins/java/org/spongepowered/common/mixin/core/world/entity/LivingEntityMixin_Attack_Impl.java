@@ -215,12 +215,13 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin
 
 
     /**
-     * Set final damage after #actuallyHurt
+     * Set final damage after #actuallyHurt and lastHurt has been set.
      */
     @ModifyVariable(method = "hurt", argsOnly = true,
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/LivingEntity;actuallyHurt(Lnet/minecraft/world/damagesource/DamageSource;F)V",
-            shift = At.Shift.AFTER))
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/DamageSource;getEntity()Lnet/minecraft/world/entity/Entity;"),
+        slice = @Slice(
+            from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;actuallyHurt(Lnet/minecraft/world/damagesource/DamageSource;F)V"),
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/DamageSource;getEntity()Lnet/minecraft/world/entity/Entity;")))
     private float attackImpl$modifyDamageTaken(float damageTaken) {
         return this.attackImpl$actuallyHurtFinalDamage;
     }
