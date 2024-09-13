@@ -24,30 +24,92 @@
  */
 package org.spongepowered.common.scheduler;
 
-public abstract class SyncScheduler extends SpongeScheduler {
+import org.jetbrains.annotations.NotNull;
 
-    // The number of ticks elapsed since this scheduler began.
-    private long counter = 0L;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.DelayQueue;
+import java.util.concurrent.Delayed;
+import java.util.concurrent.TimeUnit;
 
-    SyncScheduler(final String tag) {
+public class SyncScheduler extends SpongeScheduler {
+    private final BlockingQueue<SchedFutureTask>
+            ticksQueue = new DelayQueue<>();
+    private final BlockingQueue<SchedFutureTask>
+            timedQueue = new DelayQueue<>();
+    private volatile long timestamp;
+
+    private final Time ticked = new Time() {
+        @Override
+        public boolean tickBased() {
+            return true;
+        }
+
+        @Override
+        public long timeNanos() {
+            return SyncScheduler.this.timestamp;
+        }
+    };
+
+    protected SyncScheduler(final String tag) {
         super(tag);
     }
 
-    /**
-     * The hook to update the Ticks known by the SyncScheduler.
-     */
-    public void tick() {
-        this.counter++;
-        this.runTick();
+    @Override
+    public Delayed scheduleAtTick(Runnable command, long ticksAsNanos) {
+        final Time clock = this.ticked;
+        final SchedFutureTask f = new SchedFutureTask(
+                command, clock,
+                ticksAsNanos + clock.timeNanos());
+        this.ticksQueue.add(f);
+        return f;
     }
 
     @Override
-    protected long timestamp(final boolean tickBased) {
-        // The task is based on minecraft ticks, so we generate
-        // a timestamp based on the elapsed ticks
-        if (tickBased) {
-            return this.counter * SpongeScheduler.TICK_DURATION_NS;
+    public Delayed scheduleAtTime(Runnable command, long nanos) {
+        final Time clock = Time.REAL_TIME;
+        final SchedFutureTask f = new SchedFutureTask(
+                command, clock,
+                nanos + clock.timeNanos());
+        this.timedQueue.add(f);
+        return f;
+    }
+
+    public void tick() {
+        this.timestamp += TICK_DURATION_NS;
+        for (Runnable task;
+             (task = this.ticksQueue.poll()) != null;
+             task.run());
+        for (Runnable task;
+             (task = this.timedQueue.poll()) != null;
+             task.run());
+    }
+
+    @Override
+    public void close() throws Exception {
+        throw new UnsupportedOperationException();
+    }
+
+    private record SchedFutureTask(
+            Runnable command,
+            Time clock,
+            long timeStamp
+    ) implements Runnable, Delayed {
+        @Override
+        public void run() {
+            this.command.run();
         }
-        return super.timestamp(false);
+
+        @Override
+        public long getDelay(@NotNull TimeUnit unit) {
+            return unit.convert(
+                    this.timeStamp - this.clock.timeNanos(),
+                    TimeUnit.NANOSECONDS);
+        }
+        @Override
+        public int compareTo(@NotNull Delayed other) {
+            return other == this ? 0 : Long.compare(
+                    this.getDelay(TimeUnit.NANOSECONDS),
+                    other.getDelay(TimeUnit.NANOSECONDS));
+        }
     }
 }
