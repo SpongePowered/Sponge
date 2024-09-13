@@ -26,10 +26,8 @@ package org.spongepowered.common.data.provider.block.state;
 
 import net.minecraft.data.loot.packs.LootData;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.common.accessor.world.entity.animal.SheepAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.DyeColorUtil;
 

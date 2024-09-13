@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.core.world.item;
 
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ServerItemCooldowns;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -34,7 +32,6 @@ import org.spongepowered.api.entity.living.player.CooldownTracker;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.living.player.CooldownEvent;
-import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

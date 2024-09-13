@@ -96,12 +96,10 @@ class RegistryEntriesValidator<V> implements Generator {
         final var primaryTypeDeclaration = compilationUnit.getPrimaryType()
             .orElseThrow(() -> new IllegalStateException("Could not find primary type for registry type " + this.targetClassSimpleName));
 
-        Registry<V> registry = ctx.registries().registry(this.registry).orElse(null);
+        Registry<V> registry = ctx.registries().lookup(this.registry).orElse(null);
         if (registry == null) {
-            registry = (Registry<V>) BuiltInRegistries.REGISTRY.get(this.registry.location());
-            if (registry == null) {
-                throw new IllegalArgumentException("Unknown registry " + this.registry);
-            }
+            registry = (Registry<V>) BuiltInRegistries.REGISTRY.get(this.registry.location())
+                .orElseThrow(() -> new IllegalArgumentException("Unknown registry " + this.registry));
         }
 
         primaryTypeDeclaration.setJavadocComment(new Javadoc(JavadocDescription.parseText(Generator.GENERATED_FILE_JAVADOCS)));
@@ -130,7 +128,7 @@ class RegistryEntriesValidator<V> implements Generator {
         final Set<ResourceLocation> allKeys = new HashSet<>(registry.keySet());
         allKeys.addAll(this.extraEntries);
         for (final ResourceLocation key : allKeys) {
-            if (!this.filter.test(registry.get(key))) {
+            if (!this.filter.test(registry.getValue(key))) {
                 continue;
             }
 

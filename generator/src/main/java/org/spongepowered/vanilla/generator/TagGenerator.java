@@ -94,7 +94,7 @@ public final class TagGenerator implements Generator {
                 ).build();
 
 
-        ctx.registries().registryOrThrow(this.taggedRegistry).getTags()
+        ctx.registries().lookupOrThrow(this.taggedRegistry).getTags()
             .<TagKey<?>>map(HolderSet.Named::key)
             .map(TagKey::location)
             .sorted(Comparator.naturalOrder())

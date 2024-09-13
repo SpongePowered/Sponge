@@ -28,7 +28,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.logging.log4j.Marker;
@@ -48,39 +47,15 @@ import java.util.StringJoiner;
 public final class ReflectionUtil {
 
     public static final Marker REFLECTION_SCANNING = MarkerManager.getMarker("REFLECTION_SCANNING");
-    private static final Class<?>[] NEIGHBOR_CHANGED_METHOD_ARGS = {
-        BlockState.class,
-        Level.class,
-        BlockPos.class,
-        Block.class,
-        BlockPos.class,
-        boolean.class
-    };
     private static final Class<?>[] ENTITY_INSIDE_METHOD_ARGS = {
         BlockState.class,
         Level.class,
         BlockPos.class,
         Entity.class
     };
-    private static final Class<?>[] STEP_ON_METHOD_ARGS = {
-        Level.class,
-        BlockPos.class,
-        BlockState.class,
-        Entity.class
-    };
     private static final Class<?>[] PLAYER_TOUCH_METHOD_ARGS= {
         Player.class
     };
-
-    public static boolean isNeighborChangedDeclared(final Class<?> targetClass) {
-        return ReflectionUtil.doesMethodExist(
-            targetClass,
-            Block.class,
-            "neighborChanged",
-            ReflectionUtil.NEIGHBOR_CHANGED_METHOD_ARGS,
-            void.class
-        );
-    }
 
     public static boolean isEntityInsideDeclared(final Class<?> targetClass) {
         return ReflectionUtil.doesMethodExist(
@@ -88,16 +63,6 @@ public final class ReflectionUtil {
             BlockBehaviour.class,
             "entityInside",
             ReflectionUtil.ENTITY_INSIDE_METHOD_ARGS,
-            void.class
-        );
-    }
-
-    public static boolean isStepOnDeclared(final Class<?> targetClass) {
-        return ReflectionUtil.doesMethodExist(
-            targetClass,
-            Block.class,
-            "stepOn",
-            ReflectionUtil.STEP_ON_METHOD_ARGS,
             void.class
         );
     }

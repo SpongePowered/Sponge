@@ -217,7 +217,7 @@ public final class GeneratorMain {
         // Prepare a set of generators
         // We are starting out by just generating Vanilla registry-backed catalogs
         // Enum-backed (automatically-named) catalogs can be added later as necessary
-        return List.of(
+        return List.<Generator>of(
             new MapEntriesValidator<>(
                 "world.gamerule",
                 "GameRules",
@@ -252,13 +252,6 @@ public final class GeneratorMain {
                  Boat.Type.class,
                  "getSerializedName",
                  "sponge"
-            ),
-            new RegistryEntriesGenerator<>(
-                 "data.type",
-                 "ArmorMaterials",
-                 "ARMOR_MATERIAL",
-                 context.relativeClass("data.type", "ArmorMaterial"),
-                 Registries.ARMOR_MATERIAL
             ),
             new RegistryEntriesGenerator<>(
                  "map.decoration",

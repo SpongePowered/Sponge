@@ -25,14 +25,8 @@
 package org.spongepowered.common.mixin.api.minecraft.world.entity.vehicle;
 
 import net.minecraft.world.entity.vehicle.Boat;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
-import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.type.BoatType;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(Boat.Type.class)
 public abstract class Boat_TypeMixin_API implements BoatType {

@@ -37,6 +37,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -52,15 +53,11 @@ import org.spongepowered.common.util.ReflectionUtil;
 @Mixin(Block.class)
 public abstract class BlockMixin_Tracker implements TrackableBlockBridge, RegistryBackedTrackableBridge<Block> {
 
-    private final boolean tracker$hasNeighborLogicOverridden = ReflectionUtil.isNeighborChangedDeclared(this.getClass());
+    @Unique
     private final boolean tracker$hasEntityInsideLogicOverridden = ReflectionUtil.isEntityInsideDeclared(this.getClass());
 
+    @Unique
     @Nullable private static EffectTransactor tracker$effectTransactorForDrops = null;
-
-    @Override
-    public boolean bridge$overridesNeighborNotificationLogic() {
-        return this.tracker$hasNeighborLogicOverridden;
-    }
 
     @Override
     public boolean bridge$hasEntityInsideLogic() {

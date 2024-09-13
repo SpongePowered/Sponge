@@ -53,7 +53,6 @@ import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.function.Function;
 
 public abstract class SpongeRecipeRegistration<R extends Recipe<? extends RecipeInput>> implements RecipeRegistration {

@@ -47,8 +47,6 @@ import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.util.SpongeTicks;
 
 import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 
 public class SpongeCookingRecipeRegistration extends SpongeRecipeRegistration<AbstractCookingRecipe> implements SpongeRecipeRegistration.ResultFunctionRegistration<SingleRecipeInput>{

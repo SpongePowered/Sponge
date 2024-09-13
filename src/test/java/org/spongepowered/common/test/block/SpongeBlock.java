@@ -24,21 +24,11 @@
  */
 package org.spongepowered.common.test.block;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
 
-@SuppressWarnings("deprecation")
 public class SpongeBlock extends Block {
     public SpongeBlock(Properties param0) {
         super(param0);
     }
 
-    @Override
-    public void neighborChanged(
-        BlockState param0, Level param1, BlockPos param2, Block param3, BlockPos param4, boolean param5
-    ) {
-        super.neighborChanged(param0, param1, param2, param3, param4, param5);
-    }
 }

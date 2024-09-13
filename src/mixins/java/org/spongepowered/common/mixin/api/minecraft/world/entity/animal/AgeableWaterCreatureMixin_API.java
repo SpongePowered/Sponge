@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
 
 import net.minecraft.world.entity.animal.AgeableWaterCreature;
-import net.minecraft.world.entity.animal.WaterAnimal;
 import org.spongepowered.api.entity.Ageable;
 import org.spongepowered.api.entity.living.aquatic.Aquatic;
 import org.spongepowered.asm.mixin.Mixin;
