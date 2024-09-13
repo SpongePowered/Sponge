@@ -34,7 +34,6 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.BlockEntityArchetype;
 import org.spongepowered.api.block.entity.BlockEntityType;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.Queries;
@@ -48,20 +47,17 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.entity.SpongeBlockEntityArchetypeBuilder;
-import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 import org.spongepowered.math.vector.Vector3i;
 
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Mixin(net.minecraft.world.level.block.entity.BlockEntity.class)
-public abstract class BlockEntityMixin_API implements BlockEntity, SpongeMutableDataHolder {
+public abstract class BlockEntityMixin_API implements BlockEntity {
 
     //@formatter:off
     @Shadow @Final private net.minecraft.world.level.block.entity.BlockEntityType<?> type;
@@ -186,11 +182,5 @@ public abstract class BlockEntityMixin_API implements BlockEntity, SpongeMutable
 
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         return new HashSet<>();
-    }
-
-    @Override
-    public List<DataHolder> impl$delegateDataHolder() {
-        final BlockState state = this.block();
-        return Arrays.asList(this, state, state.type());
     }
 }
