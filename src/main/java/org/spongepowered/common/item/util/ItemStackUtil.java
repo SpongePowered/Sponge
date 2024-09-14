@@ -26,6 +26,7 @@ package org.spongepowered.common.item.util;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 
 import java.util.Arrays;
@@ -160,6 +161,10 @@ public abstract class ItemStackUtil {
 
     public static ItemStack fromSnapshot(@Nullable ItemStackSnapshot snapshot) {
         return snapshot == null ? ItemStackUtil.empty() : snapshot.isEmpty() ? ItemStackUtil.empty() : snapshot.asMutable();
+    }
+
+    public static net.minecraft.world.item.ItemStack fromLikeToNative(@Nullable ItemStackLike itemStack) {
+        return itemStack == null ? ItemStackUtil.emptyNative() : itemStack.isEmpty() ? ItemStackUtil.emptyNative() : ItemStackUtil.toNative(itemStack.asMutable());
     }
 
     public static ItemStack empty() {

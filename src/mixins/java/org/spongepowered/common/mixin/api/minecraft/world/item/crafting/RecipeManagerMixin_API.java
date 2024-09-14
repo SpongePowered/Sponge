@@ -32,7 +32,7 @@ import net.minecraft.world.item.crafting.RecipeManager.CachedCheck;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.Level;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.recipe.Recipe;
 import org.spongepowered.api.item.recipe.RecipeManager;
 import org.spongepowered.api.item.recipe.RecipeType;
@@ -79,11 +79,11 @@ public abstract class RecipeManagerMixin_API implements RecipeManager {
     }
 
     @Override
-    public <T extends Recipe<?>> Collection<T> findByResult(final RecipeType<T> type, final ItemStackSnapshot result) {
+    public <T extends Recipe<?>> Collection<T> findByResult(final RecipeType<T> type, final ItemStackLike result) {
         Objects.requireNonNull(type);
         Objects.requireNonNull(result);
         return this.allOfType(type).stream()
-                .filter(r -> r.exemplaryResult().equals(result))
+                .filter(r -> r.exemplaryResult().equals(result.asImmutable()))
                 .collect(Collectors.toList());
     }
 
@@ -110,11 +110,11 @@ public abstract class RecipeManagerMixin_API implements RecipeManager {
 
     @Override
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
-    public <T extends CookingRecipe> Optional<T> findCookingRecipe(final RecipeType<T> type, final ItemStackSnapshot ingredient) {
+    public <T extends CookingRecipe> Optional<T> findCookingRecipe(final RecipeType<T> type, final ItemStackLike ingredient) {
         Objects.requireNonNull(type);
         Objects.requireNonNull(ingredient);
 
-        final SingleRecipeInput input = new SingleRecipeInput(ItemStackUtil.fromSnapshotToNative(ingredient));
+        final SingleRecipeInput input = new SingleRecipeInput(ItemStackUtil.fromLikeToNative(ingredient));
         return this.shadow$getRecipeFor((net.minecraft.world.item.crafting.RecipeType) type, input, null);
     }
 }

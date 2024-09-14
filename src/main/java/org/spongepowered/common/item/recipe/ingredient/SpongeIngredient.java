@@ -33,6 +33,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.apache.commons.lang3.NotImplementedException;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
@@ -154,7 +155,7 @@ public class SpongeIngredient extends Ingredient {
 
     private final static Map<String, Predicate<ItemStack>> cachedPredicates = new HashMap<>();
 
-    public static SpongeIngredient spongeFromPredicate(ResourceKey key, Predicate<org.spongepowered.api.item.inventory.ItemStack> predicate,
+    public static SpongeIngredient spongeFromPredicate(ResourceKey key, Predicate<? super ItemStackLike> predicate,
             net.minecraft.world.item.ItemStack... exemplaryIngredients) {
         final Predicate<ItemStack> mcPredicate = stack -> predicate.test(ItemStackUtil.fromNative(stack));
         final Predicate<ItemStack> registeredPredicate = SpongeIngredient.cachedPredicates.get(key.toString());
