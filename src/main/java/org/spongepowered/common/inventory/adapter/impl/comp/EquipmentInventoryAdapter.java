@@ -29,6 +29,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.inventory.Equipable;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
@@ -79,7 +80,7 @@ public class EquipmentInventoryAdapter extends BasicInventoryAdapter implements 
     }
 
     @Override
-    public InventoryTransactionResult set(EquipmentType equipmentType, ItemStack stack) {
+    public InventoryTransactionResult set(EquipmentType equipmentType, ItemStackLike stack) {
         Inventory query = this.queryForType(equipmentType);
         if (query.capacity() == 0) {
             return InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.NO_SLOT).build();
