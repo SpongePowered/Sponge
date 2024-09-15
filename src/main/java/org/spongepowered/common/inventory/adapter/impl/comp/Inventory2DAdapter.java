@@ -26,6 +26,7 @@ package org.spongepowered.common.inventory.adapter.impl.comp;
 
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.inventory.type.Inventory2D;
@@ -76,8 +77,8 @@ public class Inventory2DAdapter extends BasicInventoryAdapter implements Invento
     }
 
     @Override
-    public InventoryTransactionResult set(Vector2i pos, ItemStack stack) {
-        return AdapterLogic.insertSequential(this.inventoryAdapter$getFabric(), this.getSlotLens(pos), stack);
+    public InventoryTransactionResult set(Vector2i pos, ItemStackLike stack) {
+        return AdapterLogic.insertSequential(this.inventoryAdapter$getFabric(), this.getSlotLens(pos), stack.asMutable());
     }
 
 }
