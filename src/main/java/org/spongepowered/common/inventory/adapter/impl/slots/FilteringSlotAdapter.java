@@ -32,7 +32,6 @@ import org.spongepowered.api.item.inventory.slot.FilteringSlot;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.slot.FilteringSlotLens;
-import org.spongepowered.common.item.util.ItemStackUtil;
 
 public class FilteringSlotAdapter extends SlotAdapter implements FilteringSlot {
 

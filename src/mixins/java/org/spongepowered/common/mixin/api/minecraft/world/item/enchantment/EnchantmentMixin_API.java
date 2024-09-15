@@ -28,7 +28,6 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.core.Holder;
 import net.minecraft.world.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.inventory.api.world.inventory;
 import net.minecraft.world.Container;
 import net.minecraft.world.inventory.Slot;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;

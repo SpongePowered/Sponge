@@ -92,7 +92,7 @@ public final class PacketPhaseUtil {
                 final org.spongepowered.api.item.inventory.Slot slot = slotTransaction.slot();
                 final ItemStackSnapshot snapshot = eventCancelled || !slotTransaction.isValid() ? slotTransaction.original() : slotTransaction.custom().get();
                 if (containerMenu == null || slot.viewedSlot() instanceof Slot) {
-                    slot.set(snapshot.asMutable());
+                    slot.set(snapshot);
                 } else if (player instanceof ServerPlayer serverPlayer
                         && containerMenu != player.inventoryMenu && serverPlayer.inventory().containsInventory(slot)) {
                     final org.spongepowered.api.item.inventory.ItemStack stack = snapshot.asMutable();

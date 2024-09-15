@@ -26,14 +26,12 @@ package org.spongepowered.common.inventory.adapter.impl.slots;
 
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.slot.EquipmentSlot;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.slot.HeldHandSlotLens;
-import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.function.Predicate;
 

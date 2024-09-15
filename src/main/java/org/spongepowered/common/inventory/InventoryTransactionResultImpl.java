@@ -28,7 +28,6 @@ package org.spongepowered.common.inventory;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
