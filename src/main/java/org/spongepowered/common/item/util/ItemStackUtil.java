@@ -146,7 +146,7 @@ public abstract class ItemStackUtil {
         return itemStack.isEmpty() ? ItemStackSnapshot.empty() : ItemStackUtil.fromNative(itemStack).asImmutable();
     }
 
-    public static ItemStackSnapshot snapshotOf(@Nullable ItemStack itemStack) {
+    public static ItemStackSnapshot snapshotOf(@Nullable ItemStackLike itemStack) {
         return itemStack == null ? ItemStackSnapshot.empty() : itemStack.isEmpty() ? ItemStackSnapshot.empty() : itemStack.asImmutable();
     }
 
