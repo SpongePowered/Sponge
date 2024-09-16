@@ -30,6 +30,7 @@ import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.advancement.AdvancementTypes;
 import org.spongepowered.api.advancement.DisplayInfo;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.util.Preconditions;
@@ -72,9 +73,9 @@ public final class SpongeDisplayInfoBuilder implements DisplayInfo.Builder {
     }
 
     @Override
-    public DisplayInfo.Builder icon(final ItemStackSnapshot itemStackSnapshot) {
-        Objects.requireNonNull(itemStackSnapshot, "itemStackSnapshot");
-        this.icon = itemStackSnapshot;
+    public DisplayInfo.Builder icon(final ItemStackLike itemStack) {
+        Objects.requireNonNull(itemStack, "itemStackSnapshot");
+        this.icon = itemStack.asImmutable();
         return this;
     }
 
