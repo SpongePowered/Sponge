@@ -22,31 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.launch.plugin;
+package org.spongepowered.test.serviceloader;
 
-import com.google.inject.Injector;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.common.inject.SpongePluginInjectorProvider;
-import org.spongepowered.plugin.PluginCandidate;
-import org.spongepowered.plugin.builtin.StandardPluginContainer;
+import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
+import org.spongepowered.plugin.builtin.jvm.Plugin;
 
-public final class VanillaJavaPluginContainer extends StandardPluginContainer implements SpongePluginInjectorProvider {
+@Plugin("childmoduletestplugin")
+public final class ChildModuleTestPlugin implements ChildModuleTestPluginService {
 
-    private Injector injector;
+    private final ChildModuleTestPluginService.External external;
 
-    public VanillaJavaPluginContainer(final PluginCandidate candidate) {
-        super(candidate);
-    }
-
-    public void initializeInstance(final Object instance, final Injector injector) {
-        this.initializeInstance(instance);
-        this.injector = injector;
-
-        Sponge.eventManager().registerListeners(this, instance);
+    @Inject
+    public ChildModuleTestPlugin(final ChildModuleTestPluginService.External external) {
+        this.external = external;
     }
 
     @Override
-    public Injector injector() {
-        return this.injector;
+    public External external() {
+        return this.external;
+    }
+
+    private static final class ExternalImpl implements ChildModuleTestPluginService.External {
+    }
+
+    public static final class Module extends AbstractModule {
+
+        @Override
+        protected void configure() {
+            this.bind(ChildModuleTestPluginService.class).to(ChildModuleTestPlugin.class);
+            this.bind(ChildModuleTestPluginService.External.class).toInstance(new ExternalImpl());
+        }
     }
 }

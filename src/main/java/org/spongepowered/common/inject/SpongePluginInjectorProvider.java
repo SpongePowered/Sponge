@@ -22,31 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.launch.plugin;
+package org.spongepowered.common.inject;
 
 import com.google.inject.Injector;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.common.inject.SpongePluginInjectorProvider;
-import org.spongepowered.plugin.PluginCandidate;
-import org.spongepowered.plugin.builtin.StandardPluginContainer;
 
-public final class VanillaJavaPluginContainer extends StandardPluginContainer implements SpongePluginInjectorProvider {
+public interface SpongePluginInjectorProvider {
 
-    private Injector injector;
-
-    public VanillaJavaPluginContainer(final PluginCandidate candidate) {
-        super(candidate);
-    }
-
-    public void initializeInstance(final Object instance, final Injector injector) {
-        this.initializeInstance(instance);
-        this.injector = injector;
-
-        Sponge.eventManager().registerListeners(this, instance);
-    }
-
-    @Override
-    public Injector injector() {
-        return this.injector;
-    }
+    Injector injector();
 }

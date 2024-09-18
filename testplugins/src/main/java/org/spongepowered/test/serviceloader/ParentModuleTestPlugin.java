@@ -22,31 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.launch.plugin;
+package org.spongepowered.test.serviceloader;
 
-import com.google.inject.Injector;
+import com.google.inject.Inject;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.common.inject.SpongePluginInjectorProvider;
-import org.spongepowered.plugin.PluginCandidate;
-import org.spongepowered.plugin.builtin.StandardPluginContainer;
+import org.spongepowered.plugin.builtin.jvm.Plugin;
 
-public final class VanillaJavaPluginContainer extends StandardPluginContainer implements SpongePluginInjectorProvider {
+@Plugin("parentmoduletestplugin")
+public final class ParentModuleTestPlugin {
 
-    private Injector injector;
+    @Inject
+    public ParentModuleTestPlugin(final Logger logger, final ChildModuleTestPlugin childModulePlugin, final ChildModuleTestPluginService service, final ChildModuleTestPluginService.External external) {
+        if (Sponge.pluginManager().plugin("childmoduletestplugin").get().instance() != childModulePlugin) {
+            logger.error("Mismatched instance of the plugin childmoduletestplugin");
+        }
 
-    public VanillaJavaPluginContainer(final PluginCandidate candidate) {
-        super(candidate);
-    }
+        if (childModulePlugin != service) {
+            logger.error("Mismatched instance of service component from plugin childmoduletestplugin");
+        }
 
-    public void initializeInstance(final Object instance, final Injector injector) {
-        this.initializeInstance(instance);
-        this.injector = injector;
-
-        Sponge.eventManager().registerListeners(this, instance);
-    }
-
-    @Override
-    public Injector injector() {
-        return this.injector;
+        if (childModulePlugin.external() != external) {
+            logger.error("Mismatched instance of the external component from plugin childmoduletestplugin");
+        }
     }
 }

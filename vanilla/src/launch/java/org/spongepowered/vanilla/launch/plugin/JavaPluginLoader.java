@@ -51,15 +51,9 @@ public final class JavaPluginLoader implements PluginLoader<VanillaJavaPluginCon
             final String mainClass = container.metadata().entrypoint();
             final Class<?> pluginClass = Class.forName(mainClass, true, targetClassLoader);
 
-            final Injector parentInjector = Launch.instance().lifecycle().platformInjector();
-            final Object plugin;
-            if (parentInjector != null) {
-                final Injector childInjector = parentInjector.createChildInjector(new PluginModule(container, pluginClass));
-                plugin = childInjector.getInstance(pluginClass);
-            } else {
-                plugin = pluginClass.getConstructor().newInstance();
-            }
-            container.initializeInstance(plugin);
+            final Injector pluginInjector = PluginModule.create(container, pluginClass, Launch.instance().lifecycle().platformInjector());
+            final Object plugin = pluginInjector.getInstance(pluginClass);
+            container.initializeInstance(plugin, pluginInjector);
             return container;
         } catch (final Exception ex) {
             throw new InvalidPluginException("An error occurred creating an instance of plugin '" + container.metadata().id() + "'!", ex);

@@ -333,6 +333,28 @@
             "name": "Resource Pack Tests",
             "entrypoint": "org.spongepowered.test.resourcepack.ResourcePackTest",
             "description": "Resource Pack Tests"
+        },
+        {
+            "id": "childmoduletestplugin",
+            "name": "Child Module Tests",
+            "entrypoint": "org.spongepowered.test.serviceloader.ChildModuleTestPlugin",
+            "description": "Child Module Tests",
+            "properties": {
+                "module": "org.spongepowered.test.serviceloader.ChildModuleTestPlugin$Module"
+            }
+        },
+        {
+            "id": "parentmoduletestplugin",
+            "name": "Parent Module Tests",
+            "entrypoint": "org.spongepowered.test.serviceloader.ParentModuleTestPlugin",
+            "description": "Parent Module Tests",
+            "dependencies": [
+                {
+                    "id": "childmoduletestplugin",
+                    "version": "11.0.0",
+                    "load-order": "AFTER"
+                }
+            ]
         }
     ]
 }

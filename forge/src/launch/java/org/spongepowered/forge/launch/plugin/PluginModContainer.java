@@ -44,7 +44,6 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.inject.plugin.PluginModule;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.forge.launch.event.ForgeEventManager;
-import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Optional;
 
@@ -84,9 +83,10 @@ public final class PluginModContainer extends ModContainer {
         try {
             LOGGER.trace(Logging.LOADING, "Loading plugin instance {} of type {}", getModId(), this.modClass.getName());
 
-            final PluginContainer pluginContainer = ForgePluginContainer.of(this);
-            final Injector childInjector = Launch.instance().lifecycle().platformInjector().createChildInjector(new PluginModule(pluginContainer, this.modClass));
-            this.modInstance = childInjector.getInstance(this.modClass);
+            final ForgePluginContainer pluginContainer = ForgePluginContainer.of(this);
+            final Injector pluginInjector = PluginModule.create(pluginContainer, this.modClass, Launch.instance().lifecycle().platformInjector());
+            this.modInstance = pluginInjector.getInstance(this.modClass);
+            pluginContainer.initializeInstance(pluginInjector);
             ((ForgeEventManager) MinecraftForge.EVENT_BUS).registerListeners(pluginContainer, this.modInstance);
 
             LOGGER.trace(Logging.LOADING, "Loaded plugin instance {} of type {}", getModId(), this.modClass.getName());
