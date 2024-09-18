@@ -124,6 +124,8 @@
         "world.entity.ai.goal.GoalSelectorMixin",
         "world.entity.ai.goal.RangedAttackGoalMixin",
         "world.entity.ai.goal.RunAroundLikeCrazyGoalMixin",
+        "world.entity.ai.sensing.NearestLivingEntitySensorMixin",
+        "world.entity.ai.sensing.SensorMixin",
         "world.entity.animal.AnimalMixin",
         "world.entity.animal.Cat_CatRelaxOnOwnerGoalMixin",
         "world.entity.animal.OcelotMixin",

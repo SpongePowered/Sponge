@@ -49,6 +49,7 @@ public abstract class CreeperMixin_API extends MonsterMixin_API implements Creep
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
         values.add(this.requireValue(Keys.FUSE_DURATION).asImmutable());
+        values.add(this.requireValue(Keys.IS_PRIMED).asImmutable());
         values.add(this.requireValue(Keys.IS_CHARGED).asImmutable());
         values.add(this.requireValue(Keys.TICKS_REMAINING).asImmutable());
 

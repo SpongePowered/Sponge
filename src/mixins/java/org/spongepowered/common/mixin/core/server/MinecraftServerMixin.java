@@ -37,7 +37,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.server.players.PlayerList;
-import net.minecraft.util.ProgressListener;
 import net.minecraft.util.thread.BlockableEventLoop;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.Level;
@@ -259,14 +258,13 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
      */
     @Overwrite
     public boolean saveAllChunks(final boolean suppressLog, final boolean flush, final boolean isForced) {
-        boolean var0 = false;
+        boolean result = false;
 
         for (final ServerLevel world : this.shadow$getAllLevels()) {
-            final SerializationBehavior serializationBehavior = ((PrimaryLevelDataBridge) world.getLevelData()).bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
-            final InheritableConfigHandle<WorldConfig> adapter = ((PrimaryLevelDataBridge) world.getLevelData()).bridge$configAdapter();
-
             // Sponge start - use our own config
-            final boolean log = adapter.get().world.logAutoSave;
+            final SerializationBehavior serializationBehavior = ((PrimaryLevelDataBridge) world.getLevelData()).bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
+            final InheritableConfigHandle<WorldConfig> configAdapter = ((PrimaryLevelDataBridge) world.getLevelData()).bridge$configAdapter();
+            final boolean log = configAdapter.get().world.logAutoSave;
 
             // If the server isn't running or we hit Vanilla's save interval or this was triggered
             // by a command, save our configs
@@ -283,7 +281,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
 
             // Only run auto-save skipping if the server is still running and the save is not forced
             if (this.bridge$performAutosaveChecks() && !isForced) {
-                final int autoSaveInterval = adapter.get().world.autoSaveInterval;
+                final int autoSaveInterval = configAdapter.get().world.autoSaveInterval;
 
                 // Do not process properties or chunks if the world is not set to do so unless the server is shutting down
                 if (autoSaveInterval <= 0 || serializationBehavior != SerializationBehavior.AUTOMATIC) {
@@ -301,15 +299,15 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
                 LOGGER.info("Saving chunks for level '{}'/{}", world, world.dimension().location());
             }
 
-            world.save((ProgressListener)null, flush, world.noSave && !isForced);
-            var0 = true;
+            world.save(null, flush, world.noSave && !isForced);
+            result = true;
         }
 
         // Sponge start - We do per-world WorldInfo/WorldBorders/BossBars
 //        ServerLevel var2 = this.overworld();
 //        ServerLevelData var3 = this.worldData.overworldData();
 //        var3.setWorldBorder(var2.getWorldBorder().createSettings());
-//        this.worldData.setCustomBossEvents(this.getCustomBossEvents().save());
+//        this.worldData.setCustomBossEvents(this.getCustomBossEvents().save(this.registryAccess()));
 //        this.storageSource.saveDataTag(this.registryHolder, this.worldData, this.shadow$getPlayerList().getSingleplayerData());
         // Sponge end
 
@@ -324,7 +322,22 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         }
         // Sponge end
 
-        return var0;
+        if (flush) {
+            for (final ServerLevel world : this.shadow$getAllLevels()) {
+                // Sponge start - use our own config
+                final InheritableConfigHandle<WorldConfig> configAdapter = ((PrimaryLevelDataBridge) world.getLevelData()).bridge$configAdapter();
+                final boolean log = configAdapter.get().world.logAutoSave;
+                // Sponge end
+
+                if (log) {
+                    LOGGER.info("ThreadedAnvilChunkStorage ({}): All chunks are saved", world.getChunkSource().chunkMap.getStorageName());
+                }
+            }
+
+            LOGGER.info("ThreadedAnvilChunkStorage: All dimensions are saved");
+        }
+
+        return result;
     }
 
     /**

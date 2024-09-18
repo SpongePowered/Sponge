@@ -44,8 +44,6 @@ public final class TNTData {
                     .create(Keys.DETONATOR)
                         .get(h -> (Living) h.getOwner())
                         .set((h, v) -> ((PrimedTntAccessor) h).accessor$owner((LivingEntity) v))
-                    .create(Keys.IS_PRIMED)
-                        .get(h -> !h.isRemoved() && h.getFuse() > 0)
                     .create(Keys.BLOCK_STATE)
                         .get(h -> (BlockState) h.getBlockState())
                         .set((h, v) -> h.setBlockState((net.minecraft.world.level.block.state.BlockState) v));

@@ -22,36 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.entity.vehicle;
+package org.spongepowered.common.mixin.core.world.entity.ai.sensing;
 
-import net.minecraft.world.entity.vehicle.MinecartTNT;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.entity.vehicle.minecart.TNTMinecart;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.sensing.Sensor;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.bridge.data.VanishableBridge;
 
-import java.util.Set;
+@Mixin(Sensor.class)
+public class SensorMixin<E extends LivingEntity> {
 
-@Mixin(MinecartTNT.class)
-public abstract class MinecartTNTMixin_API extends AbstractMinecartMixin_API implements TNTMinecart {
-
-    @Override
-    public void detonate() {
-        ((FusedExplosiveBridge) this).bridge$setFuseTicksRemaining(0);
-    }
-
-    @Override
-    protected Set<Value.Immutable<?>> api$getVanillaValues() {
-        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
-
-        values.add(this.requireValue(Keys.FUSE_DURATION).asImmutable());
-        values.add(this.requireValue(Keys.IS_PRIMED).asImmutable());
-        values.add(this.requireValue(Keys.TICKS_REMAINING).asImmutable());
-
-        this.getValue(Keys.EXPLOSION_RADIUS).map(Value::asImmutable).ifPresent(values::add);
-
-        return values;
+    @Inject(method = {
+        "isEntityTargetable",
+        "isEntityAttackable",
+        "isEntityAttackableIgnoringLineOfSight"
+    }, at = @At("HEAD"), cancellable = true)
+    private static void impl$cancelForVanishedEntities(LivingEntity $$0, LivingEntity $$1, CallbackInfoReturnable<Boolean> cir) {
+        final var vs = ((VanishableBridge) $$0).bridge$vanishState();
+        if (vs.invisible() && vs.untargetable()) {
+            cir.setReturnValue(false);
+        }
+        final var vsOther = ((VanishableBridge) $$1).bridge$vanishState();
+        if (vsOther.invisible() && vsOther.untargetable()) {
+            cir.setReturnValue(false);
+        }
     }
 
 }
