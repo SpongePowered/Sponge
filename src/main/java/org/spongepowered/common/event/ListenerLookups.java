@@ -22,24 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.applaunch.handler.test;
+package org.spongepowered.common.event;
 
-import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.vanilla.applaunch.AppLaunchTarget;
-import org.spongepowered.vanilla.applaunch.handler.AbstractVanillaLaunchHandler;
-import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class ServerTestLaunchHandler extends AbstractVanillaLaunchHandler {
+import java.lang.invoke.MethodHandles;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-    @Override
-    public AppLaunchTarget target() {
-        return AppLaunchTarget.SERVER_INTEGRATION_TEST;
+public class ListenerLookups {
+    private static final Map<Class<?>, MethodHandles.Lookup> lookups = new ConcurrentHashMap<>();
+
+    public static MethodHandles.@Nullable Lookup get(final Class<?> listenerClass) {
+        return ListenerLookups.lookups.get(listenerClass);
     }
 
-    @Override
-    protected void launchSponge(final Module module, final String[] arguments) throws Exception {
-        Class.forName(module, "org.spongepowered.vanilla.launch.IntegrationTestLaunch")
-                .getMethod("launch", VanillaPluginPlatform.class, Boolean.class, String[].class)
-                .invoke(null, AppLaunch.pluginPlatform(), /* isServer = */ Boolean.TRUE, arguments);
+    public static void set(final Class<?> listenerClass, final MethodHandles.Lookup lookup) {
+        ListenerLookups.lookups.put(listenerClass, lookup);
     }
 }

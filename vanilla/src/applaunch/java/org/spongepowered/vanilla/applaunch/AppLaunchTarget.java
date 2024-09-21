@@ -22,22 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.launch.event;
+package org.spongepowered.vanilla.applaunch;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+public enum AppLaunchTarget {
+    CLIENT_DEVELOPMENT("sponge_client_dev"),
+    CLIENT_PRODUCTION("sponge_client_prod"),
+    SERVER_DEVELOPMENT("sponge_server_dev"),
+    SERVER_PRODUCTION("sponge_server_prod"),
+    CLIENT_INTEGRATION_TEST("sponge_client_it"),
+    SERVER_INTEGRATION_TEST("sponge_server_it");
 
-import java.lang.invoke.MethodHandles;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+    private final String launchTarget;
 
-public class ListenerLookups {
-    private static final Map<Class<?>, MethodHandles.Lookup> lookups = new ConcurrentHashMap<>();
-
-    public static MethodHandles.@Nullable Lookup get(final Class<?> listenerClass) {
-        return ListenerLookups.lookups.get(listenerClass);
+    AppLaunchTarget(final String launchTarget) {
+        this.launchTarget = launchTarget;
     }
 
-    public static void set(final Class<?> listenerClass, final MethodHandles.Lookup lookup) {
-        ListenerLookups.lookups.put(listenerClass, lookup);
+    public String getLaunchTarget() {
+        return this.launchTarget;
+    }
+
+    public static AppLaunchTarget from(final String launchTarget) {
+        return switch (launchTarget) {
+            case "sponge_client_dev" -> AppLaunchTarget.CLIENT_DEVELOPMENT;
+            case "sponge_client_prod" -> AppLaunchTarget.CLIENT_PRODUCTION;
+            case "sponge_server_dev" -> AppLaunchTarget.SERVER_DEVELOPMENT;
+            case "sponge_server_prod" -> AppLaunchTarget.SERVER_PRODUCTION;
+            case "sponge_client_it" -> AppLaunchTarget.CLIENT_INTEGRATION_TEST;
+            case "sponge_server_it" -> AppLaunchTarget.SERVER_INTEGRATION_TEST;
+            default -> null;
+        };
     }
 }

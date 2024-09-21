@@ -323,13 +323,8 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin_Attack_I
             return true;
         }
 
-        var realOriginalDamage = originalDamage;
-        if (this.attackImpl$wasInInvulnerableTime) {
-            realOriginalDamage = Math.max(0, realOriginalDamage); // No negative damage because of invulnerableTime
-        }
-
         // Call platform hook for adjusting damage
-        final var modAdjustedDamage = this.bridge$applyModDamage(instance, damageSource, realOriginalDamage);
+        final var modAdjustedDamage = this.bridge$applyModDamage(instance, damageSource, originalDamage);
         // TODO check for direct call?
         this.attackImpl$actuallyHurt = new DamageEventUtil.ActuallyHurt(instance, new ArrayList<>(), damageSource, modAdjustedDamage);
         return false;

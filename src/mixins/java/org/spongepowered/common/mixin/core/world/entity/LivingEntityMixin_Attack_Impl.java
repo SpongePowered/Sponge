@@ -83,7 +83,6 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin
     protected float attackImpl$actuallyHurtFinalDamage;
     protected boolean attackImpl$actuallyHurtCancelled;
     protected float attackImpl$actuallyHurtBlockedDamage;
-    protected boolean attackImpl$wasInInvulnerableTime;
 
     /**
      * Forge onLivingAttack Hook
@@ -163,18 +162,6 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin
         this.attackImpl$lastHurt = this.lastHurt;
         this.attackImpl$InvulnerableTime = this.invulnerableTime;
         this.attackImpl$actuallyHurtCancelled = false;
-        this.attackImpl$wasInInvulnerableTime = false;
-    }
-
-    /**
-     * Fake {@link #lastHurt} to be 0 so that we go to #actuallyHurt even if we are invulnerable and remember that we did
-     */
-    @Redirect(method = "hurt",
-        at = @At(value = "FIELD", ordinal = 0,
-            target = "Lnet/minecraft/world/entity/LivingEntity;lastHurt:F"))
-    private float attackImpl$afterActuallyHurt(final LivingEntity instance) {
-        this.attackImpl$wasInInvulnerableTime = true;
-        return 0;
     }
 
     @ModifyArg(method = "hurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;actuallyHurt(Lnet/minecraft/world/damagesource/DamageSource;F)V", ordinal = 0))
@@ -228,12 +215,13 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin
 
 
     /**
-     * Set final damage after #actuallyHurt
+     * Set final damage after #actuallyHurt and lastHurt has been set.
      */
     @ModifyVariable(method = "hurt", argsOnly = true,
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/LivingEntity;actuallyHurt(Lnet/minecraft/world/damagesource/DamageSource;F)V",
-            shift = At.Shift.AFTER))
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/DamageSource;getEntity()Lnet/minecraft/world/entity/Entity;"),
+        slice = @Slice(
+            from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;actuallyHurt(Lnet/minecraft/world/damagesource/DamageSource;F)V"),
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/DamageSource;getEntity()Lnet/minecraft/world/entity/Entity;")))
     private float attackImpl$modifyDamageTaken(float damageTaken) {
         return this.attackImpl$actuallyHurtFinalDamage;
     }
@@ -269,13 +257,9 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin
         if (instance.isInvulnerableTo(damageSource)) {
             return true;
         }
-        var realOriginalDamage = originalDamage;
-        if (this.attackImpl$wasInInvulnerableTime) {
-            realOriginalDamage = Math.max(0, realOriginalDamage); // No negative damage because of invulnerableTime
-        }
 
         // Call platform hook for adjusting damage
-        final var modAdjustedDamage = this.bridge$applyModDamage(instance, damageSource, realOriginalDamage);
+        final var modAdjustedDamage = this.bridge$applyModDamage(instance, damageSource, originalDamage);
         // TODO check for direct call?
         this.attackImpl$actuallyHurt = new DamageEventUtil.ActuallyHurt(instance, new ArrayList<>(), damageSource, modAdjustedDamage);
         return false;
@@ -337,8 +321,11 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin
                 this.attackImpl$actuallyHurt.functions().add(func);
             }
 
-            this.attackImpl$actuallyHurtResult = DamageEventUtil.callLivingDamageEntityEvent(this.attackImpl$hurt, this.attackImpl$actuallyHurt);
+            // Use local and clear the variable to prevent re-entry if a plugin modifies the absorption hearts inside the event.
+            final DamageEventUtil.ActuallyHurt actuallyHurt = this.attackImpl$actuallyHurt;
             this.attackImpl$actuallyHurt = null;
+
+            this.attackImpl$actuallyHurtResult = DamageEventUtil.callLivingDamageEntityEvent(this.attackImpl$hurt, actuallyHurt);
 
             if (this.attackImpl$actuallyHurtResult.event().isCancelled()) {
                 this.attackImpl$actuallyHurtCancelled = true;

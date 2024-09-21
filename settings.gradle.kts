@@ -9,7 +9,7 @@ pluginManagement {
     }
 
     plugins {
-        id("org.spongepowered.gradle.vanilla") version "0.2.1-SNAPSHOT"
+        id("org.spongepowered.gradle.vanilla") version "0.2.1-20240904.014811-86"
         id("implementation-structure")
     }
 }
@@ -61,7 +61,6 @@ include(":SpongeVanilla")
 project(":SpongeVanilla").projectDir = file("vanilla")
 include("modlauncher-transformers")
 include("generator")
-include("modlauncher-patcher")
 
 val testPlugins = file("testplugins.settings.gradle.kts")
 if (testPlugins.exists()) {

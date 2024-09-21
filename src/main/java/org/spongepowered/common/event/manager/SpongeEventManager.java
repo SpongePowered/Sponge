@@ -45,6 +45,7 @@ import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.inventory.container.ContainerBridge;
+import org.spongepowered.common.event.ListenerLookups;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.filter.FilterGenerator;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -77,7 +78,6 @@ import java.util.stream.Stream;
 public abstract class SpongeEventManager implements EventManager {
 
     private static final NoExceptionClosable NULL_CLOSABLE = new NoExceptionClosable();
-    private static final MethodHandles.Lookup OWN_LOOKUP = MethodHandles.lookup();
 
     public final ListenerChecker checker;
     private final Object lock;
@@ -223,8 +223,6 @@ public abstract class SpongeEventManager implements EventManager {
         }
     }
 
-    protected abstract MethodHandles.@Nullable Lookup getLookup(final PluginContainer plugin, final Class<?> handle);
-
     private void registerListener(final PluginContainer plugin, final Object listenerObject,
                                   final MethodHandles.@Nullable Lookup customLookup) {
         Objects.requireNonNull(plugin, "plugin");
@@ -244,10 +242,10 @@ public abstract class SpongeEventManager implements EventManager {
 
         MethodHandles.@Nullable Lookup lookup = customLookup;
         if (lookup == null) {
-            lookup = this.getLookup(plugin, handle);
+            lookup = ListenerLookups.get(handle);
             if (lookup == null) {
-                SpongeCommon.logger().warn("No lookup found for listener {}. Using Sponge's lookup as fallback.", handle.getName());
-                lookup = SpongeEventManager.OWN_LOOKUP;
+                SpongeCommon.logger().warn("No lookup found for listener {}.", handle.getName());
+                return;
             }
         }
 

@@ -19,14 +19,14 @@ plugins {
 
 val commonProject = parent!!
 val transformersProject = parent!!.project(":modlauncher-transformers")
+val testPluginsProject: Project? = rootProject.subprojects.find { "testplugins" == it.name }
+
 val apiVersion: String by project
 val minecraftVersion: String by project
 val forgeVersion: String by project
 val recommendedVersion: String by project
 val organization: String by project
 val projectUrl: String by project
-
-val testPluginsProject: Project? = rootProject.subprojects.find { "testplugins" == it.name }
 
 description = "The SpongeAPI implementation for MinecraftForge"
 version = spongeImpl.generatePlatformBuildVersionString(apiVersion, minecraftVersion, recommendedVersion, forgeVersion)
@@ -38,13 +38,13 @@ repositories {
 }
 
 // SpongeForge libraries
-val serviceLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeServiceLibraries")
-val gameLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeGameLibraries")
+val serviceLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("serviceLibraries")
+val gameLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("gameLibraries")
 
-val gameManagedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeGameManagedLibraries")
+val gameManagedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("gameManagedLibraries")
 
-val serviceShadedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeServiceShadedLibraries")
-val gameShadedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeGameShadedLibraries")
+val serviceShadedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("serviceShadedLibraries")
+val gameShadedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("gameShadedLibraries")
 
 val runTaskOnlyConfig: NamedDomainObjectProvider<Configuration> = configurations.register("runTaskOnly")
 
@@ -70,7 +70,7 @@ val gameLayerConfig: NamedDomainObjectProvider<Configuration> = configurations.r
     }
 }
 
-// Common source sets and configurations
+// SpongeCommon source sets
 val launchConfig: NamedDomainObjectProvider<Configuration> = commonProject.configurations.named("launch")
 val accessors: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("accessors")
 val launch: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("launch")
@@ -78,7 +78,7 @@ val applaunch: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.n
 val mixins: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("mixins")
 val main: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("main")
 
-// Forge source sets
+// SpongeForge source sets
 val forgeMain by sourceSets.named("main") {
     // implementation (compile) dependencies
     spongeImpl.applyNamedDependencyOnOutput(commonProject, accessors.get(), this, project, this.implementationConfigurationName)
@@ -102,6 +102,7 @@ val forgeLaunch by sourceSets.register("launch") {
 }
 val forgeAccessors by sourceSets.register("accessors") {
     spongeImpl.applyNamedDependencyOnOutput(commonProject, mixins.get(), this, project, this.implementationConfigurationName)
+    spongeImpl.applyNamedDependencyOnOutput(commonProject, accessors.get(), this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, this, forgeLaunch, project, forgeLaunch.implementationConfigurationName)
 
     configurations.named(implementationConfigurationName) {
@@ -205,27 +206,27 @@ dependencies {
 
     forgeMixins.implementationConfigurationName(project(commonProject.path))
 
-    val serviceLibraries = serviceLibrariesConfig.name
-    serviceLibraries(apiLibs.pluginSpi)
-    serviceLibraries(project(transformersProject.path))
-    serviceLibraries(platform(apiLibs.configurate.bom))
-    serviceLibraries(apiLibs.configurate.core) {
+    val service = serviceLibrariesConfig.name
+    service(apiLibs.pluginSpi)
+    service(project(transformersProject.path))
+    service(platform(apiLibs.configurate.bom))
+    service(apiLibs.configurate.core) {
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
-    serviceLibraries(apiLibs.configurate.hocon) {
+    service(apiLibs.configurate.hocon) {
         exclude(group = "org.spongepowered", module = "configurate-core")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
-    serviceLibraries(libs.configurate.jackson) {
+    service(libs.configurate.jackson) {
         exclude(group = "org.spongepowered", module = "configurate-core")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
 
-    val gameLibraries = gameLibrariesConfig.name
-    gameLibraries("org.spongepowered:spongeapi:$apiVersion")
-    gameLibraries(libs.javaxInject)
-    gameLibraries(platform(apiLibs.adventure.bom))
-    gameLibraries(libs.adventure.serializerConfigurate4)
+    val game = gameLibrariesConfig.name
+    game("org.spongepowered:spongeapi:$apiVersion")
+    game(libs.javaxInject)
+    game(platform(apiLibs.adventure.bom))
+    game(libs.adventure.serializerConfigurate4)
 
     val serviceShadedLibraries = serviceShadedLibrariesConfig.name
     serviceShadedLibraries(project(transformersProject.path)) { isTransitive = false }
@@ -292,7 +293,7 @@ tasks {
         from(forgeLang.output)
     }
 
-    val forgeServicesDevJar by registering(Jar::class) {
+    val forgeServicesJar by registering(Jar::class) {
         archiveClassifier.set("services")
         manifest.from(forgeManifest)
 
@@ -307,7 +308,7 @@ tasks {
             // Default classpath is a mess, we better start a new one from scratch
             classpath = files(
                     configurations.getByName("forgeRuntimeLibrary"),
-                    forgeServicesDevJar, forgeLangJar, runTaskOnlyConfig
+                    forgeServicesJar, forgeLangJar, runTaskOnlyConfig
             )
 
             testPluginsProject?.also {
@@ -354,7 +355,7 @@ tasks {
 
         mergeServiceFiles()
         configurations = listOf(serviceShadedLibrariesConfig.get())
-        exclude("META-INF/INDEX.LIST", "META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA", "module-info.class")
+        exclude("META-INF/INDEX.LIST", "META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA", "**/module-info.class")
 
         manifest {
             attributes("Automatic-Module-Name" to "spongeforge.services")
@@ -426,21 +427,6 @@ sourceSets {
     }
 }
 
-afterEvaluate {
-    sourceSets.configureEach {
-        // Don't apply Mixin AP
-        configurations.named(annotationProcessorConfigurationName) {
-            exclude(group = "org.spongepowered", module = "mixin")
-            exclude(group = "net.fabricmc", module = "fabric-mixin-compile-extensions")
-        }
-        // And don't pass AP parameters
-        tasks.named(compileJavaTaskName, JavaCompile::class) {
-            val mixinApArgs = setOf("outRefMapFile", "defaultObfuscationEnv", "outMapFileNamedIntermediary", "inMapFileNamedIntermediary")
-            options.compilerArgs.removeIf { mixinApArgs.any { mixin -> it.contains(mixin)} }
-        }
-    }
-}
-
 indraSpotlessLicenser {
     licenseHeaderFile(rootProject.file("HEADER.txt"))
 
@@ -456,6 +442,9 @@ publishing {
 
             artifact(tasks["jar"])
             artifact(tasks["sourcesJar"])
+
+            artifact(tasks["forgeLangJar"])
+            artifact(tasks["langSourcesJar"])
 
             artifact(tasks["forgeMixinsJar"])
             artifact(tasks["mixinsSourcesJar"])
@@ -486,49 +475,6 @@ publishing {
                     developerConnection.set("scm:git:ssh://github.com/SpongePowered/Sponge.git")
                     this.url.set(projectUrl)
                 }
-            }
-        }
-    }
-}
-
-tasks.register("printConfigsHierarchy") {
-    group = "debug"
-    doLast {
-        configurations.forEach { conf: Configuration  ->
-            val seen = mutableSetOf<Configuration>()
-            println("Parents of ${conf.name}:")
-            printParents(conf, "", seen)
-        }
-    }
-}
-
-fun printParents(conf: Configuration, indent: String, seen: MutableSet<Configuration>) {
-    for (parent in conf.extendsFrom) {
-        if (parent in seen) {
-            continue
-        }
-        seen.add(parent)
-        println("$indent - ${parent.name}")
-        printParents(parent, indent + "  ", seen)
-    }
-}
-
-tasks.register("printConfigsResolution") {
-    group = "debug"
-    doLast {
-        configurations.forEach { conf: Configuration  ->
-            println()
-            println("Artifacts of ${conf.name}:")
-            if (conf.isCanBeResolved) {
-                try {
-                    conf.forEach {
-                        println(it)
-                    }
-                } catch (e: Exception) {
-                    println("error")
-                }
-            } else {
-                println("not resolved")
             }
         }
     }

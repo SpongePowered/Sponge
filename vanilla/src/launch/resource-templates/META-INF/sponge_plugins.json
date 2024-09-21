@@ -6,27 +6,11 @@
     "license": "MIT",
     "plugins": [
         {
-            "id": "minecraft",
-            "name": "Minecraft",
-            "version": "{{ minecraftVersion }}",
-            "entrypoint": "org.spongepowered.common.launcher.Launcher",
-            "links": {
-                "homepage": "https://www.minecraft.net"
-            },
-            "contributors": [
-                {
-                    "name": "Mojang AB",
-                    "description": "Lead Developer"
-                }
-            ]
-        },
-        {
-            "loader": "java_plain",
-            "id": "spongeapi",
-            "name": "SpongeAPI",
-            "version": "{{ apiVersion }}",
-            "entrypoint": "org.spongepowered.api.Sponge",
-            "description": "The Minecraft API specification",
+            "id": "spongevanilla",
+            "name": "SpongeVanilla",
+            "version": "{{ version }}",
+            "entrypoint": "org.spongepowered.vanilla.SpongeVanilla",
+            "description": "Vanilla Minecraft with Sponge",
             "links": {
                 "homepage": "https://www.spongepowered.org",
                 "source": "https://www.spongepowered.org/source",
@@ -36,6 +20,12 @@
                 {
                     "name": "SpongePowered",
                     "description": "Lead Developer"
+                }
+            ],
+            "dependencies": [
+                {
+                    "id": "sponge",
+                    "version": "{{ minecraftVersion }}-{{ apiVersion }}"
                 }
             ]
         },
@@ -68,11 +58,11 @@
             ]
         },
         {
-            "id": "spongevanilla",
-            "name": "SpongeVanilla",
-            "version": "{{ version }}",
-            "entrypoint": "org.spongepowered.vanilla.SpongeVanilla",
-            "description": "Vanilla Minecraft with Sponge",
+            "id": "spongeapi",
+            "name": "SpongeAPI",
+            "version": "{{ apiVersion }}",
+            "entrypoint": "org.spongepowered.api.Sponge",
+            "description": "The Minecraft API specification",
             "links": {
                 "homepage": "https://www.spongepowered.org",
                 "source": "https://www.spongepowered.org/source",
@@ -82,12 +72,6 @@
                 {
                     "name": "SpongePowered",
                     "description": "Lead Developer"
-                }
-            ],
-            "dependencies": [
-                {
-                    "id": "sponge",
-                    "version": "{{ minecraftVersion }}-{{ apiVersion }}"
                 }
             ]
         }

@@ -22,24 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.applaunch.handler.test;
+package org.spongepowered.vanilla.applaunch.plugin;
 
-import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.vanilla.applaunch.AppLaunchTarget;
-import org.spongepowered.vanilla.applaunch.handler.AbstractVanillaLaunchHandler;
-import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
+import cpw.mods.modlauncher.serviceapi.ILaunchPluginService;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.ClassNode;
+import org.spongepowered.transformers.modlauncher.ListenerTransformerHelper;
 
-public class ServerTestLaunchHandler extends AbstractVanillaLaunchHandler {
+import java.util.EnumSet;
+
+public class ListenerPluginService implements ILaunchPluginService {
+    private static final EnumSet<Phase> YAY = EnumSet.of(Phase.AFTER);
+    private static final EnumSet<Phase> NAY = EnumSet.noneOf(Phase.class);
 
     @Override
-    public AppLaunchTarget target() {
-        return AppLaunchTarget.SERVER_INTEGRATION_TEST;
+    public String name() {
+        return "listener";
     }
 
     @Override
-    protected void launchSponge(final Module module, final String[] arguments) throws Exception {
-        Class.forName(module, "org.spongepowered.vanilla.launch.IntegrationTestLaunch")
-                .getMethod("launch", VanillaPluginPlatform.class, Boolean.class, String[].class)
-                .invoke(null, AppLaunch.pluginPlatform(), /* isServer = */ Boolean.TRUE, arguments);
+    public EnumSet<Phase> handlesClass(Type classType, boolean isEmpty) {
+        return isEmpty ? NAY : YAY;
+    }
+
+    @Override
+    public int processClassWithFlags(final Phase phase, final ClassNode classNode, final Type classType, final String reason) {
+        if (ListenerTransformerHelper.shouldTransform(classNode)) {
+            ListenerTransformerHelper.transform(classNode);
+            return ComputeFlags.COMPUTE_FRAMES;
+        }
+        return ComputeFlags.NO_REWRITE;
     }
 }

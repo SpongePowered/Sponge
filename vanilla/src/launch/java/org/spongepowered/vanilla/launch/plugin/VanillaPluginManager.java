@@ -58,18 +58,15 @@ import java.util.stream.Collectors;
 
 @Singleton
 public final class VanillaPluginManager implements SpongePluginManager {
-
     private final Map<String, PluginContainer> plugins;
     private final Map<Object, PluginContainer> instancesToPlugins;
     private final List<PluginContainer> sortedPlugins;
-    private final Map<String, Set<PluginResource>> locatedResources;
     private final Map<PluginContainer, PluginResource> containerToResource;
 
     public VanillaPluginManager() {
         this.plugins = new Object2ObjectOpenHashMap<>();
         this.instancesToPlugins = new IdentityHashMap<>();
         this.sortedPlugins = new ArrayList<>();
-        this.locatedResources = new Object2ObjectOpenHashMap<>();
         this.containerToResource = new Object2ObjectOpenHashMap<>();
     }
 
@@ -88,20 +85,16 @@ public final class VanillaPluginManager implements SpongePluginManager {
         return Collections.unmodifiableCollection(this.sortedPlugins);
     }
 
-    @SuppressWarnings("unchecked")
     public void loadPlugins(final VanillaPluginPlatform platform) {
-        this.locatedResources.putAll(platform.getResources());
-
-        final Map<PluginCandidate<PluginResource>, PluginLanguageService<PluginResource>> pluginLanguageLookup = new HashMap<>();
-        final Map<PluginLanguageService<PluginResource>, PluginLoader<PluginResource, PluginContainer>> pluginLoaders = new HashMap<>();
+        final Map<PluginCandidate, PluginLanguageService> pluginLanguageLookup = new HashMap<>();
+        final Map<PluginLanguageService, PluginLoader<?>> pluginLoaders = new HashMap<>();
 
         // Initialise the plugin language loaders.
-        for (final Map.Entry<PluginLanguageService<PluginResource>, List<PluginCandidate<PluginResource>>> candidate : platform.getCandidates().entrySet()) {
-            final PluginLanguageService<PluginResource> languageService = candidate.getKey();
+        for (final Map.Entry<PluginLanguageService, List<PluginCandidate>> candidate : platform.getCandidates().entrySet()) {
+            final PluginLanguageService languageService = candidate.getKey();
             final String loaderClass = languageService.pluginLoader();
             try {
-                pluginLoaders.put(languageService,
-                        (PluginLoader<PluginResource, PluginContainer>) Class.forName(loaderClass).getConstructor().newInstance());
+                pluginLoaders.put(languageService, (PluginLoader<?>) Class.forName(loaderClass).getConstructor().newInstance());
             } catch (final InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
                 throw new RuntimeException(e);
             }
@@ -111,23 +104,29 @@ public final class VanillaPluginManager implements SpongePluginManager {
         // Priority to platform plugins that will already exist here -- meaning the resolver will act upon them first
         // and if someone decides to give a plugin an ID that is the same as a platform plugin, the resolver will effectively
         // reject it.
-        final Set<PluginCandidate<PluginResource>> resources = new LinkedHashSet<>();
+        final Set<PluginCandidate> resources = new LinkedHashSet<>();
         pluginLanguageLookup.keySet().stream().filter(x -> this.plugins.containsKey(x.metadata().id())).forEach(resources::add);
         resources.addAll(pluginLanguageLookup.keySet());
 
-        final ResolutionResult<PluginResource> resolutionResult = DependencyResolver.resolveAndSortCandidates(resources, platform.logger());
-        final Map<PluginCandidate<PluginResource>, String> failedInstances = new HashMap<>();
-        final Map<PluginCandidate<PluginResource>, String> consequentialFailedInstances = new HashMap<>();
+        final ResolutionResult resolutionResult = DependencyResolver.resolveAndSortCandidates(resources, platform.logger());
+        final Map<PluginCandidate, String> failedInstances = new HashMap<>();
+        final Map<PluginCandidate, String> consequentialFailedInstances = new HashMap<>();
         final ClassLoader launchClassloader = VanillaLaunch.instance().getClass().getClassLoader();
-        for (final PluginCandidate<PluginResource> candidate : resolutionResult.sortedSuccesses()) {
-            final PluginContainer plugin = this.plugins.get(candidate.metadata().id());
+        for (final PluginCandidate candidate : resolutionResult.sortedSuccesses()) {
+            final String id = candidate.metadata().id();
+            if (id.indexOf('-') >= 0) {
+                platform.logger().warn("The dash character (-) is no longer supported in plugin ids.\n" +
+                    "Plugin {} is still using it. If you are the developer of this plugin, please change the id.", id);
+            }
+
+            final PluginContainer plugin = this.plugins.get(id);
             if (plugin != null) {
                 if (plugin instanceof VanillaDummyPluginContainer) {
                     continue;
                 }
                 // If we get here, we screwed up - duplicate IDs should have been detected earlier.
                 // Place it in the resolution result... it'll then get picked up in the big error message
-                resolutionResult.duplicateIds().add(candidate.metadata().id());
+                resolutionResult.duplicateIds().add(id);
 
                 // but this is our screw up, let's also make a big point of it
                 final PrettyPrinter prettyPrinter = new PrettyPrinter(120)
@@ -135,8 +134,7 @@ public final class VanillaPluginManager implements SpongePluginManager {
                         .hr()
                         .addWrapped("Sponge attempted to create a second plugin with ID '%s'. This is not allowed - all plugins must have a unique "
                                         + "ID. Usually, Sponge will catch this earlier -- but in this case Sponge has validated two plugins with "
-                                        + "the same ID. Please report this error to Sponge.",
-                                candidate.metadata().id())
+                                        + "the same ID. Please report this error to Sponge.", id)
                         .add()
                         .add("Technical Details:")
                         .add("Plugins to load:", 4);
@@ -150,15 +148,15 @@ public final class VanillaPluginManager implements SpongePluginManager {
             // If a dependency failed to load, then we should bail on required dependencies too.
             // This should work fine, we're sorted so all deps should be in place at this stage.
             if (this.stillValid(candidate, consequentialFailedInstances)) {
-                final PluginLanguageService<PluginResource> languageService = pluginLanguageLookup.get(candidate);
-                final PluginLoader<PluginResource, PluginContainer> pluginLoader = pluginLoaders.get(languageService);
+                final PluginLanguageService languageService = pluginLanguageLookup.get(candidate);
+                final PluginLoader<?> pluginLoader = pluginLoaders.get(languageService);
                 try {
                     final PluginContainer container = pluginLoader.loadPlugin(platform.getStandardEnvironment(), candidate, launchClassloader);
                     this.addPlugin(container);
                     this.containerToResource.put(container, candidate.resource());
                 } catch (final InvalidPluginException e) {
                     failedInstances.put(candidate, "Failed to construct: see stacktrace(s) above this message for details.");
-                    platform.logger().error("Failed to construct plugin {}", candidate.metadata().id(), e);
+                    platform.logger().error("Failed to construct plugin {}", id, e);
                 }
             }
         }
@@ -176,16 +174,12 @@ public final class VanillaPluginManager implements SpongePluginManager {
         }
     }
 
-    public Map<String, Set<PluginResource>> locatedResources() {
-        return Collections.unmodifiableMap(this.locatedResources);
-    }
-
     @Nullable
     public PluginResource resource(final PluginContainer container) {
         return this.containerToResource.get(container);
     }
 
-    private boolean stillValid(final PluginCandidate<PluginResource> candidate, final Map<PluginCandidate<PluginResource>, String> consequential) {
+    private boolean stillValid(final PluginCandidate candidate, final Map<PluginCandidate, String> consequential) {
         final Optional<PluginDependency> failedId =
                 candidate.metadata().dependencies().stream().filter(x -> !x.optional() && !this.plugins.containsKey(x.id())).findFirst();
         if (failedId.isPresent()) {

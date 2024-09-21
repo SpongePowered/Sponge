@@ -22,20 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.launch.plugin;
+package org.spongepowered.vanilla.applaunch.plugin;
 
 import org.spongepowered.plugin.Environment;
-import org.spongepowered.plugin.builtin.jvm.JVMPluginLanguageService;
-import org.spongepowered.plugin.metadata.Container;
-import org.spongepowered.plugin.metadata.builtin.MetadataParser;
+import org.spongepowered.plugin.PluginCandidate;
+import org.spongepowered.plugin.PluginResource;
+import org.spongepowered.plugin.builtin.StandardPluginCandidate;
+import org.spongepowered.plugin.builtin.StandardPluginLanguageService;
+import org.spongepowered.plugin.builtin.jvm.JVMPluginResource;
+import org.spongepowered.plugin.metadata.PluginMetadata;
 
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.LinkedList;
+import java.util.List;
 
-public final class JavaPluginLanguageService extends JVMPluginLanguageService {
-
+public final class JavaPluginLanguageService extends StandardPluginLanguageService {
     private final static String NAME = "java_plain";
 
     @Override
@@ -49,9 +51,20 @@ public final class JavaPluginLanguageService extends JVMPluginLanguageService {
     }
 
     @Override
-    public Container loadMetadataContainer(final Environment environment, final InputStream stream) throws Exception {
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
-        return MetadataParser.read(reader, MetadataParser.gsonBuilder().create());
-    }
+    public List<PluginCandidate> createPluginCandidates(final Environment environment, final PluginResource resource) throws Exception {
+        if (resource instanceof JVMPluginResource jvmResource && Files.exists(jvmResource.resourcesRoot().resolve("net/minecraft/server/MinecraftServer.class"))) {
+            this.logger.debug("Container in path '{}' has been detected as Minecraft.", resource.path());
 
+            final List<PluginCandidate> candidates = new LinkedList<>();
+            try (final InputStream stream = JavaPluginLanguageService.class.getClassLoader().getResourceAsStream("META-INF/minecraft_sponge_plugins.json")) {
+                for (final PluginMetadata metadata : loadMetadataContainer(environment, stream).metadata()) {
+                    candidates.add(new StandardPluginCandidate(metadata, resource));
+                }
+            }
+
+            return candidates;
+        }
+
+        return super.createPluginCandidates(environment, resource);
+    }
 }

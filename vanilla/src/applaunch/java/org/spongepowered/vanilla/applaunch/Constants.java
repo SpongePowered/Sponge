@@ -24,41 +24,10 @@
  */
 package org.spongepowered.vanilla.applaunch;
 
-public enum AppLaunchTargets {
-    CLIENT_DEVELOPMENT("sponge_client_dev"),
-    CLIENT_PRODUCTION("sponge_client_prod"),
-    SERVER_DEVELOPMENT("sponge_server_dev"),
-    SERVER_PRODUCTION("sponge_server_prod"),
-    CLIENT_INTEGRATION_TEST("sponge_client_it"),
-    SERVER_INTEGRATION_TEST("sponge_server_it");
+public final class Constants {
 
-    private final String launchTarget;
-
-    AppLaunchTargets(final String launchTarget) {
-        this.launchTarget = launchTarget;
-    }
-
-    public String getLaunchTarget() {
-        return this.launchTarget;
-    }
-
-    public static AppLaunchTargets from(final String launchTarget) {
-
-        switch (launchTarget) {
-            case "sponge_client_dev":
-                return AppLaunchTargets.CLIENT_DEVELOPMENT;
-            case "sponge_client_prod":
-                return AppLaunchTargets.CLIENT_PRODUCTION;
-            case "sponge_server_dev":
-                return AppLaunchTargets.SERVER_DEVELOPMENT;
-            case "sponge_server_prod":
-                return AppLaunchTargets.SERVER_PRODUCTION;
-            case "sponge_client_it":
-                return AppLaunchTargets.CLIENT_INTEGRATION_TEST;
-            case "sponge_server_it":
-                return AppLaunchTargets.SERVER_INTEGRATION_TEST;
-        }
-
-        return null;
+    public static final class ManifestAttributes {
+        public static final String ACCESS_WIDENER = "Access-Widener";
+        public static final String SUPERCLASS_CHANGE = "Superclass-Transformer";
     }
 }
