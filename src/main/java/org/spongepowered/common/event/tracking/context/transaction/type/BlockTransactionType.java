@@ -24,11 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.type;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
-import net.minecraft.core.BlockPos;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.transaction.BlockTransaction;
@@ -46,7 +43,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.Collections;
 import java.util.Optional;
 
 public final class BlockTransactionType extends TransactionType<ChangeBlockEvent.All> {
@@ -69,49 +66,36 @@ public final class BlockTransactionType extends TransactionType<ChangeBlockEvent
             if (!serverWorld.isPresent()) {
                 return;
             }
-            final ListMultimap<BlockPos, SpongeBlockSnapshot> positions = LinkedListMultimap.create();
-            // Gather transactions that were valid
-            events.stream()
-                .filter(event -> !event.isCancelled())
-                .flatMap(event -> event.transactions().stream())
-                .filter(BlockTransaction::isValid)
-                .forEach(transactions -> {
-                    // Then "put" the most recent transactions such that we have a complete rebuild of
-                    // each position according to what originally existed and then
-                    // the ultimate final block on that position
-                    final SpongeBlockSnapshot original = (SpongeBlockSnapshot) transactions.original();
-                    positions.put(original.getBlockPos(), original);
-                    positions.put(original.getBlockPos(), (SpongeBlockSnapshot) transactions.finalReplacement());
-                });
 
-            // Do not bother turning the positions into receipts if it's empty
-            // just return.
-            if (positions.isEmpty()) {
-                return;
-            }
-            final ImmutableList<BlockTransactionReceipt> transactions = positions.asMap()
-                .values()
-                .stream()
-                .map(spongeBlockSnapshots -> {
-                    final List<SpongeBlockSnapshot> snapshots = new ArrayList<>(spongeBlockSnapshots);
-                    if (snapshots.isEmpty() || snapshots.size() < 2) {
-                        // Error case
-                        return Optional.<BlockTransactionReceipt>empty();
+            // Gather transactions that were valid
+            final ArrayList<BlockTransactionReceipt> transactions = new ArrayList<>();
+            for (final ChangeBlockEvent.All event : events) {
+                if (event.isCancelled()) {
+                    continue;
+                }
+
+                transactions.ensureCapacity(event.transactions().size());
+                for (final BlockTransaction transaction : event.transactions()) {
+                    if (!transaction.isValid()) {
+                        continue;
                     }
-                    final SpongeBlockSnapshot original = snapshots.get(0);
-                    final SpongeBlockSnapshot result = snapshots.get(snapshots.size() - 1);
+
+                    final SpongeBlockSnapshot original = (SpongeBlockSnapshot) transaction.original();
+                    final SpongeBlockSnapshot result = (SpongeBlockSnapshot) transaction.finalReplacement();
                     final Operation operation = context.getBlockOperation(original, result);
                     final BlockTransactionReceipt eventTransaction = new BlockTransactionReceipt(original, result, operation);
+                    transactions.add(eventTransaction);
                     context.postBlockTransactionApplication(original.blockChange, eventTransaction);
-                    return Optional.of(eventTransaction);
-                })
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(ImmutableList.toImmutableList());
+                }
+            }
+
+            if (transactions.isEmpty()) {
+                return;
+            }
 
             final Cause cause = PhaseTracker.getInstance().currentCause();
 
-            SpongeCommon.post(SpongeEventFactory.createChangeBlockEventPost(cause, transactions, serverWorld.get()));
+            SpongeCommon.post(SpongeEventFactory.createChangeBlockEventPost(cause, Collections.unmodifiableList(transactions), serverWorld.get()));
         });
     }
 }
