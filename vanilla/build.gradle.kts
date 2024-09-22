@@ -310,7 +310,13 @@ dependencies {
 
     // All minecraft deps except itself
     configurations.minecraft.get().resolvedConfiguration.resolvedArtifacts
-        .map { it.id.componentIdentifier.toString() }
+        .map {
+            var id = it.id.componentIdentifier.toString()
+            if (it.classifier != null) {
+                id += ":" + it.classifier
+            }
+            id
+        }
         .filter { !it.startsWith("net.minecraft:joined") }
         .forEach { boot(it) { isTransitive = false } }
 
