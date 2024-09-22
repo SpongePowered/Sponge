@@ -126,7 +126,6 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
     @Shadow private double vehicleFirstGoodX;
     @Shadow private double vehicleFirstGoodY;
     @Shadow private double vehicleFirstGoodZ;
-    @Shadow private int chatSpamTickCount;
 
     @Shadow public abstract void shadow$teleport(PositionMoveRotation pitch, Set<Relative> relativeArguments);
     @Shadow protected abstract CompletableFuture<List<FilteredText>> shadow$filterTextPacket(final List<String> $$0);
