@@ -25,8 +25,6 @@
 package org.spongepowered.common.event.tracking.context.transaction.block;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.ListMultimap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -49,8 +47,8 @@ import org.spongepowered.common.event.tracking.context.transaction.type.Transact
 import org.spongepowered.common.event.tracking.context.transaction.world.WorldBasedTransaction;
 import org.spongepowered.math.vector.Vector3i;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 abstract class BlockEventBasedTransaction extends WorldBasedTransaction<ChangeBlockEvent.All> {
@@ -75,53 +73,30 @@ abstract class BlockEventBasedTransaction extends WorldBasedTransaction<ChangeBl
         if (!o.isPresent()) {
             return Optional.empty();
         }
-        final ListMultimap<BlockPos, SpongeBlockSnapshot> positions = LinkedListMultimap.create();
+
+        final Map<BlockPos, BlockTransaction> eventTransactions = new HashMap<>();
         for (final GameTransaction<@NonNull ?> transaction : transactions) {
             final BlockEventBasedTransaction blockTransaction = (BlockEventBasedTransaction) transaction;
-            if (!positions.containsKey(blockTransaction.affectedPosition)) {
-                positions.put(
-                    blockTransaction.affectedPosition,
-                    blockTransaction.getOriginalSnapshot()
-                );
-            }
-            if (blockTransaction.getResultingSnapshot() != null) {
-                positions.put(
-                        blockTransaction.affectedPosition,
-                        blockTransaction.getResultingSnapshot()
-                );
-            }
+            final SpongeBlockSnapshot original = blockTransaction.getOriginalSnapshot();
+            final SpongeBlockSnapshot result = blockTransaction.getResultingSnapshot();
+            final Operation operation = context.getBlockOperation(original, result);
+            final BlockTransaction eventTransaction = new BlockTransaction(original, result, operation);
+            eventTransactions.merge(blockTransaction.affectedPosition, eventTransaction, (oldValue, newValue) -> {
+                final ImmutableList.Builder<BlockSnapshot> intermediary = ImmutableList.builderWithExpectedSize(oldValue.intermediary().size() + 1);
+                intermediary.addAll(oldValue.intermediary());
+                intermediary.add(oldValue.finalReplacement());
+                final Operation mergedOperation = context.getBlockOperation((SpongeBlockSnapshot) oldValue.original(), (SpongeBlockSnapshot) newValue.finalReplacement());
+                return new BlockTransaction(oldValue.original(), newValue.finalReplacement(), intermediary.build(), mergedOperation);
+            });
         }
-
-        final ImmutableList<BlockTransaction> eventTransactions = positions.asMap().values()
-            .stream()
-            .map(spongeBlockSnapshots -> {
-                final List<SpongeBlockSnapshot> snapshots = new ArrayList<>(spongeBlockSnapshots);
-                if (snapshots.isEmpty() || snapshots.size() < 2) {
-                    // Error case
-                    return Optional.<BlockTransaction>empty();
-                }
-                final SpongeBlockSnapshot original = snapshots.get(0);
-                final SpongeBlockSnapshot result = snapshots.get(snapshots.size() - 1);
-                final ImmutableList<BlockSnapshot> intermediary;
-                if (snapshots.size() > 2) {
-                    intermediary = ImmutableList.copyOf(snapshots.subList(1, snapshots.size() - 2));
-                } else {
-                    intermediary = ImmutableList.of();
-                }
-                final Operation operation = context.getBlockOperation(original, result);
-                final BlockTransaction eventTransaction = new BlockTransaction(original, result, intermediary, operation);
-                return Optional.of(eventTransaction);
-            })
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .collect(ImmutableList.toImmutableList());
 
         if (eventTransactions.isEmpty()) {
             return Optional.empty();
         }
+
         return Optional.of(SpongeEventFactory.createChangeBlockEventAll(
             currentCause,
-            eventTransactions,
+            ImmutableList.copyOf(eventTransactions.values()),
             o.get()
         ));
     }
