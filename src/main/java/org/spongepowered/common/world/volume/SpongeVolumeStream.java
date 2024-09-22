@@ -206,17 +206,7 @@ public class SpongeVolumeStream<V extends Volume, T> implements VolumeStream<V, 
 
     @Override
     public <W extends MutableVolume> void apply(final VolumeCollector<W, T, ?> collector) {
-        final PhaseTracker instance = PhaseTracker.getInstance();
-        try (final @Nullable PhaseContext<@NonNull ?> context = instance.getPhaseContext().isApplyingStreams()
-            ? null
-            : PluginPhase.State.VOLUME_STREAM_APPLICATION
-                .createPhaseContext(instance)
-                .setVolumeStream(this)
-                .spawnType(() -> PhaseTracker.getCauseStackManager().context(EventContextKeys.SPAWN_TYPE).orElse(null))
-        ) {
-            if (context != null) {
-                context.buildAndSwitch();
-            }
+        this.startPhase(() -> {
             this.stream.forEach(element -> {
                 final W targetVolume = collector.target().get();
                 final VolumeElement<W, T> transformed = collector.positionTransform().apply(VolumeElement.of(
@@ -227,35 +217,39 @@ public class SpongeVolumeStream<V extends Volume, T> implements VolumeStream<V, 
                 collector.applicator()
                     .apply(targetVolume, transformed);
             });
-        }
+        });
     }
 
     @Override
     public <W extends MutableVolume, R> void applyUntil(final VolumeCollector<W, T, R> collector, final Predicate<R> predicate) {
-        boolean doWork = true;
-        for (final Iterator<VolumeElement<V, T>> iterator = this.stream.iterator(); doWork && iterator.hasNext(); ) {
-            final W targetVolume = collector.target().get();
-            final VolumeElement<V, T> element = iterator.next();
-            final VolumeElement<W, T> transformed = collector.positionTransform().apply(VolumeElement.of(
-                collector.target(),
-                element::type,
-                element.position()
-            ));
-            final R apply = collector.applicator()
-                .apply(targetVolume, transformed);
-            doWork = predicate.test(apply);
-        }
+        this.startPhase(() -> {
+            boolean doWork = true;
+            for (final Iterator<VolumeElement<V, T>> iterator = this.stream.iterator(); doWork && iterator.hasNext(); ) {
+                final W targetVolume = collector.target().get();
+                final VolumeElement<V, T> element = iterator.next();
+                final VolumeElement<W, T> transformed = collector.positionTransform().apply(VolumeElement.of(
+                    collector.target(),
+                    element::type,
+                    element.position()
+                ));
+                final R apply = collector.applicator()
+                    .apply(targetVolume, transformed);
+                doWork = predicate.test(apply);
+            }
+        });
     }
 
     @Override
     public void forEach(final VolumeConsumer<V, T> visitor) {
-        this.stream.forEach(element -> visitor.consume(
-            element.volume(),
-            element.type(),
-            element.position().x(),
-            element.position().y(),
-            element.position().z()
-        ));
+        this.startPhase(() -> {
+            this.stream.forEach(element -> visitor.consume(
+                element.volume(),
+                element.type(),
+                element.position().x(),
+                element.position().y(),
+                element.position().z()
+            ));
+        });
     }
 
     @Override
@@ -263,4 +257,20 @@ public class SpongeVolumeStream<V extends Volume, T> implements VolumeStream<V, 
         this.stream.forEach(consumer);
     }
 
+    private void startPhase(final Runnable runnable) {
+        final PhaseTracker instance = PhaseTracker.getInstance();
+        try (final @Nullable PhaseContext<@NonNull ?> context = instance.getPhaseContext().isApplyingStreams()
+            ? null
+            : PluginPhase.State.VOLUME_STREAM_APPLICATION
+            .createPhaseContext(instance)
+            .setVolumeStream(this)
+            .spawnType(() -> PhaseTracker.getCauseStackManager().context(EventContextKeys.SPAWN_TYPE).orElse(null))
+        ) {
+            if (context != null) {
+                context.buildAndSwitch();
+            }
+
+            runnable.run();
+        }
+    }
 }
