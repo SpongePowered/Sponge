@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.flat;
 
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
@@ -35,6 +36,7 @@ import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.generation.config.flat.FlatGeneratorConfig;
 import org.spongepowered.api.world.generation.config.flat.LayerConfig;
+import org.spongepowered.api.world.generation.structure.StructureSet;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
@@ -51,6 +53,7 @@ public abstract class FlatLevelGeneratorSettingsMixin_API implements FlatGenerat
 
     @Shadow public abstract Holder<net.minecraft.world.level.biome.Biome> shadow$getBiome();
     @Shadow public abstract List<FlatLayerInfo> shadow$getLayersInfo();
+    @Shadow public abstract Optional<HolderSet<net.minecraft.world.level.levelgen.structure.StructureSet>> shadow$structureOverrides();
     // @formatter:on
 
     @Override
@@ -60,7 +63,11 @@ public abstract class FlatLevelGeneratorSettingsMixin_API implements FlatGenerat
 
     @Override
     public Optional<LayerConfig> layer(final int index) {
-        return Optional.ofNullable((LayerConfig) this.shadow$getLayersInfo().get(index));
+        List<LayerConfig> layers = this.layers();
+        if (index < 0 || index >= layers.size()) {
+            return Optional.empty();
+        }
+        return Optional.of(layers.get(index));
     }
 
     @Override
@@ -76,5 +83,10 @@ public abstract class FlatLevelGeneratorSettingsMixin_API implements FlatGenerat
     @Override
     public boolean populateLakes() {
         return this.addLakes;
+    }
+
+    @Override
+    public Optional<List<StructureSet>> structureSets() {
+        return this.shadow$structureOverrides().map(holderSet -> holderSet.stream().map(h -> (StructureSet) (Object) h.value()).toList());
     }
 }

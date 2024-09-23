@@ -94,6 +94,7 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
 
     private static final ExecutorService impl$EXECUTOR = Executors.newCachedThreadPool(new ThreadFactoryBuilder()
             .setNameFormat("Sponge-LoginThread-%d")
+            .setDaemon(true)
             .setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER))
             .build());
 

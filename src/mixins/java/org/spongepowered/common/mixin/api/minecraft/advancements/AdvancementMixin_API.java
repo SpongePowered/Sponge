@@ -73,7 +73,7 @@ public abstract class AdvancementMixin_API implements org.spongepowered.api.adva
 
     @Override
     public Optional<org.spongepowered.api.advancement.DisplayInfo> displayInfo() {
-        return Optional.ofNullable((org.spongepowered.api.advancement.DisplayInfo) (Object) this.display);
+        return this.display.map(org.spongepowered.api.advancement.DisplayInfo.class::cast);
     }
 
     @Override

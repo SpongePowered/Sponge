@@ -14,7 +14,7 @@ plugins {
     alias(libs.plugins.shadow)
     id("implementation-structure")
     alias(libs.plugins.blossom)
-    id("dev.architectury.loom") version "1.6-SNAPSHOT"
+    id("dev.architectury.loom") version "1.6.411"
 }
 
 val commonProject = parent!!
@@ -156,6 +156,10 @@ extensions.configure(LoomGradleExtensionAPI::class) {
 
     mixin {
         useLegacyMixinAp.set(false)
+    }
+
+    forge {
+        useCustomMixin.set(false)
     }
 
     mods {

@@ -26,6 +26,7 @@ package org.spongepowered.common.data.provider.item.stack;
 
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.network.Filterable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -89,7 +90,7 @@ public final class BookItemStackData {
                         })
                         .set((h, v) -> {
                             final WrittenBookContent content = h.getOrDefault(DataComponents.WRITTEN_BOOK_CONTENT, WrittenBookContent.EMPTY);
-                            var pages = v.stream().map(SpongeAdventure::asVanilla).map(Filterable::passThrough).toList();
+                            var pages = v.stream().map(SpongeAdventure::asVanillaMutable).map(Component.class::cast).map(Filterable::passThrough).toList();
                             h.set(DataComponents.WRITTEN_BOOK_CONTENT,
                                     new WrittenBookContent(content.title(), content.author(), content.generation(), pages, content.resolved()));
                         })

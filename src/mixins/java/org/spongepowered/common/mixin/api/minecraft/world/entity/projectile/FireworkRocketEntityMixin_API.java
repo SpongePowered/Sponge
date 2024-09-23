@@ -37,14 +37,11 @@ import java.util.Set;
 public abstract class FireworkRocketEntityMixin_API extends ProjectileMixin_API implements FireworkRocket {
 
     // @formatter:off
-    @Shadow private int life;
-    @Shadow private int lifetime;
     @Shadow protected abstract void shadow$explode();
     // @formatter:on
 
     @Override
     public void detonate() {
-        this.life = this.lifetime + 1;
         this.shadow$explode();
     }
 
@@ -53,6 +50,7 @@ public abstract class FireworkRocketEntityMixin_API extends ProjectileMixin_API 
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
         values.add(this.requireValue(Keys.FUSE_DURATION).asImmutable());
+        values.add(this.requireValue(Keys.IS_PRIMED).asImmutable());
         values.add(this.requireValue(Keys.TICKS_REMAINING).asImmutable());
 
         this.getValue(Keys.EXPLOSION_RADIUS).map(Value::asImmutable).ifPresent(values::add);

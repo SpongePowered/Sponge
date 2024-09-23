@@ -56,7 +56,6 @@ import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.ArrayList;
@@ -156,7 +155,7 @@ public final class ItemStackData {
                             }
                             return null;
                         })
-                        .set((h, v) -> h.set(DataComponents.CUSTOM_NAME, SpongeAdventure.asVanilla(v)))
+                        .set((h, v) -> h.set(DataComponents.CUSTOM_NAME, SpongeAdventure.asVanillaMutable(v)))
                         .delete(h -> h.remove(DataComponents.CUSTOM_NAME))
                     .create(Keys.IS_UNBREAKABLE)
                         .get(h -> h.has(DataComponents.UNBREAKABLE))
@@ -175,7 +174,7 @@ public final class ItemStackData {
                                 h.remove(DataComponents.LORE);
                                 return;
                             }
-                            h.set(DataComponents.LORE, new ItemLore(v.stream().map(SpongeAdventure::asVanilla).toList()));
+                            h.set(DataComponents.LORE, new ItemLore(v.stream().map(SpongeAdventure::asVanillaMutable).map(Component.class::cast).toList()));
                         })
                         .delete(h -> h.remove(DataComponents.LORE))
                     .create(Keys.MAX_DURABILITY)
@@ -264,7 +263,7 @@ public final class ItemStackData {
                             }
                             return SpongeAdventure.asAdventure(component);
                         })
-                        .set((h, value) -> h.set(DataComponents.ITEM_NAME, SpongeAdventure.asVanilla(value)))
+                        .set((h, value) -> h.set(DataComponents.ITEM_NAME, SpongeAdventure.asVanillaMutable(value)))
                         .delete(stack -> stack.remove(DataComponents.ITEM_NAME))
                     ;
     }
@@ -276,7 +275,7 @@ public final class ItemStackData {
         }
         var slots = contents.stream().map(ItemStackUtil::cloneDefensive).toList();
         if (slots.isEmpty()) {
-            return new EmptyInventoryImpl(null);
+            return null;
         }
         final Inventory inventory = Inventory.builder().slots(slots.size()).completeStructure()
                 .plugin(SpongeCommon.game().platform().container(Platform.Component.IMPLEMENTATION))

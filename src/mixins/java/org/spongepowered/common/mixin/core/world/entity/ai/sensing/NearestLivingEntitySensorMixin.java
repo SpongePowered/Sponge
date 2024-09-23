@@ -22,37 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.entity;
+package org.spongepowered.common.mixin.core.world.entity.ai.sensing;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySelector;
-import net.minecraft.world.entity.player.Player;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.sensing.NearestLivingEntitySensor;
+import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 
+import java.util.List;
 import java.util.function.Predicate;
 
-@Mixin(EntitySelector.class)
-public abstract class EntitySelectorMixin {
+@Mixin(NearestLivingEntitySensor.class)
+public class NearestLivingEntitySensorMixin<T extends LivingEntity> extends SensorMixin<T> {
 
-    @Shadow @Final @Mutable public static Predicate<Entity> NO_SPECTATORS = entity -> {
-        if (entity instanceof VanishableBridge vb && vb.bridge$vanishState().invisible()) {
-            // Sponge: Count vanished entities as spectating
-            return false;
-        }
-        return !entity.isSpectator();
-    };
-
-    @Shadow @Final @Mutable public static Predicate<Entity> NO_CREATIVE_OR_SPECTATOR = $$0 -> {
-        if ($$0 instanceof VanishableBridge vb && vb.bridge$vanishState().invisible()) {
-            // Sponge: Count vanished entities as spectating
-            return false;
-        }
-        return !($$0 instanceof Player) || !$$0.isSpectator() && !((Player)$$0).isCreative();
-    };
-
-
+    @Redirect(method = "doTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;getEntitiesOfClass(Ljava/lang/Class;Lnet/minecraft/world/phys/AABB;Ljava/util/function/Predicate;)Ljava/util/List;"))
+    private <T extends Entity> List<T> impl$ignoreVanishedEntities(
+        final ServerLevel instance, final Class<T> aClass, final AABB aabb,
+        final Predicate<? super T> predicate
+    ) {
+        return instance.getEntitiesOfClass(aClass, aabb, entity -> {
+            if (entity instanceof VanishableBridge v) {
+                final var state = v.bridge$vanishState();
+                if (state.invisible() || state.untargetable()) {
+                    return false;
+                }
+            }
+            return predicate.test(entity);
+        });
+    }
 }

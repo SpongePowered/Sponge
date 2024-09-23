@@ -39,11 +39,13 @@ public final class FusedExplosiveData {
     public static void register(final DataProviderRegistrator registrator) {
         registrator
                 .asMutable(FusedExplosive.class)
+                    .create(Keys.IS_PRIMED)
+                        .get(h -> ((FusedExplosiveBridge) h).bridge$isPrimed())
                     .create(Keys.FUSE_DURATION)
                         .get(h -> new SpongeTicks(((FusedExplosiveBridge) h).bridge$getFuseDuration()))
                         .setAnd((h, v) -> {
                             final int ticks = SpongeTicks.toSaturatedIntOrInfinite(v);
-                            if (!v.isInfinite() || ticks < 0) {
+                            if (v.isInfinite() || ticks < 0) {
                                 return false;
                             }
                             ((FusedExplosiveBridge) h).bridge$setFuseDuration(ticks);
@@ -56,8 +58,7 @@ public final class FusedExplosiveData {
                             if (v.isInfinite() || ticks < 0) {
                                 return false;
                             }
-                            // TODO isPrimed on bridge?
-                            if (h.primed().get()) {
+                            if (((FusedExplosiveBridge) h).bridge$isPrimed()) {
                                 ((FusedExplosiveBridge) h).bridge$setFuseTicksRemaining(ticks);
                             }
                             return true;

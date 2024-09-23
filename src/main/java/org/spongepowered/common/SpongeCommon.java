@@ -28,6 +28,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.LogManager;
@@ -95,8 +96,12 @@ public final class SpongeCommon {
         return (MinecraftServer) Sponge.server();
     }
 
+    public static RegistryAccess.Frozen vanillaRegistryAccess() {
+        return SpongeCommon.server().registryAccess();
+    }
+
     public static <E> Registry<E> vanillaRegistry(ResourceKey<? extends Registry<? extends E>> key) {
-        return SpongeCommon.server().registryAccess().registryOrThrow(key);
+        return SpongeCommon.vanillaRegistryAccess().registryOrThrow(key);
     }
 
     public static ServerScheduler serverScheduler() {
