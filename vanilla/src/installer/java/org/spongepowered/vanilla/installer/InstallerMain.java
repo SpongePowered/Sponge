@@ -159,7 +159,7 @@ public final class InstallerMain {
             .toArray(Path[]::new);
 
         final URL rootJar = InstallerMain.class.getProtectionDomain().getCodeSource().getLocation();
-        final URI fsURI = new URI("jar", rootJar.toString(), null);
+        final URI fsURI = new URI("jar:" + rootJar);
         System.setProperty("sponge.rootJarFS", fsURI.toString());
 
         final FileSystem fs = FileSystems.newFileSystem(fsURI, Map.of());
