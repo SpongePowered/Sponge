@@ -164,16 +164,13 @@ public abstract class BlockEntityMixin_API implements BlockEntity {
     }
 
     @Override
-    public void setTicking(final boolean ticking) {
-        if (this.remove) {
-            throw new IllegalStateException("BlockEntity is removed");
-        }
-
-        if (!this.canTick()) {
-            throw new IllegalStateException("BlockEntity cannot tick");
+    public boolean setTicking(final boolean ticking) {
+        if (this.isRemoved() || !this.canTick()) {
+            return false;
         }
 
         this.api$isTicking = ticking;
+        return true;
     }
 
     @Override
