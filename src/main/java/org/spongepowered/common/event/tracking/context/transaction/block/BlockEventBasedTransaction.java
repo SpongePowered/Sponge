@@ -77,6 +77,9 @@ abstract class BlockEventBasedTransaction extends WorldBasedTransaction<ChangeBl
         final Map<BlockPos, BlockTransaction> eventTransactions = new HashMap<>();
         for (final GameTransaction<@NonNull ?> transaction : transactions) {
             final BlockEventBasedTransaction blockTransaction = (BlockEventBasedTransaction) transaction;
+            if (!blockTransaction.actualBlockTransaction()) {
+                continue;
+            }
             final SpongeBlockSnapshot original = blockTransaction.getOriginalSnapshot();
             final SpongeBlockSnapshot result = blockTransaction.getResultingSnapshot();
             final Operation operation = context.getBlockOperation(original, result);
@@ -99,6 +102,10 @@ abstract class BlockEventBasedTransaction extends WorldBasedTransaction<ChangeBl
             ImmutableList.copyOf(eventTransactions.values()),
             o.get()
         ));
+    }
+
+    protected boolean actualBlockTransaction() {
+        return true;
     }
 
     protected abstract SpongeBlockSnapshot getResultingSnapshot();
