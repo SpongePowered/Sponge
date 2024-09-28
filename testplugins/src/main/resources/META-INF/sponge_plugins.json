@@ -340,7 +340,7 @@
             "entrypoint": "org.spongepowered.test.serviceloader.ChildModuleTestPlugin",
             "description": "Child Module Tests",
             "properties": {
-                "module": "org.spongepowered.test.serviceloader.ChildModuleTestPlugin$Module"
+                "guice-module": "org.spongepowered.test.serviceloader.ChildModuleTestPlugin$Module"
             }
         },
         {

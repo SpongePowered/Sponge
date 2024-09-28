@@ -109,7 +109,7 @@ public final class PluginModule extends PrivateModule {
         final ArrayList<Module> modules = new ArrayList<>(2);
         modules.add(new PluginModule(container, pluginClass));
 
-        final @Nullable Object customModule = container.metadata().property("module").orElse(null);
+        final @Nullable Object customModule = container.metadata().property("guice-module").orElse(null);
         if (customModule != null) {
             try {
                 final Class<?> moduleClass = Class.forName(customModule.toString(), true, pluginClass.getClassLoader());
