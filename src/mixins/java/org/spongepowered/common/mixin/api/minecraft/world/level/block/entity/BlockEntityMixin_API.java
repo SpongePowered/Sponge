@@ -71,6 +71,9 @@ public abstract class BlockEntityMixin_API implements BlockEntity {
     //@formatter:on
 
     @Nullable private LocatableBlock api$LocatableBlock;
+    private boolean api$canTickRequested = false;
+    private boolean api$canTick;
+    private boolean api$isTicking = true;
 
     public ServerLocation location() {
         return ServerLocation.of((ServerWorld) this.level, VecHelper.toVector3i(this.shadow$getBlockPos()));
@@ -142,6 +145,31 @@ public abstract class BlockEntityMixin_API implements BlockEntity {
         if (!this.remove) {
             this.world().removeBlockEntity(this.blockPosition());
         }
+    }
+
+    @Override
+    public boolean canTick() {
+        if (!this.api$canTickRequested) {
+            this.api$canTick = this.shadow$getBlockState().getTicker(this.level, this.type) != null;
+            this.api$canTickRequested = true;
+        }
+
+        return api$canTick;
+    }
+
+    @Override
+    public boolean isTicking() {
+        return !this.remove && this.canTick() && this.api$isTicking;
+    }
+
+    @Override
+    public boolean setTicking(final boolean ticking) {
+        if (this.isRemoved() || !this.canTick()) {
+            return false;
+        }
+
+        this.api$isTicking = ticking;
+        return true;
     }
 
     @Override
