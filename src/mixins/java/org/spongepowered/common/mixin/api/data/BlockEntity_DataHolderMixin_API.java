@@ -24,13 +24,21 @@
  */
 package org.spongepowered.common.mixin.api.data;
 
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.ItemStack;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
 
-@Mixin(value = {Entity.class, ItemStack.class}, priority = 899)
-public abstract class DataHolderMixin_API implements DataHolder, SpongeMutableDataHolder {
+import java.util.Arrays;
+import java.util.List;
 
+@Mixin(net.minecraft.world.level.block.entity.BlockEntity.class)
+public abstract class BlockEntity_DataHolderMixin_API implements DataHolder, SpongeMutableDataHolder {
+
+    @Override
+    public List<DataHolder> impl$delegateDataHolder() {
+        final BlockState state = ((BlockEntity) this).block();
+        return Arrays.asList(this, state, state.type());
+    }
 }

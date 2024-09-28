@@ -183,5 +183,4 @@ public abstract class BlockEntityMixin_API implements BlockEntity {
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         return new HashSet<>();
     }
-
 }

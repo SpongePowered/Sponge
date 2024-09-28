@@ -25,9 +25,11 @@
 package org.spongepowered.common.mixin.inventory.api.server.level;
 
 import net.kyori.adventure.text.Component;
+import net.minecraft.world.inventory.MenuType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.Container;
+import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.inventory.container.ContainerBridge;
@@ -62,6 +64,20 @@ public abstract class ServerPlayerMixin_Inventory_API extends PlayerMixin_Invent
             throw new UnsupportedOperationException("This player is currently modifying an open container. Opening a new one must be delayed!");
         }
         return Optional.ofNullable((Container) InventoryEventFactory.displayContainer((net.minecraft.server.level.ServerPlayer) (Object) this, inventory, displayName));
+    }
+
+    @Override
+    public Optional<Container> openInventory(final ContainerType type) {
+        return this.openInventory(type, null);
+    }
+
+    @Override
+    public Optional<Container> openInventory(final ContainerType type, final Component displayName) {
+        final ContainerBridge openContainer = (ContainerBridge) this.containerMenu;
+        if (openContainer.bridge$isInUse()) {
+            throw new UnsupportedOperationException("This player is currently modifying an open container. Opening a new one must be delayed!");
+        }
+        return Optional.ofNullable((Container) InventoryEventFactory.displayContainer((net.minecraft.server.level.ServerPlayer) (Object) this, (MenuType<?>) type, displayName));
     }
 
     @Override
