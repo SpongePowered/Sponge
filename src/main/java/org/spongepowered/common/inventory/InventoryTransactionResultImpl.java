@@ -28,7 +28,7 @@ package org.spongepowered.common.inventory;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
@@ -75,7 +75,7 @@ public class InventoryTransactionResultImpl implements InventoryTransactionResul
     @Override
     public void revert() {
         for (SlotTransaction transaction : Lists.reverse(this.slotTransactions)) {
-            transaction.slot().set(transaction.original().createStack());
+            transaction.slot().set(transaction.original());
         }
     }
 
@@ -127,35 +127,35 @@ public class InventoryTransactionResultImpl implements InventoryTransactionResul
         }
 
         @Override
-        public PollBuilder poll(ItemStackSnapshot itemStack) {
+        public PollBuilder poll(ItemStackLike itemStack) {
             if (this.polled == null) {
                 this.polled = new ArrayList<>();
             }
-            this.polled.add(itemStack);
+            this.polled.add(itemStack.asImmutable());
             return this;
         }
 
         @Override
-        public InventoryTransactionResult.Builder reject(ItemStack... itemStacks) {
+        public InventoryTransactionResult.Builder reject(ItemStackLike... itemStacks) {
             if (this.rejected == null) {
                 this.rejected = new ArrayList<>();
             }
-            for (ItemStack itemStack1 : itemStacks) {
+            for (ItemStackLike itemStack1 : itemStacks) {
                 if (!itemStack1.isEmpty()) {
-                    this.rejected.add(itemStack1.createSnapshot());
+                    this.rejected.add(itemStack1.asImmutable());
                 }
             }
             return this;
         }
 
         @Override
-        public InventoryTransactionResult.Builder reject(Iterable<ItemStackSnapshot> itemStacks) {
+        public InventoryTransactionResult.Builder reject(Iterable<? extends ItemStackLike> itemStacks) {
             if (this.rejected == null) {
                 this.rejected = new ArrayList<>();
             }
-            for (ItemStackSnapshot itemStack1 : itemStacks) {
+            for (ItemStackLike itemStack1 : itemStacks) {
                 if (!itemStack1.isEmpty()) {
-                    this.rejected.add(itemStack1);
+                    this.rejected.add(itemStack1.asImmutable());
                 }
             }
             return this;

@@ -55,7 +55,7 @@ public abstract class MerchantOfferMixin_API implements TradeOffer {
 
     @Override
     public ItemStackSnapshot firstBuyingItem() {
-        return ((ItemStack) (Object) this.shadow$getCostA()).createSnapshot();
+        return ((ItemStack) (Object) this.shadow$getCostA()).asImmutable();
     }
 
     @Override
@@ -68,12 +68,12 @@ public abstract class MerchantOfferMixin_API implements TradeOffer {
         if (this.shadow$getCostB() == null) {
             return Optional.empty();
         }
-        return Optional.of(((ItemStack) (Object) this.shadow$getCostB()).createSnapshot());
+        return Optional.of(((ItemStack) (Object) this.shadow$getCostB()).asImmutable());
     }
 
     @Override
     public ItemStackSnapshot sellingItem() {
-        return ((ItemStack) (Object) this.shadow$getResult()).createSnapshot();
+        return ((ItemStack) (Object) this.shadow$getResult()).asImmutable();
     }
 
     @Override

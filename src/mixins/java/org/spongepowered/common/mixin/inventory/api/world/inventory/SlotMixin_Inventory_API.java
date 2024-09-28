@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.inventory.api.world.inventory;
 import net.minecraft.world.Container;
 import net.minecraft.world.inventory.Slot;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
@@ -62,9 +62,9 @@ public abstract class SlotMixin_Inventory_API implements org.spongepowered.api.i
     }
 
     @Override
-    public InventoryTransactionResult set(ItemStack stack) {
+    public InventoryTransactionResult set(ItemStackLike stack) {
         final InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.SUCCESS);
-        final net.minecraft.world.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
+        final net.minecraft.world.item.ItemStack nativeStack = ItemStackUtil.fromLikeToNative(stack);
 
         final net.minecraft.world.item.ItemStack old = this.shadow$getItem();
         ItemStackSnapshot oldSnap = ItemStackUtil.snapshotOf(old);

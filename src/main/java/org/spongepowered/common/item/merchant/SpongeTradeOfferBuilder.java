@@ -36,6 +36,7 @@ import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.common.accessor.world.item.trading.MerchantOfferAccessor;
@@ -64,22 +65,22 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
     }
 
     @Override
-    public TradeOffer.Builder firstBuyingItem(final ItemStack item) {
+    public TradeOffer.Builder firstBuyingItem(final ItemStackLike item) {
         Objects.requireNonNull(item, "Buying item cannot be null");
-        this.firstItem = item.createSnapshot();
+        this.firstItem = item.asImmutable();
         return this;
     }
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public TradeOffer.Builder secondBuyingItem(final ItemStack item) {
-        this.secondItem = item != null ? item.createSnapshot() : ItemStackSnapshot.empty();
+    public TradeOffer.Builder secondBuyingItem(final ItemStackLike item) {
+        this.secondItem = item != null ? item.asImmutable() : ItemStackSnapshot.empty();
         return this;
     }
 
     @Override
-    public TradeOffer.Builder sellingItem(final ItemStack item) {
-        this.sellingItem = item.createSnapshot();
+    public TradeOffer.Builder sellingItem(final ItemStackLike item) {
+        this.sellingItem = item.asImmutable();
         return this;
     }
 

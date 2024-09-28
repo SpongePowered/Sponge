@@ -27,7 +27,7 @@ package org.spongepowered.common.item.recipe.ingredient;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.recipe.crafting.Ingredient;
 
 import java.util.Arrays;
@@ -39,7 +39,7 @@ public class SpongeIngredientBuilder implements Ingredient.Builder {
     private ItemType[] types;
     private ResourceKey itemTag;
     private ItemStack[] stacks;
-    private Predicate<ItemStack> predicate;
+    private Predicate<? super ItemStackLike> predicate;
     private ResourceKey key;
 
     @Override
@@ -75,25 +75,18 @@ public class SpongeIngredientBuilder implements Ingredient.Builder {
     }
 
     @Override
-    public Ingredient.Builder with(ItemStack... types) {
+    public Ingredient.Builder with(ItemStackLike... types) {
         this.reset();
-        this.stacks = types;
+        this.stacks = Arrays.stream(types).map(ItemStackLike::asMutable).toArray(ItemStack[]::new);
         return this;
     }
 
     @Override
-    public Ingredient.Builder with(ItemStackSnapshot... types) {
+    public Ingredient.Builder with(ResourceKey resourceKey, Predicate<? super ItemStackLike> predicate, ItemStackLike... exemplaryTypes) {
         this.reset();
-        this.stacks = Arrays.stream(types).map(ItemStackSnapshot::createStack).toArray(ItemStack[]::new);
-        return this;
-    }
-
-    @Override
-    public Ingredient.Builder with(ResourceKey key, Predicate<ItemStack> predicate, ItemStack... exemplaryTypes) {
-        this.reset();
-        this.stacks = exemplaryTypes;
+        this.stacks = Arrays.stream(exemplaryTypes).map(ItemStackLike::asMutable).toArray(ItemStack[]::new);
         this.predicate = predicate;
-        this.key = key;
+        this.key = resourceKey;
         return this;
     }
 

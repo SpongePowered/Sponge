@@ -26,13 +26,12 @@ package org.spongepowered.common.inventory.adapter.impl.slots;
 
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.slot.EquipmentSlot;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.slot.HeldHandSlotLens;
-import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.function.Predicate;
 
@@ -52,8 +51,8 @@ public class HeldSlotAdapter extends SlotAdapter implements EquipmentSlot {
     }
 
     @Override
-    public boolean isValidItem(ItemStack stack) {
-        Predicate<ItemStack> filter = this.equipmentSlot.getItemStackFilter();
+    public boolean isValidItem(ItemStackLike stack) {
+        Predicate<ItemStackLike> filter = this.equipmentSlot.getItemStackFilter();
         return filter == null || filter.test(stack);
     }
 
@@ -64,11 +63,11 @@ public class HeldSlotAdapter extends SlotAdapter implements EquipmentSlot {
     }
 
     @Override
-    public InventoryTransactionResult set(ItemStack stack) {
+    public InventoryTransactionResult set(ItemStackLike stack) {
         final boolean canSet = this.isValidItem(stack);
         if (!canSet) {
             final InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.FAILURE);
-            result.reject(ItemStackUtil.cloneDefensive(stack));
+            result.reject(stack);
             return result.build();
         }
 

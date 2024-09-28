@@ -27,6 +27,7 @@ package org.spongepowered.common.item;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.minecraft.core.component.DataComponentPatch;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -40,15 +41,19 @@ import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.MergeFunction;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.entity.attribute.AttributeModifier;
+import org.spongepowered.api.entity.attribute.type.AttributeType;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -119,20 +124,13 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         return this.privateStack.isEmpty();
     }
 
-    public boolean isNone() {
-        throw new UnsupportedOperationException("Implement is empty");
+    @Override
+    public Collection<AttributeModifier> attributeModifiers(AttributeType attributeType, EquipmentType equipmentType) {
+        return this.privateStack.attributeModifiers(attributeType, equipmentType);
     }
 
-    @Override
-    public ItemStack createStack() {
-        final net.minecraft.world.item.ItemStack nativeStack = ItemStackUtil.cloneDefensiveNative(ItemStackUtil.toNative(this.privateStack.copy()));
-        if(this.components != null) {
-            nativeStack.applyComponents(this.components);
-        }
-        for (final DataManipulator.Immutable manipulator : this.manipulators) {
-            ((ItemStack) (Object) nativeStack).copyFrom(manipulator);
-        }
-        return ItemStackUtil.fromNative(nativeStack);
+    public boolean isNone() {
+        throw new UnsupportedOperationException("Implement is empty");
     }
 
     @Override
@@ -142,7 +140,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public DataContainer toContainer() {
-        return SpongeItemStack.getDataContainer((net.minecraft.world.item.ItemStack) (Object) this.createStack());
+        return SpongeItemStack.getDataContainer((net.minecraft.world.item.ItemStack) (Object) this.asMutable());
     }
 
     @Override
@@ -152,7 +150,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         if (result.type() != DataTransactionResult.Type.SUCCESS) {
             return Optional.empty();
         }
-        return Optional.of(copy.createSnapshot());
+        return Optional.of(copy.asImmutable());
     }
 
     @Override
@@ -162,7 +160,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         if (result.type() != DataTransactionResult.Type.SUCCESS) {
             return Optional.empty();
         }
-        return Optional.of(copy.createSnapshot());
+        return Optional.of(copy.asImmutable());
     }
 
     @Override
@@ -184,6 +182,28 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     @Override
     public boolean supports(final Key<?> key) {
         return this.privateStack.supports(key);
+    }
+
+    @Override
+    public ItemStack asMutable() {
+        final net.minecraft.world.item.ItemStack nativeStack = ItemStackUtil.cloneDefensiveNative(ItemStackUtil.toNative(this.privateStack.copy()));
+        if (this.components != null) {
+            nativeStack.applyComponents(this.components);
+        }
+        for (final DataManipulator.Immutable manipulator : this.manipulators) {
+            ((ItemStack) (Object) nativeStack).copyFrom(manipulator);
+        }
+        return ItemStackUtil.fromNative(nativeStack);
+    }
+
+    @Override
+    public ItemStack asMutableCopy() {
+        return this.asMutable();
+    }
+
+    @Override
+    public ItemStackSnapshot asImmutable() {
+        return this;
     }
 
     @Override
@@ -233,7 +253,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     public ItemStackSnapshot withRawData(DataView container) throws InvalidDataException {
         final ItemStack copy = this.privateStack.copy();
         copy.setRawData(container);
-        return copy.createSnapshot();
+        return copy.asImmutable();
     }
 
     @Override
@@ -243,14 +263,14 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         if (result.type() != DataTransactionResult.Type.SUCCESS) {
             return Optional.empty();
         }
-        return Optional.of(copy.createSnapshot());
+        return Optional.of(copy.asImmutable());
     }
 
     @Override
     public ItemStackSnapshot mergeWith(ItemStackSnapshot that, MergeFunction function) {
         final ItemStack copy = this.privateStack.copy();
         copy.copyFrom(that, function);
-        return copy.createSnapshot();
+        return copy.asImmutable();
     }
 
     @Override
@@ -278,6 +298,11 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     @Override
     public int hashCode() {
         return Objects.hash(this.itemType, this.quantity, this.damageValue, this.components, this.creatorUniqueId);
+    }
+
+    @Override
+    public Component asComponent() {
+        return this.privateStack.asComponent();
     }
 
     @Override

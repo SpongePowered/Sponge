@@ -35,7 +35,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.item.recipe.RecipeType;
 import org.spongepowered.api.item.recipe.cooking.CookingRecipe;
@@ -92,21 +92,16 @@ public final class SpongeCookingRecipeBuilder extends AbstractResourceKeyedBuild
     }
 
     @Override
-    public EndStep result(final org.spongepowered.api.item.inventory.ItemStack result) {
-        this.result = ItemStackUtil.toNative(result);
+    public EndStep result(final ItemStackLike result) {
+        this.result = ItemStackUtil.fromLikeToNative(result);
         this.resultFunction = null;
         return this;
     }
 
-    @Override
-    public EndStep result(final ItemStackSnapshot result) {
-        return this.result(result.createStack());
-    }
-
     // currently unused
-    public EndStep result(final Function<RecipeInput.Single, org.spongepowered.api.item.inventory.ItemStack> resultFunction, final org.spongepowered.api.item.inventory.ItemStack exemplaryResult) {
-        this.result = ItemStackUtil.toNative(exemplaryResult);
-        this.resultFunction = (inv) -> ItemStackUtil.toNative(resultFunction.apply(InventoryUtil.toSponge(inv)));
+    public EndStep result(final Function<RecipeInput.Single, ? extends ItemStackLike> resultFunction, final ItemStackLike exemplaryResult) {
+        this.result = ItemStackUtil.fromLikeToNative(exemplaryResult);
+        this.resultFunction = (inv) -> ItemStackUtil.fromLikeToNative(resultFunction.apply(InventoryUtil.toSponge(inv)));
         return this;
     }
 

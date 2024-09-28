@@ -47,6 +47,7 @@ import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Equipable;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
@@ -267,7 +268,7 @@ public abstract class SpongeUserView implements User, BridgeSubject {
     }
 
     @Override
-    public void setHead(final ItemStack head) {
+    public void setHead(final ItemStackLike head) {
         this.backingObjectConsumer(player -> player.setHead(head), user -> user.setHead(head));
     }
 
@@ -277,7 +278,7 @@ public abstract class SpongeUserView implements User, BridgeSubject {
     }
 
     @Override
-    public void setChest(final ItemStack chest) {
+    public void setChest(final ItemStackLike chest) {
         this.backingObjectConsumer(player -> player.setChest(chest), user -> user.setChest(chest));
     }
 
@@ -287,7 +288,7 @@ public abstract class SpongeUserView implements User, BridgeSubject {
     }
 
     @Override
-    public void setLegs(final ItemStack legs) {
+    public void setLegs(final ItemStackLike legs) {
         this.backingObjectConsumer(player -> player.setLegs(legs), user -> user.setLegs(legs));
     }
 
@@ -297,7 +298,7 @@ public abstract class SpongeUserView implements User, BridgeSubject {
     }
 
     @Override
-    public void setFeet(final ItemStack feet) {
+    public void setFeet(final ItemStackLike feet) {
         this.backingObjectConsumer(player -> player.setFeet(feet), user -> user.setFeet(feet));
     }
 
@@ -307,7 +308,7 @@ public abstract class SpongeUserView implements User, BridgeSubject {
     }
 
     @Override
-    public void setItemInHand(final HandType handType, final ItemStack itemInHand) {
+    public void setItemInHand(final HandType handType, final ItemStackLike itemInHand) {
         this.backingObjectConsumer(player -> player.setItemInHand(handType, itemInHand), user -> user.setItemInHand(handType, itemInHand));
     }
 
@@ -322,7 +323,7 @@ public abstract class SpongeUserView implements User, BridgeSubject {
     }
 
     @Override
-    public boolean canEquip(final EquipmentType type, final ItemStack equipment) {
+    public boolean canEquip(final EquipmentType type, final ItemStackLike equipment) {
         return this.backingObject(player -> player.canEquip(type, equipment), user -> user.canEquip(type,  equipment));
     }
 
@@ -332,7 +333,7 @@ public abstract class SpongeUserView implements User, BridgeSubject {
     }
 
     @Override
-    public boolean equip(final EquipmentType type, final ItemStack equipment) {
+    public boolean equip(final EquipmentType type, final ItemStackLike equipment) {
         return this.backingObject(player -> player.equip(type, equipment), user -> user.equip(type, equipment));
     }
 

@@ -97,10 +97,6 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
         this.shadow$setCount(quantity);
     }
 
-    public int itemStack$maxStackQuantity() {
-        return this.shadow$getMaxStackSize();
-    }
-
     @Override
     public boolean validateRawData(final DataView container) {
         Objects.requireNonNull(container);
@@ -120,6 +116,18 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
         } catch (final Exception e) {
             throw new InvalidDataException("Unable to set raw data or translate raw data for ItemStack setting", e);
         }
+    }
+
+    public ItemStack itemStack$asMutable() {
+        return (ItemStack) this;
+    }
+
+    public ItemStack itemStack$asMutableCopy() {
+        return this.itemStack$copy();
+    }
+
+    public ItemStackSnapshot itemStack$asImmutable() {
+        return new SpongeItemStackSnapshot((ItemStack) this);
     }
 
     @Override
@@ -166,10 +174,6 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
     @Override
     public DataContainer toContainer() {
         return SpongeItemStack.getDataContainer((net.minecraft.world.item.ItemStack) (Object) this);
-    }
-
-    public ItemStackSnapshot itemStack$createSnapshot() {
-        return new SpongeItemStackSnapshot((ItemStack) this);
     }
 
     public boolean itemStack$equalTo(final ItemStack that) {

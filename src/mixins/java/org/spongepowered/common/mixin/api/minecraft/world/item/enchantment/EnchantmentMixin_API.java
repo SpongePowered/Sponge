@@ -28,7 +28,7 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.core.Holder;
 import net.minecraft.world.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
-import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -74,13 +74,13 @@ public abstract class EnchantmentMixin_API implements EnchantmentType {
     }
 
     @Override
-    public boolean canBeAppliedByTable(final ItemStack stack) {
+    public boolean canBeAppliedByTable(final ItemStackLike stack) {
         return this.canBeAppliedToStack(stack);
     }
 
     @Override
-    public boolean canBeAppliedToStack(final ItemStack stack) {
-        return PlatformHooks.INSTANCE.getItemHooks().canEnchantmentBeAppliedToItem((Enchantment) (Object) this, ItemStackUtil.toNative(stack));
+    public boolean canBeAppliedToStack(final ItemStackLike stack) {
+        return PlatformHooks.INSTANCE.getItemHooks().canEnchantmentBeAppliedToItem((Enchantment) (Object) this, ItemStackUtil.fromLikeToNative(stack));
     }
 
     @Override
