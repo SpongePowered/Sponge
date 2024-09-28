@@ -42,7 +42,7 @@ import org.spongepowered.common.event.tracking.context.transaction.EffectTransac
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 
 @Mixin(value = ServerGamePacketListenerImpl.class, priority = 999)
-public abstract class ServerGamePacketListenerImplMixin_Vanilla extends ServerCommonPacketListenerImplMixin_Vanilla implements ServerGamePacketListener {
+public abstract class ServerGamePacketListenerImplMixin_Vanilla implements ServerGamePacketListener {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Redirect(method = "lambda$handlePlaceRecipe$10",

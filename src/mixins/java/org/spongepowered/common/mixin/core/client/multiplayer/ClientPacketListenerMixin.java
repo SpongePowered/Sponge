@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.core.client.multiplayer;
+package org.spongepowered.common.mixin.core.client.multiplayer;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl;
@@ -30,8 +30,8 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.CommonListenerCookie;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -39,19 +39,25 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
+import org.spongepowered.common.network.channel.SpongeChannelPayload;
 
 @Mixin(ClientPacketListener.class)
-public abstract class ClientPacketListenerMixin_Vanilla extends ClientCommonPacketListenerImpl implements ClientGamePacketListener {
+public abstract class ClientPacketListenerMixin extends ClientCommonPacketListenerImpl {
 
-    protected ClientPacketListenerMixin_Vanilla(Minecraft $$0, Connection $$1, CommonListenerCookie $$2) {
+    protected ClientPacketListenerMixin(Minecraft $$0, Connection $$1, CommonListenerCookie $$2) {
         super($$0, $$1, $$2);
     }
 
     @Inject(method = "handleCustomPayload", cancellable = true, at = @At(value = "HEAD"))
-    private void vanilla$handleCustomPayload(final CustomPacketPayload packet, CallbackInfo ci) {
-        final SpongeChannelManager channelRegistry = (SpongeChannelManager) Sponge.channelManager();
-        if (channelRegistry.handlePlayPayload(((ConnectionBridge) this.connection).bridge$getEngineConnection(), (EngineConnectionState) this, packet)) {
-            ci.cancel();
+    private void impl$onHandleCustomPayload(final CustomPacketPayload payload, CallbackInfo ci) {
+        if (!(payload instanceof final SpongeChannelPayload spongePayload)) {
+            return;
         }
+
+        ci.cancel();
+
+        final SpongeChannelManager channelRegistry = (SpongeChannelManager) Sponge.channelManager();
+        final EngineConnection connection = ((ConnectionBridge) this.connection).bridge$getEngineConnection();
+        channelRegistry.handlePlayPayload(connection, (EngineConnectionState) this, spongePayload.id(), spongePayload.consumer());
     }
 }

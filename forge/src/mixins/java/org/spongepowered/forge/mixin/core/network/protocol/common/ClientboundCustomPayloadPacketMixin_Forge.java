@@ -22,44 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.core.network.protocol.login;
+package org.spongepowered.forge.mixin.core.network.protocol.common;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
-import net.minecraft.network.protocol.login.custom.CustomQueryPayload;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.network.NetworkRegistry;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.network.channel.SpongeChannel;
+import org.spongepowered.common.network.channel.SpongeChannelPayload;
 
-@Mixin(ClientboundCustomQueryPacket.class)
-public abstract class ClientboundCustomQueryPacketMixin_Vanilla {
+@Mixin(ClientboundCustomPayloadPacket.class)
+public abstract class ClientboundCustomPayloadPacketMixin_Forge {
 
     // @formatter: off
     @Shadow @Final private static int MAX_PAYLOAD_SIZE;
     // @formatter: on
 
-    @Inject(method = "readPayload", at = @At("HEAD"), cancellable = true)
-    private static void impl$onReadUnknownPayload(final ResourceLocation $$0, final FriendlyByteBuf $$1, final CallbackInfoReturnable<CustomQueryPayload> cir) {
-        final int readableBytes = $$1.readableBytes();
-        if (readableBytes >= 0 && readableBytes <= ClientboundCustomQueryPacketMixin_Vanilla.MAX_PAYLOAD_SIZE) {
-            final var payload = new FriendlyByteBuf($$1.readBytes(readableBytes));
-            cir.setReturnValue(new CustomQueryPayload() {
-                @Override
-                public ResourceLocation id() {
-                    return $$0;
-                }
-
-                @Override
-                public void write(FriendlyByteBuf buf) {
-                    buf.writeBytes(payload.copy());
-                }
-            });
-        } else {
-            throw new IllegalArgumentException("Payload may not be larger than " + ClientboundCustomQueryPacketMixin_Vanilla.MAX_PAYLOAD_SIZE + " bytes");
+    @Inject(method = { "lambda$static$0", "lambda$static$2" }, at = @At("HEAD"), cancellable = true)
+    private static void forge$getSpongeCustomPacketPayload(final ResourceLocation channelKey, final CallbackInfoReturnable<StreamCodec<FriendlyByteBuf, ? extends CustomPacketPayload>> cir) {
+        if (NetworkRegistry.findTarget(channelKey) != null) {
+            return;
         }
+
+        Sponge.channelManager().get((ResourceKey) (Object) channelKey)
+            .ifPresent(c -> cir.setReturnValue(SpongeChannelPayload.streamCodec(((SpongeChannel) c).payloadType(), ClientboundCustomPayloadPacketMixin_Forge.MAX_PAYLOAD_SIZE)));
     }
 }

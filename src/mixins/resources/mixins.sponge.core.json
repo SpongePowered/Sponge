@@ -46,6 +46,8 @@
         "network.protocol.game.ClientboundSetObjectivePacketMixin",
         "network.protocol.game.ServerboundChunkBatchReceivedPacketMixin",
         "network.protocol.game.ServerboundClientCommandPacketMixin",
+        "network.protocol.login.ClientboundCustomQueryPacketMixin",
+        "network.protocol.login.ServerboundCustomQueryAnswerPacketMixin",
         "network.syncher.EntityDataAccessorMixin",
         "network.syncher.SynchedEntityData_BuilderMixin",
         "network.syncher.SynchedEntityDataMixin",
@@ -275,7 +277,9 @@
     ],
     "client": [
         "client.MinecraftMixin",
+        "client.multiplayer.ClientHandshakePacketListenerImplMixin",
         "client.multiplayer.ClientLevelMixin",
+        "client.multiplayer.ClientPacketListenerMixin",
         "client.network.chat.TranslatableContentsMixin",
         "client.player.AbstractClientPlayerMixin",
         "client.server.IntegratedPlayerListMixin",
