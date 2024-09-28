@@ -24,29 +24,54 @@
  */
 package org.spongepowered.common.network.channel;
 
+import io.netty.buffer.ByteBuf;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.protocol.login.custom.CustomQueryAnswerPayload;
+import net.minecraft.network.protocol.login.custom.CustomQueryPayload;
+import net.minecraft.resources.ResourceLocation;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-public record SpongeChannelPayload(Type<? extends CustomPacketPayload> type, FriendlyByteBuf payload) implements CustomPacketPayload {
+import java.util.function.Consumer;
+
+public record SpongeChannelPayload(@Nullable Type<? extends CustomPacketPayload> type, @Nullable ResourceLocation id, @Nullable Consumer<FriendlyByteBuf> consumer) implements CustomPacketPayload, CustomQueryPayload, CustomQueryAnswerPayload {
 
     public static StreamCodec<FriendlyByteBuf, SpongeChannelPayload> streamCodec(final Type<? extends CustomPacketPayload> type, final int maxPayloadSize) {
         return CustomPacketPayload.codec(
-                SpongeChannelPayload::write, (b) -> {
-                    int readableBytes = b.readableBytes();
-                    if (readableBytes >= 0 && readableBytes <= maxPayloadSize) {
-                        return new SpongeChannelPayload(type, new FriendlyByteBuf(b.readBytes(b.readableBytes())));
-                    }
-                    throw new IllegalArgumentException("Payload may not be larger than " + maxPayloadSize + " bytes");
-                });
+            SpongeChannelPayload::write, (buffer) -> {
+                final int readableBytes = buffer.readableBytes();
+                if (readableBytes >= 0 && readableBytes <= maxPayloadSize) {
+                    final ByteBuf payload = buffer.readBytes(readableBytes);
+                    return SpongeChannelPayload.fromType(type, (b) -> b.writeBytes(payload.slice()));
+                }
+                throw new IllegalArgumentException("Payload may not be larger than " + maxPayloadSize + " bytes");
+            });
     }
 
-    private void write(FriendlyByteBuf $$0) {
-        $$0.writeBytes(this.payload);
+    public void write(final FriendlyByteBuf buf) {
+        this.consumer.accept(buf);
     }
 
     @Override
     public Type<? extends CustomPacketPayload> type() {
         return this.type;
+    }
+
+    @Override
+    public ResourceLocation id() {
+        return this.id;
+    }
+
+    public static SpongeChannelPayload fromType(final Type<? extends CustomPacketPayload> type, Consumer<FriendlyByteBuf> consumer) {
+        return new SpongeChannelPayload(type, type.id(), consumer);
+    }
+
+    public static SpongeChannelPayload fromId(final ResourceLocation id, Consumer<FriendlyByteBuf> consumer) {
+        return new SpongeChannelPayload(null, id, consumer);
+    }
+
+    public static SpongeChannelPayload bufferOnly(@Nullable Consumer<FriendlyByteBuf> consumer) {
+        return new SpongeChannelPayload(null, null, consumer);
     }
 }

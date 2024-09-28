@@ -34,6 +34,8 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public interface FusedExplosiveBridge {
 
+    boolean bridge$isPrimed();
+
     int bridge$getFuseDuration();
 
     void bridge$setFuseDuration(int fuseTicks);

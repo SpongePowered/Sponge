@@ -27,7 +27,6 @@ package org.spongepowered.vanilla.mixin.core.server.network;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.login.ServerLoginPacketListener;
-import net.minecraft.network.protocol.login.ServerboundCustomQueryAnswerPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import org.spongepowered.api.Sponge;
@@ -35,7 +34,6 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
-import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -72,14 +70,6 @@ public abstract class ServerLoginPacketListenerImplMixin_Vanilla implements Serv
     private static final int HANDSHAKE_SYNC_PLUGIN_DATA = 4;
 
     private int impl$handshakeState = ServerLoginPacketListenerImplMixin_Vanilla.HANDSHAKE_NOT_STARTED;
-
-    @Inject(method = "handleCustomQueryPacket", at = @At("HEAD"), cancellable = true)
-    private void impl$onResponsePayload(final ServerboundCustomQueryAnswerPacket packet, final CallbackInfo ci) {
-        ci.cancel();
-
-        final SpongeChannelManager channelRegistry = (SpongeChannelManager) Sponge.channelManager();
-        this.server.execute(() -> channelRegistry.handleLoginResponsePayload(((ConnectionBridge) this.connection).bridge$getEngineConnection(), (EngineConnectionState) this, packet));
-    }
 
     @Inject(method = "tick", at = @At("HEAD"))
     private void impl$onTick(final CallbackInfo ci) {

@@ -22,13 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.core.server.network;
+package org.spongepowered.common.mixin.core.client.multiplayer;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
 import net.minecraft.network.Connection;
-import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerCommonPacketListenerImpl;
+import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,19 +38,34 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
+import org.spongepowered.common.network.PacketUtil;
+import org.spongepowered.common.network.channel.PacketSender;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
+import org.spongepowered.common.network.channel.SpongeChannelPayload;
 
-@Mixin(value = ServerCommonPacketListenerImpl.class, priority = 999)
-public abstract class ServerCommonPacketListenerImplMixin_Vanilla {
+@Mixin(ClientHandshakePacketListenerImpl.class)
+public abstract class ClientHandshakePacketListenerImplMixin {
 
-    // @formatter: off
-    @Shadow @Final protected MinecraftServer server;
-    @Shadow @Final protected Connection connection;
-    // @formatter: on
+    // @formatter:off
+    @Shadow @Final private Minecraft minecraft;
+    @Shadow @Final private Connection connection;
+    // @formatter:on
 
-    @Inject(method = "handleCustomPayload", at = @At(value = "HEAD"))
-    private void vanilla$onHandleCustomPayload(final ServerboundCustomPayloadPacket packet, final CallbackInfo ci) {
-        final SpongeChannelManager channelRegistry = (SpongeChannelManager) Sponge.channelManager();
-        this.server.execute(() -> channelRegistry.handlePlayPayload(((ConnectionBridge) this.connection).bridge$getEngineConnection(), (EngineConnectionState) this, packet.payload()));
+    @Inject(method = "handleCustomQuery", at = @At(value = "INVOKE",
+        target = "Lnet/minecraft/network/Connection;send(Lnet/minecraft/network/protocol/Packet;)V"), cancellable = true)
+    private void impl$onHandleCustomQuery(final ClientboundCustomQueryPacket packet, final CallbackInfo ci) {
+        if (!(packet.payload() instanceof final SpongeChannelPayload payload)) {
+            return;
+        }
+
+        ci.cancel();
+
+        this.minecraft.execute(() -> {
+            final SpongeChannelManager channelRegistry = (SpongeChannelManager) Sponge.channelManager();
+            final EngineConnection connection = ((ConnectionBridge) this.connection).bridge$getEngineConnection();
+            if (!channelRegistry.handleLoginRequestPayload(connection, (EngineConnectionState) this, payload.id(), packet.transactionId(), payload.consumer())) {
+                PacketSender.sendTo(connection, PacketUtil.createLoginPayloadResponse(null, packet.transactionId()));
+            }
+        });
     }
 }

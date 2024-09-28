@@ -22,36 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.entity.vehicle;
+package org.spongepowered.common.mixin.core.network.protocol.login;
 
-import net.minecraft.world.entity.vehicle.MinecartTNT;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.entity.vehicle.minecart.TNTMinecart;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.login.ServerboundCustomQueryAnswerPacket;
+import net.minecraft.network.protocol.login.custom.CustomQueryAnswerPayload;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.network.channel.SpongeChannelPayload;
 
-import java.util.Set;
+@Mixin(ServerboundCustomQueryAnswerPacket.class)
+public abstract class ServerboundCustomQueryAnswerPacketMixin {
 
-@Mixin(MinecartTNT.class)
-public abstract class MinecartTNTMixin_API extends AbstractMinecartMixin_API implements TNTMinecart {
+    @Inject(method = "readUnknownPayload", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/FriendlyByteBuf;skipBytes(I)Lnet/minecraft/network/FriendlyByteBuf;"), cancellable = true)
+    private static void impl$onReadUnknownPayload(final FriendlyByteBuf $$0, final CallbackInfoReturnable<CustomQueryAnswerPayload> cir) {
+        final var payload = $$0.readNullable(buf -> new FriendlyByteBuf(buf.readBytes(buf.readableBytes())));
 
-    @Override
-    public void detonate() {
-        ((FusedExplosiveBridge) this).bridge$setFuseTicksRemaining(0);
+        cir.setReturnValue(SpongeChannelPayload.bufferOnly(payload == null ? null : buf -> buf.writeBytes(payload, payload.readerIndex(), payload.readableBytes())));
     }
-
-    @Override
-    protected Set<Value.Immutable<?>> api$getVanillaValues() {
-        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
-
-        values.add(this.requireValue(Keys.FUSE_DURATION).asImmutable());
-        values.add(this.requireValue(Keys.IS_PRIMED).asImmutable());
-        values.add(this.requireValue(Keys.TICKS_REMAINING).asImmutable());
-
-        this.getValue(Keys.EXPLOSION_RADIUS).map(Value::asImmutable).ifPresent(values::add);
-
-        return values;
-    }
-
 }
