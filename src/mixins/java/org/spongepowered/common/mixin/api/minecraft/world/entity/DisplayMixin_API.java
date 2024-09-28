@@ -42,12 +42,12 @@ public abstract class DisplayMixin_API extends EntityMixin_API implements Displa
 
     @Override
     public void setScale(Vector3d scale) {
-        entityData.set(DATA_SCALE_ID, new Vector3f((float) scale.x(), (float) scale.y(), (float) scale.z()));
+        entityData.set(DisplayMixin_API.DATA_SCALE_ID, new Vector3f((float) scale.x(), (float) scale.y(), (float) scale.z()));
     }
 
     @Override
     public Vector3d scale() {
-        Vector3f scale = entityData.get(DATA_SCALE_ID);
+        Vector3f scale = entityData.get(DisplayMixin_API.DATA_SCALE_ID);
         return new Vector3d(scale.x, scale.y, scale.z);
     }
 }
