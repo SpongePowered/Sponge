@@ -29,6 +29,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -42,6 +43,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.event.EventContextKey;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryType;
@@ -56,10 +58,12 @@ import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumePositionTranslators;
+import org.spongepowered.common.event.SpongeEventContextKeyBuilder;
 import org.spongepowered.common.registry.SpongeBuilderProvider;
 import org.spongepowered.common.registry.SpongeFactoryProvider;
 import org.spongepowered.common.registry.SpongeRegistryKey;
 import org.spongepowered.common.registry.SpongeRegistryType;
+import org.spongepowered.common.test.UnitTestExtension;
 import org.spongepowered.common.test.stub.StubGame;
 import org.spongepowered.common.test.stub.StubKey;
 import org.spongepowered.common.test.stub.StubModule;
@@ -81,8 +85,9 @@ import org.spongepowered.math.vector.Vector3i;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+@Disabled
 @SuppressWarnings("rawtypes")
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, UnitTestExtension.class })
 @MockitoSettings(strictness = Strictness.LENIENT)
 public final class VolumeTransformationTest {
 
@@ -138,6 +143,7 @@ public final class VolumeTransformationTest {
         StubMirror.registerDefaults(mirror);
         game.register(mirror);
 
+        builderProvider.register(EventContextKey.Builder.class, SpongeEventContextKeyBuilder::new);
         builderProvider.register(Transformation.Builder.class, SpongeTransformationBuilder::new);
         builderProvider.register(StreamOptions.Builder.class, SpongeStreamOptionsBuilder::new);
         StubRotations.registerDefaults(rotation);

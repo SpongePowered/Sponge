@@ -28,7 +28,6 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.enchantment.Enchantment;
@@ -58,8 +57,7 @@ public final class BookPagesItemStackData {
                     .create(Keys.STORED_ENCHANTMENTS)
                         .get(h -> BookPagesItemStackData.get(h, DataComponents.STORED_ENCHANTMENTS))
                         .set((h, v) -> BookPagesItemStackData.set(h, v, Collection::stream, DataComponents.STORED_ENCHANTMENTS))
-                        .delete(h -> BookPagesItemStackData.delete(h, DataComponents.STORED_ENCHANTMENTS))
-                        .supports(h -> h.getItem() == Items.ENCHANTED_BOOK);
+                        .delete(h -> BookPagesItemStackData.delete(h, DataComponents.STORED_ENCHANTMENTS));
     }
     // @formatter:on
 
