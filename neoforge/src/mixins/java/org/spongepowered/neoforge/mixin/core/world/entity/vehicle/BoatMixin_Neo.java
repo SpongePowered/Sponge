@@ -42,7 +42,7 @@ public abstract class BoatMixin_Neo implements BoatBridge {
             value = "INVOKE",
             target = "Lnet/minecraft/world/level/block/state/BlockState;getFriction(Lnet/minecraft/world/level/LevelReader;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;)F")
     )
-    private float forge$getBlockFrictionIfBoatIsNotOverridingMovingOnLand(BlockState caller, LevelReader level, BlockPos pos, Entity entity) {
+    private float neo$getBlockFrictionIfBoatIsNotOverridingMovingOnLand(BlockState caller, LevelReader level, BlockPos pos, Entity entity) {
         final boolean movesOnLand = this.bridge$getMoveOnLand();
         final float friction = caller.getFriction(level, pos, entity);
         if (movesOnLand && friction == 0.6f) {

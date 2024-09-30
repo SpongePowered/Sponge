@@ -46,7 +46,7 @@ public abstract class BootstrapMixin_Neo {
     // @formatter:on
 
     @Inject(method = "bootStrap", at = @At("HEAD"))
-    private static void forge$startLifecycle(final CallbackInfo ci) {
+    private static void neo$startLifecycle(final CallbackInfo ci) {
         if (BootstrapMixin_Neo.isBootstrapped) {
             return;
         }

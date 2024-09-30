@@ -39,7 +39,7 @@ public abstract class NeoForgeMixin_Neo {
 
     @Redirect(method = "<clinit>", at = @At(value = "INVOKE",
             target = "Lnet/neoforged/bus/api/BusBuilder;build()Lnet/neoforged/bus/api/IEventBus;", remap = false))
-    private static IEventBus forge$substituteForgeEventBus(final BusBuilder builder) {
+    private static IEventBus neo$substituteNeoEventBus(final BusBuilder builder) {
         return new NeoEventManager(new SpongeEventBus((BusBuilderImpl) builder));
     }
 

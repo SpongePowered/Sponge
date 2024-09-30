@@ -39,7 +39,7 @@ public abstract class ServerPlayerMixin_Neo extends LivingEntityMixin_Neo {
 
     // override from LivingEntityMixin_Neo
     @Override
-    protected void forge$onElytraUse(final CallbackInfo ci) {
+    protected void neo$onElytraUse(final CallbackInfo ci) {
         final PhaseContext<?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         final net.minecraft.server.level.ServerPlayer player = (net.minecraft.server.level.ServerPlayer) (Object) this;

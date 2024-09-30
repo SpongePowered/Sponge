@@ -50,7 +50,7 @@ public abstract class HopperBlockEntityMixin_Inventory_Neo {
     @Redirect(method = "ejectItems",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/level/block/entity/HopperBlockEntity;isFullContainer(Lnet/minecraft/world/Container;Lnet/minecraft/core/Direction;)Z"))
-    private static boolean forge$throwTransferPreIfNotFull(
+    private static boolean neo$throwTransferPreIfNotFull(
             final Container attachedContainer, final Direction direction, final Level level, final BlockPos pos, final HopperBlockEntity block
     ) {
         final boolean result = HopperBlockEntityAccessor.invoker$isFullContainer(attachedContainer, direction);
@@ -66,7 +66,7 @@ public abstract class HopperBlockEntityMixin_Inventory_Neo {
             at = @At(value = "INVOKE",
                      target = "Lnet/minecraft/world/item/ItemStack;isEmpty()Z",
                      ordinal = 1))
-    private static void forge$afterPutStackInSlots(
+    private static void neo$afterPutStackInSlots(
         final Level var0, final BlockPos var1, final HopperBlockEntity var3,
         final CallbackInfoReturnable<Boolean> cir, final Container iInventory, final Direction enumFacing,
         final int i, final ItemStack itemStack, final int count,final ItemStack itemStack1

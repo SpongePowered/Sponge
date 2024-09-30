@@ -41,6 +41,6 @@ public abstract class LivingEntityMixin_Neo {
                     shift = At.Shift.AFTER
             )
     )
-    protected void forge$onElytraUse(final CallbackInfo ci) {
+    protected void neo$onElytraUse(final CallbackInfo ci) {
     }
 }
