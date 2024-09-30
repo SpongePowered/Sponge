@@ -31,7 +31,6 @@
         "world.entity.item.ItemEntityMixin_Neo",
         "world.entity.player.PlayerMixin_Neo_Attack_Impl",
         "world.entity.projectile.FishingHookMixin_Neo",
-        "world.entity.projectile.ThrownEnderpealMixin_Neo",
         "world.entity.vehicle.BoatMixin_Neo",
         "world.level.block.FireBlockMixin_Neo",
         "world.level.block.entity.AbstractFurnaceBlockEntityMixin_Neo"
