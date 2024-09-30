@@ -40,7 +40,7 @@ import java.util.Map;
 public class RegistryManagerMixin_Neo {
 
     @Inject(method = "takeSnapshot", at = @At("RETURN"))
-    private static void forge$dontSendSpongeDataToClient(RegistryManager.SnapshotType snapshotType, CallbackInfoReturnable<Map<ResourceLocation, RegistrySnapshot>> cir) {
+    private static void neo$dontSendSpongeDataToClient(RegistryManager.SnapshotType snapshotType, CallbackInfoReturnable<Map<ResourceLocation, RegistrySnapshot>> cir) {
         if (snapshotType != RegistryManager.SnapshotType.SYNC_TO_CLIENT) {
             return;
         }

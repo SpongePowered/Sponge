@@ -60,7 +60,7 @@ public abstract class CommandsMixin_Neo {
     // The event fired by Forge is fired in ForgeCommandManager at the appropriate time.
     @Redirect(method = "performCommand",
         at = @At(value = "INVOKE", target = "Lnet/neoforged/bus/api/IEventBus;post(Lnet/neoforged/bus/api/Event;)Lnet/neoforged/bus/api/Event;"))
-    private Event forge$redirectToSpongeCommandManager(IEventBus instance, Event event) {
+    private Event neo$redirectToSpongeCommandManager(IEventBus instance, Event event) {
         return event;
     }
 

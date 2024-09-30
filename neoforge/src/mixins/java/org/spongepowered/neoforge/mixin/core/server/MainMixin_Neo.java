@@ -38,7 +38,7 @@ import org.spongepowered.neoforge.launch.NeoLaunch;
 public abstract class MainMixin_Neo {
 
     @Inject(method = "<clinit>", at = @At("RETURN"))
-    private static void forge$initLaunch(final CallbackInfo ci) {
+    private static void neo$initLaunch(final CallbackInfo ci) {
         final PluginPlatform pluginPlatform = AppLaunch.pluginPlatform();
         final NeoLaunch launch = new NeoLaunch(pluginPlatform);
         Launch.setInstance(launch);

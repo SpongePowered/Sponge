@@ -35,7 +35,7 @@ public abstract class ThrownEnderpealMixin_Neo {
 
     @Redirect(method = "changeDimension",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/ThrownEnderpearl;getOwner()Lnet/minecraft/world/entity/Entity;"))
-    private Entity forge$preventUnsetOwnerUntilLater(final ThrownEnderpearl thrownEnderpearl) {
+    private Entity neo$preventUnsetOwnerUntilLater(final ThrownEnderpearl thrownEnderpearl) {
         // This allows us to ensure the if statement after is always false
         // We deal with this later (see the common mixin)
         return null;

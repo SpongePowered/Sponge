@@ -47,7 +47,7 @@ public abstract class ServerGamePacketListenerImplMixin_Neo implements ServerGam
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Redirect(method = "lambda$handlePlaceRecipe$10",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/RecipeBookMenu;handlePlacement(ZLnet/minecraft/world/item/crafting/RecipeHolder;Lnet/minecraft/server/level/ServerPlayer;)V"))
-    private void forge$onPlaceRecipe(final RecipeBookMenu recipeBookMenu, final boolean shift, final RecipeHolder recipe, final net.minecraft.server.level.ServerPlayer player) {
+    private void neo$onPlaceRecipe(final RecipeBookMenu recipeBookMenu, final boolean shift, final RecipeHolder recipe, final net.minecraft.server.level.ServerPlayer player) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
 

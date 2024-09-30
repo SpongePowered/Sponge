@@ -42,7 +42,7 @@ public abstract class ItemEntityMixin_Neo {
     // @formatter:on
 
     @Inject(method = "<init>(Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/level/Level;)V", at = @At("RETURN"))
-    private void forge$setLifespanFromConfig(final EntityType<? extends ItemEntity> type, final Level level,
+    private void neo$setLifespanFromConfig(final EntityType<? extends ItemEntity> type, final Level level,
         final CallbackInfo ci
     ) {
         // Check the level is not null to avoid an NPE
