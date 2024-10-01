@@ -24,16 +24,11 @@
  */
 package org.spongepowered.common.inject.plugin;
 
-import com.google.inject.Binding;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.PrivateModule;
 import com.google.inject.Scopes;
-import com.google.inject.spi.Element;
-import com.google.inject.spi.ElementSource;
-import com.google.inject.spi.ExposedBinding;
-import com.google.inject.spi.PrivateElements;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
@@ -71,38 +66,35 @@ public final class PluginModule extends PrivateModule {
 
         this.install(new PluginConfigurationModule());
 
+        final BindingHelper bindingHelper = new BindingHelper(this.binder());
         for (final PluginDependency dependency : this.container.metadata().dependencies()) {
             if (dependency.loadOrder() != PluginDependency.LoadOrder.AFTER) {
                 continue;
             }
 
-            Sponge.pluginManager().plugin(dependency.id()).ifPresent(dependencyContainer -> {
-                if (!(dependencyContainer instanceof final SpongePluginInjectorProvider injectorProvider)) {
+            Sponge.pluginManager().plugin(dependency.id()).ifPresent(p -> {
+                if (!(p instanceof final SpongePluginInjectorProvider injectorProvider)) {
                     return;
                 }
 
-                for (final Binding binding : injectorProvider.injector().getBindings().values()) {
-                    if (!(binding.getSource() instanceof ElementSource)) {
-                        continue;
-                    }
-
-                    if (binding instanceof final ExposedBinding<?> exposedBinding) {
-                        final PrivateElements privateElements = exposedBinding.getPrivateElements();
-                        for (final Element privateElement : privateElements.getElements()) {
-                            if (!(privateElement instanceof final Binding privateBinding) || !privateElements.getExposedKeys().contains(privateBinding.getKey())) {
-                                continue;
-                            }
-
-                            this.bind(privateBinding.getKey()).toProvider(() -> injectorProvider.injector().getInstance(privateBinding.getKey()));
-                        }
-
-                        continue;
-                    }
-
-                    this.bind(binding.getKey()).toProvider(() -> injectorProvider.injector().getInstance(binding.getKey()));
-                }
+                bindingHelper.bindFrom(injectorProvider.injector());
             });
         }
+
+        //In-direct dependencies
+        Sponge.pluginManager()
+            .plugins()
+            .stream()
+            .filter(p -> p.metadata().dependency(this.container.metadata().id()).isPresent())
+            .forEach(p -> {
+                if (!(p instanceof final SpongePluginInjectorProvider injectorProvider)) {
+                    return;
+                }
+
+                bindingHelper.bindFrom(injectorProvider.injector());
+            });
+
+        bindingHelper.bind();
     }
 
     public static Injector create(final PluginContainer container, final Class<?> pluginClass, final @Nullable Injector platformInjector) {

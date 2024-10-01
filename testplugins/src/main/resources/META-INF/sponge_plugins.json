@@ -344,6 +344,22 @@
             }
         },
         {
+            "id": "secondchildmoduletestplugin",
+            "name": "Second Child Module Tests",
+            "entrypoint": "org.spongepowered.test.serviceloader.SecondChildModuleTestPlugin",
+            "description": "Second Child Module Tests",
+            "properties": {
+                "guice-module": "org.spongepowered.test.serviceloader.SecondChildModuleTestPlugin$Module"
+            },
+            "dependencies": [
+                {
+                    "id": "parentmoduletestplugin",
+                    "version": "12.0.0",
+                    "load-order": "BEFORE"
+                }
+            ]
+        },
+        {
             "id": "parentmoduletestplugin",
             "name": "Parent Module Tests",
             "entrypoint": "org.spongepowered.test.serviceloader.ParentModuleTestPlugin",
@@ -351,7 +367,7 @@
             "dependencies": [
                 {
                     "id": "childmoduletestplugin",
-                    "version": "11.0.0",
+                    "version": "12.0.0",
                     "load-order": "AFTER"
                 }
             ]

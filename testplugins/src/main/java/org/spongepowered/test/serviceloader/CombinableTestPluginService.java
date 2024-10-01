@@ -24,36 +24,5 @@
  */
 package org.spongepowered.test.serviceloader;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
-import com.google.inject.multibindings.Multibinder;
-import org.spongepowered.plugin.builtin.jvm.Plugin;
-
-@Plugin("childmoduletestplugin")
-public final class ChildModuleTestPlugin implements ChildModuleTestPluginService, CombinableTestPluginService {
-
-    private final ChildModuleTestPluginService.External external;
-
-    @Inject
-    public ChildModuleTestPlugin(final ChildModuleTestPluginService.External external) {
-        this.external = external;
-    }
-
-    @Override
-    public External external() {
-        return this.external;
-    }
-
-    private static final class ExternalImpl implements ChildModuleTestPluginService.External {
-    }
-
-    public static final class Module extends AbstractModule {
-
-        @Override
-        protected void configure() {
-            Multibinder.newSetBinder(this.binder(), CombinableTestPluginService.class).addBinding().to(ChildModuleTestPlugin.class);
-            this.bind(ChildModuleTestPluginService.class).to(ChildModuleTestPlugin.class);
-            this.bind(ChildModuleTestPluginService.External.class).toInstance(new ExternalImpl());
-        }
-    }
+public interface CombinableTestPluginService {
 }

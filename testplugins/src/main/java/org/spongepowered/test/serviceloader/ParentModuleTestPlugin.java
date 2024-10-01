@@ -29,13 +29,21 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
+import java.util.Set;
+
 @Plugin("parentmoduletestplugin")
 public final class ParentModuleTestPlugin {
 
     @Inject
-    public ParentModuleTestPlugin(final Logger logger, final ChildModuleTestPlugin childModulePlugin, final ChildModuleTestPluginService service, final ChildModuleTestPluginService.External external) {
+    public ParentModuleTestPlugin(final Logger logger, final ChildModuleTestPlugin childModulePlugin, final SecondChildModuleTestPlugin secondChildModulePlugin,
+                                  final ChildModuleTestPluginService service, final ChildModuleTestPluginService.External external,
+                                  final Set<CombinableTestPluginService> combinablePluginServices) {
         if (Sponge.pluginManager().plugin("childmoduletestplugin").get().instance() != childModulePlugin) {
             logger.error("Mismatched instance of the plugin childmoduletestplugin");
+        }
+
+        if (Sponge.pluginManager().plugin("secondchildmoduletestplugin").get().instance() != secondChildModulePlugin) {
+            logger.error("Mismatched instance of the plugin secondChildModuleTestPlugin");
         }
 
         if (childModulePlugin != service) {
@@ -44,6 +52,10 @@ public final class ParentModuleTestPlugin {
 
         if (childModulePlugin.external() != external) {
             logger.error("Mismatched instance of the external component from plugin childmoduletestplugin");
+        }
+
+        if (combinablePluginServices.size() != 2 || !combinablePluginServices.contains(childModulePlugin) || !combinablePluginServices.contains(secondChildModulePlugin)) {
+            logger.error("Mismatched content of combinablePluginServices");
         }
     }
 }
