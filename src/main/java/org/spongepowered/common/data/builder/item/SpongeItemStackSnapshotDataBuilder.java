@@ -43,6 +43,6 @@ public final class SpongeItemStackSnapshotDataBuilder extends AbstractDataBuilde
 
     @Override
     protected Optional<ItemStackSnapshot> buildContent(DataView container) throws InvalidDataException {
-        return SpongeItemStack.createItemStack(container).map(ItemStack::createSnapshot);
+        return SpongeItemStack.createItemStack(container).map(ItemStack::asImmutable);
     }
 }

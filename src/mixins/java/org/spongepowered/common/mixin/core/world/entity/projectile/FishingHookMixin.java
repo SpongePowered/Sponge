@@ -144,7 +144,7 @@ public abstract class FishingHookMixin extends ProjectileMixin {
                     if (!transaction.isValid()) {
                         continue;
                     }
-                    final ItemStack itemstack = (ItemStack) (Object) transaction.finalReplacement().createStack();
+                    final ItemStack itemstack = (ItemStack) (Object) transaction.finalReplacement().asMutable();
                     // Sponge end
 
                     final ItemEntity entityitem = new ItemEntity(this.shadow$level(), this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), itemstack);

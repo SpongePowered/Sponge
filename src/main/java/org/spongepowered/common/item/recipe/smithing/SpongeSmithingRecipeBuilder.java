@@ -35,7 +35,7 @@ import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.item.recipe.crafting.RecipeInput;
 import org.spongepowered.api.item.recipe.smithing.SmithingRecipe;
@@ -98,27 +98,20 @@ public final class SpongeSmithingRecipeBuilder extends AbstractResourceKeyedBuil
     }
 
     @Override
-    public EndStep result(ItemStackSnapshot result) {
-        this.result = result.createStack();
-        this.resultFunction = null;
-        return this;
-    }
-
-    @Override
-    public EndStep result(final ItemStack result) {
+    public EndStep result(final ItemStackLike result) {
         Objects.requireNonNull(result, "result");
-        this.result = result;
+        this.result = result.asMutable();
         this.resultFunction = null;
         return this;
     }
 
     @Override
-    public EndStep result(Function<RecipeInput.Smithing, ItemStack> resultFunction, ItemStack exemplaryResult) {
+    public EndStep result(Function<RecipeInput.Smithing, ? extends ItemStackLike> resultFunction, ItemStackLike exemplaryResult) {
         Objects.requireNonNull(exemplaryResult, "exemplaryResult");
         Preconditions.checkState(!exemplaryResult.isEmpty(), "exemplaryResult must not be empty");
 
-        this.result = exemplaryResult;
-        this.resultFunction = (inv) -> ItemStackUtil.toNative(resultFunction.apply(InventoryUtil.toSponge(inv)));
+        this.result = exemplaryResult.asMutable();
+        this.resultFunction = (inv) -> ItemStackUtil.fromLikeToNative(resultFunction.apply(InventoryUtil.toSponge(inv)));
         return this;
     }
 

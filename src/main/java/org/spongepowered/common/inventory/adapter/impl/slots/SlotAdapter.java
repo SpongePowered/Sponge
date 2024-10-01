@@ -30,6 +30,7 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
@@ -89,11 +90,11 @@ public class SlotAdapter extends BasicInventoryAdapter implements Slot {
     }
 
     @Override
-    public InventoryTransactionResult offer(final ItemStack... stacks) {
+    public InventoryTransactionResult offer(final ItemStackLike... stacks) {
 
         final InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.SUCCESS);
-        for (ItemStack stack : stacks) {
-            final net.minecraft.world.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
+        for (ItemStackLike stack : stacks) {
+            final net.minecraft.world.item.ItemStack nativeStack = ItemStackUtil.fromLikeToNative(stack);
 
             final int maxStackSize = this.slot.getMaxStackSize(this.inventoryAdapter$getFabric());
             int remaining = stack.quantity();
@@ -105,7 +106,7 @@ public class SlotAdapter extends BasicInventoryAdapter implements Slot {
             if (old.isEmpty() && this.slot.setStack(this.inventoryAdapter$getFabric(), ItemStackUtil.cloneDefensiveNative(nativeStack, push))) {
                 remaining -= push;
                 newStack = ItemStackUtil.snapshotOf(stack);
-            } else if (!old.isEmpty() && ItemStackUtil.compareIgnoreQuantity(old, stack) && maxStackSize > old.getCount()) {
+            } else if (!old.isEmpty() && ItemStackUtil.compareIgnoreQuantity(old, nativeStack) && maxStackSize > old.getCount()) {
                 this.inventoryAdapter$getFabric().fabric$markDirty();
                 push = Math.max(Math.min(maxStackSize - old.getCount(), remaining), 0); // max() accounts for oversized stacks
                 old.setCount(old.getCount() + push);
@@ -124,7 +125,7 @@ public class SlotAdapter extends BasicInventoryAdapter implements Slot {
     }
 
     @Override
-    public boolean canFit(final ItemStack stack) {
+    public boolean canFit(final ItemStackLike stack) {
         if (stack.isEmpty()) {
             return true;
         }
@@ -133,13 +134,13 @@ public class SlotAdapter extends BasicInventoryAdapter implements Slot {
         if (old.isEmpty()) {
             return maxStackSize >= stack.quantity();
         }
-        return ItemStackUtil.compareIgnoreQuantity(old, stack) && maxStackSize - old.getCount() >= stack.quantity();
+        return ItemStackUtil.compareIgnoreQuantity(old, stack.asMutable()) && maxStackSize - old.getCount() >= stack.quantity();
     }
 
     @Override
-    public InventoryTransactionResult set(final ItemStack stack) {
+    public InventoryTransactionResult set(final ItemStackLike stack) {
         final InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.SUCCESS);
-        final net.minecraft.world.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
+        final net.minecraft.world.item.ItemStack nativeStack = ItemStackUtil.fromLikeToNative(stack);
 
         final net.minecraft.world.item.ItemStack old = this.slot.getStack(this.inventoryAdapter$getFabric());
         ItemStackSnapshot oldSnap = ItemStackUtil.snapshotOf(old);
@@ -189,16 +190,16 @@ public class SlotAdapter extends BasicInventoryAdapter implements Slot {
     }
 
     @Override
-    public boolean contains(final ItemStack stack) {
+    public boolean contains(final ItemStackLike stack) {
         final net.minecraft.world.item.ItemStack slotStack = this.slot.getStack(this.inventoryAdapter$getFabric());
-        return slotStack.isEmpty() ? ItemStackUtil.toNative(stack).isEmpty() :
-                ItemStackUtil.compareIgnoreQuantity(slotStack, stack) && slotStack.getCount() >= stack.quantity();
+        return slotStack.isEmpty() ? ItemStackUtil.fromLikeToNative(stack).isEmpty() :
+                ItemStackUtil.compareIgnoreQuantity(slotStack, stack.asMutable()) && slotStack.getCount() >= stack.quantity();
     }
 
     @Override
-    public boolean containsAny(final ItemStack stack) {
+    public boolean containsAny(final ItemStackLike stack) {
         final net.minecraft.world.item.ItemStack slotStack = this.slot.getStack(this.inventoryAdapter$getFabric());
-        return slotStack.isEmpty() ? ItemStackUtil.toNative(stack).isEmpty() : ItemStackUtil.compareIgnoreQuantity(slotStack, stack);
+        return slotStack.isEmpty() ? ItemStackUtil.fromLikeToNative(stack).isEmpty() : ItemStackUtil.compareIgnoreQuantity(slotStack, stack.asMutable());
     }
 
     @Override

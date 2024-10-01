@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.minecraft.world.item.crafting;
 
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.recipe.cooking.CookingRecipe;
 import org.spongepowered.api.item.recipe.cooking.CookingResult;
 import org.spongepowered.api.util.Ticks;
@@ -54,12 +54,12 @@ public abstract class AbstractCookingRecipeMixin_API implements CookingRecipe {
     }
 
     @Override
-    public boolean isValid(final ItemStackSnapshot ingredient) {
-        return this.ingredient.test(ItemStackUtil.fromSnapshotToNative(ingredient));
+    public boolean isValid(final ItemStackLike ingredient) {
+        return this.ingredient.test(ItemStackUtil.fromLikeToNative(ingredient));
     }
 
     @Override
-    public Optional<CookingResult> result(final ItemStackSnapshot ingredient) {
+    public Optional<CookingResult> result(final ItemStackLike ingredient) {
         if (this.isValid(ingredient)) {
             return Optional.of(new CookingResult(this.exemplaryResult(), this.shadow$getExperience()));
         }

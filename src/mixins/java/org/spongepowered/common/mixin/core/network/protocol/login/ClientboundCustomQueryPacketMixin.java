@@ -22,23 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.core.network.protocol.login;
+package org.spongepowered.common.mixin.core.network.protocol.login;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.login.ServerboundCustomQueryAnswerPacket;
-import net.minecraft.network.protocol.login.custom.CustomQueryAnswerPayload;
+import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
+import net.minecraft.network.protocol.login.custom.CustomQueryPayload;
+import net.minecraft.resources.ResourceLocation;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.network.channel.SpongeChannelPayload;
 
-@Mixin(ServerboundCustomQueryAnswerPacket.class)
-public abstract class ServerboundCustomQueryAnswerPacketMixin_Vanilla {
+@Mixin(ClientboundCustomQueryPacket.class)
+public abstract class ClientboundCustomQueryPacketMixin {
 
-    @Inject(method = "readUnknownPayload", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/FriendlyByteBuf;skipBytes(I)Lnet/minecraft/network/FriendlyByteBuf;"), cancellable = true)
-    private static void impl$onReadUnknownPayload(final FriendlyByteBuf $$0, final CallbackInfoReturnable<CustomQueryAnswerPayload> cir) {
-        final var payload = $$0.readNullable(buf -> new FriendlyByteBuf(buf.readBytes(buf.readableBytes())));
+    // @formatter: off
+    @Shadow @Final private static int MAX_PAYLOAD_SIZE;
+    // @formatter: on
 
-        cir.setReturnValue(payload == null ? null : buf -> buf.writeBytes(payload.copy()));
+    @Inject(method = "readPayload", at = @At("HEAD"), cancellable = true)
+    private static void impl$onReadUnknownPayload(final ResourceLocation $$0, final FriendlyByteBuf $$1, final CallbackInfoReturnable<CustomQueryPayload> cir) {
+        final int readableBytes = $$1.readableBytes();
+        if (readableBytes >= 0 && readableBytes <= ClientboundCustomQueryPacketMixin.MAX_PAYLOAD_SIZE) {
+            final var payload = $$1.readBytes(readableBytes);
+            cir.setReturnValue(SpongeChannelPayload.fromId($$0, (b) -> b.writeBytes(payload.slice())));
+        } else {
+            throw new IllegalArgumentException("Payload may not be larger than " + ClientboundCustomQueryPacketMixin.MAX_PAYLOAD_SIZE + " bytes");
+        }
     }
 }

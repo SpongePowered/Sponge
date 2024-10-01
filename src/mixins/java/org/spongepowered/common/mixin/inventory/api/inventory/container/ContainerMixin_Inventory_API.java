@@ -33,6 +33,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -88,11 +89,11 @@ public abstract class ContainerMixin_Inventory_API implements org.spongepowered.
     }
 
     @Override
-    public boolean setCursor(org.spongepowered.api.item.inventory.ItemStack item) {
+    public boolean setCursor(ItemStackLike item) {
         if (!this.isOpen()) {
             return false;
         }
-        ItemStack nativeStack = ItemStackUtil.toNative(item);
+        ItemStack nativeStack = ItemStackUtil.fromLikeToNative(item);
         this.listeners().stream().findFirst()
                 .ifPresent(p -> p.containerMenu.setCarried(nativeStack));
         return true;

@@ -32,37 +32,47 @@ import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.item.component.Fireworks;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.accessor.world.entity.projectile.FireworkRocketEntityAccessor;
 import org.spongepowered.common.item.SpongeItemStack;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.function.Function;
 
 public final class FireworkUtil {
+    public static boolean setFireworkEffects(final FireworkRocketEntity firework, final List<? extends FireworkEffect> effects) {
+        return FireworkUtil.updateFireworkRocketItem(firework, item -> FireworkUtil.setFireworkEffects(item, effects));
+    }
 
-    public static boolean setFireworkEffects(final Object object, final List<? extends FireworkEffect> effects) {
+    public static boolean setFireworkEffects(final ItemStack item, final List<? extends FireworkEffect> effects) {
         if (effects.isEmpty()) {
-            return FireworkUtil.removeFireworkEffects(object);
+            return FireworkUtil.removeFireworkEffects(item);
         }
-        final ItemStack item = FireworkUtil.getItem(object);
+
         if (item.isEmpty()) {
             return false;
         }
 
         if (item.getItem() == Items.FIREWORK_STAR) {
-            item.set(DataComponents.FIREWORK_EXPLOSION, (FireworkExplosion) (Object) effects.get(0));
+            item.set(DataComponents.FIREWORK_EXPLOSION, (FireworkExplosion) (Object) effects.getFirst());
             return true;
         } else if (item.getItem() == Items.FIREWORK_ROCKET) {
             final List<FireworkExplosion> mcEffects = effects.stream().map(FireworkExplosion.class::cast).toList();
             item.update(DataComponents.FIREWORKS, new Fireworks(1, Collections.emptyList()), p -> new Fireworks(p.flightDuration(), mcEffects));
             return true;
         }
+
         return false;
     }
 
-    public static Optional<List<FireworkEffect>> getFireworkEffects(final Object object) {
-        final ItemStack item = FireworkUtil.getItem(object);
+    public static Optional<List<FireworkEffect>> getFireworkEffects(final FireworkRocketEntity firework) {
+        return FireworkUtil.getFireworkEffects(FireworkUtil.getItem(firework));
+    }
+
+    public static Optional<List<FireworkEffect>> getFireworkEffects(final ItemStack item) {
         if (item.isEmpty()) {
             return Optional.empty();
         }
@@ -83,8 +93,11 @@ public final class FireworkUtil {
         return Optional.of(List.of((FireworkEffect) (Object) fireworkExplosion));
     }
 
-    public static boolean removeFireworkEffects(final Object object) {
-        final ItemStack item = FireworkUtil.getItem(object);
+    public static boolean removeFireworkEffects(final FireworkRocketEntity firework) {
+        return FireworkUtil.updateFireworkRocketItem(firework, FireworkUtil::removeFireworkEffects);
+    }
+
+    public static boolean removeFireworkEffects(final ItemStack item) {
         if (item.isEmpty()) {
             return false;
         }
@@ -103,23 +116,51 @@ public final class FireworkUtil {
         return false;
     }
 
+    public static boolean setFlightModifier(final FireworkRocketEntity firework, final int modifier) {
+        int lifetime = 10 * modifier + ((EntityAccessor) firework).accessor$random().nextInt(6) + ((EntityAccessor) firework).accessor$random().nextInt(7);
+        ((FireworkRocketEntityAccessor) firework).accessor$lifetime(lifetime);
+        return true;
+    }
+
+    public static boolean setFlightModifier(final ItemStack item, final int modifier) {
+        if (item.isEmpty()) {
+            return false;
+        }
+
+        if (item.getItem() == Items.FIREWORK_ROCKET) {
+            item.update(DataComponents.FIREWORKS, new Fireworks(1, Collections.emptyList()), p -> new Fireworks(modifier, p.explosions()));
+            return true;
+        }
+        return false;
+    }
+
+    public static OptionalInt getFlightModifier(final FireworkRocketEntity firework) {
+        return FireworkUtil.getFlightModifier(FireworkUtil.getItem(firework));
+    }
+
+    public static OptionalInt getFlightModifier(final ItemStack item) {
+        final Fireworks fireworks = item.get(DataComponents.FIREWORKS);
+        if (fireworks == null) {
+            return OptionalInt.empty();
+        }
+        return OptionalInt.of(fireworks.flightDuration());
+    }
+
+    public static boolean updateFireworkRocketItem(final FireworkRocketEntity firework, final Function<ItemStack, Boolean> function) {
+        final ItemStack item = FireworkUtil.getItem(firework).copy();
+        if (function.apply(item)) {
+            firework.getEntityData().set(FireworkRocketEntityAccessor.accessor$DATA_ID_FIREWORKS_ITEM(), item);
+            return true;
+        }
+        return false;
+    }
+
     public static ItemStack getItem(final FireworkRocketEntity firework) {
         ItemStack item = firework.getEntityData().get(FireworkRocketEntityAccessor.accessor$DATA_ID_FIREWORKS_ITEM());
         if (item.isEmpty()) {
-            item = (ItemStack) (Object) new SpongeItemStack.BuilderImpl().itemType(ItemTypes.FIREWORK_ROCKET).build();
-            firework.getEntityData().set(FireworkRocketEntityAccessor.accessor$DATA_ID_FIREWORKS_ITEM(), item);
+            return (ItemStack) (Object) new SpongeItemStack.BuilderImpl().itemType(ItemTypes.FIREWORK_ROCKET).build();
         }
         return item;
-    }
-
-    private static ItemStack getItem(final Object object) {
-        if (object instanceof ItemStack) {
-            return (ItemStack) object;
-        }
-        if (object instanceof FireworkRocketEntity) {
-            return FireworkUtil.getItem((FireworkRocketEntity) object);
-        }
-        return ItemStack.EMPTY;
     }
 
     private FireworkUtil() {

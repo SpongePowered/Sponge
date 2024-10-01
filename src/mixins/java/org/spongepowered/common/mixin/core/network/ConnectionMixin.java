@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.network;
 
 import com.google.common.collect.Sets;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.local.LocalAddress;
@@ -75,6 +76,7 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
     @Shadow private boolean disconnectionHandled;
     @Shadow @Final private Queue<Consumer<Connection>> pendingActions;
     @Shadow public abstract SocketAddress getRemoteAddress();
+    @Shadow public abstract boolean shadow$isConnected();
 
     private TransactionStore impl$transactionStore;
     private final Set<ResourceKey> impl$registeredChannels = Sets.newConcurrentHashSet();
@@ -161,29 +163,20 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
         this.impl$version = new SpongeMinecraftVersion(String.valueOf(version), version);
     }
 
-    @Inject(method = "send(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;Z)V", at = @At(value = "HEAD"), cancellable = true)
-    private void impl$onSend(final Packet<?> $$0, final @Nullable PacketSendListener $$1, final boolean $$2, final CallbackInfo ci) {
-        if (this.disconnectionHandled) {
+    @Redirect(method = "send(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;Z)V",
+        at = @At(value = "INVOKE", target = "Ljava/util/Queue;add(Ljava/lang/Object;)Z"))
+    private boolean impl$onQueue(final Queue instance, final Object consumer,
+                                 final Packet<?> $$0, final @Nullable PacketSendListener $$1, final boolean $$2) {
+        if (this.impl$disconnected) {
             if ($$1 instanceof final PacketSender.SpongePacketSendListener spongeListener) {
                 spongeListener.accept(new IOException("Connection has been closed."));
             }
-
-            ci.cancel();
+            return false;
         }
-    }
 
-//    org.spongepowered.asm.mixin.injection.throwables.InvalidInjectionException: @Redirect handler method net/minecraft/network/Connection::impl$onQueue
-//    from mixins.sponge.core.json:network.ConnectionMixin has an invalid signature.
-//    Found unexpected argument type java.util.function.Consumer at index 1,
-//    expected java.lang.Object.
-//    Handler signature:  (Ljava/util/Queue;Ljava/util/function/Consumer;Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;Z)Z
-//    Expected signature: (Ljava/util/Queue;Ljava/lang/Object;Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;Z)Z [INJECT Applicator Phase -> mixins.sponge.core.json:network.ConnectionMixin -> Apply Injections ->  -> Inject -> mixins.sponge.core.json:network.ConnectionMixin->@Redirect::impl$onQueue(Ljava/util/Queue;Ljava/util/function/Consumer;Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;Z)Z]
-    @Redirect(method = "send(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;Z)V",
-            at = @At(value = "INVOKE", target = "Ljava/util/Queue;add(Ljava/lang/Object;)Z"))
-    private boolean impl$onQueue(final Queue instance, final Object consumer,
-            final Packet<?> $$0, final @Nullable PacketSendListener $$1, final boolean $$2) {
-        if ($$1 instanceof PacketSender.SpongePacketSendListener spongeListener) {
-            return instance.add(new SpongePacketHolder() {
+        final boolean result;
+        if ($$1 instanceof final PacketSender.SpongePacketSendListener spongeListener) {
+            result = instance.add(new SpongePacketHolder() {
                 @Override
                 public void apply(final Throwable t) {
                     spongeListener.accept(t);
@@ -194,28 +187,46 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
                     ((Consumer<Connection>) consumer).accept(connection);
                 }
             });
+        } else {
+            result = instance.add(consumer);
         }
-        return instance.add(consumer);
+
+        if (this.impl$disconnected) {
+            this.impl$closePendingActions();
+            return false;
+        }
+
+        return result;
     }
 
-    @Inject(method = "handleDisconnection", at = @At("RETURN"))
-    private void impl$onDisconnected(final CallbackInfo ci) {
-        this.impl$engineConnection.disconnected();
+    private void impl$closePendingActions() {
         Consumer<Connection> consumer;
         while ((consumer = this.pendingActions.poll()) != null) {
-            if (consumer instanceof SpongePacketHolder packetHolder) {
+            if (consumer instanceof final SpongePacketHolder packetHolder) {
                 packetHolder.apply(new IOException("Connection has been closed."));
             }
         }
     }
 
-    @Inject(method = "disconnect(Lnet/minecraft/network/DisconnectionDetails;)V", at = @At(value = "INVOKE", target = "Lio/netty/channel/ChannelFuture;awaitUninterruptibly()Lio/netty/channel/ChannelFuture;"), cancellable = true)
-    private void impl$disconnectAsync(final CallbackInfo ci) {
-        ci.cancel(); //This can cause deadlock within the event loop
+    @Inject(method = "handleDisconnection", at = @At("RETURN"))
+    private void impl$onDisconnected(final CallbackInfo ci) {
+        if (!this.disconnectionHandled) {
+            //Vanilla has race condition here where this might be called
+            //while the channel is still open
+            return;
+        }
+        this.impl$disconnected = true;
+        this.impl$engineConnection.disconnected();
+        this.impl$closePendingActions();
+    }
 
+    @Redirect(method = "disconnect(Lnet/minecraft/network/DisconnectionDetails;)V", at = @At(value = "INVOKE", target = "Lio/netty/channel/ChannelFuture;awaitUninterruptibly()Lio/netty/channel/ChannelFuture;"))
+    private ChannelFuture impl$disconnectAsync(final ChannelFuture instance) {
+        //Awaiting here can cause deadlock within the event loop
         //Because we are now disconnecting asynchronously the channel might not
         //be immediately flagged as closed so special case it
         this.impl$disconnected = true;
+        return instance;
     }
 
     @Inject(method = "isConnected", at = @At("HEAD"), cancellable = true)
@@ -223,6 +234,17 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
         if (this.impl$disconnected) {
             cir.setReturnValue(false);
         }
+    }
+
+    @Redirect(method = {
+        "exceptionCaught",
+        "channelRead0(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/protocol/Packet;)V",
+        "flushQueue",
+        "handleDisconnection" },
+        at = @At(value = "INVOKE", target = "Lio/netty/channel/Channel;isOpen()Z"))
+    private boolean impl$onIsOpen(final Channel instance) {
+        //Use isConnected instead of isOpen because it might return true while isConnected is false
+        return this.shadow$isConnected();
     }
 
     @Redirect(method = "genericsFtw", at = @At(value = "INVOKE",

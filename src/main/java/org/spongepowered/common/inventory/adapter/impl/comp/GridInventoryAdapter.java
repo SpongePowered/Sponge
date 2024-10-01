@@ -26,6 +26,7 @@ package org.spongepowered.common.inventory.adapter.impl.comp;
 
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.inventory.type.GridInventory;
@@ -110,8 +111,8 @@ public class GridInventoryAdapter extends Inventory2DAdapter implements GridInve
     }
 
     @Override
-    public InventoryTransactionResult set(int x, int y, ItemStack stack) {
-        return AdapterLogic.insertSequential(this.inventoryAdapter$getFabric(), this.getSlotLens(x, y), stack);
+    public InventoryTransactionResult set(int x, int y, ItemStackLike stack) {
+        return AdapterLogic.insertSequential(this.inventoryAdapter$getFabric(), this.getSlotLens(x, y), stack.asMutable());
     }
 
 }

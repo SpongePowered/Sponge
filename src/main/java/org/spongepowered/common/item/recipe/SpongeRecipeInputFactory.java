@@ -27,7 +27,7 @@ package org.spongepowered.common.item.recipe;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.item.crafting.SmithingRecipeInput;
-import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.api.item.recipe.crafting.RecipeInput;
@@ -36,13 +36,13 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 public final class SpongeRecipeInputFactory implements RecipeInput.Factory {
 
     @Override
-    public RecipeInput.Single single(final ItemStack stack) {
-        return (RecipeInput.Single) (Object) new SingleRecipeInput(ItemStackUtil.toNative(stack));
+    public RecipeInput.Single single(final ItemStackLike stack) {
+        return (RecipeInput.Single) (Object) new SingleRecipeInput(ItemStackUtil.fromLikeToNative(stack));
     }
 
     @Override
-    public RecipeInput.Smithing smithing(final ItemStack template, final ItemStack base, final ItemStack addtion) {
-        return (RecipeInput.Smithing) (Object) new SmithingRecipeInput(ItemStackUtil.toNative(template), ItemStackUtil.toNative(base), ItemStackUtil.toNative(addtion));
+    public RecipeInput.Smithing smithing(final ItemStackLike template, final ItemStackLike base, final ItemStackLike addtion) {
+        return (RecipeInput.Smithing) (Object) new SmithingRecipeInput(ItemStackUtil.fromLikeToNative(template), ItemStackUtil.fromLikeToNative(base), ItemStackUtil.fromLikeToNative(addtion));
     }
 
     @Override
