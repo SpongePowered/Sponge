@@ -181,7 +181,7 @@ public final class VanillaPluginManager implements SpongePluginManager {
 
     private boolean stillValid(final PluginCandidate candidate, final Map<PluginCandidate, String> consequential) {
         final Optional<PluginDependency> failedId =
-                candidate.metadata().dependencies().stream().filter(x -> !x.optional() && !this.plugins.containsKey(x.id())).findFirst();
+                candidate.metadata().dependencies().stream().filter(d -> !this.isDependencyStillValid(d)).findFirst();
         if (failedId.isPresent()) {
             consequential.put(candidate, failedId.get().id());
             return false;
@@ -189,4 +189,15 @@ public final class VanillaPluginManager implements SpongePluginManager {
         return true;
     }
 
+    private boolean isDependencyStillValid(final PluginDependency dependency) {
+        if (!dependency.optional()) {
+            return switch (dependency.loadOrder()) {
+                case BEFORE -> !this.plugins.containsKey(dependency.id());
+                case AFTER -> this.plugins.containsKey(dependency.id());
+                default -> true;
+            };
+        }
+
+        return true;
+    }
 }
