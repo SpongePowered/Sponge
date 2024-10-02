@@ -24,7 +24,9 @@
  */
 package org.spongepowered.test.serviceloader;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
+import com.google.inject.multibindings.Multibinder;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
@@ -56,6 +58,14 @@ public final class ParentModuleTestPlugin {
 
         if (combinablePluginServices.size() != 2 || !combinablePluginServices.contains(childModulePlugin) || !combinablePluginServices.contains(secondChildModulePlugin)) {
             logger.error("Mismatched content of combinablePluginServices");
+        }
+    }
+
+    public static final class Module extends AbstractModule {
+
+        @Override
+        protected void configure() {
+            Multibinder.newSetBinder(this.binder(), CombinableTestPluginService.class);
         }
     }
 }

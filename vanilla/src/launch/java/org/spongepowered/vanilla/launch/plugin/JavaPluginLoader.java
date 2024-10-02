@@ -27,7 +27,7 @@ package org.spongepowered.vanilla.launch.plugin;
 import com.google.inject.Injector;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
-import org.spongepowered.common.inject.plugin.PluginModule;
+import org.spongepowered.common.inject.plugin.PluginGuice;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.Environment;
 import org.spongepowered.plugin.InvalidPluginException;
@@ -51,7 +51,7 @@ public final class JavaPluginLoader implements PluginLoader<VanillaJavaPluginCon
             final String mainClass = container.metadata().entrypoint();
             final Class<?> pluginClass = Class.forName(mainClass, true, targetClassLoader);
 
-            final Injector pluginInjector = PluginModule.create(container, pluginClass, Launch.instance().lifecycle().platformInjector());
+            final Injector pluginInjector = PluginGuice.create(container, pluginClass, Launch.instance().lifecycle().platformInjector());
             final Object plugin = pluginInjector.getInstance(pluginClass);
             container.initializeInstance(plugin, pluginInjector);
             return container;

@@ -364,6 +364,9 @@
             "name": "Parent Module Tests",
             "entrypoint": "org.spongepowered.test.serviceloader.ParentModuleTestPlugin",
             "description": "Parent Module Tests",
+            "properties": {
+                "guice-module": "org.spongepowered.test.serviceloader.ParentModuleTestPlugin$Module"
+            },
             "dependencies": [
                 {
                     "id": "childmoduletestplugin",

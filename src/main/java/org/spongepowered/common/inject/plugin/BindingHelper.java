@@ -72,12 +72,12 @@ final class BindingHelper {
                 continue;
             }
 
-            this.bind(fromInjector, binding);
+            this.bindFrom(fromInjector, binding);
         }
     }
 
     @SuppressWarnings("rawtypes")
-    void bind(final Injector fromInjector, final Binding binding) {
+    void bindFrom(final Injector fromInjector, final Binding binding) {
         if (binding instanceof final ExposedBinding<?> exposedBinding) {
             final PrivateElements privateElements = exposedBinding.getPrivateElements();
             for (final Element privateElement : privateElements.getElements()) {
@@ -86,17 +86,18 @@ final class BindingHelper {
                     continue;
                 }
 
-                this.bind(fromInjector, privateBinding);
+                this.bindFrom(fromInjector, privateBinding);
             }
 
             return;
         }
 
-        this.bind(fromInjector, binding.getKey());
+        this.bind(fromInjector, binding);
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private void bind(final Injector fromInjector, final Key key) {
+    private void bind(final Injector fromInjector, final Binding<?> binding) {
+        final Key key = binding.getKey();
         final Class<?> clazz = key.getTypeLiteral().getRawType();
         if (Iterable.class.isAssignableFrom(clazz)) {
             final Collection destinationCollection;

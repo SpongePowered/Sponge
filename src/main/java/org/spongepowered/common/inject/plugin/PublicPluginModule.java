@@ -24,47 +24,28 @@
  */
 package org.spongepowered.common.inject.plugin;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Module;
-import com.google.inject.PrivateModule;
-import com.google.inject.Scopes;
-import org.apache.logging.log4j.Logger;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import com.google.inject.AbstractModule;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.common.inject.InjectionPointProvider;
 import org.spongepowered.common.inject.SpongePluginInjectorProvider;
-import org.spongepowered.common.inject.provider.PluginConfigurationModule;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.model.PluginDependency;
 
-import java.util.ArrayList;
-
 /**
  * A module installed for each plugin.
+ * Contains the values that are publicly visible and shared
+ * across dependencies.
  */
-public final class PluginModule extends PrivateModule {
+public final class PublicPluginModule extends AbstractModule {
 
     private final PluginContainer container;
-    private final Class<?> pluginClass;
 
-    private PluginModule(final PluginContainer container, final Class<?> pluginClass) {
+    PublicPluginModule(final PluginContainer container) {
         this.container = container;
-        this.pluginClass = pluginClass;
     }
 
     @Override
     protected void configure() {
-        this.bind(this.pluginClass).in(Scopes.SINGLETON);
-        this.expose(this.pluginClass);
-
-        this.install(new InjectionPointProvider());
-
-        this.bind(PluginContainer.class).toInstance(this.container);
-        this.bind(Logger.class).toInstance(this.container.logger());
-        this.bind(System.Logger.class).toProvider(() -> System.getLogger(this.container.logger().getName())).in(Scopes.SINGLETON);
-
-        this.install(new PluginConfigurationModule());
+        this.requestStaticInjection(PreserveHelper.class);
 
         final BindingHelper bindingHelper = new BindingHelper(this.binder());
         for (final PluginDependency dependency : this.container.metadata().dependencies()) {
@@ -97,25 +78,11 @@ public final class PluginModule extends PrivateModule {
         bindingHelper.bind();
     }
 
-    public static Injector create(final PluginContainer container, final Class<?> pluginClass, final @Nullable Injector platformInjector) {
-        final ArrayList<Module> modules = new ArrayList<>(2);
-        modules.add(new PluginModule(container, pluginClass));
-
-        final @Nullable Object customModule = container.metadata().property("guice-module").orElse(null);
-        if (customModule != null) {
-            try {
-                final Class<?> moduleClass = Class.forName(customModule.toString(), true, pluginClass.getClassLoader());
-                final com.google.inject.Module moduleInstance = (com.google.inject.Module) moduleClass.getConstructor().newInstance();
-                modules.add(moduleInstance);
-            } catch (final Exception ex) {
-                throw new RuntimeException("Failed to instantiate the custom module!", ex);
-            }
-        }
-
-        if (platformInjector != null) {
-            return platformInjector.createChildInjector(modules);
-        } else {
-            return Guice.createInjector(modules);
-        }
+    /**
+     * If no public module has any bindings, Guice will silently promote
+     * the private module as the "main" one which leads to everything
+     * being marked as private, including the plugin provided custom module.
+     */
+    private static final class PreserveHelper {
     }
 }
