@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.vehicle;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.vehicle.MinecartTNT;
@@ -88,8 +89,9 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
     }
 
 
-    @Inject(method = "hurt", at = @At("HEAD"))
-    private void impl$onAttackSetPrimeCause(final DamageSource damageSource, final float amount, final CallbackInfoReturnable<Boolean> ci) {
+    @Inject(method = "hurtServer", at = @At("HEAD"))
+    private void impl$onAttackSetPrimeCause(final ServerLevel level, final DamageSource damageSource,
+                                            final float amount, final CallbackInfoReturnable<Boolean> ci) {
         this.impl$primeCause = damageSource;
     }
 
@@ -136,9 +138,9 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
         }
     }
 
-    @Inject(method = "hurt", cancellable = true, at = @At(value = "INVOKE",
+    @Inject(method = "hurtServer", cancellable = true, at = @At(value = "INVOKE",
         target = "Lnet/minecraft/world/entity/vehicle/MinecartTNT;explode(Lnet/minecraft/world/damagesource/DamageSource;D)V"))
-    private void attackImpl$postOnAttackEntityFrom(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
+    private void attackImpl$postOnAttackEntityFrom(final ServerLevel level, final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
         if (DamageEventUtil.callOtherAttackEvent((Entity) (Object) this, source, amount).isCancelled()) {
             cir.setReturnValue(true);
         }

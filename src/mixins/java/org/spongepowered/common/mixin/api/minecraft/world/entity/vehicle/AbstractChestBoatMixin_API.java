@@ -24,11 +24,20 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.vehicle;
 
-import net.minecraft.world.entity.vehicle.Boat;
-import org.spongepowered.api.data.type.BoatType;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.entity.vehicle.ChestBoat;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(Boat.Type.class)
-public abstract class Boat_TypeMixin_API implements BoatType {
+import java.util.Set;
+
+@Mixin(net.minecraft.world.entity.vehicle.AbstractChestBoat.class)
+public abstract class AbstractChestBoatMixin_API extends AbstractBoatMixin_API implements ChestBoat {
+
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        return values;
+    }
 
 }

@@ -44,7 +44,7 @@ public abstract class ThrownEnderpearlMixin extends ThrowableProjectileMixin {
 
     @ModifyArg(method = "onHit",
             at = @At(value = "INVOKE",
-                target = "Lnet/minecraft/world/entity/player/Player;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
+                target = "Lnet/minecraft/world/entity/player/Player;hurtServer(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
     private float impl$onAttackEntityFromWithDamage(final float damage) {
         return (float) this.impl$damageAmount;
     }

@@ -22,22 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.entity.vehicle;
+package org.spongepowered.vanilla.mixin.core.world.entity.vehicle;
 
-import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.entity.vehicle.ChestBoat;
+import net.minecraft.world.entity.vehicle.AbstractBoat;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.world.entity.vehicle.AbstractBoatBridge;
 
-import java.util.Set;
+@Mixin(AbstractBoat.class)
+public abstract class AbstractBoatMixin_Vanilla implements AbstractBoatBridge {
 
-@Mixin(net.minecraft.world.entity.vehicle.ChestBoat.class)
-public abstract class ChestBoatMixin_API extends BoatMixin_API implements ChestBoat {
-
-    @Override
-    protected Set<Value.Immutable<?>> api$getVanillaValues() {
-        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
-
-        return values;
+    /**
+     * Forge changes this check to ask the block state for "slipperiness" so we return the check here to Vanilla
+     */
+    @Redirect(method = "getGroundFriction", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;getFriction()F"))
+    private float vanilla$getBlockSlipperinessIfBoatIsNotOverridingMovingOnLand(Block block) {
+        return this.bridge$getMoveOnLand() ? Blocks.ICE.getFriction() : block.getFriction();
     }
-
 }

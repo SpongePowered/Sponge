@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.ai.sensing;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,7 +41,7 @@ public class SensorMixin<E extends LivingEntity> {
         "isEntityAttackable",
         "isEntityAttackableIgnoringLineOfSight"
     }, at = @At("HEAD"), cancellable = true)
-    private static void impl$cancelForVanishedEntities(LivingEntity $$0, LivingEntity $$1, CallbackInfoReturnable<Boolean> cir) {
+    private static void impl$cancelForVanishedEntities(ServerLevel $$0, LivingEntity $$1, LivingEntity $$2, CallbackInfoReturnable<Boolean> cir) {
         final var vs = ((VanishableBridge) $$0).bridge$vanishState();
         if (vs.invisible() && vs.untargetable()) {
             cir.setReturnValue(false);

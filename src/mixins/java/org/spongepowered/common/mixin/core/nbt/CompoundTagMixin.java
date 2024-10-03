@@ -24,14 +24,16 @@
  */
 package org.spongepowered.common.mixin.core.nbt;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Maps;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import org.apache.logging.log4j.Level;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.PrettyPrinter;
@@ -54,11 +56,10 @@ public abstract class CompoundTagMixin {
     @Shadow @Final private Map<String, Tag> tags;
     // @formatter:on
 
-    @Redirect(method = "copy()Lnet/minecraft/nbt/CompoundTag;", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/Tag;copy()Lnet/minecraft/nbt/Tag;"))
-    @Nullable
-    private Tag impl$checkForOverflowOnCopy(Tag inbt) {
-        try {
-            return inbt == null ? null : inbt.copy();
+    @Redirect(method = "copy()Lnet/minecraft/nbt/CompoundTag;", at = @At(value = "INVOKE", target = "Lcom/google/common/collect/Maps;transformValues(Ljava/util/Map;Lcom/google/common/base/Function;)Ljava/util/Map;"))
+    private Map<String, Tag> impl$checkForOverflowOnCopy(Map<String, Tag> fromMap, Function<? super Tag, Tag> function) {
+        return Maps.transformValues(fromMap, (tag) -> {try {
+            return tag == null ? null : tag.copy();
         } catch (StackOverflowError e) {
             final PrettyPrinter printer = new PrettyPrinter(60)
                 .add("StackOverflow from trying to copy this compound")
@@ -86,22 +87,22 @@ public abstract class CompoundTagMixin {
             printer.add();
             printer.log(SpongeCommon.logger(), Level.ERROR);
             return null;
-        }
+        }});
     }
 
-    @Redirect(method = "copy()Lnet/minecraft/nbt/CompoundTag;", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/CompoundTag;put(Ljava/lang/String;Lnet/minecraft/nbt/Tag;)Lnet/minecraft/nbt/Tag;"))
-    private Tag impl$checkForNullNBTValuesDuringCopy(CompoundTag compound, String key, Tag value) {
-        if (value == null) {
-            final IllegalStateException exception = new IllegalStateException("There is a null NBT component in the compound for key: " + key);
-            SpongeCommon.logger().error("Printing out a stacktrace to catch an exception in performing an NBTTagCompound.copy!\n"
-                                         + "If you are seeing this, then Sponge is preventing an exception from being thrown due to unforseen\n"
-                                         + "possible bugs in any mods present. Please report this to SpongePowered and/or the relative mod\n"
-                                         + "authors for the offending compound data!", exception);
-        } else {
-            compound.put(key, value);
-        }
-
-        return value;
+    @ModifyArg(method = "copy()Lnet/minecraft/nbt/CompoundTag;", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/CompoundTag;<init>(Ljava/util/Map;)V"))
+    private Map<String, Tag> impl$checkForNullNBTValuesDuringCopy(Map<String, Tag> map) {
+        return Maps.newHashMap(Maps.filterEntries(map, entry -> {
+            if (entry.getValue() == null) {
+                final IllegalStateException exception = new IllegalStateException("There is a null NBT component in the compound for key: " + entry.getKey());
+                SpongeCommon.logger().error("Printing out a stacktrace to catch an exception in performing an NBTTagCompound.copy!\n"
+                                            + "If you are seeing this, then Sponge is preventing an exception from being thrown due to unforseen\n"
+                                            + "possible bugs in any mods present. Please report this to SpongePowered and/or the relative mod\n"
+                                            + "authors for the offending compound data!", exception);
+                return false;
+            }
+            return true;
+        }));
     }
 
 }

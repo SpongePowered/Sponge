@@ -34,6 +34,7 @@
         "item.EmptyMapItemMixin",
         "item.ThrowableInaccurateItemMixin",
         "item.YeetableInaccurateItemMixin",
+        "nbt.CompoundTagMixin",
         "network.ConnectionMixin",
         "network.PacketEncoderMixin",
         "network.chat.Component_SerializerMixin",
@@ -135,6 +136,7 @@
         "world.entity.animal.OcelotMixin",
         "world.entity.animal.ParrotMixin",
         "world.entity.animal.Rabbit_RaidGardenGoalMixin",
+        "world.entity.animal.SnowGolemMixin",
         "world.entity.animal.WolfMixin",
         "world.entity.animal.horse.AbstractHorseMixin",
         "world.entity.boss.enderdragon.EndCrystalMixin",
@@ -178,9 +180,9 @@
         "world.entity.projectile.ThrownEnderpearlMixin",
         "world.entity.projectile.ThrownTridentMixin",
         "world.entity.projectile.WitherSkullMixin",
+        "world.entity.vehicle.AbstractBoatMixin",
         "world.entity.vehicle.AbstractMinecartContainerMixin",
         "world.entity.vehicle.AbstractMinecartMixin",
-        "world.entity.vehicle.BoatMixin",
         "world.entity.vehicle.MinecartCommandBlock_MinecartCommandBaseMixin",
         "world.entity.vehicle.MinecartCommandBlockMixin",
         "world.entity.vehicle.MinecartFurnaceMixin",
@@ -235,9 +237,11 @@
         "world.level.block.MagmaBlockMixin",
         "world.level.block.NetherPortalBlockMixin",
         "world.level.block.NoteBlockMixin",
+        "world.level.block.TntBlockMixin",
         "world.level.block.entity.AbstractFurnaceBlockEntityMixin",
         "world.level.block.entity.BannerBlockEntityMixin",
         "world.level.block.entity.BaseContainerBlockEntityMixin",
+        "world.level.block.entity.BeaconBlockEntityMixin",
         "world.level.block.entity.BellBLockEntityMixin",
         "world.level.block.entity.BlockEntityMixin",
         "world.level.block.entity.BrewingStandBlockEntityMixin",
@@ -300,5 +304,5 @@
     },
     "overwrites": {
         "conformVisibility": true
-    }
+  }
 }

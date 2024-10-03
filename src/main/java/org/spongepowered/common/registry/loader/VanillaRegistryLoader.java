@@ -166,7 +166,6 @@ public final class VanillaRegistryLoader {
             map.put(AttributeModifier.Operation.ADD_MULTIPLIED_BASE, "multiply_base");
             map.put(AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, "multiply_total");
         });
-        this.automaticName(RegistryTypes.BOAT_TYPE, Boat.Type.values());
         this.automaticName(RegistryTypes.CHEST_ATTACHMENT_TYPE, ChestType.values());
         this.automaticName(RegistryTypes.COLLISION_RULE, Team.CollisionRule.values());
         this.automaticName(RegistryTypes.COMPARATOR_MODE, ComparatorMode.values());

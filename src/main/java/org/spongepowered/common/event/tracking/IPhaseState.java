@@ -61,6 +61,7 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.server.TickTaskBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
@@ -160,12 +161,14 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     /**
      * Performs any necessary custom logic after the provided {@link BlockSnapshot}
      * {@link Transaction} has taken place.
-     * @param context The context for information
+     *
+     * @param context     The context for information
+     * @param serverWorld
      * @param blockChange The block change performed
-     * @param receipt The transaction of the old and new snapshots
+     * @param receipt     The transaction of the old and new snapshots
      */
     default void postBlockTransactionApplication(
-        final C context, final BlockChange blockChange,
+        final C context, ServerWorld serverWorld, final BlockChange blockChange,
         final BlockTransactionReceipt receipt
     ) { }
 

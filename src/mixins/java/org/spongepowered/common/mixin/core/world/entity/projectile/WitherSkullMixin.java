@@ -54,7 +54,7 @@ public abstract class WitherSkullMixin extends AbstractHurtingProjectileMixin im
     private boolean impl$damageSet = false;
 
     @ModifyArg(method = "onHitEntity",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;hurtServer(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
     private float impl$onAttackEntityFrom(final float amount) {
         if (this.impl$damageSet) {
             return this.impl$damage;

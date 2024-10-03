@@ -24,18 +24,18 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.vehicle;
 
-import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.vehicle.AbstractBoat;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
-import org.spongepowered.common.bridge.world.entity.vehicle.BoatBridge;
+import org.spongepowered.common.bridge.world.entity.vehicle.AbstractBoatBridge;
 import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
 
-@Mixin(Boat.class)
-public abstract class BoatMixin extends EntityMixin implements BoatBridge {
+@Mixin(AbstractBoat.class)
+public abstract class AbstractBoatMixin extends EntityMixin implements AbstractBoatBridge {
 
     private float impl$maxSpeed = Constants.Entity.Boat.DEFAULT_MAX_SPEED;
     private boolean impl$moveOnLand = Constants.Entity.Boat.MOVE_ON_LAND;

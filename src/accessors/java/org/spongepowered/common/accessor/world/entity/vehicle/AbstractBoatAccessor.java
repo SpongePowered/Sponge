@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.accessor.world.entity.vehicle;
 
-import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.vehicle.AbstractBoat;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(Boat.class)
-public interface BoatAccessor {
+@Mixin(AbstractBoat.class)
+public interface AbstractBoatAccessor {
 
-    @Accessor("status") Boat.Status accessor$status();
+    @Accessor("status") AbstractBoat.Status accessor$status();
 
 }

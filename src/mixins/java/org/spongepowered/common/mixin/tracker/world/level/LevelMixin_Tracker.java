@@ -74,9 +74,6 @@ public abstract class LevelMixin_Tracker implements LevelBridge, LevelAccessor {
     @Shadow public abstract FluidState shadow$getFluidState(BlockPos p_204610_1_);
     // @formatter:on
 
-
-    @Shadow public abstract GameRules getGameRules();
-
     /**
      * We introduce the protected method to be overridden in
      * {@code org.spongepowered.common.mixin.core.world.server.ServerWorldMixin#tracker$wrapTileEntityTick(ITickableTileEntity)}

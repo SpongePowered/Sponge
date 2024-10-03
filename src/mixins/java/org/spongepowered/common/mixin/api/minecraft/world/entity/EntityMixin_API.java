@@ -32,6 +32,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -98,7 +99,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract boolean shadow$isRemoved();
     @Shadow public abstract UUID shadow$getUUID();
-    @Shadow public abstract boolean shadow$hurt(DamageSource source, float amount);
+    @Shadow public abstract boolean shadow$hurtOrSimulate(DamageSource source, float amount);
     @Shadow protected abstract void shadow$setRot(float yaw, float pitch);
     @Shadow public abstract net.minecraft.world.phys.AABB shadow$getBoundingBox();
     @Shadow public abstract void shadow$setRemoved(Entity.RemovalReason var1);
@@ -107,7 +108,6 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow public abstract CompoundTag shadow$saveWithoutId(CompoundTag $$0);
     @Shadow public abstract Level shadow$level();
     // @formatter:on
-
 
     @Override
     public Source random() {
@@ -237,6 +237,8 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         this.shadow$setRemoved(Entity.RemovalReason.DISCARDED);
     }
 
+
+
     @Override
     public boolean damage(final double damage, final org.spongepowered.api.event.cause.entity.damage.source.DamageSource damageSource) {
         if (!(damageSource instanceof DamageSource)) {
@@ -244,7 +246,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
             return false;
         }
         // Causes at this point should already be pushed from plugins before this point with the cause system.
-        return this.shadow$hurt((DamageSource) damageSource, (float) damage);
+        return this.shadow$hurtOrSimulate((DamageSource) damageSource, (float) damage);
     }
 
     @Override

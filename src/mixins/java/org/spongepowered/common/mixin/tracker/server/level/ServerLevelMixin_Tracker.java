@@ -169,8 +169,8 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
 
     @Redirect(method = "tickFluid(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/material/Fluid;)V",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/level/material/FluidState;tick(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)V"))
-    private void tracker$wrapFluidTick(final FluidState fluidState, final net.minecraft.world.level.Level level, final BlockPos pos, final BlockState blockState) {
+            target = "Lnet/minecraft/world/level/material/FluidState;tick(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)V"))
+    private void tracker$wrapFluidTick(final FluidState fluidState, final ServerLevel level, final BlockPos pos, final BlockState blockState) {
         TrackingUtil.updateTickFluid(this, fluidState, pos, blockState);
     }
 
@@ -229,10 +229,10 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
 
     @Redirect(method = "tickChunk(Lnet/minecraft/world/level/chunk/LevelChunk;I)V",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/level/material/FluidState;randomTick(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/util/RandomSource;)V"
+            target = "Lnet/minecraft/world/level/material/FluidState;randomTick(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Lnet/minecraft/util/RandomSource;)V"
         )
     )
-    private void tracker$wrapFluidRandomTick(final FluidState fluidState, final net.minecraft.world.level.Level worldIn, final BlockPos pos, final RandomSource random) {
+    private void tracker$wrapFluidRandomTick(final FluidState fluidState, final ServerLevel worldIn, final BlockPos pos, final RandomSource random) {
         TrackingUtil.randomTickFluid(this, fluidState, pos, this.random);
     }
 

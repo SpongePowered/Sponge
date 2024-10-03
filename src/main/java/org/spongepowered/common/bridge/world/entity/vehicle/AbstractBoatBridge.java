@@ -22,24 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.core.world.entity.vehicle;
+package org.spongepowered.common.bridge.world.entity.vehicle;
 
-import net.minecraft.world.entity.vehicle.Boat;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.world.entity.vehicle.BoatBridge;
+public interface AbstractBoatBridge {
 
-@Mixin(Boat.class)
-public abstract class BoatMixin_Vanilla implements BoatBridge {
+    double bridge$getMaxSpeed();
 
-    /**
-     * Forge changes this check to ask the block state for "slipperiness" so we return the check here to Vanilla
-     */
-    @Redirect(method = "getGroundFriction", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;getFriction()F"))
-    private float vanilla$getBlockSlipperinessIfBoatIsNotOverridingMovingOnLand(Block block) {
-        return this.bridge$getMoveOnLand() ? Blocks.ICE.getFriction() : block.getFriction();
-    }
+    void bridge$setMaxSpeed(double impl$maxSpeed);
+
+    boolean bridge$getMoveOnLand();
+
+    void bridge$setMoveOnLand(boolean impl$moveOnLand);
+
+    double bridge$getOccupiedDecelerationSpeed();
+
+    void bridge$setOccupiedDecelerationSpeed(double impl$occupiedDecelerationSpeed);
+
+    double bridge$getUnoccupiedDecelerationSpeed();
+
+    void bridge$setUnoccupiedDecelerationSpeed(double impl$unoccupiedDecelerationSpeed);
 }

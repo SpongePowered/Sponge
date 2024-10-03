@@ -32,6 +32,7 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
+import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -163,9 +164,9 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract void shadow$setInvisible(boolean invisible);
     @Shadow public abstract EntityType<?> shadow$getType();
     @Shadow public abstract void shadow$teleportTo(double x, double y, double z);
-    @Shadow public abstract CommandSourceStack shadow$createCommandSourceStack();
+    @Shadow public abstract CommandSourceStack shadow$createCommandSourceStackForNameResolution(ServerLevel level);
     @Shadow public abstract net.minecraft.world.phys.Vec3 shadow$position();
-    @Shadow @Nullable public abstract ItemEntity shadow$spawnAtLocation(ItemStack stack, float offsetY);
+    @Shadow @Nullable public abstract ItemEntity shadow$spawnAtLocation(ServerLevel $$0, ItemStack stack, float offsetY);
     @Shadow @Nullable public abstract Entity shadow$getVehicle();
     @Shadow public abstract AABB shadow$getBoundingBox();
     @Shadow @Nullable public abstract PlayerTeam shadow$getTeam();
@@ -176,7 +177,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract void shadow$setDeltaMovement(net.minecraft.world.phys.Vec3 motion);
     @Shadow public abstract void shadow$unRide();
     @Shadow protected abstract void shadow$removeAfterChangingDimensions();
-    @Shadow protected abstract int shadow$getPermissionLevel();
     @Shadow public abstract float shadow$getYRot();
     @Shadow public abstract float shadow$getXRot();
     @Shadow public abstract void shadow$setYRot(final float param0);
@@ -420,7 +420,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     @Override
     public CommandSourceStack bridge$getCommandSource(final Cause cause) {
-        return this.shadow$createCommandSourceStack();
+        return this.shadow$createCommandSourceStackForNameResolution((ServerLevel) this.shadow$level());
     }
 
     /**
@@ -659,23 +659,20 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Redirect(method = "lavaHurt",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z"
+            target = "Lnet/minecraft/world/entity/Entity;hurtServer(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)Z"
         )
     )
-    private boolean impl$createLavaBlockDamageSource(final Entity entity, final DamageSource source, final float damage) {
-        if (this.shadow$level().isClientSide) { // Short circuit
-            return entity.hurt(source, damage);
-        }
+    private boolean impl$createLavaBlockDamageSource(final Entity instance, ServerLevel serverLevel, DamageSource source, float damage) {
         final AABB bb = this.shadow$getBoundingBox().inflate(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D);
-        final ServerLocation location = DamageEventUtil.findFirstMatchingBlock((Entity) (Object) this, bb, block ->
+        final ServerLocation location = DamageEventUtil.findFirstMatchingBlock(instance, bb, block ->
             block.is(Blocks.LAVA) || block.getBlock() instanceof LavaCauldronBlock);
         if (location != null) {
             var blockSource = org.spongepowered.api.event.cause.entity.damage.source.DamageSource.builder()
                     .from((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) source).block(location)
                     .block(location.createSnapshot()).build();
-            return entity.hurt((DamageSource) blockSource, damage);
+            return instance.hurtServer(serverLevel, (DamageSource) blockSource, damage);
         }
-        return entity.hurt(source, damage);
+        return instance.hurtServer(serverLevel, source, damage);
     }
 
     @Redirect(method = "move", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;collide(Lnet/minecraft/world/phys/Vec3;)Lnet/minecraft/world/phys/Vec3;"))
@@ -765,18 +762,12 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     }
 
-    /**
-         * @author gabizou - January 4th, 2016
-         * @reason gabizou - January 27th, 2016 - Rewrite to a redirect
-         *     <p>
-         *     This prevents sounds from being sent to the server by entities that are vanished
-         */
-
-    @Redirect(method = "playSound",
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/Entity;isSilent()Z"))
-    private boolean impl$checkIsSilentOrInvis(final Entity entity) {
-        return entity.isSilent() || !this.bridge$vanishState().createsSounds();
+    @Redirect(method = "isSilent", at = @At(
+        value = "INVOKE",
+        target = "Lnet/minecraft/network/syncher/SynchedEntityData;get(Lnet/minecraft/network/syncher/EntityDataAccessor;)Ljava/lang/Object;"
+    ))
+    private Object impl$checkIsSilentOrInvis(final SynchedEntityData data, final EntityDataAccessor<Boolean> key) {
+        return data.get(key) || !this.bridge$vanishState().createsSounds();
     }
 
     @Redirect(method = "push(Lnet/minecraft/world/entity/Entity;)V",
@@ -826,18 +817,18 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
      */
 
     @Inject(
-        method = "spawnAtLocation(Lnet/minecraft/world/item/ItemStack;F)Lnet/minecraft/world/entity/item/ItemEntity;",
+        method = "spawnAtLocation(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;F)Lnet/minecraft/world/entity/item/ItemEntity;",
         at = @At("HEAD"),
         cancellable = true
     )
     public void impl$throwDropItemConstructEvent(
-        final ItemStack stack, final float offsetY, final CallbackInfoReturnable<ItemEntity> cir
+        final ServerLevel serverLevel, ItemStack stack, float offsetY, CallbackInfoReturnable<ItemEntity> cir
     ) {
         if (stack.isEmpty()) {
             cir.setReturnValue(null);
             return;
         }
-        if (((LevelBridge) this.shadow$level()).bridge$isFake()) {
+        if (((LevelBridge) serverLevel).bridge$isFake()) {
             return;
         }
         // Now the real fun begins.
@@ -863,7 +854,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             }
             final ItemEntity entityitem = new ItemEntity(this.shadow$level(), posX, posY, posZ, item);
             entityitem.setDefaultPickUpDelay();
-            this.shadow$level().addFreshEntity(entityitem);
+            serverLevel.addFreshEntity(entityitem);
             cir.setReturnValue(entityitem);
         }
     }
@@ -946,16 +937,13 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     @Redirect(method = "thunderHit",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
+            target = "Lnet/minecraft/world/entity/Entity;hurtServer(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
     private boolean impl$ThrowDamageEventWithLightingSource(
-        final Entity entity, final DamageSource source, final float damage,
+        final Entity entity, final ServerLevel serverLevel, final DamageSource source, final float damage,
         final ServerLevel level, final LightningBolt lightningBolt
     ) {
-        if (!this.shadow$level().isClientSide) {
-            return entity.hurt(source, damage);
-        }
         var entitySource = new DamageSource(source.typeHolder(), lightningBolt);
-        return entity.hurt(entitySource, damage);
+        return entity.hurtServer(serverLevel, entitySource, damage);
     }
 
     @Inject(method = "getFireImmuneTicks", at = @At(value = "HEAD"), cancellable = true)

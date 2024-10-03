@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.projectile;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.level.Level;
@@ -88,15 +89,11 @@ public abstract class FireworkRocketEntityMixin extends ProjectileMixin implemen
         this.impl$explosionRadius = radius == null ? Constants.Entity.Firework.DEFAULT_EXPLOSION_RADIUS : radius;
     }
 
-    @Redirect(method = "explode()V",
+    @Redirect(method = "explode(Lnet/minecraft/server/level/ServerLevel;)V",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/level/Level;broadcastEntityEvent(Lnet/minecraft/world/entity/Entity;B)V")
+            target = "Lnet/minecraft/server/level/ServerLevel;broadcastEntityEvent(Lnet/minecraft/world/entity/Entity;B)V")
     )
-    private void impl$useSpongeExplosion(final Level world, final Entity self, final byte state) {
-        if (this.shadow$level().isClientSide) {
-            world.broadcastEntityEvent(self, state);
-            return;
-        }
+    private void impl$useSpongeExplosion(final ServerLevel world, final Entity self, final byte state) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             // Fireworks don't typically explode like other explosives, but we'll
             // post an event regardless and if the radius is zero the explosion

@@ -104,12 +104,12 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Shadow public abstract int shadow$getUseItemRemainingTicks();
     @Shadow public abstract float shadow$getHealth();
     @Shadow public abstract CombatTracker shadow$getCombatTracker();
-    @Shadow public void shadow$kill() { }
+    @Shadow public void shadow$kill(ServerLevel level) { }
     @Shadow public abstract InteractionHand shadow$getUsedItemHand();
     @Shadow public abstract Optional<BlockPos> shadow$getSleepingPos();
     @Shadow protected abstract void shadow$spawnItemParticles(ItemStack stack, int count);
     @Shadow public abstract ItemStack shadow$getItemInHand(InteractionHand hand);
-    @Shadow protected abstract void shadow$dropEquipment();
+    @Shadow protected abstract void shadow$dropEquipment(ServerLevel level);
     @Shadow protected abstract void shadow$dropAllDeathLoot(ServerLevel level, DamageSource damageSourceIn);
     @Shadow @Nullable public abstract LivingEntity shadow$getKillCredit();
     @Shadow protected abstract void shadow$createWitherRose(@Nullable LivingEntity p_226298_1_);
@@ -172,14 +172,14 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
     @Redirect(method = "dropAllDeathLoot",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/entity/LivingEntity;dropEquipment()V"
+                    target = "Lnet/minecraft/world/entity/LivingEntity;dropEquipment(Lnet/minecraft/server/level/ServerLevel;)V"
             )
     )
-    private void tracker$dropInventory(final LivingEntity thisEntity) {
+    private void tracker$dropInventory(final LivingEntity thisEntity, final ServerLevel level) {
         if (thisEntity instanceof PlayerBridge && ((PlayerBridge) thisEntity).bridge$keepInventory()) {
             return;
         }
-        this.shadow$dropEquipment();
+        this.shadow$dropEquipment(level);
     }
 
     @Inject(method = "pushEntities", at = @At("HEAD"), cancellable = true)

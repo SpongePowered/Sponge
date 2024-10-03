@@ -39,7 +39,7 @@
         "world.entity.LivingEntityMixin_Vanilla",
         "world.entity.ai.attributes.DefaultAttributesMixin",
         "world.entity.item.ItemEntityMixin_Vanilla",
-        "world.entity.vehicle.BoatMixin_Vanilla",
+      "world.entity.vehicle.AbstractBoatMixin_Vanilla",
         "world.level.block.FireBlockMixin_Vanilla",
         "world.level.block.entity.AbstractFurnaceBlockEntityMixin_Vanilla",
         "world.level.storage.LevelStorageSourceMixin_Vanilla"

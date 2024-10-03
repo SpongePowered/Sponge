@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.boss.enderdragon;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
@@ -62,16 +63,18 @@ public abstract class EndCrystalMixin extends EntityMixin implements ExplosiveBr
         this.impl$explosionRadius = radius == null ? Constants.Entity.EnderCrystal.DEFAULT_EXPLOSION_STRENGTH : radius;
     }
 
-    @Redirect(method = "hurt",
+    @Redirect(method = "hurtServer",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/level/Level;explode(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;Lnet/minecraft/world/level/ExplosionDamageCalculator;DDDFZLnet/minecraft/world/level/Level$ExplosionInteraction;)V"
+            target = "Lnet/minecraft/server/level/ServerLevel;explode(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;Lnet/minecraft/world/level/ExplosionDamageCalculator;DDDFZLnet/minecraft/world/level/Level$ExplosionInteraction;)V"
         )
     )
-    private void impl$onHurtExplode(final net.minecraft.world.level.Level world,
-        final Entity entityIn, final DamageSource damageSource, final ExplosionDamageCalculator exDamageCalc, final double xIn, final double yIn, final double zIn, final float explosionRadius,
-            final boolean fire, final Level.ExplosionInteraction modeIn, final DamageSource causeSource, final float $$1) {
-        this.bridge$wrappedExplode(xIn, yIn, zIn, damageSource, causeSource);
+    private void impl$onHurtExplode(
+        final ServerLevel instance, final Entity entity, final DamageSource damageSource,
+        final ExplosionDamageCalculator explosionDamageCalculator, final double xIn, double yIn, double zIn,
+        float v, boolean b, Level.ExplosionInteraction explosionInteraction, final ServerLevel level,
+        final DamageSource source, final float amount) {
+        this.bridge$wrappedExplode(xIn, yIn, zIn, damageSource, source);
     }
 
     @Override
@@ -87,9 +90,9 @@ public abstract class EndCrystalMixin extends EntityMixin implements ExplosiveBr
         }
     }
 
-    @Inject(method = "hurt", cancellable = true, at = @At(value = "INVOKE",
+    @Inject(method = "hurtServer", cancellable = true, at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/entity/boss/enderdragon/EndCrystal;remove(Lnet/minecraft/world/entity/Entity$RemovalReason;)V"))
-    private void attackImpl$onAttackEntityFrom(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
+    private void attackImpl$onAttackEntityFrom(final ServerLevel level, final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
         if (DamageEventUtil.callOtherAttackEvent((Entity) (Object) this, source, amount).isCancelled()) {
             cir.setReturnValue(true);
         }

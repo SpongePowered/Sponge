@@ -503,7 +503,7 @@ public final class SpongeCommonEventFactory {
 
             final DestructEntityEvent.Death event = SpongeEventFactory.createDestructEntityEventDeath(frame.currentCause(),
                     originalChannel, Optional.of(originalChannel), originalMessage, originalMessage, (Living) entity,
-                    entity.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY), messageCancelled);
+                ((ServerLevel) entity.level()).getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY), messageCancelled);
             SpongeCommon.post(event);
 
             return event;

@@ -246,13 +246,6 @@ public final class GeneratorMain {
                  "getSerializedName",
                  "sponge"
             ),
-            new EnumEntriesValidator<>(
-                 "data.type",
-                 "BoatTypes",
-                 Boat.Type.class,
-                 "getSerializedName",
-                 "sponge"
-            ),
             new RegistryEntriesGenerator<>(
                  "map.decoration",
                  "MapDecorationTypes",

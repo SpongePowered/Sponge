@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.decoration;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,9 +36,10 @@ import org.spongepowered.common.util.DamageEventUtil;
 @Mixin(net.minecraft.world.entity.decoration.ItemFrame.class)
 public abstract class ItemFrameMixin extends HangingEntityMixin {
 
-    @Inject(method = "hurt", cancellable = true, at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/decoration/ItemFrame;dropItem(Lnet/minecraft/world/entity/Entity;Z)V"))
-    private void attackImpl$onAttackEntityFrom(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "hurtServer", cancellable = true, at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/decoration/ItemFrame;dropItem(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Entity;Z)V"))
+    private void attackImpl$onAttackEntityFrom(final ServerLevel level, final DamageSource source,
+                                               final float amount, final CallbackInfoReturnable<Boolean> cir) {
         if (DamageEventUtil.callOtherAttackEvent((Entity) (Object) this, source, amount).isCancelled()) {
             cir.setReturnValue(true);
         }

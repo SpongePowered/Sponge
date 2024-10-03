@@ -34,6 +34,6 @@ import java.util.function.Predicate;
 @Mixin(TargetingConditions.class)
 public interface TargetingConditionsAccessor {
 
-    @Accessor("selector") Predicate<LivingEntity> accessor$selector();
+    @Accessor("selector") TargetingConditions.Selector accessor$selector();
 
 }

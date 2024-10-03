@@ -38,9 +38,9 @@ public final class LockableData {
     public static void register(final DataProviderRegistrator registrator) {
         registrator
                 .asMutable(BaseContainerBlockEntityAccessor.class)
-                    .create(Keys.LOCK_TOKEN)
-                        .get(h -> h.accessor$lockKey().key())
-                        .set((h, v) -> h.accessor$lockKey(v.isEmpty() ? LockCode.NO_LOCK : new LockCode(v)));
+                    .create(Keys.LOCK_TOKEN);// TODO - Implement Item Predicates
+//                        .get(h -> h.accessor$lockKey().key())
+//                        .set((h, v) -> h.accessor$lockKey(v.isEmpty() ? LockCode.NO_LOCK : new LockCode(v)));
     }
     // @formatter:on
 }

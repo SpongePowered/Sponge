@@ -24,12 +24,19 @@
  */
 package org.spongepowered.common.mixin.core.world.level.block.entity;
 
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+
+import javax.swing.text.html.Option;
+import java.util.Optional;
+import java.util.function.Function;
 
 @Mixin(BeaconBlockEntity.class)
 public abstract class BeaconBlockEntityMixin extends BlockEntityMixin {
@@ -43,11 +50,13 @@ public abstract class BeaconBlockEntityMixin extends BlockEntityMixin {
      * @param id The id
      * @return The potion by id, no validation
      */
+    @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "rawtypes"})
     @Redirect(method = "loadEffect",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BeaconBlockEntity;filterEffect(Lnet/minecraft/world/effect/MobEffect;)Lnet/minecraft/world/effect/MobEffect;")
+        at = @At(value = "INVOKE", target = "Ljava/util/Optional;map(Ljava/util/function/Function;)Ljava/util/Optional;")
     )
     @Nullable
-    private static MobEffect impl$UsePotionUtilInsteadOfCheckingValidPotions(MobEffect effect) {
-        return effect;
+    private static Optional impl$UsePotionUtilInsteadOfCheckingValidPotions(
+        Optional instance, Function mapper) {
+        return instance;
     }
 }

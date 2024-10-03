@@ -118,7 +118,7 @@
         "world.entity.raid.RaidAccessor",
         "world.entity.raid.RaiderAccessor",
         "world.entity.raid.RaidsAccessor",
-        "world.entity.vehicle.BoatAccessor",
+      "world.entity.vehicle.AbstractBoatAccessor",
         "world.entity.vehicle.MinecartFurnaceAccessor",
         "world.food.FoodDataAccessor",
         "world.inventory.AbstractContainerMenuAccessor",

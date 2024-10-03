@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import net.minecraft.world.entity.vehicle.AbstractBoat;
 import net.minecraft.world.entity.vehicle.Boat;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
-import org.spongepowered.api.data.type.BoatType;
-import org.spongepowered.common.accessor.world.entity.vehicle.BoatAccessor;
-import org.spongepowered.common.bridge.world.entity.vehicle.BoatBridge;
+import org.spongepowered.common.accessor.world.entity.vehicle.AbstractBoatAccessor;
+import org.spongepowered.common.bridge.world.entity.vehicle.AbstractBoatBridge;
 import org.spongepowered.common.data.ByteToBooleanContentUpdater;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -46,32 +46,29 @@ public final class BoatData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(Boat.class)
-                    .create(Keys.BOAT_TYPE)
-                        .get(h -> ((BoatType) (Object) h.getVariant()))
-                        .set((h, v) -> h.setVariant((Boat.Type) (Object) v))
-                .asMutable(BoatAccessor.class)
+                .asMutable(AbstractBoat.class)
+                .asMutable(AbstractBoatAccessor.class)
                     .create(Keys.IS_IN_WATER)
                         .get(h -> h.accessor$status() == Boat.Status.IN_WATER)
-                .asMutable(BoatBridge.class)
+                .asMutable(AbstractBoatBridge.class)
                     .create(Keys.CAN_MOVE_ON_LAND)
-                        .get(BoatBridge::bridge$getMoveOnLand)
-                        .set(BoatBridge::bridge$setMoveOnLand)
-                .asMutable(BoatBridge.class)
+                        .get(AbstractBoatBridge::bridge$getMoveOnLand)
+                        .set(AbstractBoatBridge::bridge$setMoveOnLand)
+                .asMutable(AbstractBoatBridge.class)
                     .create(Keys.OCCUPIED_DECELERATION)
-                        .get(BoatBridge::bridge$getOccupiedDecelerationSpeed)
-                        .set(BoatBridge::bridge$setOccupiedDecelerationSpeed)
-                .asMutable(BoatBridge.class)
+                        .get(AbstractBoatBridge::bridge$getOccupiedDecelerationSpeed)
+                        .set(AbstractBoatBridge::bridge$setOccupiedDecelerationSpeed)
+                .asMutable(AbstractBoatBridge.class)
                     .create(Keys.MAX_SPEED)
-                        .get(BoatBridge::bridge$getMaxSpeed)
-                        .set(BoatBridge::bridge$setMaxSpeed)
-                .asMutable(BoatBridge.class)
+                        .get(AbstractBoatBridge::bridge$getMaxSpeed)
+                        .set(AbstractBoatBridge::bridge$setMaxSpeed)
+                .asMutable(AbstractBoatBridge.class)
                     .create(Keys.UNOCCUPIED_DECELERATION)
-                        .get(BoatBridge::bridge$getUnoccupiedDecelerationSpeed)
-                        .set(BoatBridge::bridge$setUnoccupiedDecelerationSpeed)
+                        .get(AbstractBoatBridge::bridge$getUnoccupiedDecelerationSpeed)
+                        .set(AbstractBoatBridge::bridge$setUnoccupiedDecelerationSpeed)
         ;
         final ResourceKey boatDataStoreKey = ResourceKey.sponge("boat");
-        registrator.spongeDataStore(boatDataStoreKey, 2, new DataContentUpdater[]{BoatData.BOAT_UPDATER_BYTE_TO_BOOL_FIX}, BoatBridge.class,
+        registrator.spongeDataStore(boatDataStoreKey, 2, new DataContentUpdater[]{BoatData.BOAT_UPDATER_BYTE_TO_BOOL_FIX}, AbstractBoatBridge.class,
                 Keys.MAX_SPEED, Keys.CAN_MOVE_ON_LAND, Keys.OCCUPIED_DECELERATION, Keys.UNOCCUPIED_DECELERATION);
         SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Entity.Boat.BOAT_MAX_SPEED, boatDataStoreKey, Keys.MAX_SPEED);
         SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Entity.Boat.BOAT_MOVE_ON_LAND, boatDataStoreKey, Keys.CAN_MOVE_ON_LAND);

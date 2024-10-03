@@ -41,6 +41,7 @@ import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -91,7 +92,7 @@ public final class UseItemPacketState extends BasicPacketState {
 
     @Override
     public void postBlockTransactionApplication(
-        final BasicPacketContext context, final BlockChange blockChange,
+        final BasicPacketContext context, ServerWorld serverWorld, final BlockChange blockChange,
         final BlockTransactionReceipt transaction
     ) {
         final ServerPlayer player = context.getSpongePlayer();

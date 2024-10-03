@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.projectile;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
@@ -91,10 +92,8 @@ public abstract class AbstractArrowMixin extends ProjectileMixin implements Abst
                     this.impl$getProjectileSource(), hitResult)) {
                 this.shadow$playSound(SoundEvents.ARROW_HIT, 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
                 // Make it almost look like it collided with something
-                final BlockHitResult blockraytraceresult = (BlockHitResult)hitResult;
-                final BlockState blockstate = this.shadow$level().getBlockState(blockraytraceresult.getBlockPos());
-                this.lastState = blockstate;
-                final Vec3 vec3d = blockraytraceresult.getLocation().subtract(this.shadow$getX(), this.shadow$getY(), this.shadow$getZ());
+                this.lastState = this.shadow$level().getBlockState(hitResult.getBlockPos());
+                final Vec3 vec3d = hitResult.getLocation().subtract(this.shadow$getX(), this.shadow$getY(), this.shadow$getZ());
                 this.shadow$setDeltaMovement(vec3d);
                 final Vec3 vec3d1 = vec3d.normalize().scale(0.05F);
                 this.shadow$setPos(this.shadow$getX() - vec3d1.x, this.shadow$getY() - vec3d1.y, this.shadow$getZ() - vec3d1.z);
@@ -138,7 +137,7 @@ public abstract class AbstractArrowMixin extends ProjectileMixin implements Abst
                 this.life = 0;
                 if (!this.shadow$level().isClientSide && this.shadow$getDeltaMovement().lengthSqr() < 1.0E-7D) {
                     if (this.pickup == AbstractArrow.Pickup.ALLOWED) {
-                        this.shadow$spawnAtLocation(this.shadow$getPickupItem(), 0.1F);
+                        this.shadow$spawnAtLocation((ServerLevel) this.shadow$level(), this.shadow$getPickupItem(), 0.1F);
                     }
 
                     this.shadow$discard();

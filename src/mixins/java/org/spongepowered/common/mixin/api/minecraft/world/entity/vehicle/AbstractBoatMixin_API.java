@@ -34,15 +34,14 @@ import org.spongepowered.common.mixin.api.minecraft.world.entity.EntityMixin_API
 
 import java.util.Set;
 
-@Mixin(net.minecraft.world.entity.vehicle.Boat.class)
+@Mixin(net.minecraft.world.entity.vehicle.AbstractBoat.class)
 @Implements(@Interface(iface = Boat.class, prefix = "apiBoat$"))
-public abstract class BoatMixin_API extends EntityMixin_API implements Boat {
+public abstract class AbstractBoatMixin_API extends EntityMixin_API implements Boat {
 
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.requireValue(Keys.BOAT_TYPE).asImmutable());
         values.add(this.requireValue(Keys.CAN_MOVE_ON_LAND).asImmutable());
         values.add(this.requireValue(Keys.IS_IN_WATER).asImmutable());
         values.add(this.requireValue(Keys.MAX_SPEED).asImmutable());

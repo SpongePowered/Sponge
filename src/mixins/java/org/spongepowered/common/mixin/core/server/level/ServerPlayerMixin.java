@@ -321,7 +321,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Override
     public boolean bridge$keepInventory() {
         if (this.impl$keepInventory == null) {
-            return this.shadow$level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY);
+            return this.shadow$serverLevel().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY);
         }
         return this.impl$keepInventory;
     }
@@ -638,7 +638,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         }
         // Sponge end
 
-        final var level = this.shadow$level();
+        final var level = this.shadow$serverLevel();
         final boolean flag = level.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) && !event.isMessageCancelled();
         if (flag) {
             final net.minecraft.network.chat.Component component = this.shadow$getCombatTracker().getDeathMessage();

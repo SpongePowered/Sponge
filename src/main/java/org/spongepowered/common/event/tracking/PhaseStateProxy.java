@@ -53,6 +53,7 @@ import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.server.TickTaskBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
@@ -102,11 +103,13 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
     /**
      * Performs any necessary custom logic after the provided {@link BlockSnapshot}
      * {@link Transaction} has taken place.
-     *  @param blockChange The block change performed
-     * @param receipt The transaction of the old and new snapshots
+     *
+     * @param serverWorld
+     * @param blockChange The block change performed
+     * @param receipt     The transaction of the old and new snapshots
      */
-    default void postBlockTransactionApplication(final BlockChange blockChange, final BlockTransactionReceipt receipt) {
-        this.getState().postBlockTransactionApplication(this.asContext(), blockChange, receipt);
+    default void postBlockTransactionApplication(ServerWorld serverWorld, final BlockChange blockChange, final BlockTransactionReceipt receipt) {
+        this.getState().postBlockTransactionApplication(this.asContext(), serverWorld, blockChange, receipt);
     }
 
     /**

@@ -45,7 +45,6 @@ public interface LevelDataMixin_API extends WorldProperties {
     // @formatter:off
     @Shadow long shadow$getGameTime();
     @Shadow long shadow$getDayTime();
-    @Shadow GameRules shadow$getGameRules();
     // @formatter:on
 
     @Override
@@ -58,48 +57,4 @@ public interface LevelDataMixin_API extends WorldProperties {
         return new SpongeMinecraftDayTime(this.shadow$getDayTime());
     }
 
-    @Override
-    default <V> V gameRule(final GameRule<V> gameRule) {
-        final GameRules.Value<?> value = this.shadow$getGameRules().getRule((GameRules.Key<?>) (Object) Objects.requireNonNull(gameRule,
-                "gameRule"));
-        if (value instanceof GameRules.BooleanValue) {
-            return (V) Boolean.valueOf(((GameRules.BooleanValue) value).get());
-        } else if (value instanceof GameRules.IntegerValue) {
-            return (V) Integer.valueOf(((GameRules.IntegerValue) value).get());
-        }
-        return null;
-    }
-
-    @Override
-    default <V> void setGameRule(final GameRule<V> gameRule, final V value) {
-        Objects.requireNonNull(gameRule, "gameRule");
-        Objects.requireNonNull(value, "value");
-
-        final GameRules.Value<?> mValue = this.shadow$getGameRules().getRule((GameRules.Key<?>) (Object) gameRule);
-        ((GameRules_ValueAccessor) mValue).invoker$deserialize(value.toString());
-    }
-
-    @Override
-    default Map<GameRule<?>, ?> gameRules() {
-        final Map<GameRules.Key<?>, GameRules.Value<?>> rules =
-                ((GameRulesAccessor) this.shadow$getGameRules()).accessor$rules();
-
-        final Map<GameRule<?>, Object> apiRules = new HashMap<>();
-        for (final Map.Entry<GameRules.Key<?>, GameRules.Value<?>> rule : rules.entrySet()) {
-            final GameRule<?> key = (GameRule<?>) (Object) rule.getKey();
-            final GameRules.Value<?> mValue = rule.getValue();
-            Object value = null;
-            if (mValue instanceof GameRules.BooleanValue) {
-                value = ((GameRules.BooleanValue) mValue).get();
-            } else if (mValue instanceof GameRules.IntegerValue) {
-                value = ((GameRules.IntegerValue) mValue).get();
-            }
-
-            if (value != null) {
-                apiRules.put(key, value);
-            }
-        }
-
-        return apiRules;
-    }
 }

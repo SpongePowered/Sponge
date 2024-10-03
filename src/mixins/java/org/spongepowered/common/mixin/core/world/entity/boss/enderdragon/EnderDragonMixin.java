@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.boss.enderdragon;
 
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.enderdragon.phases.DragonHoverPhase;
 import net.minecraft.world.entity.boss.enderdragon.phases.DragonPhaseInstance;
@@ -53,23 +54,23 @@ public abstract class EnderDragonMixin extends MobMixin {
         method = "checkWalls",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/level/block/state/BlockState;getBlock()Lnet/minecraft/world/level/block/Block;"
+            target = "Lnet/minecraft/world/level/block/state/BlockState;is(Lnet/minecraft/tags/TagKey;)Z"
         ),
         slice = @Slice(
             from = @At(
-                value = "INVOKE",
-                target = "Lnet/minecraft/world/level/Level;getBlockState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/block/state/BlockState;"
+                value = "FIELD",
+                target = "Lnet/minecraft/world/level/GameRules;RULE_MOBGRIEFING:Lnet/minecraft/world/level/GameRules$Key;"
             ),
             to = @At(
-                value = "FIELD",
-                target = "Lnet/minecraft/world/level/material/Material;FIRE:Lnet/minecraft/world/level/material/Material;",
+                value = "INVOKE",
+                target = "Lnet/minecraft/server/level/ServerLevel;removeBlock(Lnet/minecraft/core/BlockPos;Z)Z",
                 opcode = Opcodes.GETSTATIC
             )
         ),
         require = 0 // Forge rewrites the material request to block.isAir
     )
-    private Block impl$onCanGrief(final BlockState state) {
-        return ((GrieferBridge) this).bridge$canGrief() ? state.getBlock() : Blocks.AIR;
+    private boolean impl$onCanGrief(final BlockState state, final TagKey<Block> tag) {
+        return ((GrieferBridge) this).bridge$canGrief() && state.is(tag);
     }
 
     /**
