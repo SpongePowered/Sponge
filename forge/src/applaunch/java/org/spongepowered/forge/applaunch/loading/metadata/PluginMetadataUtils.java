@@ -113,13 +113,16 @@ public final class PluginMetadataUtils {
             builder.dependencies(dependencies);
         }
 
+        builder.properties(info.getModProperties());
+
         return builder.build();
     }
 
     private static PluginDependency.LoadOrder orderingToLoad(final IModInfo.Ordering ordering) {
-        if (ordering == IModInfo.Ordering.AFTER) {
-            return PluginDependency.LoadOrder.AFTER;
-        }
-        return PluginDependency.LoadOrder.UNDEFINED;
+        return switch (ordering) {
+            case BEFORE -> PluginDependency.LoadOrder.BEFORE;
+            case AFTER -> PluginDependency.LoadOrder.AFTER;
+            default -> PluginDependency.LoadOrder.UNDEFINED;
+        };
     }
 }
