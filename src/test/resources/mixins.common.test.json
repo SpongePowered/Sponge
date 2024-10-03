@@ -1,16 +1,11 @@
 {
     "required": true,
-    "minVersion": "0.7",
+    "parent": "mixins.sponge.parent.json",
     "package": "org.spongepowered.common.launch.mixin",
-    "target": "@env(DEFAULT)",
-    "compatibilityLevel": "JAVA_8",
     "mixinPriority": 11111,
     "mixins": [
         "ItemMixin_Test",
         "SchematicTranslatorMixin_Test",
         "SpongeImplHooksMixin_Test"
-    ],
-    "injectors": {
-        "defaultRequire": 1
-    }
+    ]
 }
