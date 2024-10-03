@@ -26,7 +26,7 @@ package org.spongepowered.common.bridge.world.entity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.portal.TeleportTransition;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.cause.entity.DismountType;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
@@ -70,7 +70,7 @@ public interface EntityBridge {
 
     boolean bridge$dismountRidingEntity(DismountType type);
 
-    Entity bridge$changeDimension(DimensionTransition transition);
+    Entity bridge$changeDimension(TeleportTransition transition);
 
     ChangeEntityWorldEvent.Reposition bridge$fireRepositionEvent(org.spongepowered.api.world.server.ServerWorld originalDestinationWorld,
             org.spongepowered.api.world.server.ServerWorld targetWorld,

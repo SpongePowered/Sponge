@@ -108,7 +108,7 @@ public final class ItemStackData {
                     .create(Keys.BURN_TIME)
                         .get(h -> SpongeCommon.server().fuelValues().burnDuration(h))
                     .create(Keys.CONTAINER_ITEM)
-                        .get(h -> (ItemType) h.getItem().getCraftingRemainingItem())
+                        .get(h -> (ItemType) h.getItem().getCraftingRemainder().getItem())
                     .create(Keys.DISPLAY_NAME)
                         .get(h -> SpongeAdventure.asAdventure(h.getDisplayName()))
                     .create(Keys.CUSTOM_MODEL_DATA)
