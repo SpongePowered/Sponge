@@ -28,11 +28,13 @@ import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.event.entity.player.CriticalHitEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.util.DamageEventUtil;
+import org.spongepowered.neoforge.mixin.core.world.entity.LivingEntityMixin_Neo_Attack_Impl;
 
 @Mixin(Player.class)
-public class PlayerMixin_Neo_Attack_Impl {
+public class PlayerMixin_Neo_Attack_Impl extends LivingEntityMixin_Neo_Attack_Impl {
     private DamageEventUtil.Attack<Player> attackImpl$attack;
 
     @Redirect(method = "attack", at = @At(value = "INVOKE", target = "Lnet/neoforged/neoforge/event/entity/player/CriticalHitEvent;isCriticalHit()Z"))
@@ -42,5 +44,17 @@ public class PlayerMixin_Neo_Attack_Impl {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Set absorbed damage after calling {@link Player#setAbsorptionAmount} in which we called the event
+     */
+    @ModifyVariable(method = "actuallyHurt", ordinal = 2,
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;setAbsorptionAmount(F)V", shift = At.Shift.AFTER))
+    public float attackImpl$setAbsorbed(final float value) {
+        if (this.attackImpl$actuallyHurtResult.event().isCancelled()) {
+            return 0;
+        }
+        return this.attackImpl$actuallyHurtResult.damageAbsorbed().orElse(0f);
     }
 }

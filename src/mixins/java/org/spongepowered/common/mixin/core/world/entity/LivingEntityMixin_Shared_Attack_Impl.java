@@ -31,7 +31,6 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.util.DamageEventUtil;
 
-// TODO NeoForge
 // Forge and Vanilla
 @Mixin(value = LivingEntity.class, priority = 900)
 public class LivingEntityMixin_Shared_Attack_Impl {

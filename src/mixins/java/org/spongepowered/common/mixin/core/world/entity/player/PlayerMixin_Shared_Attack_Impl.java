@@ -31,7 +31,6 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.mixin.core.world.entity.LivingEntityMixin_Attack_Impl;
 
-// TODO NeoForge
 // Forge and Vanilla
 @Mixin(value = Player.class, priority = 900)
 public abstract class PlayerMixin_Shared_Attack_Impl extends LivingEntityMixin_Attack_Impl {
