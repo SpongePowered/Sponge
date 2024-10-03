@@ -91,12 +91,6 @@ public final class SpongeSpecialRecipe extends CustomRecipe {
         return ItemStackUtil.toNative(this.resultFunction.apply(InventoryUtil.toSponge(input)));
     }
 
-    @OnlyIn(Dist.CLIENT)
-    @Override
-    public boolean canCraftInDimensions(int width, int height) {
-        throw new MissingImplementationException("SpongeSpecialRecipe", "canFit");
-    }
-
     @Override
     public NonNullList<ItemStack> getRemainingItems(final CraftingInput input) {
         if (this.remainingItemsFunction == null) {

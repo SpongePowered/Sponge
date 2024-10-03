@@ -59,12 +59,4 @@ public class SpongeSmeltingRecipe extends SmeltingRecipe implements ResultFuncti
         return super.assemble($$0, $$1);
     }
 
-    @Override
-    public ItemStack getResultItem(final HolderLookup.Provider $$1) {
-        if (this.resultFunctionId != null) {
-            return ItemStack.EMPTY;
-        }
-        return super.getResultItem($$1);
-    }
-
 }

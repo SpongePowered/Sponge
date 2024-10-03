@@ -81,25 +81,7 @@ public class SpongeSmithingRecipe extends SmithingTransformRecipe implements Res
             return IngredientResultUtil.cachedResultFunction(this.resultFunctionId).apply($$0);
         }
 
-        final ItemStack resultItem = this.getResultItem($$1);
-        if (!resultItem.getComponents().isEmpty()) {
-            final ItemStack itemStack = resultItem.copy();
-            var patch = $$0.getItem(0).getComponentsPatch();
-            if (!patch.isEmpty()) {
-                itemStack.applyComponents(patch);
-                return itemStack;
-            }
-        }
         return super.assemble($$0, $$1);
     }
-
-    @Override
-    public ItemStack getResultItem(HolderLookup.Provider $$1) {
-        if (this.resultFunctionId != null) {
-            return ItemStack.EMPTY;
-        }
-        return super.getResultItem($$1);
-    }
-
 
 }
