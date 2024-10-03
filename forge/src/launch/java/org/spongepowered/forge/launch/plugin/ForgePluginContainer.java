@@ -25,10 +25,12 @@
 package org.spongepowered.forge.launch.plugin;
 
 import com.google.common.collect.MapMaker;
+import com.google.inject.Injector;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.common.inject.SpongePluginInjectorProvider;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.forge.launch.ForgeLaunch;
 import org.spongepowered.plugin.PluginContainer;
@@ -41,14 +43,19 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-public class ForgePluginContainer implements PluginContainer {
+public class ForgePluginContainer implements PluginContainer, SpongePluginInjectorProvider {
     private final ModContainer modContainer;
 
+    private Injector injector;
     private Logger logger;
     private PluginMetadata pluginMetadata;
 
     ForgePluginContainer(final ModContainer modContainer) {
         this.modContainer = modContainer;
+    }
+
+    public void initializeInstance(Injector injector) {
+        this.injector = injector;
     }
 
     public ModContainer getModContainer() {
@@ -90,6 +97,11 @@ public class ForgePluginContainer implements PluginContainer {
     @Override
     public Object instance() {
         return this.modContainer.getMod();
+    }
+
+    @Override
+    public Injector injector() {
+        return this.injector;
     }
 
     private static final Map<ModContainer, ForgePluginContainer> containers = new MapMaker().weakKeys().makeMap();

@@ -22,39 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inject.plugin;
+package org.spongepowered.common.inject;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Scopes;
-import org.apache.logging.log4j.Logger;
-import org.spongepowered.common.inject.InjectionPointProvider;
-import org.spongepowered.common.inject.provider.PluginConfigurationModule;
-import org.spongepowered.plugin.PluginContainer;
+import com.google.inject.Injector;
 
-/**
- * A module installed for each plugin.
- */
-public final class PluginModule extends AbstractModule {
+public interface SpongePluginInjectorProvider {
 
-    private final PluginContainer container;
-    private final Class<?> pluginClass;
-
-    public PluginModule(final PluginContainer container, final Class<?> pluginClass) {
-        this.container = container;
-        this.pluginClass = pluginClass;
-    }
-
-    @Override
-    protected void configure() {
-        this.bind(this.pluginClass).in(Scopes.SINGLETON);
-
-        this.install(new InjectionPointProvider());
-
-        this.bind(PluginContainer.class).toInstance(this.container);
-        this.bind(Logger.class).toInstance(this.container.logger());
-        this.bind(System.Logger.class).toProvider(() -> System.getLogger(this.container.logger().getName())).in(Scopes.SINGLETON);
-
-        this.install(new PluginConfigurationModule());
-    }
-
+    Injector injector();
 }

@@ -333,6 +333,47 @@
             "name": "Resource Pack Tests",
             "entrypoint": "org.spongepowered.test.resourcepack.ResourcePackTest",
             "description": "Resource Pack Tests"
+        },
+        {
+            "id": "childmoduletestplugin",
+            "name": "Child Module Tests",
+            "entrypoint": "org.spongepowered.test.serviceloader.ChildModuleTestPlugin",
+            "description": "Child Module Tests",
+            "properties": {
+                "guice-module": "org.spongepowered.test.serviceloader.ChildModuleTestPlugin$Module"
+            }
+        },
+        {
+            "id": "secondchildmoduletestplugin",
+            "name": "Second Child Module Tests",
+            "entrypoint": "org.spongepowered.test.serviceloader.SecondChildModuleTestPlugin",
+            "description": "Second Child Module Tests",
+            "properties": {
+                "guice-module": "org.spongepowered.test.serviceloader.SecondChildModuleTestPlugin$Module"
+            },
+            "dependencies": [
+                {
+                    "id": "parentmoduletestplugin",
+                    "version": "12.0.0",
+                    "load-order": "BEFORE"
+                }
+            ]
+        },
+        {
+            "id": "parentmoduletestplugin",
+            "name": "Parent Module Tests",
+            "entrypoint": "org.spongepowered.test.serviceloader.ParentModuleTestPlugin",
+            "description": "Parent Module Tests",
+            "properties": {
+                "guice-module": "org.spongepowered.test.serviceloader.ParentModuleTestPlugin$Module"
+            },
+            "dependencies": [
+                {
+                    "id": "childmoduletestplugin",
+                    "version": "12.0.0",
+                    "load-order": "AFTER"
+                }
+            ]
         }
     ]
 }
