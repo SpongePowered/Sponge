@@ -62,11 +62,13 @@ public final class PublicPluginModule extends AbstractModule {
             });
         }
 
-        //In-direct dependencies
+        //Indirect dependencies
         Sponge.pluginManager()
             .plugins()
             .stream()
-            .filter(p -> p.metadata().dependency(this.container.metadata().id()).isPresent())
+            .filter(p -> p.metadata().dependency(this.container.metadata().id())
+                .map(PluginDependency::loadOrder)
+                .orElse(PluginDependency.LoadOrder.UNDEFINED) == PluginDependency.LoadOrder.BEFORE)
             .forEach(p -> {
                 if (!(p instanceof final SpongePluginInjectorProvider injectorProvider)) {
                     return;
