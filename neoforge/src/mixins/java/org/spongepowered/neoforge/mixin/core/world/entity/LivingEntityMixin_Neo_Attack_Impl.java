@@ -29,10 +29,26 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.util.DamageEventUtil;
 
 @Mixin(LivingEntity.class)
 public class LivingEntityMixin_Neo_Attack_Impl {
+
+    protected DamageEventUtil.DamageEventResult attackImpl$actuallyHurtResult;
+
+    /**
+     * Set absorbed damage after calling {@link LivingEntity#setAbsorptionAmount} in which we called the event
+     */
+    @ModifyVariable(method = "actuallyHurt", ordinal = 2,
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;setAbsorptionAmount(F)V", shift = At.Shift.AFTER))
+    public float attackImpl$setAbsorbed(final float value) {
+        if (this.attackImpl$actuallyHurtResult.event().isCancelled()) {
+            return 0;
+        }
+        return this.attackImpl$actuallyHurtResult.damageAbsorbed().orElse(0f);
+    }
 
     /**
      * Prevents {@link ServerPlayer#awardStat} from running before event
