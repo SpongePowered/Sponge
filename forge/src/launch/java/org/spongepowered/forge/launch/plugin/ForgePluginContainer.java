@@ -52,10 +52,6 @@ public class ForgePluginContainer implements PluginContainer, SpongePluginInject
         this.modContainer = modContainer;
     }
 
-    public void initializeInstance(Injector injector) {
-        this.injector = injector;
-    }
-
     public ModContainer getModContainer() {
         return this.modContainer;
     }
@@ -90,6 +86,10 @@ public class ForgePluginContainer implements PluginContainer, SpongePluginInject
     @Override
     public Injector injector() {
         return this.injector;
+    }
+
+    public void setInjector(final Injector injector) {
+        this.injector = injector;
     }
 
     private static final Map<ModContainer, ForgePluginContainer> containers = new MapMaker().weakKeys().makeMap();

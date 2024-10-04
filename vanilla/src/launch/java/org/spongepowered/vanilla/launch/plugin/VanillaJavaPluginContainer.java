@@ -38,15 +38,18 @@ public final class VanillaJavaPluginContainer extends StandardPluginContainer im
         super(candidate);
     }
 
-    public void initializeInstance(final Object instance, final Injector injector) {
-        this.initializeInstance(instance);
-        this.injector = injector;
-
+    @Override
+    protected void initializeInstance(final Object instance) {
+        super.initializeInstance(instance);
         Sponge.eventManager().registerListeners(this, instance);
     }
 
     @Override
     public Injector injector() {
         return this.injector;
+    }
+
+    public void setInjector(final Injector injector) {
+        this.injector = injector;
     }
 }

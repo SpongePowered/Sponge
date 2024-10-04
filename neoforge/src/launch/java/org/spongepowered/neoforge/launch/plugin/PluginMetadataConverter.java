@@ -47,7 +47,8 @@ public final class PluginMetadataConverter {
             .description(info.getDescription())
             .entrypoint("unknown")
             .addContributor(StandardPluginContributor.builder().name(info.getConfigElement("authors").orElse("unknown").toString()).build())
-            .links(StandardPluginLinks.builder().issues(info.getOwningFile().getIssueURL()).build());
+            .links(StandardPluginLinks.builder().issues(info.getOwningFile().getIssueURL()).build())
+            .properties(info.getModProperties());
 
         final List<StandardPluginDependency> dependencies = new ArrayList<>();
         for (final IModInfo.ModVersion dependency : info.getDependencies()) {
