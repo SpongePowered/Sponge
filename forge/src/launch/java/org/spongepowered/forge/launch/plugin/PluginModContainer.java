@@ -89,28 +89,27 @@ public final class PluginModContainer extends ModContainer {
             LOGGER.trace(Logging.LOADING, "Loading plugin instance {} of type {}", getModId(), this.modClass.getName());
 
             final ForgePluginContainer pluginContainer = ForgePluginContainer.of(this);
-            pluginContainer.metadata().dependencies()
-                .stream()
+            pluginContainer.metadata().dependencies().stream()
                 .filter(d -> d.loadOrder() == PluginDependency.LoadOrder.AFTER)
-                .forEach(d -> ModList.get().getModContainerById(d.id()).ifPresent(PluginModContainer::waitModInitialization));
+                .flatMap(d -> ModList.get().getModContainerById(d.id()).stream())
+                .filter(m -> m instanceof PluginModContainer)
+                .forEach(m -> ((PluginModContainer) m).waitForInitialization());
 
             ModList.get().forEachModInOrder(m -> {
-                if (m instanceof PluginModContainer) {
-                    ForgePluginContainer.of(m).metadata().dependencies()
-                        .stream()
-                        .filter(d -> d.id().equals(this.getModId()) && d.loadOrder() == PluginDependency.LoadOrder.BEFORE)
-                        .findAny()
-                        .flatMap($ -> ModList.get().getModContainerById(m.getModId())).ifPresent(PluginModContainer::waitModInitialization);
+                if (m instanceof PluginModContainer p && ForgePluginContainer.of(m).metadata().dependencies().stream()
+                    .anyMatch(d -> d.id().equals(this.getModId()) && d.loadOrder() == PluginDependency.LoadOrder.BEFORE)) {
+                    p.waitForInitialization();
                 }
             });
 
             final Injector pluginInjector = PluginGuice.create(pluginContainer, this.modClass, Launch.instance().lifecycle().platformInjector());
             this.modInstance = pluginInjector.getInstance(this.modClass);
-            pluginContainer.initializeInstance(pluginInjector);
+            pluginContainer.setInjector(pluginInjector);
             ((ForgeEventManager) MinecraftForge.EVENT_BUS).registerListeners(pluginContainer, this.modInstance);
-            this.initializationLock.countDown();
 
             LOGGER.trace(Logging.LOADING, "Loaded plugin instance {} of type {}", getModId(), this.modClass.getName());
+
+            this.initializationLock.countDown();
         } catch (Throwable e) {
             LOGGER.error(Logging.LOADING, "Failed to create plugin instance. PluginID: {}, class {}", getModId(), this.modClass.getName(), e);
             throw new ModLoadingException(this.modInfo, ModLoadingStage.CONSTRUCT, "fml.modloading.failedtoloadmod", e, this.modClass);
@@ -148,13 +147,11 @@ public final class PluginModContainer extends ModContainer {
         }
     }
 
-    private static void waitModInitialization(final ModContainer modContainer) {
-        if (modContainer instanceof final PluginModContainer pluginModContainer) {
-            try {
-                pluginModContainer.initializationLock.await();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+    private void waitForInitialization() {
+        try {
+            this.initializationLock.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 }

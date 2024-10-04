@@ -42,7 +42,7 @@ import net.neoforged.neoforgespi.language.IModInfo;
 import net.neoforged.neoforgespi.language.ModFileScanData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.common.inject.plugin.PluginModule;
+import org.spongepowered.common.inject.plugin.PluginGuice;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.neoforge.launch.event.NeoEventManager;
 
@@ -91,10 +91,11 @@ public final class PluginModContainer extends ModContainer {
             LOGGER.trace(Logging.LOADING, "Loading plugin instance {} of type {}", getModId(), this.modClass.getName());
 
             final NeoPluginContainer pluginContainer = NeoPluginContainer.of(this);
-            final Injector childInjector = Launch.instance().lifecycle().platformInjector().createChildInjector(new PluginModule(pluginContainer, this.modClass));
-            final Object modInstance = childInjector.getInstance(this.modClass);
-            ((NeoEventManager) NeoForge.EVENT_BUS).registerListeners(pluginContainer, modInstance);
+            final Injector pluginInjector = PluginGuice.create(pluginContainer, this.modClass, Launch.instance().lifecycle().platformInjector());
+            final Object modInstance = pluginInjector.getInstance(this.modClass);
+            pluginContainer.setInjector(pluginInjector);
             pluginContainer.setInstance(modInstance);
+            ((NeoEventManager) NeoForge.EVENT_BUS).registerListeners(pluginContainer, modInstance);
 
             LOGGER.trace(Logging.LOADING, "Loaded plugin instance {} of type {}", getModId(), this.modClass.getName());
         } catch (Throwable e) {

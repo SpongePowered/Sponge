@@ -25,10 +25,12 @@
 package org.spongepowered.neoforge.launch.plugin;
 
 import com.google.common.collect.MapMaker;
+import com.google.inject.Injector;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.loading.moddiscovery.ModInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.common.inject.SpongePluginInjectorProvider;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 
@@ -39,12 +41,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-public class NeoPluginContainer implements PluginContainer {
+public class NeoPluginContainer implements PluginContainer, SpongePluginInjectorProvider {
     private final ModContainer modContainer;
 
     private Logger logger;
     private PluginMetadata pluginMetadata;
     private Object instance = new Object();
+    private Injector injector;
 
     private NeoPluginContainer(final ModContainer modContainer) {
         this.modContainer = modContainer;
@@ -83,6 +86,15 @@ public class NeoPluginContainer implements PluginContainer {
 
     public void setInstance(final Object instance) {
         this.instance = instance;
+    }
+
+    @Override
+    public Injector injector() {
+        return this.injector;
+    }
+
+    public void setInjector(final Injector injector) {
+        this.injector = injector;
     }
 
     private static final Map<ModContainer, NeoPluginContainer> containers = new MapMaker().weakKeys().makeMap();
