@@ -26,11 +26,13 @@ package org.spongepowered.vanilla.launch.plugin;
 
 import com.google.inject.Injector;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.common.inject.SpongePluginInjectorProvider;
+import org.spongepowered.common.launch.plugin.SpongePluginContainer;
 import org.spongepowered.plugin.PluginCandidate;
 import org.spongepowered.plugin.builtin.StandardPluginContainer;
 
-public final class VanillaJavaPluginContainer extends StandardPluginContainer implements SpongePluginInjectorProvider {
+import java.util.Optional;
+
+public final class VanillaJavaPluginContainer extends StandardPluginContainer implements SpongePluginContainer {
 
     private Injector injector;
 
@@ -45,8 +47,8 @@ public final class VanillaJavaPluginContainer extends StandardPluginContainer im
     }
 
     @Override
-    public Injector injector() {
-        return this.injector;
+    public Optional<Injector> injector() {
+        return Optional.ofNullable(this.injector);
     }
 
     public void setInjector(final Injector injector) {
