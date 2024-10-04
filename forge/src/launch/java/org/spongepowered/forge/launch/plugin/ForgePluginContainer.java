@@ -30,8 +30,7 @@ import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.common.inject.SpongePluginInjectorProvider;
-import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.common.launch.plugin.SpongePluginContainer;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 
 import java.net.URI;
@@ -41,7 +40,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-public class ForgePluginContainer implements PluginContainer, SpongePluginInjectorProvider {
+public class ForgePluginContainer implements SpongePluginContainer {
     private final ModContainer modContainer;
 
     private Injector injector;
@@ -50,10 +49,6 @@ public class ForgePluginContainer implements PluginContainer, SpongePluginInject
 
     private ForgePluginContainer(final ModContainer modContainer) {
         this.modContainer = modContainer;
-    }
-
-    public ModContainer getModContainer() {
-        return this.modContainer;
     }
 
     @Override
@@ -84,8 +79,8 @@ public class ForgePluginContainer implements PluginContainer, SpongePluginInject
     }
 
     @Override
-    public Injector injector() {
-        return this.injector;
+    public Optional<Injector> injector() {
+        return Optional.ofNullable(this.injector);
     }
 
     public void setInjector(final Injector injector) {

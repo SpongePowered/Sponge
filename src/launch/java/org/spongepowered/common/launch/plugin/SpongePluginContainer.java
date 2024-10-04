@@ -22,11 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inject;
+package org.spongepowered.common.launch.plugin;
 
 import com.google.inject.Injector;
+import org.spongepowered.plugin.PluginContainer;
 
-public interface SpongePluginInjectorProvider {
+import java.util.Optional;
 
-    Injector injector();
+public interface SpongePluginContainer extends PluginContainer {
+
+    Optional<Injector> injector();
 }

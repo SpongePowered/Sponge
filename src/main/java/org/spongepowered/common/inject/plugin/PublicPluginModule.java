@@ -26,7 +26,7 @@ package org.spongepowered.common.inject.plugin;
 
 import com.google.inject.AbstractModule;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.common.inject.SpongePluginInjectorProvider;
+import org.spongepowered.common.launch.plugin.SpongePluginContainer;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.model.PluginDependency;
 
@@ -53,29 +53,20 @@ public final class PublicPluginModule extends AbstractModule {
                 continue;
             }
 
-            Sponge.pluginManager().plugin(dependency.id()).ifPresent(p -> {
-                if (!(p instanceof final SpongePluginInjectorProvider injectorProvider)) {
-                    return;
-                }
-
-                bindingHelper.bindFrom(injectorProvider.injector());
-            });
+            Sponge.pluginManager().plugin(dependency.id())
+                .flatMap(p -> ((SpongePluginContainer) p).injector())
+                .ifPresent(bindingHelper::bindFrom);
         }
 
-        //Indirect dependencies
+        // Indirect dependencies
         Sponge.pluginManager()
             .plugins()
             .stream()
             .filter(p -> p.metadata().dependency(this.container.metadata().id())
                 .map(PluginDependency::loadOrder)
                 .orElse(PluginDependency.LoadOrder.UNDEFINED) == PluginDependency.LoadOrder.BEFORE)
-            .forEach(p -> {
-                if (!(p instanceof final SpongePluginInjectorProvider injectorProvider)) {
-                    return;
-                }
-
-                bindingHelper.bindFrom(injectorProvider.injector());
-            });
+            .flatMap(p -> ((SpongePluginContainer) p).injector().stream())
+            .forEach(bindingHelper::bindFrom);
 
         bindingHelper.bind();
     }
