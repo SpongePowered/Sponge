@@ -79,7 +79,6 @@ public abstract class ServerCommonPacketListenerImplMixin implements ServerCommo
     @Shadow @Final protected MinecraftServer server;
     @Shadow public abstract void shadow$send(final Packet<?> $$0);
     @Shadow public abstract void shadow$disconnect(Component reason);
-    @Shadow public void shadow$handleCustomPayload(final ServerboundCustomPayloadPacket $$0) { }
     @Shadow protected abstract GameProfile shadow$playerProfile();
     // @formatter:on
 
@@ -184,16 +183,16 @@ public abstract class ServerCommonPacketListenerImplMixin implements ServerCommo
 
     @Inject(method = "handleCustomPayload", at = @At(value = "HEAD"), cancellable = true)
     private void impl$onHandleCustomPayload(final ServerboundCustomPayloadPacket packet, final CallbackInfo ci) {
-        if (!(packet.payload() instanceof final SpongeChannelPayload payload)) {
-            return;
+        if (packet.payload() instanceof final SpongeChannelPayload payload) {
+            this.server.execute(() -> this.impl$handleSpongePayload(payload));
+
+            ci.cancel();
         }
+    }
 
-        ci.cancel();
-
-        this.server.execute(() -> {
-            final SpongeChannelManager channelRegistry = (SpongeChannelManager) Sponge.channelManager();
-            final EngineConnection connection = ((ConnectionBridge) this.connection).bridge$getEngineConnection();
-            channelRegistry.handlePlayPayload(connection, (EngineConnectionState) this, payload.id(), payload.consumer());
-        });
+    protected void impl$handleSpongePayload(final SpongeChannelPayload payload) {
+        final SpongeChannelManager channelRegistry = (SpongeChannelManager) Sponge.channelManager();
+        final EngineConnection connection = ((ConnectionBridge) this.connection).bridge$getEngineConnection();
+        channelRegistry.handlePlayPayload(connection, (EngineConnectionState) this, payload.id(), payload.consumer());
     }
 }

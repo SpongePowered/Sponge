@@ -519,7 +519,7 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
     }
 
     private static long packTypeAndValue(final int type, final int value) {
-        return type | value << SpongePacketChannel.TYPE_BITS;
+        return type | Integer.toUnsignedLong(value) << SpongePacketChannel.TYPE_BITS;
     }
 
     private static int extractType(final long typeAndValue) {

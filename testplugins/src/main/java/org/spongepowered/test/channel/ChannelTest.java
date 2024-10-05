@@ -174,6 +174,20 @@ public final class ChannelTest {
         }
 
         @Listener
+        private void onConnectionConfiguration(final ServerSideConnectionEvent.Configuration event) {
+            ChannelTest.this.plugin.logger().info("Starting configuration phase.");
+
+            final ServerSideConnection connection = event.connection();
+            final PingPacket pingPacket1 = new PingPacket(333);
+            this.channel.sendTo(connection, pingPacket1)
+                .thenAccept(response1 -> this.logReceived(this.channel, response1, connection))
+                .exceptionally(cause -> {
+                    ChannelTest.this.plugin.logger().error("Failed to get a response to {}", pingPacket1, cause);
+                    return null;
+                });
+        }
+
+        @Listener
         private void onConnectionLogin(final ServerSideConnectionEvent.Login event) {
             ChannelTest.this.plugin.logger().info("Player \"" + event.user().profile().name().orElse("unknown") + "\" is logging in.");
         }

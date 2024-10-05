@@ -277,9 +277,9 @@
     ],
     "client": [
         "client.MinecraftMixin",
+        "client.multiplayer.ClientCommonPacketListenerImplMixin",
         "client.multiplayer.ClientHandshakePacketListenerImplMixin",
         "client.multiplayer.ClientLevelMixin",
-        "client.multiplayer.ClientPacketListenerMixin",
         "client.network.chat.TranslatableContentsMixin",
         "client.player.AbstractClientPlayerMixin",
         "client.server.IntegratedPlayerListMixin",
