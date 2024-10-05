@@ -143,7 +143,7 @@ public class SpongeRawLoginDataChannel implements RawHandshakeDataChannel {
 
     @Override
     public CompletableFuture<ChannelBuf> sendTo(final EngineConnection connection, final Consumer<ChannelBuf> payload) {
-        ConnectionUtil.checkHandshakePhase(connection);
+        ConnectionUtil.checkHandshakeOrIntentPhase(connection);
 
         final EngineConnectionState state = (EngineConnectionState) ((SpongeEngineConnection) connection).connection().getPacketListener();
 
