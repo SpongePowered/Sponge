@@ -53,6 +53,7 @@ import org.spongepowered.common.bridge.server.players.PlayerListBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.network.channel.ConnectionUtil;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
+import org.spongepowered.common.network.channel.SpongeChannelPayload;
 import org.spongepowered.common.network.channel.TransactionStore;
 import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.util.LocaleCache;
@@ -167,7 +168,9 @@ public abstract class ServerConfigurationPacketListenerImplMixin extends ServerC
     }
 
     @Override
-    protected void impl$onCustomPayload() {
+    protected void impl$handleSpongePayload(final SpongeChannelPayload payload) {
+        super.impl$handleSpongePayload(payload);
+
         if (this.currentTask == null || this.currentTask.type() != ServerConfigurationPacketListenerImplMixin.impl$SPONGE_CONFIGURATION_TYPE) {
             return;
         }

@@ -99,10 +99,6 @@ public abstract class ServerCommonPacketListenerImplMixin implements ServerCommo
         }
     }
 
-    protected void impl$onCustomPayload() {
-        // nothing here, see subclasses
-    }
-
     @Inject(method = "handleResourcePackResponse", at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/util/thread/BlockableEventLoop;)V",
@@ -187,18 +183,16 @@ public abstract class ServerCommonPacketListenerImplMixin implements ServerCommo
 
     @Inject(method = "handleCustomPayload", at = @At(value = "HEAD"), cancellable = true)
     private void impl$onHandleCustomPayload(final ServerboundCustomPayloadPacket packet, final CallbackInfo ci) {
-        this.impl$onCustomPayload();
+        if (packet.payload() instanceof final SpongeChannelPayload payload) {
+            this.server.execute(() -> this.impl$handleSpongePayload(payload));
 
-        if (!(packet.payload() instanceof final SpongeChannelPayload payload)) {
-            return;
+            ci.cancel();
         }
+    }
 
-        ci.cancel();
-
-        this.server.execute(() -> {
-            final SpongeChannelManager channelRegistry = (SpongeChannelManager) Sponge.channelManager();
-            final EngineConnection connection = ((ConnectionBridge) this.connection).bridge$getEngineConnection();
-            channelRegistry.handlePlayPayload(connection, (EngineConnectionState) this, payload.id(), payload.consumer());
-        });
+    protected void impl$handleSpongePayload(final SpongeChannelPayload payload) {
+        final SpongeChannelManager channelRegistry = (SpongeChannelManager) Sponge.channelManager();
+        final EngineConnection connection = ((ConnectionBridge) this.connection).bridge$getEngineConnection();
+        channelRegistry.handlePlayPayload(connection, (EngineConnectionState) this, payload.id(), payload.consumer());
     }
 }

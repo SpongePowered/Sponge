@@ -24,16 +24,15 @@
  */
 package org.spongepowered.common.mixin.core.client.multiplayer;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl;
-import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.client.multiplayer.CommonListenerCookie;
 import net.minecraft.network.Connection;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.api.network.EngineConnectionState;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -41,16 +40,16 @@ import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
 import org.spongepowered.common.network.channel.SpongeChannelPayload;
 
-@Mixin(ClientPacketListener.class)
-public abstract class ClientPacketListenerMixin extends ClientCommonPacketListenerImpl {
+@Mixin(ClientCommonPacketListenerImpl.class)
+public abstract class ClientCommonPacketListenerImplMixin {
 
-    protected ClientPacketListenerMixin(Minecraft $$0, Connection $$1, CommonListenerCookie $$2) {
-        super($$0, $$1, $$2);
-    }
+    // @formatter:off
+    @Shadow @Final protected Connection connection;
+    // @formatter:on
 
-    @Inject(method = "handleCustomPayload", cancellable = true, at = @At(value = "HEAD"))
-    private void impl$onHandleCustomPayload(final CustomPacketPayload payload, CallbackInfo ci) {
-        if (!(payload instanceof final SpongeChannelPayload spongePayload)) {
+    @Inject(method = "handleCustomPayload(Lnet/minecraft/network/protocol/common/ClientboundCustomPayloadPacket;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientCommonPacketListenerImpl;handleCustomPayload(Lnet/minecraft/network/protocol/common/custom/CustomPacketPayload;)V"), cancellable = true)
+    private void impl$onHandleCustomPayload(final ClientboundCustomPayloadPacket packet, final CallbackInfo ci) {
+        if (!(packet.payload() instanceof final SpongeChannelPayload payload)) {
             return;
         }
 
@@ -58,6 +57,6 @@ public abstract class ClientPacketListenerMixin extends ClientCommonPacketListen
 
         final SpongeChannelManager channelRegistry = (SpongeChannelManager) Sponge.channelManager();
         final EngineConnection connection = ((ConnectionBridge) this.connection).bridge$getEngineConnection();
-        channelRegistry.handlePlayPayload(connection, (EngineConnectionState) this, spongePayload.id(), spongePayload.consumer());
+        channelRegistry.handlePlayPayload(connection, (EngineConnectionState) this, payload.id(), payload.consumer());
     }
 }

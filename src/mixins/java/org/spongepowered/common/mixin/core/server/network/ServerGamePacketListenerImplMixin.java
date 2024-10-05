@@ -36,6 +36,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.LastSeenMessages;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundMoveVehiclePacket;
@@ -103,6 +104,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.network.channel.SpongeChannelPayload;
 import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.util.CommandUtil;
 import org.spongepowered.common.util.VecHelper;
@@ -517,6 +519,15 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
             frame.pushCause(this.player);
             frame.addContext(EventContextKeys.COMMAND, $$0.command());
             this.shadow$performSignedChatCommand($$0, $$1);
+        }
+    }
+
+    @Inject(method = "handleCustomPayload", at = @At(value = "HEAD"), cancellable = true)
+    private void impl$onHandleCustomPayload(final ServerboundCustomPayloadPacket packet, final CallbackInfo ci) {
+        if (packet.payload() instanceof final SpongeChannelPayload payload) {
+            this.server.execute(() -> this.impl$handleSpongePayload(payload));
+
+            ci.cancel();
         }
     }
 }
