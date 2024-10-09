@@ -33,7 +33,7 @@ import net.minecraft.world.entity.Relative;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Portal;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.portal.TeleportTransition;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -76,8 +76,8 @@ public abstract class PortalProcessorMixin implements PortalProcessorBridge {
 
 
     @Redirect(method = "getPortalDestination",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Portal;getPortalDestination(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/portal/DimensionTransition;"))
-    public DimensionTransition impl$onGetPortalDestination(final Portal instance, final ServerLevel serverLevel, final Entity entity, final BlockPos blockPos) {
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Portal;getPortalDestination(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/portal/TeleportTransition;"))
+    public TeleportTransition impl$onGetPortalDestination(final Portal instance, final ServerLevel serverLevel, final Entity entity, final BlockPos blockPos) {
         final var spongEntity = (org.spongepowered.api.entity.Entity) entity;
 
         var finalPortal = instance;
@@ -142,14 +142,15 @@ public abstract class PortalProcessorMixin implements PortalProcessorBridge {
             }
 
             // modify transition after event
-            return new DimensionTransition((ServerLevel) tpEvent.destinationWorld(),
+            return new TeleportTransition((ServerLevel) tpEvent.destinationWorld(),
                     VecHelper.toVanillaVector3d(tpEvent.destinationPosition()),
                     VecHelper.toVanillaVector3d(tpEvent.exitSpeed()),
                     (float) tpEvent.toRotation().x(),
                     (float) tpEvent.toRotation().y(),
                     transition.missingRespawnBlock(),
+                    transition.asPassenger(),
                     EnumSet.noneOf(Relative.class),
-                    transition.postDimensionTransition());
+                    transition.postTeleportTransition());
         }
     }
 

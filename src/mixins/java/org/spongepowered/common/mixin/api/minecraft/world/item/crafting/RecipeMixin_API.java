@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.api.minecraft.world.item.crafting;
 import static org.spongepowered.common.inventory.util.InventoryUtil.toCraftingInputOrThrow;
 
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeInput;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -41,24 +40,22 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Mixin(net.minecraft.world.item.crafting.Recipe.class)
 public interface RecipeMixin_API<I extends RecipeInput, I2 extends org.spongepowered.api.item.recipe.crafting.RecipeInput> extends Recipe<I2> {
 
     // @formatter:off
     @Shadow ItemStack shadow$assemble(I inv, HolderLookup.Provider registryAccess);
-    @Shadow net.minecraft.world.item.ItemStack shadow$getResultItem(HolderLookup.Provider registryAccess);
     @Shadow boolean shadow$isSpecial();
     @Shadow boolean shadow$matches(I inv, net.minecraft.world.level.Level worldIn);
-    @Shadow NonNullList<ItemStack> shadow$getRemainingItems(I inv);
     @Shadow net.minecraft.world.item.crafting.RecipeType<?> shadow$getType();
     // @formatter:on
 
     @NonNull
     @Override
     default ItemStackSnapshot exemplaryResult() {
-        return ItemStackUtil.snapshotOf(this.shadow$getResultItem(SpongeCommon.server().registryAccess()));
+        // TODO - Do we want to start exposing slot displays in some way?
+        return ItemStackSnapshot.empty();
     }
 
     @Override
@@ -75,10 +72,7 @@ public interface RecipeMixin_API<I extends RecipeInput, I2 extends org.spongepow
     @NonNull
     @Override
     default List<ItemStackSnapshot> remainingItems(@NonNull final I2 inv) {
-        final var nonNullList = this.shadow$getRemainingItems((I) toCraftingInputOrThrow(inv));
-        return nonNullList.stream()
-                .map(ItemStackUtil::snapshotOf)
-                .collect(Collectors.toList());
+        return List.of();
     }
 
     @Override

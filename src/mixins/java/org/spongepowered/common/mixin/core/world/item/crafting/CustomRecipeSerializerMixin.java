@@ -30,7 +30,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.item.crafting.CraftingRecipe;
-import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
+import net.minecraft.world.item.crafting.CustomRecipe;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -38,8 +38,8 @@ import org.spongepowered.common.item.recipe.crafting.custom.SpongeSpecialRecipe;
 
 import java.util.function.Function;
 
-@Mixin(SimpleCraftingRecipeSerializer.class)
-public abstract class SimpleCraftingRecipeSerializerMixin {
+@Mixin(CustomRecipe.Serializer.class)
+public abstract class CustomRecipeSerializerMixin {
 
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE",

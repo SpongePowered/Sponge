@@ -58,7 +58,7 @@ import net.minecraft.world.level.block.LavaCauldronBlock;
 import net.minecraft.world.level.block.Portal;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -430,7 +430,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
      * TODO we may need to separate into Vanilla and Forge again
      */
     @Overwrite
-    public Entity changeDimension(final DimensionTransition transition) {
+    public Entity teleport(final TeleportTransition transition) {
         return this.bridge$changeDimension(transition);
     }
 
@@ -471,8 +471,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
      * See {@link PortalProcessorMixin#impl$onGetPortalDestination} for portal events
      */
     @Redirect(method = "handlePortal",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;changeDimension(Lnet/minecraft/world/level/portal/DimensionTransition;)Lnet/minecraft/world/entity/Entity;"))
-    public Entity impl$onChangeDimension(final Entity instance, final DimensionTransition transition) {
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;teleport(Lnet/minecraft/world/level/portal/TeleportTransition;)Lnet/minecraft/world/entity/Entity;"))
+    public Entity impl$onChangeDimension(final Entity instance, final TeleportTransition transition) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
             var be = this.shadow$level().getBlockEntity(this.portalProcess.getEntryPosition());
@@ -487,7 +487,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             // TODO frame.addContext(EventContextKeys.PORTAL, transition);
             // TODO 2-dim portal?
             this.impl$moveEventsFired = true;
-            return instance.changeDimension(transition);
+            return instance.teleport(transition);
         } finally {
             this.impl$moveEventsFired = false;
         }
@@ -500,7 +500,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
      */
     @SuppressWarnings("ConstantConditions")
     @Nullable
-    public Entity bridge$changeDimension(final DimensionTransition transition) {
+    public Entity bridge$changeDimension(final TeleportTransition transition) {
         final Entity thisEntity = (Entity) (Object) this;
         if (!(thisEntity.level() instanceof ServerLevel oldLevel) || this.shadow$isRemoved()) { // Sponge inverted check
             return null;
@@ -512,7 +512,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         List<Entity> recreatedPassengers = new ArrayList<>();
         this.shadow$unRide();
         for (final Entity passenger : passengers) {
-            var recreatedPassenger = passenger.changeDimension(transition);
+            var recreatedPassenger = passenger.teleport(transition);
             if (recreatedPassenger != null) {
                 recreatedPassengers.add(recreatedPassenger);
             }
@@ -540,7 +540,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
             oldLevel.resetEmptyTime();
             newLevel.resetEmptyTime();
-            transition.postDimensionTransition().onTransition(newEntity);
+            transition.postTeleportTransition().onTransition(newEntity);
 
         }
 

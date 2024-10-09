@@ -32,7 +32,6 @@ import org.spongepowered.api.entity.living.PathfinderAgent;
 import org.spongepowered.api.world.server.ServerWorld;
 
 import java.util.Objects;
-import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 public final class SpongeAvoidLivingGoalBuilder implements AvoidLivingGoal.Builder {

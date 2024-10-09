@@ -70,8 +70,11 @@ public abstract class CrafterBlockBlockEntityMixin_Inventory_API extends Randomi
      */
     @Override
     public boolean craftItem() {
+        if (!(this.level instanceof ServerLevel sl)) {
+            return false;
+        }
         final var input = ((CraftingContainer) this).asCraftInput();
-        final var potentialResults = CrafterBlock.getPotentialResults(this.level, input);
+        final var potentialResults = CrafterBlock.getPotentialResults(sl, input);
         if (potentialResults.isEmpty()) {
             return false;
         }

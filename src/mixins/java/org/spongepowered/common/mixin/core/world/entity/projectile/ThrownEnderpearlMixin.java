@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.world.entity.projectile;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.ThrownEnderpearl;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.portal.TeleportTransition;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
@@ -44,21 +44,20 @@ public abstract class ThrownEnderpearlMixin extends ThrowableProjectileMixin {
 
     @ModifyArg(method = "onHit",
             at = @At(value = "INVOKE",
-                target = "Lnet/minecraft/world/entity/player/Player;hurtServer(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
+                target = "Lnet/minecraft/server/level/ServerPlayer;hurtServer(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
     private float impl$onAttackEntityFromWithDamage(final float damage) {
         return (float) this.impl$damageAmount;
     }
 
     @Redirect(method = "onHit",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;changeDimension(Lnet/minecraft/world/level/portal/DimensionTransition;)Lnet/minecraft/world/entity/Entity;")
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;teleport(Lnet/minecraft/world/level/portal/TeleportTransition;)Lnet/minecraft/world/entity/Entity;")
     )
-    private Entity impl$callMoveEntityEventForThrower(final Entity instance, final DimensionTransition $$0) {
-        final Entity entity = this.shadow$getOwner();
+    private Entity impl$callMoveEntityEventForThrower(final Entity instance, final TeleportTransition $$0) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(entity);
+            frame.pushCause(instance);
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.ENDER_PEARL);
 
-            return instance.changeDimension($$0);
+            return instance.teleport($$0);
         }
     }
 

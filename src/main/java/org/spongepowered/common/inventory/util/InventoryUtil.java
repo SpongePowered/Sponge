@@ -53,7 +53,6 @@ import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.inventory.AbstractCraftingMenuAccessor;
 import org.spongepowered.common.accessor.world.inventory.SmithingMenuAccessor;
-import org.spongepowered.common.accessor.world.inventory.StonecutterMenuAccessor;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.entity.player.SpongeUserData;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
@@ -99,7 +98,7 @@ public final class InventoryUtil {
                     .map(SingleRecipeInput::new).orElse(null);
             case AbstractCraftingMenuAccessor menu -> menu.accessor$craftSlots().asCraftInput();
             case InventoryMenu menu -> menu.getCraftSlots().asCraftInput();
-            case StonecutterMenu menu -> StonecutterMenuAccessor.invoker$createRecipeInput(menu.container);
+            case StonecutterMenu menu -> new SingleRecipeInput(menu.container.getItem(0));
             case SmithingMenuAccessor menu -> menu.invoker$createRecipeInput();
             default -> null;
         };

@@ -22,12 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.level.block.entity;
+package org.spongepowered.common.accessor.world.item.crafting;
 
-import net.minecraft.world.item.crafting.CampfireCookingRecipe;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeMap;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public interface CampfireBlockEntityBridge {
+import java.util.Map;
 
-    void bridge$placeRecipe(RecipeHolder<CampfireCookingRecipe> recipe);
+@Mixin(RecipeMap.class)
+public interface RecipeMapAccessor {
+
+    @Accessor("byKey")
+    Map<ResourceKey<Recipe<?>>, RecipeHolder<?>> accessor$byKey();
 }

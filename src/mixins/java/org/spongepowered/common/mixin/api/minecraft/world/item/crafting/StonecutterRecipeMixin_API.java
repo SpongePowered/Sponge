@@ -34,7 +34,7 @@ public abstract class StonecutterRecipeMixin_API extends SingleItemRecipeMixin_A
 
     @Override
     public org.spongepowered.api.item.recipe.crafting.Ingredient ingredient() {
-        return IngredientUtil.fromNative(this.ingredient);
+        return IngredientUtil.fromNative(this.shadow$input());
     }
 
 

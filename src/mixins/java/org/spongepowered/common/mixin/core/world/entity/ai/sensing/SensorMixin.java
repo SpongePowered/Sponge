@@ -42,11 +42,11 @@ public class SensorMixin<E extends LivingEntity> {
         "isEntityAttackableIgnoringLineOfSight"
     }, at = @At("HEAD"), cancellable = true)
     private static void impl$cancelForVanishedEntities(ServerLevel $$0, LivingEntity $$1, LivingEntity $$2, CallbackInfoReturnable<Boolean> cir) {
-        final var vs = ((VanishableBridge) $$0).bridge$vanishState();
+        final var vs = ((VanishableBridge) $$1).bridge$vanishState();
         if (vs.invisible() && vs.untargetable()) {
             cir.setReturnValue(false);
         }
-        final var vsOther = ((VanishableBridge) $$1).bridge$vanishState();
+        final var vsOther = ((VanishableBridge) $$2).bridge$vanishState();
         if (vsOther.invisible() && vsOther.untargetable()) {
             cir.setReturnValue(false);
         }

@@ -30,7 +30,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.EndPortalBlock;
 import net.minecraft.world.level.levelgen.feature.EndPlatformFeature;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.portal.TeleportTransition;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.world.portal.Portal;
@@ -66,7 +66,7 @@ public abstract class EndPortalBlockMixin implements PortalBlockBridge {
         }
 
         if (entity instanceof ServerPlayer player) {
-            var transition = player.findRespawnPositionAndUseSpawnBlock(false, DimensionTransition.DO_NOTHING);
+            var transition = player.findRespawnPositionAndUseSpawnBlock(false, TeleportTransition.DO_NOTHING);
             return ServerLocation.of((ServerWorld) transition.newLevel(), VecHelper.toVector3d(transition.position()));
         }
 

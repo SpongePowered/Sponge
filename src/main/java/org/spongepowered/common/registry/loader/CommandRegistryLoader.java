@@ -217,7 +217,7 @@ public final class CommandRegistryLoader {
     public static RegistryLoader<CommandCompletionProvider> clientSuggestionProvider() {
         return RegistryLoader.of(l -> {
             // TODO based on SuggestionProviders.PROVIDERS_BY_NAME instead
-            l.add(CommandCompletionProviders.ALL_RECIPES, k -> (CommandCompletionProvider) SuggestionProviders.ALL_RECIPES);
+//            l.add(CommandCompletionProviders.ALL_RECIPES, k -> (CommandCompletionProvider) SuggestionProviders.ALL_RECIPES);
             l.add(CommandCompletionProviders.AVAILABLE_SOUNDS, k -> (CommandCompletionProvider) SuggestionProviders.AVAILABLE_SOUNDS);
             l.add(CommandCompletionProviders.SUMMONABLE_ENTITIES, k -> (CommandCompletionProvider) SuggestionProviders.SUMMONABLE_ENTITIES);
         });

@@ -108,27 +108,15 @@ public final class SpongeParticleHelper {
             final Color toColor = effect.optionOrDefault(ParticleOptions.TO_COLOR).get();
             final double scale = effect.optionOrDefault(ParticleOptions.SCALE).get();
             final DustColorTransitionOptions particleData = new DustColorTransitionOptions(
-                    new org.joml.Vector3f(
-                            (float) color.red() / 255,
-                            (float) color.green() / 255,
-                            (float) color.blue() / 255
-                    ),
-                    new org.joml.Vector3f(
-                            (float) toColor.red() / 255,
-                            (float) toColor.green() / 255,
-                            (float) toColor.blue() / 255
-                    ),
+                    ARGB.color(color.red(), color.green(), color.blue()),
+                    ARGB.color(toColor.red(), toColor.green(), toColor.blue()),
                     (float) scale);
             return new NamedCachedPacket(particleData, offset, quantity, velocity);
         } else if (internalType == ParticleTypes.DUST) {
             //This particle type supports a color option.
             final Color color = effect.optionOrDefault(ParticleOptions.COLOR).get();
             final double scale = effect.optionOrDefault(ParticleOptions.SCALE).get();
-            final DustParticleOptions particleData = new DustParticleOptions(new org.joml.Vector3f(
-                    (float) color.red() / 255,
-                    (float) color.green() / 255,
-                    (float) color.blue() / 255),
-                    (float) scale);
+            final DustParticleOptions particleData = new DustParticleOptions(ARGB.color(color.red(), color.green(), color.blue()), (float) scale);
             return new NamedCachedPacket(particleData, offset, quantity, velocity);
         } else if (internalType == ParticleTypes.ITEM) {
             //This particle type supports an item option.

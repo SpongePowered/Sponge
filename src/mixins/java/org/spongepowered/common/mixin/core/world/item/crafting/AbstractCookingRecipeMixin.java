@@ -24,30 +24,16 @@
  */
 package org.spongepowered.common.mixin.core.world.item.crafting;
 
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.item.crafting.CookingRecipeBridge;
 
 @Mixin(AbstractCookingRecipe.class)
-public abstract class AbstractCookingRecipeMixin implements CookingRecipeBridge {
-
-    // @formatter=off
-    @Shadow @Final protected ItemStack result;
-    @Shadow @Final protected Ingredient ingredient;
-
-    // @formatter=on
-
-    @Override
-    public ItemStack bridge$result() {
-        return this.result;
-    }
+public abstract class AbstractCookingRecipeMixin extends SingleItemRecipeMixin implements CookingRecipeBridge {
 
     @Override
     public Ingredient bridge$ingredient() {
-        return this.ingredient;
+        return this.shadow$input();
     }
 }

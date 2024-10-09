@@ -24,20 +24,13 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.storage;
 
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.storage.LevelData;
 import org.spongepowered.api.util.MinecraftDayTime;
-import org.spongepowered.api.world.gamerule.GameRule;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.accessor.world.level.GameRulesAccessor;
-import org.spongepowered.common.accessor.world.level.GameRules_ValueAccessor;
 import org.spongepowered.common.util.SpongeMinecraftDayTime;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 @Mixin(LevelData.class)
 public interface LevelDataMixin_API extends WorldProperties {

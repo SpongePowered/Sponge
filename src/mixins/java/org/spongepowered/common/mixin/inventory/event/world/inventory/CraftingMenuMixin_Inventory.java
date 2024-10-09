@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.inventory.event.world.inventory;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -31,7 +32,6 @@ import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
@@ -50,8 +50,10 @@ public abstract class CraftingMenuMixin_Inventory {
     // Crafting Preview
     @Redirect(method = "slotChangedCraftingGrid",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/ResultContainer;setItem(ILnet/minecraft/world/item/ItemStack;)V"))
-    private static void beforeSlotChangedCraftingGrid(final ResultContainer resultContainer, final int slotId, final ItemStack itemStack,
-            final AbstractContainerMenu param0, final Level param1, final Player player, final CraftingContainer craftingContainer, final ResultContainer resultcontainer) {
+    private static void beforeSlotChangedCraftingGrid(
+        final ResultContainer resultContainer, final int slotId, final ItemStack itemStack,
+        final AbstractContainerMenu param0, final ServerLevel param1, final Player player,
+        final CraftingContainer craftingContainer, final ResultContainer resultcontainer) {
         resultContainer.setItem(slotId, itemStack);
 
         final Inventory inv = ((Inventory) player.containerMenu).query(QueryTypes.INVENTORY_TYPE.get().of(CraftingInventory.class));

@@ -38,7 +38,6 @@ import net.minecraft.world.item.crafting.BlastingRecipe;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
 import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.SimpleCookingSerializer;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.item.crafting.SmokingRecipe;
 import org.spongepowered.asm.mixin.Mixin;
@@ -56,8 +55,8 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.function.Function;
 
-@Mixin(SimpleCookingSerializer.class)
-public abstract class SimpleCookingSerializerMixin<T extends AbstractCookingRecipe> {
+@Mixin(AbstractCookingRecipe.Serializer.class)
+public abstract class AbstractCookingRecipeSerializerMixin<T extends AbstractCookingRecipe> {
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE",
             target = "Lcom/mojang/serialization/codecs/RecordCodecBuilder;mapCodec(Ljava/util/function/Function;)Lcom/mojang/serialization/MapCodec;"))
@@ -69,7 +68,7 @@ public abstract class SimpleCookingSerializerMixin<T extends AbstractCookingReci
 
         final T constructed = $$0.create(null, null, null, null, 0, 0);
         if (constructed instanceof BlastingRecipe) {
-            var spongeCodec = SimpleCookingSerializerMixin.impl$buildCodec(SpongeBlastingRecipe::new, defaultCookingTime);
+            var spongeCodec = AbstractCookingRecipeSerializerMixin.impl$buildCodec(SpongeBlastingRecipe::new, defaultCookingTime);
             return Codec.mapEither(spongeCodec, mcMapCodec).xmap(to -> to.map(si -> (T) si, i -> i),
                     fr -> {
                         if (fr instanceof SpongeBlastingRecipe si) {
@@ -80,7 +79,7 @@ public abstract class SimpleCookingSerializerMixin<T extends AbstractCookingReci
         }
 
         if (constructed instanceof CampfireCookingRecipe) {
-            var spongeCodec = SimpleCookingSerializerMixin.impl$buildCodec(SpongeCampfireCookingRecipe::new, defaultCookingTime);
+            var spongeCodec = AbstractCookingRecipeSerializerMixin.impl$buildCodec(SpongeCampfireCookingRecipe::new, defaultCookingTime);
             return Codec.mapEither(spongeCodec, mcMapCodec).xmap(to -> to.map(si -> (T) si, i -> i),
                     fr -> {
                         if (fr instanceof SpongeCampfireCookingRecipe si) {
@@ -92,7 +91,7 @@ public abstract class SimpleCookingSerializerMixin<T extends AbstractCookingReci
 
 
         if (constructed instanceof SmeltingRecipe) {
-            var spongeCodec = SimpleCookingSerializerMixin.impl$buildCodec(SpongeSmeltingRecipe::new, defaultCookingTime);
+            var spongeCodec = AbstractCookingRecipeSerializerMixin.impl$buildCodec(SpongeSmeltingRecipe::new, defaultCookingTime);
             return Codec.mapEither(spongeCodec, mcMapCodec).xmap(to -> to.map(si -> (T) si, i -> i),
                     fr -> {
                         if (fr instanceof SpongeSmeltingRecipe si) {
@@ -105,7 +104,7 @@ public abstract class SimpleCookingSerializerMixin<T extends AbstractCookingReci
 
 
         if (constructed instanceof SmokingRecipe) {
-            var spongeCodec = SimpleCookingSerializerMixin.impl$buildCodec(SpongeSmokingRecipe::new, defaultCookingTime);
+            var spongeCodec = AbstractCookingRecipeSerializerMixin.impl$buildCodec(SpongeSmokingRecipe::new, defaultCookingTime);
             return Codec.mapEither(spongeCodec, mcMapCodec).xmap(to -> to.map(si -> (T) si, i -> i),
                     fr -> {
                         if (fr instanceof SpongeSmokingRecipe si) {
@@ -124,12 +123,12 @@ public abstract class SimpleCookingSerializerMixin<T extends AbstractCookingReci
        return RecordCodecBuilder.mapCodec(
                $$2 -> $$2.group(
                                Codec.STRING.fieldOf(SPONGE_TYPE).forGetter(a -> "custom"),
-                               Codec.STRING.optionalFieldOf("group", "").forGetter(AbstractCookingRecipe::getGroup),
+                               Codec.STRING.optionalFieldOf("group", "").forGetter(AbstractCookingRecipe::group),
                                CookingBookCategory.CODEC.fieldOf("category").orElse(CookingBookCategory.MISC).forGetter(AbstractCookingRecipe::category),
                                Ingredient.CODEC.fieldOf(Constants.Recipe.COOKING_INGREDIENT).forGetter($$0x -> ((CookingRecipeBridge) $$0x).bridge$ingredient()),
                                BuiltInRegistries.ITEM.byNameCodec().xmap(ItemStack::new, ItemStack::getItem).fieldOf(Constants.Recipe.RESULT).forGetter($$0x -> ((RecipeResultBridge)$$0x).bridge$result()),
-                               Codec.FLOAT.fieldOf(Constants.Recipe.COOKING_EXP).orElse(0.0F).forGetter(AbstractCookingRecipe::getExperience),
-                               Codec.INT.fieldOf(Constants.Recipe.COOKING_TIME).orElse(defaultCookingTime).forGetter(AbstractCookingRecipe::getCookingTime),
+                               Codec.FLOAT.fieldOf(Constants.Recipe.COOKING_EXP).orElse(0.0F).forGetter(AbstractCookingRecipe::experience),
+                               Codec.INT.fieldOf(Constants.Recipe.COOKING_TIME).orElse(defaultCookingTime).forGetter(AbstractCookingRecipe::cookingTime),
                                ItemStack.CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULT, ItemStack.EMPTY).forGetter($$0x -> ((RecipeResultBridge)$$0x).bridge$spongeResult()),
                                Codec.STRING.optionalFieldOf(Constants.Recipe.SPONGE_RESULTFUNCTION).forGetter(ResultFunctionRecipe::resultFunctionId)
                        )

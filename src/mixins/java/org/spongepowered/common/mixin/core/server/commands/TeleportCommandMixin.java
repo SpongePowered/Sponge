@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.server.commands;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.commands.LookAt;
 import net.minecraft.server.commands.TeleportCommand;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -70,7 +71,7 @@ public abstract class TeleportCommandMixin {
     @Overwrite
     // TODO check if this is still correct - check if we can get rid of the overwrite
     private static void performTeleport(CommandSourceStack source, Entity entityIn, ServerLevel worldIn, double x, double y, double z,
-            Set<Relative> relativeList, float yaw, float pitch, TeleportCommand.@Nullable LookAt facing) {
+            Set<Relative> relativeList, float yaw, float pitch, @Nullable LookAt facing) {
 
         double actualX = x;
         double actualY = y;

@@ -26,10 +26,10 @@ package org.spongepowered.common.mixin.core.world.inventory;
 
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerListener;
-import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.StonecutterMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,28 +37,33 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.accessor.world.inventory.AbstractContainerMenuAccessor;
 import org.spongepowered.common.item.recipe.stonecutting.SpongeStonecuttingRecipe;
 
-import java.util.List;
+import java.util.Optional;
 
 @Mixin(StonecutterMenu.class)
 public abstract class StonecutterMenuMixin {
 
     // @formatter:off
     @Shadow @Final Slot resultSlot;
-    @Shadow private List<StonecutterRecipe> recipes;
-    @Shadow @Final private DataSlot selectedRecipeIndex;
     // @formatter:on
 
-    @Inject(method = "setupResultSlot", at = @At(value = "RETURN"))
-    private void impl$updateRecipeResultSlot(final CallbackInfo ci) {
-        if (!this.recipes.isEmpty() && this.recipes.get(this.selectedRecipeIndex.get()) instanceof SpongeStonecuttingRecipe) {
-            // For SpongeStonecuttingRecipe resend the output slot in case the actual crafting result differs from the exemplary result
-            final ItemStack stack = this.resultSlot.getItem();
-            for (final ContainerListener listener : ((AbstractContainerMenuAccessor) this).accessor$containerListeners()) {
-                listener.slotChanged((AbstractContainerMenu) (Object) this, 1, stack);
-            }
-        }
+    @Inject(method = "setupResultSlot",
+        at = @At(value = "INVOKE", target = "Ljava/util/Optional;ifPresentOrElse(Ljava/util/function/Consumer;Ljava/lang/Runnable;)V", shift = At.Shift.AFTER),
+        locals = LocalCapture.CAPTURE_FAILHARD
+    )
+    private void impl$updateRecipeResultSlot(
+        final int $$0, final CallbackInfo ci,
+        final Optional<RecipeHolder<StonecutterRecipe>> recipe) {
+        recipe.filter(e -> e.value() instanceof SpongeStonecuttingRecipe)
+            .ifPresent(e -> {
+                // For SpongeStonecuttingRecipe resend the output slot in case the actual crafting result differs from the exemplary result
+                final ItemStack stack = this.resultSlot.getItem();
+                for (final ContainerListener listener : ((AbstractContainerMenuAccessor) this).accessor$containerListeners()) {
+                    listener.slotChanged((AbstractContainerMenu) (Object) this, 1, stack);
+                }
+            });
     }
 }
