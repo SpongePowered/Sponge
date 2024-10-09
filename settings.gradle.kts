@@ -7,10 +7,17 @@ pluginManagement {
         }
         maven("https://maven.architectury.dev/")
     }
-
+    val vanillaGradleVersion = "0.2.1-20241006.183638-89"
     plugins {
-        id("org.spongepowered.gradle.vanilla") version "0.2.1-20240904.014811-86"
+        id("org.spongepowered.gradle.vanilla") version vanillaGradleVersion
         id("implementation-structure")
+    }
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == "org.spongepowered.gradle.vanilla") {
+                useModule("org.spongepowered:vanillagradle:$vanillaGradleVersion")
+            }
+        }
     }
 }
 
