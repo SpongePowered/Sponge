@@ -47,7 +47,7 @@ public final class PublicPluginModule extends AbstractModule {
     protected void configure() {
         this.requestStaticInjection(PreserveHelper.class);
 
-        final BindingHelper bindingHelper = new BindingHelper(this.binder());
+        final BindingHelper bindingHelper = new BindingHelper(this.binder().withSource(BindingHelper.class));
         for (final PluginDependency dependency : this.container.metadata().dependencies()) {
             if (dependency.loadOrder() != PluginDependency.LoadOrder.AFTER) {
                 continue;

@@ -68,7 +68,7 @@ final class BindingHelper {
 
     void bindFrom(final Injector fromInjector) {
         for (final Binding<?> binding : fromInjector.getBindings().values()) {
-            if (!(binding.getSource() instanceof ElementSource)) {
+            if (!(binding.getSource() instanceof ElementSource elementSource) || elementSource.getDeclaringSource() == BindingHelper.class) {
                 continue;
             }
 
