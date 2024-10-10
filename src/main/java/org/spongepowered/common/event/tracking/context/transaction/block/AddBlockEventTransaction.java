@@ -54,8 +54,13 @@ public class AddBlockEventTransaction extends BlockEventBasedTransaction {
     }
 
     @Override
+    protected boolean actualBlockTransaction() {
+        return false;
+    }
+
+    @Override
     protected SpongeBlockSnapshot getResultingSnapshot() {
-        return this.getOriginalSnapshot();
+        throw new UnsupportedOperationException();
     }
 
     @Override
