@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.item.crafting;
 
-import static org.spongepowered.common.inventory.util.InventoryUtil.toCraftingInputOrThrow;
-
 import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeInput;
+import net.minecraft.world.item.crafting.display.RecipeDisplay;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.Recipe;
@@ -37,9 +37,12 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.inventory.util.InventoryUtil;
+import org.spongepowered.common.item.recipe.crafting.RecipeUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 @Mixin(net.minecraft.world.item.crafting.Recipe.class)
 public interface RecipeMixin_API<I extends RecipeInput, I2 extends org.spongepowered.api.item.recipe.crafting.RecipeInput> extends Recipe<I2> {
@@ -49,30 +52,44 @@ public interface RecipeMixin_API<I extends RecipeInput, I2 extends org.spongepow
     @Shadow boolean shadow$isSpecial();
     @Shadow boolean shadow$matches(I inv, net.minecraft.world.level.Level worldIn);
     @Shadow net.minecraft.world.item.crafting.RecipeType<?> shadow$getType();
-    // @formatter:on
+    @Shadow List<RecipeDisplay> shadow$display();
+// @formatter:on
 
     @NonNull
     @Override
     default ItemStackSnapshot exemplaryResult() {
-        // TODO - Do we want to start exposing slot displays in some way?
-        return ItemStackSnapshot.empty();
+        return this.shadow$display().stream()
+            .map(RecipeDisplay::result)
+            .map(sd -> sd.resolveForFirstStack(RecipeUtil.serverBasedContextMap()))
+            .filter(Predicate.not(ItemStack::isEmpty))
+            .map(ItemStackUtil::snapshotOf)
+            .findFirst()
+            .orElseGet(ItemStackSnapshot::empty);
     }
 
     @Override
     default boolean isValid(@NonNull final I2 inv, @NonNull final ServerWorld world) {
-        return this.shadow$matches((I) toCraftingInputOrThrow(inv), (net.minecraft.world.level.Level) world);
+        return this.shadow$matches((I) InventoryUtil.toCraftingInputOrThrow(inv), (net.minecraft.world.level.Level) world);
     }
 
     @NonNull
     @Override
     default ItemStackSnapshot result(@NonNull final I2 inv) {
-        return ItemStackUtil.snapshotOf(this.shadow$assemble((I) toCraftingInputOrThrow(inv), SpongeCommon.server().registryAccess()));
+        return ItemStackUtil.snapshotOf(this.shadow$assemble((I) InventoryUtil.toCraftingInputOrThrow(inv), SpongeCommon.server().registryAccess()));
     }
 
     @NonNull
     @Override
     default List<ItemStackSnapshot> remainingItems(@NonNull final I2 inv) {
-        return List.of();
+       return this.shadow$display().stream()
+            .map(RecipeDisplay::result)
+            .filter(sd -> sd instanceof SlotDisplay.WithRemainder)
+            .map(SlotDisplay.WithRemainder.class::cast)
+            .map(SlotDisplay.WithRemainder::remainder)
+            .map(sd -> sd.resolveForFirstStack(RecipeUtil.serverBasedContextMap()))
+            .filter(Predicate.not(ItemStack::isEmpty))
+            .map(ItemStackUtil::snapshotOf)
+            .toList();
     }
 
     @Override
