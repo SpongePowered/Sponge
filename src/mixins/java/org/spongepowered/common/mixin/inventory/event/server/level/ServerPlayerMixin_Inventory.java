@@ -259,17 +259,17 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
         method = "openHorseInventory",
         at = @At(
             value = "NEW",
-            target = "(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/Container;Lnet/minecraft/world/entity/animal/horse/AbstractHorse;)Lnet/minecraft/world/inventory/HorseInventoryMenu;"
+            target = "(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/Container;Lnet/minecraft/world/entity/animal/horse/AbstractHorse;I)Lnet/minecraft/world/inventory/HorseInventoryMenu;"
         )
     )
     private HorseInventoryMenu impl$transactHorseInventoryMenuCreationWithEffect(
-        final int $$0, final net.minecraft.world.entity.player.Inventory $$1, final Container $$2, final AbstractHorse $$3
+            final int $$0, final net.minecraft.world.entity.player.Inventory $$1, final Container $$2, final AbstractHorse $$3, final int $$4
     ) {
         try (final EffectTransactor ignored = PhaseTracker.SERVER.getPhaseContext()
             .getTransactor()
             .logOpenInventory((ServerPlayer) (Object) this)
         ) {
-            return new HorseInventoryMenu($$0, $$1, $$2, $$3);
+            return new HorseInventoryMenu($$0, $$1, $$2, $$3, $$4);
         }
     }
 

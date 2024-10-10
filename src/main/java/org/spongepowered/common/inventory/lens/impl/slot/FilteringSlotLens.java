@@ -26,7 +26,7 @@ package org.spongepowered.common.inventory.lens.impl.slot;
 
 import net.minecraft.world.Container;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.adapter.impl.slots.FilteringSlotAdapter;
@@ -59,7 +59,7 @@ public class FilteringSlotLens extends DelegatingSlotLens {
 
     @FunctionalInterface
     public interface ItemStackFilter {
-        boolean test(Fabric fabric, ItemStack itemStack);
+        boolean test(Fabric fabric, ItemStackLike itemStack);
 
         static ItemStackFilter filterNone() {
             return (f, i) -> true;
@@ -69,7 +69,7 @@ public class FilteringSlotLens extends DelegatingSlotLens {
             return (fabric, item) -> {
                 InventoryBridge inventory = fabric.fabric$get(slot);
                 if (inventory instanceof Container) {
-                    return ((Container) inventory).canPlaceItem(slot, ItemStackUtil.toNative(item));
+                    return ((Container) inventory).canPlaceItem(slot, ItemStackUtil.fromLikeToNative(item));
                 }
                 return true;
             };

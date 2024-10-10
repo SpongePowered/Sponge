@@ -86,6 +86,11 @@ public interface LivingEntityAccessor {
     @Accessor("lastHurtByMob") @Nullable LivingEntity accessor$lastHurtByMob();
 
     @Accessor("autoSpinAttackTicks") int accessor$autoSpinAttackTicks();
+    @Accessor("autoSpinAttackTicks") void accessor$autoSpinAttackTicks(final int autoSpinAttackTicks);
+    @Accessor("autoSpinAttackDmg") float accessor$autoSpinAttackDmg();
+    @Accessor("autoSpinAttackItemStack") ItemStack accessor$autoSpinAttackItemStack();
+
+    @Invoker("setLivingEntityFlag") void invoker$setLivingEntityFlag(int $$0, boolean $$1);
 
     @Accessor("useItem") void accessor$useItem(final ItemStack useItem);
 

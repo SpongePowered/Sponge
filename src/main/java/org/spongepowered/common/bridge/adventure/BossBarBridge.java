@@ -25,8 +25,13 @@
 package org.spongepowered.common.bridge.adventure;
 
 import net.minecraft.server.level.ServerBossEvent;
+import net.minecraft.world.BossEvent;
 
 public interface BossBarBridge {
 
     ServerBossEvent bridge$asVanillaServerBar();
+
+    void bridge$setVanilla(BossEvent vanilla);
+
+    void bridge$assignImplementation();
 }

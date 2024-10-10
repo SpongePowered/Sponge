@@ -42,6 +42,7 @@ public interface BaseSpawnerAccessor {
     @Accessor("spawnPotentials") void accessor$spawnPotentials(SimpleWeightedRandomList<SpawnData> newData);
 
     @Accessor("nextSpawnData") SpawnData accessor$nextSpawnData();
+    @Accessor("nextSpawnData") void accessor$nextSpawnData(SpawnData spawnData);
 
     @Accessor("minSpawnDelay") int accessor$minSpawnDelay();
 

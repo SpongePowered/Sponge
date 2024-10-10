@@ -24,27 +24,21 @@
  */
 package org.spongepowered.vanilla.applaunch.handler.dev;
 
-import cpw.mods.modlauncher.api.ITransformingClassLoader;
 import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.vanilla.applaunch.AppLaunchTargets;
+import org.spongepowered.vanilla.applaunch.AppLaunchTarget;
 import org.spongepowered.vanilla.applaunch.handler.AbstractVanillaLaunchHandler;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 
 public final class ClientDevLaunchHandler extends AbstractVanillaLaunchHandler {
 
     @Override
-    protected boolean isDev() {
-        return true;
+    public AppLaunchTarget target() {
+        return AppLaunchTarget.CLIENT_DEVELOPMENT;
     }
 
     @Override
-    public String name() {
-        return AppLaunchTargets.CLIENT_DEVELOPMENT.getLaunchTarget();
-    }
-
-    @Override
-    protected void launchService0(final String[] arguments, final ITransformingClassLoader launchClassLoader) throws Exception {
-        Class.forName("org.spongepowered.vanilla.launch.ClientLaunch", true, launchClassLoader.getInstance())
+    protected void launchSponge(final Module module, final String[] arguments) throws Exception {
+        Class.forName(module, "org.spongepowered.vanilla.launch.ClientLaunch")
                 .getMethod("launch", VanillaPluginPlatform.class, Boolean.class, String[].class)
                 .invoke(null, AppLaunch.pluginPlatform(), Boolean.TRUE, arguments);
     }

@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.api.minecraft.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.network.Connection;
 import net.minecraft.server.packs.repository.PackRepository;
@@ -42,15 +43,18 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.client.MinecraftBridge;
+import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.client.SpongeClient;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.registry.RegistryHolderLogic;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.scheduler.ClientScheduler;
+import org.spongepowered.common.util.BlockDestructionIdCache;
 import org.spongepowered.common.util.LocaleCache;
 
 import java.util.Locale;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Mixin(Minecraft.class)
 public abstract class MinecraftMixin_API implements SpongeClient, SpongeRegistryHolder {
@@ -64,10 +68,12 @@ public abstract class MinecraftMixin_API implements SpongeClient, SpongeRegistry
     @Shadow @Nullable public abstract IntegratedServer shadow$getSingleplayerServer();
     @Shadow public abstract PackRepository shadow$getResourcePackRepository();
     @Shadow public abstract net.minecraft.server.packs.resources.ResourceManager shadow$getResourceManager();
+    @Shadow @Nullable public abstract ClientPacketListener shadow$getConnection();
     // @formatter:on
 
     private final ClientScheduler api$scheduler = new ClientScheduler();
     private final RegistryHolderLogic api$registryHolder = new RegistryHolderLogic();
+    private final BlockDestructionIdCache api$blockDestructionIdCache = new BlockDestructionIdCache(Integer.MIN_VALUE, AtomicInteger::incrementAndGet);
 
     @Override
     public Optional<LocalPlayer> player() {
@@ -93,10 +99,11 @@ public abstract class MinecraftMixin_API implements SpongeClient, SpongeRegistry
 
     @Override
     public Optional<ClientSideConnection> connection() {
-        if (this.pendingConnection == null) {
+        final @Nullable ClientPacketListener connection = this.shadow$getConnection();
+        if (connection == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable((ClientSideConnection) this.pendingConnection.getPacketListener());
+        return Optional.ofNullable((ClientSideConnection) ((ConnectionBridge) connection.getConnection()).bridge$getEngineConnection());
     }
 
     @Override
@@ -137,5 +144,10 @@ public abstract class MinecraftMixin_API implements SpongeClient, SpongeRegistry
     @Override
     public RegistryHolderLogic registryHolder() {
         return this.api$registryHolder;
+    }
+
+    @Override
+    public BlockDestructionIdCache getBlockDestructionIdCache() {
+        return this.api$blockDestructionIdCache;
     }
 }

@@ -100,7 +100,7 @@ public abstract class ServerPlayerMixin_HealthScale extends PlayerMixin implemen
         // We need to use the dirty instances to signify that the player needs to have it updated, instead
         // of modifying the attribute instances themselves, we bypass other potentially detrimental logic
         // that would otherwise break the actual health scaling.
-        final Set<AttributeInstance> dirtyInstances = this.shadow$getAttributes().getDirtyAttributes();
+        final Set<AttributeInstance> dirtyInstances = this.shadow$getAttributes().getAttributesToUpdate();
         this.bridge$injectScaledHealth(dirtyInstances);
 
         // Send the new information to the client.

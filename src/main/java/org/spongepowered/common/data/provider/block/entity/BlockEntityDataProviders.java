@@ -42,8 +42,10 @@ public final class BlockEntityDataProviders extends DataProviderRegistratorBuild
         LecternData.register(this.registrator);
         LockableData.register(this.registrator);
         MobSpawnerData.register(this.registrator);
+        TrialSpawnerDataProvider.register(this.registrator);
         SignData.register(this.registrator);
         SkullData.register(this.registrator);
         StructureBlockData.register(this.registrator);
+        CrafterData.register(this.registrator);
     }
 }

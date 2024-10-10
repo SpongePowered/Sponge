@@ -26,7 +26,6 @@ package org.spongepowered.common.item.recipe.cooking;
 
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.BlastingRecipe;
@@ -35,6 +34,7 @@ import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.item.crafting.SmokingRecipe;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -50,7 +50,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
-public class SpongeCookingRecipeRegistration extends SpongeRecipeRegistration<AbstractCookingRecipe> implements SpongeRecipeRegistration.ResultFunctionRegistration<Container>{
+public class SpongeCookingRecipeRegistration extends SpongeRecipeRegistration<AbstractCookingRecipe> implements SpongeRecipeRegistration.ResultFunctionRegistration<SingleRecipeInput>{
 
     // Vanilla Recipe
     private final Ingredient ingredient;
@@ -59,13 +59,13 @@ public class SpongeCookingRecipeRegistration extends SpongeRecipeRegistration<Ab
 
     // Sponge Recipe
     private final ItemStack spongeResult;
-    private final Function<Container, ItemStack> resultFunction;
+    private final Function<SingleRecipeInput, ItemStack> resultFunction;
     private final RecipeType<?> type;
     private final CookingBookCategory cookingCategory;
 
     public SpongeCookingRecipeRegistration(final ResourceLocation key, final RecipeType<?> type, final RecipeSerializer<? extends AbstractCookingRecipe> serializer,
                                            final String group, final Ingredient ingredient, final float experience, final Ticks cookingTime,
-                                           final ItemStack spongeResult, final Function<Container, ItemStack> resultFunction,
+                                           final ItemStack spongeResult, final Function<SingleRecipeInput, ItemStack> resultFunction,
                                            final DataPack<RecipeRegistration> pack, final RecipeCategory category, final CookingBookCategory cookingCategory) {
         super(key, group, pack, category, serializer);
         this.type = type;
@@ -79,7 +79,7 @@ public class SpongeCookingRecipeRegistration extends SpongeRecipeRegistration<Ab
 
     public static SpongeCookingRecipeRegistration of(final ResourceLocation key, final RecipeType<?> type, final @Nullable String group,
             final Ingredient ingredient, final Float experience, final @Nullable Ticks cookingTime, final ItemStack result,
-            final Function<Container, ItemStack> resultFunction, final DataPack<RecipeRegistration> pack, final RecipeCategory recipeCategory, final CookingBookCategory cookingCategory)
+            final Function<SingleRecipeInput, ItemStack> resultFunction, final DataPack<RecipeRegistration> pack, final RecipeCategory recipeCategory, final CookingBookCategory cookingCategory)
     {
         var finalCookingTime = cookingTime;
 
@@ -151,7 +151,7 @@ public class SpongeCookingRecipeRegistration extends SpongeRecipeRegistration<Ab
     }
 
     @Override
-    public Function<Container, ItemStack> resultFunction() {
+    public Function<SingleRecipeInput, ItemStack> resultFunction() {
         return this.resultFunction;
     }
 }

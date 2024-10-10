@@ -27,7 +27,7 @@ package org.spongepowered.common.data.provider.entity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.PickupRule;
-import org.spongepowered.common.accessor.world.entity.projectile.AbstractArrowAccessor;
+import org.spongepowered.common.bridge.world.entity.projectile.AbstractArrowBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class AbstractArrowData {
@@ -46,8 +46,9 @@ public final class AbstractArrowData {
                         .get(AbstractArrow::isCritArrow)
                         .set(AbstractArrow::setCritArrow)
                     .create(Keys.KNOCKBACK_STRENGTH)
-                        .get(h -> (double) ((AbstractArrowAccessor) h).accessor$knockback())
-                        .set((h, v) -> h.setKnockback((int) Math.round(v)))
+                        // TODO calculating the knockback strength now requires the target entity and damage source
+                        .get(h -> ((AbstractArrowBridge) h).bridge$getKnockback())
+                        .set((h, v) -> ((AbstractArrowBridge) h).bridge$setKnockback(v))
                     .create(Keys.PICKUP_RULE)
                         .get(h -> (PickupRule) (Object) h.pickup)
                         .set((h, v) -> h.pickup = ((AbstractArrow.Pickup) (Object) v));

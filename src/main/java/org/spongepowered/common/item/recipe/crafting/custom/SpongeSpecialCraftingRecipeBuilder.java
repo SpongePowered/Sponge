@@ -30,8 +30,9 @@ import net.minecraft.world.item.crafting.CraftingBookCategory;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
+import org.spongepowered.api.item.recipe.crafting.RecipeInput;
 import org.spongepowered.api.item.recipe.crafting.SpecialCraftingRecipe;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
@@ -43,34 +44,34 @@ import java.util.function.Function;
 public final class SpongeSpecialCraftingRecipeBuilder extends AbstractResourceKeyedBuilder<RecipeRegistration, SpecialCraftingRecipe.Builder>
         implements SpecialCraftingRecipe.Builder, SpecialCraftingRecipe.Builder.ResultStep, SpecialCraftingRecipe.Builder.EndStep {
 
-    private BiPredicate<CraftingGridInventory, ServerWorld> biPredicate;
-    private Function<CraftingGridInventory, List<ItemStack>> remainingItemsFunction;
-    private Function<CraftingGridInventory, ItemStack> resultFunction;
+    private BiPredicate<RecipeInput.Crafting, ServerWorld> biPredicate;
+    private Function<RecipeInput.Crafting, List<ItemStack>> remainingItemsFunction;
+    private Function<RecipeInput.Crafting, ItemStack> resultFunction;
     private DataPack<RecipeRegistration> pack = DataPacks.RECIPE;
 
     private RecipeCategory recipeCategory = RecipeCategory.MISC; // TODO support category
 
     @Override
-    public ResultStep matching(BiPredicate<CraftingGridInventory, ServerWorld> biPredicate) {
+    public ResultStep matching(BiPredicate<RecipeInput.Crafting, ServerWorld> biPredicate) {
         this.biPredicate = biPredicate;
         return this;
     }
 
     @Override
-    public ResultStep remainingItems(Function<CraftingGridInventory, List<ItemStack>> remainingItemsFunction) {
-        this.remainingItemsFunction = remainingItemsFunction;
+    public ResultStep remainingItems(Function<RecipeInput.Crafting, ? extends List<? extends ItemStackLike>> remainingItemsFunction) {
+        this.remainingItemsFunction = inv -> remainingItemsFunction.apply(inv).stream().map(ItemStackLike::asMutable).toList();
         return this;
     }
 
     @Override
-    public EndStep result(Function<CraftingGridInventory, ItemStack> resultFunction) {
-        this.resultFunction = resultFunction;
+    public EndStep result(Function<RecipeInput.Crafting, ? extends ItemStackLike> resultFunction) {
+        this.resultFunction = inv -> resultFunction.apply(inv).asMutable();
         return this;
     }
 
     @Override
-    public EndStep result(ItemStack result) {
-        final ItemStack copy = result.copy();
+    public EndStep result(ItemStackLike result) {
+        final ItemStack copy = result.asMutableCopy();
         this.resultFunction = inv -> copy.copy();
         return this;
     }

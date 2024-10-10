@@ -24,27 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.world.item.enchantment;
 
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.enchantment.Enchantment;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-
-import java.util.StringJoiner;
 
 @Mixin(Enchantment.class)
 public abstract class EnchantmentMixin {
 
-    // @formatter:off
-    @Shadow public abstract String shadow$getDescriptionId();
-    // @formatter:on
-
-    @Override
-    public String toString() {
-        final ResourceKey key = (ResourceKey) (Object) BuiltInRegistries.ENCHANTMENT.getKey((Enchantment) (Object) this);
-        return new StringJoiner(", ", "EnchantmentType[", "]")
-                .add("Name=" + this.shadow$getDescriptionId())
-                .add("Key=" + key)
-                .toString();
-    }
 }

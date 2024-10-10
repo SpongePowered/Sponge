@@ -54,7 +54,7 @@ public final class RecipeDataPackSerializer extends JsonDataPackSerializer<Recip
 
             final Path file = packDir.resolve("data")
                     .resolve(entry.key().namespace())
-                    .resolve("advancements")
+                    .resolve("advancement")
                     .resolve(entry.key().value() + ".json");
             Files.createDirectories(file.getParent());
 

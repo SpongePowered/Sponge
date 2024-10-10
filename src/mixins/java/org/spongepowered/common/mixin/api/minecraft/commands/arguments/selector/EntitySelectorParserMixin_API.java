@@ -98,7 +98,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     @Shadow @Nullable private Double deltaZ;
     @Shadow private WrappedMinMaxBounds rotX = WrappedMinMaxBounds.ANY;
     @Shadow private WrappedMinMaxBounds rotY = WrappedMinMaxBounds.ANY;
-    @Shadow private Predicate<Entity> predicate;
+    @Shadow @Final private List<Predicate<Entity>> predicates;
     @Shadow private boolean currentEntity;
     @Shadow @Nullable private String playerName;
     @Shadow private int startPosition;
@@ -415,7 +415,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
         this.deltaZ = null;
         this.rotX = WrappedMinMaxBounds.ANY;
         this.rotY = WrappedMinMaxBounds.ANY;
-        this.predicate = x -> true;
+        this.predicates.clear();
         this.currentEntity = false;
         this.playerName = null;
         this.startPosition = 0;

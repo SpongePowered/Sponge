@@ -26,6 +26,7 @@ package org.spongepowered.common.network.channel;
 
 import com.google.common.collect.Multimap;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -68,7 +69,7 @@ public abstract class SpongeChannel implements Channel {
         this.key = key;
         this.manager = manager;
         this.logger = LogManager.getLogger("channel/" + key.formatted());
-        this.payloadType = CustomPacketPayload.createType(key.toString());
+        this.payloadType = new CustomPacketPayload.Type<>((ResourceLocation) (Object) key);
     }
 
     public int getType() {

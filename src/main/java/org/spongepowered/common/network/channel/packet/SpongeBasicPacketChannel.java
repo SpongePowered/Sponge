@@ -103,13 +103,17 @@ public final class SpongeBasicPacketChannel extends AbstractPacketChannel implem
                                                                                                                }
                                                                                                            }
                     , transactionId);
+
+            final TransactionData<P, R> transactionData = new TransactionData<>(request, binding, success, future);
+            transactionStore.put(transactionId, SpongeBasicPacketChannel.this, transactionData);
+
             PacketSender.sendTo(connection, mcPacket, throwable -> {
                 if (throwable != null) {
-                    // Failed before it could reach the client
-                    SpongeBasicPacketChannel.this.handleException(connection, state, ChannelExceptionUtil.of(throwable), future);
+                    if (transactionStore.remove(transactionId) != null) {
+                        // Failed before it could reach the client
+                        SpongeBasicPacketChannel.this.handleException(connection, state, ChannelExceptionUtil.of(throwable), future);
+                    }
                 } else {
-                    final TransactionData<P, R> transactionData = new TransactionData<>(request, binding, success, future);
-                    transactionStore.put(transactionId, SpongeBasicPacketChannel.this, transactionData);
                     if (sendSuccess != null) {
                         sendSuccess.run();
                     }
@@ -145,7 +149,16 @@ public final class SpongeBasicPacketChannel extends AbstractPacketChannel implem
                                                                                                                }
                                                                                                            }
                     , transactionId);
-            PacketSender.sendTo(connection, mcPacket, future);
+
+            transactionStore.put(transactionId, SpongeBasicPacketChannel.this, null);
+
+            PacketSender.sendTo(connection, mcPacket, throwable -> {
+                if (throwable == null) {
+                    future.complete(null);
+                } else if (transactionStore.remove(transactionId) != null) {
+                    future.completeExceptionally(throwable);
+                }
+            });
             return future;
         }
 

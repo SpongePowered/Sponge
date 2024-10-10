@@ -36,11 +36,12 @@ import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.recipes.RecipeCategory;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -54,7 +55,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.function.Function;
 
-public abstract class SpongeRecipeRegistration<R extends Recipe<? extends Container>> implements RecipeRegistration {
+public abstract class SpongeRecipeRegistration<R extends Recipe<? extends RecipeInput>> implements RecipeRegistration {
 
     private static final Gson GSON = new Gson();
 
@@ -73,12 +74,12 @@ public abstract class SpongeRecipeRegistration<R extends Recipe<? extends Contai
         this.advancement = Advancement.Builder.advancement()
                 .addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(key))
                 .rewards(AdvancementRewards.Builder.recipe(key))
-                .build(new ResourceLocation(key.getNamespace(), "recipes/" + recipeCategory.getFolderName() + "/" + key.getPath()));
+                .build(ResourceLocation.fromNamespaceAndPath(key.getNamespace(), "recipes/" + recipeCategory.getFolderName() + "/" + key.getPath()));
         this.group = group == null ? "" : group;
     }
 
-    public static <R extends Recipe<C>, C extends Container> RecipeSerializer<? extends R> determineSerializer(final ItemStack resultStack,
-            final Function<C, ItemStack> resultFunction,
+    public static <R extends Recipe<I>, I extends RecipeInput> RecipeSerializer<? extends R> determineSerializer(final ItemStack resultStack,
+            final Function<I, ItemStack> resultFunction,
             final Function<net.minecraft.world.inventory.CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction,
             final Collection<Ingredient> ingredients,
             final RecipeSerializer<R> vanilla, final RecipeSerializer<? extends R> sponge) {
@@ -93,9 +94,9 @@ public abstract class SpongeRecipeRegistration<R extends Recipe<? extends Contai
         return vanilla;
     }
 
-    public static <C extends Container> boolean isVanillaSerializer(final ItemStack resultStack,
-            final Function<C, ItemStack> resultFunction,
-            final Function<net.minecraft.world.inventory.CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction,
+    public static <I extends RecipeInput> boolean isVanillaSerializer(final ItemStack resultStack,
+            final Function<I, ItemStack> resultFunction,
+            final Function<I, NonNullList<ItemStack>> remainingItemsFunction,
             final Collection<Ingredient> ingredients) {
         if (!resultStack.getComponents().isEmpty() || resultFunction != null || remainingItemsFunction != null) {
             return false;
@@ -152,7 +153,8 @@ public abstract class SpongeRecipeRegistration<R extends Recipe<? extends Contai
             if (template instanceof SpongeRecipeRegistration<?> srr) {
                 srr.ensureCached();
             }
-            final DataResult<JsonElement> encoded = Recipe.CODEC.encodeStart(JsonOps.INSTANCE, (Recipe<?>) template.recipe());
+            final var ops = RegistryOps.create(JsonOps.INSTANCE, access);
+            final DataResult<JsonElement> encoded = Recipe.CODEC.encodeStart(ops, (Recipe<?>) template.recipe());
             if (encoded.result().isPresent()) {
                 return encoded.result().get().getAsJsonObject();
             }
@@ -163,13 +165,13 @@ public abstract class SpongeRecipeRegistration<R extends Recipe<? extends Contai
         }
     }
 
-    public interface ResultFunctionRegistration<C> {
+    public interface ResultFunctionRegistration<I extends RecipeInput> {
 
-        Function<C, net.minecraft.world.item.ItemStack> resultFunction();
+        Function<I, net.minecraft.world.item.ItemStack> resultFunction();
     }
 
-    public interface RemainingItemsFunctionRegistration<C> {
+    public interface RemainingItemsFunctionRegistration<I extends RecipeInput> {
 
-        Function<C, NonNullList<net.minecraft.world.item.ItemStack>> remainingItems();
+        Function<I, NonNullList<net.minecraft.world.item.ItemStack>> remainingItems();
     }
 }

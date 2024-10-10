@@ -50,6 +50,7 @@ import org.spongepowered.api.data.KeyValueMatcher;
 import org.spongepowered.api.data.MutableDataProviderBuilder;
 import org.spongepowered.api.data.meta.BannerPatternLayer;
 import org.spongepowered.api.data.persistence.DataStore;
+import org.spongepowered.api.data.type.ArtTypeTemplate;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.sound.SoundType;
@@ -129,6 +130,7 @@ import org.spongepowered.api.world.generation.structure.StructureSetTemplate;
 import org.spongepowered.api.world.generation.structure.StructureTemplate;
 import org.spongepowered.api.world.generation.structure.jigsaw.JigsawPoolTemplate;
 import org.spongepowered.api.world.generation.structure.jigsaw.ProcessorListTemplate;
+import org.spongepowered.api.world.portal.PortalLogic;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.server.TicketType;
@@ -160,6 +162,7 @@ import org.spongepowered.common.data.builder.meta.SpongePatternLayerBuilder;
 import org.spongepowered.common.data.key.SpongeKeyBuilder;
 import org.spongepowered.common.data.persistence.datastore.SpongeDataStoreBuilder;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.data.type.SpongeArtTypeTemplate;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.effect.potion.SpongePotionBuilder;
 import org.spongepowered.common.effect.sound.SpongeSoundBuilder;
@@ -233,6 +236,7 @@ import org.spongepowered.common.world.generation.structure.SpongeStructureSetTem
 import org.spongepowered.common.world.generation.structure.SpongeStructureTemplate;
 import org.spongepowered.common.world.generation.structure.jigsaw.SpongeJigsawPoolTemplate;
 import org.spongepowered.common.world.generation.structure.jigsaw.SpongeProcessorListTemplate;
+import org.spongepowered.common.world.portal.SpongePortalLogicBuilder;
 import org.spongepowered.common.world.schematic.SpongePaletteTypeBuilder;
 import org.spongepowered.common.world.schematic.SpongeSchematicBuilder;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
@@ -388,7 +392,9 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(JigsawPoolTemplate.Builder.class, SpongeJigsawPoolTemplate.BuilderImpl::new)
                 .register(ChatTypeTemplate.Builder.class, SpongeChatTypeTemplate.BuilderImpl::new)
                 .register(DamageTypeTemplate.Builder.class, SpongeDamageTypeTemplate.BuilderImpl::new)
+                .register(ArtTypeTemplate.Builder.class, SpongeArtTypeTemplate.BuilderImpl::new)
                 .register(TicketType.Builder.class, SpongeTicketTypeBuilder::new)
+                .register(PortalLogic.Builder.class, SpongePortalLogicBuilder::new)
         ;
     }
 }

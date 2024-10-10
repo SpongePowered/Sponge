@@ -27,8 +27,8 @@ package org.spongepowered.common.entity.ai.goal.builtin.creature;
 import net.minecraft.world.entity.PathfinderMob;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.AvoidLivingGoal;
-import org.spongepowered.api.entity.living.Creature;
 import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.api.entity.living.PathfinderAgent;
 
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -86,7 +86,7 @@ public final class SpongeAvoidLivingGoalBuilder implements AvoidLivingGoal.Build
 
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public AvoidLivingGoal build(Creature owner) {
+    public AvoidLivingGoal build(PathfinderAgent owner) {
         Objects.requireNonNull(owner);
         Objects.requireNonNull(this.targetSelector);
         return (AvoidLivingGoal) new net.minecraft.world.entity.ai.goal.AvoidEntityGoal((PathfinderMob) owner, Entity.class, this.searchDistance,

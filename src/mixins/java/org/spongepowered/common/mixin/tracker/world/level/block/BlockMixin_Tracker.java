@@ -159,6 +159,7 @@ public abstract class BlockMixin_Tracker implements TrackableBlockBridge, Regist
         }
         final PhaseContext<@NonNull ?> context = server.getPhaseContext();
         context.getTransactor().completeBlockDrops(BlockMixin_Tracker.tracker$effectTransactorForDrops);
+        BlockMixin_Tracker.tracker$effectTransactorForDrops = null;
     }
 
     @Override

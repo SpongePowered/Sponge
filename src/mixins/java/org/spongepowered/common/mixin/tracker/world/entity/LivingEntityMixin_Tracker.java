@@ -24,14 +24,12 @@
  */
 package org.spongepowered.common.mixin.tracker.world.entity;
 
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.CombatEntry;
 import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.asm.mixin.Mixin;
@@ -52,23 +50,16 @@ import java.util.List;
 public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker {
 
     // @formatter:off
-    @Shadow protected boolean dead;
-    @Shadow protected int deathScore;
-    @Shadow protected int lastHurtByPlayerTime;
 
     @Shadow protected abstract void shadow$tickDeath();
-    @Shadow protected abstract boolean shadow$shouldDropExperience();
-    @Shadow protected abstract void shadow$dropFromLootTable(DamageSource damageSourceIn, boolean p_213354_2_);
-    @Shadow protected abstract void shadow$dropEquipment();
     @Shadow public abstract CombatTracker shadow$getCombatTracker();
-    @Shadow @Nullable public abstract LivingEntity shadow$getKillCredit();
     @Shadow public void shadow$die(final DamageSource cause) {}
-    @Shadow protected abstract void shadow$dropAllDeathLoot(DamageSource damageSourceIn);
-    @Shadow protected abstract void shadow$createWitherRose(@Nullable LivingEntity p_226298_1_);
-    @Shadow public abstract void shadow$swing(InteractionHand p_184609_1_);
     @Shadow protected abstract void shadow$pushEntities();
     @Shadow public abstract float shadow$getHealth();
+
     @Shadow public int deathTime;
+    @Shadow protected boolean dead;
+
     // @formatter:on
 
     @Override

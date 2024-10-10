@@ -24,21 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.projectile;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.ProjectileDeflection;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.TheEndGatewayBlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.HitResult;
-import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 
 @Mixin(ThrowableProjectile.class)
 public abstract class ThrowableProjectileMixin extends ProjectileMixin {
@@ -58,25 +51,6 @@ public abstract class ThrowableProjectileMixin extends ProjectileMixin {
             return ProjectileDeflection.NONE;
         } else {
             return this.shadow$hitTargetOrDeflectSelf(movingObjectPosition);
-        }
-    }
-
-    @Redirect(method = "tick",
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/level/block/entity/TheEndGatewayBlockEntity;teleportEntity(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/level/block/entity/TheEndGatewayBlockEntity;)V"
-        )
-    )
-    private void impl$createCauseFrameForGatewayTeleport(
-        final Level level, final BlockPos pos, final BlockState state, final Entity self, final TheEndGatewayBlockEntity gateway
-    ) {
-        if (this.shadow$getCommandSenderWorld().isClientSide) {
-            return;
-        }
-
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(gateway);
-            frame.pushCause(self);
-            TheEndGatewayBlockEntity.teleportEntity(level, pos, state, self, gateway);
         }
     }
 

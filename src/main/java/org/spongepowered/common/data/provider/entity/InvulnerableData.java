@@ -40,10 +40,12 @@ public final class InvulnerableData {
                 .asMutable(Entity.class)
                     .create(Keys.INVULNERABLE)
                         .get(Entity::isInvulnerable)
+                        .resetOnDelete(false)
                         .set(Entity::setInvulnerable)
                 .asMutable(SpongeUserData.class)
                     .create(Keys.INVULNERABLE)
                         .get(SpongeUserData::isInvulnerable)
+                        .resetOnDelete(false)
                         .set(SpongeUserData::setInvulnerable);
     }
     // @formatter:on

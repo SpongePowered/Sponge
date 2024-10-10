@@ -27,8 +27,8 @@ package org.spongepowered.common.mixin.api.minecraft.world.entity.ai.goal;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.AvoidLivingGoal;
-import org.spongepowered.api.entity.living.Creature;
 import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.api.entity.living.PathfinderAgent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -39,7 +39,7 @@ import java.util.function.Predicate;
 
 @SuppressWarnings({"unchecked"})
 @Mixin(net.minecraft.world.entity.ai.goal.AvoidEntityGoal.class)
-public abstract class AvoidEntityGoalMixin_API extends GoalMixin_API<Creature> implements AvoidLivingGoal {
+public abstract class AvoidEntityGoalMixin_API extends GoalMixin_API<PathfinderAgent> implements AvoidLivingGoal {
 
     private static final Predicate<LivingEntity> ALWAYS_TRUE = e -> true;
 

@@ -25,14 +25,13 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.RecordItem;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.JukeboxBlock;
 import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.block.entity.Jukebox;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -48,7 +47,7 @@ public abstract class JukeboxBlockEntityMixin_API extends BlockEntityMixin_API i
 
     @Shadow public abstract void shadow$setTheItem(final net.minecraft.world.item.ItemStack $$1);
 
-    @Shadow public abstract void shadow$popOutRecord();
+    @Shadow public abstract void shadow$popOutTheItem();
 
     // @formatter:on
 
@@ -70,19 +69,15 @@ public abstract class JukeboxBlockEntityMixin_API extends BlockEntityMixin_API i
     public void eject() {
         final BlockState block = this.level.getBlockState(this.shadow$getBlockPos());
         if (block.getBlock() == Blocks.JUKEBOX) {
-            this.shadow$popOutRecord();
+            this.shadow$popOutTheItem();
         }
     }
 
     @Override
-    public void insert(final ItemStack record) {
-        final net.minecraft.world.item.ItemStack itemStack = ItemStackUtil.toNative(record);
-        if (!(itemStack.getItem() instanceof RecordItem)) {
-            return;
-        }
+    public void insert(final ItemStackLike record) {
+        final net.minecraft.world.item.ItemStack itemStack = ItemStackUtil.fromLikeToNative(record);
         final BlockState block = this.level.getBlockState(this.shadow$getBlockPos());
         if (block.getBlock() == Blocks.JUKEBOX) {
-            // Don't use BlockJukebox#insertRecord - it looses item data
             this.shadow$setTheItem(itemStack);
             this.level.setBlock(this.shadow$getBlockPos(), block.setValue(JukeboxBlock.HAS_RECORD, true), Constants.BlockChangeFlags.NOTIFY_CLIENTS);
         }

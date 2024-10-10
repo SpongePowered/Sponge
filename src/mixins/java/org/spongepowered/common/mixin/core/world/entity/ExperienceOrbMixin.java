@@ -24,11 +24,15 @@
  */
 package org.spongepowered.common.mixin.core.world.entity;
 
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ExperienceOrb;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.util.DamageEventUtil;
 
 @Mixin(ExperienceOrb.class)
 public abstract class ExperienceOrbMixin extends EntityMixin {
@@ -41,4 +45,11 @@ public abstract class ExperienceOrbMixin extends EntityMixin {
         this.impl$callExpireEntityEvent();
     }
 
+    @Inject(method = "hurt", cancellable = true, at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/ExperienceOrb;markHurt()V"))
+    private void attackImpl$onAttackEntityFrom(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
+        if (DamageEventUtil.callOtherAttackEvent((Entity) (Object) this, source, amount).isCancelled()) {
+            cir.setReturnValue(true);
+        }
+    }
 }

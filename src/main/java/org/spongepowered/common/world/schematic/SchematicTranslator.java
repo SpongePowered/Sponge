@@ -305,7 +305,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         final byte[] blockData = (byte[]) view.get(Constants.Sponge.Schematic.BLOCK_DATA)
             .orElseThrow(() -> new InvalidDataException("Missing BlockData for Schematic"));
         SchematicTranslator.readByteArrayData(
-            width, (width * length), offset, palette, blockData, archetypeVolume,
+            width, (width * length), offset, new CachingPalette.MutableImpl<>(palette), blockData, archetypeVolume,
             BlockVolume.Modifiable::setBlock
         );
         view.getViewList(Constants.Sponge.Schematic.BLOCKENTITY_CONTAINER)

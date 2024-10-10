@@ -32,6 +32,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.FrontAndTop;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.trialspawner.TrialSpawnerState;
+import net.minecraft.world.level.block.entity.vault.VaultState;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.level.block.state.properties.BambooLeaves;
@@ -144,6 +146,8 @@ public class BlockStatePropertiesGenerator implements Generator {
         vanillaEnumTypeMapping.put(DripstoneThickness.class, BlockStatePropertiesGenerator.inDataTypePkg("DripstoneSegment"));
         vanillaEnumTypeMapping.put(FrontAndTop.class, BlockStatePropertiesGenerator.inDataTypePkg("JigsawBlockOrientation"));
         vanillaEnumTypeMapping.put(ComparatorMode.class, BlockStatePropertiesGenerator.inDataTypePkg("ComparatorMode"));
+        vanillaEnumTypeMapping.put(TrialSpawnerState.class, BlockStatePropertiesGenerator.inDataTypePkg("TrialSpawnerState"));
+        vanillaEnumTypeMapping.put(VaultState.class, BlockStatePropertiesGenerator.inDataTypePkg("VaultState"));
 
         // Custom Mapping required see StateHolderMixin_API
         final ClassName portionTypeClass = BlockStatePropertiesGenerator.inDataTypePkg("PortionType");

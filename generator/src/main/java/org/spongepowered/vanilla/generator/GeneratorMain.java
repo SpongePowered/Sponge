@@ -46,24 +46,38 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.server.packs.resources.CloseableResourceManager;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageEffects;
 import net.minecraft.world.damagesource.DamageScaling;
 import net.minecraft.world.entity.Display;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.animal.Fox;
+import net.minecraft.world.entity.animal.MushroomCow;
+import net.minecraft.world.entity.animal.Panda;
+import net.minecraft.world.entity.animal.Parrot;
+import net.minecraft.world.entity.animal.Rabbit;
 import net.minecraft.world.entity.animal.TropicalFish;
 import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.animal.horse.Markings;
 import net.minecraft.world.entity.animal.horse.Variant;
+import net.minecraft.world.entity.monster.SpellcasterIllager;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.Tiers;
 import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.WorldDataConfiguration;
+import net.minecraft.world.level.block.entity.trialspawner.TrialSpawnerState;
 import net.minecraft.world.level.block.state.properties.BambooLeaves;
+import net.minecraft.world.level.block.state.properties.DripstoneThickness;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
+import net.minecraft.world.level.block.state.properties.SculkSensorPhase;
+import net.minecraft.world.level.block.state.properties.Tilt;
+import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.scores.DisplaySlot;
 import org.tinylog.Logger;
 
 import java.io.IOException;
@@ -212,7 +226,7 @@ public final class GeneratorMain {
                     final Map<ResourceLocation, Object> out = new HashMap<>(map.size());
                     map.forEach((BiConsumer<Object, Object>) (k, v) -> {
                         var key = (GameRules.Key<?>) k;
-                        out.put(new ResourceLocation("sponge:" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, key.getId())), v);
+                        out.put(ResourceLocation.fromNamespaceAndPath("sponge", CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, key.getId())), v);
                     });
                     return out;
                 }
@@ -228,14 +242,14 @@ public final class GeneratorMain {
                  "entity",
                  "EntityCategories",
                  MobCategory.class,
-                 "getName",
+                 "getSerializedName",
                  "sponge"
             ),
             new EnumEntriesValidator<>(
                  "data.type",
                  "BoatTypes",
                  Boat.Type.class,
-                 "getName",
+                 "getSerializedName",
                  "sponge"
             ),
             new RegistryEntriesGenerator<>(
@@ -244,6 +258,13 @@ public final class GeneratorMain {
                  "ARMOR_MATERIAL",
                  context.relativeClass("data.type", "ArmorMaterial"),
                  Registries.ARMOR_MATERIAL
+            ),
+            new RegistryEntriesGenerator<>(
+                 "map.decoration",
+                 "MapDecorationTypes",
+                 "MAP_DECORATION_TYPE",
+                 context.relativeClass("map.decoration", "MapDecorationType"),
+                 Registries.MAP_DECORATION_TYPE
             ),
             new EnumEntriesValidator<>(
                  "data.type",
@@ -256,7 +277,49 @@ public final class GeneratorMain {
                  "data.type",
                  "DyeColors",
                  DyeColor.class,
-                 "getName",
+                 "getSerializedName",
+                 "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                 "world.difficulty",
+                 "Difficulties",
+                 Difficulty.class,
+                 "getSerializedName",
+                 "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                 "data.type",
+                 "PandaGenes",
+                 Panda.Gene.class,
+                 "getSerializedName",
+                 "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                 "data.type",
+                 "SpellTypes",
+                 SpellcasterIllager.IllagerSpell.class,
+                 "name",
+                 "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                 "data.type",
+                 "RabbitTypes",
+                 Rabbit.Variant.class,
+                 "getSerializedName",
+                 "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                 "data.type",
+                 "ParrotTypes",
+                 Parrot.Variant.class,
+                 "getSerializedName",
+                 "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                 "data.type",
+                 "MooshroomTypes",
+                 MushroomCow.MushroomType.class,
+                 "getSerializedName",
                  "sponge"
             ),
             new EnumEntriesValidator<>(
@@ -298,7 +361,7 @@ public final class GeneratorMain {
                  "item",
                  "ItemRarities",
                  Rarity.class,
-                 "name",
+                 "getSerializedName",
                  "sponge"
             ),
             new EnumEntriesValidator<>(
@@ -320,7 +383,8 @@ public final class GeneratorMain {
                 "ArtTypes",
                 "ART_TYPE",
                 context.relativeClass("data.type", "ArtType"),
-                Registries.PAINTING_VARIANT
+                Registries.PAINTING_VARIANT,
+                a -> true, RegistryScope.SERVER
             ),
             new RegistryEntriesGenerator<>(
                 "entity.attribute.type",
@@ -419,7 +483,7 @@ public final class GeneratorMain {
                 "EntityTypes",
                 Registries.ENTITY_TYPE,
                 $ -> true,
-                Set.of(new ResourceLocation("sponge", "human")) // Sponge's Human type is an extra addition
+                Set.of(ResourceLocation.fromNamespaceAndPath("sponge", "human")) // Sponge's Human type is an extra addition
             ),
             new RegistryEntriesGenerator<>(
                 "fluid",
@@ -486,6 +550,15 @@ public final class GeneratorMain {
                 context.relativeClass("data.type", "FrogType"),
                 Registries.FROG_VARIANT
             ),
+            new RegistryEntriesGenerator<>(
+                "effect.sound.music",
+                "MusicDiscs",
+                "MUSIC_DISC",
+                context.relativeClass("effect.sound.music", "MusicDisc"),
+                Registries.JUKEBOX_SONG,
+                $ -> true,
+                RegistryScope.SERVER
+            ),
             new RegistryEntriesValidator<>(
                 "item.recipe",
                 "RecipeTypes",
@@ -505,11 +578,11 @@ public final class GeneratorMain {
                 context.relativeClass("statistic", "Statistic"),
                 Registries.CUSTOM_STAT
             ),
-            /*new RegistryEntriesValidator<>( // TODO: Needs to be updated
+            new RegistryEntriesValidator<>(
                 "statistic",
                 "StatisticCategories",
-                Registry.STAT_TYPE_REGISTRY
-            ), */
+                Registries.STAT_TYPE
+            ),
             new RegistryEntriesGenerator<>(
                 "world.generation.structure",
                 "Structures",
@@ -584,8 +657,7 @@ public final class GeneratorMain {
             ),
             new BlockStateDataProviderGenerator(),
             new BlockStatePropertiesGenerator(),
-            // TODO fix me
-            //new BlockStatePropertyKeysGenerator(),
+            new BlockStatePropertyKeysGenerator(),
             new RegistryEntriesGenerator<>(
                     "world.generation.feature",
                     "PlacedFeatures",
@@ -653,6 +725,13 @@ public final class GeneratorMain {
                     "tag",
                     "FluidTypeTags"
             ),
+            new TagGenerator(
+                    "ENCHANTMENT_TYPE",
+                    Registries.ENCHANTMENT,
+                    context.relativeClass("item.enchantment", "EnchantmentType"),
+                    "tag",
+                    "EnchantmenTypeTags"
+            ),
             new RegistryEntriesGenerator<>(
                     "event.cause.entity.damage",
                     "DamageTypes",
@@ -690,9 +769,72 @@ public final class GeneratorMain {
                     "sponge"
             ),
             new EnumEntriesValidator<>(
+                    "data.type",
+                    "PushReactions",
+                    PushReaction.class,
+                    "name",
+                    "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                    "item.inventory.equipment",
+                    "EquipmentGroups",
+                    EquipmentSlot.Type.class,
+                    "name",
+                    "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                    "data.type",
+                    "DripstoneSegments",
+                    DripstoneThickness.class,
+                    "getSerializedName",
+                    "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                    "data.type",
+                    "ItemTiers",
+                    Tiers.class,
+                    "name",
+                    "sponge"
+            ),
+            new EnumEntriesValidator<>(
                     "entity.display",
                     "BillboardTypes",
                     Display.BillboardConstraints.class,
+                    "getSerializedName",
+                    "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                    "data.type",
+                    "Tilts",
+                    Tilt.class,
+                    "getSerializedName",
+                    "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                    "scoreboard.displayslot",
+                    "DisplaySlots",
+                    DisplaySlot.class,
+                    "getSerializedName",
+                    "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                    "data.type",
+                    "SculkSensorStates",
+                    SculkSensorPhase.class,
+                    "getSerializedName",
+                    "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                    "data.type",
+                    "TrialSpawnerStates",
+                    TrialSpawnerState.class,
+                    "getSerializedName",
+                    "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                    "item.inventory.equipment",
+                    "EquipmentTypes",
+                    EquipmentSlot.class,
                     "getSerializedName",
                     "sponge"
             ),

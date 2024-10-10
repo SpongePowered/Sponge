@@ -50,11 +50,11 @@ import net.minecraft.server.players.IpBanList;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.server.players.UserBanList;
 import net.minecraft.server.players.UserWhiteList;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.storage.PlayerDataStorage;
-import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.slf4j.Logger;
@@ -66,6 +66,7 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.message.PlayerChatEvent;
 import org.spongepowered.api.event.message.SystemMessageEvent;
@@ -102,6 +103,7 @@ import org.spongepowered.common.bridge.server.players.PlayerListBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.entity.player.LoginPermissions;
 import org.spongepowered.common.entity.player.SpongeUserView;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
@@ -155,7 +157,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final net.minecraft.server.level.@Nullable ServerPlayer $$2, final ChatType.Bound $$4);
     // @formatter:on
 
-    private boolean impl$isGameMechanicRespawn = false;
+    private boolean impl$isRespawnWithPosition = false;
     private boolean impl$isDuringSystemMessageEvent = false;
 
     private ResourceKey<Level> impl$originalRespawnDestination = null;
@@ -481,34 +483,20 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    @Redirect(
-        method = "respawn",
-        at = @At(
-            value = "INVOKE",
-            target = "Ljava/util/Optional;isPresent()Z",
-            remap = false
-        ),
-        slice = @Slice(
-            from = @At(value = "INVOKE", target = "Ljava/util/Optional;empty()Ljava/util/Optional;", remap = false),
-            to = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;overworld()Lnet/minecraft/server/level/ServerLevel;")
+    @Inject(method = "respawn",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/level/ServerPlayer;findRespawnPositionAndUseSpawnBlock(ZLnet/minecraft/world/level/portal/DimensionTransition$PostDimensionTransition;)Lnet/minecraft/world/level/portal/DimensionTransition;"
         )
     )
-    private boolean impl$flagIfRespawnPositionIsGameMechanic(final Optional<Vec3> respawnPosition) {
-        this.impl$isGameMechanicRespawn = respawnPosition.isPresent();
-        return false; // force call of MinecraftServer#overworld which is redirected into impl$callRespawnPlayerSelectWorld
+    private void impl$flagIfRespawnPositionIsGameMechanic(final net.minecraft.server.level.ServerPlayer $$0, final boolean $$1,
+            final Entity.RemovalReason $$2, final CallbackInfoReturnable<net.minecraft.server.level.ServerPlayer> cir) {
+        this.impl$isRespawnWithPosition = $$0.getRespawnPosition() != null;
     }
 
-    @Redirect(method = "respawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;overworld()Lnet/minecraft/server/level/ServerLevel;"))
-    private ServerLevel impl$callRespawnPlayerSelectWorld(final MinecraftServer server, final net.minecraft.server.level.ServerPlayer player) {
-        final ServerLevel playerRespawnDestination = server.getLevel(player.getRespawnDimension());
-        final ServerLevel originalDestination = playerRespawnDestination != null && this.impl$isGameMechanicRespawn ? playerRespawnDestination : server.overworld();
-        this.impl$originalRespawnDestination = originalDestination.dimension();
-
-        final RespawnPlayerEvent.SelectWorld event = SpongeEventFactory.createRespawnPlayerEventSelectWorld(PhaseTracker.getCauseStackManager().currentCause(),
-                (ServerWorld) originalDestination, (ServerWorld) player.serverLevel(), (ServerWorld) originalDestination, (ServerPlayer) player);
-        SpongeCommon.post(event);
-
-        return (ServerLevel) event.destinationWorld();
+    @Inject(method = "respawn", at = @At(value = "HEAD"))
+    private void impl$callRespawnPlayerSelectWorld(final net.minecraft.server.level.ServerPlayer player, final boolean $$1,
+            final Entity.RemovalReason $$2, final CallbackInfoReturnable<net.minecraft.server.level.ServerPlayer> cir) {
+        this.impl$originalRespawnDestination = player.getRespawnDimension();
     }
 
     @Redirect(
@@ -532,17 +520,34 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final RespawnPlayerEvent.Recreate event = SpongeEventFactory.createRespawnPlayerEventRecreate(PhaseTracker.getCauseStackManager().currentCause(),
                 destinationPosition, originalWorld, originalPosition, destinationWorld,
                 (ServerWorld) this.server.getLevel(this.impl$originalRespawnDestination),
-                destinationPosition, originalPlayer, recreatedPlayer, this.impl$isGameMechanicRespawn, !keepAllPlayerData);
+                destinationPosition, originalPlayer, recreatedPlayer, this.impl$isRespawnWithPosition, !keepAllPlayerData);
         SpongeCommon.post(event);
 
-        this.impl$isGameMechanicRespawn = false;
+        this.impl$isRespawnWithPosition = false;
         newPlayer.setPos(event.destinationPosition().x(), event.destinationPosition().y(), event.destinationPosition().z());
+
+        if (ShouldFire.ROTATE_ENTITY_EVENT) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+                frame.pushCause(event);
+
+                final RotateEntityEvent rotateEvent = SpongeEventFactory.createRotateEntityEvent(
+                    frame.currentCause(), recreatedPlayer, originalPlayer.rotation(), recreatedPlayer.rotation());
+                if (SpongeCommon.post(rotateEvent)) {
+                    newPlayer.setXRot(player.getXRot());
+                    newPlayer.setYRot(player.getYRot());
+                } else {
+                    newPlayer.setXRot((float) rotateEvent.toRotation().x());
+                    newPlayer.setYRot((float) rotateEvent.toRotation().y());
+                }
+            }
+        }
 
         return newPlayer.getX();
     }
 
     @Inject(method = "respawn", at = @At("RETURN"))
-    private void impl$callRespawnPlayerPostEvent(final net.minecraft.server.level.ServerPlayer player, final boolean keepAllPlayerData, final CallbackInfoReturnable<net.minecraft.server.level.ServerPlayer> cir) {
+    private void impl$callRespawnPlayerPostEvent(final net.minecraft.server.level.ServerPlayer player, final boolean $$1, final Entity.RemovalReason $$2,
+            final CallbackInfoReturnable<net.minecraft.server.level.ServerPlayer> cir) {
         final ServerPlayer recreatedPlayer = (ServerPlayer) cir.getReturnValue();
         final ServerWorld originalWorld = (ServerWorld) player.serverLevel();
 

@@ -31,14 +31,15 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
+import org.spongepowered.api.item.recipe.crafting.RecipeInput;
 import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
@@ -55,8 +56,8 @@ public class SpongeShapelessCraftingRecipeBuilder extends AbstractResourceKeyedB
         implements ShapelessCraftingRecipe.Builder.EndStep, ShapelessCraftingRecipe.Builder.ResultStep {
 
     private org.spongepowered.api.item.inventory.ItemStack result;
-    private Function<net.minecraft.world.inventory.CraftingContainer, net.minecraft.world.item.ItemStack> resultFunction;
-    private Function<net.minecraft.world.inventory.CraftingContainer, NonNullList<net.minecraft.world.item.ItemStack>> remainingItemsFunction;
+    private Function<CraftingInput, net.minecraft.world.item.ItemStack> resultFunction;
+    private Function<CraftingInput, NonNullList<net.minecraft.world.item.ItemStack>> remainingItemsFunction;
     private final NonNullList<Ingredient> ingredients = NonNullList.create();
     private String group;
     private DataPack<RecipeRegistration> pack = DataPacks.RECIPE;
@@ -89,35 +90,27 @@ public class SpongeShapelessCraftingRecipeBuilder extends AbstractResourceKeyedB
     }
 
     @Override
-    public ResultStep remainingItems(Function<CraftingGridInventory, List<org.spongepowered.api.item.inventory.ItemStack>> remainingItemsFunction) {
+    public ResultStep remainingItems(Function<RecipeInput.Crafting, ? extends List<? extends ItemStackLike>> remainingItemsFunction) {
         this.remainingItemsFunction = grid -> {
             final NonNullList<ItemStack> mcList = NonNullList.create();
-            remainingItemsFunction.apply(InventoryUtil.toSpongeInventory(grid)).forEach(stack -> mcList.add(ItemStackUtil.toNative(stack)));
+            remainingItemsFunction.apply(InventoryUtil.toSponge(grid)).forEach(stack -> mcList.add(ItemStackUtil.fromLikeToNative(stack)));
             return mcList;
         };
         return this;
     }
 
     @Override
-    public EndStep result(final ItemStackSnapshot result) {
+    public EndStep result(ItemStackLike result) {
         Objects.requireNonNull(result, "result");
-        this.result = result.createStack();
+        this.result = result.asMutable();
         this.resultFunction = null;
         return this;
     }
 
     @Override
-    public EndStep result(org.spongepowered.api.item.inventory.ItemStack result) {
-        Objects.requireNonNull(result, "result");
-        this.result = result;
-        this.resultFunction = null;
-        return this;
-    }
-
-    @Override
-    public EndStep result(Function<CraftingGridInventory, org.spongepowered.api.item.inventory.ItemStack> resultFunction, org.spongepowered.api.item.inventory.ItemStack exemplaryResult) {
-        this.resultFunction = (inv) -> ItemStackUtil.toNative(resultFunction.apply(InventoryUtil.toSpongeInventory(inv)));
-        this.result = exemplaryResult.copy();
+    public EndStep result(Function<RecipeInput.Crafting, ? extends ItemStackLike> resultFunction, ItemStackLike exemplaryResult) {
+        this.resultFunction = (input) -> ItemStackUtil.fromLikeToNative(resultFunction.apply(InventoryUtil.toSponge(input)));
+        this.result = exemplaryResult.asMutableCopy();
         return this;
     }
 

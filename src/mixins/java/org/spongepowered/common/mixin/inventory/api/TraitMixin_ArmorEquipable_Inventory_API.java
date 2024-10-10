@@ -33,6 +33,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.item.inventory.ArmorEquipable;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -61,7 +62,7 @@ public abstract class TraitMixin_ArmorEquipable_Inventory_API implements ArmorEq
     }
 
     @Override
-    public boolean canEquip(final EquipmentType type, @Nullable final ItemStack equipment) {
+    public boolean canEquip(final EquipmentType type, @Nullable final ItemStackLike equipment) {
         return true;
     }
 
@@ -74,11 +75,11 @@ public abstract class TraitMixin_ArmorEquipable_Inventory_API implements ArmorEq
     }
 
     @Override
-    public boolean equip(final EquipmentType type, @Nullable final ItemStack equipment) {
+    public boolean equip(final EquipmentType type, @Nullable final ItemStackLike equipment) {
         final InventoryAdapter inv = ((InventoryBridge) this).bridge$getAdapter();
         final EquipmentInventoryLens lens = this.impl$equipmentInventory(inv);
         final Fabric fabric = inv.inventoryAdapter$getFabric();
-        return lens.getSlotLens(type).setStack(fabric, ItemStackUtil.toNative(equipment));
+        return lens.getSlotLens(type).setStack(fabric, ItemStackUtil.fromLikeToNative(equipment));
     }
 
     @Override
@@ -89,9 +90,9 @@ public abstract class TraitMixin_ArmorEquipable_Inventory_API implements ArmorEq
     }
 
     @Override
-    public void setItemInHand(HandType handType, @Nullable ItemStack itemInHand) {
+    public void setItemInHand(HandType handType, @Nullable ItemStackLike itemInHand) {
         Objects.requireNonNull(handType);
-        ((LivingEntity) (Object)this).setItemInHand((InteractionHand) (Object) handType, ItemStackUtil.toNative(itemInHand).copy());
+        ((LivingEntity) (Object)this).setItemInHand((InteractionHand) (Object) handType, ItemStackUtil.fromLikeToNative(itemInHand).copy());
     }
 
     @Override
@@ -100,7 +101,7 @@ public abstract class TraitMixin_ArmorEquipable_Inventory_API implements ArmorEq
     }
 
     @Override
-    public void setHead(ItemStack head) {
+    public void setHead(ItemStackLike head) {
         this.equip(EquipmentTypes.HEAD, head);
     }
 
@@ -110,7 +111,7 @@ public abstract class TraitMixin_ArmorEquipable_Inventory_API implements ArmorEq
     }
 
     @Override
-    public void setChest(ItemStack chest) {
+    public void setChest(ItemStackLike chest) {
         this.equip(EquipmentTypes.CHEST, chest);
     }
 
@@ -120,7 +121,7 @@ public abstract class TraitMixin_ArmorEquipable_Inventory_API implements ArmorEq
     }
 
     @Override
-    public void setLegs(ItemStack legs) {
+    public void setLegs(ItemStackLike legs) {
         this.equip(EquipmentTypes.LEGS, legs);
     }
 
@@ -130,7 +131,7 @@ public abstract class TraitMixin_ArmorEquipable_Inventory_API implements ArmorEq
     }
 
     @Override
-    public void setFeet(ItemStack feet) {
+    public void setFeet(ItemStackLike feet) {
         this.equip(EquipmentTypes.FEET, feet);
     }
 

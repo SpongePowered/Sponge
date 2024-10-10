@@ -32,9 +32,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.chunk.storage.ChunkSerializer;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -70,7 +68,6 @@ import org.spongepowered.common.world.level.chunk.storage.SpongeIOWorkerType;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 
 @Mixin(ChunkMap.class)
 public abstract class ChunkMapMixin implements ChunkMapBridge {
@@ -124,7 +121,7 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
         return chunkManager.write(pos, compound);
     }
 
-    @Redirect(method = "lambda$scheduleUnload$16",
+    @Redirect(method = "lambda$scheduleUnload$12",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;unload(Lnet/minecraft/world/level/chunk/LevelChunk;)V"),
             slice = @Slice(
                     from = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ChunkMap;save(Lnet/minecraft/world/level/chunk/ChunkAccess;)Z")
@@ -173,57 +170,10 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
         }
     }
 
-    @Redirect(method = "lambda$protoChunkToFullChunk$35",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;setLoaded(Z)V"),
-            slice = @Slice(
-                    from = @At(value = "INVOKE", remap = false, target = "Lit/unimi/dsi/fastutil/longs/LongSet;add(J)Z"),
-                    to = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;registerAllBlockEntitiesAfterLevelLoad()V")
-            )
-    )
-    private void impl$onLoad(final LevelChunk levelChunk, final boolean loaded) {
-        levelChunk.setLoaded(true);
-        final Vector3i chunkPos = VecHelper.toVector3i(levelChunk.getPos());
-        if (ShouldFire.CHUNK_EVENT_BLOCKS_LOAD) {
-            final ChunkEvent.Blocks.Load loadEvent = SpongeEventFactory.createChunkEventBlocksLoad(PhaseTracker.getInstance().currentCause(),
-                ((BlockChunk) levelChunk), chunkPos, (ResourceKey) (Object) this.level.dimension().location());
-            SpongeCommon.post(loadEvent);
-        }
-
-        for (final Direction dir : Constants.Chunk.CARDINAL_DIRECTIONS) {
-            final Vector3i neighborPos = chunkPos.add(dir.asBlockOffset());
-            ChunkAccess neighbor = this.level.getChunk(neighborPos.x(), neighborPos.z(), ChunkStatus.EMPTY, false);
-            if (neighbor instanceof ImposterProtoChunk) {
-                neighbor = ((ImposterProtoChunk) neighbor).getWrapped();
-            }
-            if (neighbor instanceof LevelChunk) {
-                final int index = DirectionUtil.directionToIndex(dir);
-                final int oppositeIndex = DirectionUtil.directionToIndex(dir.opposite());
-                ((LevelChunkBridge) levelChunk).bridge$setNeighborChunk(index, (LevelChunk) neighbor);
-                ((LevelChunkBridge) neighbor).bridge$setNeighborChunk(oppositeIndex, levelChunk);
-            }
-        }
-    }
-
-    @Inject(method = "schedule", at = @At("HEAD"), cancellable = true)
-    private void impl$onSchedule(final CallbackInfoReturnable<CompletableFuture<ChunkResult<ChunkAccess>>> cir) {
+    @Inject(method = "applyStep", at = @At("HEAD"), cancellable = true)
+    private void impl$onApplyStep(final CallbackInfoReturnable<CompletableFuture<ChunkResult<ChunkAccess>>> cir) {
         if (!((ServerLevelBridge) this.level).bridge$isLoaded()) {
             cir.setReturnValue(ChunkHolder.UNLOADED_CHUNK_FUTURE);
         }
-    }
-
-    @Redirect(method = "lambda$scheduleChunkGeneration$30",
-            at = @At(value = "INVOKE",
-                    target = "Ljava/util/concurrent/CompletableFuture;thenApply(Ljava/util/function/Function;)Ljava/util/concurrent/CompletableFuture;",
-                    remap = false),
-            slice = @Slice(
-                    from = @At(value = "INVOKE",
-                            target = "Lnet/minecraft/server/level/progress/ChunkProgressListener;onStatusChange(Lnet/minecraft/world/level/ChunkPos;Lnet/minecraft/world/level/chunk/status/ChunkStatus;)V")))
-    private CompletableFuture<ChunkResult<ChunkAccess>> impl$guardForUnloadedChunkOnGenerate(final CompletableFuture<ChunkAccess> instance,
-                                                                                             final Function<ChunkAccess, ChunkResult<ChunkAccess>> function) {
-        //See ChunkStatusTasksMixin, only applies for when generation is cancelled due to world unload
-        if (instance != null) {
-            return instance.thenApply(function);
-        }
-        return ChunkHolder.UNLOADED_CHUNK_FUTURE;
     }
 }

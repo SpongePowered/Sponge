@@ -63,10 +63,14 @@ public final class JavaPluginLanguageProvider extends FMLJavaModLanguageProvider
             final Map<String, IModLanguageLoader> modTargetMap = scanResult.getAnnotations().stream()
                     .filter(ad -> ad.annotationType().equals(JavaPluginLanguageProvider.PLUGIN_ANNOTATION))
                     .peek(ad -> this.logger.debug(Logging.SCAN, "Found @Plugin class {} with id {}", ad.clazz().getClassName(), ad.annotationData().get("value")))
-                    .map(ad -> new PluginTarget(ad.clazz().getClassName(), (String)ad.annotationData().get("value")))
+                    .map(ad -> new PluginTarget(ad.clazz().getClassName(), JavaPluginLanguageProvider.fixPluginId((String) ad.annotationData().get("value"))))
                     .collect(Collectors.toMap(PluginTarget::getPlugin, Function.identity(), (a,b)->a));
             scanResult.addLanguageLoader(modTargetMap);
         };
+    }
+
+    private static String fixPluginId(final String id) {
+        return id.replace('-', '_');
     }
 
     private static final class PluginTarget implements IModLanguageProvider.IModLanguageLoader {

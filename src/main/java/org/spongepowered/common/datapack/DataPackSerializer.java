@@ -68,7 +68,7 @@ public abstract class DataPackSerializer<E, T extends DataPackEntry<T>> {
     }
 
     public ResourceLocation location(final SpongeDataPackType<?, T> packType, final ResourceKey key) {
-        return new ResourceLocation(key.namespace(), packType.dir() + "/" + key.value() + this.fileEnding());
+        return ResourceLocation.fromNamespaceAndPath(key.namespace(), packType.dir() + "/" + key.value() + this.fileEnding());
     }
 
     public abstract String fileEnding();

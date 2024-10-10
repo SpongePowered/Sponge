@@ -27,21 +27,15 @@ package org.spongepowered.common.mixin.inventory.api.world.inventory;
 
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.TransientCraftingContainer;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.inventory.type.GridInventory;
-import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
-import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.comp.CraftingGridInventoryLens;
-
-import java.util.Objects;
-import java.util.Optional;
 
 @Mixin(TransientCraftingContainer.class)
 public abstract class TransientCraftingContainerMixin_Inventory_API implements CraftingGridInventory {
@@ -50,20 +44,17 @@ public abstract class TransientCraftingContainerMixin_Inventory_API implements C
     @Shadow @Final private AbstractContainerMenu menu;
     // @formatter:on
 
-    private GridInventory gridAdapter;
+    private GridInventory api$gridAdapter;
 
-    @Override
-    public Optional<CraftingRecipe> recipe(ServerWorld world) {
-        return Sponge.server().recipeManager().findMatchingRecipe((Inventory) this.menu, Objects.requireNonNull(world, "world")).map(CraftingRecipe.class::cast);
-    }
 
     @Override
     public GridInventory asGrid() {
+        // override with caching
         final CraftingGridInventoryLens lens = (CraftingGridInventoryLens) ((InventoryAdapter) this).inventoryAdapter$getRootLens();
-        if (this.gridAdapter == null) {
-            this.gridAdapter = (GridInventory) lens.getGrid().getAdapter(((Fabric) this), ((Inventory) this.menu));
+        if (this.api$gridAdapter == null) {
+            this.api$gridAdapter = (GridInventory) lens.getGrid().getAdapter((Fabric) this, ((Inventory) this.menu));
         }
-        return this.gridAdapter;
+        return this.api$gridAdapter;
     }
 
 }

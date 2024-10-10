@@ -42,6 +42,7 @@ import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
+import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.entity.carrier.Dispenser;
 import org.spongepowered.api.data.Keys;
@@ -177,7 +178,7 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<Arrow> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final net.minecraft.world.entity.projectile.Arrow arrow = new net.minecraft.world.entity.projectile.Arrow(source.level(), source, new ItemStack(this.item));
+                final var arrow = new net.minecraft.world.entity.projectile.Arrow(source.level(), source, new ItemStack(this.item), source.getWeaponItem());
                 arrow.shoot(source.getXRot(), source.getYRot(), 0.0F, 3.0F, 0);
                 return ProjectileUtil.doLaunch(loc.world(), (Arrow) arrow);
             }
@@ -187,7 +188,7 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<SpectralArrow> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final net.minecraft.world.entity.projectile.SpectralArrow arrow = new net.minecraft.world.entity.projectile.SpectralArrow(source.level(), source, new ItemStack(this.item));
+                final var arrow = new net.minecraft.world.entity.projectile.SpectralArrow(source.level(), source, new ItemStack(this.item), source.getWeaponItem());
                 arrow.shoot(source.getXRot(), source.getYRot(), 0.0F, 3.0F, 0);
                 return ProjectileUtil.doLaunch(loc.world(), (SpectralArrow) arrow);
             }
@@ -207,8 +208,7 @@ public final class ProjectileUtil {
             @Override
             protected Optional<SmallFireball> createProjectile(final LivingEntity source, final ServerLocation loc) {
                 final net.minecraft.world.phys.Vec3 lookVec = source.getViewVector(1);
-                final net.minecraft.world.entity.projectile.SmallFireball fireball = new net.minecraft.world.entity.projectile.SmallFireball(source.level(), source,
-                        lookVec.x * 4, lookVec.y * 4, lookVec.z * 4);
+                final var fireball = new net.minecraft.world.entity.projectile.SmallFireball(source.level(), source, lookVec.scale(4));
                 fireball.setPos(fireball.getX(), fireball.getY() + source.getEyeHeight(), fireball.getZ());
                 return ProjectileUtil.doLaunch(loc.world(), (SmallFireball) fireball);
             }
@@ -257,8 +257,7 @@ public final class ProjectileUtil {
             @Override
             protected Optional<ExplosiveFireball> createProjectile(final LivingEntity source, final ServerLocation loc) {
                 final net.minecraft.world.phys.Vec3 lookVec = source.getViewVector(1);
-                final LargeFireball fireball = new LargeFireball(source.level(), source,
-                        lookVec.x * 4, lookVec.y * 4, lookVec.z * 4, Constants.Entity.Fireball.DEFAULT_EXPLOSION_RADIUS);
+                final LargeFireball fireball = new LargeFireball(source.level(), source, lookVec.scale(4), Constants.Entity.Fireball.DEFAULT_EXPLOSION_RADIUS);
                 fireball.setPos(fireball.getX(), fireball.getY() + source.getEyeHeight(), fireball.getZ());
                 return ProjectileUtil.doLaunch(loc.world(), (ExplosiveFireball) fireball);
             }
@@ -271,14 +270,11 @@ public final class ProjectileUtil {
                 }
                 final DispenserBlockEntity dispenser = (DispenserBlockEntity) source;
                 final Direction enumfacing = DispenserSourceLogic.getFacing(dispenser);
-                final LivingEntity thrower = new ArmorStand(dispenser.getLevel(), loc.x() + enumfacing.getStepX(),
-                        loc.y() + enumfacing.getStepY(), loc.z() + enumfacing.getStepZ());
-                final LargeFireball fireball = new LargeFireball(dispenser.getLevel(), thrower, 0, 0, 0, Constants.Entity.Fireball.DEFAULT_EXPLOSION_RADIUS);
+                final LivingEntity thrower = new ArmorStand(dispenser.getLevel(), loc.x() + enumfacing.getStepX(), loc.y() + enumfacing.getStepY(), loc.z() + enumfacing.getStepZ());
+                final LargeFireball fireball = new LargeFireball(dispenser.getLevel(), thrower, Vec3.ZERO, Constants.Entity.Fireball.DEFAULT_EXPLOSION_RADIUS);
                 // Acceleration is set separately because the constructor applies a random value to it
                 // As for 0.1;  it is a reasonable default value
-                fireball.xPower = enumfacing.getStepX() * 0.1;
-                fireball.yPower = enumfacing.getStepY() * 0.1;
-                fireball.zPower = enumfacing.getStepZ() * 0.1;
+                fireball.accelerationPower = 0.1;
                 return ProjectileUtil.doLaunch(loc.world(), (ExplosiveFireball) fireball);
             }
         });
@@ -287,8 +283,7 @@ public final class ProjectileUtil {
             @Override
             protected Optional<WitherSkull> createProjectile(final LivingEntity source, final ServerLocation loc) {
                 final net.minecraft.world.phys.Vec3 lookVec = source.getViewVector(1);
-                final net.minecraft.world.entity.projectile.WitherSkull skull = new net.minecraft.world.entity.projectile.WitherSkull(source.level(), source,
-                        lookVec.x * 4, lookVec.y * 4, lookVec.z * 4);
+                final var skull = new net.minecraft.world.entity.projectile.WitherSkull(source.level(), source, lookVec.scale(4));
                 skull.setPos(skull.getX(), skull.getY() + source.getEyeHeight(), skull.getZ());
                 return ProjectileUtil.doLaunch(loc.world(), (WitherSkull) skull);
             }
@@ -343,8 +338,7 @@ public final class ProjectileUtil {
             @Override
             protected Optional<DragonFireball> createProjectile(final LivingEntity source, final ServerLocation loc) {
                 final net.minecraft.world.phys.Vec3 lookVec = source.getViewVector(1);
-                final net.minecraft.world.entity.projectile.DragonFireball fireball = new net.minecraft.world.entity.projectile.DragonFireball(source.level(), source,
-                        lookVec.x * 4, lookVec.y * 4, lookVec.z * 4);
+                final var fireball = new net.minecraft.world.entity.projectile.DragonFireball(source.level(), source, lookVec.scale(4));
                 fireball.setPos(fireball.getX(), fireball.getY() + source.getEyeHeight(), fireball.getZ());
                 return ProjectileUtil.doLaunch(loc.world(), (DragonFireball) fireball);
             }

@@ -26,14 +26,14 @@ package org.spongepowered.common.effect.particle;
 
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.math.vector.Vector3d;
 
 import java.util.List;
 
 interface CachedParticlePacket {
 
-    void process(Vector3d position, List<Packet<?>> output);
+    void process(double x, double y, double z, List<Packet<? super ClientGamePacketListener>> output);
 
     @Nullable ParticleOptions particleOptions();
 }

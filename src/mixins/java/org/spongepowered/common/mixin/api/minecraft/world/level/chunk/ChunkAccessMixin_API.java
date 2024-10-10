@@ -60,7 +60,7 @@ import java.util.Objects;
 public abstract class ChunkAccessMixin_API<P extends Chunk<P>> implements Chunk<P>, LevelHeightAccessor {
 
     // @formatter:off
-    @Shadow public abstract ChunkStatus shadow$getStatus();
+    @Shadow public abstract ChunkStatus shadow$getPersistedStatus();
     @Shadow public abstract void shadow$addEntity(net.minecraft.world.entity.Entity entity);
     @Shadow public abstract void shadow$setInhabitedTime(long var1);
     @Shadow public abstract long shadow$getInhabitedTime();
@@ -86,12 +86,12 @@ public abstract class ChunkAccessMixin_API<P extends Chunk<P>> implements Chunk<
 
     @Override
     public ChunkState state() {
-        return (ChunkState) this.shadow$getStatus();
+        return (ChunkState) this.shadow$getPersistedStatus();
     }
 
     @Override
     public boolean isEmpty() {
-        return this.shadow$getStatus() == ChunkStatus.EMPTY;
+        return this.shadow$getPersistedStatus() == ChunkStatus.EMPTY;
     }
 
     @Override

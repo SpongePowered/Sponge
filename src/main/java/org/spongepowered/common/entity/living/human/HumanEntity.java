@@ -42,6 +42,8 @@ import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerEntity;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -65,7 +67,6 @@ import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ResolvableProfile;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -99,7 +100,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 public final class HumanEntity extends PathfinderMob implements TeamMember, RangedAttackMob {
-    public static final ResourceKey<EntityType<?>> KEY = ResourceKey.create(Registries.ENTITY_TYPE, new ResourceLocation("sponge", "human"));
+    public static final ResourceKey<EntityType<?>> KEY = ResourceKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath("sponge", "human"));
 
     public static AttributeSupplier createAttributes() {
         return Mob.createMobAttributes()
@@ -227,11 +228,6 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     }
 
     @Override
-    public int getPortalWaitTime() {
-        return 1;
-    }
-
-    @Override
     protected SoundEvent getSwimSound() {
         return SoundEvents.PLAYER_SWIM;
     }
@@ -303,37 +299,6 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
         // Make the body rotation follow head rotation
         this.setYRot(this.getYHeadRot());
         return retValue;
-    }
-
-    @Override
-    public boolean doHurtTarget(final Entity entityIn) {
-        super.doHurtTarget(entityIn);
-        this.swing(this.getUsedItemHand());
-        float f = (float) this.getAttribute(Attributes.ATTACK_DAMAGE).getValue();
-        int i = 0;
-
-        f += EnchantmentHelper.getDamageBonus(this.getItemInHand(InteractionHand.MAIN_HAND), this.getType());
-        i += EnchantmentHelper.getKnockbackBonus(this);
-
-        final boolean flag = entityIn.hurt(this.damageSources().mobAttack(this), f);
-
-        if (flag) {
-            if (i > 0) {
-                entityIn.push(-Mth.sin(this.getYRot() * (float) Math.PI / 180.0F) * i * 0.5F, 0.1D,
-                        Mth.cos(this.getYRot() * (float) Math.PI / 180.0F) * i * 0.5F);
-                this.setDeltaMovement(this.getDeltaMovement().multiply(0.6, 1.0, 0.6));
-            }
-
-            final int j = EnchantmentHelper.getFireAspect(this);
-
-            if (j > 0) {
-                entityIn.igniteForSeconds(j * 4);
-            }
-
-            this.doEnchantDamageEffects(this, entityIn);
-        }
-
-        return flag;
     }
 
     private void setProfileName(final net.minecraft.network.chat.@Nullable Component newName) {
@@ -429,7 +394,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
 
     private void respawnOnClient() {
         this.pushPackets(new ClientboundRemoveEntitiesPacket(this.getId()), this.createPlayerListPacket(EnumSet.allOf(ClientboundPlayerInfoUpdatePacket.Action.class)));
-        this.pushPackets(this.getAddEntityPacket());
+        this.pushPackets(this.getAddEntityPacket(new ServerEntity((ServerLevel) this.level(), this, 1, true, packet -> {})));
     }
 
     /**
@@ -508,22 +473,21 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     @Override
     public void performRangedAttack(final LivingEntity target, final float distanceFactor) {
         final ItemStack itemstack = this.getItemInHand(InteractionHand.OFF_HAND);
-        final Arrow arrow = new Arrow(this.level(), this, itemstack.getItem() instanceof ArrowItem ? itemstack : new ItemStack(Items.ARROW));
+        final ItemStack weaponStack = this.getWeaponItem();
+        final Arrow arrow = new Arrow(this.level(), this, itemstack.getItem() instanceof ArrowItem ? itemstack : new ItemStack(Items.ARROW), weaponStack);
         final double d0 = target.getX() - this.getX();
         final double d1 = target.getBoundingBox().minY + target.getBbHeight() / 3.0F - arrow.getY();
         final double d2 = target.getZ() - this.getZ();
         final double d3 = Math.sqrt(d0 * d0 + d2 * d2);
         arrow.shoot(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, 14 - this.level().getDifficulty().getId() * 4);
 
-        arrow.setEnchantmentEffectsFromEntity(this, distanceFactor);
-
         this.playSound(SoundEvents.ARROW_SHOOT, 1.0F, 1.0F / (this.random.nextFloat() * 0.4F + 0.8F));
         this.level().addFreshEntity(arrow);
     }
 
     @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        final ClientboundAddEntityPacket packet = new ClientboundAddEntityPacket(this);
+    public Packet<ClientGamePacketListener> getAddEntityPacket(ServerEntity $$0) {
+        final ClientboundAddEntityPacket packet = new ClientboundAddEntityPacket(this, $$0);
         ((ClientboundAddEntityPacketAccessor) packet).accessor$type(EntityType.PLAYER);
         return packet;
     }

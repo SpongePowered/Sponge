@@ -41,7 +41,7 @@ public final class AbstractHorseData {
                     .create(Keys.IS_TAMED)
                         .get(AbstractHorse::isTamed)
                         .set(AbstractHorse::setTamed)
-                    .create(Keys.TAMER)
+                    .create(Keys.OWNER)
                         .get(AbstractHorse::getOwnerUUID)
                         .set((h, v) -> {
                             h.setOwnerUUID(v);

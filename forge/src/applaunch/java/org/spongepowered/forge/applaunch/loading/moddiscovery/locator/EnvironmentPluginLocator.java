@@ -40,7 +40,7 @@ public final class EnvironmentPluginLocator extends AbstractModProvider implemen
     @Override
     public List<ModFileOrException> scanMods() {
         final List<ModFileOrException> modFiles = new ArrayList<>();
-        for (final Path[] paths : getPluginsPaths()) {
+        for (final Path[] paths : EnvironmentPluginLocator.getPluginsPaths()) {
             modFiles.add(new ModFileOrException(ModFileParsers.newPluginInstance(this, paths), null));
         }
         return modFiles;

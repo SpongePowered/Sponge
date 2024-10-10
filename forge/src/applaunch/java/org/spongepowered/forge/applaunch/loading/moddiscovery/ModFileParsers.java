@@ -35,6 +35,7 @@ import net.minecraftforge.forgespi.locating.ModFileFactory;
 import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.common.applaunch.plugin.PluginPlatformConstants;
 import org.spongepowered.forge.applaunch.loading.metadata.PluginFileConfigurable;
+import org.spongepowered.forge.applaunch.loading.metadata.PluginMetadataUtils;
 import org.spongepowered.plugin.metadata.builtin.MetadataContainer;
 import org.spongepowered.plugin.metadata.builtin.MetadataParser;
 
@@ -73,7 +74,7 @@ public final class ModFileParsers {
                 container = MetadataParser.read(reader);
             }
 
-            final PluginFileConfigurable config = new PluginFileConfigurable(container);
+            final PluginFileConfigurable config = new PluginFileConfigurable(PluginMetadataUtils.fixPluginIds(container));
             return new ModFileInfo(modFile, config, (info) -> {}, List.of());
         } catch (final Exception e) {
             AppLaunch.logger().warn("Could not read metadata for plugin file '{}'", modFile, e);

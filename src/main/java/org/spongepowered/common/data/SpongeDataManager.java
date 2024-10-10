@@ -166,6 +166,9 @@ public final class SpongeDataManager implements DataManager {
         this.customDataUpdaters = new ArrayList<>();
         this.legacyRegistrations = new HashMap<>();
         this.keyListeners = new ArrayList<>();
+
+        this.updatersMap.put(ItemStack.class, SpongeItemStack.STACK_UPDATERS);
+        this.updatersMap.put(ItemStackSnapshot.class, SpongeItemStack.STACK_UPDATERS);
     }
 
     @Override
@@ -202,7 +205,7 @@ public final class SpongeDataManager implements DataManager {
             throw new IllegalArgumentException("Attempting to convert to the same version!");
         }
         if (fromVersion > toVersion) {
-            throw new IllegalArgumentException("Attempting to backwards convert data! This isn't supported!");
+            throw new IllegalArgumentException("Attempting to backwards convert data! This isn't supported! " + fromVersion + " -> " + toVersion);
         }
         final List<DataContentUpdater> updaters = this.updatersMap.get(clazz);
         if (updaters == null) {

@@ -139,7 +139,7 @@ public final class PhaseTracker implements CauseStackManager {
                 if (type != null) {
                     @Nullable ResourceLocation id = BlockEntityType.getKey(type);
                     if (id == null) {
-                        id = new ResourceLocation(source.getClass().getCanonicalName());
+                        id = ResourceLocation.parse(source.getClass().getCanonicalName());
                     }
                     final Map<String, Boolean> autoFixedTiles = trackerConfig.autoFixNullSourceBlockProvidingBlockEntities;
                     final boolean contained = autoFixedTiles.containsKey(type.toString());

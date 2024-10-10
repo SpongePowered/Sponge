@@ -29,6 +29,6 @@ import org.spongepowered.api.entity.hanging.LeashKnot;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(LeashFenceKnotEntity.class)
-public abstract class LeashFenceKnotEntityMixin_API extends HangingEntityMixin_API implements LeashKnot {
+public abstract class LeashFenceKnotEntityMixin_API extends BlockAttachedEntityMixin_API implements LeashKnot {
 
 }

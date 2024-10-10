@@ -33,6 +33,7 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.EmptyInventory;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.query.Query;
@@ -105,12 +106,12 @@ public class EmptyInventoryImpl implements EmptyInventory {
     }
 
     @Override
-    public boolean contains(ItemStack stack) {
+    public boolean contains(ItemStackLike stack) {
         return false;
     }
 
     @Override
-    public boolean containsAny(ItemStack stack) {
+    public boolean containsAny(ItemStackLike stack) {
         return false;
     }
 
@@ -193,7 +194,7 @@ public class EmptyInventoryImpl implements EmptyInventory {
     }
 
     @Override
-    public InventoryTransactionResult offer(ItemStack... stacks) {
+    public InventoryTransactionResult offer(ItemStackLike... stacks) {
         return InventoryTransactionResult.builder().type(Type.FAILURE).reject(stacks).build();
     }
 
@@ -209,16 +210,16 @@ public class EmptyInventoryImpl implements EmptyInventory {
         return Optional.empty();
     }
 
-    public InventoryTransactionResult offer(int index, ItemStack stack) {
+    public InventoryTransactionResult offer(int index, ItemStackLike stack) {
         return InventoryTransactionResult.builder().type(Type.NO_SLOT).reject(stack).build();
     }
 
-    public InventoryTransactionResult set(int index, ItemStack stack) {
+    public InventoryTransactionResult set(int index, ItemStackLike stack) {
         return InventoryTransactionResult.builder().type(Type.NO_SLOT).reject(stack).build();
     }
 
     @Override
-    public boolean canFit(ItemStack stack) {
+    public boolean canFit(ItemStackLike stack) {
         return false;
     }
 

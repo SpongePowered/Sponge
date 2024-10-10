@@ -68,6 +68,7 @@ public abstract class EnderDragonMixin_API extends MobMixin_API implements Ender
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
         this.getValue(Keys.HEALING_CRYSTAL).map(Value::asImmutable).ifPresent(values::add);
+        this.getValue(Keys.BOSS_BAR).map(Value::asImmutable).ifPresent(values::add);
 
         return values;
     }

@@ -94,8 +94,8 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
             .create(r -> r
                     .group(
                             SpongeAdventure.STRING_CODEC.optionalFieldOf("display_name").forGetter(v -> Optional.ofNullable(v.displayName)),
-                            ResourceLocation.CODEC.optionalFieldOf("game_mode").forGetter(v -> Optional.ofNullable(v.gameMode).map(t -> new ResourceLocation("sponge", t.getName()))),
-                            ResourceLocation.CODEC.optionalFieldOf("difficulty").forGetter(v -> Optional.ofNullable(v.difficulty).map(t -> new ResourceLocation("sponge", t.getKey()))),
+                            ResourceLocation.CODEC.optionalFieldOf("game_mode").forGetter(v -> Optional.ofNullable(v.gameMode).map(t -> ResourceLocation.fromNamespaceAndPath("sponge", t.getName()))),
+                            ResourceLocation.CODEC.optionalFieldOf("difficulty").forGetter(v -> Optional.ofNullable(v.difficulty).map(t -> ResourceLocation.fromNamespaceAndPath("sponge", t.getKey()))),
                             EnumCodec.create(SerializationBehavior.class).optionalFieldOf("serialization_behavior")
                                     .forGetter(v -> Optional.ofNullable(v.serializationBehavior)),
                             Codec.INT.optionalFieldOf("view_distance").forGetter(v -> Optional.ofNullable(v.viewDistance)),

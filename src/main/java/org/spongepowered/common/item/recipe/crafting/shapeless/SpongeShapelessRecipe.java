@@ -30,9 +30,9 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.level.Level;
@@ -124,36 +124,29 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
         return Optional.ofNullable(remainingItemsFunctionId);
     }
 
-
     @Override
-    public boolean matches(CraftingContainer inv, Level p_77569_2_) {
+    public boolean matches(final CraftingInput $$0, final Level $$1) {
         if (this.onlyVanillaIngredients) {
-            return super.matches(inv, p_77569_2_);
+            return super.matches($$0, $$1);
         }
-        List<ItemStack> items = new ArrayList<>();
-        for(int j = 0; j < inv.getContainerSize(); ++j) {
-            final ItemStack itemstack = inv.getItem(j);
-            if (!itemstack.isEmpty()) {
-                items.add(itemstack);
-            }
-        }
-        return SpongeShapelessRecipe.matches(items, this.getIngredients());
+        return SpongeShapelessRecipe.matches($$0.items(), this.getIngredients());
     }
 
     @Override
-    public NonNullList<ItemStack> getRemainingItems(CraftingContainer inv) {
+    public NonNullList<ItemStack> getRemainingItems(final CraftingInput $$0) {
         if (this.remainingItemsFunctionId != null) {
-            return IngredientResultUtil.cachedRemainingItemsFunction(this.remainingItemsFunctionId).apply(inv);
+            return IngredientResultUtil.cachedRemainingItemsFunction(this.remainingItemsFunctionId).apply($$0);
         }
-        return super.getRemainingItems(inv);
+        return super.getRemainingItems($$0);
     }
 
+
     @Override
-    public ItemStack assemble(CraftingContainer container, final HolderLookup.Provider $$1) {
+    public ItemStack assemble(final CraftingInput $$0, final HolderLookup.Provider $$1) {
         if (this.resultFunctionId != null) {
-            return IngredientResultUtil.cachedResultFunction(this.resultFunctionId).apply(container);
+            return IngredientResultUtil.cachedResultFunction(this.resultFunctionId).apply($$0);
         }
-        return super.assemble(container, $$1);
+        return super.assemble($$0, $$1);
     }
 
     @Override
@@ -164,9 +157,10 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
         return super.getResultItem($$1);
     }
 
-    private static boolean matches(List<ItemStack> stacks, List<Ingredient> ingredients) {
+    private static boolean
+    matches(List<ItemStack> stacks, List<Ingredient> ingredients) {
         final int elements = ingredients.size();
-        if (stacks.size() != elements) {
+        if (stacks.size() < elements) {
             return false;
         }
 

@@ -227,7 +227,7 @@ public final class ChangeBlockTest implements LoadableModule {
         private void onChangeBlock(final ChangeBlockEvent.All post) {
             final Logger pluginLogger = ChangeBlockTest.this.plugin.logger();
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/*************");
-            pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/* ChangeBlockEvent");
+            pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/* ChangeBlockEvent " + post.transactions().size() + " transactions");
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/");
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/ Cause:");
             for (final Object o : post.cause()) {
@@ -246,6 +246,7 @@ public final class ChangeBlockTest implements LoadableModule {
                     return;
                 }
             }
+
             if (ChangeBlockTest.this.cancelAll) {
                 post.setCancelled(true);
             }

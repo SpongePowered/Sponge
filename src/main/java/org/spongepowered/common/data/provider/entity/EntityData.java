@@ -27,6 +27,7 @@ package org.spongepowered.common.data.provider.entity;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PortalProcessor;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -34,16 +35,21 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.PushReaction;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Ticks;
+import org.spongepowered.api.world.portal.Portal;
+import org.spongepowered.api.world.portal.PortalLogic;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
+import org.spongepowered.common.accessor.world.entity.PortalProcessorAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.entity.EntityMaxAirBridge;
+import org.spongepowered.common.bridge.world.entity.PortalProcessorBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.entity.SpongeEntityArchetype;
 import org.spongepowered.common.entity.SpongeEntitySnapshot;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.math.vector.Vector3d;
 
 import java.util.stream.Collectors;
 
@@ -134,6 +140,7 @@ public final class EntityData {
                         })
                     .create(Keys.FROZEN_TIME)
                         .get(h -> Ticks.of(h.getTicksFrozen()))
+                        .resetOnDelete(Ticks.zero())
                         .setAnd((h, v) -> {
                             if (v.isInfinite()) {
                                 return false;
@@ -147,6 +154,7 @@ public final class EntityData {
                         .get(h -> (double) h.getBbHeight())
                     .create(Keys.INVULNERABILITY_TICKS)
                         .get(h -> new SpongeTicks(h.invulnerableTime))
+                        .resetOnDelete(Ticks.zero())
                         .setAnd((h, v) -> {
                             final int ticks = SpongeTicks.toSaturatedIntOrInfinite(v);
                             if (v.isInfinite() || ticks < 0) {
@@ -186,6 +194,7 @@ public final class EntityData {
                         .get(Entity::onGround)
                     .create(Keys.PASSENGERS)
                         .get(h -> h.getPassengers().stream().map(org.spongepowered.api.entity.Entity.class::cast).collect(Collectors.toList()))
+                        .delete(Entity::ejectPassengers)
                         .set((h, v) -> {
                             h.ejectPassengers();
                             v.forEach(v1 -> ((Entity) v1).startRiding(h, true));
@@ -208,6 +217,7 @@ public final class EntityData {
                         .get(h -> 1d)
                     .create(Keys.SCOREBOARD_TAGS)
                         .get(Entity::getTags)
+                        .delete(h -> h.getTags().clear())
                         .set((h, v) -> {
                             h.getTags().clear();
                             h.getTags().addAll(v);
@@ -218,6 +228,7 @@ public final class EntityData {
                         .delete(h -> h.stopRiding())
                     .create(Keys.VELOCITY)
                         .get(h -> VecHelper.toVector3d(h.getDeltaMovement()))
+                        .resetOnDelete(Vector3d.ZERO)
                         .set((h, v) -> {
                             h.setDeltaMovement(VecHelper.toVanillaVector3d(v));
                             h.hurtMarked = true;
@@ -229,6 +240,15 @@ public final class EntityData {
                             m.hurtMarked = true;
                         })
                         .supports(m -> m.getDeltaMovement().lengthSqr() > 0)
+                    .create(Keys.PORTAL)
+                        .get(h -> (Portal) h.portalProcess)
+                    .create(Keys.PORTAL_LOGIC)
+                        .get(h -> h.portalProcess == null ? null : (PortalLogic) ((PortalProcessorAccessor) h.portalProcess).accessor$portal())
+                        .set((h, v) -> {
+                            h.portalProcess = new PortalProcessor((net.minecraft.world.level.block.Portal) v, h.blockPosition());
+                            ((PortalProcessorBridge)h.portalProcess).bridge$init(h.level());
+                        })
+                        .delete(h -> h.portalProcess = null)
                 .asMutable(EntityMaxAirBridge.class)
                     .create(Keys.MAX_AIR)
                         .get(EntityMaxAirBridge::bridge$getMaxAir)

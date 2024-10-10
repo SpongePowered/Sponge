@@ -40,6 +40,6 @@ public interface KeyMixin {
      */
     @Overwrite
     static @NonNull Key key(final @NonNull String namespace, final @NonNull String value) {
-        return (ResourceKey) (Object) new ResourceLocation(namespace, value);
+        return (ResourceKey) (Object) ResourceLocation.fromNamespaceAndPath(namespace, value);
     }
 }

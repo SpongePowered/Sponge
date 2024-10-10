@@ -26,8 +26,8 @@ package org.spongepowered.common.mixin.core.world.entity.player;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Either;
+import net.kyori.adventure.bossbar.BossBar;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -41,7 +41,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player.BedSleepingProblem;
 import net.minecraft.world.food.FoodData;
@@ -72,9 +71,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.authlib.GameProfileHolderBridge;
+import org.spongepowered.common.bridge.effect.ViewerBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
-import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
 import org.spongepowered.common.bridge.world.food.FoodDataBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
@@ -87,23 +86,21 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.ExperienceHolderUtil;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.player.Player.class)
-public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBridge, GameProfileHolderBridge {
+public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBridge, GameProfileHolderBridge, ViewerBridge {
 
     // @formatter: off
     @Shadow @Final protected static EntityDataAccessor<Byte> DATA_PLAYER_MODE_CUSTOMISATION;
     @Shadow public int experienceLevel;
     @Shadow public int totalExperience;
     @Shadow public float experienceProgress;
-    @Shadow @Final private Abilities abilities;
-    @Shadow @Final private net.minecraft.world.entity.player.Inventory inventory;
     @Shadow public AbstractContainerMenu containerMenu;
     @Shadow @Final public InventoryMenu inventoryMenu;
     @Shadow @Final private GameProfile gameProfile;
-
     @Shadow public abstract boolean shadow$isSpectator();
     @Shadow public abstract int shadow$getXpNeededForNextLevel();
     @Shadow @Nullable public abstract ItemEntity shadow$drop(final ItemStack droppedItem, final boolean dropAround, final boolean traceItem);
@@ -115,19 +112,18 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
     @Shadow public abstract Component shadow$getDisplayName();
     @Shadow protected abstract void shadow$removeEntitiesOnShoulder();
     @Shadow public abstract void shadow$awardStat(ResourceLocation stat);
-    @Shadow public abstract Abilities shadow$getAbilities();
     @Shadow public abstract Inventory shadow$getInventory();
     @Shadow public Either<BedSleepingProblem, Unit> shadow$startSleepInBed(final BlockPos param0) {
         return null; // Shadowed
     }
     @Shadow protected abstract void shadow$playShoulderEntityAmbientSound(CompoundTag p_192028_1_);
-    @Shadow public abstract Optional<GlobalPos> shadow$getLastDeathLocation();
     // @formatter: on
 
-
-
     private boolean impl$affectsSpawning = true;
-    protected final boolean impl$isFake = ((PlatformEntityBridge) (net.minecraft.world.entity.player.Player) (Object) this).bridge$isFakePlayer();
+    protected final boolean impl$isFake = this.bridge$isFakePlayer();
+
+    private final Set<BossBar> impl$activeBossBars = new HashSet<>();
+    private final Set<BossBar> impl$unmodifiableActiveBossBars = Collections.unmodifiableSet(this.impl$activeBossBars);
 
     @Override
     public boolean bridge$affectsSpawning() {
@@ -153,6 +149,21 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
     public void bridge$setExperienceSinceLevel(final int experience) {
         this.totalExperience = ExperienceHolderUtil.xpAtLevel(this.experienceLevel) + experience;
         this.experienceProgress = (float) experience / this.shadow$getXpNeededForNextLevel();
+    }
+
+    @Override
+    public Iterable<? extends BossBar> bridge$getActiveBossBars() {
+        return this.impl$unmodifiableActiveBossBars;
+    }
+
+    @Override
+    public void bridge$addActiveBossBar(final BossBar bar) {
+        this.impl$activeBossBars.add(bar);
+    }
+
+    @Override
+    public void bridge$removeActiveBossBar(final BossBar bar) {
+        this.impl$activeBossBars.remove(bar);
     }
 
     @Redirect(

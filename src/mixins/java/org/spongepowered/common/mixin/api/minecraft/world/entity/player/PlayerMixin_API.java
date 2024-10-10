@@ -25,27 +25,38 @@
 package org.spongepowered.common.mixin.api.minecraft.world.entity.player;
 
 import com.mojang.authlib.GameProfile;
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.identity.Identified;
 import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.inventory.Book;
+import net.kyori.adventure.sound.Sound;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemCooldowns;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.effect.sound.music.MusicDisc;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.effect.ViewerBridge;
 import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
+import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
+import org.spongepowered.common.effect.SpongeViewer;
+import org.spongepowered.common.effect.util.ViewerPacketUtil;
 import org.spongepowered.common.mixin.api.minecraft.world.entity.LivingEntityMixin_API;
+import org.spongepowered.common.util.BookUtil;
 
+import java.util.Objects;
 import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.player.Player.class)
 @Implements(@Interface(iface=Identified.class, prefix = "identified$", remap = Remap.NONE))
-public abstract class PlayerMixin_API extends LivingEntityMixin_API implements Player {
+public abstract class PlayerMixin_API extends LivingEntityMixin_API implements Player, SpongeViewer {
 
     // @formatter:off
     @Shadow public AbstractContainerMenu containerMenu;
@@ -95,5 +106,63 @@ public abstract class PlayerMixin_API extends LivingEntityMixin_API implements P
 
     public Identity identified$identity() {
         return this.profile();
+    }
+
+    // Viewer
+
+    @Override
+    public void playMusicDisc(final int x, final int y, final int z, final MusicDisc musicDisc) {
+        ((ViewerBridge) this).bridge$sendToViewer(ViewerPacketUtil.playMusicDisc(x, y, z, musicDisc, this.shadow$level().registryAccess()));
+    }
+
+    @Override
+    public void resetBlockChange(final int x, final int y, final int z) {
+        ((ViewerBridge) this).bridge$sendToViewer(ViewerPacketUtil.blockUpdate(x, y, z, this.world()));
+    }
+
+    @Override
+    public void sendBlockProgress(final int x, final int y, final int z, final double progress) {
+        ((ViewerBridge) this).bridge$sendToViewer(ViewerPacketUtil.blockProgress(x, y, z, progress, this.world().engine()));
+    }
+
+    @Override
+    public void resetBlockProgress(final int x, final int y, final int z) {
+        ViewerPacketUtil.resetBlockProgress(x, y, z, this.world().engine()).ifPresent(((ViewerBridge) this)::bridge$sendToViewer);
+    }
+
+    // Audience
+
+    @Override
+    public void playSound(final Sound sound, final double x, final double y, final double z) {
+        ((ViewerBridge) this).bridge$sendToViewer(ViewerPacketUtil.playSound(sound, this.shadow$level().random, x, y, z));
+    }
+
+    @Override
+    public void playSound(final Sound sound) {
+        this.playSound(sound, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ());
+    }
+
+    @Override
+    public void playSound(final Sound sound, final Sound.Emitter emitter) {
+        Objects.requireNonNull(emitter, "emitter");
+        if (emitter == Sound.Emitter.self()) {
+            ((ViewerBridge) this).bridge$sendToViewer(ViewerPacketUtil.playSound(sound, this));
+        } else if (emitter instanceof final Entity entityEmitter) {
+            ((ViewerBridge) this).bridge$sendToViewer(ViewerPacketUtil.playSound(sound, entityEmitter));
+        } else {
+            throw new IllegalArgumentException("Specified emitter '" + emitter + "' is not a Sponge Entity or Emitter.self(), was of type '" + emitter.getClass() + "'");
+        }
+    }
+
+    @Override
+    public void openBook(final Book book) {
+        ((ViewerBridge) this).bridge$sendToViewer(BookUtil.createFakeBookViewPacket(this, Objects.requireNonNull(book, "book")));
+    }
+
+    // BossBarViewer
+
+    @Override
+    public Iterable<? extends BossBar> activeBossBars() {
+        return ((PlayerBridge) this).bridge$getActiveBossBars();
     }
 }

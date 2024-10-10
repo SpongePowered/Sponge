@@ -31,15 +31,16 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.ShapedRecipePattern;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.item.recipe.crafting.Ingredient;
+import org.spongepowered.api.item.recipe.crafting.RecipeInput;
 import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
@@ -66,8 +67,8 @@ public final class SpongeShapedCraftingRecipeBuilder extends AbstractResourceKey
     private final Map<Ingredient, Character> reverseIngredientMap = new IdentityHashMap<>();
 
     private ItemStack result = ItemStack.empty();
-    private Function<net.minecraft.world.inventory.CraftingContainer, NonNullList<net.minecraft.world.item.ItemStack>> remainingItemsFunction;
-    private Function<net.minecraft.world.inventory.CraftingContainer, net.minecraft.world.item.ItemStack> resultFunction;
+    private Function<CraftingInput, NonNullList<net.minecraft.world.item.ItemStack>> remainingItemsFunction;
+    private Function<CraftingInput, net.minecraft.world.item.ItemStack> resultFunction;
 
     private String group;
     private DataPack<RecipeRegistration> pack = DataPacks.RECIPE;
@@ -136,38 +137,28 @@ public final class SpongeShapedCraftingRecipeBuilder extends AbstractResourceKey
         return this;
     }
 
-    public ShapedCraftingRecipe.Builder.ResultStep shapedLike(ShapedCraftingRecipe recipe) {
-        throw new UnsupportedOperationException("not implemented yet");
-    }
-
     @Override
-    public ShapedCraftingRecipe.Builder.ResultStep remainingItems(Function<CraftingGridInventory, List<ItemStack>> remainingItemsFunction) {
+    public ShapedCraftingRecipe.Builder.ResultStep remainingItems(Function<RecipeInput.Crafting, ? extends List<? extends ItemStackLike>> remainingItemsFunction) {
         this.remainingItemsFunction = grid -> {
             final NonNullList<net.minecraft.world.item.ItemStack> mcList = NonNullList.create();
-            remainingItemsFunction.apply(InventoryUtil.toSpongeInventory(grid)).forEach(stack -> mcList.add(ItemStackUtil.toNative(stack)));
+            remainingItemsFunction.apply(InventoryUtil.toSponge(grid)).forEach(stack -> mcList.add(ItemStackUtil.fromLikeToNative(stack)));
             return mcList;
         };
         return this;
     }
 
     @Override
-    public EndStep result(ItemStackSnapshot result) {
+    public EndStep result(final ItemStackLike result) {
         Objects.requireNonNull(result, "result");
-        return this.result(result.createStack());
-    }
-
-    @Override
-    public EndStep result(final ItemStack result) {
-        Objects.requireNonNull(result, "result");
-        this.result = result.copy();
+        this.result = result.asMutableCopy();
         this.resultFunction = null;
         return this;
     }
 
     @Override
-    public EndStep result(Function<CraftingGridInventory, ItemStack> resultFunction, ItemStack exemplaryResult) {
-        this.resultFunction = (inv) -> ItemStackUtil.toNative(resultFunction.apply(InventoryUtil.toSpongeInventory(inv)));
-        this.result = exemplaryResult.copy();
+    public EndStep result(Function<RecipeInput.Crafting, ? extends ItemStackLike> resultFunction, ItemStackLike exemplaryResult) {
+        this.resultFunction = (inv) -> ItemStackUtil.fromLikeToNative(resultFunction.apply(InventoryUtil.toSponge(inv)));
+        this.result = exemplaryResult.asMutableCopy();
         return this;
     }
 

@@ -36,6 +36,9 @@ import net.minecraft.world.inventory.MerchantContainer;
 import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.TransientCraftingContainer;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
+import net.minecraft.world.item.crafting.SmithingRecipeInput;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -67,7 +70,10 @@ import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
         ArmorStand.class,
         Mob.class,
         MerchantContainer.class,
-        CampfireBlockEntity.class
+        CampfireBlockEntity.class,
+        CraftingInput.class,
+        SingleRecipeInput.class,
+        SmithingRecipeInput.class
 }, targets = "net.minecraft.world.level.block.entity.LecternBlockEntity$1", priority = 999)
 public abstract class TraitMixin_InventoryBridge_Inventory implements InventoryAdapter, InventoryBridge {
 

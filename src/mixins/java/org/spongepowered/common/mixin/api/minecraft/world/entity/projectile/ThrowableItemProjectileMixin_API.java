@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.projectile;
 
-import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.entity.projectile.ThrowableItemProjectile;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Set;
 
-@Mixin(ThrowableItemProjectile.class)
-public abstract class ThrowableItemProjectileMixin_API extends ThrowableProjectileMixin_API {
+@Mixin(net.minecraft.world.entity.projectile.ThrowableItemProjectile.class)
+public abstract class ThrowableItemProjectileMixin_API extends ThrowableProjectileMixin_API implements ThrowableItemProjectile {
 
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {

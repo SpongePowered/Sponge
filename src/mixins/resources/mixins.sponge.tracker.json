@@ -13,6 +13,7 @@
         "server.TickTaskMixin_Tracker",
         "server.dedicated.DedicatedServerMixin_Tracker",
         "server.level.ChunkMapMixin_Tracker",
+        "server.level.ChunkStatusTasksMixin_Tracker",
         "server.level.ServerChunkCacheMixin_Tracker",
         "server.level.ServerLevelMixin_Tracker",
         "server.level.ServerPlayerGameModeMixin_Tracker",

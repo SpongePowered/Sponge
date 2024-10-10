@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.util;
 
+import java.util.function.Supplier;
+
 public class Preconditions {
 
     public static void checkState(final boolean expression, final String errorMessage) {
@@ -42,6 +44,12 @@ public class Preconditions {
     public static void checkArgument(final boolean expression, final String errorMessage) {
         if (!expression) {
             throw new IllegalArgumentException(errorMessage);
+        }
+    }
+
+    public static void checkArgument(final boolean expression, final Supplier<String> errorMessage) {
+        if (!expression) {
+            throw new IllegalArgumentException(errorMessage.get());
         }
     }
 

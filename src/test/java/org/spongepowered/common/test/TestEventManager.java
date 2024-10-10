@@ -27,9 +27,6 @@ package org.spongepowered.common.test;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.event.manager.SpongeEventManager;
 import org.spongepowered.common.util.DefinableClassLoader;
-import org.spongepowered.plugin.PluginContainer;
-
-import java.lang.invoke.MethodHandles;
 
 public class TestEventManager extends SpongeEventManager {
 
@@ -41,10 +38,5 @@ public class TestEventManager extends SpongeEventManager {
 
     public TestEventManager() {
         this.loader = null;
-    }
-
-    @Override
-    protected MethodHandles.@Nullable Lookup getLookup(PluginContainer plugin, Class<?> handle) {
-        return this.loader == null ? null : this.loader.lookup();
     }
 }

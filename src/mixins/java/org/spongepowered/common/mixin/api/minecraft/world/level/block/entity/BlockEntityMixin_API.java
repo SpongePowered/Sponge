@@ -63,13 +63,12 @@ public abstract class BlockEntityMixin_API implements BlockEntity {
     @Shadow @Final private net.minecraft.world.level.block.entity.BlockEntityType<?> type;
     @Shadow protected net.minecraft.world.level.Level level;
     @Shadow protected boolean remove;
-
     @Shadow public abstract BlockPos shadow$getBlockPos();
     @Shadow public abstract CompoundTag shadow$saveWithFullMetadata(HolderLookup.Provider $$0);
-    //@formatter:on
-
     @Shadow @Final protected BlockPos worldPosition;
-    @Shadow private net.minecraft.world.level.block.state.BlockState blockState;
+    @Shadow public abstract net.minecraft.world.level.block.state.BlockState shadow$getBlockState();
+    @Shadow public abstract void shadow$setChanged();
+    //@formatter:on
 
     @Nullable private LocatableBlock api$LocatableBlock;
     private boolean api$canTickRequested = false;
@@ -151,7 +150,7 @@ public abstract class BlockEntityMixin_API implements BlockEntity {
     @Override
     public boolean canTick() {
         if (!this.api$canTickRequested) {
-            this.api$canTick = this.blockState.getTicker(this.level, this.type) != null;
+            this.api$canTick = this.shadow$getBlockState().getTicker(this.level, this.type) != null;
             this.api$canTickRequested = true;
         }
 

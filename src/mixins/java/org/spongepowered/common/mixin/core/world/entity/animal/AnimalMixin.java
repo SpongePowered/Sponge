@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.world.entity.animal;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.animal.Animal;
-import org.spongepowered.api.entity.living.Ageable;
+import org.spongepowered.api.entity.Ageable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.asm.mixin.Mixin;

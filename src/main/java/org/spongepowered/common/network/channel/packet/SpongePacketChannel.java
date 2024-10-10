@@ -332,7 +332,7 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
             final int dynamicOpcode) {
         final TransactionStore store = ConnectionUtil.getTransactionStore(connection);
         final TransactionStore.Entry stored = store.remove(transactionId);
-        if (stored == null) {
+        if (stored == null || stored.getData() == null) {
             return;
         }
         final TransactionData<RequestPacket<Packet>, Packet> transactionData =

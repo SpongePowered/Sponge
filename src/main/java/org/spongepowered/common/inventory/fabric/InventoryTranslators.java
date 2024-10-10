@@ -25,6 +25,7 @@
 package org.spongepowered.common.inventory.fabric;
 
 import net.minecraft.world.Container;
+import org.spongepowered.api.item.recipe.crafting.RecipeInput;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,7 +34,8 @@ public class InventoryTranslators {
     private static final Map<Class<?>, InventoryTranslator<?>> fabricTranslators = new HashMap<>();
 
     static {
-        InventoryTranslators.register(Container.class, new IInventoryTranslator());
+        InventoryTranslators.register(Container.class, new ContainerTranslator());
+        InventoryTranslators.register(RecipeInput.class, new RecipeInputTranslator());
     }
 
     public static void register(Class<?> inventoryInterface, InventoryTranslator<?> translator) {

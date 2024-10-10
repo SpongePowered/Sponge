@@ -26,12 +26,13 @@ package org.spongepowered.common.data.provider.item.stack;
 
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Predicates;
 
@@ -56,14 +57,13 @@ public final class BookPagesItemStackData {
                     .create(Keys.STORED_ENCHANTMENTS)
                         .get(h -> BookPagesItemStackData.get(h, DataComponents.STORED_ENCHANTMENTS))
                         .set((h, v) -> BookPagesItemStackData.set(h, v, Collection::stream, DataComponents.STORED_ENCHANTMENTS))
-                        .delete(h -> BookPagesItemStackData.delete(h, DataComponents.STORED_ENCHANTMENTS))
-                        .supports(h -> h.getItem() == Items.ENCHANTED_BOOK);
+                        .delete(h -> BookPagesItemStackData.delete(h, DataComponents.STORED_ENCHANTMENTS));
     }
     // @formatter:on
 
     private static List<Enchantment> get(final ItemStack holder, final DataComponentType<ItemEnchantments> component) {
         return holder.getOrDefault(component, ItemEnchantments.EMPTY).entrySet().stream()
-                .map(e -> Enchantment.of((EnchantmentType) e.getKey().value(), e.getIntValue())).toList();
+                .map(e -> Enchantment.of((EnchantmentType) (Object) e.getKey().value(), e.getIntValue())).toList();
     }
 
     private static boolean set(final ItemStack holder, final List<Enchantment> value, final Function<List<Enchantment>, Stream<Enchantment>> filter,
@@ -71,10 +71,14 @@ public final class BookPagesItemStackData {
         if (value.isEmpty()) {
             return BookPagesItemStackData.delete(holder, component);
         }
+        final var registry = SpongeCommon.server().registryAccess().registryOrThrow(Registries.ENCHANTMENT);
         holder.update(component, ItemEnchantments.EMPTY, ench -> {
             final ItemEnchantments.Mutable mutable = new ItemEnchantments.Mutable(ench);
             mutable.keySet().clear();
-            value.forEach(e -> mutable.set((net.minecraft.world.item.enchantment.Enchantment) e.type(), e.level()));
+            value.forEach(e -> {
+                var enchHolder = registry.wrapAsHolder((net.minecraft.world.item.enchantment.Enchantment) (Object) e.type());
+                mutable.set(enchHolder, e.level());
+            });
             return mutable.toImmutable();
         });
         return true;

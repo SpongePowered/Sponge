@@ -27,13 +27,14 @@ package org.spongepowered.common.mixin.api.minecraft.world.entity;
 import net.minecraft.world.entity.AgeableMob;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.entity.living.Ageable;
+import org.spongepowered.api.entity.Ageable;
+import org.spongepowered.api.entity.Breedable;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Set;
 
 @Mixin(AgeableMob.class)
-public abstract class AgeableMobMixin_API extends PathfinderMobMixin_API implements Ageable {
+public abstract class AgeableMobMixin_API extends PathfinderMobMixin_API implements Ageable, Breedable {
 
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {

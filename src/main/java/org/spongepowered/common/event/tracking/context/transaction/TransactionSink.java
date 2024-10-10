@@ -45,12 +45,15 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.ticks.ScheduledTick;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.common.SpongeCommon;
@@ -69,9 +72,12 @@ import org.spongepowered.common.event.tracking.context.transaction.block.Prepare
 import org.spongepowered.common.event.tracking.context.transaction.block.RemoveBlockEntity;
 import org.spongepowered.common.event.tracking.context.transaction.block.ReplaceBlockEntity;
 import org.spongepowered.common.event.tracking.context.transaction.block.ScheduleUpdateTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.effect.BlockAddedEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.EntityPerformingDropsEffect;
+import org.spongepowered.common.event.tracking.context.transaction.effect.InteractionItemEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.InventoryEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.PrepareBlockDrops;
+import org.spongepowered.common.event.tracking.context.transaction.effect.ProcessingSideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.ClickCreativeMenuTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.ClickMenuTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.CloseMenuTransaction;
@@ -80,6 +86,8 @@ import org.spongepowered.common.event.tracking.context.transaction.inventory.Cra
 import org.spongepowered.common.event.tracking.context.transaction.inventory.CraftingTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.DropFromPlayerInventoryTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.ExplicitInventoryOmittedTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.inventory.InteractItemTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.inventory.InteractItemWithBlockTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.InventoryTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.OpenMenuTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.PlaceRecipeTransaction;
@@ -97,6 +105,7 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
+import org.spongepowered.math.vector.Vector3d;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;
@@ -121,7 +130,7 @@ interface TransactionSink {
     @Deprecated
     void logTransaction(StatefulTransaction transaction);
 
-    EffectTransactor pushEffect(final ResultingTransactionBySideEffect effect);
+    <T, C, A extends ProcessingSideEffect.Args, @Nullable R> EffectTransactor pushEffect(final ResultingTransactionBySideEffect<T, C, A, R> effect);
 
     default ChangeBlock logBlockChange(final SpongeBlockSnapshot originalBlockSnapshot, final BlockState newState,
         final BlockChangeFlag flags
@@ -174,7 +183,7 @@ interface TransactionSink {
         original.blockChange = BlockChange.MODIFY;
         final PrepareBlockDropsTransaction transaction = new PrepareBlockDropsTransaction(pos, state, original);
         this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect(PrepareBlockDrops.getInstance()));
+        return this.pushEffect(new ResultingTransactionBySideEffect<>(PrepareBlockDrops.getInstance()));
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -218,6 +227,16 @@ interface TransactionSink {
         this.logTransaction(transaction);
     }
 
+
+    @SuppressWarnings("ConstantConditions")
+    default WrapperTransaction logWrapper() {
+        final var transaction = new WrapperTransaction<>();
+        this.logTransaction(transaction);
+        this.pushEffect(new ResultingTransactionBySideEffect(BlockAddedEffect.getInstance()));
+        return transaction;
+    }
+
+
     default boolean logTileReplacement(
         final BlockPos pos, final @Nullable BlockEntity existing, final @Nullable BlockEntity proposed,
         final Supplier<ServerLevel> worldSupplier
@@ -258,7 +277,7 @@ interface TransactionSink {
         final EntityPerformingDropsTransaction transaction = new EntityPerformingDropsTransaction(entity);
         this.logTransaction(transaction);
         if (transaction.recorded()) {
-            return this.pushEffect(new ResultingTransactionBySideEffect(EntityPerformingDropsEffect.getInstance()));
+            return this.pushEffect(new ResultingTransactionBySideEffect<>(EntityPerformingDropsEffect.getInstance()));
         }
         return null;
     }
@@ -334,44 +353,44 @@ interface TransactionSink {
         final ClickMenuTransaction transaction = new ClickMenuTransaction(
             player, menu, slotNum, buttonNum, clickType, slot, ItemStackUtil.snapshotOf(player.containerMenu.getCarried()));
         this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
+        return this.pushEffect(new ResultingTransactionBySideEffect<>(InventoryEffect.getInstance()));
     }
 
     default EffectTransactor logPlayerInventoryChangeWithEffect(final Player player, final PlayerInventoryTransaction.EventCreator eventCreator) {
         final PlayerInventoryTransaction transaction = new PlayerInventoryTransaction(player, eventCreator);
         this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
+        return this.pushEffect(new ResultingTransactionBySideEffect<>(InventoryEffect.getInstance()));
     }
 
     default EffectTransactor logCreativeClickContainer(final int slotNum, final ItemStackSnapshot creativeStack, final Player player) {
         final ClickCreativeMenuTransaction transaction = new ClickCreativeMenuTransaction(player, slotNum, creativeStack);
         this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
+        return this.pushEffect(new ResultingTransactionBySideEffect<>(InventoryEffect.getInstance()));
     }
 
 
     default EffectTransactor logDropFromPlayerInventory(final ServerPlayer player, final boolean dropAll) {
         final DropFromPlayerInventoryTransaction transaction = new DropFromPlayerInventoryTransaction(player, dropAll);
         this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
+        return this.pushEffect(new ResultingTransactionBySideEffect<>(InventoryEffect.getInstance()));
     }
 
     default EffectTransactor logOpenInventory(final Player player) {
         final OpenMenuTransaction transaction = new OpenMenuTransaction(player);
         this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
+        return this.pushEffect(new ResultingTransactionBySideEffect<>(InventoryEffect.getInstance()));
     }
 
     default EffectTransactor logCloseInventory(final Player player, final boolean clientSource) {
         final CloseMenuTransaction transaction = new CloseMenuTransaction(player, clientSource);
         this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
+        return this.pushEffect(new ResultingTransactionBySideEffect<>(InventoryEffect.getInstance()));
     }
 
     default EffectTransactor logPlaceRecipe(final boolean shift, final RecipeHolder<Recipe<?>> recipe, final ServerPlayer player, final CraftingInventory craftInv) {
         final PlaceRecipeTransaction transaction = new PlaceRecipeTransaction(player, shift, recipe, craftInv);
         this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
+        return this.pushEffect(new ResultingTransactionBySideEffect<>(InventoryEffect.getInstance()));
     }
 
     default void logSelectTrade(final ServerPlayer player, final int item) {
@@ -403,12 +422,36 @@ interface TransactionSink {
     default EffectTransactor logIgnoredInventory(AbstractContainerMenu containerMenu) {
         final ExplicitInventoryOmittedTransaction transaction = new ExplicitInventoryOmittedTransaction(containerMenu);
         this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
+        return this.pushEffect(new ResultingTransactionBySideEffect<>(InventoryEffect.getInstance()));
     }
 
     default EffectTransactor logInventoryTransaction(final AbstractContainerMenu containerMenu) {
         final InventoryTransaction transaction = new InventoryTransaction((Inventory) containerMenu);
         this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
+        return this.pushEffect(new ResultingTransactionBySideEffect<>(InventoryEffect.getInstance()));
     }
+
+    default void logSecondaryInteractionTransaction(
+        final ServerPlayer playerIn, final Vector3d hitVec,
+        final BlockSnapshot snapshot, final Direction direction, InteractBlockEvent.Secondary.Pre event) {
+        final InteractItemWithBlockTransaction transaction = new InteractItemWithBlockTransaction(playerIn,
+            hitVec,
+            snapshot,
+            direction,
+            event.originalUseBlockResult(),
+            event.useBlockResult(),
+            event.originalUseItemResult(),
+            event.useItemResult()
+            );
+        this.logTransaction(transaction);
+    }
+
+    default EffectTransactor logSecondaryInteractItemTransaction(
+        final ServerPlayer playerIn, final ItemStack stackIn
+    ) {
+        final InteractItemTransaction transaction = new InteractItemTransaction(playerIn, stackIn);
+        this.logTransaction(transaction);
+        return this.pushEffect(new ResultingTransactionBySideEffect<>(InteractionItemEffect.getInstance()));
+    }
+
 }

@@ -30,14 +30,13 @@
         "server.packs.repository.PackRepositoryMixin_Vanilla",
         "world.entity.EntityMixin_Vanilla",
         "world.entity.EntityTypeMixin_Vanilla",
+        "world.entity.LivingEntityMixin_Attack_Impl",
         "world.entity.LivingEntityMixin_Vanilla",
         "world.entity.ai.attributes.DefaultAttributesMixin",
         "world.entity.item.ItemEntityMixin_Vanilla",
-        "world.entity.projectile.ThrownEnderpearlMixin_Vanilla",
         "world.entity.vehicle.BoatMixin_Vanilla",
         "world.level.block.FireBlockMixin_Vanilla",
         "world.level.block.entity.AbstractFurnaceBlockEntityMixin_Vanilla",
-        "world.level.portal.PortalForcerMixin_Vanilla",
         "world.level.storage.LevelStorageSourceMixin_Vanilla"
     ],
     "overwrites": {

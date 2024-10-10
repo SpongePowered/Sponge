@@ -107,10 +107,6 @@ public class AccessWidenerTransformationService implements ITransformationServic
     }
 
     @Override
-    public void beginScanning(final IEnvironment environment) {
-    }
-
-    @Override
     @SuppressWarnings("rawtypes") // :(
     public @NonNull List<ITransformer> transformers() {
         return Collections.singletonList(new AWTransformer(this.widener));

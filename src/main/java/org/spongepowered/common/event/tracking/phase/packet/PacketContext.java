@@ -77,7 +77,7 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
 
     public P itemUsed(final ItemStack stack) {
         this.itemUsed = stack;
-        this.itemUsedSnapshot = this.itemUsed.createSnapshot();
+        this.itemUsedSnapshot = this.itemUsed.asImmutable();
         return (P) this;
     }
 

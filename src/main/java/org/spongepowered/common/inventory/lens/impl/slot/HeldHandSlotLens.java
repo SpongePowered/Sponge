@@ -28,6 +28,7 @@ import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
@@ -148,10 +149,10 @@ public class HeldHandSlotLens extends AbstractLens implements SlotLens {
     }
 
     public Predicate<EquipmentType> getEquipmentTypeFilter() {
-        return (e) -> e == EquipmentTypes.MAIN_HAND.get();
+        return (e) -> e == EquipmentTypes.MAINHAND.get();
     }
 
-    public Predicate<org.spongepowered.api.item.inventory.ItemStack> getItemStackFilter() {
+    public Predicate<ItemStackLike> getItemStackFilter() {
         return (i) -> true;
     }
 

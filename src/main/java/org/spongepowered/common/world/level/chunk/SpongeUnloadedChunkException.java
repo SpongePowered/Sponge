@@ -24,9 +24,14 @@
  */
 package org.spongepowered.common.world.level.chunk;
 
+import net.minecraft.world.level.chunk.ChunkAccess;
+
+import java.util.concurrent.CompletableFuture;
+
 public final class SpongeUnloadedChunkException extends Exception {
 
     public static final SpongeUnloadedChunkException INSTANCE = new SpongeUnloadedChunkException();
+    public static final CompletableFuture<ChunkAccess> INSTANCE_FUTURE = CompletableFuture.failedFuture(SpongeUnloadedChunkException.INSTANCE);
 
     private SpongeUnloadedChunkException() {
     }

@@ -24,27 +24,19 @@
  */
 package org.spongepowered.common.mixin.core.world.entity;
 
-import net.minecraft.util.Mth;
-import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Leashable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.objectweb.asm.Opcodes;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ai.goal.GoalExecutorTypes;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.entity.living.Living;
-import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
-import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.api.event.entity.UnleashEntityEvent;
 import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.asm.mixin.Final;
@@ -63,10 +55,6 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.util.DamageEventUtil;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Mixin(Mob.class)
 public abstract class MobMixin extends LivingEntityMixin {
@@ -75,12 +63,10 @@ public abstract class MobMixin extends LivingEntityMixin {
     @Shadow @Final protected GoalSelector goalSelector;
     @Shadow @Final protected GoalSelector targetSelector;
     @Shadow @Nullable private LivingEntity target;
-    @Shadow public abstract net.minecraft.world.entity.@Nullable Entity  shadow$getLeashHolder();
+    @Shadow public abstract Leashable.LeashData shadow$getLeashData();
     @Shadow protected abstract void shadow$registerGoals();
     // @formatter:on
 
-
-    @Shadow @Final protected float[] handDropChances;
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Mob;registerGoals()V"))
     private void impl$registerGoals(final Mob this$0) {
@@ -101,18 +87,19 @@ public abstract class MobMixin extends LivingEntityMixin {
         }
     }
 
-    @Inject(method = "dropLeash",
-        at = @At(value = "FIELD",
-            target = "Lnet/minecraft/world/entity/Mob;leashHolder:Lnet/minecraft/world/entity/Entity;",
-            opcode = Opcodes.PUTFIELD
-        ),
-        cancellable = true)
+    @Inject(method = "dropLeash", cancellable = true,
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Leashable;dropLeash(ZZ)V"))
     private void impl$ThrowUnleashEvent(final boolean sendPacket, final boolean dropLead, final CallbackInfo ci) {
         if (this.shadow$level().isClientSide) {
             return;
         }
 
-        final net.minecraft.world.entity.Entity entity = this.shadow$getLeashHolder();
+        var leashData = this.shadow$getLeashData();
+        if (leashData == null) {
+            return;
+        }
+
+        final net.minecraft.world.entity.Entity entity = leashData.leashHolder;
 
         final CauseStackManager csm = PhaseTracker.getCauseStackManager();
         if (entity == null) {
@@ -189,78 +176,9 @@ public abstract class MobMixin extends LivingEntityMixin {
         return thisEntity.canPickUpLoot() && ((GrieferBridge) this).bridge$canGrief();
     }
 
-    /**
-     * @author gabizou - April 8th, 2016
-     * @author gabizou - April 11th, 2016 - Update for 1.9 additions
-     * @author Aaron1011 - November 12, 2016 - Update for 1.11
-     * @author Zidane - Minecraft 1.14.4
-     *
-     * @reason Rewrite this to throw an {@link AttackEntityEvent} and process correctly.
-     *
-     * float f        | baseDamage
-     * int i          | knockbackModifier
-     * boolean flag   | attackSucceeded
-     *
-     * @param targetEntity The entity to attack
-     * @return True if the attack was successful
-     */
-    @Overwrite
-    public boolean doHurtTarget(final net.minecraft.world.entity.Entity targetEntity) {
-        // Sponge Start - Prepare our event values
-        // float baseDamage = this.getEntityAttribute(Attributes.attackDamage).getAttributeValue();
-        final double originalBaseDamage = this.shadow$getAttribute(Attributes.ATTACK_DAMAGE).getValue();
-        final List<DamageFunction> originalFunctions = new ArrayList<>();
-        // Sponge End
-        float knockbackModifier = (float) this.shadow$getAttribute(Attributes.ATTACK_KNOCKBACK).getValue();
-
-        if (targetEntity instanceof LivingEntity) {
-            // Sponge Start - Gather modifiers
-            originalFunctions.addAll(DamageEventUtil
-                .createAttackEnchantmentFunction(this.shadow$getMainHandItem(), targetEntity.getType(), 1.0F)); // 1.0F is for full attack strength since mobs don't have the concept
-            // baseDamage += EnchantmentHelper.getModifierForCreature(this.getHeldItem(), ((EntityLivingBase) targetEntity).getCreatureAttribute());
-            knockbackModifier += EnchantmentHelper.getKnockbackBonus((Mob) (Object) this);
-        }
-
-        // Sponge Start - Throw our event and handle appropriately
-        final DamageSource damageSource = this.shadow$level().damageSources().mobAttack((Mob) (Object) this);
-        PhaseTracker.getCauseStackManager().pushCause(damageSource);
-        final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(PhaseTracker.getCauseStackManager().currentCause(), (org.spongepowered.api.entity.Entity) targetEntity,
-            originalFunctions, knockbackModifier, originalBaseDamage);
-        SpongeCommon.post(event);
-        PhaseTracker.getCauseStackManager().popCause();
-        if (event.isCancelled()) {
-            return false;
-        }
-        knockbackModifier = event.knockbackModifier();
-        // boolean attackSucceeded = targetEntity.attackEntityFrom(DamageSource.causeMobDamage(this), baseDamage);
-        final boolean attackSucceeded = targetEntity.hurt(damageSource, (float) event.finalOutputDamage());
-        // Sponge End
-        if (attackSucceeded) {
-            if (knockbackModifier > 0 && targetEntity instanceof LivingEntity) {
-                ((LivingEntity)targetEntity).knockback(knockbackModifier * 0.5F,
-                        Mth.sin(this.shadow$getYRot() * ((float)Math.PI / 180F)), -Mth.cos(this.shadow$getYRot() * ((float)Math.PI / 180F)));
-                this.shadow$setDeltaMovement(this.shadow$getDeltaMovement().multiply(0.6D, 1.0D, 0.6D));
-            }
-
-            final int j = EnchantmentHelper.getFireAspect((Mob) (Object) this);
-
-            if (j > 0) {
-                targetEntity.igniteForSeconds(j * 4);
-            }
-
-            this.shadow$doEnchantDamageEffects((Mob) (Object) this, targetEntity);
-            this.shadow$setLastHurtMob(targetEntity);
-        }
-
-        return attackSucceeded;
-    }
-
     @Nullable
-    @Redirect(
-            method = "checkDespawn()V",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/world/level/Level;getNearestPlayer(Lnet/minecraft/world/entity/Entity;D)Lnet/minecraft/world/entity/player/Player;"))
+    @Redirect(method = "checkDespawn()V", at = @At(value = "INVOKE",
+                target = "Lnet/minecraft/world/level/Level;getNearestPlayer(Lnet/minecraft/world/entity/Entity;D)Lnet/minecraft/world/entity/player/Player;"))
     private Player impl$getClosestPlayerForSpawning(final Level world, final net.minecraft.world.entity.Entity entityIn, final double distance) {
         double bestDistance = -1.0D;
         Player result = null;
@@ -279,16 +197,6 @@ public abstract class MobMixin extends LivingEntityMixin {
         }
 
         return result;
-    }
-
-    @Inject(method = "setLeashedTo", at = @At("HEAD"), cancellable = true)
-    private void impl$onSetLeashedTo(final net.minecraft.world.entity.Entity param0, final boolean param1, final CallbackInfo ci) {
-        if (!this.shadow$level().isClientSide) {
-            final Cause currentCause = Sponge.server().causeStackManager().currentCause();
-            if (Sponge.eventManager().post(SpongeEventFactory.createLeashEntityEvent(currentCause, (Entity) this))) {
-                ci.cancel();
-            }
-        }
     }
 
 }

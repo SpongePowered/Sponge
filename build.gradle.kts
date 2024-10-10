@@ -19,6 +19,8 @@ val apiVersion: String by project
 val apiJavaTarget: String by project
 val minecraftVersion: String by project
 val recommendedVersion: String by project
+val organization: String by project
+val projectUrl: String by project
 
 val commonManifest = java.manifest {
     attributes(
@@ -34,48 +36,9 @@ val commonManifest = java.manifest {
     System.getenv()["GIT_BRANCH"]?.apply { attributes("Git-Branch" to this) }
 }
 
-tasks {
-    jar {
-        manifest.from(commonManifest)
-    }
-    val mixinsJar by registering(Jar::class) {
-        archiveClassifier.set("mixins")
-        manifest.from(commonManifest)
-        from(mixins.map { it.output })
-    }
-    val accessorsJar by registering(Jar::class) {
-        archiveClassifier.set("accessors")
-        manifest.from(commonManifest)
-        from(accessors.map { it.output })
-    }
-    val launchJar by registering(Jar::class) {
-        archiveClassifier.set("launch")
-        manifest.from(commonManifest)
-        from(launch.map { it.output })
-    }
-    val applaunchJar by registering(Jar::class) {
-        archiveClassifier.set("applaunch")
-        manifest.from(commonManifest)
-        from(applaunch.map { it.output })
-    }
-
-    test {
-        useJUnitPlatform()
-    }
-
-    check {
-        dependsOn(gradle.includedBuild("SpongeAPI").task(":check"))
-    }
-
-    prepareWorkspace {
-        dependsOn(gradle.includedBuild("SpongeAPI").task(":genEventImpl"))
-    }
-
-}
-
 version = spongeImpl.generateImplementationVersionString(apiVersion, minecraftVersion, recommendedVersion)
 
-// Configurations
+// SpongeCommon configurations
 val applaunchConfig by configurations.register("applaunch")
 
 val launchConfig by configurations.register("launch") {
@@ -90,35 +53,28 @@ val mixinsConfig by configurations.register("mixins") {
     extendsFrom(launchConfig)
 }
 
-// create the sourcesets
+// SpongeCommon source sets
 val main by sourceSets
 
 val applaunch by sourceSets.registering {
     spongeImpl.applyNamedDependencyOnOutput(project, this, main, project, main.implementationConfigurationName)
-    project.dependencies {
-        mixinsConfig(this@registering.output)
-    }
+
     configurations.named(implementationConfigurationName) {
         extendsFrom(applaunchConfig)
     }
 }
 val launch by sourceSets.registering {
     spongeImpl.applyNamedDependencyOnOutput(project, applaunch.get(), this, project, this.implementationConfigurationName)
-    project.dependencies {
-        mixinsConfig(this@registering.output)
-    }
-    project.dependencies {
-        implementation(this@registering.output)
-    }
+    spongeImpl.applyNamedDependencyOnOutput(project, this, main, project, main.implementationConfigurationName)
 
     configurations.named(implementationConfigurationName) {
         extendsFrom(launchConfig)
     }
 }
-
 val accessors by sourceSets.registering {
     spongeImpl.applyNamedDependencyOnOutput(project, launch.get(), this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, this, main, project, main.implementationConfigurationName)
+
     configurations.named(implementationConfigurationName) {
         extendsFrom(accessorsConfig)
     }
@@ -128,6 +84,7 @@ val mixins by sourceSets.registering {
     spongeImpl.applyNamedDependencyOnOutput(project, applaunch.get(), this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, accessors.get(), this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, main, this, project, this.implementationConfigurationName)
+
     configurations.named(implementationConfigurationName) {
         extendsFrom(mixinsConfig)
     }
@@ -199,7 +156,6 @@ dependencies {
     applaunchConfig(libs.log4j.core)
     applaunchConfig(libs.log4j.jpl)
 
-    mixinsConfig(sourceSets.main.map { it.output })
     add(mixins.get().implementationConfigurationName, "org.spongepowered:spongeapi:$apiVersion")
 
     // Tests
@@ -215,8 +171,6 @@ dependencies {
     }
 }
 
-val organization: String by project
-val projectUrl: String by project
 indraSpotlessLicenser {
     licenseHeaderFile(rootProject.file("HEADER.txt"))
 
@@ -229,7 +183,6 @@ idea {
     if (project != null) {
         (project as ExtensionAware).extensions["settings"].run {
             (this as ExtensionAware).extensions.getByType(org.jetbrains.gradle.ext.TaskTriggersConfig::class).run {
-                afterSync(":modlauncher-patcher:build")
                 afterSync(":modlauncher-transformers:build")
             }
         }
@@ -365,6 +318,38 @@ allprojects {
         }
     }
 
+    tasks.register("printConfigsHierarchy") {
+        group = "debug"
+        doLast {
+            configurations.forEach { conf: Configuration  ->
+                val seen = mutableSetOf<Configuration>()
+                println("Parents of ${conf.name}:")
+                printParents(conf, "", seen)
+            }
+        }
+    }
+
+    tasks.register("printConfigsResolution") {
+        group = "debug"
+        doLast {
+            configurations.forEach { conf: Configuration  ->
+                println()
+                println("Artifacts of ${conf.name}:")
+                if (conf.isCanBeResolved) {
+                    try {
+                        conf.forEach {
+                            println(it)
+                        }
+                    } catch (e: Exception) {
+                        println("error")
+                    }
+                } else {
+                    println("not resolved")
+                }
+            }
+        }
+    }
+
     afterEvaluate {
         publishing {
             repositories {
@@ -395,33 +380,79 @@ allprojects {
     }
 }
 
+fun printParents(conf: Configuration, indent: String, seen: MutableSet<Configuration>) {
+    for (parent in conf.extendsFrom) {
+        if (parent in seen) {
+            continue
+        }
+        seen.add(parent)
+        println("$indent - ${parent.name}")
+        printParents(parent, indent + "  ", seen)
+    }
+}
+
 tasks {
+    jar {
+        manifest.from(commonManifest)
+    }
+    val mixinsJar by registering(Jar::class) {
+        archiveClassifier.set("mixins")
+        manifest.from(commonManifest)
+        from(mixins.map { it.output })
+    }
+    val accessorsJar by registering(Jar::class) {
+        archiveClassifier.set("accessors")
+        manifest.from(commonManifest)
+        from(accessors.map { it.output })
+    }
+    val launchJar by registering(Jar::class) {
+        archiveClassifier.set("launch")
+        manifest.from(commonManifest)
+        from(launch.map { it.output })
+    }
+    val applaunchJar by registering(Jar::class) {
+        archiveClassifier.set("applaunch")
+        manifest.from(commonManifest)
+        from(applaunch.map { it.output })
+    }
+
     val jar by existing
     val sourcesJar by existing
-    val mixinsJar by existing
-    val accessorsJar by existing
-    val launchJar by existing
-    val applaunchJar by existing
 
     shadowJar {
         mergeServiceFiles()
         archiveClassifier.set("dev")
+
         manifest {
             attributes(mapOf(
-                    "Access-Widener" to "common.accesswidener",
-                    "Multi-Release" to true
+                "Access-Widener" to "common.accesswidener",
+                "Multi-Release" to true
             ))
             from(commonManifest)
         }
+
         from(jar)
         from(sourcesJar)
         from(mixinsJar)
         from(accessorsJar)
         from(launchJar)
         from(applaunchJar)
+
         dependencies {
             include(project(":"))
         }
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
+    check {
+        dependsOn(gradle.includedBuild("SpongeAPI").task(":check"))
+    }
+
+    prepareWorkspace {
+        dependsOn(gradle.includedBuild("SpongeAPI").task(":genEventImpl"))
     }
 }
 

@@ -232,13 +232,13 @@ public final class RecipeTest implements LoadableModule {
 
         final RecipeRegistration stonecutter1 = StoneCutterRecipe.builder()
                 .ingredient(ItemTypes.BEDROCK)
-                .result(ItemStack.of(ItemTypes.BLACK_CONCRETE, 64))
+                .result(ItemStack.of(ItemTypes.BLACK_CONCRETE, 32))
                 .key(ResourceKey.of(this.plugin, "cut_bedrock_to_concrete"))
                 .build();
 
         final RecipeRegistration stonecutter2 = StoneCutterRecipe.builder()
                 .ingredient(ItemTypes.BEDROCK)
-                .result(ItemStack.of(ItemTypes.BLACK_GLAZED_TERRACOTTA, 64))
+                .result(ItemStack.of(ItemTypes.BLACK_GLAZED_TERRACOTTA, 16))
                 .key(ResourceKey.of(this.plugin, "cut_bedrock_to_terracotta"))
                 .build();
 
@@ -255,7 +255,7 @@ public final class RecipeTest implements LoadableModule {
         // Predicate Ingredients
 
         final Predicate<ItemStack> hardnessPredicate = stack -> stack.type().block().map(b -> b.defaultState().get(Keys.DESTROY_SPEED).orElse(0d) > 20).orElse(false); // e.g. obsidian
-        final Ingredient hardBlock = Ingredient.of(ResourceKey.of(this.plugin, "hardblock"), hardnessPredicate, ItemStack.of(ItemTypes.BEDROCK));
+        final Ingredient hardBlock = Ingredient.of(ResourceKey.of(this.plugin, "hardblock"), hardnessPredicate, ItemStack.of(ItemTypes.OBSIDIAN));
         final RecipeRegistration hardblockToWool =
                 ShapelessCraftingRecipe.builder().addIngredients(hardBlock).result(ItemStack.of(ItemTypes.WHITE_WOOL))
                         .key(ResourceKey.of(this.plugin, "hardblock_to_wool"))
@@ -318,16 +318,14 @@ public final class RecipeTest implements LoadableModule {
 
         event.register(blackOrWhiteRecipe);
 
-// Custom results dont work well in cooking recipes
-//        final ItemStack anvil = ItemStack.of(ItemTypes.DAMAGED_ANVIL);
-//        final RecipeRegistration<SmeltingRecipe> cookedAnvilRecipe = SmeltingRecipe.builder().type(RecipeTypes.BLASTING)
-//                .ingredient(ItemTypes.IRON_BLOCK)
-//                .result(inv -> {
-//                    return anvil.copy();
-//                }, anvil.copy())
-//                .key(ResourceKey.of(this.plugin, "cooked_anvil"))
-//                .build();
-//        event.register(cookedAnvilRecipe);
+        // Custom results dont work well in cooking recipes
+        final ItemStack anvil = ItemStack.of(ItemTypes.DAMAGED_ANVIL);
+        final RecipeRegistration cookedAnvilRecipe = CookingRecipe.builder().type(RecipeTypes.BLASTING)
+                .ingredient(ItemTypes.IRON_BLOCK)
+                .result(inv -> anvil.copy(), anvil.copy())
+                .key(ResourceKey.of(this.plugin, "cooked_anvil"))
+                .build();
+        event.register(cookedAnvilRecipe);
 
         final RecipeRegistration cutPlanksRecipe = StoneCutterRecipe.builder()
                 .ingredient(ItemTypes.OAK_PLANKS)
@@ -341,26 +339,26 @@ public final class RecipeTest implements LoadableModule {
                 .build();
         event.register(cutPlanksRecipe);
 
-
         final RecipeRegistration stripedBannerRecipe = SpecialCraftingRecipe.builder()
                 .matching((inv, world) -> {
                     if (inv.capacity() != 9) {
                         return false;
                     }
-                    final ItemType stick = inv.asGrid().peek(2,1).get().type();
+                    final var grid = inv.asGrid();
+                    final ItemType stick = grid.peek(1, 2).get().type();
                     if (!stick.isAnyOf(ItemTypes.STICK)) {
                         return false;
                     }
 
-                    final ItemStack middleItem = inv.peekAt(1).get();
+                    final ItemStack middleItem = grid.peekAt(1).get();
 
-                    final ItemType type00 = inv.asGrid().peek(0,0).get().type();
-                    final ItemType type10 = inv.asGrid().peek(0,1).get().type();
-                    final ItemType type20 = inv.asGrid().peek(0,2).get().type();
+                    final ItemType type00 = grid.peek(0, 0).get().type();
+                    final ItemType type10 = grid.peek(1, 0).get().type();
+                    final ItemType type20 = grid.peek(2, 0).get().type();
 
-                    final ItemType type01 = inv.asGrid().peek(1,0).get().type();
-                    final ItemType type11 = inv.asGrid().peek(1,1).get().type();
-                    final ItemType type21 = inv.asGrid().peek(1,2).get().type();
+                    final ItemType type01 = grid.peek(0, 1).get().type();
+                    final ItemType type11 = grid.peek(1, 1).get().type();
+                    final ItemType type21 = grid.peek(2, 1).get().type();
 
                     if (type00 == type01 && type01 == type20 && type20 == type21 && type10 == type11) {
                         if (type00.isAnyOf(ItemTypes.WHITE_WOOL)) {

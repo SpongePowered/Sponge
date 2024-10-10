@@ -33,6 +33,7 @@ import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.chunk.storage.ChunkSerializer;
+import net.minecraft.world.level.chunk.storage.RegionStorageInfo;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -56,7 +57,7 @@ public abstract class ChunkSerializerMixin {
     }
 
     @Inject(method = "read", at = @At("RETURN"))
-    private static void impl$readSpongeChunkData(final ServerLevel level, final PoiManager poi, final ChunkPos pos, final CompoundTag compound, final CallbackInfoReturnable<ProtoChunk> cir) {
+    private static void impl$readSpongeChunkData(final ServerLevel level, final PoiManager poi, final RegionStorageInfo $$2, final ChunkPos pos, final CompoundTag compound, final CallbackInfoReturnable<ProtoChunk> cir) {
         if (!(cir.getReturnValue() instanceof ImposterProtoChunk imposter)) {
             return;
         }

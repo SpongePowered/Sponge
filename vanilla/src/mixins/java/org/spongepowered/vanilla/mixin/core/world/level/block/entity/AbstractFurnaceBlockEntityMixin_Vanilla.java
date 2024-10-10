@@ -50,7 +50,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.MixinTargetHelper;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.block.entity.AbstractFurnaceBlockEntityBridge;
@@ -134,24 +133,22 @@ public abstract class AbstractFurnaceBlockEntityMixin_Vanilla extends BaseContai
         mixinSelf.vanilla$filledWaterBucket = true;
     }
 
-    @Inject(
-            method = "burn",
-            locals = LocalCapture.CAPTURE_FAILHARD,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;shrink(I)V", shift = At.Shift.AFTER))
-    private static void vanillaImpl$afterSmeltItem(final RegistryAccess registryAccess,
-                                            final RecipeHolder<?> recipe, final NonNullList<ItemStack> slots, final int var2, final CallbackInfoReturnable<Boolean> cir,
-                                            final ItemStack $$4, final ItemStack $$5, final ItemStack $$6
-    ) {
+    @Inject(method = "burn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;shrink(I)V", shift = At.Shift.AFTER))
+    private static void vanillaImpl$afterSmeltItem(final RegistryAccess registryAccess, final RecipeHolder<?> recipe, final NonNullList<ItemStack> slots, final int var2, final CallbackInfoReturnable<Boolean> cir) {
+        final ItemStack itemIn = slots.get(0);
+        final ItemStack recipeResult = recipe.value().getResultItem(registryAccess);
+        final ItemStack itemOut = slots.get(2);
+
         final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
         final FurnaceBlockEntity entity = cause.first(FurnaceBlockEntity.class)
                 .orElseThrow(() -> new IllegalStateException("Expected to have a FurnaceBlockEntity in the Cause"));
         final AbstractFurnaceBlockEntityMixin_Vanilla mixinSelf = MixinTargetHelper.cast(entity);
 
         final List<SlotTransaction> transactions = new ArrayList<>();
-        $$4.grow(1);
-        final ItemStackSnapshot originalSmeltItem = ItemStackUtil.snapshotOf($$4);
-        $$4.shrink(1);
-        transactions.add(new SlotTransaction(entity.inventory().slot(0).get(), originalSmeltItem, ItemStackUtil.snapshotOf($$4)));
+        itemIn.grow(1);
+        final ItemStackSnapshot originalSmeltItem = ItemStackUtil.snapshotOf(itemIn);
+        itemIn.shrink(1);
+        transactions.add(new SlotTransaction(entity.inventory().slot(0).get(), originalSmeltItem, ItemStackUtil.snapshotOf(itemIn)));
 
         final boolean hasFuel = !mixinSelf.vanilla$filledWaterBucket;
         if (mixinSelf.vanilla$filledWaterBucket) {
@@ -159,17 +156,17 @@ public abstract class AbstractFurnaceBlockEntityMixin_Vanilla extends BaseContai
         }
         mixinSelf.vanilla$filledWaterBucket = false;
 
-        if ($$6.isEmpty()) {
-            transactions.add(new SlotTransaction(entity.inventory().slot(2).get(), ItemStackSnapshot.empty(), ItemStackUtil.snapshotOf($$5)));
-        } else if (ItemStack.isSameItemSameComponents($$6, $$5)) {
-            $$6.shrink(1);
-            final ItemStackSnapshot originalResult = ItemStackUtil.snapshotOf($$6);
-            $$6.grow(1);
-            transactions.add(new SlotTransaction(entity.inventory().slot(2).get(), originalResult, ItemStackUtil.snapshotOf($$6)));
+        if (itemOut.isEmpty()) {
+            transactions.add(new SlotTransaction(entity.inventory().slot(2).get(), ItemStackSnapshot.empty(), ItemStackUtil.snapshotOf(recipeResult)));
+        } else if (ItemStack.isSameItemSameComponents(itemOut, recipeResult)) {
+            itemOut.shrink(1);
+            final ItemStackSnapshot originalResult = ItemStackUtil.snapshotOf(itemOut);
+            itemOut.grow(1);
+            transactions.add(new SlotTransaction(entity.inventory().slot(2).get(), originalResult, ItemStackUtil.snapshotOf(itemOut)));
         }
         final Optional<ItemStackSnapshot> fuel = hasFuel && !slots.get(1).isEmpty() ? Optional.of(ItemStackUtil.snapshotOf(slots.get(1))) : Optional.empty();
         final CookingEvent.Finish event = SpongeEventFactory.createCookingEventFinish(cause, entity,
-            fuel, Optional.ofNullable((CookingRecipe) recipe.value()), Optional.of((ResourceKey) (Object) recipe.id()), Collections.unmodifiableList(transactions));
+            fuel, Optional.of((CookingRecipe) recipe.value()), Optional.of((ResourceKey) (Object) recipe.id()), Collections.unmodifiableList(transactions));
         SpongeCommon.post(event);
 
         for (final SlotTransaction transaction : transactions) {

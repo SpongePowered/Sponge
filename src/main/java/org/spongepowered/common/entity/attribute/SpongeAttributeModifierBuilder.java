@@ -24,33 +24,28 @@
  */
 package org.spongepowered.common.entity.attribute;
 
+import net.minecraft.resources.ResourceLocation;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.attribute.AttributeModifier;
 import org.spongepowered.api.entity.attribute.AttributeOperation;
 
 import java.util.Objects;
-import java.util.UUID;
 
 public final class SpongeAttributeModifierBuilder implements AttributeModifier.Builder {
     // Use a random id
-    private UUID id = UUID.randomUUID();
-    private String name;
     private AttributeOperation operation;
     private double amount;
+    private ResourceLocation key;
 
     public SpongeAttributeModifierBuilder() {
     }
 
     @Override
-    public AttributeModifier.Builder id(final UUID id) {
-        this.id = Objects.requireNonNull(id, "Modifier id cannot be null");
+    public AttributeModifier.Builder key(final ResourceKey key) {
+        this.key = (ResourceLocation) (Object) key;
         return this;
     }
 
-    @Override
-    public AttributeModifier.Builder name(final String name) {
-        this.name = Objects.requireNonNull(name, "Name cannot be null");
-        return this;
-    }
 
     @Override
     public AttributeModifier.Builder operation(final AttributeOperation operation) {
@@ -66,16 +61,15 @@ public final class SpongeAttributeModifierBuilder implements AttributeModifier.B
 
     @Override
     public AttributeModifier build() {
-        Objects.requireNonNull(this.name, "Name must be set");
+        Objects.requireNonNull(this.key, "ResourceKey must be set");
         Objects.requireNonNull(this.operation, "Operation must be set");
-        return (AttributeModifier) (Object) new net.minecraft.world.entity.ai.attributes.AttributeModifier(this.id, this.name, this.amount, (net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation) (Object) this.operation);
+        return (AttributeModifier) (Object) new net.minecraft.world.entity.ai.attributes.AttributeModifier(this.key, this.amount, (net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation) (Object) this.operation);
     }
 
     @Override
     public AttributeModifier.Builder reset() {
         // Randomize id when reset
-        this.id = UUID.randomUUID();
-        this.name = null;
+        this.key = null;
         this.amount = 0.0D;
         this.operation = null;
         return this;

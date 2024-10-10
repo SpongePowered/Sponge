@@ -31,10 +31,10 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.SingleItemRecipe;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
 import org.spongepowered.common.bridge.world.item.crafting.RecipeResultBridge;
 import org.spongepowered.common.item.recipe.ResultFunctionRecipe;
@@ -88,11 +88,11 @@ public class SpongeStonecuttingRecipe extends StonecutterRecipe implements Resul
     }
 
     @Override
-    public ItemStack assemble(final Container container, final HolderLookup.Provider $$1) {
+    public ItemStack assemble(final SingleRecipeInput $$0, final HolderLookup.Provider $$1) {
         if (this.resultFunctionId != null) {
-            return IngredientResultUtil.cachedResultFunction(this.resultFunctionId).apply(container);
+            return IngredientResultUtil.cachedResultFunction(this.resultFunctionId).apply($$0);
         }
-        return super.assemble(container, $$1);
+        return super.assemble($$0, $$1);
     }
 
     @Override

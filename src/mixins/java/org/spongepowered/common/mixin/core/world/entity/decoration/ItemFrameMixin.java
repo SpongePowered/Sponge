@@ -25,37 +25,21 @@
 package org.spongepowered.common.mixin.core.world.entity.decoration;
 
 import net.minecraft.world.damagesource.DamageSource;
-import org.spongepowered.api.entity.hanging.ItemFrame;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.entity.AttackEntityEvent;
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-
-import java.util.ArrayList;
+import org.spongepowered.common.util.DamageEventUtil;
 
 @Mixin(net.minecraft.world.entity.decoration.ItemFrame.class)
 public abstract class ItemFrameMixin extends HangingEntityMixin {
 
-    @Inject(method = "hurt",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/decoration/ItemFrame;dropItem(Lnet/minecraft/world/entity/Entity;Z)V"
-        ),
-        cancellable = true)
-    private void onAttackEntityFrom(final DamageSource source, final float amount,
-        final CallbackInfoReturnable<Boolean> cir) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(source);
-            final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.currentCause(), (ItemFrame) this, new ArrayList<>(), 0, amount);
-            SpongeCommon.post(event);
-            if (event.isCancelled()) {
-                cir.setReturnValue(true);
-            }
+    @Inject(method = "hurt", cancellable = true, at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/decoration/ItemFrame;dropItem(Lnet/minecraft/world/entity/Entity;Z)V"))
+    private void attackImpl$onAttackEntityFrom(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
+        if (DamageEventUtil.callOtherAttackEvent((Entity) (Object) this, source, amount).isCancelled()) {
+            cir.setReturnValue(true);
         }
     }
 

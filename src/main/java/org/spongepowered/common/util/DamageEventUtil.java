@@ -26,45 +26,51 @@ package org.spongepowered.common.util;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.CombatRules;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.AABB;
-import org.spongepowered.api.Server;
-import org.spongepowered.api.effect.potion.PotionEffect;
-import org.spongepowered.api.entity.FallingBlock;
+import org.apache.commons.lang3.mutable.MutableFloat;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
+import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierTypes;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.event.entity.AttackEntityEvent;
+import org.spongepowered.api.event.entity.DamageEntityEvent;
+import org.spongepowered.api.registry.DefaultedRegistryReference;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.world.damagesource.DamageSourceBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
+import org.spongepowered.common.event.cause.entity.damage.SpongeDamageSources;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.DoubleUnaryOperator;
@@ -72,99 +78,57 @@ import java.util.function.Predicate;
 
 public final class DamageEventUtil {
 
-    public static final DoubleUnaryOperator HARD_HAT_FUNCTION = damage -> -(damage - (damage * 0.75F));
-
     private DamageEventUtil() {
     }
 
-    public static DoubleUnaryOperator createResistanceFunction(final int resistanceAmplifier) {
-        final int base = (resistanceAmplifier + 1) * 5;
-        final int modifier = 25 - base;
-        return damage -> -(damage - (Math.max(((damage * modifier) / 25.0F), 0.0f)));
-    }
 
     @SuppressWarnings("ConstantConditions")
-    public static Optional<DamageFunction> createHardHatModifier(final LivingEntity living, final DamageSource damageSource) {
-        if (damageSource.getDirectEntity() instanceof FallingBlock && !living.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
-            final DamageModifier modifier = DamageModifier.builder()
-                    // TODO - Event Context Key for Helmet
-                    .cause(Cause.of(EventContext.empty(), ((ItemStack) (Object) living.getItemBySlot(EquipmentSlot.HEAD)).createSnapshot()))
-                    .type(DamageModifierTypes.HARD_HAT)
-                    .build();
-            return Optional.of(new DamageFunction(modifier, DamageEventUtil.HARD_HAT_FUNCTION));
-        }
-        return Optional.empty();
+    public static DamageFunction createHardHatModifier(final ItemStack headItem, final float multiplier) {
+        final var snapshot = ItemStackUtil.snapshotOf(headItem);
+        final var modifier = DamageEventUtil.buildDamageReductionModifier(DamageModifierTypes.HARD_HAT, snapshot);
+        return new DamageFunction(modifier, damage -> damage * multiplier);
     }
 
-    public static Optional<DamageFunction> createArmorModifiers(final LivingEntity living, final DamageSource damageSource) {
-        if (damageSource.is(DamageTypeTags.BYPASSES_ARMOR)) {
-            return Optional.empty();
-        }
+    /**
+     * LivingEntity#getDamageAfterArmorAbsorb
+     */
+    public static DamageFunction createArmorModifiers(final LivingEntity living, final DamageSource damageSource) {
+        final DoubleUnaryOperator function = dmg -> CombatRules.getDamageAfterAbsorb(living, (float) dmg,
+                damageSource, living.getArmorValue(), (float) living.getAttributeValue(Attributes.ARMOR_TOUGHNESS));
+        final var modifier = DamageEventUtil.buildDamageReductionModifierWithFrame(DamageModifierTypes.ARMOR, living, Attributes.ARMOR_TOUGHNESS);
 
-        final DoubleUnaryOperator function = incomingDamage -> -(incomingDamage - CombatRules.getDamageAfterAbsorb((float) incomingDamage, damageSource, living.getArmorValue(), (float) living.getAttributeValue(Attributes.ARMOR_TOUGHNESS)));
-        final DamageFunction armorModifier;
-        try (final CauseStackManager.StackFrame frame = ((Server) living.getServer()).causeStackManager().pushCauseFrame()){
-            frame.pushCause(living);
-            frame.pushCause(Attributes.ARMOR_TOUGHNESS);
-            armorModifier = DamageFunction.of(DamageModifier.builder()
-                .cause(frame.currentCause())
-                .type(DamageModifierTypes.ARMOR)
-                .build(), function);
-        }
-
-        return Optional.of(armorModifier);
+        return DamageFunction.of(modifier, function);
     }
 
-    public static Optional<DamageFunction> createResistanceModifier(final LivingEntity living, final DamageSource damageSource) {
-        final PotionEffect effect = ((PotionEffect) living.getEffect(MobEffects.DAMAGE_RESISTANCE));
-
-        if (effect != null &&
-            !damageSource.is(DamageTypeTags.BYPASSES_EFFECTS) &&
-            !damageSource.is(DamageTypeTags.BYPASSES_RESISTANCE)) {
-            return Optional.of(new DamageFunction(DamageModifier.builder()
-                    .cause(Cause.of(EventContext.empty(), effect))
-                    .type(DamageModifierTypes.DEFENSIVE_POTION_EFFECT)
-                    .build(), DamageEventUtil.createResistanceFunction(effect.amplifier())));
-        }
-        return Optional.empty();
+    /**
+     * LivingEntity#getDamageAfterMagicAbsorb
+     */
+    public static DamageFunction createResistanceModifier(final LivingEntity living) {
+        final var effect = living.getEffect(MobEffects.DAMAGE_RESISTANCE);
+        var modifier = DamageEventUtil.buildDamageReductionModifier(DamageModifierTypes.DEFENSIVE_POTION_EFFECT, effect);
+        return new DamageFunction(modifier, DamageEventUtil.createResistanceFunction(living));
     }
 
-    public static Optional<List<DamageFunction>> createEnchantmentModifiers(final LivingEntity living, final DamageSource damageSource) {
-        if (damageSource.is(DamageTypeTags.BYPASSES_ENCHANTMENTS)) {
-            return Optional.empty();
-        }
-        final Iterable<net.minecraft.world.item.ItemStack> inventory = living.getArmorSlots();
-        final int damageProtection = EnchantmentHelper.getDamageProtection(inventory, damageSource);
-        if (damageProtection <= 0) {
-            return Optional.empty();
-        }
-        final List<DamageFunction> modifiers = new ArrayList<>();
-        final DoubleUnaryOperator enchantmentFunction = incomingDamage -> -(incomingDamage - CombatRules.getDamageAfterMagicAbsorb((float) incomingDamage, damageProtection));
-        try (final CauseStackManager.StackFrame frame = ((Server) living.getServer()).causeStackManager().pushCauseFrame()) {
-            frame.pushCause(living);
-            final DamageModifier enchantmentModifier = DamageModifier.builder()
-                .cause(frame.currentCause())
-                .type(DamageModifierTypes.ARMOR_ENCHANTMENT)
-                .build();
-            modifiers.add(new DamageFunction(enchantmentModifier, enchantmentFunction));
-        }
-
-        return Optional.of(modifiers);
-
+    public static DoubleUnaryOperator createResistanceFunction(final LivingEntity living) {
+        final var effect = living.getEffect(MobEffects.DAMAGE_RESISTANCE);
+        final int base = effect == null ? 0 : (effect.getAmplifier() + 1) * 5;
+        final int modifier = 25 - base;
+        return damage -> Math.max(((damage * modifier) / 25.0F), 0.0f);
     }
 
-    public static Optional<DamageFunction> createAbsorptionModifier(final LivingEntity living) {
-        final float absorptionAmount = living.getAbsorptionAmount();
-        if (absorptionAmount > 0) {
-            final DoubleUnaryOperator function = damage ->
-                    -(Math.max(damage - Math.max(damage - absorptionAmount, 0.0F), 0.0F));
-            final DamageModifier modifier = DamageModifier.builder()
-                    .cause(Cause.of(EventContext.empty(), living))
-                    .type(DamageModifierTypes.ABSORPTION)
-                    .build();
-            return Optional.of(new DamageFunction(modifier, function));
-        }
-        return Optional.empty();
+
+    /**
+     * LivingEntity#getDamageAfterMagicAbsorb
+     */
+    public static DamageFunction createEnchantmentModifiers(final LivingEntity living, final float damageProtection) {
+        final DoubleUnaryOperator func = damage -> CombatRules.getDamageAfterMagicAbsorb((float) damage, damageProtection);
+        final var modifier = DamageEventUtil.buildDamageReductionModifierWithFrame(DamageModifierTypes.ARMOR_ENCHANTMENT, living);
+        return new DamageFunction(modifier, func);
+    }
+
+    public static DamageFunction createAbsorptionModifier(final LivingEntity living, final float absorptionAmount) {
+        final var modifier = DamageEventUtil.buildDamageReductionModifier(DamageModifierTypes.ABSORPTION, living);
+        return new DamageFunction(modifier, damage -> Math.max(damage - absorptionAmount, 0.0F));
     }
 
     public static ServerLocation findFirstMatchingBlock(final Entity entity, final AABB bb, final Predicate<BlockState> predicate) {
@@ -215,68 +179,251 @@ public final class DamageEventUtil {
         frame.pushCause(damageSource);
     }
 
-    public static List<DamageFunction> createAttackEnchantmentFunction(final net.minecraft.world.item.ItemStack heldItem,
-            final EntityType<?> entityType, final float attackStrength) {
-        if (heldItem.isEmpty()) {
-            return Collections.emptyList();
-        }
+    /**
+     * Mirrors {@link EnchantmentHelper#modifyDamage}
+     */
+    public static List<DamageFunction> createAttackEnchantmentFunction(final ItemStack weapon, final Entity entity, final DamageSource damageSource) {
+        final var enchantments = weapon.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
+        final var snapshot = ItemStackUtil.snapshotOf(weapon);
 
-        final ItemEnchantments enchantmentCompounds = heldItem.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
-        if (enchantmentCompounds.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        final List<DamageFunction> damageModifierFunctions = new ArrayList<>();
-        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(heldItem);
-
-        for (final var entry : enchantmentCompounds.entrySet()) {
+        return enchantments.entrySet().stream().map(entry -> {
             final var enchantment = entry.getKey().value();
             final int level = entry.getIntValue();
 
-            final DamageModifier enchantmentModifier = DamageModifier.builder()
-                    .type(DamageModifierTypes.WEAPON_ENCHANTMENT)
-                    .cause(Cause.of(EventContext.empty(), snapshot, enchantment))
-                    .build();
-            final DoubleUnaryOperator enchantmentFunction = (damage) -> {
-                double totalDamage = 0;
-                totalDamage += enchantment.getDamageBonus(level, entityType) * attackStrength;
-                return totalDamage;
-            };
-            damageModifierFunctions.add(new DamageFunction(enchantmentModifier, enchantmentFunction));
-        }
+            final var modifier = DamageEventUtil.buildAttackEnchantmentModifier(DamageModifierTypes.WEAPON_ENCHANTMENT, snapshot, enchantment);
 
-        return damageModifierFunctions;
+            return new DamageFunction(modifier, damage ->
+                    DamageEventUtil.enchantmentDamageFunction(weapon, entity, damageSource, damage, enchantment, level));
+        }).toList();
     }
 
-    public static DamageFunction provideCriticalAttackTuple(final Player player, double criticalModifier) {
-        final DamageModifier modifier = DamageModifier.builder()
-                .cause(Cause.of(EventContext.empty(), player))
-                .type(DamageModifierTypes.CRITICAL_HIT)
-                .build();
+    public static DamageFunction provideSeparateEnchantmentFromBaseDamageFunction(final float baseDamage, final ItemStack weapon) {
+        final var modifier = DamageEventUtil.buildAttackEnchantmentModifier(DamageModifierTypes.WEAPON_ENCHANTMENT, ItemStackUtil.snapshotOf(weapon));
+        return new DamageFunction(modifier, damage -> damage - baseDamage);
+    }
+
+    public static DamageFunction provideCooldownEnchantmentStrengthFunction(final ItemStack weapon, final float attackStrength) {
+        final var snapshot = ItemStackUtil.snapshotOf(weapon);
+        final var modifier = DamageEventUtil.buildAttackEnchantmentModifier(DamageModifierTypes.ATTACK_STRENGTH, snapshot);
+        return new DamageFunction(modifier, damage -> damage * attackStrength);
+    }
+
+    private static double enchantmentDamageFunction(final ItemStack weapon, final Entity entity,
+            final DamageSource damageSource, final double damage, final Enchantment enchantment, final int level) {
+        var totalDamage = new MutableFloat(damage);
+        enchantment.modifyDamage((ServerLevel) entity.level(), level, weapon, entity, damageSource, totalDamage);
+        return totalDamage.doubleValue();
+    }
+
+    public static DamageFunction provideCriticalAttackFunction(final Player player, double criticalModifier) {
+        final var modifier = DamageEventUtil.buildAttackDamageModifier(DamageModifierTypes.CRITICAL_HIT, player);
         final DoubleUnaryOperator function = (damage) -> damage * criticalModifier;
         return new DamageFunction(modifier, function);
     }
 
     public static DamageFunction provideCooldownAttackStrengthFunction(final Player player, final float attackStrength) {
-        final DamageModifier modifier = DamageModifier.builder()
-                .cause(Cause.of(EventContext.empty(), player))
-                .type(DamageModifierTypes.ATTACK_COOLDOWN)
-                .build();
-        // The formula is as follows:
-        // Since damage needs to be "multiplied", this needs to basically add negative damage but re-add the "reduced" damage.
-        final DoubleUnaryOperator function = (damage) -> -damage + (damage * (0.2F + attackStrength * attackStrength * 0.8F));
+        final var modifier = DamageEventUtil.buildAttackDamageModifier(DamageModifierTypes.ATTACK_STRENGTH, player);
+        final DoubleUnaryOperator function = (damage) -> damage * (0.2F + attackStrength * attackStrength * 0.8F);
         return new DamageFunction(modifier, function);
     }
 
+    public static DamageFunction provideWeaponAttackDamageBonusFunction(final Entity targetEntity, final ItemStack weapon, final DamageSource damageSource) {
+        final var modifier = DamageEventUtil.buildAttackDamageModifier(DamageModifierTypes.WEAPON_BONUS, targetEntity);
+        final DoubleUnaryOperator function = (damage) -> damage + weapon.getItem().getAttackDamageBonus(targetEntity, (float) damage, damageSource);
+        return new DamageFunction(modifier, function);
+    }
+
+    public static DamageFunction provideSweepingDamageRatioFunction(final ItemStack held, final Player player, final double attackDamage) {
+        final var modifier = DamageEventUtil.buildAttackEnchantmentModifier(DamageModifierTypes.SWEEPING, ItemStackUtil.snapshotOf(held));
+        return DamageFunction.of(modifier, damage -> damage + player.getAttributeValue(Attributes.SWEEPING_DAMAGE_RATIO) * attackDamage);
+    }
+
     @SuppressWarnings("ConstantConditions")
-    public static Optional<DamageFunction> createShieldFunction(final LivingEntity entity, final DamageSource source, final float amount) {
-        if (entity.isBlocking() && amount > 0.0 && ((LivingEntityAccessor) entity).invoker$isDamageSourceBlocked(source)) {
-            final DamageModifier modifier = DamageModifier.builder()
-                    .cause(Cause.of(EventContext.empty(), entity, ((ItemStack) (Object) entity.getUseItem()).createSnapshot()))
-                    .type(DamageModifierTypes.SHIELD)
-                    .build();
-            return Optional.of(new DamageFunction(modifier, (damage) -> -damage));
+    public static DamageFunction createShieldFunction(final LivingEntity entity) {
+        final var snapshot = ItemStackUtil.snapshotOf(entity.getUseItem());
+        final var modifier = DamageEventUtil.buildDamageReductionModifier(DamageModifierTypes.SHIELD, entity, snapshot);
+        return new DamageFunction(modifier, (damage) -> 0);
+    }
+
+    public static DamageFunction createFreezingBonus(final LivingEntity entity, final DamageSource damageSource, float multiplier) {
+        final var modifier = DamageEventUtil.buildDamageReductionModifier(DamageModifierTypes.FREEZING_BONUS, damageSource, entity);
+        return new DamageFunction(modifier, (damage) -> damage * multiplier);
+    }
+
+    private static DamageModifier buildDamageReductionModifierWithFrame(final DefaultedRegistryReference<DamageModifierType> modifierType, Object... causes) {
+        try (final CauseStackManager.StackFrame frame = Sponge.server().causeStackManager().pushCauseFrame()) {
+            for (final Object cause : causes) {
+                frame.pushCause(cause);
+            }
+            return DamageModifier.builder().damageReductionGroup()
+                    .cause(frame.currentCause()).type(modifierType).build();
         }
-        return Optional.empty();
+    }
+
+    private static DamageModifier buildAttackDamageModifier(final DefaultedRegistryReference<DamageModifierType> modifierType, Object... causes) {
+        return DamageModifier.builder().attackDamageGroup()
+                .cause(Cause.of(EventContext.empty(), Arrays.asList(causes))).type(modifierType).build();
+    }
+
+    private static DamageModifier buildAttackEnchantmentModifier(final DefaultedRegistryReference<DamageModifierType> modifierType, Object... causes) {
+        return DamageModifier.builder().attackEnchantmentGroup()
+                .cause(Cause.of(EventContext.empty(), Arrays.asList(causes))).type(modifierType).build();
+    }
+
+    private static DamageModifier buildDamageReductionModifier(final DefaultedRegistryReference<DamageModifierType> modifierType, Object... causes) {
+        return DamageModifier.builder().damageReductionGroup()
+                .cause(Cause.of(EventContext.empty(), Arrays.asList(causes))).type(modifierType).build();
+    }
+
+    public static AttackEntityEvent callPlayerAttackEntityEvent(final Attack<Player> attack, final float knockbackModifier) {
+        final boolean isMainthread = !attack.sourceEntity().level().isClientSide;
+        if (isMainthread) {
+            PhaseTracker.getInstance().pushCause(attack.dmgSource());
+        }
+        final var currentCause = isMainthread
+                ? PhaseTracker.getInstance().currentCause()
+                : Cause.of(EventContext.empty(), attack.dmgSource());
+        final var event = attack.postEvent(knockbackModifier, currentCause);
+        if (isMainthread) {
+            PhaseTracker.getInstance().popCause();
+        }
+        return event;
+    }
+
+    /**
+     * {@link Mob#doHurtTarget}
+     */
+    public static AttackEntityEvent callMobAttackEvent(final Attack<Mob> attack, final float knockbackModifier) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(attack.dmgSource());
+            return attack.postEvent(knockbackModifier, frame.currentCause());
+        }
+    }
+
+    /**
+     * For {@link Entity#hurt} overrides without super call:
+     * {@link net.minecraft.world.entity.decoration.BlockAttachedEntity#hurt}
+     * {@link net.minecraft.world.entity.vehicle.VehicleEntity#hurt}
+     * {@link net.minecraft.world.entity.decoration.ItemFrame#hurt}
+     * {@link net.minecraft.world.entity.vehicle.MinecartTNT#hurt}
+     * {@link net.minecraft.world.entity.boss.enderdragon.EndCrystal#hurt}
+     * {@link net.minecraft.world.entity.projectile.ShulkerBullet#hurt}
+     * {@link net.minecraft.world.entity.ExperienceOrb#hurt}
+     * {@link net.minecraft.world.entity.item.ItemEntity#hurt}
+     */
+    public static AttackEntityEvent callOtherAttackEvent(
+            final Entity targetEntity,
+            final DamageSource damageSource,
+            final double damage) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(damageSource);
+            final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.currentCause(), (org.spongepowered.api.entity.Entity) targetEntity, new ArrayList<>(), 0, damage);
+            SpongeCommon.post(event);
+            return event;
+        }
+    }
+
+    public static DamageEventResult callLivingDamageEntityEvent(final Hurt hurt, final ActuallyHurt actuallyHurt) {
+
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            DamageEventUtil.generateCauseFor(actuallyHurt.dmgSource(), frame);
+
+            final List<DamageFunction> originalFunctions = new ArrayList<>();
+            originalFunctions.addAll(hurt.functions());
+            originalFunctions.addAll(actuallyHurt.functions());
+            final var event = SpongeEventFactory.createDamageEntityEvent(frame.currentCause(),
+                    (org.spongepowered.api.entity.Entity) actuallyHurt.entity(),
+                    originalFunctions,
+                    actuallyHurt.baseDamage());
+
+            if (actuallyHurt.dmgSource() != SpongeDamageSources.IGNORED) { // Basically, don't throw an event if it's our own damage source
+                SpongeCommon.post(event);
+            }
+
+            return new DamageEventResult(event,
+                    actuallyHurt.dmgSource(),
+                    DamageEventUtil.findDamageBefore(event, DamageModifierTypes.SHIELD),
+                    DamageEventUtil.findDamageDifference(event, DamageModifierTypes.SHIELD),
+                    DamageEventUtil.findDamageBefore(event, DamageModifierTypes.HARD_HAT),
+                    DamageEventUtil.findDamageBefore(event, DamageModifierTypes.ARMOR),
+                    DamageEventUtil.findDamageDifference(event, DamageModifierTypes.DEFENSIVE_POTION_EFFECT), // TODO Math.max(0, resisted)?
+                    DamageEventUtil.findDamageDifference(event, DamageModifierTypes.ABSORPTION)
+            );
+        }
+
+    }
+
+    private static Optional<Float> findDamageDifference(DamageEntityEvent event, DefaultedRegistryReference<DamageModifierType> type) {
+        return DamageEventUtil.findModifier(event, type).map(event::damage).map(tuple -> tuple.first() - tuple.second()).map(Double::floatValue);
+    }
+
+
+    private static Optional<Float> findDamageBefore(DamageEntityEvent event, DefaultedRegistryReference<DamageModifierType> type) {
+        return DamageEventUtil.findModifier(event, type).map(event::damage).map(Tuple::first).map(Double::floatValue);
+    }
+
+    private static Optional<DamageModifier> findModifier(DamageEntityEvent event, DefaultedRegistryReference<DamageModifierType> type) {
+        return event.originalFunctions().stream()
+                .map(DamageFunction::modifier)
+                .filter(mod -> type.get().equals(mod.type()))
+                .findFirst();
+    }
+
+
+    public static DamageEntityEvent callSimpleDamageEntityEvent(final DamageSource source, final Entity targetEntity, final double amount) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            DamageEventUtil.generateCauseFor(source, frame);
+            final var event = SpongeEventFactory.createDamageEntityEvent(frame.currentCause(), (org.spongepowered.api.entity.Entity) targetEntity, new ArrayList<>(), amount);
+            SpongeCommon.post(event);
+            return event;
+        }
+    }
+
+
+
+
+    public record DamageEventResult(DamageEntityEvent event,
+                                    DamageSource source,
+                                    Optional<Float> damageToShield,
+                                    Optional<Float> damageBlockedByShield,
+                                    Optional<Float> damageToHelmet,
+                                    Optional<Float> damageToArmor,
+                                    Optional<Float> damageResisted,
+                                    Optional<Float> damageAbsorbed
+    ) {
+
+    }
+
+
+    public record Hurt(DamageSource dmgSource, List<DamageFunction> functions) {
+
+    }
+
+    public record ActuallyHurt(LivingEntity entity,
+                               List<DamageFunction> functions,
+                               DamageSource dmgSource,
+                               float baseDamage) {
+
+    }
+
+    public record Attack<T>(T sourceEntity,
+                            Entity target,
+                            ItemStack weapon,
+                            DamageSource dmgSource,
+                            float strengthScale,
+                            float baseDamage,
+                            List<DamageFunction> functions) {
+
+        private AttackEntityEvent postEvent(final float knockbackModifier, final Cause cause) {
+            final var event = SpongeEventFactory.createAttackEntityEvent(
+                    cause,
+                    (org.spongepowered.api.entity.Entity) this.target,
+                    this.functions,
+                    knockbackModifier,
+                    this.baseDamage);
+            SpongeCommon.post(event);
+            return event;
+        }
+
     }
 }

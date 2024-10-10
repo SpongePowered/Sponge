@@ -27,9 +27,9 @@ package org.spongepowered.common.item.recipe.crafting.shapeless;
 import net.minecraft.core.NonNullList;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
@@ -43,21 +43,21 @@ import java.util.List;
 import java.util.function.Function;
 
 public class SpongeShapelessCraftingRecipeRegistration extends SpongeRecipeRegistration<ShapelessRecipe> implements
-        SpongeRecipeRegistration.ResultFunctionRegistration<CraftingContainer>,
-        SpongeRecipeRegistration.RemainingItemsFunctionRegistration<CraftingContainer>
+        SpongeRecipeRegistration.ResultFunctionRegistration<CraftingInput>,
+        SpongeRecipeRegistration.RemainingItemsFunctionRegistration<CraftingInput>
 {
     // Vanilla Recipe
     private final List<Ingredient> ingredients;
 
     // Sponge Recipe
     private final ItemStack spongeResult;
-    private final Function<CraftingContainer, ItemStack> resultFunction;
-    private final Function<CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction;
+    private final Function<CraftingInput, ItemStack> resultFunction;
+    private final Function<CraftingInput, NonNullList<ItemStack>> remainingItemsFunction;
     private final CraftingBookCategory craftingBookCategory;
 
     public SpongeShapelessCraftingRecipeRegistration(final ResourceLocation key, final String group,
-            final List<Ingredient> ingredients, final ItemStack spongeResult, final Function<CraftingContainer, ItemStack> resultFunction,
-            final Function<CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction,
+            final List<Ingredient> ingredients, final ItemStack spongeResult, final Function<CraftingInput, ItemStack> resultFunction,
+            final Function<CraftingInput, NonNullList<ItemStack>> remainingItemsFunction,
             final DataPack<RecipeRegistration> pack, final RecipeCategory category, final CraftingBookCategory craftingBookCategory) {
         super(key, group, pack, category, RecipeSerializer.SHAPELESS_RECIPE);
         this.ingredients = ingredients;
@@ -69,12 +69,12 @@ public class SpongeShapelessCraftingRecipeRegistration extends SpongeRecipeRegis
 
 
     @Override
-    public Function<CraftingContainer, ItemStack> resultFunction() {
+    public Function<CraftingInput, ItemStack> resultFunction() {
         return this.resultFunction;
     }
 
     @Override
-    public Function<CraftingContainer, NonNullList<ItemStack>> remainingItems() {
+    public Function<CraftingInput, NonNullList<ItemStack>> remainingItems() {
         return this.remainingItemsFunction;
     }
 

@@ -26,6 +26,7 @@ package org.spongepowered.common.item.util;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 
 import java.util.Arrays;
@@ -142,11 +143,11 @@ public abstract class ItemStackUtil {
         if (itemStack == null) {
             return ItemStackSnapshot.empty();
         }
-        return itemStack.isEmpty() ? ItemStackSnapshot.empty() : ItemStackUtil.fromNative(itemStack).createSnapshot();
+        return itemStack.isEmpty() ? ItemStackSnapshot.empty() : ItemStackUtil.fromNative(itemStack).asImmutable();
     }
 
-    public static ItemStackSnapshot snapshotOf(@Nullable ItemStack itemStack) {
-        return itemStack == null ? ItemStackSnapshot.empty() : itemStack.isEmpty() ? ItemStackSnapshot.empty() : itemStack.createSnapshot();
+    public static ItemStackSnapshot snapshotOf(@Nullable ItemStackLike itemStack) {
+        return itemStack == null ? ItemStackSnapshot.empty() : itemStack.isEmpty() ? ItemStackSnapshot.empty() : itemStack.asImmutable();
     }
 
     public static List<ItemStackSnapshot> snapshotOf(final List<net.minecraft.world.item.ItemStack> items) {
@@ -155,11 +156,15 @@ public abstract class ItemStackUtil {
 
     public static net.minecraft.world.item.ItemStack fromSnapshotToNative(@Nullable ItemStackSnapshot snapshot) {
         return snapshot == null ? ItemStackUtil.emptyNative() : snapshot == ItemStackSnapshot.empty() ? ItemStackUtil.emptyNative() : ItemStackUtil
-            .toNative(snapshot.createStack());
+            .toNative(snapshot.asMutable());
     }
 
     public static ItemStack fromSnapshot(@Nullable ItemStackSnapshot snapshot) {
-        return snapshot == null ? ItemStackUtil.empty() : snapshot.isEmpty() ? ItemStackUtil.empty() : snapshot.createStack();
+        return snapshot == null ? ItemStackUtil.empty() : snapshot.isEmpty() ? ItemStackUtil.empty() : snapshot.asMutable();
+    }
+
+    public static net.minecraft.world.item.ItemStack fromLikeToNative(@Nullable ItemStackLike itemStack) {
+        return itemStack == null ? ItemStackUtil.emptyNative() : itemStack.isEmpty() ? ItemStackUtil.emptyNative() : ItemStackUtil.toNative(itemStack.asMutable());
     }
 
     public static ItemStack empty() {

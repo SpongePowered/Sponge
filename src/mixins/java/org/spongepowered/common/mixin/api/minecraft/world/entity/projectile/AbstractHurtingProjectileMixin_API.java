@@ -27,13 +27,13 @@ package org.spongepowered.common.mixin.api.minecraft.world.entity.projectile;
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.entity.projectile.DamagingProjectile;
+import org.spongepowered.api.entity.projectile.AcceleratingProjectile;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Set;
 
 @Mixin(AbstractHurtingProjectile.class)
-public abstract class AbstractHurtingProjectileMixin_API extends ProjectileMixin_API implements DamagingProjectile {
+public abstract class AbstractHurtingProjectileMixin_API extends ProjectileMixin_API implements AcceleratingProjectile {
 
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {

@@ -58,7 +58,7 @@ import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.api.item.inventory.ContainerTypes;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.registry.DefaultedRegistryReference;
@@ -214,8 +214,8 @@ public final class SpongeViewableInventoryBuilder implements ViewableInventory.B
     }
     // dummy
     @Override
-    public BuildingStep item(ItemStackSnapshot item) {
-        this.lastSlot.set(item.createStack());
+    public BuildingStep item(ItemStackLike item) {
+        this.lastSlot.set(item);
         return this;
     }
 
@@ -388,9 +388,10 @@ public final class SpongeViewableInventoryBuilder implements ViewableInventory.B
         // horse is used for distance to player
         // checking HorseArmor Item in Slot
         // chested State and capacity (hasChest/getInventoryColumns) to add more Slots
+        int chestColumns = 0;
         AbstractHorse horse = null;
         ContainerTypeInfo.of(0, 0,
-                (id, i, p, vi) -> new HorseInventoryMenu(id, i, vi, horse));
+                (id, i, p, vi) -> new HorseInventoryMenu(id, i, vi, horse, chestColumns));
 
         return SpongeViewableInventoryBuilder.containerTypeInfo;
     }

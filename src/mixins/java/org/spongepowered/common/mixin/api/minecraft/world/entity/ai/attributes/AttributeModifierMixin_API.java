@@ -24,31 +24,30 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.ai.attributes;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.attribute.AttributeModifier;
 import org.spongepowered.api.entity.attribute.AttributeOperation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.UUID;
-
 @Mixin(net.minecraft.world.entity.ai.attributes.AttributeModifier.class)
 public abstract class AttributeModifierMixin_API implements AttributeModifier {
 
     // @formatter:off
-    @Shadow @Final private String name;
     @Shadow @Final private double amount;
-    @Shadow @Final private UUID id;
-
     @Shadow @Final private Operation operation;
+    @Shadow @Final private ResourceLocation id;
+
     // @formatter:on
 
 
 
     @Override
-    public String name() {
-        return this.name;
+    public ResourceKey key() {
+        return (ResourceKey) (Object) this.id;
     }
 
     @Override
@@ -60,11 +59,6 @@ public abstract class AttributeModifierMixin_API implements AttributeModifier {
     @Override
     public double amount() {
         return this.amount;
-    }
-
-    @Override
-    public UUID uniqueId() {
-        return this.id;
     }
 
 }

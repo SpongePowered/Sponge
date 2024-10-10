@@ -37,7 +37,7 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.monster.boss.dragon.EnderDragon;
-import org.spongepowered.api.entity.living.monster.slime.Slime;
+import org.spongepowered.api.entity.living.slime.Slime;
 import org.spongepowered.common.data.value.SpongeValue;
 
 public final class TypeTokenUtilTest {

@@ -27,6 +27,8 @@ package org.spongepowered.common.item.enchantment;
 
 import com.google.common.collect.Lists;
 import net.minecraft.Util;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.random.WeightedRandom;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -47,7 +49,6 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
     private @Nullable Integer seed;
     private @Nullable Integer option;
     private @Nullable Integer level;
-    private boolean treasure;
     private @Nullable List<Enchantment> pool;
     private @Nullable ItemStack item;
 
@@ -72,12 +73,6 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
     }
 
     @Override
-    public Enchantment.RandomListBuilder treasure(final boolean treasure) {
-        this.treasure = treasure;
-        return this;
-    }
-
-    @Override
     public Enchantment.RandomListBuilder fixedPool(final List<Enchantment> pool) {
         this.pool = pool;
         return this;
@@ -98,10 +93,9 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
         if (this.pool == null || this.pool.isEmpty()) {
             Objects.requireNonNull(this.item, "The item cannot be null");
             this.randomSource.setSeed(this.seed + this.option);
-            enchantments = EnchantmentHelper.selectEnchantment(SpongeCommon.server().getWorldData().enabledFeatures(),
-                    this.randomSource, ItemStackUtil.toNative(this.item), this.level, this.treasure);
-
-
+            final var registry = SpongeCommon.server().registryAccess().registryOrThrow(Registries.ENCHANTMENT);
+            var stream = registry.holders().map($$0x -> (Holder<net.minecraft.world.item.enchantment.Enchantment>)$$0x);
+            enchantments = EnchantmentHelper.selectEnchantment(this.randomSource, ItemStackUtil.toNative(this.item), this.level, stream);
         } else {
             this.randomSource.setSeed(this.seed + this.option);
             enchantments = this.basedOfFixedPool(this.randomSource, this.pool);
@@ -141,12 +135,15 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
     }
 
     public static List<Enchantment> fromNative(final List<EnchantmentInstance> list) {
-        return list.stream().map(data -> Enchantment.of(((EnchantmentType) data.enchantment), data.level)).collect(Collectors.toList());
+        return list.stream().map(data -> Enchantment.of(((EnchantmentType) (Object) data.enchantment.value()), data.level)).collect(Collectors.toList());
     }
 
     public static List<EnchantmentInstance> toNative(final List<Enchantment> list) {
-        return list.stream().map(ench ->
-                new EnchantmentInstance(((net.minecraft.world.item.enchantment.Enchantment) ench.type()), ench.level())
+        final var registry = SpongeCommon.server().registryAccess().registryOrThrow(Registries.ENCHANTMENT);
+        return list.stream().map(ench -> {
+                    var mcEnch = registry.wrapAsHolder((net.minecraft.world.item.enchantment.Enchantment) (Object) ench.type());
+                    return new EnchantmentInstance(mcEnch, ench.level());
+                }
         ).collect(Collectors.toList());
     }
 

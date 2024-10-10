@@ -58,6 +58,7 @@ public final class LivingData {
                 .asMutable(LivingEntity.class)
                     .create(Keys.ABSORPTION)
                         .get(h -> (double) h.getAbsorptionAmount())
+                        .resetOnDelete(0.0)
                         .setAnd((h, v) -> {
                             if (v < 0) {
                                 return false;
@@ -77,12 +78,39 @@ public final class LivingData {
                         .delete(LivingEntity::releaseUsingItem)
                     .create(Keys.AUTO_SPIN_ATTACK_TICKS)
                         .get(h -> Ticks.of(((LivingEntityAccessor)h).accessor$autoSpinAttackTicks()))
+                        .resetOnDelete(Ticks.zero())
                         .setAnd((h, v) -> {
                             if (v.isInfinite()) {
                                 return false;
                             }
                             if (h instanceof final Player p) {
-                                p.startAutoSpinAttack(SpongeTicks.toSaturatedIntOrInfinite(v));
+                                final var dmg = ((LivingEntityAccessor)h).accessor$autoSpinAttackDmg();
+                                final var stack = ((LivingEntityAccessor)h).accessor$autoSpinAttackItemStack();
+                                p.startAutoSpinAttack(SpongeTicks.toSaturatedIntOrInfinite(v), dmg == 0 ? 8.0F : dmg, stack);
+                                return true;
+                            }
+                            ((LivingEntityAccessor) h).accessor$autoSpinAttackTicks(SpongeTicks.toSaturatedIntOrInfinite(v));
+                            ((LivingEntityAccessor) h).invoker$setLivingEntityFlag(4, true);
+                            return true;
+                        })
+                    .create(Keys.AUTO_SPIN_ATTACK_DAMAGE)
+                        .get(h -> (double) ((LivingEntityAccessor)h).accessor$autoSpinAttackDmg())
+                        .setAnd((h, v) -> {
+                            if (h instanceof final Player p) {
+                                final var stack = ((LivingEntityAccessor)h).accessor$autoSpinAttackItemStack();
+                                final var ticks = ((LivingEntityAccessor)h).accessor$autoSpinAttackTicks();
+                                p.startAutoSpinAttack(ticks, v.floatValue(), stack);
+                                return true;
+                            }
+                            return false;
+                        })
+                    .create(Keys.AUTO_SPIN_ATTACK_WEAPON)
+                        .get(h -> ItemStackUtil.snapshotOf(((LivingEntityAccessor)h).accessor$autoSpinAttackItemStack()))
+                        .setAnd((h, v) -> {
+                            if (h instanceof final Player p) {
+                                final var ticks = ((LivingEntityAccessor)h).accessor$autoSpinAttackTicks();
+                                final var dmg = ((LivingEntityAccessor)h).accessor$autoSpinAttackDmg();
+                                p.startAutoSpinAttack(ticks, dmg, ItemStackUtil.fromSnapshotToNative(v));
                                 return true;
                             }
                             return false;
@@ -165,6 +193,7 @@ public final class LivingData {
                             final Collection<MobEffectInstance> effects = h.getActiveEffects();
                             return PotionEffectUtil.copyAsPotionEffects(effects);
                         })
+                        .delete(LivingEntity::removeAllEffects)
                         .set((h, v) -> {
                             h.removeAllEffects();
                             for (final PotionEffect effect : v) {
@@ -175,6 +204,7 @@ public final class LivingData {
                         .get(h -> (double) h.getScale())
                     .create(Keys.STUCK_ARROWS)
                         .get(LivingEntity::getArrowCount)
+                        .resetOnDelete(0)
                         .setAnd((h, v) -> {
                             if (v < 0 || v > Integer.MAX_VALUE) {
                                 return false;

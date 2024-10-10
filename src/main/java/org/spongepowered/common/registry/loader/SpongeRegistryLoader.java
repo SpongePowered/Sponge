@@ -27,8 +27,6 @@ package org.spongepowered.common.registry.loader;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.RecordItem;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorPreset;
 import net.minecraft.world.level.material.MapColor;
 import org.spongepowered.api.ResourceKey;
@@ -50,9 +48,6 @@ import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.data.type.SkinParts;
 import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.api.effect.particle.ParticleOptions;
-import org.spongepowered.api.effect.potion.PotionEffectType;
-import org.spongepowered.api.effect.sound.music.MusicDisc;
-import org.spongepowered.api.effect.sound.music.MusicDiscs;
 import org.spongepowered.api.entity.ai.goal.GoalExecutorType;
 import org.spongepowered.api.entity.ai.goal.GoalExecutorTypes;
 import org.spongepowered.api.entity.ai.goal.GoalType;
@@ -95,17 +90,15 @@ import org.spongepowered.api.service.economy.account.AccountDeletionResultTypes;
 import org.spongepowered.api.service.economy.transaction.TransactionType;
 import org.spongepowered.api.service.economy.transaction.TransactionTypes;
 import org.spongepowered.api.util.Color;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.util.orientation.Orientation;
 import org.spongepowered.api.util.orientation.Orientations;
 import org.spongepowered.api.world.ChunkRegenerateFlag;
 import org.spongepowered.api.world.ChunkRegenerateFlags;
+import org.spongepowered.api.world.PositionSource;
 import org.spongepowered.api.world.generation.config.flat.FlatGeneratorConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfigs;
-import org.spongepowered.api.world.portal.PortalType;
-import org.spongepowered.api.world.portal.PortalTypes;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.schematic.PaletteTypes;
 import org.spongepowered.api.world.weather.WeatherType;
@@ -126,7 +119,6 @@ import org.spongepowered.common.data.type.SpongeSkinPart;
 import org.spongepowered.common.economy.SpongeAccountDeletionResultType;
 import org.spongepowered.common.economy.SpongeTransactionType;
 import org.spongepowered.common.effect.particle.SpongeParticleOption;
-import org.spongepowered.common.effect.record.SpongeMusicDisc;
 import org.spongepowered.common.entity.ai.SpongeGoalExecutorType;
 import org.spongepowered.common.entity.ai.goal.SpongeGoalType;
 import org.spongepowered.common.event.cause.entity.SpongeDismountType;
@@ -157,9 +149,6 @@ import org.spongepowered.common.map.decoration.orientation.SpongeMapDecorationOr
 import org.spongepowered.common.registry.RegistryLoader;
 import org.spongepowered.common.util.SpongeOrientation;
 import org.spongepowered.common.world.SpongeChunkRegenerateFlag;
-import org.spongepowered.common.world.portal.EndPortalType;
-import org.spongepowered.common.world.portal.NetherPortalType;
-import org.spongepowered.common.world.portal.UnknownPortalType;
 import org.spongepowered.common.world.schematic.SpongePaletteType;
 import org.spongepowered.common.world.weather.SpongeWeatherType;
 import org.spongepowered.math.vector.Vector3d;
@@ -244,7 +233,10 @@ public final class SpongeRegistryLoader {
                 DamageModifierTypes.OFFENSIVE_POTION_EFFECT,
                 DamageModifierTypes.SHIELD,
                 DamageModifierTypes.SWEEPING,
-                DamageModifierTypes.WEAPON_ENCHANTMENT
+                DamageModifierTypes.WEAPON_ENCHANTMENT,
+                DamageModifierTypes.WEAPON_BONUS,
+                DamageModifierTypes.ATTACK_STRENGTH,
+                DamageModifierTypes.FREEZING_BONUS
         )));
     }
 
@@ -298,27 +290,6 @@ public final class SpongeRegistryLoader {
                 MovementTypes.PLUGIN,
                 MovementTypes.PORTAL
         )));
-    }
-
-    public static RegistryLoader<MusicDisc> musicDisc() {
-        return RegistryLoader.of(l -> {
-            // TODO ItemTags.MUSIC_DISCS to check for completion
-            l.add(MusicDiscs.BLOCKS, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_BLOCKS));
-            l.add(MusicDiscs.CAT, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_CAT));
-            l.add(MusicDiscs.CHIRP, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_CHIRP));
-            l.add(MusicDiscs.FAR, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_FAR));
-            l.add(MusicDiscs.MALL, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_MALL));
-            l.add(MusicDiscs.MELLOHI, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_MELLOHI));
-            l.add(MusicDiscs.MUSIC_DISC_5, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_5));
-            l.add(MusicDiscs.MUSIC_DISC_11, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_11));
-            l.add(MusicDiscs.MUSIC_DISC_13, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_13));
-            l.add(MusicDiscs.OTHERSIDE, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_OTHERSIDE));
-            l.add(MusicDiscs.PIGSTEP, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_PIGSTEP));
-            l.add(MusicDiscs.STAL, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_STAL));
-            l.add(MusicDiscs.STRAD, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_STRAD));
-            l.add(MusicDiscs.WAIT, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_WAIT));
-            l.add(MusicDiscs.WARD, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_WARD));
-        });
     }
 
     public static RegistryLoader<NotePitch> notePitch() {
@@ -398,24 +369,20 @@ public final class SpongeRegistryLoader {
             l.add(ParticleOptions.BLOCK_STATE, k -> new SpongeParticleOption<>(BlockState.class));
             l.add(ParticleOptions.COLOR, k -> new SpongeParticleOption<>(Color.class));
             l.add(ParticleOptions.DELAY, k -> new SpongeParticleOption<>(Double.class));
-            l.add(ParticleOptions.DIRECTION, k -> new SpongeParticleOption<>(Direction.class));
-            l.add(ParticleOptions.ITEM_STACK_SNAPSHOT, k -> new SpongeParticleOption<>(ItemStackSnapshot.class));
+            l.add(ParticleOptions.DESTINATION, k -> new SpongeParticleOption<>(PositionSource.class));
+            l.add(ParticleOptions.ITEM_STACK_SNAPSHOT, k -> new SpongeParticleOption<>(ItemStackSnapshot.class,
+                    v -> v.isEmpty() ? new IllegalArgumentException("ItemStackSnapshot must not be empty") : null));
             l.add(ParticleOptions.OFFSET, k -> new SpongeParticleOption<>(Vector3d.class));
-            l.add(ParticleOptions.POTION_EFFECT_TYPE, k -> new SpongeParticleOption<>(PotionEffectType.class));
-            l.add(ParticleOptions.QUANTITY, k -> new SpongeParticleOption<>(Integer.class, v -> v < 1 ? new IllegalArgumentException("Quantity must be at least one") : null));
+            l.add(ParticleOptions.OPACITY, k -> new SpongeParticleOption<>(Double.class,
+                    v -> v < 0 || v > 1 ? new IllegalArgumentException("Opacity must be between 0 and 1") : null));
+            l.add(ParticleOptions.QUANTITY, k -> new SpongeParticleOption<>(Integer.class,
+                    v -> v < 1 ? new IllegalArgumentException("Quantity must be at least one") : null));
             l.add(ParticleOptions.ROLL, k -> new SpongeParticleOption<>(Double.class));
-            l.add(ParticleOptions.SCALE, k -> new SpongeParticleOption<>(Double.class, v -> v < 0 ? new IllegalArgumentException("Scale must not be negative") : null));
+            l.add(ParticleOptions.SCALE, k -> new SpongeParticleOption<>(Double.class,
+                    v -> v < 0 ? new IllegalArgumentException("Scale must not be negative") : null));
             l.add(ParticleOptions.TO_COLOR, k -> new SpongeParticleOption<>(Color.class));
             l.add(ParticleOptions.TRAVEL_TIME, k -> new SpongeParticleOption<>(Ticks.class));
             l.add(ParticleOptions.VELOCITY, k -> new SpongeParticleOption<>(Vector3d.class));
-        });
-    }
-
-    public static RegistryLoader<PortalType> portalType() {
-        return RegistryLoader.of(l -> {
-            l.add(PortalTypes.END, EndPortalType::new);
-            l.add(PortalTypes.NETHER, NetherPortalType::new);
-            l.add(PortalTypes.UNKNOWN, UnknownPortalType::new);
         });
     }
 

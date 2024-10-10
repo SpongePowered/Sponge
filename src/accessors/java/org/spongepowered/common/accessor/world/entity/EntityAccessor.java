@@ -24,18 +24,11 @@
  */
 package org.spongepowered.common.accessor.world.entity;
 
-import com.google.common.collect.ImmutableList;
-import net.minecraft.BlockUtil;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.entity.EntityInLevelCallback;
-import net.minecraft.world.level.portal.PortalInfo;
-import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -83,21 +76,8 @@ public interface EntityAccessor {
 
     @Accessor("random") RandomSource accessor$random();
 
-    @Accessor("isInsidePortal") void accessor$isInsidePortal(final boolean isInsidePortal);
-
-    @Accessor("portalTime") int accessor$portalTime();
-
-    @Accessor("portalTime") void accessor$portalTime(final int portalTime);
-
-    @Accessor("portalEntrancePos") BlockPos accessor$portalEntrancePos();
-
-    @Accessor("portalEntrancePos") void accessor$portalEntrancePos(final BlockPos portalEntrancePos);
-
-    @Accessor("passengers") ImmutableList<Entity> accessor$passengers();
 
     @Accessor("levelCallback") EntityInLevelCallback accessor$levelCallback();
-
-    @Invoker("setRot") void invoker$setRot(final float yRot, final float xRot);
 
     @Invoker("getEncodeId") @Nullable String invoker$getEncodeId();
 
@@ -108,12 +88,6 @@ public interface EntityAccessor {
     @Invoker("getFireImmuneTicks") int invoker$getFireImmuneTicks();
 
     @Invoker("getPermissionLevel") int invoker$getPermissionLevel();
-
-    @Invoker("removeAfterChangingDimensions") void invoker$removeAfterChangingDimensions();
-
-    @Invoker("getRelativePortalPosition") Vec3 invoker$getRelativePortalPosition(Direction.Axis axis, BlockUtil.FoundRectangle result);
-
-    @Invoker("findDimensionEntryPoint") PortalInfo invoker$findDimensionEntryPoint(ServerLevel targetWorld);
 
     @Invoker("unsetRemoved") void invoker$unsetRemoved();
 

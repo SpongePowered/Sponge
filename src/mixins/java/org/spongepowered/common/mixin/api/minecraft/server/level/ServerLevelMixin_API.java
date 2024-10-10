@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.server.level;
 
 import com.google.common.collect.ImmutableList;
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.pointer.Pointers;
 import net.minecraft.core.BlockPos;
@@ -41,6 +42,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.storage.RegionFile;
 import net.minecraft.world.level.chunk.storage.RegionStorageInfo;
+import net.minecraft.world.level.dimension.end.EndDragonFight;
 import net.minecraft.world.level.entity.PersistentEntitySectionManager;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.LevelResource;
@@ -73,8 +75,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.entity.raid.RaidsAccessor;
+import org.spongepowered.common.accessor.world.level.dimension.end.EndDragonFightAccessor;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
+import org.spongepowered.common.bridge.world.level.chunk.storage.RegionFileBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.data.holder.SpongeServerLocationBaseDataHolder;
 import org.spongepowered.common.mixin.api.minecraft.world.level.LevelMixin_API;
@@ -121,6 +126,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     @Shadow public abstract List<net.minecraft.server.level.ServerPlayer> shadow$players();
     @Shadow public abstract Raids shadow$getRaids();
     @Nullable @Shadow public abstract Raid shadow$getRaidAt(BlockPos p_217475_1_);
+    @Nullable @Shadow public abstract EndDragonFight shadow$getDragonFight();
     @Shadow public abstract long shadow$getSeed();
     // @formatter:on
 
@@ -206,12 +212,21 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
         return ((ServerLevelBridge) this).bridge$getLevelSave().getLevelPath(LevelResource.ROOT);
     }
 
-    @Override
-    public boolean save() throws IOException {
+    private boolean impl$save(final boolean flush) {
         final SerializationBehavior behavior = ((PrimaryLevelDataBridge) this.serverLevelData).bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
         ((ServerLevelBridge) this).bridge$setManualSave(true);
-        this.shadow$save(null, false, false);
+        this.shadow$save(null, flush, false);
         return !behavior.equals(SerializationBehavior.NONE);
+    }
+
+    @Override
+    public boolean save() {
+        return this.impl$save(false);
+    }
+
+    @Override
+    public boolean saveAndFlush() {
+        return this.impl$save(true);
     }
 
     @Override
@@ -246,6 +261,16 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     @Override
     public Optional<org.spongepowered.api.raid.Raid> raidAt(final Vector3i blockPosition) {
         return Optional.ofNullable((org.spongepowered.api.raid.Raid) this.shadow$getRaidAt(VecHelper.toBlockPos(Objects.requireNonNull(blockPosition, "blockPosition"))));
+    }
+
+    @Override
+    public Optional<BossBar> dragonFightBossBar() {
+        final @Nullable EndDragonFight fight = this.shadow$getDragonFight();
+        if (fight != null) {
+            return Optional.of(SpongeAdventure.asAdventure(((EndDragonFightAccessor) fight).accessor$dragonEvent()));
+        } else {
+            return Optional.empty();
+        }
     }
 
     // Volume
@@ -367,7 +392,8 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     @Override
     public Stream<Vector3i> chunkPositions() {
         return this.api$chunkPosStream((regionFile, stream) ->
-                stream.filter(regionFile::doesChunkExist) // filter out non-existent chunks
+//            stream.filter(regionFile::doesChunkExist) // filter out non-existent chunks
+            stream.filter(cp -> ((RegionFileBridge) regionFile).bridge$doesChunkExist(cp)) // filter out non-existent chunks
                       .map(cp -> new Vector3i(cp.x, 0, cp.z)) // map to API type
         );
     }

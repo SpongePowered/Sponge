@@ -24,10 +24,14 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import org.spongepowered.api.block.entity.carrier.furnace.FurnaceBlockEntity;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.item.recipe.crafting.RecipeInput;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.Constants;
@@ -38,10 +42,11 @@ import java.util.Set;
 public abstract class AbstractFurnaceBlockEntityMixin_API extends BaseContainerBlockEntityMixin_API implements FurnaceBlockEntity {
 
     // @formatter:off
-    @Shadow private int litTime;
-    @Shadow private int litDuration;
-    @Shadow private int cookingProgress;
-    @Shadow private int cookingTotalTime;
+    @Shadow int litTime;
+    @Shadow int litDuration;
+    @Shadow int cookingProgress;
+    @Shadow int cookingTotalTime;
+    @Shadow protected NonNullList<ItemStack> items;
     // @formatter:on
 
     @Override
@@ -65,4 +70,8 @@ public abstract class AbstractFurnaceBlockEntityMixin_API extends BaseContainerB
             .set(Constants.TileEntity.Furnace.COOK_TIME_TOTAL, this.cookingTotalTime);
     }
 
+    @Override
+    public RecipeInput.Single asRecipeInput() {
+        return (RecipeInput.Single) (Object) new SingleRecipeInput(this.items.get(0));
+    }
 }

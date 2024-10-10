@@ -26,11 +26,11 @@ package org.spongepowered.common.mixin.api.minecraft.server.level;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
-import net.minecraft.world.level.ChunkPos;
+import net.minecraft.util.StaticCache2D;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.chunk.status.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStep;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
@@ -49,27 +49,28 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.math.vector.Vector3i;
 
-import java.util.List;
-
 @Mixin(WorldGenRegion.class)
 public abstract class WorldGenRegionMixin_API implements GenerationRegion {
 
     // @formatter:off
-    @Shadow @Final private ChunkPos firstPos;
-    @Shadow @Final private ChunkPos lastPos;
+    @Shadow @Final private ServerLevel level;
+    @Shadow @Final private ChunkAccess center;
+    @Shadow @Final private ChunkStep generatingStep;
     @Shadow public abstract ChunkAccess shadow$getChunk(int param0, int param1);
     // @formatter:on
 
-    @Shadow @Final private ServerLevel level;
+
     private ResourceKey api$serverWorldKey;
+    private @MonotonicNonNull Vector3i api$minChunk;
+    private @MonotonicNonNull Vector3i api$maxChunk;
     private @MonotonicNonNull Vector3i api$minBlock;
     private @MonotonicNonNull Vector3i api$maxBlock;
     private @MonotonicNonNull Vector3i api$size;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void api$getWorldKeyOnConstruction(final ServerLevel param0, final List<ChunkAccess> param1, final ChunkStatus param2, final int param3,
+    private void api$getWorldKeyOnConstruction(final ServerLevel $$0, final StaticCache2D $$1, final ChunkStep $$2, final ChunkAccess $$3,
             final CallbackInfo ci) {
-        this.api$serverWorldKey = (ResourceKey) (Object) param0.dimension().location();
+        this.api$serverWorldKey = (ResourceKey) (Object) $$0.dimension().location();
     }
 
     @Override
@@ -103,12 +104,22 @@ public abstract class WorldGenRegionMixin_API implements GenerationRegion {
 
     @Override
     public @NonNull Vector3i chunkMin() {
-        return VecHelper.toVector3i(this.firstPos).min(VecHelper.toVector3i(this.lastPos));
+        if (this.api$minChunk == null) {
+            final var center = this.center.getPos();
+            final var radius = this.generatingStep.directDependencies().size();
+            this.api$minChunk = VecHelper.toVector3i(center).sub(radius, 0, radius);
+        }
+        return this.api$minChunk;
     }
 
     @Override
     public @NonNull Vector3i chunkMax() {
-        return VecHelper.toVector3i(this.firstPos).max(VecHelper.toVector3i(this.lastPos));
+        if (this.api$maxChunk == null) {
+            final var center = this.center.getPos();
+            final var radius = this.generatingStep.directDependencies().size();
+            this.api$maxChunk = VecHelper.toVector3i(center).add(radius, 0, radius);
+        }
+        return this.api$maxChunk;
     }
 
     @Override

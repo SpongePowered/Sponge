@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.query.Query;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
@@ -97,17 +98,17 @@ public interface DefaultImplementedAdapterInventory extends InventoryDataHolder 
     }
 
     @Override
-    default InventoryTransactionResult offer(ItemStack... stacks) {
+    default InventoryTransactionResult offer(ItemStackLike... stacks) {
         InventoryTransactionResult result = InventoryTransactionResult.successNoTransactions();
-        for (ItemStack stack : stacks) {
-            result = result.and(AdapterLogic.appendSequential(this.impl$getFabric(), this.impl$getLens(), stack));
+        for (ItemStackLike stack : stacks) {
+            result = result.and(AdapterLogic.appendSequential(this.impl$getFabric(), this.impl$getLens(), stack.asMutable()));
         }
         return result;
     }
 
     @Override
-    default boolean canFit(ItemStack stack) {
-        return AdapterLogic.canFit(this.impl$getFabric(), this.impl$getLens(), stack);
+    default boolean canFit(ItemStackLike stack) {
+        return AdapterLogic.canFit(this.impl$getFabric(), this.impl$getLens(), stack.asMutable());
     }
 
     @Override
@@ -131,13 +132,13 @@ public interface DefaultImplementedAdapterInventory extends InventoryDataHolder 
     }
 
     @Override
-    default boolean contains(ItemStack stack) {
-        return AdapterLogic.contains(((InventoryBridge) this).bridge$getAdapter(), stack);
+    default boolean contains(ItemStackLike stack) {
+        return AdapterLogic.contains(((InventoryBridge) this).bridge$getAdapter(), stack.asMutable());
     }
 
     @Override
-    default boolean containsAny(ItemStack stack) {
-        return AdapterLogic.contains(((InventoryBridge) this).bridge$getAdapter(), stack, 1);
+    default boolean containsAny(ItemStackLike stack) {
+        return AdapterLogic.contains(((InventoryBridge) this).bridge$getAdapter(), stack.asMutable(), 1);
     }
 
     @Override
@@ -208,13 +209,13 @@ public interface DefaultImplementedAdapterInventory extends InventoryDataHolder 
     }
 
     @Override
-    default InventoryTransactionResult set(int index, ItemStack stack) {
-        return AdapterLogic.insertSequential(this.impl$getFabric(), this.impl$getLens().getSlotLens(this.impl$getFabric(), index), stack);
+    default InventoryTransactionResult set(int index, ItemStackLike stack) {
+        return AdapterLogic.insertSequential(this.impl$getFabric(), this.impl$getLens().getSlotLens(this.impl$getFabric(), index), stack.asMutable());
     }
 
     @Override
-    default InventoryTransactionResult offer(int index, ItemStack stack) {
-        return AdapterLogic.appendSequential(this.impl$getFabric(), this.impl$getLens().getSlotLens(this.impl$getFabric(), index), stack);
+    default InventoryTransactionResult offer(int index, ItemStackLike stack) {
+        return AdapterLogic.appendSequential(this.impl$getFabric(), this.impl$getLens().getSlotLens(this.impl$getFabric(), index), stack.asMutable());
     }
 
     @Override

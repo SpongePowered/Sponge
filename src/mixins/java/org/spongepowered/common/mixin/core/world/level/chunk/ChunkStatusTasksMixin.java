@@ -24,21 +24,38 @@
  */
 package org.spongepowered.common.mixin.core.world.level.chunk;
 
+import net.minecraft.server.level.GenerationChunkHolder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
+import net.minecraft.util.StaticCache2D;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ImposterProtoChunk;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.chunk.status.ChunkStatusTasks;
-import net.minecraft.world.level.chunk.status.ToFullChunk;
+import net.minecraft.world.level.chunk.status.ChunkStep;
 import net.minecraft.world.level.chunk.status.WorldGenContext;
 import net.minecraft.world.level.levelgen.blending.Blender;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.world.chunk.ChunkEvent;
+import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.world.chunk.BlockChunk;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
+import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.DirectionUtil;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.level.chunk.SpongeUnloadedChunkException;
+import org.spongepowered.math.vector.Vector3i;
 
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 
 @Mixin(ChunkStatusTasks.class)
 public abstract class ChunkStatusTasksMixin {
@@ -47,6 +64,7 @@ public abstract class ChunkStatusTasksMixin {
      * @author aromaa - December 17th, 2023 - 1.19.4
      * @author aromaa - December 18th, 2023 - Updated to 1.20.2
      * @author aromaa - May 14th, 2024 - Updated to 1.20.6
+     * @author aromaa - June 1st, 2024 - Updated to 1.21
      * @reason Fixes a deadlock when the world is unloading/unloaded.
      * The Blender#of method calls to the IOWorker#isOldChunkAround which
      * submits a task to the main thread while blocking the current thread
@@ -54,27 +72,57 @@ public abstract class ChunkStatusTasksMixin {
      * as it no longer responds to further work and causes the thread to block
      * indefinitely. Fixes this by special casing the IOWorker#isOldChunkAround
      * to throw a special exception when the IOWorker has finished up its work
-     * and catches it here to convert it to a ChunkLoadingFailure.
+     * and catches it here to convert it to a CompletableFuture.
      *
      * In previous versions you were able to return ChunkResult here but this
-     * is no longer the case, so we instead return null here which
-     * needs to be checking for in ChunkMap.
+     * is no longer the case.
      *
-     * See IOWorkerMixin#createOldDataForRegion
+     * See IOWorkerMixin#createOldDataForRegion and GenerationChunkHolderMixin#impl$guardForUnloadedChunkOnGenerate
      */
     @Overwrite
-    static CompletableFuture<ChunkAccess> generateBiomes(final WorldGenContext $$0, final ChunkStatus $$1, final Executor $$2,
-            final ToFullChunk $$3, final List<ChunkAccess> $$4, final ChunkAccess $$5) {
-        ServerLevel $$6 = $$0.level();
-        WorldGenRegion $$7 = new WorldGenRegion($$6, $$4, $$1, -1);
+    static CompletableFuture<ChunkAccess> generateBiomes(final WorldGenContext $$0, final ChunkStep $$1, final StaticCache2D<GenerationChunkHolder> $$2, final ChunkAccess $$3) {
+        ServerLevel $$4 = $$0.level();
+        WorldGenRegion $$5 = new WorldGenRegion($$4, $$2, $$1, $$3);
         try { //Sponge: Add try
-            return $$0.generator().createBiomes($$2, $$6.getChunkSource().randomState(), Blender.of($$7), $$6.structureManager().forWorldGenRegion($$7), $$5);
+            return $$0.generator().createBiomes($$4.getChunkSource().randomState(), Blender.of($$5), $$4.structureManager().forWorldGenRegion($$5), $$3);
         } catch (final Exception e) { //Sponge start: Add catch
             if (e.getCause() != SpongeUnloadedChunkException.INSTANCE) {
                 throw e;
             }
 
-            return null;
+            return SpongeUnloadedChunkException.INSTANCE_FUTURE;
         } //Sponge end
     }
+
+
+
+    @Redirect(method = "lambda$full$2",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;setLoaded(Z)V")
+    )
+    private static void impl$onLoad(final LevelChunk levelChunk, final boolean loaded) {
+        levelChunk.setLoaded(true);
+        final Vector3i chunkPos = VecHelper.toVector3i(levelChunk.getPos());
+        if (ShouldFire.CHUNK_EVENT_BLOCKS_LOAD) {
+            final ChunkEvent.Blocks.Load loadEvent = SpongeEventFactory.createChunkEventBlocksLoad(PhaseTracker.getInstance().currentCause(),
+                    ((BlockChunk) levelChunk), chunkPos, (ResourceKey) (Object) levelChunk.getLevel().dimension().location());
+            SpongeCommon.post(loadEvent);
+        }
+
+        for (final Direction dir : Constants.Chunk.CARDINAL_DIRECTIONS) {
+            final Vector3i neighborPos = chunkPos.add(dir.asBlockOffset());
+            ChunkAccess neighbor = levelChunk.getLevel().getChunk(neighborPos.x(), neighborPos.z(), ChunkStatus.EMPTY, false);
+            if (neighbor instanceof ImposterProtoChunk) {
+                neighbor = ((ImposterProtoChunk) neighbor).getWrapped();
+            }
+            if (neighbor instanceof LevelChunk) {
+                final int index = DirectionUtil.directionToIndex(dir);
+                final int oppositeIndex = DirectionUtil.directionToIndex(dir.opposite());
+                ((LevelChunkBridge) levelChunk).bridge$setNeighborChunk(index, (LevelChunk) neighbor);
+                ((LevelChunkBridge) neighbor).bridge$setNeighborChunk(oppositeIndex, levelChunk);
+            }
+        }
+    }
+
+
+
 }

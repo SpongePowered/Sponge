@@ -25,40 +25,29 @@
 package org.spongepowered.common.mixin.core.world.level.block;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CampfireCookingRecipe;
-import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.CampfireBlock;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.world.level.block.entity.CampfireBlockEntityBridge;
 import org.spongepowered.common.mixin.core.block.BlockMixin;
-
-import java.util.Optional;
 
 @Mixin(CampfireBlock.class)
 public abstract class CampfireBlockMixin extends BlockMixin {
 
 
     @Redirect(method = "entityInside",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/DamageSources;inFire()Lnet/minecraft/world/damagesource/DamageSource;"))
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/DamageSources;campfire()Lnet/minecraft/world/damagesource/DamageSource;"))
     private DamageSource impl$spongeRedirectForFireDamage(final DamageSources instance, final BlockState blockState, final Level world, final BlockPos blockPos, final Entity entity) {
         final DamageSource source = instance.inFire();
         if (world.isClientSide) { // Short Circuit
@@ -71,11 +60,13 @@ public abstract class CampfireBlockMixin extends BlockMixin {
         return (DamageSource) blockSource;
     }
 
-    @Inject(method = "useItemOn", locals = LocalCapture.CAPTURE_FAILEXCEPTION, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/CampfireBlockEntity;placeFood(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/item/ItemStack;I)Z"))
-    public void impl$placeFood(ItemStack $$0, BlockState $$1, Level $$2, BlockPos $$3, Player $$4, InteractionHand $$5, BlockHitResult $$6,
-            CallbackInfoReturnable<InteractionResult> cir,
-            BlockEntity tileEntity, CampfireBlockEntity campfire, ItemStack itemStack, Optional<RecipeHolder<CampfireCookingRecipe>> optional) {
-        ((CampfireBlockEntityBridge) campfire).bridge$placeRecipe(optional.get());
+    @Redirect(method = "useItemOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/CampfireBlockEntity;placeFood(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;I)Z"))
+    public boolean impl$placeFood(final CampfireBlockEntity instance, final LivingEntity player, final ItemStack item, final int cookingTime) {
+        if (instance.placeFood(player, item, cookingTime)) {
+            ((CampfireBlockEntityBridge) instance).bridge$placeRecipe(instance.getCookableRecipe(item).get());
+            return true;
+        }
+        return false;
     }
 
 }

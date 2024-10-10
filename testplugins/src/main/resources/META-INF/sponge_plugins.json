@@ -116,6 +116,12 @@
             "description": "Testing recipes"
         },
         {
+            "id": "validationtest",
+            "name": "Validation Test",
+            "entrypoint": "org.spongepowered.test.validation.ValidationTest",
+            "description": "Validate API classes"
+        },
+        {
             "id": "particletest",
             "name": "Particle Test",
             "entrypoint": "org.spongepowered.test.particle.ParticleTest",

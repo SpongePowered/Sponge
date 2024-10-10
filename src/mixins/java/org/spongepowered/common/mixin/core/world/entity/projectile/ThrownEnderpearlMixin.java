@@ -26,23 +26,15 @@ package org.spongepowered.common.mixin.core.world.entity.projectile;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.ThrownEnderpearl;
-import net.minecraft.world.phys.HitResult;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minecraft.world.level.portal.DimensionTransition;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
-import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.math.vector.Vector3d;
 
 @Mixin(ThrownEnderpearl.class)
 public abstract class ThrownEnderpearlMixin extends ThrowableProjectileMixin {
@@ -57,46 +49,17 @@ public abstract class ThrownEnderpearlMixin extends ThrowableProjectileMixin {
         return (float) this.impl$damageAmount;
     }
 
-    @Inject(
-            method = "onHit",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;teleportTo(DDD)V"),
-            cancellable = true
+    @Redirect(method = "onHit",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;changeDimension(Lnet/minecraft/world/level/portal/DimensionTransition;)Lnet/minecraft/world/entity/Entity;")
     )
-    private void impl$callMoveEntityEventForThrower(final HitResult result, final CallbackInfo ci) {
-        if (this.shadow$getCommandSenderWorld().isClientSide || !ShouldFire.MOVE_ENTITY_EVENT) {
-            return;
-        }
+    private Entity impl$callMoveEntityEventForThrower(final Entity instance, final DimensionTransition $$0) {
         final Entity entity = this.shadow$getOwner();
-
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(entity);
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.ENDER_PEARL);
 
-            final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.currentCause(),
-                    (org.spongepowered.api.entity.Entity) entity, VecHelper.toVector3d(entity.position()),
-                    VecHelper.toVector3d(this.shadow$position()), VecHelper.toVector3d(this.shadow$position()));
-            if (SpongeCommon.post(event)) {
-                // Eventhough the event is made, the pearl was still created so remove it anyways
-                this.shadow$discard();
-                ci.cancel();
-                return;
-            }
-
-            // This seems odd but we move the pearl so that the pearl's logic will move the living entity later in the impact method
-            final Vector3d destinationPosition = event.destinationPosition();
-            this.shadow$setPos(destinationPosition.x(), destinationPosition.y(), destinationPosition.z());
+            return instance.changeDimension($$0);
         }
-    }
-
-    @Override
-    @Nullable
-    public Entity impl$postProcessChangeDimension(final Entity entity) {
-        if (entity instanceof ThrownEnderpearl) {
-            // We actually teleported so...
-            this.shadow$setOwner(null);
-        }
-
-        return entity;
     }
 
 }

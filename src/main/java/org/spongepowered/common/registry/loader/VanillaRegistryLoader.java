@@ -101,7 +101,6 @@ import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scoreboard.criteria.Criteria;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
-import org.spongepowered.common.accessor.world.entity.animal.MushroomCow_MushroomTypeAccessor;
 import org.spongepowered.common.accessor.world.entity.boss.enderdragon.phases.EnderDragonPhaseAccessor;
 import org.spongepowered.common.accessor.world.level.GameRulesAccessor;
 import org.spongepowered.common.registry.RegistryLoader;
@@ -147,102 +146,79 @@ public final class VanillaRegistryLoader {
     }
 
     private void loadEnumRegistries() {
-        this.automaticSerializedName(RegistryTypes.ATTACHMENT_SURFACE, AttachFace.values());
-        this.automaticSerializedName(RegistryTypes.BAMBOO_LEAVES_TYPE, BambooLeaves.values());
-        this.automaticSerializedName(RegistryTypes.BELL_ATTACHMENT_TYPE, BellAttachType.values());
+        this.automaticName(RegistryTypes.ATTACHMENT_SURFACE, AttachFace.values());
+        this.automaticName(RegistryTypes.BAMBOO_LEAVES_TYPE, BambooLeaves.values());
+        this.automaticName(RegistryTypes.BELL_ATTACHMENT_TYPE, BellAttachType.values());
         this.manualName(RegistryTypes.ATTRIBUTE_OPERATION, AttributeModifier.Operation.values(), map -> {
             // names come from net.minecraft.world.level.storage.loot.functions.SetAttributesFunction.Modifier#operationFromString
             map.put(AttributeModifier.Operation.ADD_VALUE, "addition");
             map.put(AttributeModifier.Operation.ADD_MULTIPLIED_BASE, "multiply_base");
             map.put(AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, "multiply_total");
         });
-        this.knownName(RegistryTypes.BOAT_TYPE, Boat.Type.values(), Boat.Type::getName);
-        this.automaticSerializedName(RegistryTypes.CHEST_ATTACHMENT_TYPE, ChestType.values());
-        this.manualName(RegistryTypes.COLLISION_RULE, Team.CollisionRule.values(), map -> {
-            map.put(Team.CollisionRule.ALWAYS, "always");
-            map.put(Team.CollisionRule.NEVER, "never");
-            map.put(Team.CollisionRule.PUSH_OTHER_TEAMS, "push_other_teams");
-            map.put(Team.CollisionRule.PUSH_OWN_TEAM, "push_own_team");
-        });
-        this.automaticSerializedName(RegistryTypes.COMPARATOR_MODE, ComparatorMode.values());
-        this.knownName(RegistryTypes.DIFFICULTY, Difficulty.values(), Difficulty::getKey);
-        this.automaticSerializedName(RegistryTypes.DYE_COLOR, DyeColor.values());
-        this.automaticSerializedName(RegistryTypes.DOOR_HINGE, DoorHingeSide.values());
-        this.automaticSerializedName(RegistryTypes.DRIPSTONE_SEGMENT, DripstoneThickness.values());
-        this.manualName(RegistryTypes.EQUIPMENT_GROUP, EquipmentSlot.Type.values(), map -> {
-            map.put(EquipmentSlot.Type.ARMOR, "worn");
-            map.put(EquipmentSlot.Type.HAND, "held");
-            map.put(EquipmentSlot.Type.BODY, "body");
-        });
-        this.manualName(RegistryTypes.EQUIPMENT_TYPE, EquipmentSlot.values(), map -> {
-            map.put(EquipmentSlot.CHEST, "chest");
-            map.put(EquipmentSlot.FEET, "feet");
-            map.put(EquipmentSlot.HEAD, "head");
-            map.put(EquipmentSlot.LEGS, "legs");
-            map.put(EquipmentSlot.MAINHAND, "main_hand");
-            map.put(EquipmentSlot.OFFHAND, "off_hand");
-            map.put(EquipmentSlot.BODY, "body");
-        });
-        this.knownName(RegistryTypes.FOX_TYPE, Fox.Type.values(), Fox.Type::getSerializedName);
-        this.knownName(RegistryTypes.GAME_MODE, GameType.values(), GameType::getName);
+        this.automaticName(RegistryTypes.BOAT_TYPE, Boat.Type.values());
+        this.automaticName(RegistryTypes.CHEST_ATTACHMENT_TYPE, ChestType.values());
+        this.automaticName(RegistryTypes.COLLISION_RULE, Team.CollisionRule.values());
+        this.automaticName(RegistryTypes.COMPARATOR_MODE, ComparatorMode.values());
+        this.automaticName(RegistryTypes.DIFFICULTY, Difficulty.values());
+        this.automaticName(RegistryTypes.DYE_COLOR, DyeColor.values());
+        this.automaticName(RegistryTypes.DOOR_HINGE, DoorHingeSide.values());
+        this.automaticName(RegistryTypes.DRIPSTONE_SEGMENT, DripstoneThickness.values());
+        this.automaticName(RegistryTypes.EQUIPMENT_GROUP, EquipmentSlot.Type.values());
+        this.automaticName(RegistryTypes.EQUIPMENT_TYPE, EquipmentSlot.values());
+        this.automaticName(RegistryTypes.FOX_TYPE, Fox.Type.values());
+        this.automaticName(RegistryTypes.GAME_MODE, GameType.values());
         this.automaticName(RegistryTypes.HAND_PREFERENCE, HumanoidArm.values());
         this.automaticName(RegistryTypes.HAND_TYPE, InteractionHand.values());
-        this.automaticSerializedName(RegistryTypes.INSTRUMENT_TYPE, NoteBlockInstrument.values());
+        this.automaticName(RegistryTypes.INSTRUMENT_TYPE, NoteBlockInstrument.values());
         this.automaticName(RegistryTypes.ITEM_RARITY, Rarity.values());
         this.automaticName(RegistryTypes.ITEM_TIER, Tiers.values());
-        this.automaticSerializedName(RegistryTypes.JIGSAW_BLOCK_ORIENTATION, FrontAndTop.values());
-        this.knownName(RegistryTypes.MOOSHROOM_TYPE, MushroomCow.MushroomType.values(), type -> ((MushroomCow_MushroomTypeAccessor) (Object) type).accessor$type());
-        this.knownName(RegistryTypes.OBJECTIVE_DISPLAY_MODE, ObjectiveCriteria.RenderType.values(), ObjectiveCriteria.RenderType::getId);
-        this.knownName(RegistryTypes.PANDA_GENE, Panda.Gene.values(), Panda.Gene::getSerializedName);
+        this.automaticName(RegistryTypes.JIGSAW_BLOCK_ORIENTATION, FrontAndTop.values());
+        this.automaticName(RegistryTypes.MOOSHROOM_TYPE, MushroomCow.MushroomType.values());
+        this.automaticName(RegistryTypes.OBJECTIVE_DISPLAY_MODE, ObjectiveCriteria.RenderType.values());
+        this.automaticName(RegistryTypes.PANDA_GENE, Panda.Gene.values());
         this.automaticName(RegistryTypes.PHANTOM_PHASE, Phantom.AttackPhase.values());
         this.automaticName(RegistryTypes.PICKUP_RULE, AbstractArrow.Pickup.values());
         this.automaticName(RegistryTypes.MIRROR, Mirror.values());
         this.automaticName(RegistryTypes.CHAT_VISIBILITY, ChatVisiblity.values());
-        this.automaticSerializedName(RegistryTypes.PISTON_TYPE, PistonType.values());
-        this.automaticSerializedName(RegistryTypes.PORTION_TYPE, Half.values());
+        this.automaticName(RegistryTypes.PISTON_TYPE, PistonType.values());
+        this.automaticName(RegistryTypes.PORTION_TYPE, Half.values());
         this.automaticName(RegistryTypes.RAID_STATUS, Raid.RaidStatus.values());
         this.automaticName(RegistryTypes.ROTATION, Rotation.values());
-        this.automaticSerializedName(RegistryTypes.RAIL_DIRECTION, RailShape.values());
-        this.automaticSerializedName(RegistryTypes.SCULK_SENSOR_STATE, SculkSensorPhase.values());
-        this.automaticSerializedName(RegistryTypes.SLAB_PORTION, SlabType.values());
+        this.automaticName(RegistryTypes.RAIL_DIRECTION, RailShape.values());
+        this.automaticName(RegistryTypes.SCULK_SENSOR_STATE, SculkSensorPhase.values());
+        this.automaticName(RegistryTypes.SLAB_PORTION, SlabType.values());
         this.automaticName(RegistryTypes.SPELL_TYPE, SpellcasterIllager.IllagerSpell.values());
-        this.automaticSerializedName(RegistryTypes.STAIR_SHAPE, StairsShape.values());
-        this.automaticSerializedName(RegistryTypes.STRUCTURE_MODE, StructureMode.values());
-        this.automaticSerializedName(RegistryTypes.TILT, Tilt.values());
+        this.automaticName(RegistryTypes.STAIR_SHAPE, StairsShape.values());
+        this.automaticName(RegistryTypes.STRUCTURE_MODE, StructureMode.values());
+        this.automaticName(RegistryTypes.TILT, Tilt.values());
         this.automaticName(RegistryTypes.TASK_PRIORITY, TickPriority.values());
-        this.manualName(RegistryTypes.VISIBILITY, Team.Visibility.values(), map -> {
-            map.put(Team.Visibility.ALWAYS, "always");
-            map.put(Team.Visibility.NEVER, "never");
-            map.put(Team.Visibility.HIDE_FOR_OTHER_TEAMS, "hide_for_other_teams");
-            map.put(Team.Visibility.HIDE_FOR_OWN_TEAM, "hide_for_own_team");
-        });
-        this.automaticSerializedName(RegistryTypes.WIRE_ATTACHMENT_TYPE, RedstoneSide.values());
-        this.automaticSerializedName(RegistryTypes.ADVANCEMENT_TYPE, AdvancementType.values());
-        // TODO banner patterns are in registry now this.knownName(RegistryTypes.BANNER_PATTERN_SHAPE, BannerPattern.values(), b -> ((BannerPatternAccessor) (Object) b).accessor$filename());
+        this.automaticName(RegistryTypes.VISIBILITY, Team.Visibility.values());
+        this.automaticName(RegistryTypes.WIRE_ATTACHMENT_TYPE, RedstoneSide.values());
+        this.automaticName(RegistryTypes.ADVANCEMENT_TYPE, AdvancementType.values());
         this.automaticName(RegistryTypes.TROPICAL_FISH_SHAPE, TropicalFish.Pattern.values());
         this.automaticName(RegistryTypes.HEIGHT_TYPE, Heightmap.Types.values());
-        this.knownName(RegistryTypes.ENTITY_CATEGORY, MobCategory.values(), VanillaRegistryLoader.sanitizedName(MobCategory::getName));
-        this.automaticSerializedName(RegistryTypes.WALL_CONNECTION_STATE, WallSide.values());
+        this.automaticName(RegistryTypes.ENTITY_CATEGORY, MobCategory.values());
+        this.automaticName(RegistryTypes.WALL_CONNECTION_STATE, WallSide.values());
         this.automaticName(RegistryTypes.GRASS_COLOR_MODIFIER, BiomeSpecialEffects.GrassColorModifier.values());
         this.automaticName(RegistryTypes.PRECIPITATION, Biome.Precipitation.values());
         this.automaticName(RegistryTypes.TEMPERATURE_MODIFIER, Biome.TemperatureModifier.values());
         this.automaticName(RegistryTypes.CARVING_STEP, GenerationStep.Carving.values());
         this.automaticName(RegistryTypes.DECORATION_STEP, GenerationStep.Decoration.values());
-        this.automaticSerializedName(RegistryTypes.PARROT_TYPE, Parrot.Variant.values());
-        this.automaticSerializedName(RegistryTypes.RABBIT_TYPE, Rabbit.Variant.values());
-        this.automaticSerializedName(RegistryTypes.LLAMA_TYPE, Llama.Variant.values());
-        this.automaticSerializedName(RegistryTypes.HORSE_COLOR, Variant.values());
+        this.automaticName(RegistryTypes.PARROT_TYPE, Parrot.Variant.values());
+        this.automaticName(RegistryTypes.RABBIT_TYPE, Rabbit.Variant.values());
+        this.automaticName(RegistryTypes.LLAMA_TYPE, Llama.Variant.values());
+        this.automaticName(RegistryTypes.HORSE_COLOR, Variant.values());
         this.automaticName(RegistryTypes.HORSE_STYLE, Markings.values());
         this.automaticName(RegistryTypes.DAMAGE_SCALING, DamageScaling.values());
         this.automaticName(RegistryTypes.DAMAGE_EFFECT, DamageEffects.values());
-        this.automaticSerializedName(RegistryTypes.ITEM_DISPLAY_TYPE, ItemDisplayContext.values());
-        this.automaticSerializedName(RegistryTypes.BILLBOARD_TYPE, Display.BillboardConstraints.values());
-        this.automaticSerializedName(RegistryTypes.TEXT_ALIGNMENT, Display.TextDisplay.Align.values());
+        this.automaticName(RegistryTypes.ITEM_DISPLAY_TYPE, ItemDisplayContext.values());
+        this.automaticName(RegistryTypes.BILLBOARD_TYPE, Display.BillboardConstraints.values());
+        this.automaticName(RegistryTypes.TEXT_ALIGNMENT, Display.TextDisplay.Align.values());
         this.automaticName(RegistryTypes.LIGHT_TYPE, LightLayer.values());
-        this.naming(RegistryTypes.DISPLAY_SLOT, DisplaySlot.values(), d -> d.getSerializedName().replace(".", "_"));
+        this.automaticName(RegistryTypes.DISPLAY_SLOT, DisplaySlot.values());
         this.automaticName(RegistryTypes.PUSH_REACTION, PushReaction.values());
-        this.automaticSerializedName(RegistryTypes.TRIAL_SPAWNER_STATE, TrialSpawnerState.values());
-        this.automaticSerializedName(RegistryTypes.VAULT_STATE, VaultState.values());
+        this.automaticName(RegistryTypes.TRIAL_SPAWNER_STATE, TrialSpawnerState.values());
+        this.automaticName(RegistryTypes.VAULT_STATE, VaultState.values());
     }
 
     private static RegistryLoader<Criterion> criterion() {
@@ -276,17 +252,8 @@ public final class VanillaRegistryLoader {
 
     @SuppressWarnings("UnusedReturnValue")
     private <A, I extends Enum<I>> Registry<A> automaticName(final RegistryType<A> type, final I[] values) {
-        return this.naming(type, values, VanillaRegistryLoader.sanitizedName(Enum::name));
-    }
-
-    @SuppressWarnings("UnusedReturnValue")
-    private <A, I extends Enum<I> & StringRepresentable> Registry<A> automaticSerializedName(final RegistryType<A> type, final I[] values) {
-        return this.naming(type, values, StringRepresentable::getSerializedName); // not using method reference as ECJ bug workaround
-    }
-
-    @SuppressWarnings("UnusedReturnValue")
-    private <A, I extends Enum<I>> Registry<A> knownName(final RegistryType<A> type,final I[] values, final Function<I, String> name) {
-        return this.naming(type, values, name);
+        final Function<I, String> keyFunction = i -> i instanceof final StringRepresentable s ? s.getSerializedName() : i.name();
+        return this.naming(type, values, keyFunction.andThen(i -> i.toLowerCase(Locale.ROOT)));
     }
 
     @SuppressWarnings("UnusedReturnValue")
@@ -341,7 +308,7 @@ public final class VanillaRegistryLoader {
                 // To address Vanilla shortcomings, some mods will manually prefix their modid onto values they put into Vanilla registry-like
                 // registrars. We need to account for that possibility
                 if (rawId.contains(":")) {
-                    map.put((ResourceKey) (Object) new ResourceLocation(rawId), (A) value.getKey());
+                    map.put((ResourceKey) (Object) ResourceLocation.parse(rawId), (A) value.getKey());
                 } else {
                     map.put(ResourceKey.sponge(rawId), (A) value.getKey());
                 }
@@ -357,9 +324,5 @@ public final class VanillaRegistryLoader {
     @SuppressWarnings("unused")
     private interface Manual<A, I> {
         void put(final I value, final String key);
-    }
-
-    private static <I> Function<I, String> sanitizedName(final Function<I, String> original) {
-        return original.andThen(s -> s.toLowerCase(Locale.ROOT));
     }
 }

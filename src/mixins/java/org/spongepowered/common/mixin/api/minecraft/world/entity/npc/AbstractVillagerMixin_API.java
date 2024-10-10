@@ -25,42 +25,22 @@
 package org.spongepowered.common.mixin.api.minecraft.world.entity.npc;
 
 import net.minecraft.world.entity.npc.AbstractVillager;
-import net.minecraft.world.entity.player.Player;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.entity.living.Humanoid;
-import org.spongepowered.api.entity.living.trader.Trader;
+import org.spongepowered.api.entity.living.trader.VillagerLike;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.api.minecraft.world.entity.AgeableMobMixin_API;
 
-import java.util.Optional;
 import java.util.Set;
 
 @Mixin(AbstractVillager.class)
-public abstract class AbstractVillagerMixin_API extends AgeableMobMixin_API implements Trader {
-
-    // @formatter:off
-    @Shadow public abstract void shadow$setTradingPlayer(Player player);
-    @Shadow public abstract Player shadow$getTradingPlayer();
-    // @formatter:on
-
-    @Override
-    public Optional<Humanoid> customer() {
-        return Optional.ofNullable((Humanoid) this.shadow$getTradingPlayer());
-    }
-
-    @Override
-    public void setCustomer(@Nullable Humanoid humanoid) {
-        this.shadow$setTradingPlayer((Player) humanoid);
-    }
+public abstract class AbstractVillagerMixin_API extends AgeableMobMixin_API implements VillagerLike {
 
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.requireValue(Keys.IS_TRADING).asImmutable());
+        values.add(this.requireValue(Keys.CUSTOMER).asImmutable());
 
         return values;
     }

@@ -60,11 +60,12 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @SuppressWarnings({"unchecked", "UnstableApiUsage"})
 public final class ItemStackData {
 
-    public static final FoodProperties DEFAULT_FOOD_PROPERTIES = new FoodProperties(0, 0, false, 1.6F, List.of());
+    public static final FoodProperties DEFAULT_FOOD_PROPERTIES = new FoodProperties(0, 0, false, 1.6F, Optional.empty(), List.of());
 
     private ItemStackData() {
     }
@@ -118,7 +119,7 @@ public final class ItemStackData {
                                 }
                             }
                             h.update(DataComponents.FOOD, DEFAULT_FOOD_PROPERTIES,
-                                    fp -> new FoodProperties(fp.nutrition(), fp.saturation(), fp.canAlwaysEat(), fp.eatSeconds(), newEffects));
+                                    fp -> new FoodProperties(fp.nutrition(), fp.saturation(), fp.canAlwaysEat(), fp.eatSeconds(), fp.usingConvertsTo(), newEffects));
                         })
 
                     .create(Keys.BURN_TIME)
@@ -179,8 +180,26 @@ public final class ItemStackData {
                         .delete(h -> h.remove(DataComponents.LORE))
                     .create(Keys.MAX_DURABILITY)
                         .get(h -> h.getMaxDamage() != 0 ? h.getMaxDamage() : null)
-                        .set((h, v) -> h.set(DataComponents.MAX_DAMAGE, v))
-                        .supports(h -> h.getMaxDamage() != 0)
+                        .setAnd((h, v) -> {
+                            if (v <= 0) {
+                                return false;
+                            }
+
+                            h.set(DataComponents.MAX_DAMAGE, v);
+                            return true;
+                        })
+                        .supports(h -> h.getOrDefault(DataComponents.MAX_STACK_SIZE, 1) == 1)
+                    .create(Keys.MAX_STACK_SIZE)
+                        .get(ItemStack::getMaxStackSize)
+                        .setAnd((h, v) -> {
+                            if (v <= 0 || v > 99) {
+                                return false;
+                            }
+
+                            h.set(DataComponents.MAX_STACK_SIZE, v);
+                            return true;
+                        })
+                        .supports(h -> !h.has(DataComponents.MAX_DAMAGE))
                     .create(Keys.ITEM_DURABILITY)
                         .get(stack -> stack.getMaxDamage() - stack.getDamageValue())
                         .set((stack, durability) -> stack.setDamageValue(stack.getMaxDamage() - durability))
@@ -194,29 +213,38 @@ public final class ItemStackData {
                             return food == null ? null : food.nutrition();
                         })
                         .set((h, v) -> h.update(DataComponents.FOOD, DEFAULT_FOOD_PROPERTIES,
-                                fp -> new FoodProperties(v, fp.saturation(), fp.canAlwaysEat(), fp.eatSeconds(), fp.effects())))
+                                fp -> new FoodProperties(v, fp.saturation(), fp.canAlwaysEat(), fp.eatSeconds(), fp.usingConvertsTo(), fp.effects())))
                     .create(Keys.REPLENISHED_SATURATION)
                         .get(h -> {
                             final var food = h.get(DataComponents.FOOD);
                             return food == null ? null : (double) food.saturation();
                             })
                         .set((h, v) -> h.update(DataComponents.FOOD, DEFAULT_FOOD_PROPERTIES,
-                                fp -> new FoodProperties(fp.nutrition(), v.floatValue(), fp.canAlwaysEat(), fp.eatSeconds(), fp.effects())))
+                                fp -> new FoodProperties(fp.nutrition(), v.floatValue(), fp.canAlwaysEat(), fp.eatSeconds(), fp.usingConvertsTo(), fp.effects())))
                     .create(Keys.CAN_ALWAYS_EAT)
                         .get(h -> {
                             final var food = h.get(DataComponents.FOOD);
                             return food == null ? null : food.canAlwaysEat();
                         })
                         .set((h, v) -> h.update(DataComponents.FOOD, DEFAULT_FOOD_PROPERTIES,
-                                fp -> new FoodProperties(fp.nutrition(), fp.saturation(), v, fp.eatSeconds(), fp.effects())))
+                                fp -> new FoodProperties(fp.nutrition(), fp.saturation(), v, fp.eatSeconds(), fp.usingConvertsTo(), fp.effects())))
                     .create(Keys.EATING_TIME)
                         .get(h -> {
                             final var food = h.get(DataComponents.FOOD);
                             return food == null ? null : Ticks.of(food.eatDurationTicks());
                         })
                         .set((h, v) -> h.update(DataComponents.FOOD, DEFAULT_FOOD_PROPERTIES,
-                                fp -> new FoodProperties(fp.nutrition(), fp.saturation(), fp.canAlwaysEat(), v.ticks() / 20f, fp.effects())))
-                .create(Keys.REPAIR_COST)
+                                fp -> new FoodProperties(fp.nutrition(), fp.saturation(), fp.canAlwaysEat(), v.ticks() / 20f, fp.usingConvertsTo(), fp.effects())))
+                    .create(Keys.FOOD_CONVERTS_TO)
+                        .get(h -> {
+                            final var food = h.get(DataComponents.FOOD);
+                            return food == null ? null : food.usingConvertsTo().map(ItemStackUtil::fromNative).orElse(null);
+                        })
+                        .set((h, v) -> h.update(DataComponents.FOOD, DEFAULT_FOOD_PROPERTIES,
+                            fp -> new FoodProperties(fp.nutrition(), fp.saturation(), fp.canAlwaysEat(), fp.eatSeconds(), Optional.ofNullable(ItemStackUtil.toNative(v)), fp.effects())))
+                        .delete(h -> h.update(DataComponents.FOOD, DEFAULT_FOOD_PROPERTIES,
+                                fp -> new FoodProperties(fp.nutrition(), fp.saturation(), fp.canAlwaysEat(), fp.eatSeconds(), Optional.empty(), fp.effects())))
+                    .create(Keys.REPAIR_COST)
                         .get(h -> h.getOrDefault(DataComponents.REPAIR_COST, 0))
                         .set((stack, cost) -> stack.set(DataComponents.REPAIR_COST, cost))
                         .delete(stack -> stack.remove(DataComponents.REPAIR_COST))

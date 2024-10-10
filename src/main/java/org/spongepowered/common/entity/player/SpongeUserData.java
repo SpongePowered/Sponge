@@ -55,6 +55,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.entity.UserInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
@@ -285,7 +286,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
     }
 
     @Override
-    public boolean canEquip(final EquipmentType type, final @Nullable ItemStack equipment) {
+    public boolean canEquip(final EquipmentType type, final @Nullable ItemStackLike equipment) {
         return true;
     }
 
@@ -295,7 +296,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
     }
 
     @Override
-    public boolean equip(final EquipmentType type, final @Nullable ItemStack equipment) {
+    public boolean equip(final EquipmentType type, final @Nullable ItemStackLike equipment) {
         if (this.canEquip(type, equipment)) {
             this.loadInventory();
             this.setEquippedItem(type, equipment);
@@ -317,9 +318,9 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
     @Override
     public ItemStack itemInHand(final HandType handType) {
         if (handType == HandTypes.MAIN_HAND.get()) {
-            this.equipped(EquipmentTypes.MAIN_HAND.get()).orElseThrow(IllegalStateException::new);
+            this.equipped(EquipmentTypes.MAINHAND.get()).orElseThrow(IllegalStateException::new);
         } else if (handType == HandTypes.OFF_HAND.get()) {
-            this.equipped(EquipmentTypes.OFF_HAND.get()).orElseThrow(IllegalStateException::new);
+            this.equipped(EquipmentTypes.OFFHAND.get()).orElseThrow(IllegalStateException::new);
         }
         throw new IllegalArgumentException("Invalid hand " + handType);
     }
@@ -330,7 +331,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
     }
 
     @Override
-    public void setHead(final ItemStack helmet) {
+    public void setHead(final ItemStackLike helmet) {
         this.equip(EquipmentTypes.HEAD.get(), helmet);
     }
 
@@ -340,7 +341,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
     }
 
     @Override
-    public void setChest(final ItemStack chestplate) {
+    public void setChest(final ItemStackLike chestplate) {
         this.equip(EquipmentTypes.CHEST.get(), chestplate);
     }
 
@@ -350,7 +351,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
     }
 
     @Override
-    public void setLegs(final ItemStack leggings) {
+    public void setLegs(final ItemStackLike leggings) {
         this.equip(EquipmentTypes.LEGS.get(), leggings);
     }
 
@@ -360,16 +361,16 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
     }
 
     @Override
-    public void setFeet(final ItemStack boots) {
+    public void setFeet(final ItemStackLike boots) {
         this.equip(EquipmentTypes.FEET.get(), boots);
     }
 
     @Override
-    public void setItemInHand(final HandType handType, final @Nullable ItemStack itemInHand) {
+    public void setItemInHand(final HandType handType, final @Nullable ItemStackLike itemInHand) {
         if (handType == HandTypes.MAIN_HAND.get()) {
-            this.setEquippedItem(EquipmentTypes.MAIN_HAND, itemInHand);
+            this.setEquippedItem(EquipmentTypes.MAINHAND, itemInHand);
         } else if (handType == HandTypes.OFF_HAND.get()) {
-            this.setEquippedItem(EquipmentTypes.OFF_HAND, itemInHand);
+            this.setEquippedItem(EquipmentTypes.OFFHAND, itemInHand);
         } else {
             throw new IllegalArgumentException("Invalid hand " + handType);
         }
@@ -439,11 +440,11 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
 
     // Helpers for Equipment:
 
-    private void setEquippedItem(final Supplier<? extends EquipmentType> type, final @Nullable ItemStack item) {
+    private void setEquippedItem(final Supplier<? extends EquipmentType> type, final @Nullable ItemStackLike item) {
         this.setEquippedItem(type.get(), item);
     }
 
-    private void setEquippedItem(final EquipmentType type, final @Nullable ItemStack item) {
+    private void setEquippedItem(final EquipmentType type, final @Nullable ItemStackLike item) {
         throw new MissingImplementationException("SpongeUser", "setEquippedItem");
     }
 

@@ -43,7 +43,7 @@ public final class TameableData {
                     .create(Keys.IS_TAMED)
                         .get(TamableAnimal::isTame)
                         .set((h, v) -> h.setTame(v, true))
-                    .create(Keys.TAMER)
+                    .create(Keys.OWNER)
                         .get(TamableAnimal::getOwnerUUID)
                         .set((h, v) -> {
                             h.setOwnerUUID(v);

@@ -104,7 +104,7 @@ public final class TrackingUtil {
     public static final int WIDTH = 40;
 
     public static void tickEntity(final Consumer<net.minecraft.world.entity.Entity> consumer, final net.minecraft.world.entity.Entity entity) {
-        Preconditions.checkArgument(entity instanceof Entity, String.format("Entity %s is not an instance of SpongeAPI's Entity!", entity));
+        Preconditions.checkArgument(entity instanceof Entity, () -> String.format("Entity %s is not an instance of SpongeAPI's Entity!", entity));
         Objects.requireNonNull(entity, "Cannot capture on a null ticking entity!");
         if (!((TrackableBridge) entity).bridge$shouldTick()) {
             return;

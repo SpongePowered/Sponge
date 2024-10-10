@@ -59,13 +59,13 @@ public final class RegistryHolderLogic implements RegistryHolder {
 
     public RegistryHolderLogic() {
         this.roots.put(
-            (ResourceKey) (Object) new ResourceLocation("minecraft", "root"),
+            (ResourceKey) (Object) ResourceLocation.withDefaultNamespace("root"),
             new MappedRegistry<>(
                 net.minecraft.resources.ResourceKey.createRegistryKey((ResourceLocation) (Object) RegistryRoots.MINECRAFT),
                 Lifecycle.experimental()
             )
         );
-        final ResourceLocation sponge = new ResourceLocation("sponge", "root");
+        final ResourceLocation sponge = ResourceLocation.fromNamespaceAndPath("sponge", "root");
         this.roots.put(
             (ResourceKey) (Object) sponge,
             new MappedRegistry<>(
@@ -81,7 +81,7 @@ public final class RegistryHolderLogic implements RegistryHolder {
     public RegistryHolderLogic(final RegistryAccess dynamicAccess) {
         this();
 
-        final WritableRegistry root = (WritableRegistry) this.roots.get(new ResourceLocation("minecraft", "root"));
+        final WritableRegistry root = (WritableRegistry) this.roots.get(ResourceLocation.withDefaultNamespace("root"));
         // Add the dynamic registries. These are server-scoped in Vanilla
 
         dynamicAccess.registries().forEach(entry -> root.register(entry.key(), entry.value(), RegistrationInfo.BUILT_IN));

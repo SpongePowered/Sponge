@@ -29,6 +29,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.world.level.entity.LevelEntityGetter;
+import org.spongepowered.api.Client;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.client.ClientPlayer;
 import org.spongepowered.api.world.client.ClientLocation;
@@ -54,6 +55,11 @@ public abstract class ClientLevelMixin_API extends LevelMixin_API<ClientWorld, C
 
     @Shadow protected abstract LevelEntityGetter<net.minecraft.world.entity.Entity> shadow$getEntities();
     // @formatter:on
+
+    @Override
+    public Client engine() {
+        return (Client) Minecraft.getInstance();
+    }
 
     @Override
     public boolean isLoaded() {

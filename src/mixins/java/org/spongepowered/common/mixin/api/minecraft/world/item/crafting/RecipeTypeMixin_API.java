@@ -29,5 +29,5 @@ import org.spongepowered.api.item.recipe.RecipeType;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(net.minecraft.world.item.crafting.RecipeType.class)
-public interface RecipeTypeMixin_API<R extends Recipe> extends RecipeType<R> {
+public interface RecipeTypeMixin_API<R extends Recipe<?>> extends RecipeType<R> {
 }

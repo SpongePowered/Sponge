@@ -55,7 +55,7 @@ public class DropFromPlayerInventoryTransaction extends InventoryBasedTransactio
         super((Inventory) player.getInventory());
         this.player = player;
         this.dropAll = dropAll;
-        this.slot = ((PlayerInventory) player.getInventory()).equipment().slot(EquipmentTypes.MAIN_HAND).orElse(null);
+        this.slot = ((PlayerInventory) player.getInventory()).equipment().slot(EquipmentTypes.MAINHAND).orElse(null);
     }
 
     @Override

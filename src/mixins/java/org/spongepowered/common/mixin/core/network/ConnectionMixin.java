@@ -164,9 +164,9 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
     }
 
     @Redirect(method = "send(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;Z)V",
-            at = @At(value = "INVOKE", target = "Ljava/util/Queue;add(Ljava/lang/Object;)Z"))
+        at = @At(value = "INVOKE", target = "Ljava/util/Queue;add(Ljava/lang/Object;)Z"))
     private boolean impl$onQueue(final Queue instance, final Object consumer,
-            final Packet<?> $$0, final @Nullable PacketSendListener $$1, final boolean $$2) {
+                                 final Packet<?> $$0, final @Nullable PacketSendListener $$1, final boolean $$2) {
         if (this.impl$disconnected) {
             if ($$1 instanceof final PacketSender.SpongePacketSendListener spongeListener) {
                 spongeListener.accept(new IOException("Connection has been closed."));
@@ -220,7 +220,7 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
         this.impl$closePendingActions();
     }
 
-    @Redirect(method = "disconnect", at = @At(value = "INVOKE", target = "Lio/netty/channel/ChannelFuture;awaitUninterruptibly()Lio/netty/channel/ChannelFuture;"))
+    @Redirect(method = "disconnect(Lnet/minecraft/network/DisconnectionDetails;)V", at = @At(value = "INVOKE", target = "Lio/netty/channel/ChannelFuture;awaitUninterruptibly()Lio/netty/channel/ChannelFuture;"))
     private ChannelFuture impl$disconnectAsync(final ChannelFuture instance) {
         //Awaiting here can cause deadlock within the event loop
         //Because we are now disconnecting asynchronously the channel might not
@@ -245,6 +245,17 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
     private boolean impl$onIsOpen(final Channel instance) {
         //Use isConnected instead of isOpen because it might return true while isConnected is false
         return this.shadow$isConnected();
+    }
+
+    @Redirect(method = "genericsFtw", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/network/protocol/Packet;handle(Lnet/minecraft/network/PacketListener;)V"))
+    private static <T extends PacketListener> void impl$logPacketError(Packet<T> $$0, PacketListener $$1) {
+        try {
+            $$0.handle((T)$$1);
+        } catch (ExceptionInInitializerError e) {
+            SpongeCommon.logger().error("Error handling packet " + $$0.getClass(), e);
+            throw e;
+        }
     }
 
     @Inject(method = "exceptionCaught", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Connection;disconnect(Lnet/minecraft/network/chat/Component;)V"))

@@ -24,23 +24,22 @@
  */
 package org.spongepowered.vanilla.applaunch.handler.test;
 
-import cpw.mods.modlauncher.api.ITransformingClassLoader;
 import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.vanilla.applaunch.AppLaunchTargets;
+import org.spongepowered.vanilla.applaunch.AppLaunchTarget;
 import org.spongepowered.vanilla.applaunch.handler.AbstractVanillaLaunchHandler;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 
 public class ClientTestLaunchHandler extends AbstractVanillaLaunchHandler {
 
     @Override
-    public String name() {
-        return AppLaunchTargets.CLIENT_INTEGRATION_TEST.getLaunchTarget();
+    public AppLaunchTarget target() {
+        return AppLaunchTarget.CLIENT_INTEGRATION_TEST;
     }
 
     @Override
-    protected void launchService0(final String[] arguments, final ITransformingClassLoader launchClassLoader) throws Exception {
-        Class.forName("org.spongepowered.vanilla.launch.IntegrationTestLaunch", true, launchClassLoader.getInstance())
-            .getMethod("launch", VanillaPluginPlatform.class, Boolean.class, String[].class)
-            .invoke(null, AppLaunch.pluginPlatform(), /* isServer = */ Boolean.FALSE, arguments);
+    protected void launchSponge(final Module module, final String[] arguments) throws Exception {
+        Class.forName(module, "org.spongepowered.vanilla.launch.IntegrationTestLaunch")
+                .getMethod("launch", VanillaPluginPlatform.class, Boolean.class, String[].class)
+                .invoke(null, AppLaunch.pluginPlatform(), /* isServer = */ Boolean.FALSE, arguments);
     }
 }

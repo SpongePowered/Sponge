@@ -33,6 +33,8 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeVariableName;
 import net.minecraft.core.Direction;
 import net.minecraft.core.FrontAndTop;
+import net.minecraft.world.level.block.entity.trialspawner.TrialSpawnerState;
+import net.minecraft.world.level.block.entity.vault.VaultState;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.level.block.state.properties.BambooLeaves;
@@ -142,6 +144,8 @@ public class BlockStatePropertyKeysGenerator implements Generator {
         vanillaEnumTypeMapping.put(DripstoneThickness.class, BlockStatePropertyKeysGenerator.inDataTypePkg("DripstoneSegment"));
         vanillaEnumTypeMapping.put(FrontAndTop.class, BlockStatePropertyKeysGenerator.inDataTypePkg("JigsawBlockOrientation"));
         vanillaEnumTypeMapping.put(ComparatorMode.class, BlockStatePropertyKeysGenerator.inDataTypePkg("ComparatorMode"));
+        vanillaEnumTypeMapping.put(TrialSpawnerState.class, BlockStatePropertyKeysGenerator.inDataTypePkg("TrialSpawnerState"));
+        vanillaEnumTypeMapping.put(VaultState.class, BlockStatePropertyKeysGenerator.inDataTypePkg("VaultState"));
 
         // Custom Mapping required see StateHolderMixin_API
         final ClassName portionTypeClass = BlockStatePropertyKeysGenerator.inDataTypePkg("PortionType");
@@ -221,10 +225,6 @@ public class BlockStatePropertyKeysGenerator implements Generator {
     private Map<String, Property<?>> vanillaProperties() {
         final Map<String, Property<?>> vanillaMap = new TreeMap<>();
         for (Field field : BlockStateProperties.class.getDeclaredFields()) {
-            if (field.getName().equals("TRIAL_SPAWNER_STATE")) {
-                // TODO add spawner states to API
-                continue;
-            }
             try {
                 final Object property = field.get(null);
                 if (property instanceof Property<?>) {

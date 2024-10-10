@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerPlayerConnection;
@@ -32,10 +33,10 @@ import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.entity.decoration.PaintingVariant;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.ArtType;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.level.ChunkMapAccessor;
 import org.spongepowered.common.accessor.server.level.ChunkMap_TrackedEntityAccessor;
 import org.spongepowered.common.accessor.world.entity.decoration.HangingEntityAccessor;
-import org.spongepowered.common.accessor.world.entity.decoration.PaintingAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class PaintingData {
@@ -48,14 +49,15 @@ public final class PaintingData {
         registrator
                 .asMutable(Painting.class)
                     .create(Keys.ART_TYPE)
-                        .get(h -> (ArtType) h.getVariant().value())
+                        .get(h -> (ArtType) (Object) h.getVariant().value())
                         .setAnd((h, v) -> {
                             if (!h.level().isClientSide) {
                                 final Holder<PaintingVariant> oldArt = h.getVariant();
-                                ((PaintingAccessor)h).invoker$setVariant(Holder.direct((PaintingVariant) v));
+                                var newArt = SpongeCommon.server().registryAccess().registryOrThrow(Registries.PAINTING_VARIANT).wrapAsHolder((PaintingVariant) (Object) v);
+                                h.setVariant(newArt);
                                 ((HangingEntityAccessor) h).invoker$setDirection(h.getDirection());
                                 if (!h.survives()) {
-                                    ((PaintingAccessor)h).invoker$setVariant(oldArt);
+                                    h.setVariant(oldArt);
                                     ((HangingEntityAccessor) h).invoker$setDirection(h.getDirection());
                                     return false;
                                 }

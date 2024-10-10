@@ -77,6 +77,8 @@ public abstract class ProtoChunkMixin_API extends ChunkAccess implements Generat
     @Shadow public abstract void shadow$setBlockEntity(final net.minecraft.world.level.block.entity.BlockEntity param1);
     @Shadow public abstract void shadow$removeBlockEntity(final BlockPos param0);
     @Shadow public abstract Holder<net.minecraft.world.level.biome.Biome> shadow$getNoiseBiome(int $$0, int $$1, int $$2);
+    @Shadow public abstract ChunkStatus shadow$getPersistedStatus();
+
     //@formatter:on
 
 
@@ -143,7 +145,7 @@ public abstract class ProtoChunkMixin_API extends ChunkAccess implements Generat
 
     @Override
     public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
-        if (!this.getStatus().isOrAfter(ChunkStatus.BIOMES) && (this.belowZeroRetrogen == null || !this.belowZeroRetrogen.targetStatus().isOrAfter(ChunkStatus.BIOMES))) {
+        if (!this.shadow$getPersistedStatus().isOrAfter(ChunkStatus.BIOMES) && (this.belowZeroRetrogen == null || !this.belowZeroRetrogen.targetStatus().isOrAfter(ChunkStatus.BIOMES))) {
             throw new IllegalStateException("Asking for biomes before we have biomes");
         }
         return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, biome, () -> this.getSection(this.getSectionIndex(y)), () -> {});

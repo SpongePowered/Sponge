@@ -95,6 +95,28 @@ public class DataDeserializer {
             final BiFunction<DataView, DataQuery, Optional<Object>> valueDeserializer = DataDeserializer.deserializer(valueType);
             return (view, dataQuery) -> (Optional<T>) DataDeserializer.deserializeMap(view, dataQuery, keyDeserializer, valueDeserializer);
         }
+        // Number Type Deserializers
+        if (rawType == Long.class) {
+            return (view, dataQuery) -> (Optional<T>) view.getLong(dataQuery);
+        }
+        if (rawType == Integer.class) {
+            return (view, dataQuery) -> (Optional<T>) view.getInt(dataQuery);
+        }
+        if (rawType == Short.class) {
+            return (view, dataQuery) -> (Optional<T>) view.getShort(dataQuery);
+        }
+        if (rawType == Byte.class) {
+            return (view, dataQuery) -> (Optional<T>) view.getByte(dataQuery);
+        }
+        if (rawType == Double.class) {
+            return (view, dataQuery) -> (Optional<T>) view.getDouble(dataQuery);
+        }
+        if (rawType == Float.class) {
+            return (view, dataQuery) -> (Optional<T>) view.getFloat(dataQuery);
+        }
+        if (rawType == Boolean.class) {
+            return (view, dataQuery) -> (Optional<T>) view.getBoolean(dataQuery);
+        }
         return (view, dataQuery) -> (Optional<T>) view.get(dataQuery);
     }
 

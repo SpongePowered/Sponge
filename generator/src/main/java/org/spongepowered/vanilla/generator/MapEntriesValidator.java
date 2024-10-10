@@ -161,24 +161,24 @@ class MapEntriesValidator<V> implements Generator {
         final VariableDeclarator var = declaration.getVariable(0);
         final Expression initializer = var.getInitializer().orElse(null);
         if (!(initializer instanceof MethodCallExpr) || ((MethodCallExpr) initializer).getArguments().size() != 1) {
-            return new ResourceLocation(var.getNameAsString().toLowerCase(Locale.ROOT)); // a best guess
+            return ResourceLocation.parse(var.getNameAsString().toLowerCase(Locale.ROOT)); // a best guess
         }
 
         final Expression argument = ((MethodCallExpr) initializer).getArgument(0);
         if (!(argument instanceof final MethodCallExpr keyInitializer)
                 || keyInitializer.getArguments().size() < 1) {
-            return new ResourceLocation(var.getNameAsString().toLowerCase(Locale.ROOT)); // a best guess
+            return ResourceLocation.parse(var.getNameAsString().toLowerCase(Locale.ROOT)); // a best guess
         }
 
         if (keyInitializer.getArguments().size() == 1) { // method name as namespace
-            return new ResourceLocation(keyInitializer.getNameAsString(), keyInitializer.getArgument(0).asStringLiteralExpr().asString());
+            return ResourceLocation.fromNamespaceAndPath(keyInitializer.getNameAsString(), keyInitializer.getArgument(0).asStringLiteralExpr().asString());
         } else if (keyInitializer.getArguments().size() == 2) { // (namespace, path)
-            return new ResourceLocation(
+            return ResourceLocation.fromNamespaceAndPath(
                     keyInitializer.getArgument(0).asStringLiteralExpr().asString(),
                     keyInitializer.getArgument(1).asStringLiteralExpr().asString()
             );
         } else {
-            return new ResourceLocation(var.getNameAsString().toLowerCase(Locale.ROOT)); // a best guess
+            return ResourceLocation.parse(var.getNameAsString().toLowerCase(Locale.ROOT)); // a best guess
         }
 
     }

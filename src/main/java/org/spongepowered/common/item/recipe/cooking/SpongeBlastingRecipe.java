@@ -25,11 +25,11 @@
 package org.spongepowered.common.item.recipe.cooking;
 
 import net.minecraft.core.HolderLookup;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.BlastingRecipe;
 import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 import org.spongepowered.common.item.recipe.ResultFunctionRecipe;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 
@@ -50,13 +50,13 @@ public class SpongeBlastingRecipe extends BlastingRecipe implements ResultFuncti
     }
 
     @Override
-    public ItemStack assemble(final Container container, final HolderLookup.Provider $$1) {
+    public ItemStack assemble(final SingleRecipeInput $$0, final HolderLookup.Provider $$1) {
         if (this.resultFunctionId != null) {
-            final ItemStack result = IngredientResultUtil.cachedResultFunction(this.resultFunctionId).apply(container);
+            final ItemStack result = IngredientResultUtil.cachedResultFunction(this.resultFunctionId).apply($$0);
             result.setCount(1);
             return result;
         }
-        return super.assemble(container, $$1);
+        return super.assemble($$0, $$1);
     }
 
     @Override

@@ -53,8 +53,13 @@ public final class PrepareBlockDropsTransaction extends BlockEventBasedTransacti
     }
 
     @Override
+    protected boolean actualBlockTransaction() {
+        return false;
+    }
+
+    @Override
     protected SpongeBlockSnapshot getResultingSnapshot() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

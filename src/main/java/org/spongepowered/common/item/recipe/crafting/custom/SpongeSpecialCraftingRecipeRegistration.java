@@ -29,9 +29,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.Recipe;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
+import org.spongepowered.api.item.recipe.crafting.RecipeInput;
 import org.spongepowered.api.item.recipe.crafting.SpecialCraftingRecipe;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
@@ -46,17 +46,17 @@ public class SpongeSpecialCraftingRecipeRegistration extends SpongeRecipeRegistr
 
     public static final Map<String, SpongeSpecialRecipe> RECIPES = new HashMap<>();
 
-    private final BiPredicate<CraftingGridInventory, ServerWorld> biPredicate;
-    private final Function<CraftingGridInventory, List<ItemStack>> remainingItemsFunction;
-    private final Function<CraftingGridInventory, ItemStack> resultFunction;
+    private final BiPredicate<RecipeInput.Crafting, ServerWorld> biPredicate;
+    private final Function<RecipeInput.Crafting, List<ItemStack>> remainingItemsFunction;
+    private final Function<RecipeInput.Crafting, ItemStack> resultFunction;
 
     private final SpongeSpecialRecipe recipe;
 
     public SpongeSpecialCraftingRecipeRegistration(ResourceLocation key,
             final CraftingBookCategory category,
-            BiPredicate<CraftingGridInventory, ServerWorld> biPredicate,
-            Function<CraftingGridInventory, List<ItemStack>> remainingItemsFunction,
-            Function<CraftingGridInventory, ItemStack> resultFunction,
+            BiPredicate<RecipeInput.Crafting, ServerWorld> biPredicate,
+            Function<RecipeInput.Crafting, List<ItemStack>> remainingItemsFunction,
+            Function<RecipeInput.Crafting, ItemStack> resultFunction,
             DataPack<RecipeRegistration> pack, final RecipeCategory recipeCategory) {
         super(key, "", pack, recipeCategory, null);
 
@@ -69,9 +69,8 @@ public class SpongeSpecialCraftingRecipeRegistration extends SpongeRecipeRegistr
     }
 
     public static SpongeSpecialRecipe get(final String id, final CraftingBookCategory category) {
-        // TODO: category?
         return SpongeSpecialCraftingRecipeRegistration.RECIPES.getOrDefault(id,
-                new SpongeSpecialRecipe(ResourceLocation.tryParse(id), CraftingBookCategory.MISC, (x, y) -> false, null, null));
+                new SpongeSpecialRecipe(ResourceLocation.tryParse(id), category, (x, y) -> false, null, null));
     }
 
     @Override

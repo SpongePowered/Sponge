@@ -24,405 +24,349 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.player;
 
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.stats.Stats;
-import net.minecraft.tags.EntityTypeTags;
-import net.minecraft.util.Mth;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.entity.projectile.ProjectileDeflection;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.EventContext;
-import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
-import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
-import org.spongepowered.api.event.cause.entity.damage.DamageModifierTypes;
-import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
-import org.spongepowered.api.event.cause.entity.damage.ModifierFunction;
+import org.objectweb.asm.Opcodes;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.event.impl.entity.AbstractModifierEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
-import org.spongepowered.common.hooks.EventHooks;
 import org.spongepowered.common.hooks.PlatformHooks;
-import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.mixin.core.world.entity.LivingEntityMixin;
+import org.spongepowered.common.mixin.core.world.entity.LivingEntityMixin_Attack_Impl;
 import org.spongepowered.common.util.DamageEventUtil;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("ConstantConditions")
 @Mixin(value = Player.class, priority = 900)
-public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin {
+public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin_Attack_Impl {
 
     //@formatter:off
     @Shadow @Final public InventoryMenu inventoryMenu;
-    @Shadow public abstract float shadow$getAttackStrengthScale(float p_184825_1_);
-    @Shadow public abstract void shadow$resetAttackStrengthTicker();
-    @Shadow public abstract float shadow$getSpeed();
-    @Shadow public abstract void shadow$sweepAttack();
-    @Shadow public abstract void shadow$crit(Entity p_71009_1_);
-    @Shadow public abstract void shadow$magicCrit(Entity p_71047_1_);
-    @Shadow public abstract void shadow$awardStat(ResourceLocation stat, int amount);
-    @Shadow public abstract void shadow$causeFoodExhaustion(float p_71020_1_);
+    @Shadow public abstract float shadow$getAttackStrengthScale(final float $$0);
+
     //@formatter:on
 
-    /**
-     * @author gabizou - April 8th, 2016
-     * @author gabizou - April 11th, 2016 - Update for 1.9 - This enitre method was rewritten
-     * @author i509VCB - February 15th, 2020 - Update for 1.14.4
-     * @author gabizou - November 15th, 2020 - Update for 1.15.2
-     *
-     * @reason Rewrites the attack to throw an {@link AttackEntityEvent} prior
-     * to the ensuing {@link org.spongepowered.api.event.entity.DamageEntityEvent}. This should cover all cases where players are
-     * attacking entities and those entities override {@link LivingEntity#hurt(DamageSource, float)}
-     * and effectively bypass our damage event hooks.
-     *
-     * LVT Rename Table:
-     * float f        | damage               |
-     * float f1       | enchantmentDamage    |
-     * float f2       | attackStrength       |
-     * boolean flag   | isStrongAttack       |
-     * boolean flag1  | isSprintingAttack    |
-     * boolean flag2  | isCriticalAttack     | Whether critical particles will spawn and of course, multiply the output damage
-     * boolean flag3  | isSweapingAttack     | Whether the player is sweaping an attack and will deal AoE damage
-     * int i          | knockbackModifier    | The knockback modifier, must be set from the event after it has been thrown
-     * float f4       | targetOriginalHealth | This is initially set as the entity original health
-     * boolean flag4  | litEntityOnFire      | This is an internal flag to where if the attack failed, the entity is no longer set on fire
-     * int j          | fireAspectModifier   | Literally just to check that the weapon used has fire aspect enchantments
-     * double d0      | distanceWalkedDelta  | This checks that the distance walked delta is more than the normal walking speed to evaluate if you're making a sweaping attack
-     * double d1      | targetMotionX        | Current target entity motion x vector
-     * double d2      | targetMotionY        | Current target entity motion y vector
-     * double d3      | targetMotionZ        | Current target entity motion z vector
-     * boolean flag5  | attackSucceeded      | Whether the attack event succeeded
-     *
-     * @param targetEntity The target entity
-     */
-    @Overwrite
-    public void attack(final Entity targetEntity) {
-        // Sponge Start - Add SpongeImpl hook to override in forge as necessary
-        if (!PlatformHooks.INSTANCE.getEntityHooks().checkAttackEntity((net.minecraft.world.entity.player.Player) (Object) this, targetEntity)) {
-            return;
+    private void impl$playAttackSound(Player thisPlayer, SoundEvent sound) {
+        if (this.bridge$vanishState().createsSounds()) {
+            thisPlayer.level().playSound(null, thisPlayer.getX(), thisPlayer.getY(), thisPlayer.getZ(), sound, thisPlayer.getSoundSource());
         }
-        // Sponge End
-        if (targetEntity.isAttackable()) {
-            if (!targetEntity.skipAttackInteraction((net.minecraft.world.entity.player.Player) (Object) this)) {
-                // Sponge Start - Prepare our event values
-                // float damage = (float) this.getEntityAttribute(Attributes.ATTACK_DAMAGE).getAttributeValue();
-                final double originalBaseDamage = this.shadow$getAttribute(Attributes.ATTACK_DAMAGE).getValue();
-                float damage = (float) originalBaseDamage;
-                // Sponge End
-                float enchantmentDamage = 0.0F;
+    }
 
-                // Sponge Start - Redirect getting enchantments for our damage event handlers
-                // if (targetEntity instanceof LivingEntity) {
-                //     enchantmentDamage = EnchantmentHelper.getModifierForCreature(this.getHeldItemMainhand(), ((LivingEntity) targetEntity).getCreatureAttribute());
-                // } else {
-                //     enchantmentDamage = EnchantmentHelper.getModifierForCreature(this.getHeldItemMainhand(), CreatureAttribute.UNDEFINED);
-                // }
-                if (targetEntity.getType().is(EntityTypeTags.REDIRECTABLE_PROJECTILE) && targetEntity instanceof Projectile proj) {
-                    proj.deflect(ProjectileDeflection.AIM_DEFLECT, (Player) (Object) this, (Player) (Object) this, true);
-                    // sponge - move the reset attack strength early to avoid resetting it from other events
-                    this.shadow$resetAttackStrengthTicker();
-                    return;
-                }
-                final float attackStrength = this.shadow$getAttackStrengthScale(0.5F);
+    private DamageEventUtil.Attack<Player> attackImpl$attack;
+    private AttackEntityEvent attackImpl$attackEvent;
+    private Map<String, Double> attackImpl$finalDamageAmounts;
 
-                final List<DamageFunction> originalFunctions = new ArrayList<>();
+    private int attackImpl$attackStrengthTicker;
+    private boolean attackImpl$isStrongSprintAttack;
 
-                final List<DamageFunction> enchantmentModifierFunctions = DamageEventUtil
-                    .createAttackEnchantmentFunction(this.shadow$getMainHandItem(), targetEntity.getType(), attackStrength);
-                // This is kept for the post-damage event handling
-                final List<DamageModifier> enchantmentModifiers = enchantmentModifierFunctions.stream()
-                    .map(ModifierFunction::modifier)
-                    .toList();
+    /**
+     * Cleanup
+     */
+    @Inject(method = "attack", at = @At("RETURN"))
+    public void attackImpl$onReturnCleanup(final Entity $$0, final CallbackInfo ci) {
+        this.attackImpl$attack = null;
+        this.attackImpl$attackEvent = null;
+        this.attackImpl$finalDamageAmounts = null;
+    }
 
-                enchantmentDamage = (float) enchantmentModifierFunctions.stream()
-                    .map(ModifierFunction::function)
-                    .mapToDouble(function -> function.applyAsDouble(originalBaseDamage))
-                    .sum();
-                originalFunctions.addAll(enchantmentModifierFunctions);
-                // Sponge End
+    /**
+     * Captures the base damage for the {@link AttackEntityEvent} in {@link #attackImpl$attack}
+     * and the {@link #attackStrengthTicker} in case we need to roll it back.
+     * Reset {@link #attackImpl$isStrongSprintAttack}
+     */
+    @Inject(method = "attack", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/player/Player;getEnchantedDamage(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;)F", shift = At.Shift.BEFORE))
+    public void attackImpl$captureAttackStart(final Entity target, final CallbackInfo ci, final float baseDamage, final ItemStack weapon, final DamageSource source) {
+        final var strengthScale = this.shadow$getAttackStrengthScale(0.5F);
+        this.attackImpl$attack = new DamageEventUtil.Attack<>((Player) (Object) this, target, weapon, source, strengthScale, baseDamage, new ArrayList<>());
+        this.attackImpl$attackStrengthTicker = this.attackStrengthTicker;
+        this.attackImpl$isStrongSprintAttack = false;
+    }
 
-                originalFunctions.add(
-                    DamageEventUtil.provideCooldownAttackStrengthFunction((net.minecraft.world.entity.player.Player) (Object) this, attackStrength));
-                damage = damage * (0.2F + attackStrength * attackStrength * 0.8F);
-                enchantmentDamage = enchantmentDamage * attackStrength;
-                this.shadow$resetAttackStrengthTicker();
+    /**
+     * Captures the enchantment damage calculations as functions
+     */
+    @Inject(method = "attack", at = @At(value = "INVOKE", ordinal = 0,
+            target = "Lnet/minecraft/world/entity/player/Player;getEnchantedDamage(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;)F"))
+    public void attackImpl$enchanttDamageFunc(final Entity $$0, final CallbackInfo ci) {
+        final var weapon = this.attackImpl$attack.weapon();
+        // this.getEnchantedDamage(targetEntity, damage, damageSource) - damage;
+        final var functions = DamageEventUtil.createAttackEnchantmentFunction(weapon, this.attackImpl$attack.target(), this.attackImpl$attack.dmgSource());
+        final var separateFunc = DamageEventUtil.provideSeparateEnchantmentFromBaseDamageFunction(this.attackImpl$attack.baseDamage(), weapon);
+        // enchantmentDamage *= attackStrength;
+        final var strengthScaleFunc = DamageEventUtil.provideCooldownEnchantmentStrengthFunction(weapon, this.attackImpl$attack.strengthScale());
 
-                if (damage > 0.0F || enchantmentDamage > 0.0F) {
-                    final boolean isStrongAttack = attackStrength > 0.9F;
-                    boolean isSprintingAttack = false;
-                    boolean isCriticalAttack = false;
-                    boolean isSweapingAttack = false;
-                    int knockbackModifier = 0;
-                    knockbackModifier = knockbackModifier + EnchantmentHelper.getKnockbackBonus((net.minecraft.world.entity.player.Player) (Object) this);
+        this.attackImpl$attack.functions().addAll(functions);
+        this.attackImpl$attack.functions().add(separateFunc);
+        this.attackImpl$attack.functions().add(strengthScaleFunc);
+    }
 
-                    if (this.shadow$isSprinting() && isStrongAttack) {
-                        // Sponge - Only play sound after the event has be thrown and not cancelled.
-                        // this.world.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.entity_player_attack_knockback, this.getSoundCategory(), 1.0F, 1.0F);
-                        ++knockbackModifier;
-                        isSprintingAttack = true;
-                    }
 
-                    isCriticalAttack = isStrongAttack && this.fallDistance > 0.0F && !this.shadow$onGround() && !this.shadow$onClimbable() && !this.shadow$isInWater() && !this.shadow$hasEffect(
-                        MobEffects.BLINDNESS) && !this.shadow$isPassenger() && targetEntity instanceof LivingEntity;
-                    isCriticalAttack = isCriticalAttack && !this.shadow$isSprinting();
-                    final EventHooks.CriticalHitResult criticalResult = PlatformHooks.INSTANCE.getEventHooks().callCriticalHitEvent((net.minecraft.world.entity.player.Player) (Object) this, targetEntity, isCriticalAttack, isCriticalAttack ? 0.5F : 0.0F);
-                    isCriticalAttack = criticalResult.criticalHit;
-                    if (isCriticalAttack) {
-                        // Sponge Start - add critical attack tuple
-                        // damage *= 1.5F; // Sponge - This is handled in the event
-                        originalFunctions.add(DamageEventUtil.provideCriticalAttackTuple((net.minecraft.world.entity.player.Player) (Object) this, criticalResult.modifier));
-                        // Sponge End
-                    }
+    /**
+     * Captures the attack-strength damage scaling as a function
+     */
+    @Inject(method = "attack", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/player/Player;resetAttackStrengthTicker()V"))
+    public void attackImpl$attackStrengthScalingDamageFunc(final Entity $$0, final CallbackInfo ci) {
+        // damage *= 0.2F + attackStrength * attackStrength * 0.8F;
+        final var strengthScaleFunc = DamageEventUtil.provideCooldownAttackStrengthFunction((Player) (Object) this,  this.attackImpl$attack.strengthScale());
+        this.attackImpl$attack.functions().add(strengthScaleFunc);
+    }
 
-                    // damage = damage + enchantmentDamage; // Sponge - We don't need this since our event will re-assign the damage to deal
-                    final double distanceWalkedDelta = (double) (this.walkDist - this.walkDistO);
+    /**
+     *  Prevents the {@link SoundEvents#PLAYER_ATTACK_KNOCKBACK} from playing before the event.
+     *  Captures if {@link #attackImpl$isStrongSprintAttack} for later
+     */
+    @Redirect(method = "attack",
+            slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;isSprinting()Z", ordinal = 0),
+                           to = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;getAttackDamageBonus(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;)F")),
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;playSound(Lnet/minecraft/world/entity/player/Player;DDDLnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FF)V"))
+    public void attackImpl$preventSprintingAttackSound(final Level instance, final Player $$0, final double $$1, final double $$2, final double $$3, final SoundEvent $$4,
+            final SoundSource $$5, final float $$6, final float $$7) {
+        // prevent sound
+        this.attackImpl$isStrongSprintAttack = true;
+    }
 
-                    final ItemStack heldItem = this.shadow$getMainHandItem();
-                    if (isStrongAttack && !isCriticalAttack && !isSprintingAttack && this.shadow$onGround() && distanceWalkedDelta < (double) this.shadow$getSpeed()) {
-                        if (PlatformHooks.INSTANCE.getItemHooks().canPerformSweepAttack(heldItem)) {
-                            isSweapingAttack = true;
-                        }
-                    }
+    /**
+     * Captures the weapon bonus damage as a function
+     */
+    @Inject(method = "attack", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/item/Item;getAttackDamageBonus(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;)F"))
+    public void attackImpl$attackDamageFunc(final Entity $$0, final CallbackInfo ci) {
+        // damage += weaponItem.getItem().getAttackDamageBonus(targetEntity, damage, damageSource);
+        final var bonusDamageFunc = DamageEventUtil.provideWeaponAttackDamageBonusFunction( this.attackImpl$attack.target(),  this.attackImpl$attack.weapon(),  this.attackImpl$attack.dmgSource());
+        this.attackImpl$attack.functions().add(bonusDamageFunc);
+    }
 
-                    // Sponge Start - Create the event and throw it
-                    final DamageSource damageSource = this.shadow$level().damageSources().playerAttack((net.minecraft.world.entity.player.Player) (Object) this);
-                    final boolean isMainthread = !this.shadow$level().isClientSide;
-                    if (isMainthread) {
-                        PhaseTracker.getInstance().pushCause(damageSource);
-                    }
-                    final Cause currentCause = isMainthread ? PhaseTracker.getInstance().currentCause() : Cause.of(
-                        EventContext.empty(), damageSource);
-                    final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(currentCause, (org.spongepowered.api.entity.Entity) targetEntity,
-                        originalFunctions, knockbackModifier, originalBaseDamage);
-                    SpongeCommon.post(event);
-                    if (isMainthread) {
-                        PhaseTracker.getInstance().popCause();
-                    }
-                    if (event.isCancelled()) {
-                        return;
-                    }
+    /**
+     * Crit Hook - Before vanilla decides
+     * Also captures the crit multiplier as a function
+     */
+    @ModifyVariable(method = "attack", ordinal = 2,
+            slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;isSprinting()Z", ordinal = 1),
+                           to = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/player/Player;walkDist:F")),
+            at = @At(value = "JUMP", opcode = Opcodes.IFEQ)
+    )
+    public boolean attackImpl$critHook(final boolean isCrit) {
+        final var critResult = PlatformHooks.INSTANCE.getEventHooks().callCriticalHitEvent(this.attackImpl$attack.sourceEntity(),
+                this.attackImpl$attack.target(), isCrit, isCrit ? 1.5F : 1.0F);
 
-                    damage = (float) event.finalOutputDamage();
-                    // Sponge End
+        // if (isCrit) damage *= 1.5F;
+        if (critResult.criticalHit) {
+            final var bonusDamageFunc = DamageEventUtil.provideCriticalAttackFunction(this.attackImpl$attack.sourceEntity(), critResult.modifier);
+            this.attackImpl$attack.functions().add(bonusDamageFunc);
+        }
 
-                    // Sponge Start - need final for later events
-                    final double attackDamage = damage;
-                    knockbackModifier = (int) event.knockbackModifier();
-                    enchantmentDamage = (float) enchantmentModifiers.stream()
-                        .mapToDouble(event::outputDamage)
-                        .sum();
-                    // Sponge End
+        return critResult.criticalHit;
+    }
 
-                    float targetOriginalHealth = 0.0F;
-                    boolean litEntityOnFire = false;
-                    final int fireAspectModifier = EnchantmentHelper.getFireAspect((net.minecraft.world.entity.player.Player) (Object) this);
+    /**
+     * Capture damageSource for sweep attacks event later
+     * Calculate knockback earlier than vanilla for event
+     * call the AttackEntityEvent
+     * Play prevented sound from {@link #attackImpl$preventSprintingAttackSound}
+     * returns false if canceled, appearing for vanilla as an invulnerable target. {@link #attackImpl$onNoDamageSound}
+     */
+    @Redirect(method = "attack",
+            slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getDeltaMovement()Lnet/minecraft/world/phys/Vec3;"),
+                           to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getKnockback(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;)F")),
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
+    public boolean attackImpl$onHurt(final Entity targetEntity, final DamageSource damageSource, final float mcDamage) {
 
-                    if (targetEntity instanceof LivingEntity) {
-                        targetOriginalHealth = ((LivingEntity) targetEntity).getHealth();
+        float knockbackModifier = this.shadow$getKnockback(targetEntity, damageSource) + (this.attackImpl$isStrongSprintAttack ? 1.0F : 0.0F);
+        this.attackImpl$attackEvent = DamageEventUtil.callPlayerAttackEntityEvent(this.attackImpl$attack, knockbackModifier);
 
-                        if (fireAspectModifier > 0 && !targetEntity.isOnFire()) {
-                            litEntityOnFire = true;
-                            targetEntity.igniteForSeconds(1);
-                        }
-                    }
+        if (this.attackImpl$attackEvent.isCancelled()) {
+            // TODO this is actually not really doing anything because a ServerboundSwingPacket also resets it immediatly after
+            this.attackStrengthTicker = this.attackImpl$attackStrengthTicker; // Reset to old value
+            return false;
+        }
 
-                    final Vec3 targetMotion = targetEntity.getDeltaMovement();
-                    final boolean attackSucceeded = targetEntity.hurt(this.shadow$level().damageSources().playerAttack((net.minecraft.world.entity.player.Player) (Object) this), damage);
+        this.attackImpl$finalDamageAmounts = AbstractModifierEvent.finalAmounts(this.attackImpl$attackEvent.originalDamage(), this.attackImpl$attackEvent.modifiers());
 
-                    if (attackSucceeded) {
-                        if (knockbackModifier > 0) {
-                            if (targetEntity instanceof LivingEntity le) {
-                                le.knockback(
-                                    (float) knockbackModifier * 0.5F,
-                                    Mth.sin(this.shadow$getYRot() * 0.017453292F),
-                                    -Mth.cos(this.shadow$getYRot() * 0.017453292F)
-                                );
-                            } else {
-                                targetEntity.push(
-                                    -Mth.sin(this.shadow$getYRot() * 0.017453292F) * (float) knockbackModifier * 0.5F,
-                                    0.1D,
-                                    Mth.cos(this.shadow$getYRot() * 0.017453292F) * (float) knockbackModifier * 0.5F
-                                );
-                            }
+        if (this.attackImpl$isStrongSprintAttack) {
+            // Play prevented sprint attack sound
+            this.impl$playAttackSound((Player) (Object) this, SoundEvents.PLAYER_ATTACK_KNOCKBACK);
+        }
 
-                            this.shadow$setDeltaMovement(this.shadow$getDeltaMovement().multiply(0.6D, 1.0D, 0.6D));
-                            this.shadow$setSprinting(false);
-                        }
+        return targetEntity.hurt(damageSource, (float) this.attackImpl$attackEvent.finalOutputDamage());
+    }
 
-                        if (isSweapingAttack) {
-                            // Sponge - add forge compatibility hook
-                            final var hitbox = PlatformHooks.INSTANCE.getItemHooks().getSweepingHitBox(((Player) (Object) this), this.shadow$getItemInHand(InteractionHand.MAIN_HAND), targetEntity);
-                            for (final LivingEntity livingEntity : this.shadow$level().getEntitiesOfClass(LivingEntity.class, hitbox)) {
-                                if (livingEntity != (net.minecraft.world.entity.player.Player) (Object) this && livingEntity != targetEntity && !this.shadow$isAlliedTo(livingEntity) && (!(livingEntity instanceof ArmorStand) || !((ArmorStand)livingEntity).isMarker()) && this.shadow$distanceToSqr(livingEntity) < 9.0D) {
-                                    // Sponge Start - Do a small event for these entities
-                                    // livingEntity.knockBack(this, 0.4F, (double)MathHelper.sin(this.rotationYaw * 0.017453292F), (double)(-MathHelper.cos(this.rotationYaw * 0.017453292F)));
-                                    // livingEntity.attackEntityFrom(DamageSource.causePlayerDamage(this), 1.0F);
-                                    final var sweepingAttackSource = org.spongepowered.api.event.cause.entity.damage.source.DamageSource.builder().entity((org.spongepowered.api.entity.living.player.Player) this)
-                                            .type(DamageTypes.PLAYER_ATTACK).build();
-                                    try (final CauseStackManager.StackFrame frame = isMainthread ? PhaseTracker.getInstance().pushCauseFrame() : null) {
-                                        if (isMainthread) {
-                                            frame.pushCause(sweepingAttackSource);
-                                        }
-                                        final ItemStackSnapshot heldSnapshot = ItemStackUtil.snapshotOf(heldItem);
-                                        if (isMainthread) {
-                                            frame.addContext(EventContextKeys.WEAPON, heldSnapshot);
-                                        }
-                                        final DamageFunction sweapingFunction = DamageFunction.of(DamageModifier.builder()
-                                                .cause(Cause.of(EventContext.empty(), heldSnapshot))
-                                                .item(heldSnapshot)
-                                                .type(DamageModifierTypes.SWEEPING)
-                                                .build(),
-                                            incoming -> EnchantmentHelper.getSweepingDamageRatio((net.minecraft.world.entity.player.Player) (Object) this) * attackDamage);
-                                        final List<DamageFunction> sweapingFunctions = new ArrayList<>();
-                                        sweapingFunctions.add(sweapingFunction);
-                                        final AttackEntityEvent sweepingAttackEvent = SpongeEventFactory.createAttackEntityEvent(
-                                            currentCause, (org.spongepowered.api.entity.Entity) livingEntity,
-                                            sweapingFunctions, 1, 1.0D);
-                                        SpongeCommon.post(sweepingAttackEvent);
-                                        if (!sweepingAttackEvent.isCancelled()) {
-                                            livingEntity.knockback(sweepingAttackEvent.knockbackModifier() * 0.4F,
-                                                (double) Mth.sin(this.shadow$getYRot() * ((float)Math.PI / 180F)),
-                                                (double) -Mth.cos(this.shadow$getYRot() * ((float)Math.PI / 180F)));
+    /**
+     * Set enchantment damage with value from event
+     */
+    @ModifyVariable(method = "attack", ordinal = 1,
+            slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z"),
+                    to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;knockback(DDD)V", ordinal = 0)),
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getKnockback(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;)F"))
+    public float attackImpl$enchentmentDamageFromEvent(final float enchDmg) {
+        return this.attackImpl$finalDamageAmounts.getOrDefault(ResourceKey.minecraft("attack_enchantment"), 0.0).floatValue();
+    }
 
-                                            livingEntity.hurt(this.shadow$level().damageSources().playerAttack((net.minecraft.world.entity.player.Player) (Object) this),
-                                                (float) sweepingAttackEvent.finalOutputDamage());
-                                        }
-                                    }
-                                    // Sponge End
-                                }
-                            }
+    /**
+     *  Redirects Player#getKnockback to the attack event value
+     */
+    @Redirect(method = "attack",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getKnockback(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;)F"))
+    public float attackImpl$sweepHook(final Player instance, final Entity entity, final DamageSource damageSource) {
+        return this.attackImpl$attackEvent.knockbackModifier();
+    }
 
-                            if (this.bridge$vanishState().createsSounds()) {
-                                this.shadow$level().playSound(
-                                    null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(),
-                                    SoundEvents.PLAYER_ATTACK_SWEEP, this.shadow$getSoundSource(), 1.0F, 1.0F
-                                );
-                            }
-                            this.shadow$sweepAttack();
-                        }
-
-                        if (targetEntity instanceof ServerPlayer sp && sp.hurtMarked) {
-                            sp.connection.send(new ClientboundSetEntityMotionPacket(targetEntity));
-                            sp.hurtMarked = false;
-                            sp.setDeltaMovement(targetMotion);
-                        }
-
-                        if (isCriticalAttack) {
-                            if (this.bridge$vanishState().createsSounds()) {
-                                this.shadow$level().playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.PLAYER_ATTACK_CRIT, this.shadow$getSoundSource(), 1.0F, 1.0F);
-                            }
-                            this.shadow$crit(targetEntity);
-                        }
-
-                        if (!isCriticalAttack && !isSweapingAttack && this.bridge$vanishState().createsSounds()) {
-                            if (isStrongAttack) {
-                                this.shadow$level().playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.PLAYER_ATTACK_STRONG, this.shadow$getSoundSource(), 1.0F, 1.0F);
-                            } else {
-                                this.shadow$level().playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.PLAYER_ATTACK_WEAK , this.shadow$getSoundSource(), 1.0F, 1.0F);
-                            }
-                        }
-
-                        if (enchantmentDamage > 0.0F) {
-                            this.shadow$magicCrit(targetEntity);
-                        }
-
-                        this.shadow$setLastHurtMob(targetEntity);
-
-                        if (targetEntity instanceof LivingEntity le) {
-                            EnchantmentHelper.doPostHurtEffects(le, (net.minecraft.world.entity.player.Player) (Object) this);
-                        }
-
-                        EnchantmentHelper.doPostDamageEffects((net.minecraft.world.entity.player.Player) (Object) this, targetEntity);
-                        final ItemStack itemstack1 = this.shadow$getMainHandItem();
-                        Entity entity = targetEntity;
-
-                        // Sponge - Forge compatibility for multi-part entities
-                        entity = PlatformHooks.INSTANCE.getEntityHooks().getParentPart(entity);
-                        // if (targetEntity instanceof EnderDragonPart) {
-                        //    entity = ((EnderDragonPart) targetEntity).parentMob;
-                        // }
-
-                        if(!this.shadow$level().isClientSide && !itemstack1.isEmpty() && entity instanceof LivingEntity le) {
-                            itemstack1.hurtEnemy(le, (net.minecraft.world.entity.player.Player) (Object) this);
-                            if(itemstack1.isEmpty()) {
-                                // Sponge - platform hook for forge
-                                PlatformHooks.INSTANCE.getEventHooks().callItemDestroyedEvent((net.minecraft.world.entity.player.Player) (Object) this, itemstack1, InteractionHand.MAIN_HAND);
-                                this.shadow$setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-                            }
-                            // Sponge Start
-                            final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
-                            final TransactionalCaptureSupplier transactor = context.getTransactor();
-                            transactor.logPlayerInventoryChange((net.minecraft.world.entity.player.Player) (Object) this, PlayerInventoryTransaction.EventCreator.STANDARD);
-                            this.inventoryMenu.broadcastChanges(); // capture
-                            // Spong End
-                        }
-
-                        if (targetEntity instanceof LivingEntity le) {
-                            final float f5 = targetOriginalHealth - le.getHealth();
-                            this.shadow$awardStat(Stats.DAMAGE_DEALT, Math.round(f5 * 10.0F));
-
-                            if (fireAspectModifier > 0) {
-                                targetEntity.igniteForSeconds(fireAspectModifier * 4);
-                            }
-
-                            if (this.shadow$level() instanceof ServerLevel swe && f5 > 2.0F) {
-                                final int k = (int) ((double) f5 * 0.5D);
-                                swe.sendParticles(ParticleTypes.DAMAGE_INDICATOR, targetEntity.getX(), targetEntity.getY() + (double) (targetEntity.getBbHeight() * 0.5F), targetEntity.getZ(), k, 0.1D, 0.0D, 0.1D, 0.2D);
-                            }
-                        }
-
-                        this.shadow$causeFoodExhaustion(0.1F);
-                    } else {
-                        if (this.bridge$vanishState().createsSounds()) {
-                            this.shadow$level().playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, this.shadow$getSoundSource(), 1.0F, 1.0F);
-                        }
-
-                        if (litEntityOnFire) {
-                            targetEntity.clearFire();
-                        }
-                    }
-                }
-            }
+    /**
+     * Prevents the {@link SoundEvents#PLAYER_ATTACK_NODAMAGE} when event was canceled
+     */
+    @Redirect(method = "attack",
+            slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;causeFoodExhaustion(F)V")),
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;playSound(Lnet/minecraft/world/entity/player/Player;DDDLnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FF)V"))
+    public void attackImpl$onNoDamageSound(final Level instance, final Player $$0, final double $$1, final double $$2, final double $$3,
+            final SoundEvent $$4, final SoundSource $$5, final float $$6, final float $$7) {
+        if (!this.attackImpl$attackEvent.isCancelled()) {
+            this.impl$playAttackSound((Player) (Object) this, SoundEvents.PLAYER_ATTACK_NODAMAGE);
         }
     }
 
     /**
-     * @author gabizou - January 26th, 2022
-     * @reason Add changes according to
+     * Call Sweep Attack Events
      */
-    @Override
-    @Overwrite
-    protected void actuallyHurt(final DamageSource damageSource, final float damage) {
-        this.bridge$damageEntity(damageSource, damage);
+    @Redirect(method = "attack",
+            slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getEntitiesOfClass(Ljava/lang/Class;Lnet/minecraft/world/phys/AABB;)Ljava/util/List;")),
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;distanceToSqr(Lnet/minecraft/world/entity/Entity;)D"))
+    public double attackImpl$beforeSweepHurt(final Player instance, final Entity sweepTarget) {
+        final var distanceToSqr = instance.distanceToSqr(sweepTarget);
+        if (!(distanceToSqr < 9.0)) {
+            return distanceToSqr; // Too far - no event
+        }
+
+        final var mainAttack = this.attackImpl$attack;
+        final var mainAttackDamage = this.attackImpl$finalDamageAmounts.getOrDefault(ResourceKey.minecraft("attack_damage"), 0.0).floatValue();
+
+        var sweepAttack = new DamageEventUtil.Attack<>(mainAttack.sourceEntity(), sweepTarget, mainAttack.weapon(), mainAttack.dmgSource(), mainAttack.strengthScale(), 1, new ArrayList<>());
+        // float sweepBaseDamage = 1.0F + (float)this.getAttributeValue(Attributes.SWEEPING_DAMAGE_RATIO) * attackDamage;
+        sweepAttack.functions().add(DamageEventUtil.provideSweepingDamageRatioFunction(mainAttack.weapon(), mainAttack.sourceEntity(), mainAttackDamage));
+        // float sweepFullDamage = this.getEnchantedDamage(sweepTarget, sweepBaseDamage, $$3) * strengthScale;
+        sweepAttack.functions().addAll(DamageEventUtil.createAttackEnchantmentFunction(mainAttack.weapon(), sweepTarget, mainAttack.dmgSource()));
+        sweepAttack.functions().add(DamageEventUtil.provideCooldownEnchantmentStrengthFunction(mainAttack.weapon(), mainAttack.strengthScale()));
+
+        this.attackImpl$attackEvent = DamageEventUtil.callPlayerAttackEntityEvent(sweepAttack, 1.0F);
+        if (attackImpl$attackEvent.isCancelled()) {
+            return Double.MAX_VALUE;
+        }
+
+        return distanceToSqr;
     }
+
+    /**
+     * Redirect Player#getEnchantedDamage to sweep event value
+     */
+    @Redirect(method = "attack",
+            slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getEntitiesOfClass(Ljava/lang/Class;Lnet/minecraft/world/phys/AABB;)Ljava/util/List;")),
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getEnchantedDamage(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;)F"))
+    public float attackImpl$beforeSweepHurt(final Player instance, final Entity $$0, final float $$1, final DamageSource $$2) {
+        return (float) this.attackImpl$attackEvent.finalOutputDamage();
+    }
+
+    /**
+     * Redirect {@link LivingEntity#knockback} to use modified event knockback
+     */
+    @Redirect(method = "attack",
+            slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getEntitiesOfClass(Ljava/lang/Class;Lnet/minecraft/world/phys/AABB;)Ljava/util/List;"),
+                           to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z")),
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;knockback(DDD)V"))
+    public void attackImpl$modifyKnockback(final LivingEntity instance, final double $$0, final double $$1, final double $$2) {
+        instance.knockback($$0 * this.attackImpl$attackEvent.knockbackModifier(), $$1, $$2);
+    }
+
+    /**
+     * Captures inventory changes
+     */
+    @Redirect(method = "attack",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;setItemInHand(Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/item/ItemStack;)V"))
+    public void attackImpl$causeInventoryCapture(final Player instance, final InteractionHand interactionHand, final ItemStack stack) {
+        instance.setItemInHand(interactionHand, stack);
+
+        // Capture...
+        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final TransactionalCaptureSupplier transactor = context.getTransactor();
+        transactor.logPlayerInventoryChange(instance, PlayerInventoryTransaction.EventCreator.STANDARD);
+        this.inventoryMenu.broadcastChanges();
+    }
+
+    @Redirect(method = "actuallyHurt", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/player/Player;isInvulnerableTo(Lnet/minecraft/world/damagesource/DamageSource;)Z"))
+    public boolean attackImpl$startActuallyHurt(final Player instance, final DamageSource damageSource, final DamageSource $$0, final float originalDamage) {
+        if (instance.isInvulnerableTo(damageSource)) {
+            return true;
+        }
+
+        // Call platform hook for adjusting damage
+        final var modAdjustedDamage = this.bridge$applyModDamage(instance, damageSource, originalDamage);
+        // TODO check for direct call?
+        this.attackImpl$actuallyHurt = new DamageEventUtil.ActuallyHurt(instance, new ArrayList<>(), damageSource, modAdjustedDamage);
+        return false;
+    }
+
+    /**
+     * Set final damage after calling {@link Player#setAbsorptionAmount} in which we called the event
+     * !!NOTE that var7 is actually decompiled incorrectly!!
+     * It is NOT the final damage value instead the method parameter is mutated
+     */
+    @ModifyVariable(method = "actuallyHurt", ordinal = 0,
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;setAbsorptionAmount(F)V",
+            shift = At.Shift.AFTER), argsOnly = true)
+    public float attackImpl$setFinalDamage(final float value) {
+        if (this.attackImpl$actuallyHurtResult.event().isCancelled()) {
+            return 0;
+        }
+        return this.attackImpl$actuallyHurtFinalDamage;
+    }
+
+    /**
+     * Set absorbed damage after calling {@link Player#setAbsorptionAmount} in which we called the event
+     */
+    @ModifyVariable(method = "actuallyHurt", ordinal = 2,
+            slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;setAbsorptionAmount(F)V")),
+            at = @At(value = "STORE", ordinal = 0))
+    public float attackImpl$setAbsorbed(final float value) {
+        if (this.attackImpl$actuallyHurtResult.event().isCancelled()) {
+            return 0;
+        }
+        return this.attackImpl$actuallyHurtResult.damageAbsorbed().orElse(0f);
+    }
+
+    /**
+     * Cleanup
+     */
+    @Inject(method = "actuallyHurt", at = @At("RETURN"))
+    public void attackImpl$afterActuallyHurt(final DamageSource $$0, final float $$1, final CallbackInfo ci) {
+        this.attackImpl$handlePostDamage();
+        this.attackImpl$actuallyHurt = null;
+        this.attackImpl$actuallyHurtResult = null;
+    }
+
+
 }

@@ -44,12 +44,14 @@ import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.type.ToolRule;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.datapack.DataPackType;
+import org.spongepowered.api.effect.ForwardingViewer;
 import org.spongepowered.api.effect.VanishState;
 import org.spongepowered.api.event.EventListenerRegistration;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackComparators;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.recipe.crafting.RecipeInput;
 import org.spongepowered.api.network.channel.ChannelExceptionHandler;
 import org.spongepowered.api.network.status.Favicon;
 import org.spongepowered.api.profile.GameProfile;
@@ -80,6 +82,7 @@ import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.util.blockray.RayTrace;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.DefaultWorldKeys;
+import org.spongepowered.api.world.PositionSource;
 import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.api.world.biome.AttributedBiome;
 import org.spongepowered.api.world.biome.BiomeAttributes;
@@ -93,6 +96,7 @@ import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.generation.config.SurfaceRule;
 import org.spongepowered.api.world.generation.config.flat.LayerConfig;
 import org.spongepowered.api.world.generation.structure.jigsaw.JigsawPoolElement;
+import org.spongepowered.api.world.portal.PortalLogic;
 import org.spongepowered.api.world.schematic.PaletteReference;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerLocationCreator;
@@ -118,12 +122,14 @@ import org.spongepowered.common.data.manipulator.ImmutableDataManipulatorFactory
 import org.spongepowered.common.data.manipulator.MutableDataManipulatorFactory;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.datapack.SpongeDataPackType;
+import org.spongepowered.common.effect.SpongeCustomForwardingViewer;
 import org.spongepowered.common.entity.effect.SpongeVanishState;
 import org.spongepowered.common.event.SpongeEventListenerRegistration;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
 import org.spongepowered.common.item.SpongeItemStack;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.item.SpongeToolRuleFactory;
+import org.spongepowered.common.item.recipe.SpongeRecipeInputFactory;
 import org.spongepowered.common.item.util.SpongeItemStackComparatorFactory;
 import org.spongepowered.common.network.channel.SpongeChannelExceptionHandlerFactory;
 import org.spongepowered.common.network.status.SpongeFavicon;
@@ -146,6 +152,7 @@ import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.SpongeTransform;
 import org.spongepowered.common.util.raytrace.SpongeRayTraceFactory;
 import org.spongepowered.common.world.SpongeDefaultWorldKeysFactory;
+import org.spongepowered.common.world.SpongePositionSourceFactory;
 import org.spongepowered.common.world.SpongeWorldTypeEffect;
 import org.spongepowered.common.world.biome.SpongeAttributedBiome;
 import org.spongepowered.common.world.biome.SpongeBiomeAttributesFactory;
@@ -159,6 +166,7 @@ import org.spongepowered.common.world.generation.SpongeChunkGeneratorFactory;
 import org.spongepowered.common.world.generation.config.flat.SpongeLayerConfigFactory;
 import org.spongepowered.common.world.generation.config.noise.SpongeSurfaceRulesFactory;
 import org.spongepowered.common.world.generation.structure.jigsaw.SpongeJigsawFactory;
+import org.spongepowered.common.world.portal.SpongePortalLogicFactory;
 import org.spongepowered.common.world.schematic.SpongePaletteReferenceFactory;
 import org.spongepowered.common.world.server.SpongeServerLocation;
 import org.spongepowered.common.world.server.SpongeServerLocationCreatorFactory;
@@ -208,6 +216,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
         this
                 .registerFactory(ResourceKey.Factory.class, new SpongeResourceKeyFactory())
                 .registerFactory(Audiences.Factory.class, new AudiencesFactory())
+                .registerFactory(ForwardingViewer.Factory.class, new SpongeCustomForwardingViewer.FactoryImpl())
                 .registerFactory(AABB.Factory.class, new SpongeAABB.FactoryImpl())
                 .registerFactory(AdvancementCriterion.Factory.class, new SpongeAdvancementCriterionFactory())
                 .registerFactory(CommandCause.Factory.class, new SpongeCommandCauseFactory())
@@ -271,6 +280,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(IntegerStateProperty.Factory.class, new BlockStatePropertyImpl.IntegerFactoryImpl())
                 .registerFactory(EnumStateProperty.Factory.class, new BlockStatePropertyImpl.EnumFactoryImpl())
                 .registerFactory(DefaultWorldKeys.Factory.class, new SpongeDefaultWorldKeysFactory())
+                .registerFactory(PositionSource.Factory.class, new SpongePositionSourceFactory())
                 .registerFactory(JigsawPoolElement.Factory.class, new SpongeJigsawFactory())
                 .registerFactory(ParticleConfig.Factory.class, new SpongeParticleConfigFactory())
                 .registerFactory(SoundConfig.Factory.class, new SpongeSoundConfigFactory())
@@ -278,6 +288,8 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(NaturalSpawner.Factory.class, new SpongeNaturalSpawnerFactory())
                 .registerFactory(ScoreFormat.Factory.class, new SpongeScoreFormatFactory())
                 .registerFactory(ToolRule.Factory.class, new SpongeToolRuleFactory())
+                .registerFactory(PortalLogic.Factory.class, new SpongePortalLogicFactory())
+                .registerFactory(RecipeInput.Factory.class, new SpongeRecipeInputFactory())
         ;
     }
 }

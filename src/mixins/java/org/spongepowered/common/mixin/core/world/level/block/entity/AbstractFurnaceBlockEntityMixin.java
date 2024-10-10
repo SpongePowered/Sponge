@@ -26,11 +26,11 @@ package org.spongepowered.common.mixin.core.world.level.block.entity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -70,7 +70,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
 
     // @Formatter:on
 
-    @Shadow @Final private RecipeManager.CachedCheck<Container, ? extends AbstractCookingRecipe> quickCheck;
+    @Shadow @Final private RecipeManager.CachedCheck<SingleRecipeInput, ? extends AbstractCookingRecipe> quickCheck;
 
     // Shrink Fuel
     @Redirect(method = "serverTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;shrink(I)V"))
@@ -103,7 +103,8 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
 
     @Override
     public Optional<? extends RecipeHolder<? extends AbstractCookingRecipe>> bridge$getCurrentRecipe() {
-        return this.quickCheck.getRecipeFor((AbstractFurnaceBlockEntity) (Object) this, this.level);
+        var recipeInpuit = new SingleRecipeInput(this.items.get(0));
+        return this.quickCheck.getRecipeFor(recipeInpuit, this.level);
     }
 
     // Interrupt-Active - e.g. a player removing the currently smelting item

@@ -25,6 +25,9 @@
 package org.spongepowered.common;
 
 import org.spongepowered.api.Engine;
+import org.spongepowered.common.util.BlockDestructionIdCache;
 
 public interface SpongeEngine extends Engine {
+
+    BlockDestructionIdCache getBlockDestructionIdCache();
 }

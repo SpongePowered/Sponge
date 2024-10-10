@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.server.network;
 
 import net.minecraft.network.Connection;
+import net.minecraft.network.DisconnectionDetails;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
 import net.minecraft.network.protocol.status.ServerStatus;
@@ -61,7 +62,7 @@ public abstract class ServerStatusPacketListenerImplMixin {
             if (response != null) {
                 this.connection.send(new ClientboundStatusResponsePacket(response));
             } else {
-                this.connection.disconnect(null);
+                this.connection.disconnect(new DisconnectionDetails(null));
             }
         }
     }

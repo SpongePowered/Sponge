@@ -38,6 +38,7 @@ import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.description.JavadocDescription;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.StringRepresentable;
 import org.tinylog.Logger;
 
 import java.util.ArrayList;
@@ -51,7 +52,7 @@ class EnumEntriesValidator<V> implements Generator {
 
     private final String relativePackageName;
     private final String targetClassSimpleName;
-    private final Class<?> clazz;
+    private final Class<? extends Enum<?>> clazz;
     private final String keyFunction;
 
     private final String namespace;
@@ -59,7 +60,7 @@ class EnumEntriesValidator<V> implements Generator {
     EnumEntriesValidator(
             final String targetRelativePackage,
             final String targetClassSimpleName,
-            final Class<?> clazz,
+            final Class<? extends Enum<?>> clazz,
             final String keyFunction,
             final String namespace
     ) {
@@ -83,7 +84,7 @@ class EnumEntriesValidator<V> implements Generator {
         final var primaryTypeDeclaration = compilationUnit.getPrimaryType()
                 .orElseThrow(() -> new IllegalStateException("Could not find primary type for registry type " + this.targetClassSimpleName));
 
-        final Object[] map = this.clazz.getEnumConstants();
+        final Enum<?>[] map = this.clazz.getEnumConstants();
 
         primaryTypeDeclaration.setJavadocComment(new Javadoc(JavadocDescription.parseText(Generator.GENERATED_FILE_JAVADOCS)));
 
@@ -108,8 +109,11 @@ class EnumEntriesValidator<V> implements Generator {
         // Now, iterate the registry, discovering which fields were added and removed
         final var added = new HashSet<ResourceLocation>();
         final var processedFields = new ArrayList<FieldDeclaration>(map.length);
-        for (final Object f : map) {
+        for (final Enum<?> f : map) {
             final String name;
+            if (!this.keyFunction.equalsIgnoreCase("getSerializedName") && f instanceof StringRepresentable) {
+                Logger.warn("Using {} as keyFunction on a StringRepresentable object: {}.{}", this.keyFunction, this.clazz.getName(), f.name());
+            }
             try {
                 if (this.keyFunction.equals("name")) {
                     name = ((String) Enum.class.getMethod("name").invoke(f)).toLowerCase();
@@ -119,7 +123,7 @@ class EnumEntriesValidator<V> implements Generator {
             } catch (Exception e) {
                 throw new IllegalStateException("Failed to name for enum field in class " + this.clazz.getName(), e);
             }
-            final ResourceLocation key = new ResourceLocation(this.namespace, name);
+            final ResourceLocation key = ResourceLocation.fromNamespaceAndPath(this.namespace, name);
 
             final FieldDeclaration existing = fields.remove(key);
             if (existing != null) {
@@ -150,24 +154,24 @@ class EnumEntriesValidator<V> implements Generator {
         final VariableDeclarator var = declaration.getVariable(0);
         final Expression initializer = var.getInitializer().orElse(null);
         if (!(initializer instanceof MethodCallExpr) || ((MethodCallExpr) initializer).getArguments().size() != 1) {
-            return new ResourceLocation(var.getNameAsString().toLowerCase(Locale.ROOT)); // a best guess
+            return ResourceLocation.parse(var.getNameAsString().toLowerCase(Locale.ROOT)); // a best guess
         }
 
         final Expression argument = ((MethodCallExpr) initializer).getArgument(0);
         if (!(argument instanceof final MethodCallExpr keyInitializer)
                 || keyInitializer.getArguments().size() < 1) {
-            return new ResourceLocation(var.getNameAsString().toLowerCase(Locale.ROOT)); // a best guess
+            return ResourceLocation.parse(var.getNameAsString().toLowerCase(Locale.ROOT)); // a best guess
         }
 
         if (keyInitializer.getArguments().size() == 1) { // method name as namespace
-            return new ResourceLocation(keyInitializer.getNameAsString(), keyInitializer.getArgument(0).asStringLiteralExpr().asString());
+            return ResourceLocation.fromNamespaceAndPath(keyInitializer.getNameAsString(), keyInitializer.getArgument(0).asStringLiteralExpr().asString());
         } else if (keyInitializer.getArguments().size() == 2) { // (namespace, path)
-            return new ResourceLocation(
+            return ResourceLocation.fromNamespaceAndPath(
                     keyInitializer.getArgument(0).asStringLiteralExpr().asString(),
                     keyInitializer.getArgument(1).asStringLiteralExpr().asString()
             );
         } else {
-            return new ResourceLocation(var.getNameAsString().toLowerCase(Locale.ROOT)); // a best guess
+            return ResourceLocation.parse(var.getNameAsString().toLowerCase(Locale.ROOT)); // a best guess
         }
 
     }

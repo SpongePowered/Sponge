@@ -25,7 +25,9 @@
 package org.spongepowered.common.mixin.api.minecraft.world.entity.ai.attributes;
 
 import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.attribute.Attribute;
 import org.spongepowered.api.entity.attribute.AttributeModifier;
 import org.spongepowered.api.entity.attribute.AttributeOperation;
@@ -44,6 +46,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.annotation.Nullable;
+
 @Mixin(AttributeInstance.class)
 @Implements(@Interface(iface = Attribute.class, prefix = "attribute$", remap = Remap.NONE))
 public abstract class AttributeInstanceMixin_API implements Attribute {
@@ -53,13 +57,14 @@ public abstract class AttributeInstanceMixin_API implements Attribute {
     @Shadow public abstract double shadow$getBaseValue();
     @Shadow public abstract void shadow$setBaseValue(double baseValue);
     @Shadow public abstract double shadow$getValue();
-    @Shadow public abstract net.minecraft.world.entity.ai.attributes.AttributeModifier shadow$getModifier(UUID uuid);
-    @Shadow public abstract boolean shadow$hasModifier(net.minecraft.world.entity.ai.attributes.AttributeModifier modifier);
     @Shadow protected abstract void shadow$addModifier(net.minecraft.world.entity.ai.attributes.AttributeModifier modifier);
     @Shadow public abstract void shadow$removeModifier(net.minecraft.world.entity.ai.attributes.AttributeModifier modifier);
-    @Shadow public abstract void shadow$removeModifier(UUID uuid);
+    @Shadow public abstract boolean shadow$removeModifier(ResourceLocation $$0);
     @Shadow abstract Map<UUID, net.minecraft.world.entity.ai.attributes.AttributeModifier> shadow$getModifiers(net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation p_225504_1_);
     @Shadow public abstract Set<net.minecraft.world.entity.ai.attributes.AttributeModifier> shadow$getModifiers();
+    @Shadow public abstract boolean shadow$hasModifier(final ResourceLocation $$0);
+    @Shadow @Nullable public abstract net.minecraft.world.entity.ai.attributes.AttributeModifier shadow$getModifier(final ResourceLocation $$0);
+
     // @formatter:on
 
     @Override
@@ -94,12 +99,7 @@ public abstract class AttributeInstanceMixin_API implements Attribute {
 
     @Override
     public boolean hasModifier(final AttributeModifier modifier) {
-        return this.shadow$hasModifier((net.minecraft.world.entity.ai.attributes.AttributeModifier) (Object) Objects.requireNonNull(modifier, "modifier"));
-    }
-
-    @Override
-    public Optional<AttributeModifier> modifier(final UUID uniqueId) {
-        return Optional.ofNullable((AttributeModifier) (Object) this.shadow$getModifier(Objects.requireNonNull(uniqueId, "uniqueId")));
+        return this.shadow$hasModifier((ResourceLocation) (Object) modifier.key());
     }
 
     @Override
@@ -112,9 +112,14 @@ public abstract class AttributeInstanceMixin_API implements Attribute {
         this.shadow$removeModifier((net.minecraft.world.entity.ai.attributes.AttributeModifier) (Object) Objects.requireNonNull(modifier, "modifier"));
     }
 
-    @Intrinsic
-    public void attribute$removeModifier(final UUID uniqueId) {
-        this.shadow$removeModifier(Objects.requireNonNull(uniqueId, "uniqueId"));
+    @Override
+    public void removeModifier(ResourceKey key) {
+        this.shadow$removeModifier((ResourceLocation) (Object) key);
+    }
+
+    @Override
+    public Optional<AttributeModifier> modifier(final ResourceKey key) {
+        return Optional.ofNullable((AttributeModifier) (Object) this.shadow$getModifier((ResourceLocation) (Object) Objects.requireNonNull(key, "uniqueId")));
     }
 
 }

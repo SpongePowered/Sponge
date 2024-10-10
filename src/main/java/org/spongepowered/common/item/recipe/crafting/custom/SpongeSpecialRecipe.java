@@ -24,21 +24,25 @@
  */
 package org.spongepowered.common.item.recipe.crafting.custom;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
+import org.spongepowered.api.item.recipe.crafting.RecipeInput;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MissingImplementationException;
 
 import java.util.List;
@@ -47,16 +51,24 @@ import java.util.function.Function;
 
 public final class SpongeSpecialRecipe extends CustomRecipe {
 
+    public static final MapCodec<SpongeSpecialRecipe> SPONGE_CODEC = RecordCodecBuilder.mapCodec(
+            $$0 -> $$0.group(
+                            Codec.STRING.fieldOf(Constants.Recipe.SPONGE_TYPE).forGetter(SpongeSpecialRecipe::id), // important to fail early when decoding vanilla recipes
+                            CraftingBookCategory.CODEC.fieldOf(Constants.Recipe.CATEGORY).orElse(CraftingBookCategory.MISC).forGetter(SpongeSpecialRecipe::category)
+                    )
+                    .apply($$0, SpongeSpecialCraftingRecipeRegistration::get)
+    );
+
     private final String id;
-    private final BiPredicate<CraftingGridInventory, ServerWorld> biPredicate;
-    private final Function<CraftingGridInventory, List<org.spongepowered.api.item.inventory.ItemStack>> remainingItemsFunction;
-    private final Function<CraftingGridInventory, org.spongepowered.api.item.inventory.ItemStack> resultFunction;
+    private final BiPredicate<RecipeInput.Crafting, ServerWorld> biPredicate;
+    private final Function<RecipeInput.Crafting, List<org.spongepowered.api.item.inventory.ItemStack>> remainingItemsFunction;
+    private final Function<RecipeInput.Crafting, org.spongepowered.api.item.inventory.ItemStack> resultFunction;
 
     public SpongeSpecialRecipe(ResourceLocation key,
             CraftingBookCategory category,
-            BiPredicate<CraftingGridInventory, ServerWorld> biPredicate,
-            Function<CraftingGridInventory, List<org.spongepowered.api.item.inventory.ItemStack>> remainingItemsFunction,
-            Function<CraftingGridInventory, org.spongepowered.api.item.inventory.ItemStack> resultFunction) {
+            BiPredicate<RecipeInput.Crafting, ServerWorld> biPredicate,
+            Function<RecipeInput.Crafting, List<org.spongepowered.api.item.inventory.ItemStack>> remainingItemsFunction,
+            Function<RecipeInput.Crafting, org.spongepowered.api.item.inventory.ItemStack> resultFunction) {
         super(category);
         this.id = key.toString();
         this.biPredicate = biPredicate;
@@ -68,14 +80,15 @@ public final class SpongeSpecialRecipe extends CustomRecipe {
         return id;
     }
 
+
     @Override
-    public boolean matches(CraftingContainer inv, Level worldIn) {
-        return this.biPredicate.test(InventoryUtil.toSpongeInventory(inv), (ServerWorld) worldIn);
+    public boolean matches(final CraftingInput input, final Level level) {
+        return this.biPredicate.test(InventoryUtil.toSponge(input), (ServerWorld) level);
     }
 
     @Override
-    public ItemStack assemble(final CraftingContainer inv, final HolderLookup.Provider $$1) {
-        return ItemStackUtil.toNative(this.resultFunction.apply(InventoryUtil.toSpongeInventory(inv)));
+    public ItemStack assemble(final CraftingInput input, final HolderLookup.Provider lookup) {
+        return ItemStackUtil.toNative(this.resultFunction.apply(InventoryUtil.toSponge(input)));
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -85,11 +98,11 @@ public final class SpongeSpecialRecipe extends CustomRecipe {
     }
 
     @Override
-    public NonNullList<ItemStack> getRemainingItems(CraftingContainer inv) {
+    public NonNullList<ItemStack> getRemainingItems(final CraftingInput input) {
         if (this.remainingItemsFunction == null) {
-            return super.getRemainingItems(inv);
+            return super.getRemainingItems(input);
         }
-        final List<org.spongepowered.api.item.inventory.ItemStack> remainingSponge = this.remainingItemsFunction.apply(InventoryUtil.toSpongeInventory(inv));
+        final List<org.spongepowered.api.item.inventory.ItemStack> remainingSponge = this.remainingItemsFunction.apply(InventoryUtil.toSponge(input));
         final NonNullList<ItemStack> remaining = NonNullList.create();
         remainingSponge.forEach(item -> remaining.add(ItemStackUtil.toNative(item)));
         return remaining;

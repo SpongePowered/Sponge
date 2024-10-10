@@ -24,38 +24,35 @@
  */
 package org.spongepowered.common.entity;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
-import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
-import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
-import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.players.PlayerList;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.util.random.SimpleWeightedRandomList;
+import net.minecraft.util.random.WeightedEntry;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.biome.BiomeManager;
-import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.level.SpawnData;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.EntityArchetype;
+import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.common.accessor.server.level.ServerPlayerAccessor;
-import org.spongepowered.common.accessor.server.network.ServerCommonPacketListenerImplAccessor;
+import org.spongepowered.api.util.weighted.WeightedObject;
+import org.spongepowered.api.util.weighted.WeightedSerializableObject;
+import org.spongepowered.api.util.weighted.WeightedTable;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
-import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
-import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
-import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
-import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
+import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.hooks.PlatformHooks;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.ArrayList;
@@ -86,78 +83,6 @@ public final class EntityUtil {
                 }
             }
         }
-    }
-
-    public static void performPostChangePlayerWorldLogic(final ServerPlayer player, final ServerLevel fromWorld,
-            final ServerLevel originalToWorld, final ServerLevel toWorld, final boolean isPortal) {
-        // Sponge Start - Send any platform dimension data
-        ((ServerPlayerBridge) player).bridge$sendDimensionData(((ServerCommonPacketListenerImplAccessor) player.connection).accessor$connection(), toWorld.dimensionType(), toWorld.dimension());
-        // Sponge End
-        final LevelData worldinfo = toWorld.getLevelData();
-        // We send dimension change for portals before loading chunks
-        if (!isPortal) {
-            // Sponge Start - Allow the platform to handle how dimension changes are sent down
-            ((ServerPlayerBridge) player).bridge$sendChangeDimension(toWorld.dimensionTypeRegistration(), toWorld.dimension(), BiomeManager.obfuscateSeed(toWorld.getSeed()),
-                    player.gameMode.getGameModeForPlayer(), player.gameMode.getPreviousGameModeForPlayer(),
-                    toWorld.isDebug(), toWorld.isFlat(), ClientboundRespawnPacket.KEEP_ALL_DATA
-            );
-        }
-        // Sponge End
-        player.connection.send(new ClientboundChangeDifficultyPacket(worldinfo.getDifficulty(), worldinfo.isDifficultyLocked()));
-        final PlayerList playerlist = player.getServer().getPlayerList();
-        playerlist.sendPlayerPermissionLevel(player);
-
-        // Sponge Start - Have the platform handle removing the entity from the world. Move this to after the event call so
-        //                that we do not remove the player from the world unless we really have teleported..
-        ((PlatformServerLevelBridge) fromWorld).bridge$removeEntity(player, Entity.RemovalReason.CHANGED_DIMENSION, true);
-        ((PlatformEntityBridge) player).bridge$revive();
-        // Sponge End
-
-        player.setServerLevel(toWorld);
-        toWorld.addDuringPortalTeleport(player);
-        if (isPortal) {
-            ((ServerPlayerAccessor) player).invoker$triggerDimensionChangeTriggers(toWorld);
-        }
-        player.gameMode.setLevel(toWorld);
-        player.connection.send(new ClientboundPlayerAbilitiesPacket(player.getAbilities()));
-        playerlist.sendLevelInfo(player, toWorld);
-        playerlist.sendAllPlayerInfo(player);
-
-        for (final MobEffectInstance effectinstance : player.getActiveEffects()) {
-            player.connection.send(new ClientboundUpdateMobEffectPacket(player.getId(), effectinstance, false));
-        }
-
-        if (isPortal) {
-            player.connection.send(new ClientboundLevelEventPacket(1032, BlockPos.ZERO, 0, false));
-        }
-
-        ((ServerLevelBridge) fromWorld).bridge$getBossBarManager().onPlayerDisconnect(player);
-        ((ServerLevelBridge) toWorld).bridge$getBossBarManager().onPlayerDisconnect(player);
-
-        ((ServerPlayerAccessor) player).accessor$lastSentExp(-1);
-        ((ServerPlayerAccessor) player).accessor$lastSentHealth(-1.0f);
-        ((ServerPlayerAccessor) player).accessor$lastSentFood(-1);
-
-        if (!isPortal) {
-            player.connection.teleport(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
-            player.connection.resetPosition();
-        }
-
-        if (player.containerMenu != player.inventoryMenu) {
-            player.closeContainer();
-        }
-
-        // Sponge Start - Call event
-        Sponge.eventManager().post(
-                SpongeEventFactory.createChangeEntityWorldEventPost(
-                        PhaseTracker.getCauseStackManager().currentCause(),
-                        (org.spongepowered.api.entity.Entity) player,
-                        (ServerWorld) fromWorld,
-                        (ServerWorld) originalToWorld,
-                        (ServerWorld) toWorld
-                )
-        );
-        // Sponge End
     }
 
     public static boolean processEntitySpawn(final org.spongepowered.api.entity.Entity entity, final Supplier<Optional<UUID>> supplier, final Consumer<Entity> spawner) {
@@ -255,5 +180,65 @@ public final class EntityUtil {
         }
         // Temporary fix for https://bugs.mojang.com/browse/MC-149563
         return from.level() != target.level();
+    }
+
+    public static EntityArchetype toArchetype(final SpawnData logic) {
+        final var tag = logic.entityToSpawn();
+        final var resourceLocation = tag.getString(Constants.Entity.ENTITY_TYPE_ID);
+        final var entityTypeRegistry = SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE);
+        final var type = entityTypeRegistry.getOptional(ResourceLocation.parse(resourceLocation))
+            .map(org.spongepowered.api.entity.EntityType.class::cast)
+            .orElse(EntityTypes.PIG.get());
+
+        return SpongeEntityArchetypeBuilder.pooled()
+                .type(type)
+                .entityData(NBTTranslator.INSTANCE.translateFrom(tag))
+                .build();
+    }
+
+    public static SpawnData toSpawnData(final EntityArchetype value) {
+        final var tag = NBTTranslator.INSTANCE.translate(value.entityData());
+        if (!tag.contains(Constants.Entity.ENTITY_TYPE_ID)) {
+            final ResourceKey key = (ResourceKey) (Object) EntityType.getKey((EntityType<?>) value.type());
+            tag.putString(Constants.Entity.ENTITY_TYPE_ID, key.toString());
+        }
+
+        // TODO customSpawnRules & equipment support
+        return new SpawnData(tag, Optional.empty(), Optional.empty());
+    }
+
+    public static WeightedTable<EntityArchetype> toWeightedArchetypes(final SimpleWeightedRandomList<SpawnData> spawnData) {
+        final WeightedTable<EntityArchetype> possibleEntities = new WeightedTable<>();
+
+        for (final WeightedEntry.Wrapper<SpawnData> weightedEntity : spawnData.unwrap()) {
+            final CompoundTag nbt = weightedEntity.data().entityToSpawn();
+            final String resourceLocation = nbt.getString(Constants.Entity.ENTITY_TYPE_ID);
+            final var mcType = SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE).getOptional(ResourceLocation.parse(resourceLocation));
+            final var type = mcType.map(org.spongepowered.api.entity.EntityType.class::cast).orElse(EntityTypes.PIG.get());
+
+            final EntityArchetype archetype = SpongeEntityArchetypeBuilder.pooled()
+                    .type(type)
+                    .entityData(NBTTranslator.INSTANCE.translateFrom(nbt))
+                    .build();
+
+            possibleEntities.add(new WeightedSerializableObject<>(archetype, weightedEntity.getWeight().asInt()));
+        }
+        return possibleEntities;
+    }
+
+    public static SimpleWeightedRandomList<SpawnData> toSpawnPotentials(final WeightedTable<EntityArchetype> table) {
+        final SimpleWeightedRandomList.Builder<SpawnData> builder = SimpleWeightedRandomList.builder();
+        for (final var entry : table) {
+            if (entry instanceof final WeightedObject<EntityArchetype> weightedObj) {
+                final var tag = NBTTranslator.INSTANCE.translate(weightedObj.get().entityData());
+                if (!tag.contains(Constants.Entity.ENTITY_TYPE_ID)) {
+                    final var key = EntityType.getKey((EntityType<?>) weightedObj.get().type());
+                    tag.putString(Constants.Entity.ENTITY_TYPE_ID, key.toString());
+                }
+                // TODO customSpawnRules & equipment support
+                builder.add(new SpawnData(tag, Optional.empty(), Optional.empty()), (int) entry.weight());
+            }
+        }
+        return builder.build();
     }
 }

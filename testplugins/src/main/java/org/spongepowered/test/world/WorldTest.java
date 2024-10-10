@@ -50,7 +50,7 @@ import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.api.world.WorldTypes;
-import org.spongepowered.api.world.portal.PortalType;
+import org.spongepowered.api.world.portal.PortalLogic;
 import org.spongepowered.api.world.server.DataPackManager;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -82,17 +82,16 @@ public final class WorldTest {
         final Parameter.Value<ResourceKey> worldKeyParameter = Parameter.resourceKey().key("world").build();
         final Parameter.Value<ServerWorld> optWorldParameter = Parameter.world().optional().key("world").build();
         final Parameter.Value<Vector3d> optPositionParameter = Parameter.vector3d().optional().key("position").build();
-        final Parameter.Value<PortalType> portalTypeParameter = Parameter.registryElement(TypeToken.get(PortalType.class), RegistryTypes.PORTAL_TYPE, "minecraft", "sponge").key("portal_type").build();
         final Parameter.Value<WorldType> worldTypeParameter = Parameter.registryElement(TypeToken.get(WorldType.class), RegistryTypes.WORLD_TYPE, "minecraft", "sponge").key("world_type").build();
         final Parameter.Value<ResourceKey> copyWorldKeyParameter = Parameter.resourceKey().key("copy_world").build();
         final Parameter.Value<ResourceKey> moveWorldKeyParameter = Parameter.resourceKey().key("move_world").build();
 
-        event.register(this.plugin, Command.builder().addParameters(CommonParameters.LOCATION_ONLINE_ONLY, portalTypeParameter)
+        event.register(this.plugin, Command.builder().addParameters(CommonParameters.LOCATION_ONLINE_ONLY)
                      .permission(this.plugin.metadata().id() + ".command.portal.create")
-                     .executor(context -> this.createPortal(context, portalTypeParameter)).build(), "cp", "createportal")
-             .register(this.plugin, Command.builder().addParameters(optPlayerParameter, CommonParameters.LOCATION_ONLINE_ONLY, portalTypeParameter)
+                     .executor(this::createPortal).build(), "cp", "createportal")
+             .register(this.plugin, Command.builder().addParameters(optPlayerParameter, CommonParameters.LOCATION_ONLINE_ONLY)
                      .permission(this.plugin.metadata().id() + ".command.portal.use")
-                     .executor(context -> this.useportal(context, optPlayerParameter, portalTypeParameter)).build(), "up", "useportal")
+                     .executor(context -> this.useportal(context, optPlayerParameter)).build(), "up", "useportal")
              .register(this.plugin, Command.builder().addParameters(optPlayerParameter, worldTypeParameter)
                      .permission(this.plugin.metadata().id() + ".command.environment.change")
                      .executor(context -> this.changeEnvironement(context, optPlayerParameter, worldTypeParameter)).build(), "ce", "changeenvironment")
@@ -125,16 +124,15 @@ public final class WorldTest {
         ;
     }
 
-    private CommandResult createPortal(final CommandContext context, final Parameter.Value<PortalType> portalTypeParameter) {
+    private CommandResult createPortal(final CommandContext context) {
         final ServerLocation location = context.requireOne(CommonParameters.LOCATION_ONLINE_ONLY);
-        final PortalType portalType = context.requireOne(portalTypeParameter);
-        portalType.generatePortal(location, Axis.X);
+        PortalLogic.factory().netherPortal().generator().get().generatePortal(location, Axis.X);
         return CommandResult.success();
     }
-    private CommandResult useportal(final CommandContext context, final Parameter.Value<ServerPlayer> optPlayerParameter, final Parameter.Value<PortalType> portalTypeParameter) {
+    private CommandResult useportal(final CommandContext context, final Parameter.Value<ServerPlayer> optPlayerParameter) {
         final ServerPlayer player = context.one(optPlayerParameter).orElse(this.getSourcePlayer(context));
         final ServerLocation location = context.requireOne(CommonParameters.LOCATION_ONLINE_ONLY);
-        final PortalType portalType = context.requireOne(portalTypeParameter);
+        final PortalLogic portalType = PortalLogic.factory().netherPortal();
         return portalType.teleport(player, location, true) ? CommandResult.success() : CommandResult.error(Component.text("Could not teleport!"));
     }
 
