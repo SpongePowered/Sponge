@@ -35,6 +35,7 @@ import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.transformation.Transformation;
+import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.schematic.Palette;
@@ -265,6 +266,13 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
     public void applyToWorld(
         final ServerWorld target, final Vector3i placement, final Supplier<SpawnType> spawnContext
     ) {
+        this.applyToWorld(target, placement, spawnContext, BlockChangeFlags.DEFAULT_PLACEMENT);
+    }
+
+    @Override
+    public void applyToWorld(
+        final ServerWorld target, final Vector3i placement, final Supplier<SpawnType> spawnContext, final BlockChangeFlag flag
+    ) {
         Objects.requireNonNull(target, "Target world cannot be null");
         Objects.requireNonNull(placement, "Target position cannot be null");
         try (final PhaseContext<@NonNull ?> context = PluginPhase.State.VOLUME_STREAM_APPLICATION
@@ -276,7 +284,7 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
                 .apply(VolumeCollectors.of(
                     target,
                     VolumePositionTranslators.relativeTo(placement),
-                    VolumeApplicators.applyBlocks(BlockChangeFlags.DEFAULT_PLACEMENT)
+                    VolumeApplicators.applyBlocks(flag)
                 ));
 
             this.biomeStream(this.min(), this.max(), StreamOptions.lazily())
