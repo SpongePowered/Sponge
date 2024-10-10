@@ -1,0 +1,8 @@
+{
+    "required": true,
+    "parent": "mixins.sponge.parent.json",
+    "package": "org.spongepowered.neoforge.accessor",
+    "mixins": [
+        "neoforge.registries.RegistrySnapshotAccessor_Neo"
+    ]
+}

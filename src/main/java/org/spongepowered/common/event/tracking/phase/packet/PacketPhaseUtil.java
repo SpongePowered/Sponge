@@ -80,6 +80,7 @@ import java.util.List;
 
 public final class PacketPhaseUtil {
 
+    @SuppressWarnings("removal")
     public static void handleSlotRestore(@Nullable final Player player, final @Nullable AbstractContainerMenu containerMenu, final List<SlotTransaction> slotTransactions, final boolean eventCancelled) {
         try (PhaseContext<@NonNull ?> ignored = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext(PhaseTracker.SERVER).buildAndSwitch()) {
             boolean restoredAny = false;
@@ -92,10 +93,10 @@ public final class PacketPhaseUtil {
                 final org.spongepowered.api.item.inventory.Slot slot = slotTransaction.slot();
                 final ItemStackSnapshot snapshot = eventCancelled || !slotTransaction.isValid() ? slotTransaction.original() : slotTransaction.custom().get();
                 if (containerMenu == null || slot.viewedSlot() instanceof Slot) {
-                    slot.set(snapshot.createStack());
+                    slot.set(snapshot);
                 } else if (player instanceof ServerPlayer serverPlayer
                         && containerMenu != player.inventoryMenu && serverPlayer.inventory().containsInventory(slot)) {
-                    final org.spongepowered.api.item.inventory.ItemStack stack = snapshot.createStack();
+                    final org.spongepowered.api.item.inventory.ItemStack stack = snapshot.asMutable();
                     slot.set(stack);
                     ((net.minecraft.server.level.ServerPlayer) player).connection.send(
                             new ClientboundContainerSetSlotPacket(-2, player.inventoryMenu.getStateId(), ((SlotAdapter) slot).getOrdinal(), ItemStackUtil.toNative(stack)));

@@ -27,15 +27,16 @@ package org.spongepowered.common.network.channel;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
-import net.minecraft.network.protocol.login.ServerboundCustomQueryAnswerPacket;
 import net.minecraft.network.protocol.login.custom.CustomQueryPayload;
 import net.minecraft.resources.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.network.EngineConnection;
+import org.spongepowered.api.network.EngineConnectionSide;
 import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.api.network.channel.Channel;
 import org.spongepowered.api.network.channel.ChannelBuf;
@@ -236,7 +237,15 @@ public final class SpongeChannelManager implements ChannelManager {
     }
 
     public void sendChannelRegistrations(final EngineConnection connection) {
-        final Packet<?> mcPacket = PlatformHooks.INSTANCE.getChannelHooks().createRegisterPayload(RegisterChannelUtil.encodePayload(this.channels.keySet()), connection.side());
+        final CustomPacketPayload payload = PlatformHooks.INSTANCE.getChannelHooks().createRegisterPayload(this.channels.keySet());
+        final Packet<?> mcPacket;
+        if (connection.side() == EngineConnectionSide.CLIENT) {
+            mcPacket = new ServerboundCustomPayloadPacket(payload);
+        } else if (connection.side() == EngineConnectionSide.SERVER) {
+            mcPacket = new ClientboundCustomPayloadPacket(payload);
+        } else {
+            throw new UnsupportedOperationException();
+        }
         PacketSender.sendTo(connection, mcPacket);
     }
 
@@ -279,15 +288,15 @@ public final class SpongeChannelManager implements ChannelManager {
         }
     }
 
-    public boolean handlePlayPayload(final EngineConnection connection, final EngineConnectionState state, final CustomPacketPayload payload) {
-        if (!(payload instanceof SpongeChannelPayload spongeChannelPayload)) {
-            return false;
-        }
-        final ResourceKey channel = (ResourceKey) (Object) payload.type().id();
+    public boolean handlePlayPayload(final EngineConnection connection, final EngineConnectionState state, final ResourceLocation channelKey, final Consumer<FriendlyByteBuf> payload) {
         final ChannelBuf buf = this.bufferAllocator.buffer();
-        ((FriendlyByteBuf) buf).writeBytes(spongeChannelPayload.payload().copy());
+        payload.accept((FriendlyByteBuf) buf);
 
-        return this.handlePlayPayload(connection, state, channel, buf);
+        try {
+            return this.handlePlayPayload(connection, state, (ResourceKey) (Object) channelKey, buf);
+        } finally {
+            ChannelBuffers.release(buf);
+        }
     }
 
     private void handleRegisterChannel(final EngineConnection connection, final ChannelBuf payload,
@@ -318,28 +327,22 @@ public final class SpongeChannelManager implements ChannelManager {
         }
         final SpongeChannel channel = this.channels.get(channelKey);
         if (channel != null) {
-            try {
-                channel.handlePlayPayload(connection, state, payload);
-            } finally {
-                ChannelBuffers.release(payload);
-            }
+            channel.handlePlayPayload(connection, state, payload);
             return true;
         } else {
             return false;
         }
     }
 
-    public boolean handleLoginRequestPayload(final EngineConnection connection, final EngineConnectionState state, final ClientboundCustomQueryPacket packet) {
+    public boolean handleLoginRequestPayload(final EngineConnection connection, final EngineConnectionState state, final ResourceLocation channelKey, final int transactionId, final Consumer<FriendlyByteBuf> payload) {
         // Server -> Client request
-        final ResourceKey channel = (ResourceKey) (Object) packet.payload().id();
-        final int transactionId = packet.transactionId();
-        final ChannelBuf payload = this.bufferAllocator.buffer();
-        packet.payload().write((FriendlyByteBuf) payload);
+        final ChannelBuf buf = this.bufferAllocator.buffer();
+        payload.accept((FriendlyByteBuf) buf);
 
         try {
-            return this.handleLoginRequestPayload(connection, state, channel, transactionId, payload);
+            return this.handleLoginRequestPayload(connection, state, (ResourceKey) (Object) channelKey, transactionId, buf);
         } finally {
-            ChannelBuffers.release(payload);
+            ChannelBuffers.release(buf);
         }
     }
 
@@ -374,24 +377,21 @@ public final class SpongeChannelManager implements ChannelManager {
         return false;
     }
 
-    public void handleLoginResponsePayload(final EngineConnection connection, final EngineConnectionState state, final ServerboundCustomQueryAnswerPacket packet) {
+    public void handleLoginResponsePayload(final EngineConnection connection, final EngineConnectionState state, final ResourceLocation channelKey, final int transactionId, final @Nullable Consumer<FriendlyByteBuf> payload) {
         // Client -> Server response
-
-        final int transactionId = packet.transactionId();
-
-        final ChannelBuf payload;
-        if (packet.payload() != null) {
-            payload = this.bufferAllocator.buffer();
-            packet.payload().write((FriendlyByteBuf) payload);
+        final ChannelBuf buf;
+        if (payload != null) {
+            buf = this.bufferAllocator.buffer();
+            payload.accept((FriendlyByteBuf) buf);
         } else {
-            payload = null;
+            buf = null;
         }
 
         try {
-            this.handleLoginResponsePayload(connection, state, transactionId, payload);
+            this.handleLoginResponsePayload(connection, state, transactionId, buf);
         } finally {
-            if (payload != null) {
-                ChannelBuffers.release(payload);
+            if (buf != null) {
+                ChannelBuffers.release(buf);
             }
         }
     }

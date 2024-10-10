@@ -67,10 +67,10 @@ public final class PluginDependencyConfigurable implements IConfigurable {
     }
 
     private IModInfo.Ordering loadToOrdering(final PluginDependency.LoadOrder order) {
-        if (order == PluginDependency.LoadOrder.AFTER) {
-            return IModInfo.Ordering.AFTER;
-        }
-
-        return IModInfo.Ordering.NONE;
+        return switch (order) {
+            case UNDEFINED -> IModInfo.Ordering.NONE;
+            case BEFORE -> IModInfo.Ordering.BEFORE;
+            case AFTER -> IModInfo.Ordering.AFTER;
+        };
     }
 }

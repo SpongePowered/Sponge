@@ -109,7 +109,7 @@ public abstract class AdapterLogic {
             removedType.setQuantity(totalPolled);
         }
 
-        return result.poll(removedType.createSnapshot()).build();
+        return result.poll(removedType).build();
     }
 
     public static Optional<ItemStack> peekSequential(Fabric fabric, @Nullable Lens lens) {

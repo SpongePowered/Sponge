@@ -50,7 +50,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.MixinTargetHelper;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.block.entity.AbstractFurnaceBlockEntityBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -71,38 +70,38 @@ public abstract class AbstractFurnaceBlockEntityMixin_Forge implements AbstractF
     @Shadow protected NonNullList<ItemStack> items;
     @Shadow int cookingProgress;
     @Shadow private boolean shadow$canBurn(RegistryAccess registryAccess, @Nullable RecipeHolder<?> recipe, NonNullList<ItemStack> slots, int maxStackSize) {
-        throw new IllegalStateException("Mixin failed to shadow canBurn");
+        throw new UnsupportedOperationException("Shadowed canBurn");
     }
     // @formatter:on
 
-    private boolean forgeImpl$filledWaterBucket;
+    private boolean forge$filledWaterBucket;
 
     // Tick up and Start
     @Redirect(method = "serverTick",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;canBurn(Lnet/minecraft/core/RegistryAccess;Lnet/minecraft/world/item/crafting/RecipeHolder;Lnet/minecraft/core/NonNullList;I)Z",
             ordinal = 1))
-    private static boolean forgeImpl$checkIfCanSmelt(final AbstractFurnaceBlockEntity entity,
+    private static boolean forge$checkIfCanSmelt(final AbstractFurnaceBlockEntity entityIn,
                                                      final RegistryAccess registryAccess,
                                                      final RecipeHolder<?> recipe,
                                                      final NonNullList<ItemStack> slots,
                                                      final int maxStackSize) {
-        final var $this = (AbstractFurnaceBlockEntityMixin_Forge) (Object) (entity);
-        if (!$this.shadow$canBurn(registryAccess, recipe, slots, maxStackSize)) {
+        final var entity = (AbstractFurnaceBlockEntityMixin_Forge) (Object) (entityIn);
+        if (!entity.shadow$canBurn(registryAccess, recipe, slots, maxStackSize)) {
             return false;
         }
 
         final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(slots.get(1));
 
         final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
-        if ($this.cookingProgress == 0) { // Start
-            final CookingEvent.Start event = SpongeEventFactory.createCookingEventStart(cause, (FurnaceBlockEntity) entity, Optional.of(fuel),
+        if (entity.cookingProgress == 0) { // Start
+            final CookingEvent.Start event = SpongeEventFactory.createCookingEventStart(cause, (FurnaceBlockEntity) entityIn, Optional.of(fuel),
                 Optional.of((CookingRecipe) recipe.value()), Optional.of((ResourceKey) (Object) recipe.id()));
             SpongeCommon.post(event);
             return !event.isCancelled();
         } else { // Tick up
-            final ItemStackSnapshot cooking = ItemStackUtil.snapshotOf($this.items.get(0));
-            final CookingEvent.Tick event = SpongeEventFactory.createCookingEventTick(cause, (FurnaceBlockEntity) entity, cooking, Optional.of(fuel),
+            final ItemStackSnapshot cooking = ItemStackUtil.snapshotOf(entity.items.get(0));
+            final CookingEvent.Tick event = SpongeEventFactory.createCookingEventTick(cause, (FurnaceBlockEntity) entityIn, cooking, Optional.of(fuel),
                 Optional.of((CookingRecipe) recipe.value()), Optional.of((ResourceKey) (Object) recipe.id()));
             SpongeCommon.post(event);
             return !event.isCancelled();
@@ -111,19 +110,19 @@ public abstract class AbstractFurnaceBlockEntityMixin_Forge implements AbstractF
 
     // Tick down
     @Redirect(method = "serverTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;clamp(III)I"))
-    private static int forgeImpl$resetCookTimeIfCancelled(final int newCookTime, final int zero, final int totalCookTime,
-                                                          final Level level, final BlockPos entityPos, final BlockState state, final AbstractFurnaceBlockEntity entity) {
+    private static int forge$resetCookTimeIfCancelled(final int newCookTime, final int zero, final int totalCookTime,
+                                                          final Level level, final BlockPos entityPos, final BlockState state, final AbstractFurnaceBlockEntity entityIn) {
         final int clampedCookTime = Mth.clamp(newCookTime, zero, totalCookTime);
-        final var thisEntity = (AbstractFurnaceBlockEntityMixin_Forge) (Object) entity;
-        final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(thisEntity.items.get(1));
+        final var entity = (AbstractFurnaceBlockEntityMixin_Forge) (Object) entityIn;
+        final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(entity.items.get(1));
         final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
-        final var recipe = thisEntity.bridge$getCurrentRecipe();
-        final ItemStackSnapshot cooking = ItemStackUtil.snapshotOf(thisEntity.items.get(0));
-        final CookingEvent.Tick event = SpongeEventFactory.createCookingEventTick(cause, (FurnaceBlockEntity) entity, cooking, Optional.of(fuel),
+        final var recipe = entity.bridge$getCurrentRecipe();
+        final ItemStackSnapshot cooking = ItemStackUtil.snapshotOf(entity.items.get(0));
+        final CookingEvent.Tick event = SpongeEventFactory.createCookingEventTick(cause, (FurnaceBlockEntity) entityIn, cooking, Optional.of(fuel),
                 recipe.map(r -> (CookingRecipe) r.value()), recipe.map(r -> (ResourceKey) (Object) r.id()));
         SpongeCommon.post(event);
         if (event.isCancelled()) {
-            return thisEntity.cookingProgress; // dont tick down
+            return entity.cookingProgress; // dont tick down
         }
 
         return clampedCookTime;
@@ -134,22 +133,20 @@ public abstract class AbstractFurnaceBlockEntityMixin_Forge implements AbstractF
         slice = @Slice(
             from = @At(value = "FIELD", target = "Lnet/minecraft/world/level/block/Blocks;WET_SPONGE:Lnet/minecraft/world/level/block/Block;", opcode = Opcodes.GETSTATIC)
         ))
-    private void forgeImpl$captureBucketFill(final RegistryAccess $$0, final RecipeHolder<?> $$1, final NonNullList<ItemStack> $$2, final int $$3, final CallbackInfoReturnable<Boolean> cir) {
-        final AbstractFurnaceBlockEntityMixin_Forge mixinSelf = MixinTargetHelper.cast(this);
-        mixinSelf.forgeImpl$filledWaterBucket = true;
+    private void forge$captureBucketFill(final RegistryAccess registryAccess, final RecipeHolder<?> recipe, final NonNullList<ItemStack> slots, final int maxStackSize, final CallbackInfoReturnable<Boolean> cir) {
+        this.forge$filledWaterBucket = true;
     }
 
     @Inject(
         method = "burn",
         locals = LocalCapture.CAPTURE_FAILHARD,
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;shrink(I)V"))
-    private void forgeImpl$afterSmeltItem(
+    private void forge$afterSmeltItem(
         final RegistryAccess registryAccess, final RecipeHolder<?> recipe,
-        final NonNullList<ItemStack> slots, final int var2,
+        final NonNullList<ItemStack> slots, final int maxStackSize,
         final CallbackInfoReturnable<Boolean> cir,
         final ItemStack itemIn, final ItemStack recipeResult, final ItemStack itemOut
     ) {
-        final AbstractFurnaceBlockEntityMixin_Forge mixinSelf = MixinTargetHelper.cast(this);
         final FurnaceBlockEntity entity = (FurnaceBlockEntity) this;
 
         final List<SlotTransaction> transactions = new ArrayList<>();
@@ -158,11 +155,11 @@ public abstract class AbstractFurnaceBlockEntityMixin_Forge implements AbstractF
         itemIn.shrink(1);
         transactions.add(new SlotTransaction(entity.inventory().slot(0).get(), originalSmeltItem, ItemStackUtil.snapshotOf(itemIn)));
 
-        final boolean hasFuel = !mixinSelf.forgeImpl$filledWaterBucket;
-        if (mixinSelf.forgeImpl$filledWaterBucket) {
+        final boolean hasFuel = !this.forge$filledWaterBucket;
+        if (this.forge$filledWaterBucket) {
             transactions.add(new SlotTransaction(entity.inventory().slot(1).get(), ItemStackSnapshot.empty(), ItemStackUtil.snapshotOf(slots.get(1))));
         }
-        mixinSelf.forgeImpl$filledWaterBucket = false;
+        this.forge$filledWaterBucket = false;
 
         if (itemOut.isEmpty()) {
             transactions.add(new SlotTransaction(entity.inventory().slot(2).get(), ItemStackSnapshot.empty(), ItemStackUtil.snapshotOf(recipeResult)));

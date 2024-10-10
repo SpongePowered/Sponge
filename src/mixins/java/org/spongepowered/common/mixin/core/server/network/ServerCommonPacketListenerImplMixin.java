@@ -44,7 +44,10 @@ import net.minecraft.server.network.ServerCommonPacketListenerImpl;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.network.EngineConnection;
+import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -58,6 +61,8 @@ import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.bridge.network.protocol.game.ClientboundResourcePackPacketBridge;
 import org.spongepowered.common.bridge.server.network.ServerCommonPacketListenerImplBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.network.channel.SpongeChannelManager;
+import org.spongepowered.common.network.channel.SpongeChannelPayload;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.util.Map;
@@ -74,7 +79,6 @@ public abstract class ServerCommonPacketListenerImplMixin implements ServerCommo
     @Shadow @Final protected MinecraftServer server;
     @Shadow public abstract void shadow$send(final Packet<?> $$0);
     @Shadow public abstract void shadow$disconnect(Component reason);
-    @Shadow public void shadow$handleCustomPayload(final ServerboundCustomPayloadPacket $$0) { }
     @Shadow protected abstract GameProfile shadow$playerProfile();
     // @formatter:on
 
@@ -175,5 +179,20 @@ public abstract class ServerCommonPacketListenerImplMixin implements ServerCommo
     @Override
     public void bridge$clearResourcePacks() {
         this.shadow$send(new ClientboundResourcePackPopPacket(Optional.empty()));
+    }
+
+    @Inject(method = "handleCustomPayload", at = @At(value = "HEAD"), cancellable = true)
+    private void impl$onHandleCustomPayload(final ServerboundCustomPayloadPacket packet, final CallbackInfo ci) {
+        if (packet.payload() instanceof final SpongeChannelPayload payload) {
+            this.server.execute(() -> this.impl$handleSpongePayload(payload));
+
+            ci.cancel();
+        }
+    }
+
+    protected void impl$handleSpongePayload(final SpongeChannelPayload payload) {
+        final SpongeChannelManager channelRegistry = (SpongeChannelManager) Sponge.channelManager();
+        final EngineConnection connection = ((ConnectionBridge) this.connection).bridge$getEngineConnection();
+        channelRegistry.handlePlayPayload(connection, (EngineConnectionState) this, payload.id(), payload.consumer());
     }
 }

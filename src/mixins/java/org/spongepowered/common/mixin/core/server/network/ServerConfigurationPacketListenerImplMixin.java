@@ -29,7 +29,6 @@ import io.netty.channel.Channel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ServerboundClientInformationPacket;
-import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.configuration.ServerboundFinishConfigurationPacket;
 import net.minecraft.server.network.ConfigurationTask;
 import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
@@ -54,6 +53,7 @@ import org.spongepowered.common.bridge.server.players.PlayerListBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.network.channel.ConnectionUtil;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
+import org.spongepowered.common.network.channel.SpongeChannelPayload;
 import org.spongepowered.common.network.channel.TransactionStore;
 import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.util.LocaleCache;
@@ -168,8 +168,8 @@ public abstract class ServerConfigurationPacketListenerImplMixin extends ServerC
     }
 
     @Override
-    public void shadow$handleCustomPayload(final ServerboundCustomPayloadPacket $$0) {
-        super.shadow$handleCustomPayload($$0);
+    protected void impl$handleSpongePayload(final SpongeChannelPayload payload) {
+        super.impl$handleSpongePayload(payload);
 
         if (this.currentTask == null || this.currentTask.type() != ServerConfigurationPacketListenerImplMixin.impl$SPONGE_CONFIGURATION_TYPE) {
             return;

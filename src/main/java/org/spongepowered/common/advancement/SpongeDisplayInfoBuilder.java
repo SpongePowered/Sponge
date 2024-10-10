@@ -30,6 +30,7 @@ import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.advancement.AdvancementTypes;
 import org.spongepowered.api.advancement.DisplayInfo;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.util.Preconditions;
@@ -72,9 +73,9 @@ public final class SpongeDisplayInfoBuilder implements DisplayInfo.Builder {
     }
 
     @Override
-    public DisplayInfo.Builder icon(final ItemStackSnapshot itemStackSnapshot) {
-        Objects.requireNonNull(itemStackSnapshot, "itemStackSnapshot");
-        this.icon = itemStackSnapshot;
+    public DisplayInfo.Builder icon(final ItemStackLike itemStack) {
+        Objects.requireNonNull(itemStack, "itemStackSnapshot");
+        this.icon = itemStack.asImmutable();
         return this;
     }
 
@@ -104,7 +105,7 @@ public final class SpongeDisplayInfoBuilder implements DisplayInfo.Builder {
         final net.minecraft.network.chat.Component title = SpongeAdventure.asVanilla(this.title);
         final net.minecraft.network.chat.Component description = SpongeAdventure.asVanilla(this.description);
         final net.minecraft.advancements.AdvancementType frameType = (net.minecraft.advancements.AdvancementType) (Object) this.advancementType;
-        final ItemStack icon = (ItemStack) (Object) this.icon.createStack();
+        final ItemStack icon = (ItemStack) (Object) this.icon.asMutable();
         return (DisplayInfo) new net.minecraft.advancements.DisplayInfo(icon, title, description, null,
                 frameType, this.showToast, this.announceToChat, this.hidden);
     }

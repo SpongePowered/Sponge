@@ -87,7 +87,7 @@ public final class ParticleTest {
                 .type(type)
                 .option(ParticleOptions.BLOCK_STATE, BlockTypes.DIAMOND_BLOCK.get().defaultState())
                 .option(ParticleOptions.COLOR, Color.LIME)
-                .option(ParticleOptions.ITEM_STACK_SNAPSHOT, ItemStack.of(ItemTypes.GOLDEN_APPLE.get()).createSnapshot())
+                .option(ParticleOptions.ITEM_STACK_SNAPSHOT, ItemStack.of(ItemTypes.GOLDEN_APPLE.get()).asImmutable())
                 .offset(Vector3d.from(0, 1, 1))
                 .velocity(Vector3d.RIGHT.mul(0.5))
                 .quantity(20)

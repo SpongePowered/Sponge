@@ -78,7 +78,7 @@ public abstract class EmptyMapItemMixin {
             frame.addContext(EventContextKeys.PLAYER, player);
             final HandType handType = (HandType) (Object) usedHand;
             frame.addContext(EventContextKeys.USED_HAND, handType);
-            frame.addContext(EventContextKeys.USED_ITEM, player.itemInHand(handType).createSnapshot());
+            frame.addContext(EventContextKeys.USED_ITEM, player.itemInHand(handType).asImmutable());
 
             final Set<Value<?>> mapValues = Sets.newHashSet(
                     Value.immutableOf(Keys.MAP_LOCATION, Vector2i.from((int)playerIn.getX(), (int)playerIn.getZ())),

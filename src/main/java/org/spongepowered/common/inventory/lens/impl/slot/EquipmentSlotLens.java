@@ -52,7 +52,7 @@ public class EquipmentSlotLens extends FilteringSlotLens {
             if (item.isEmpty()) {
                 return true;
             }
-            final var equippable = ItemStackUtil.toNative(item).get(DataComponents.EQUIPPABLE);
+            final var equippable = ItemStackUtil.fromLikeToNative(item).get(DataComponents.EQUIPPABLE);
             final var itemSlotType = equippable != null ? equippable.slot() : EquipmentSlot.MAINHAND;
             return itemSlotType == (Object) type;
         };

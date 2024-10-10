@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.core.server.level;
 
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
@@ -48,7 +46,6 @@ import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 
 import java.util.Collection;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -96,38 +93,6 @@ public abstract class ServerEntityMixin {
     private void impl$removeHumanFromPlayerClient(final ServerPlayer viewer, final CallbackInfo ci) {
         if (this.entity instanceof HumanEntity) {
             ((HumanEntity) this.entity).untrackFrom(viewer);
-        }
-    }
-
-    /**
-     * @author gabizou
-     * @reason Because the entity spawn packet is just a lone packet, we have to actually
-     * do some hackery to create the player list packet first, then the spawn packet,
-     * then perform the remove packet.
-     */
-    @Redirect(method = "sendPairingData",
-            at = @At(
-                    value = "INVOKE",
-                    remap = false,
-                    target = "Ljava/util/function/Consumer;accept(Ljava/lang/Object;)V",
-                    ordinal = 0)
-    )
-    public void impl$sendHumanSpawnPacket(final Consumer<Packet<?>> consumer, final Object spawnPacket) {
-        if (!(this.entity instanceof final HumanEntity human)) {
-            consumer.accept((Packet<?>) spawnPacket);
-            return;
-        }
-        // Adds the GameProfile to the client
-        consumer.accept(human.createPlayerListPacket(EnumSet.of(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER)));
-        // Actually spawn the human (a player)
-        consumer.accept((Packet<?>) spawnPacket);
-        // Remove from the player map
-        final ClientboundPlayerInfoRemovePacket removePacket = new ClientboundPlayerInfoRemovePacket(List.of(human.getUUID()));
-        if (human.canRemoveFromListImmediately()) {
-            consumer.accept(removePacket);
-        } else {
-            // Human is a Player entity on the client and needs to tick once for the skin to render
-            human.removeFromTabListDelayed(null, removePacket);
         }
     }
 

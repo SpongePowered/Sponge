@@ -30,6 +30,7 @@ import net.minecraft.world.item.crafting.CraftingBookCategory;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.item.recipe.crafting.RecipeInput;
 import org.spongepowered.api.item.recipe.crafting.SpecialCraftingRecipe;
@@ -57,20 +58,20 @@ public final class SpongeSpecialCraftingRecipeBuilder extends AbstractResourceKe
     }
 
     @Override
-    public ResultStep remainingItems(Function<RecipeInput.Crafting, List<ItemStack>> remainingItemsFunction) {
-        this.remainingItemsFunction = remainingItemsFunction;
+    public ResultStep remainingItems(Function<RecipeInput.Crafting, ? extends List<? extends ItemStackLike>> remainingItemsFunction) {
+        this.remainingItemsFunction = inv -> remainingItemsFunction.apply(inv).stream().map(ItemStackLike::asMutable).toList();
         return this;
     }
 
     @Override
-    public EndStep result(Function<RecipeInput.Crafting, ItemStack> resultFunction) {
-        this.resultFunction = resultFunction;
+    public EndStep result(Function<RecipeInput.Crafting, ? extends ItemStackLike> resultFunction) {
+        this.resultFunction = inv -> resultFunction.apply(inv).asMutable();
         return this;
     }
 
     @Override
-    public EndStep result(ItemStack result) {
-        final ItemStack copy = result.copy();
+    public EndStep result(ItemStackLike result) {
+        final ItemStack copy = result.asMutableCopy();
         this.resultFunction = inv -> copy.copy();
         return this;
     }

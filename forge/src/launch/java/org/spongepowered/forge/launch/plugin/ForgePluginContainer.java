@@ -25,40 +25,36 @@
 package org.spongepowered.forge.launch.plugin;
 
 import com.google.common.collect.MapMaker;
+import com.google.inject.Injector;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.common.launch.Launch;
-import org.spongepowered.forge.launch.ForgeLaunch;
-import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.common.launch.plugin.SpongePluginContainer;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-public class ForgePluginContainer implements PluginContainer {
+public class ForgePluginContainer implements SpongePluginContainer {
     private final ModContainer modContainer;
 
+    private Injector injector;
     private Logger logger;
     private PluginMetadata pluginMetadata;
 
-    ForgePluginContainer(final ModContainer modContainer) {
+    private ForgePluginContainer(final ModContainer modContainer) {
         this.modContainer = modContainer;
-    }
-
-    public ModContainer getModContainer() {
-        return this.modContainer;
     }
 
     @Override
     public PluginMetadata metadata() {
         if (this.pluginMetadata == null) {
-            this.pluginMetadata = ((ForgeLaunch) Launch.instance()).metadataForMod((ModInfo) this.modContainer.getModInfo());
+            this.pluginMetadata = PluginMetadataConverter.modToPlugin((ModInfo) this.modContainer.getModInfo());
         }
         return this.pluginMetadata;
     }
@@ -73,23 +69,22 @@ public class ForgePluginContainer implements PluginContainer {
 
     @Override
     public Optional<URI> locateResource(String relative) {
-        Objects.requireNonNull(relative, "relative");
-
-        final ClassLoader classLoader = this.modContainer.getMod().getClass().getClassLoader();
-        final URL resolved = classLoader.getResource(relative);
-        try {
-            if (resolved == null) {
-                return Optional.empty();
-            }
-            return Optional.of(resolved.toURI());
-        } catch (final URISyntaxException ignored) {
-            return Optional.empty();
-        }
+        final Path p = this.modContainer.getModInfo().getOwningFile().getFile().findResource(Objects.requireNonNull(relative, "relative"));
+        return Files.exists(p) ? Optional.of(p.toUri()) : Optional.empty();
     }
 
     @Override
     public Object instance() {
         return this.modContainer.getMod();
+    }
+
+    @Override
+    public Optional<Injector> injector() {
+        return Optional.ofNullable(this.injector);
+    }
+
+    public void setInjector(final Injector injector) {
+        this.injector = injector;
     }
 
     private static final Map<ModContainer, ForgePluginContainer> containers = new MapMaker().weakKeys().makeMap();

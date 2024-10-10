@@ -28,12 +28,10 @@ import com.google.inject.Injector;
 import com.google.inject.Stage;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.common.launch.mapping.SpongeMappingManager;
 import org.spongepowered.common.launch.plugin.SpongePluginManager;
 import org.spongepowered.plugin.PluginContainer;
 
 public class TestLaunch extends Launch {
-    private final SpongeMappingManager mappingManager = new TestMappingsManager();
 
     protected TestLaunch(final PluginPlatform pluginPlatform) {
         super(pluginPlatform);
@@ -50,11 +48,6 @@ public class TestLaunch extends Launch {
     }
 
     @Override
-    public SpongeMappingManager mappingManager() {
-        return this.mappingManager;
-    }
-
-    @Override
     public Stage injectionStage() {
         return null;
     }
@@ -67,23 +60,5 @@ public class TestLaunch extends Launch {
     @Override
     public Injector createInjector() {
         return null;
-    }
-
-    static class TestMappingsManager implements SpongeMappingManager {
-
-        @Override
-        public String toRuntimeClassName(final String srcName) {
-            return srcName;
-        }
-
-        @Override
-        public String toRuntimeFieldName(final Class<?> owner, final String srcName) {
-            return srcName;
-        }
-
-        @Override
-        public String toRuntimeMethodName(final Class<?> owner, final String srcName, final Class<?>... params) {
-            return srcName;
-        }
     }
 }

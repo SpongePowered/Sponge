@@ -1,9 +1,7 @@
 {
     "required": true,
-    "minVersion": "0.8",
+    "parent": "mixins.sponge.parent.json",
     "package": "org.spongepowered.forge.mixin.api",
-    "target": "@env(DEFAULT)",
-    "compatibilityLevel": "JAVA_8",
     "priority": 1300,
     "mixins": [
         "minecraft.server.MinecraftServerMixin_Forge_API"

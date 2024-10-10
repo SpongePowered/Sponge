@@ -25,10 +25,7 @@
 package org.spongepowered.common.hooks;
 
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.common.SpongeCommon;
@@ -47,24 +44,4 @@ public interface EventHooks {
         SpongeCommon.post(event);
         return event;
     }
-
-    default void callItemDestroyedEvent(final Player player, final ItemStack stack, final InteractionHand hand) {
-    }
-
-    final class CriticalHitResult {
-        public final boolean criticalHit;
-        public final double modifier;
-
-        public CriticalHitResult(final boolean criticalHit, final double modifier) {
-            this.criticalHit = criticalHit;
-            this.modifier = modifier;
-        }
-
-    }
-
-    @SuppressWarnings("unused")
-    default CriticalHitResult callCriticalHitEvent(Player player, Entity targetEntity, boolean isCriticalAttack, float v) {
-        return new CriticalHitResult(isCriticalAttack, v);
-    }
-
 }

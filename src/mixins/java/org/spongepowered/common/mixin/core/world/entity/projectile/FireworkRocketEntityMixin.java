@@ -58,6 +58,11 @@ public abstract class FireworkRocketEntityMixin extends ProjectileMixin implemen
     private float impl$explosionRadius = Constants.Entity.Firework.DEFAULT_EXPLOSION_RADIUS;
 
     @Override
+    public boolean bridge$isPrimed() {
+        return true;
+    }
+
+    @Override
     public int bridge$getFuseDuration() {
         return this.lifetime;
     }

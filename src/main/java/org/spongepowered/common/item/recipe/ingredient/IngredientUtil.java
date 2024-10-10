@@ -36,6 +36,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.Arrays;
@@ -73,7 +74,7 @@ public class IngredientUtil {
         return IngredientUtil.fromNative(ingredient);
     }
 
-    public static org.spongepowered.api.item.recipe.crafting.Ingredient of(ResourceKey key, Predicate<ItemStack> predicate, ItemStack... stacks) {
+    public static org.spongepowered.api.item.recipe.crafting.Ingredient of(ResourceKey key, Predicate<? super ItemStackLike> predicate, ItemStack... stacks) {
         final SpongeIngredient ingredient = SpongeIngredient.spongeFromPredicate(key, predicate, IngredientUtil.toNativeStacks(stacks));
         return IngredientUtil.fromNative(ingredient);
     }

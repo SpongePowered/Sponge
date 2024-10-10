@@ -2,7 +2,6 @@
   "required": true,
   "minVersion": "0.8",
   "package": "org.spongepowered.forge.mixin.inventory",
-  "plugin": "org.spongepowered.forge.mixin.plugin.ForgeCorePlugin",
   "target": "@env(DEFAULT)",
   "priority": 1300,
   "mixins": [

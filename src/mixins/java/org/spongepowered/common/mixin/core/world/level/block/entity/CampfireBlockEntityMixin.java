@@ -53,7 +53,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.MixinTargetHelper;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
@@ -82,18 +81,18 @@ public abstract class CampfireBlockEntityMixin {
     private static void impl$canCook(final ServerLevel level, final BlockPos pos, final BlockState state, final CampfireBlockEntity self,
                                      final RecipeManager.CachedCheck<SingleRecipeInput, CampfireCookingRecipe> check,
                                      final CallbackInfo ci, final boolean hasChanged, final int i, final ItemStack itemStack) {
-        ((CampfireBlockEntityMixin) (Object) self).impl$currentIndex = i;
+        final CampfireBlockEntityMixin mixinSelf = (CampfireBlockEntityMixin) (Object) self;
+        mixinSelf.impl$currentIndex = i;
         final boolean isEmpty = itemStack.isEmpty();
         if (!isEmpty) {
             final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
-            final CampfireBlockEntityMixin mixinSelf = MixinTargetHelper.cast(self);
             final ItemStackSnapshot stack = ItemStackUtil.snapshotOf(mixinSelf.items.get(i));
             final RecipeHolder<?> recipe = mixinSelf.impl$cookingRecipe[i];
             final CookingEvent.Tick event = SpongeEventFactory.createCookingEventTick(cause, (Campfire) self, stack, Optional.empty(),
                     Optional.ofNullable(recipe).map(r -> (CookingRecipe) r.value()), Optional.ofNullable(recipe).map(r -> (ResourceKey) (Object) r.id()));
             SpongeCommon.post(event);
             if (event.isCancelled()) {
-                ((CampfireBlockEntityMixin) (Object) self).cookingProgress[i]--;
+                mixinSelf.cookingProgress[i]--;
             }
         }
 
@@ -106,7 +105,7 @@ public abstract class CampfireBlockEntityMixin {
         final CallbackInfo ci, final boolean hasChanged, final int i,
         final ItemStack itemStack, final SingleRecipeInput recipeInput, final ItemStack itemStack1) {
         final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
-        final CampfireBlockEntityMixin mixinSelf = MixinTargetHelper.cast(self);
+        final CampfireBlockEntityMixin mixinSelf = (CampfireBlockEntityMixin) (Object) self;
         final SlotTransaction transaction = new SlotTransaction(((Campfire) self).inventory().slot(i).get(), ItemStackUtil.snapshotOf(itemStack1), ItemStackSnapshot.empty());
         final RecipeHolder<?> recipe = mixinSelf.impl$cookingRecipe[i];
         final CookingEvent.Finish event = SpongeEventFactory.createCookingEventFinish(cause, (Campfire) self,
@@ -126,7 +125,7 @@ public abstract class CampfireBlockEntityMixin {
         final CallbackInfo ci, final boolean $$5, final int $$6, final ItemStack $$7, final SingleRecipeInput $$8,
         final ItemStack $$9
     ) {
-        final CampfireBlockEntityMixin mixinSelf = MixinTargetHelper.cast(self);
+        final CampfireBlockEntityMixin mixinSelf = (CampfireBlockEntityMixin) (Object) self;
         mixinSelf.impl$pendingSlotTransaction.custom().ifPresent(item ->
             mixinSelf.items.set(((SlotAdapter) mixinSelf.impl$pendingSlotTransaction.slot()).getOrdinal(), ItemStackUtil.fromSnapshotToNative(item)));
         mixinSelf.impl$pendingSlotTransaction = null;

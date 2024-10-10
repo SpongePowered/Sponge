@@ -37,7 +37,6 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.api.event.impl.entity.AbstractModifierEvent;
@@ -55,7 +54,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
-import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.mixin.core.world.entity.LivingEntityMixin_Attack_Impl;
 import org.spongepowered.common.util.DamageEventUtil;
 
@@ -165,28 +163,6 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin_Attack_I
     }
 
     /**
-     * Crit Hook - Before vanilla decides
-     * Also captures the crit multiplier as a function
-     */
-    @ModifyVariable(method = "attack", ordinal = 2,
-            slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;isSprinting()Z", ordinal = 1),
-                           to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getKnownMovement()Lnet/minecraft/world/phys/Vec3;")),
-            at = @At(value = "JUMP", opcode = Opcodes.IFEQ)
-    )
-    public boolean attackImpl$critHook(final boolean isCrit) {
-        final var critResult = PlatformHooks.INSTANCE.getEventHooks().callCriticalHitEvent(this.attackImpl$attack.sourceEntity(),
-                this.attackImpl$attack.target(), isCrit, isCrit ? 1.5F : 1.0F);
-
-        // if (isCrit) damage *= 1.5F;
-        if (critResult.criticalHit) {
-            final var bonusDamageFunc = DamageEventUtil.provideCriticalAttackFunction(this.attackImpl$attack.sourceEntity(), critResult.modifier);
-            this.attackImpl$attack.functions().add(bonusDamageFunc);
-        }
-
-        return critResult.criticalHit;
-    }
-
-    /**
      * Capture damageSource for sweep attacks event later
      * Calculate knockback earlier than vanilla for event
      * call the AttackEntityEvent
@@ -268,7 +244,7 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin_Attack_I
         }
 
         final var mainAttack = this.attackImpl$attack;
-        final var mainAttackDamage = this.attackImpl$finalDamageAmounts.getOrDefault(ResourceKey.minecraft("attack_damage"), 0.0).floatValue();
+        final var mainAttackDamage = this.attackImpl$finalDamageAmounts.getOrDefault("minecraft:attack_damage", 0.0).floatValue();
 
         var sweepAttack = new DamageEventUtil.Attack<>(mainAttack.sourceEntity(), sweepTarget, mainAttack.weapon(), mainAttack.dmgSource(), mainAttack.strengthScale(), 1, new ArrayList<>());
         // float sweepBaseDamage = 1.0F + (float)this.getAttributeValue(Attributes.SWEEPING_DAMAGE_RATIO) * attackDamage;
@@ -321,19 +297,10 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin_Attack_I
         this.inventoryMenu.broadcastChanges();
     }
 
-    @Redirect(method = "actuallyHurt", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/player/Player;isInvulnerableTo(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;)Z"))
-    public boolean attackImpl$startActuallyHurt(final Player instance, final ServerLevel level, final DamageSource damageSource,
-                                        final ServerLevel redundant, final DamageSource ds, final float originalDamage) {
-        if (instance.isInvulnerableTo(level, damageSource)) {
-            return true;
-        }
-
-        // Call platform hook for adjusting damage
-        final var modAdjustedDamage = this.bridge$applyModDamage(instance, damageSource, originalDamage);
+    @Inject(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getDamageAfterArmorAbsorb(Lnet/minecraft/world/damagesource/DamageSource;F)F"))
+    public void attackImpl$startActuallyHurt(final ServerLevel level, DamageSource damageSource, float originalDamage, CallbackInfo ci) {
         // TODO check for direct call?
-        this.attackImpl$actuallyHurt = new DamageEventUtil.ActuallyHurt(instance, new ArrayList<>(), damageSource, modAdjustedDamage);
-        return false;
+        this.attackImpl$actuallyHurt = new DamageEventUtil.ActuallyHurt((LivingEntity) (Object) this, new ArrayList<>(), damageSource, originalDamage);
     }
 
     /**
@@ -349,19 +316,6 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin_Attack_I
             return 0;
         }
         return this.attackImpl$actuallyHurtFinalDamage;
-    }
-
-    /**
-     * Set absorbed damage after calling {@link Player#setAbsorptionAmount} in which we called the event
-     */
-    @ModifyVariable(method = "actuallyHurt", ordinal = 2,
-            slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;setAbsorptionAmount(F)V")),
-            at = @At(value = "STORE", ordinal = 0))
-    public float attackImpl$setAbsorbed(final float value) {
-        if (this.attackImpl$actuallyHurtResult.event().isCancelled()) {
-            return 0;
-        }
-        return this.attackImpl$actuallyHurtResult.damageAbsorbed().orElse(0f);
     }
 
     /**

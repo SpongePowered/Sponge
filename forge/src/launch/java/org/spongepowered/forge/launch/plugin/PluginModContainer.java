@@ -33,6 +33,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.IEventListener;
 import net.minecraftforge.fml.Logging;
 import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingException;
 import net.minecraftforge.fml.ModLoadingStage;
 import net.minecraftforge.fml.event.IModBusEvent;
@@ -41,12 +42,13 @@ import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.forgespi.language.ModFileScanData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.common.inject.plugin.PluginModule;
+import org.spongepowered.common.inject.plugin.PluginGuice;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.forge.launch.event.ForgeEventManager;
-import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.plugin.metadata.model.PluginDependency;
 
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 
 // Spongified FMLModContainer
 public final class PluginModContainer extends ModContainer {
@@ -56,6 +58,7 @@ public final class PluginModContainer extends ModContainer {
     private final IEventBus eventBus;
     private Object modInstance;
     private final Class<?> modClass;
+    private final CountDownLatch initializationLock;
 
     public PluginModContainer(IModInfo info, String className, ModFileScanData modFileScanResults, ModuleLayer gameLayer) {
         super(info);
@@ -65,6 +68,7 @@ public final class PluginModContainer extends ModContainer {
         this.eventBus = BusBuilder.builder().setExceptionHandler(this::onEventFailed).setTrackPhases(false).markerType(IModBusEvent.class).useModLauncher().build();
         this.configHandler = Optional.of(ce -> this.eventBus.post(ce.self()));
         this.contextExtension = () -> null;
+        this.initializationLock = new CountDownLatch(1);
 
         try {
             Module module = gameLayer.findModule(info.getOwningFile().moduleName()).orElseThrow();
@@ -84,12 +88,28 @@ public final class PluginModContainer extends ModContainer {
         try {
             LOGGER.trace(Logging.LOADING, "Loading plugin instance {} of type {}", getModId(), this.modClass.getName());
 
-            final PluginContainer pluginContainer = ForgePluginContainer.of(this);
-            final Injector childInjector = Launch.instance().lifecycle().platformInjector().createChildInjector(new PluginModule(pluginContainer, this.modClass));
-            this.modInstance = childInjector.getInstance(this.modClass);
+            final ForgePluginContainer pluginContainer = ForgePluginContainer.of(this);
+            pluginContainer.metadata().dependencies().stream()
+                .filter(d -> d.loadOrder() == PluginDependency.LoadOrder.AFTER)
+                .flatMap(d -> ModList.get().getModContainerById(d.id()).stream())
+                .filter(m -> m instanceof PluginModContainer)
+                .forEach(m -> ((PluginModContainer) m).waitForInitialization());
+
+            ModList.get().forEachModInOrder(m -> {
+                if (m instanceof PluginModContainer p && ForgePluginContainer.of(m).metadata().dependencies().stream()
+                    .anyMatch(d -> d.id().equals(this.getModId()) && d.loadOrder() == PluginDependency.LoadOrder.BEFORE)) {
+                    p.waitForInitialization();
+                }
+            });
+
+            final Injector pluginInjector = PluginGuice.create(pluginContainer, this.modClass, Launch.instance().lifecycle().platformInjector());
+            this.modInstance = pluginInjector.getInstance(this.modClass);
+            pluginContainer.setInjector(pluginInjector);
             ((ForgeEventManager) MinecraftForge.EVENT_BUS).registerListeners(pluginContainer, this.modInstance);
 
             LOGGER.trace(Logging.LOADING, "Loaded plugin instance {} of type {}", getModId(), this.modClass.getName());
+
+            this.initializationLock.countDown();
         } catch (Throwable e) {
             LOGGER.error(Logging.LOADING, "Failed to create plugin instance. PluginID: {}, class {}", getModId(), this.modClass.getName(), e);
             throw new ModLoadingException(this.modInfo, ModLoadingStage.CONSTRUCT, "fml.modloading.failedtoloadmod", e, this.modClass);
@@ -124,6 +144,14 @@ public final class PluginModContainer extends ModContainer {
         } catch (Throwable t) {
             LOGGER.error(Logging.LOADING, "Caught exception during event {} dispatch for modid {}", e, this.getModId(), t);
             throw new ModLoadingException(this.modInfo, this.modLoadingStage, "fml.modloading.errorduringevent", t);
+        }
+    }
+
+    private void waitForInitialization() {
+        try {
+            this.initializationLock.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 }

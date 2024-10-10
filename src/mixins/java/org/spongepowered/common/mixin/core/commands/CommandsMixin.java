@@ -89,6 +89,9 @@ public abstract class CommandsMixin implements CommandsBridge {
             remap = false
     ))
     private CommandDispatcher<CommandSourceStack> impl$useSpongeDispatcher() {
+        if (!Launch.instance().pluginManager().isReady()) {
+            return new CommandDispatcher<>();
+        }
         final SpongeCommandManager manager = Launch.instance().lifecycle().platformInjector().getInstance(SpongeCommandManager.class);
         manager.init();
         this.impl$commandManager = manager;
@@ -98,16 +101,20 @@ public abstract class CommandsMixin implements CommandsBridge {
     @Redirect(method = "<init>", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/server/commands/AdvancementCommands;register(Lcom/mojang/brigadier/CommandDispatcher;)V"))
     private void impl$setupStackFrameOnInit(final CommandDispatcher<CommandSourceStack> dispatcher) {
-        this.impl$initFrame = PhaseTracker.getCauseStackManager().pushCauseFrame();
-        this.impl$initFrame.pushCause(Launch.instance().minecraftPlugin());
+        if (Launch.instance().pluginManager().isReady()) {
+            this.impl$initFrame = PhaseTracker.getCauseStackManager().pushCauseFrame();
+            this.impl$initFrame.pushCause(Launch.instance().minecraftPlugin());
+        }
         AdvancementCommands.register(dispatcher);
     }
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$tellDispatcherCommandsAreRegistered(final CallbackInfo ci) {
-        this.impl$initFrame.popCause();
-        PhaseTracker.getCauseStackManager().popCauseFrame(this.impl$initFrame);
-        this.impl$initFrame = null;
+        if (this.impl$initFrame != null) {
+            this.impl$initFrame.popCause();
+            PhaseTracker.getCauseStackManager().popCauseFrame(this.impl$initFrame);
+            this.impl$initFrame = null;
+        }
     }
 
     /*

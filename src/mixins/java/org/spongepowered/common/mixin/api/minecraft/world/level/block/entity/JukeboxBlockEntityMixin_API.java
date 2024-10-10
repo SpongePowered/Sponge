@@ -31,7 +31,7 @@ import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.block.entity.Jukebox;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -74,8 +74,8 @@ public abstract class JukeboxBlockEntityMixin_API extends BlockEntityMixin_API i
     }
 
     @Override
-    public void insert(final ItemStack record) {
-        final net.minecraft.world.item.ItemStack itemStack = ItemStackUtil.toNative(record);
+    public void insert(final ItemStackLike record) {
+        final net.minecraft.world.item.ItemStack itemStack = ItemStackUtil.fromLikeToNative(record);
         final BlockState block = this.level.getBlockState(this.shadow$getBlockPos());
         if (block.getBlock() == Blocks.JUKEBOX) {
             this.shadow$setTheItem(itemStack);

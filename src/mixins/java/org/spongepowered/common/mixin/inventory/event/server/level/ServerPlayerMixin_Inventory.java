@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.inventory.event.server.level;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
-import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -41,7 +40,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
@@ -70,9 +68,8 @@ import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.mixin.inventory.event.entity.player.PlayerMixin_Inventory;
 
 import java.util.Map;
-import java.util.OptionalInt;
 
-@Mixin(value = ServerPlayer.class)
+@Mixin(ServerPlayer.class)
 public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory {
 
     @Nullable private EffectTransactor inventory$effectTransactor = null;
@@ -179,21 +176,6 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
     // -- Normal redirects
 
     @Inject(
-        method = "openMenu",
-        at = @At(
-            value = "FIELD",
-            target = "Lnet/minecraft/server/level/ServerPlayer;containerMenu:Lnet/minecraft/world/inventory/AbstractContainerMenu;",
-            opcode = Opcodes.PUTFIELD,
-            shift = At.Shift.AFTER
-        )
-    )
-    private void impl$afterOpenMenu(final MenuProvider param0, final CallbackInfoReturnable<OptionalInt> cir) {
-        PhaseTracker.SERVER.getPhaseContext()
-            .getTransactor()
-            .logContainerSet((ServerPlayer) (Object) this);
-    }
-
-    @Inject(
         method = "openHorseInventory",
         at = @At(
             value = "INVOKE",
@@ -205,11 +187,6 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
         PhaseTracker.SERVER.getPhaseContext()
             .getTransactor()
             .logContainerSet((ServerPlayer) (Object) this);
-    }
-
-    @Inject(method = "openMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;initMenu(Lnet/minecraft/world/inventory/AbstractContainerMenu;)V"))
-    private void impl$onOpenMenu(final MenuProvider $$0, final CallbackInfoReturnable<OptionalInt> cir) {
-        this.inventory$menuProvider = $$0;
     }
 
     @Inject(method = "openHorseInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;initMenu(Lnet/minecraft/world/inventory/AbstractContainerMenu;)V"))
@@ -234,25 +211,6 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
             bridge.viewableBridge$removePlayer(((ServerPlayer) (Object) this));
         }
         this.inventory$menuProvider = null;
-    }
-
-    @Redirect(
-        method = "openMenu",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/MenuProvider;createMenu(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/entity/player/Player;)Lnet/minecraft/world/inventory/AbstractContainerMenu;"
-        )
-    )
-    private AbstractContainerMenu impl$transactMenuCreationWithEffect(
-        final MenuProvider menuProvider, final int var1, final net.minecraft.world.entity.player.Inventory var2,
-        final Player var3
-    ) {
-        try (final EffectTransactor ignored = PhaseTracker.SERVER.getPhaseContext()
-            .getTransactor()
-            .logOpenInventory((ServerPlayer) (Object) this)
-        ) {
-            return menuProvider.createMenu(var1, var2, var3);
-        }
     }
 
     @Redirect(

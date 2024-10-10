@@ -32,6 +32,7 @@ import net.minecraft.DefaultUncaughtExceptionHandler;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.login.ServerboundCustomQueryAnswerPacket;
 import net.minecraft.network.protocol.login.ServerboundKeyPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
@@ -41,10 +42,13 @@ import net.minecraft.util.CryptException;
 import org.apache.commons.lang3.Validate;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
+import org.spongepowered.api.network.EngineConnection;
+import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -60,6 +64,8 @@ import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.bridge.network.ServerLoginPacketListenerImplBridge;
 import org.spongepowered.common.bridge.server.players.PlayerListBridge;
 import org.spongepowered.common.network.SpongeEngineConnection;
+import org.spongepowered.common.network.channel.SpongeChannelManager;
+import org.spongepowered.common.network.channel.SpongeChannelPayload;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.math.BigInteger;
@@ -241,5 +247,20 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
         return this.server.getPreventProxyConnections() && $$0 instanceof InetSocketAddress
                 ? ((InetSocketAddress)$$0).getAddress()
                 : null;
+    }
+
+    @Inject(method = "handleCustomQueryPacket", at = @At("HEAD"), cancellable = true)
+    private void impl$onHandleCustomQueryPacket(final ServerboundCustomQueryAnswerPacket packet, final CallbackInfo ci) {
+        if (!(packet.payload() instanceof final SpongeChannelPayload payload)) {
+            return;
+        }
+
+        ci.cancel();
+
+        this.server.execute(() -> {
+            final SpongeChannelManager channelRegistry = (SpongeChannelManager) Sponge.channelManager();
+            final EngineConnection connection = ((ConnectionBridge) this.connection).bridge$getEngineConnection();
+            channelRegistry.handleLoginResponsePayload(connection, (EngineConnectionState) this, payload.id(), packet.transactionId(), payload.consumer());
+        });
     }
 }

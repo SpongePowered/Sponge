@@ -1,0 +1,15 @@
+{
+    "required": true,
+    "parent": "mixins.sponge.parent.json",
+    "package": "org.spongepowered.common.mixin.core",
+    "priority": 1301,
+    "mixins": [
+        "server.level.ServerEntityMixin_Shared",
+        "world.entity.LivingEntityMixin_Shared_Attack_Impl",
+        "world.entity.player.PlayerMixin_Shared_Attack_Impl",
+        "world.entity.projectile.FishingHookMixin_Shared"
+    ],
+    "overwrites": {
+        "conformVisibility": true
+    }
+}

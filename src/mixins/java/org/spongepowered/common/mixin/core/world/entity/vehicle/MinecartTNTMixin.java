@@ -51,6 +51,8 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
 
     // @formatter:off
     @Shadow private int fuse;
+    @Shadow public abstract boolean shadow$isPrimed();
+    @Shadow public abstract void shadow$primeFuse();
     // @formatter:on
 
     @Nullable private Float impl$explosionRadius = null; // override for fixed radius
@@ -69,12 +71,20 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
     }
 
     @Override
+    public boolean bridge$isPrimed() {
+        return this.shadow$isPrimed();
+    }
+
+    @Override
     public int bridge$getFuseDuration() {
         return this.impl$fuseDuration;
     }
 
     @Override
     public void bridge$setFuseDuration(final int fuseTicks) {
+        if (this.shadow$isPrimed()) {
+            this.fuse = Math.max(this.fuse + fuseTicks - this.impl$fuseDuration, 0);
+        }
         this.impl$fuseDuration = fuseTicks;
     }
 

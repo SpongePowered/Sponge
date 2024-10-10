@@ -194,7 +194,7 @@ public final class InventoryTest implements LoadableModule {
         @Listener
         private void beforePickup(final ChangeInventoryEvent.Pickup.Pre event) {
             if (event.originalStack().type().isAnyOf(ItemTypes.BEDROCK)) {
-                final ItemStackSnapshot stack = ItemStack.of(ItemTypes.COBBLESTONE, 64).createSnapshot();
+                final ItemStackSnapshot stack = ItemStack.of(ItemTypes.COBBLESTONE, 64).asImmutable();
                 final ArrayList<ItemStackSnapshot> items = new ArrayList<>();
                 event.setCustom(items);
                 for (int i = 0; i < 100; i++) {
@@ -333,7 +333,7 @@ public final class InventoryTest implements LoadableModule {
                     case 45:
                     case 53:
                         this.last = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X6.get())
-                                .fillDummy().item(slot.peek().createSnapshot())
+                                .fillDummy().item(slot.peek().asImmutable())
                                 .completeStructure().plugin(this.plugin).build();
                         Sponge.server().scheduler().submit(Task.builder().execute(() -> this.menu.setCurrentInventory(this.last)).plugin(this.plugin).build());
                         break;

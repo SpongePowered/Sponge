@@ -1,10 +1,7 @@
 {
     "required": true,
-    "minVersion": "0.8",
+    "parent": "mixins.sponge.parent.json",
     "package": "org.spongepowered.forge.mixin.core",
-    "plugin": "org.spongepowered.forge.mixin.plugin.ForgeCorePlugin",
-    "target": "@env(DEFAULT)",
-    "compatibilityLevel": "JAVA_8",
     "priority": 1301,
     "mixins": [
         "api.event.EventMixin_Forge",
@@ -21,6 +18,8 @@
         "minecraftforge.registries.ForgeRegistryMixin_Forge",
         "minecraftforge.registries.RegistryManagerMixin_Forge",
         "network.ConnectionMixin_Forge",
+        "network.protocol.common.ClientboundCustomPayloadPacketMixin_Forge",
+        "network.protocol.common.ServerboundCustomPayloadPacketMixin_Forge",
         "server.BootstrapMixin_Forge",
         "server.MinecraftServerMixin_Forge",
         "server.commands.SpreadPlayersCommandMixin_Forge",
@@ -30,8 +29,7 @@
         "world.entity.LivingEntityMixin_Forge",
         "world.entity.LivingEntityMixin_Forge_Attack_Impl",
         "world.entity.item.ItemEntityMixin_Forge",
-        "world.entity.player.PlayerMixin_Forge",
-        "world.entity.projectile.ThrownEnderpealMixin_Forge",
+        "world.entity.player.PlayerMixin_Forge_Attack_Impl",
         "world.entity.vehicle.BoatMixin_Forge",
         "world.level.block.FireBlockMixin_Forge",
         "world.level.block.entity.AbstractFurnaceBlockEntityMixin_Forge"
@@ -42,5 +40,5 @@
     ],
     "server": [
         "server.MainMixin_Forge"
-  ]
+    ]
 }

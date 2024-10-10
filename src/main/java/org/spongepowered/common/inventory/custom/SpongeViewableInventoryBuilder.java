@@ -58,7 +58,7 @@ import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.api.item.inventory.ContainerTypes;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.registry.DefaultedRegistryReference;
@@ -214,8 +214,8 @@ public final class SpongeViewableInventoryBuilder implements ViewableInventory.B
     }
     // dummy
     @Override
-    public BuildingStep item(ItemStackSnapshot item) {
-        this.lastSlot.set(item.createStack());
+    public BuildingStep item(ItemStackLike item) {
+        this.lastSlot.set(item);
         return this;
     }
 

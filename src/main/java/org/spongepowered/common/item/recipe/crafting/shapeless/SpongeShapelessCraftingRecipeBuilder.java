@@ -37,7 +37,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.item.recipe.crafting.RecipeInput;
 import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
@@ -90,35 +90,27 @@ public class SpongeShapelessCraftingRecipeBuilder extends AbstractResourceKeyedB
     }
 
     @Override
-    public ResultStep remainingItems(Function<RecipeInput.Crafting, List<org.spongepowered.api.item.inventory.ItemStack>> remainingItemsFunction) {
+    public ResultStep remainingItems(Function<RecipeInput.Crafting, ? extends List<? extends ItemStackLike>> remainingItemsFunction) {
         this.remainingItemsFunction = grid -> {
             final NonNullList<ItemStack> mcList = NonNullList.create();
-            remainingItemsFunction.apply(InventoryUtil.toSponge(grid)).forEach(stack -> mcList.add(ItemStackUtil.toNative(stack)));
+            remainingItemsFunction.apply(InventoryUtil.toSponge(grid)).forEach(stack -> mcList.add(ItemStackUtil.fromLikeToNative(stack)));
             return mcList;
         };
         return this;
     }
 
     @Override
-    public EndStep result(final ItemStackSnapshot result) {
+    public EndStep result(ItemStackLike result) {
         Objects.requireNonNull(result, "result");
-        this.result = result.createStack();
+        this.result = result.asMutable();
         this.resultFunction = null;
         return this;
     }
 
     @Override
-    public EndStep result(org.spongepowered.api.item.inventory.ItemStack result) {
-        Objects.requireNonNull(result, "result");
-        this.result = result;
-        this.resultFunction = null;
-        return this;
-    }
-
-    @Override
-    public EndStep result(Function<RecipeInput.Crafting, org.spongepowered.api.item.inventory.ItemStack> resultFunction, org.spongepowered.api.item.inventory.ItemStack exemplaryResult) {
-        this.resultFunction = (input) -> ItemStackUtil.toNative(resultFunction.apply(InventoryUtil.toSponge(input)));
-        this.result = exemplaryResult.copy();
+    public EndStep result(Function<RecipeInput.Crafting, ? extends ItemStackLike> resultFunction, ItemStackLike exemplaryResult) {
+        this.resultFunction = (input) -> ItemStackUtil.fromLikeToNative(resultFunction.apply(InventoryUtil.toSponge(input)));
+        this.result = exemplaryResult.asMutableCopy();
         return this;
     }
 

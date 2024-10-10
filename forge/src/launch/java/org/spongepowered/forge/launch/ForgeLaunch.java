@@ -31,17 +31,13 @@ import com.google.inject.Module;
 import com.google.inject.Stage;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLLoader;
-import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.common.inject.SpongeCommonModule;
 import org.spongepowered.common.inject.SpongeModule;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.common.launch.mapping.SpongeMappingManager;
-import org.spongepowered.forge.applaunch.loading.metadata.PluginMetadataUtils;
 import org.spongepowered.forge.launch.inject.SpongeForgeModule;
 import org.spongepowered.forge.launch.plugin.ForgePluginManager;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.metadata.PluginMetadata;
 
 import java.util.List;
 
@@ -49,7 +45,6 @@ public final class ForgeLaunch extends Launch {
 
     private final ForgePluginManager pluginManager;
     private PluginContainer spongeForgePlugin;
-    private final ForgeMappingManager mappings = new ForgeMappingManager();
 
     public ForgeLaunch(final PluginPlatform platform) {
         super(platform);
@@ -64,11 +59,6 @@ public final class ForgeLaunch extends Launch {
     @Override
     public ForgePluginManager pluginManager() {
         return this.pluginManager;
-    }
-
-    @Override
-    public SpongeMappingManager mappingManager() {
-        return this.mappings;
     }
 
     @Override
@@ -97,9 +87,5 @@ public final class ForgeLaunch extends Launch {
         }
 
         return this.spongeForgePlugin;
-    }
-
-    public PluginMetadata metadataForMod(final ModInfo info) {
-        return PluginMetadataUtils.modToPlugin(info);
     }
 }

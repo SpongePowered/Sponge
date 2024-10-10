@@ -150,6 +150,9 @@ public final class TrackingUtil {
             return;
         }
         final net.minecraft.world.level.block.entity.BlockEntity blockEntity = tickingBlockEntity.get();
+        if (!((org.spongepowered.api.block.entity.BlockEntity) blockEntity).isTicking()) {
+            return;
+        }
         final BlockEntityBridge mixinTileEntity = (BlockEntityBridge) tickingBlockEntity.get();
         final BlockPos pos = blockEntity.getBlockPos();
         final @Nullable LevelChunkBridge chunk = ((ActiveChunkReferantBridge) blockEntity).bridge$getActiveChunk();

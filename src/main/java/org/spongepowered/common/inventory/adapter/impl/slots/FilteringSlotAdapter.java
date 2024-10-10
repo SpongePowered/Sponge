@@ -27,11 +27,11 @@ package org.spongepowered.common.inventory.adapter.impl.slots;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.slot.FilteringSlot;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.slot.FilteringSlotLens;
-import org.spongepowered.common.item.util.ItemStackUtil;
 
 public class FilteringSlotAdapter extends SlotAdapter implements FilteringSlot {
 
@@ -43,7 +43,7 @@ public class FilteringSlotAdapter extends SlotAdapter implements FilteringSlot {
     }
 
     @Override
-    public boolean isValidItem(ItemStack stack) {
+    public boolean isValidItem(ItemStackLike stack) {
         FilteringSlotLens.ItemStackFilter filter = this.filteringSlot.getItemStackFilter();
         return filter == null || filter.test(this.impl$getFabric(), stack);
     }
@@ -68,11 +68,11 @@ public class FilteringSlotAdapter extends SlotAdapter implements FilteringSlot {
     */
 
     @Override
-    public InventoryTransactionResult set(ItemStack stack) {
+    public InventoryTransactionResult set(ItemStackLike stack) {
         final boolean canSet = this.isValidItem(stack);
         if (!canSet) {
             final InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.FAILURE);
-            result.reject(ItemStackUtil.cloneDefensive(stack));
+            result.reject(stack);
             return result.build();
         }
 

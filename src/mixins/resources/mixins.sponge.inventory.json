@@ -28,6 +28,7 @@
         "api.world.entity.vehicle.AbstractMinecartContainerMixin_Carried_Inventory_API",
         "api.world.entity.vehicle.AbstractMinecartContainerMixin_Carrier_Inventory_API",
         "api.world.inventory.AnvilMenuMixin_BlockCarrier_Inventory_API",
+        "api.world.inventory.ArmorSlot_Inventory_API",
         "api.world.inventory.BrewingStandMenu_PotionSlotMixin_Inventory_API",
         "api.world.inventory.CartographyTableMenu_5Mixin_Inventory_API",
         "api.world.inventory.CrafterBlockBlockEntityMixin_Inventory_API",

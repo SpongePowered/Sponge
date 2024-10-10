@@ -30,4 +30,6 @@ import org.spongepowered.api.plugin.PluginManager;
  * This marker is required to handle injection in the core Sponge module
  */
 public interface SpongePluginManager extends PluginManager {
+
+    boolean isReady();
 }

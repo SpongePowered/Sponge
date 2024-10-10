@@ -54,4 +54,9 @@ public final class ForgePluginManager implements SpongePluginManager {
         ModList.get().forEachModInOrder(mod -> builder.add(ForgePluginContainer.of(mod)));
         return builder.build();
     }
+
+    @Override
+    public boolean isReady() {
+        return ModList.get() != null;
+    }
 }

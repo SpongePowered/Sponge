@@ -75,9 +75,9 @@ public final class PacketUtil {
 
     public static net.minecraft.network.protocol.Packet<?> createPlayPayload(final CustomPacketPayload.Type<? extends CustomPacketPayload> channel, final ChannelBuf payload, final EngineConnectionSide<?> side) {
         if (side == EngineConnectionSide.CLIENT) {
-            return new ServerboundCustomPayloadPacket(new SpongeChannelPayload(channel, (FriendlyByteBuf) payload));
+            return new ServerboundCustomPayloadPacket(SpongeChannelPayload.fromType(channel, (b) -> b.writeBytes((FriendlyByteBuf) payload).slice()));
         } else if (side == EngineConnectionSide.SERVER) {
-            return new ClientboundCustomPayloadPacket(new SpongeChannelPayload(channel, (FriendlyByteBuf) payload));
+            return new ClientboundCustomPayloadPacket(SpongeChannelPayload.fromType(channel, (b) -> b.writeBytes((FriendlyByteBuf) payload).slice()));
         } else {
             throw new UnsupportedOperationException();
         }
