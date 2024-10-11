@@ -163,6 +163,7 @@
         "world.level.block.CropBlockAccessor",
         "world.level.block.DispenserBlockAccessor",
         "world.level.block.EnderChestBlockAccessor",
+        "world.level.block.StemBlockAccessor",
         "world.level.block.entity.AbstractFurnaceBlockEntityAccessor",
         "world.level.block.entity.BaseContainerBlockEntityAccessor",
         "world.level.block.entity.BeaconBlockEntityAccessor",
