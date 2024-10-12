@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.minecraft.world.item.crafting;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Interface.Remap;
@@ -52,8 +53,8 @@ public abstract class IngredientMixin_API {
         return Arrays.stream(this.shadow$getItems()).map(ItemStackUtil::snapshotOf).collect(Collectors.toList());
     }
 
-    public boolean ingredient$test(final org.spongepowered.api.item.inventory.ItemStack itemStack) {
-        return this.shadow$test(ItemStackUtil.toNative(itemStack));
+    public boolean ingredient$test(final ItemStackLike itemStack) {
+        return this.shadow$test(ItemStackUtil.fromLikeToNative(itemStack));
     }
 
 }
