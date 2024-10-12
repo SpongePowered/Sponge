@@ -23,7 +23,6 @@
         "server.level.ServerEntityMixin_Neo",
         "server.level.ServerPlayerMixin_Neo",
         "server.network.ServerGamePacketListenerImplMixin_Neo",
-        "server.network.ServerLoginPacketListenerImplMixin_Neo",
         "world.entity.LivingEntityMixin_Neo",
         "world.entity.LivingEntityMixin_Neo_Attack_Impl",
         "world.entity.item.ItemEntityMixin_Neo",

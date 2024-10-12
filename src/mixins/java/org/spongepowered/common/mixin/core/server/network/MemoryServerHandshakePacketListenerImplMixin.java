@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.server.network;
 
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.Connection;
+import net.minecraft.network.ProtocolInfo;
 import net.minecraft.network.protocol.login.ClientboundLoginDisconnectPacket;
 import net.minecraft.network.protocol.login.LoginProtocols;
 import net.minecraft.server.network.MemoryServerHandshakePacketListenerImpl;
@@ -37,6 +38,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
@@ -58,6 +60,7 @@ public abstract class MemoryServerHandshakePacketListenerImplMixin implements Se
             target = "Lnet/minecraft/network/Connection;setupInboundProtocol(Lnet/minecraft/network/ProtocolInfo;Lnet/minecraft/network/PacketListener;)V"),
             cancellable = true)
     private void impl$onLogin(final CallbackInfo ci) {
+        this.connection.setupOutboundProtocol(LoginProtocols.CLIENTBOUND);
         final SpongeEngineConnection connection = ((ConnectionBridge) this.connection).bridge$getEngineConnection();
         final Component message = Component.text("You are not allowed to log in to this server.");
         final ServerSideConnectionEvent.Intent event = SpongeEventFactory.createServerSideConnectionEventIntent(
@@ -65,9 +68,13 @@ public abstract class MemoryServerHandshakePacketListenerImplMixin implements Se
         if (connection.postGuardedEvent(event)) {
             ci.cancel();
             final net.minecraft.network.chat.Component kickReason = SpongeAdventure.asVanilla(event.message());
-            this.connection.setupOutboundProtocol(LoginProtocols.CLIENTBOUND);
             this.connection.send(new ClientboundLoginDisconnectPacket(kickReason));
             this.connection.disconnect(kickReason);
         }
+    }
+
+    @Redirect(method = "handleIntention", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Connection;setupOutboundProtocol(Lnet/minecraft/network/ProtocolInfo;)V"))
+    private void impl$onSetupOutboundProtocol(final Connection instance, final ProtocolInfo<?> $$0) {
+        //Moved to impl$onLogin
     }
 }

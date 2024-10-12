@@ -37,6 +37,7 @@ import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
+import org.spongepowered.common.bridge.network.ServerLoginPacketListenerImplBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
@@ -66,7 +67,11 @@ public abstract class SpongeEngineConnection implements EngineConnection {
     @Override
     public Optional<EngineConnectionState> state() {
         if (this.active()) {
-            return Optional.of((EngineConnectionState) this.connection.getPacketListener());
+            final EngineConnectionState state = (EngineConnectionState) this.connection.getPacketListener();
+            if (!(state instanceof ServerLoginPacketListenerImplBridge loginBridge) || loginBridge.bridge$isIntentDone()) {
+                return Optional.of(state);
+            }
+            return Optional.of(DummyIntent.of(state.transferred()));
         }
         return Optional.empty();
     }
@@ -132,6 +137,23 @@ public abstract class SpongeEngineConnection implements EngineConnection {
 
         boolean shouldFireDisconnectionImmediately() {
             return this == EventFireState.POST;
+        }
+    }
+
+    private record DummyIntent(boolean transferred) implements EngineConnectionState.Intent {
+
+        private static final DummyIntent TRANSFERRED_FALSE = new DummyIntent(false);
+        private static final DummyIntent TRANSFERRED_TRUE = new DummyIntent(true);
+
+        @Override
+        public boolean transferred() {
+            return this.transferred;
+        }
+
+        static DummyIntent of(final boolean transferred) {
+            return transferred
+                ? DummyIntent.TRANSFERRED_TRUE
+                : DummyIntent.TRANSFERRED_FALSE;
         }
     }
 }

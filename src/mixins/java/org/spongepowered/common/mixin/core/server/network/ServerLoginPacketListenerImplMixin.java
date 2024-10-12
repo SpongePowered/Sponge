@@ -64,8 +64,10 @@ import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.bridge.network.ServerLoginPacketListenerImplBridge;
 import org.spongepowered.common.bridge.server.players.PlayerListBridge;
 import org.spongepowered.common.network.SpongeEngineConnection;
+import org.spongepowered.common.network.channel.ConnectionUtil;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
 import org.spongepowered.common.network.channel.SpongeChannelPayload;
+import org.spongepowered.common.network.channel.TransactionStore;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.math.BigInteger;
@@ -104,6 +106,31 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
             .setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER))
             .build());
 
+    private static final int NEGOTIATION_NOT_STARTED = 0;
+    private static final int NEGOTIATION_INTENT = 1;
+    private static final int NEGOTIATION_HANDSHAKE = 2;
+
+    private static final int INTENT_SYNC_PLUGIN_DATA = 0;
+    private static final int INTENT_DONE = 1;
+
+    // Handshake state:
+    // 1. Sync registered plugin channels
+    // 2. Post handshake event and plugins can start sending login payloads
+    // 3. Wait until the client responded for each of the plugin' requests
+    private static final int HANDSHAKE_NOT_STARTED = 0;
+    private static final int HANDSHAKE_CLIENT_TYPE = 1;
+    private static final int HANDSHAKE_SYNC_CHANNEL_REGISTRATIONS = 2;
+    private static final int HANDSHAKE_CHANNEL_REGISTRATION = 3;
+    private static final int HANDSHAKE_SYNC_PLUGIN_DATA = 4;
+    private static final int HANDSHAKE_DONE = 5;
+
+    //Packed long. Avoids subtle threading related problems with
+    //two separate fields.
+    //Bits 63-32 are for the phase.
+    //Bits 31-0 are for the state.
+    private volatile long impl$negotiationValue = ServerLoginPacketListenerImplMixin.impl$packNegotiationValue(
+        ServerLoginPacketListenerImplMixin.NEGOTIATION_NOT_STARTED, 0);
+
     @Override
     public Connection bridge$getConnection() {
         return this.connection;
@@ -129,39 +156,45 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
     private void impl$handleAuthEventCancellation(final CallbackInfo ci) {
         ci.cancel();
 
-        ((PlayerListBridge) this.server.getPlayerList()).bridge$canPlayerLogin(this.connection.getRemoteAddress(), this.authenticatedProfile)
-                .handle((componentOpt, throwable) -> {
-                    if (throwable != null) {
-                        // An error occurred during login checks so we ask to abort.
-                        ((ConnectionBridge) this.connection).bridge$setKickReason(Component.literal("An error occurred checking ban/whitelist status."));
-                        SpongeCommon.logger().error("An error occurred when checking the ban/whitelist status of {}.", this.authenticatedProfile.getId().toString());
-                        SpongeCommon.logger().error(throwable);
-                    } else if (componentOpt != null) {
-                        // We handle this later
-                        ((ConnectionBridge) this.connection).bridge$setKickReason(componentOpt);
-                    }
-                    return null;
-                }).handleAsync((ignored, throwable) -> {
-                    if (throwable != null) {
-                        // We're just going to disconnect here, because something went horribly wrong.
-                        if (throwable instanceof CompletionException) {
-                            throw (CompletionException) throwable;
-                        } else {
-                            throw new CompletionException(throwable);
-                        }
-                    }
-                    this.impl$fireAuthEvent();
-                    return null;
-                }, this.bridge$getExecutor()).exceptionally(throwable -> {
-                    SpongeCommon.logger().error("Forcibly disconnecting user {}({}) due to an error during login.", this.authenticatedProfile.getName(), this.authenticatedProfile.getId(), throwable);
-                    this.shadow$disconnect(Component.literal("Internal Server Error: unable to complete login."));
-                    return null;
-                });
+        final ServerSideConnection connection = (ServerSideConnection) ((ConnectionBridge) this.connection).bridge$getEngineConnection();
+        final TransactionStore store = ConnectionUtil.getTransactionStore(connection);
+        if (store.isEmpty()) {
+            this.impl$processVerification();
+        } else {
+            this.impl$changeNegotiationPhase(ServerLoginPacketListenerImplMixin.NEGOTIATION_INTENT, ServerLoginPacketListenerImplMixin.INTENT_SYNC_PLUGIN_DATA);
+            this.state = ServerLoginPacketListenerImpl.State.NEGOTIATING;
+        }
     }
 
-    @Override
-    public ExecutorService bridge$getExecutor() {
-        return ServerLoginPacketListenerImplMixin.impl$EXECUTOR;
+    private void impl$processVerification() {
+        ((PlayerListBridge) this.server.getPlayerList()).bridge$canPlayerLogin(this.connection.getRemoteAddress(), this.authenticatedProfile)
+            .handle((componentOpt, throwable) -> {
+                if (throwable != null) {
+                    // An error occurred during login checks so we ask to abort.
+                    ((ConnectionBridge) this.connection).bridge$setKickReason(Component.literal("An error occurred checking ban/whitelist status."));
+                    SpongeCommon.logger().error("An error occurred when checking the ban/whitelist status of {}.", this.authenticatedProfile.getId().toString());
+                    SpongeCommon.logger().error(throwable);
+                } else if (componentOpt != null) {
+                    // We handle this later
+                    ((ConnectionBridge) this.connection).bridge$setKickReason(componentOpt);
+                }
+                return null;
+            }).handleAsync((ignored, throwable) -> {
+                if (throwable != null) {
+                    // We're just going to disconnect here, because something went horribly wrong.
+                    if (throwable instanceof CompletionException) {
+                        throw (CompletionException) throwable;
+                    } else {
+                        throw new CompletionException(throwable);
+                    }
+                }
+                this.impl$fireAuthEvent();
+                return null;
+            }, ServerLoginPacketListenerImplMixin.impl$EXECUTOR).exceptionally(throwable -> {
+                SpongeCommon.logger().error("Forcibly disconnecting user {}({}) due to an error during login.", this.authenticatedProfile.getName(), this.authenticatedProfile.getId(), throwable);
+                this.shadow$disconnect(Component.literal("Internal Server Error: unable to complete login."));
+                return null;
+            });
     }
 
     private void impl$fireAuthEvent() {
@@ -183,6 +216,7 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
             return;
         }
 
+        this.impl$changeNegotiationPhase(ServerLoginPacketListenerImplMixin.NEGOTIATION_HANDSHAKE, ServerLoginPacketListenerImplMixin.HANDSHAKE_NOT_STARTED);
         this.state = ServerLoginPacketListenerImpl.State.NEGOTIATING;
     }
 
@@ -212,7 +246,7 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
         }
 
         //Sponge start
-        ((ServerLoginPacketListenerImplBridge)this).bridge$getExecutor().submit(() -> {
+        ServerLoginPacketListenerImplMixin.impl$EXECUTOR.submit(() -> {
             //Sponge end
             final String username = Objects.requireNonNull(this.requestedUsername, "Player name not initialized");
 
@@ -262,5 +296,84 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
             final EngineConnection connection = ((ConnectionBridge) this.connection).bridge$getEngineConnection();
             channelRegistry.handleLoginResponsePayload(connection, (EngineConnectionState) this, payload.id(), packet.transactionId(), payload.consumer());
         });
+    }
+
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void impl$onTick(final CallbackInfo ci) {
+        if (this.state == ServerLoginPacketListenerImpl.State.NEGOTIATING) {
+            final long value = this.impl$negotiationValue;
+            final int phase = ServerLoginPacketListenerImplMixin.impl$readNegotiationPhase(value);
+            final int state = ServerLoginPacketListenerImplMixin.impl$readNegotiationState(value);
+            if (phase == ServerLoginPacketListenerImplMixin.NEGOTIATION_INTENT) {
+                this.impl$handleIntentNegotiation(state);
+            } else if (phase == ServerLoginPacketListenerImplMixin.NEGOTIATION_HANDSHAKE) {
+                this.impl$handleHandshakeNegotiation(state);
+            }
+        }
+    }
+
+    private void impl$handleIntentNegotiation(final int state) {
+        if (state == ServerLoginPacketListenerImplMixin.INTENT_SYNC_PLUGIN_DATA) {
+            final ServerSideConnection connection = (ServerSideConnection) ((ConnectionBridge) this.connection).bridge$getEngineConnection();
+            final TransactionStore store = ConnectionUtil.getTransactionStore(connection);
+            if (store.isEmpty()) {
+                this.impl$changeNegotiationState(ServerLoginPacketListenerImplMixin.INTENT_DONE);
+                this.impl$processVerification();
+            }
+        }
+    }
+
+    private void impl$handleHandshakeNegotiation(final int state) {
+        final ServerSideConnection connection = (ServerSideConnection) ((ConnectionBridge) this.connection).bridge$getEngineConnection();
+        if (state == ServerLoginPacketListenerImplMixin.HANDSHAKE_NOT_STARTED) {
+            this.impl$changeNegotiationState(ServerLoginPacketListenerImplMixin.HANDSHAKE_CLIENT_TYPE);
+
+            ((SpongeChannelManager) Sponge.channelManager()).requestClientType(connection).thenAccept(result -> {
+                this.impl$changeNegotiationState(ServerLoginPacketListenerImplMixin.HANDSHAKE_SYNC_CHANNEL_REGISTRATIONS);
+            });
+
+        } else if (state == ServerLoginPacketListenerImplMixin.HANDSHAKE_SYNC_CHANNEL_REGISTRATIONS) {
+            this.impl$changeNegotiationState(ServerLoginPacketListenerImplMixin.HANDSHAKE_CHANNEL_REGISTRATION);
+
+            ((SpongeChannelManager) Sponge.channelManager()).sendLoginChannelRegistry(connection).thenAccept(result -> {
+                final Cause cause = Cause.of(EventContext.empty(), this);
+                final ServerSideConnectionEvent.Handshake event =
+                    SpongeEventFactory.createServerSideConnectionEventHandshake(cause, connection, SpongeGameProfile.of(this.authenticatedProfile));
+                SpongeCommon.post(event);
+                this.impl$changeNegotiationState(ServerLoginPacketListenerImplMixin.HANDSHAKE_SYNC_PLUGIN_DATA);
+            });
+        } else if (state == ServerLoginPacketListenerImplMixin.HANDSHAKE_SYNC_PLUGIN_DATA) {
+            final TransactionStore store = ConnectionUtil.getTransactionStore(connection);
+            if (store.isEmpty()) {
+                this.impl$changeNegotiationState(ServerLoginPacketListenerImplMixin.HANDSHAKE_DONE);
+                this.state = ServerLoginPacketListenerImpl.State.VERIFYING;
+            }
+        }
+    }
+
+    @Override
+    public boolean bridge$isIntentDone() {
+        final int phase = ServerLoginPacketListenerImplMixin.impl$readNegotiationPhase(this.impl$negotiationValue);
+        return phase > ServerLoginPacketListenerImplMixin.NEGOTIATION_INTENT;
+    }
+
+    private void impl$changeNegotiationPhase(final int phase, final int state) {
+        this.impl$negotiationValue = ServerLoginPacketListenerImplMixin.impl$packNegotiationValue(phase, state);
+    }
+
+    private void impl$changeNegotiationState(final int state) {
+        this.impl$changeNegotiationPhase(ServerLoginPacketListenerImplMixin.impl$readNegotiationPhase(this.impl$negotiationValue), state);
+    }
+
+    private static long impl$packNegotiationValue(final int phase, final int state) {
+        return Integer.toUnsignedLong(phase) << 32 | Integer.toUnsignedLong(state);
+    }
+
+    private static int impl$readNegotiationPhase(final long value) {
+        return (int) (value >>> 32);
+    }
+
+    private static int impl$readNegotiationState(final long value) {
+        return (int) value;
     }
 }

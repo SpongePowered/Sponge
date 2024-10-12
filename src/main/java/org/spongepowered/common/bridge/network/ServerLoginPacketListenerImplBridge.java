@@ -26,11 +26,10 @@ package org.spongepowered.common.bridge.network;
 
 import net.minecraft.network.Connection;
 
-import java.util.concurrent.ExecutorService;
 
 public interface ServerLoginPacketListenerImplBridge {
 
-    ExecutorService bridge$getExecutor();
-
     Connection bridge$getConnection();
+
+    boolean bridge$isIntentDone();
 }
