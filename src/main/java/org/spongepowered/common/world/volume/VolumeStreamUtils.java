@@ -321,7 +321,7 @@ public final class VolumeStreamUtils {
     ) {
         final boolean result = VolumeStreamUtils.setBiome(chunk.getSection(chunk.getSectionIndex(y)), x, y, z, biome);
         if (result) {
-            chunk.setUnsaved(true);
+            chunk.markUnsaved();
         }
         return result;
     }

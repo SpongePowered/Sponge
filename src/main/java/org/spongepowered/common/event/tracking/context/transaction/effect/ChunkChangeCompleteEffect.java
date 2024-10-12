@@ -49,7 +49,7 @@ public final class ChunkChangeCompleteEffect implements ProcessingSideEffect {
 
         final LevelChunk chunk = pipeline.getAffectedChunk();
         // this.unsaved = true; // Vanilla, we'll just call the accessor available
-        chunk.setUnsaved(true);
+        chunk.markUnsaved();
         return new EffectResult(oldState.state(), true);
     }
 }

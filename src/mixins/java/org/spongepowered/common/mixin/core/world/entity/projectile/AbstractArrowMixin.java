@@ -51,7 +51,6 @@ public abstract class AbstractArrowMixin extends ProjectileMixin implements Abst
 
     // @formatter:off
     @Shadow private int life;
-    @Shadow protected boolean inGround;
     @Shadow public int shakeTime;
     @Shadow public AbstractArrow.Pickup pickup;
     @Shadow @Nullable private BlockState lastState;
@@ -60,8 +59,9 @@ public abstract class AbstractArrowMixin extends ProjectileMixin implements Abst
     @Shadow public abstract void shadow$setPierceLevel(byte level);
     @Shadow protected abstract ItemStack shadow$getPickupItem();
     @Shadow protected abstract void resetPiercedEntities();
-
+    @Shadow protected abstract void shadow$setInGround(boolean $$0);
     // @formatter:on
+
 
     @Nullable private Double impl$customKnockback;
 
@@ -97,7 +97,7 @@ public abstract class AbstractArrowMixin extends ProjectileMixin implements Abst
                 this.shadow$setDeltaMovement(vec3d);
                 final Vec3 vec3d1 = vec3d.normalize().scale(0.05F);
                 this.shadow$setPos(this.shadow$getX() - vec3d1.x, this.shadow$getY() - vec3d1.y, this.shadow$getZ() - vec3d1.z);
-                this.inGround = true;
+                this.shadow$setInGround(true);
                 this.shakeTime = 7;
                 this.shadow$setCritArrow(false);
                 this.shadow$setPierceLevel((byte)0);

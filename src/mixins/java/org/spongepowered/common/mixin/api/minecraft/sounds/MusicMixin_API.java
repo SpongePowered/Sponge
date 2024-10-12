@@ -45,7 +45,7 @@ public abstract class MusicMixin_API implements SoundConfig.BackgroundMusic {
 
     @Override
     public SoundType sound() {
-        return (SoundType) this.event.value();
+        return (SoundType) (Object) this.event.value();
     }
 
     @Override

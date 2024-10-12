@@ -195,7 +195,7 @@ public record SpongeBiomeTemplate(ResourceKey key, Biome representedBiome, DataP
             foliageColor.ifPresent(c -> effectsBuilder.foliageColorOverride(c.rgb()));
             grassColor.ifPresent(c -> effectsBuilder.grassColorOverride(c.rgb()));
             particleSettings.ifPresent(ps -> effectsBuilder.ambientParticle((AmbientParticleSettings) ps));
-            ambientSound.ifPresent(s -> effectsBuilder.ambientLoopSound(Holder.direct((SoundEvent) s)));
+            ambientSound.ifPresent(s -> effectsBuilder.ambientLoopSound(Holder.direct((SoundEvent) (Object) s)));
             ambientMood.ifPresent(m -> effectsBuilder.ambientMoodSound((net.minecraft.world.level.biome.AmbientMoodSettings) m));
             additionalSound.ifPresent(s -> effectsBuilder.ambientAdditionsSound((AmbientAdditionsSettings) s));
             backgroundMusic.ifPresent(m -> effectsBuilder.backgroundMusic((Music) m));

@@ -92,7 +92,9 @@ public abstract class LevelChunkMixin extends ChunkAccess implements LevelChunkB
     @Shadow @Nullable public abstract BlockEntity shadow$getBlockEntity(BlockPos pos, net.minecraft.world.level.chunk.LevelChunk.EntityCreationType p_177424_2_);
     @Shadow public abstract BlockState shadow$getBlockState(BlockPos pos);
     @Shadow public abstract void shadow$addEntity(net.minecraft.world.entity.Entity param0);
-    // @formatter:on
+    @Shadow public abstract void shadow$markUnsaved();
+// @formatter:on
+
 
     private long impl$scheduledForUnload = -1; // delay chunk unloads
     private boolean impl$persistedChunk = false;
@@ -130,7 +132,7 @@ public abstract class LevelChunkMixin extends ChunkAccess implements LevelChunkB
 
     @Override
     public void bridge$markChunkDirty() {
-        this.unsaved = true;
+        this.shadow$markUnsaved();
     }
 
     @Override
@@ -399,14 +401,14 @@ public abstract class LevelChunkMixin extends ChunkAccess implements LevelChunkB
     @Override
     public <E> DataTransactionResult bridge$offer(final Key<@NonNull ? extends Value<E>> key, final E value) {
         final DataTransactionResult result = DataHolderProcessor.bridge$offer(this, key, value);
-        this.unsaved = true;
+        this.shadow$markUnsaved();
         return result;
     }
 
     @Override
     public <E> DataTransactionResult bridge$remove(final Key<@NonNull ? extends Value<E>> key) {
         final DataTransactionResult result = DataHolderProcessor.bridge$remove(this, key);
-        this.unsaved = true;
+        this.shadow$markUnsaved();
         return result;
     }
 
