@@ -54,7 +54,7 @@ public abstract class IngredientMixin_API {
     }
 
     public boolean ingredient$test(final ItemStackLike itemStack) {
-        return this.shadow$test(ItemStackUtil.toNative(itemStack.asMutable()));
+        return this.shadow$test(ItemStackUtil.fromLikeToNative(itemStack));
     }
 
 }

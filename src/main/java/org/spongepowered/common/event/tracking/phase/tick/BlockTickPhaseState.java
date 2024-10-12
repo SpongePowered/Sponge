@@ -24,10 +24,21 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BonemealableBlock;
+import net.minecraft.world.level.block.BushBlock;
+import net.minecraft.world.level.block.CactusBlock;
+import net.minecraft.world.level.block.ChorusFlowerBlock;
+import net.minecraft.world.level.block.ChorusPlantBlock;
+import net.minecraft.world.level.block.StemBlock;
+import net.minecraft.world.level.block.SugarCaneBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.common.accessor.world.level.block.StemBlockAccessor;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.world.BlockChange;
@@ -56,13 +67,26 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
         final BlockState currentState
     ) {
         final Block newBlock = newState.getBlock();
-        if (phaseContext.tickingBlock instanceof BonemealableBlock) {
-            if (newBlock == Blocks.AIR) {
-                return BlockChange.BREAK;
-            }
-            if (newBlock instanceof BonemealableBlock || newState.ignitedByLava()) {
+        if (newBlock == Blocks.AIR) {
+            return BlockChange.BREAK;
+        } else if (phaseContext.tickingBlock instanceof BonemealableBlock) {
+            if (newBlock instanceof BonemealableBlock) {
                 return BlockChange.GROW;
+            } else if (phaseContext.tickingBlock instanceof final StemBlock stemBlock) {
+                final Registry<Block> registry = ((Level) phaseContext.world).registryAccess().registryOrThrow(Registries.BLOCK);
+                final @Nullable Block fruitBlock = registry.get(((StemBlockAccessor) stemBlock).accessor$fruit());
+                final @Nullable Block attachedStemBlock = registry.get(((StemBlockAccessor) stemBlock).accessor$attachedStem());
+                if (newBlock == fruitBlock || newBlock == attachedStemBlock) {
+                    return BlockChange.GROW;
+                }
             }
+        } else if ((phaseContext.tickingBlock instanceof BushBlock ||
+            phaseContext.tickingBlock instanceof SugarCaneBlock ||
+            phaseContext.tickingBlock instanceof CactusBlock) && (Block) phaseContext.tickingBlock == newBlock) {
+            return BlockChange.GROW;
+        } else if (phaseContext.tickingBlock instanceof ChorusFlowerBlock &&
+            (newBlock instanceof ChorusFlowerBlock || newBlock instanceof ChorusPlantBlock)) {
+            return BlockChange.GROW;
         }
         return super.associateBlockChangeWithSnapshot(phaseContext, newState, currentState);
     }
