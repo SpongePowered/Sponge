@@ -548,7 +548,7 @@ public final class DataTest  {
         this.checkGetData(player, Keys.EXPERIENCE, 7);
         this.checkOfferData(player, Keys.EXPERIENCE_SINCE_LEVEL, 1);
 
-        this.checkOfferData(tntEntity, Keys.EXPLOSION_RADIUS, 1);
+        this.checkOfferData(tntEntity, Keys.EXPLOSION_RADIUS, 1f);
 
         this.checkGetData(player, Keys.EYE_HEIGHT, (double)1.62f);
         this.checkGetData(sheep, Keys.EYE_HEIGHT,  (double)(1.3f * 0.95f));

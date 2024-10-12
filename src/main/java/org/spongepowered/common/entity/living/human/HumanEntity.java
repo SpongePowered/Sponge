@@ -429,7 +429,8 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     public ClientboundPlayerInfoUpdatePacket createPlayerListPacket(final EnumSet<ClientboundPlayerInfoUpdatePacket.Action> actions) {
         final ClientboundPlayerInfoUpdatePacket packet = new ClientboundPlayerInfoUpdatePacket(actions, List.of());
 
-        ((ClientboundPlayerInfoUpdatePacketAccessor) packet).accessor$entries(List.of(new ClientboundPlayerInfoUpdatePacket.Entry(this.uuid, this.fakeProfile.gameProfile(), false, 0, GameType.DEFAULT_MODE, this.getDisplayName(), null)));
+        ((ClientboundPlayerInfoUpdatePacketAccessor) packet).accessor$entries(List.of(
+            new ClientboundPlayerInfoUpdatePacket.Entry(this.uuid, this.fakeProfile.gameProfile(), false, 0, GameType.DEFAULT_MODE, this.getDisplayName(), 0, null)));
         return packet;
     }
 

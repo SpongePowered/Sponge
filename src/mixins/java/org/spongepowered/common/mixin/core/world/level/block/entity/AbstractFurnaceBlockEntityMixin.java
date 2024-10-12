@@ -26,12 +26,12 @@ package org.spongepowered.common.mixin.core.world.level.block.entity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.objectweb.asm.Opcodes;
@@ -74,7 +74,9 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
 
     // Shrink Fuel
     @Redirect(method = "serverTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;shrink(I)V"))
-    private static void impl$throwFuelEventIfOrShrink(final ItemStack itemStack, final int quantity, final Level var0, final BlockPos var1, final BlockState var2, final AbstractFurnaceBlockEntity entity) {
+    private static void impl$throwFuelEventIfOrShrink(
+        final ItemStack itemStack, final int quantity, final ServerLevel var0, final BlockPos var1,
+        final BlockState var2, final AbstractFurnaceBlockEntity entity) {
         final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
 
         final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(itemStack);
@@ -103,8 +105,11 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
 
     @Override
     public Optional<? extends RecipeHolder<? extends AbstractCookingRecipe>> bridge$getCurrentRecipe() {
+        if (!(this.level instanceof ServerLevel se)) {
+            return Optional.empty();
+        }
         var recipeInpuit = new SingleRecipeInput(this.items.get(0));
-        return this.quickCheck.getRecipeFor(recipeInpuit, this.level);
+        return this.quickCheck.getRecipeFor(recipeInpuit, se);
     }
 
     // Interrupt-Active - e.g. a player removing the currently smelting item
@@ -112,7 +117,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
         method = "setItem",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;getTotalCookTime(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;)I"
+            target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;getTotalCookTime(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;)I"
         )
     )
     private void impl$interruptSmelt(final CallbackInfo ci) {
@@ -130,7 +135,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
         slice = @Slice(
             from = @At(
                 value = "INVOKE",
-                target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;burn(Lnet/minecraft/core/RegistryAccess;Lnet/minecraft/world/item/crafting/RecipeHolder;Lnet/minecraft/core/NonNullList;I)Z"
+                target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;burn(Lnet/minecraft/core/RegistryAccess;Lnet/minecraft/world/item/crafting/RecipeHolder;Lnet/minecraft/world/item/crafting/SingleRecipeInput;Lnet/minecraft/core/NonNullList;I)Z"
             ),
             to = @At(
                 value = "INVOKE",
@@ -138,7 +143,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
             )
         )
     )
-    private static void impl$onResetCookTimePassive(final Level level, final BlockPos pos, final BlockState state,
+    private static void impl$onResetCookTimePassive(final ServerLevel level, final BlockPos pos, final BlockState state,
         @Coerce final AbstractFurnaceBlockEntityMixin entity, final CallbackInfo ci) {
         entity.impl$callInteruptSmeltEvent();
     }

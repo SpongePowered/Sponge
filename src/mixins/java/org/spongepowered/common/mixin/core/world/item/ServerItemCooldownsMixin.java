@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.world.item;
 
-import net.minecraft.world.item.Item;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ServerItemCooldowns;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.CooldownTracker;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.living.player.CooldownEvent;
-import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -50,20 +50,20 @@ public abstract class ServerItemCooldownsMixin extends ItemCooldownsMixin {
     // @formmater:off
     @Shadow @Final private net.minecraft.server.level.ServerPlayer player;
 
-    @Shadow protected abstract void shadow$onCooldownStarted(Item itemIn, int ticksIn);
+    @Shadow protected abstract void shadow$onCooldownStarted(ResourceLocation group, int ticksIn);
     // @formmater:on
 
     @Override
-    protected int impl$throwSetCooldownEvent(final ItemType type, final int ticks) {
+    protected int impl$throwSetCooldownEvent(final ResourceLocation group, final int ticks) {
         if (ticks == 0) {
             return 0;
         }
-        final Optional<Ticks> beforeCooldown = ((CooldownTracker) this).cooldown(type);
+        final Optional<Ticks> beforeCooldown = ((CooldownTracker) this).cooldown((ResourceKey) (Object)group);
         final CooldownEvent.Set event = SpongeEventFactory.createCooldownEventSet(PhaseTracker.getCauseStackManager().currentCause(),
-                SpongeTicks.ticksOrInfinite(ticks), SpongeTicks.ticksOrInfinite(ticks), type, (ServerPlayer) this.player, beforeCooldown);
+                SpongeTicks.ticksOrInfinite(ticks), SpongeTicks.ticksOrInfinite(ticks), (ResourceKey) (Object) group, (ServerPlayer) this.player, beforeCooldown);
 
         if (Sponge.eventManager().post(event)) {
-            this.shadow$onCooldownStarted((Item) type, beforeCooldown.map(x -> (int) x.ticks()).orElse(0));
+            this.shadow$onCooldownStarted(group, beforeCooldown.map(x -> (int) x.ticks()).orElse(0));
             return Constants.Sponge.Entity.Player.ITEM_COOLDOWN_CANCELLED;
         } else {
             return SpongeTicks.toSaturatedIntOrInfinite(event.newCooldown());
@@ -71,9 +71,9 @@ public abstract class ServerItemCooldownsMixin extends ItemCooldownsMixin {
     }
 
     @Override
-    protected void impl$throwEndCooldownEvent(final ItemType type) {
+    protected void impl$throwEndCooldownEvent(final ResourceLocation group) {
         final CooldownEvent.End event = SpongeEventFactory.createCooldownEventEnd(PhaseTracker.getCauseStackManager().currentCause(),
-                type, (ServerPlayer) this.player);
+            (ResourceKey) (Object) group, (ServerPlayer) this.player);
         Sponge.eventManager().post(event);
     }
 

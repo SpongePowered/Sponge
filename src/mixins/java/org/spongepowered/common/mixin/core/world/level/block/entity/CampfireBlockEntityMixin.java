@@ -26,12 +26,14 @@ package org.spongepowered.common.mixin.core.world.level.block.entity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.ResourceKey;
@@ -49,9 +51,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.world.level.block.entity.CampfireBlockEntityBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -61,7 +63,7 @@ import java.util.Collections;
 import java.util.Optional;
 
 @Mixin(CampfireBlockEntity.class)
-public abstract class CampfireBlockEntityMixin implements CampfireBlockEntityBridge {
+public abstract class CampfireBlockEntityMixin {
 
     // @Formatter:off
     @Shadow @Final private NonNullList<ItemStack> items;
@@ -76,8 +78,9 @@ public abstract class CampfireBlockEntityMixin implements CampfireBlockEntityBri
     // Tick up
     @Inject(method = "cookTick", locals = LocalCapture.CAPTURE_FAILEXCEPTION,
             at = @At(value = "FIELD", target = "Lnet/minecraft/world/level/block/entity/CampfireBlockEntity;cookingProgress:[I", ordinal = 1))
-    private static void impl$canCook(final Level level, final BlockPos pos, final BlockState state, final CampfireBlockEntity self,
-        final CallbackInfo ci, final boolean hasChanged, final int i, final ItemStack itemStack) {
+    private static void impl$canCook(final ServerLevel level, final BlockPos pos, final BlockState state, final CampfireBlockEntity self,
+                                     final RecipeManager.CachedCheck<SingleRecipeInput, CampfireCookingRecipe> check,
+                                     final CallbackInfo ci, final boolean hasChanged, final int i, final ItemStack itemStack) {
         final CampfireBlockEntityMixin mixinSelf = (CampfireBlockEntityMixin) (Object) self;
         mixinSelf.impl$currentIndex = i;
         final boolean isEmpty = itemStack.isEmpty();
@@ -97,8 +100,9 @@ public abstract class CampfireBlockEntityMixin implements CampfireBlockEntityBri
 
     @Inject(method = "cookTick", locals = LocalCapture.CAPTURE_FAILEXCEPTION, at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/Containers;dropItemStack(Lnet/minecraft/world/level/Level;DDDLnet/minecraft/world/item/ItemStack;)V"))
-    private static void impl$assembleCampfireResult(final Level level, final BlockPos pos, final BlockState state,
-        final CampfireBlockEntity self, final CallbackInfo ci, final boolean hasChanged, final int i,
+    private static void impl$assembleCampfireResult(final ServerLevel level, final BlockPos pos, final BlockState state,
+        final CampfireBlockEntity self, final RecipeManager.CachedCheck<SingleRecipeInput, CampfireCookingRecipe> check,
+        final CallbackInfo ci, final boolean hasChanged, final int i,
         final ItemStack itemStack, final SingleRecipeInput recipeInput, final ItemStack itemStack1) {
         final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
         final CampfireBlockEntityMixin mixinSelf = (CampfireBlockEntityMixin) (Object) self;
@@ -112,27 +116,32 @@ public abstract class CampfireBlockEntityMixin implements CampfireBlockEntityBri
         mixinSelf.impl$pendingSlotTransaction = transaction;
     }
 
-    @Inject(method = "cookTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;sendBlockUpdated(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/state/BlockState;I)V"))
-    private static void impl$setCookingEventFinishResult(final Level level, final BlockPos pos, final BlockState state, final CampfireBlockEntity entity, final CallbackInfo ci) {
-        final CampfireBlockEntityMixin mixinSelf = (CampfireBlockEntityMixin) (Object) entity;
+    @Inject(method = "cookTick", at = @At(value = "INVOKE",
+        target = "Lnet/minecraft/server/level/ServerLevel;sendBlockUpdated(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/state/BlockState;I)V"
+    ), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
+    private static void impl$setCookingEventFinishResult(
+        final ServerLevel level, final BlockPos pos, final BlockState state,
+        final CampfireBlockEntity self, final RecipeManager.CachedCheck<SingleRecipeInput, CampfireCookingRecipe> $$4,
+        final CallbackInfo ci, final boolean $$5, final int $$6, final ItemStack $$7, final SingleRecipeInput $$8,
+        final ItemStack $$9
+    ) {
+        final CampfireBlockEntityMixin mixinSelf = (CampfireBlockEntityMixin) (Object) self;
         mixinSelf.impl$pendingSlotTransaction.custom().ifPresent(item ->
             mixinSelf.items.set(((SlotAdapter) mixinSelf.impl$pendingSlotTransaction.slot()).getOrdinal(), ItemStackUtil.fromSnapshotToNative(item)));
         mixinSelf.impl$pendingSlotTransaction = null;
     }
 
-    @Override
-    public void bridge$placeRecipe(final RecipeHolder<CampfireCookingRecipe> recipe) {
-        for(int i = 0; i < this.items.size(); ++i) {
-            final ItemStack itemstack = this.items.get(i);
-            if (itemstack.isEmpty()) {
-                this.impl$cookingRecipe[i] = recipe;
-                return;
-            }
-        }
+    @Inject(method = "placeFood", at = @At(value = "INVOKE", target = "Ljava/util/Optional;get()Ljava/lang/Object;"),
+    locals = LocalCapture.CAPTURE_FAILHARD)
+    private void impl$captureRecipeUsage(
+        final ServerLevel $$0, final LivingEntity $$1, final ItemStack $$2, final CallbackInfoReturnable<Boolean> cir,
+        final int i, final ItemStack stack, final Optional<RecipeHolder<CampfireCookingRecipe>> recipeOptional) {
+        // We know that the crafting recipe will exist because mojang checked for us
+        this.impl$cookingRecipe[i] = recipeOptional.get();
     }
 
     @Redirect(method = "cookTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;isItemEnabled(Lnet/minecraft/world/flag/FeatureFlagSet;)Z"))
-    private static boolean impl$checkInfiniteCookingTime(final ItemStack instance, final FeatureFlagSet featureFlagSet, final Level level, final BlockPos blockPos,
+    private static boolean impl$checkInfiniteCookingTime(final ItemStack instance, final FeatureFlagSet featureFlagSet, final ServerLevel level, final BlockPos blockPos,
                                   final BlockState state, final CampfireBlockEntity self) {
         final int cookingTime =
                 ((CampfireBlockEntityMixin) (Object) self).cookingTime[((CampfireBlockEntityMixin) (Object) self).impl$currentIndex];

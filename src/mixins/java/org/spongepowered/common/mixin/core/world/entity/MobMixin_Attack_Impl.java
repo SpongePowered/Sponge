@@ -50,8 +50,8 @@ public abstract class MobMixin_Attack_Impl extends LivingEntityMixin_Attack_Impl
     }
 
     @Redirect(method = "doHurtTarget", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
-    private boolean attackImpl$onCanGrief(final net.minecraft.world.entity.Entity targetEntity, final DamageSource damageSource, final float mcFinalDamage) {
+            target = "Lnet/minecraft/world/entity/Entity;hurtServer(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
+    private boolean attackImpl$onCanGrief(final net.minecraft.world.entity.Entity targetEntity, final ServerLevel level, final DamageSource damageSource, final float mcFinalDamage) {
         final var thisEntity = (Mob) (Object) this;
 
         float knockbackModifier = this.shadow$getKnockback(targetEntity, damageSource);
@@ -65,7 +65,7 @@ public abstract class MobMixin_Attack_Impl extends LivingEntityMixin_Attack_Impl
         final var event = DamageEventUtil.callMobAttackEvent(attack, knockbackModifier);
         this.impl$knockbackModifier = event.knockbackModifier();
 
-        return targetEntity.hurt(damageSource, (float) event.finalOutputDamage());
+        return targetEntity.hurtServer(level, damageSource, (float) event.finalOutputDamage());
     }
 
     @Redirect(method = "doHurtTarget", at = @At(value = "INVOKE",

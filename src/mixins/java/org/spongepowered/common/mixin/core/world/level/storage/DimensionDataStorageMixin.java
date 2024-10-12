@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.data.DataUtil;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.function.BiFunction;
 
 @Mixin(DimensionDataStorage.class)
@@ -46,7 +46,7 @@ public abstract class DimensionDataStorageMixin {
     @Inject(method = "readSavedData", at = @At(value = "RETURN", ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
     public void readSpongeMapData(BiFunction<CompoundTag, HolderLookup.Provider, SavedData> var1, DataFixTypes $$1, String var2,
                                   CallbackInfoReturnable<SavedData> cir,
-                                  File var3, CompoundTag rootTag) {
+                                  Path var3, CompoundTag rootTag) {
         final SavedData savedData = cir.getReturnValue();
         if (savedData instanceof DataCompoundHolder) {
             ((DataCompoundHolder) savedData).data$setCompound(rootTag);

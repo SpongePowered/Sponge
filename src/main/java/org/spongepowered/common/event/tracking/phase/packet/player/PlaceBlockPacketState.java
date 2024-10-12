@@ -87,7 +87,7 @@ public final class PlaceBlockPacketState extends BasicPacketState {
 
     @Override
     public void postBlockTransactionApplication(
-        final BasicPacketContext context, final BlockChange blockChange,
+        final BasicPacketContext context, ServerWorld serverWorld, final BlockChange blockChange,
         final BlockTransactionReceipt transaction
     ) {
         TrackingUtil.associateTrackerToTarget(blockChange, transaction, ((ServerPlayer) context.getPacketPlayer()).uniqueId());

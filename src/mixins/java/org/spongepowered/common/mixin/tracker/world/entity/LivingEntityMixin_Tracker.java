@@ -120,7 +120,7 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker {
      * @reason Instead of inlining the onDeath method with the main mixin, we can "toggle"
      * the usage of the death state control in the tracker mixin.
      */
-    @Redirect(method = "hurt",
+    @Redirect(method = "hurtServer",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/entity/LivingEntity;die(Lnet/minecraft/world/damagesource/DamageSource;)V"
         )

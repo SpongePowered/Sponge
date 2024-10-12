@@ -24,13 +24,15 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.projectile;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
-import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.projectile.explosive.FireworkRocket;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -40,7 +42,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 
@@ -54,7 +55,7 @@ public abstract class FireworkRocketEntityMixin extends ProjectileMixin implemen
     @Shadow private int lifetime;
     // @formatter:on
 
-    private int impl$explosionRadius = Constants.Entity.Firework.DEFAULT_EXPLOSION_RADIUS;
+    private float impl$explosionRadius = Constants.Entity.Firework.DEFAULT_EXPLOSION_RADIUS;
 
     @Override
     public boolean bridge$isPrimed() {
@@ -83,35 +84,37 @@ public abstract class FireworkRocketEntityMixin extends ProjectileMixin implemen
     }
 
     @Override
-    public Optional<Integer> bridge$getExplosionRadius() {
+    public Optional<Float> bridge$getExplosionRadius() {
         return Optional.of(this.impl$explosionRadius);
     }
 
     @Override
-    public void bridge$setExplosionRadius(final @Nullable Integer radius) {
+    public void bridge$setExplosionRadius(final @Nullable Float radius) {
         this.impl$explosionRadius = radius == null ? Constants.Entity.Firework.DEFAULT_EXPLOSION_RADIUS : radius;
     }
 
-    @Redirect(method = "explode()V",
+    @Redirect(method = "explode(Lnet/minecraft/server/level/ServerLevel;)V",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/level/Level;broadcastEntityEvent(Lnet/minecraft/world/entity/Entity;B)V")
+            target = "Lnet/minecraft/server/level/ServerLevel;broadcastEntityEvent(Lnet/minecraft/world/entity/Entity;B)V")
     )
-    private void impl$useSpongeExplosion(final Level world, final Entity self, final byte state) {
-        if (this.shadow$level().isClientSide) {
-            world.broadcastEntityEvent(self, state);
-            return;
-        }
+    private void impl$useSpongeExplosion(final ServerLevel world, final Entity self, final byte state) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             // Fireworks don't typically explode like other explosives, but we'll
             // post an event regardless and if the radius is zero the explosion
             // won't be triggered (the default behavior).
             frame.pushCause(this);
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, this.impl$getProjectileSource());
-            SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
+            final var explosionBuilder = Explosion.builder()
                 .sourceExplosive(((FireworkRocket) this))
                 .location(((FireworkRocket) this).serverLocation())
-                .radius(this.impl$explosionRadius))
-                .ifPresent(explosion -> world.broadcastEntityEvent(self, state));
+                .radius(this.impl$explosionRadius);
+
+            final var detonateEvent = SpongeEventFactory.createDetonateExplosiveEvent(PhaseTracker.getCauseStackManager().currentCause(),
+                explosionBuilder, (FireworkRocket) this, explosionBuilder.build());
+            if (Sponge.eventManager().post(detonateEvent)) {
+                return;
+            }
+            world.broadcastEntityEvent(self, state);
         }
     }
 

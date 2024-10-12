@@ -53,9 +53,9 @@ public final class UpdateHeightMapEffect implements ProcessingSideEffect {
         if (heightMap == null) {
             throw new IllegalStateException("Heightmap dereferenced!");
         }
-        final int x = oldState.pos.getX() & 15;
-        final int y = oldState.pos.getY();
-        final int z = oldState.pos.getZ() & 15;
+        final int x = oldState.pos().getX() & 15;
+        final int y = oldState.pos().getY();
+        final int z = oldState.pos().getZ() & 15;
         heightMap.get(Heightmap.Types.MOTION_BLOCKING).update(x, y, z, newState);
         heightMap.get(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES).update(x, y, z, newState);
         heightMap.get(Heightmap.Types.OCEAN_FLOOR).update(x, y, z, newState);

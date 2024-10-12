@@ -87,7 +87,7 @@ public abstract class StructureMixin_API implements org.spongepowered.api.world.
             return false;
         }
         ChunkPos.rangeClosed(minPos, maxPos).forEach((chunkPos) -> start.placeInChunk(level, level.structureManager(), chunkSource.getGenerator(), level.getRandom(),
-                new BoundingBox(chunkPos.getMinBlockX(), level.getMinBuildHeight(), chunkPos.getMinBlockZ(), chunkPos.getMaxBlockX(), level.getMaxBuildHeight(), chunkPos.getMaxBlockZ()), chunkPos));
+                new BoundingBox(chunkPos.getMinBlockX(), level.getMinY(), chunkPos.getMinBlockZ(), chunkPos.getMaxBlockX(), level.getMaxY(), chunkPos.getMaxBlockZ()), chunkPos));
         return true;
     }
 

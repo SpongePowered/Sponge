@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.inventory;
 
-import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
+import net.minecraft.network.protocol.game.ClientboundSetHeldSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -76,7 +76,7 @@ public class SetCarriedItemTransaction extends InventoryBasedTransaction {
 
     @Override
     public void restore(final PhaseContext<@NonNull ?> context, final ChangeInventoryEvent event) {
-        this.player.connection.send(new ClientboundSetCarriedItemPacket(this.prevSlotId));
+        this.player.connection.send(new ClientboundSetHeldSlotPacket(this.prevSlotId));
         this.player.getInventory().selected = this.prevSlotId;
         this.handleEventResults(this.player, event);
     }

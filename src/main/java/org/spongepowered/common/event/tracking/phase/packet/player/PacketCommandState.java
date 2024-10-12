@@ -37,6 +37,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.util.Tuple;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
@@ -69,7 +70,7 @@ public final class PacketCommandState extends PacketState<PlayerCommandPhaseCont
 
     @Override
     public void postBlockTransactionApplication(
-        final PlayerCommandPhaseContext context, final BlockChange blockChange,
+        final PlayerCommandPhaseContext context, ServerWorld serverWorld, final BlockChange blockChange,
         final BlockTransactionReceipt transaction
     ) {
         // We want to investigate if there is a user on the cause stack

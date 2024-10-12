@@ -32,28 +32,30 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.item.crafting.SmithingRecipeBridge;
 
+import java.util.Optional;
+
 @Mixin(SmithingTransformRecipe.class)
 public abstract class SmithingTransformRecipeMixin implements SmithingRecipeBridge {
 
     // @formatter=off
-    @Shadow @Final Ingredient template;
-    @Shadow @Final Ingredient base;
-    @Shadow @Final Ingredient addition;
+    @Shadow @Final Optional<Ingredient> template;
+    @Shadow @Final Optional<Ingredient> base;
+    @Shadow @Final Optional<Ingredient> addition;
     @Shadow @Final ItemStack result;
     // @formatter=on
 
     @Override
-    public Ingredient bridge$template() {
+    public Optional<Ingredient> bridge$template() {
         return this.template;
     }
 
     @Override
-    public Ingredient bridge$base() {
+    public Optional<Ingredient> bridge$base() {
         return this.base;
     }
 
     @Override
-    public Ingredient bridge$addition() {
+    public Optional<Ingredient> bridge$addition() {
         return this.addition;
     }
 

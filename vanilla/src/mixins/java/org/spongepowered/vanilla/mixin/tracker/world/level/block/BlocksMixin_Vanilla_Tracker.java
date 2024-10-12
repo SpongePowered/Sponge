@@ -24,34 +24,34 @@
  */
 package org.spongepowered.vanilla.mixin.tracker.world.level.block;
 
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.storage.loot.LootTable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.accessor.world.level.block.state.BlockBehaviourAccessor;
 import org.spongepowered.common.bridge.RegistryBackedTrackableBridge;
 
 @Mixin(Blocks.class)
 public abstract class BlocksMixin_Vanilla_Tracker {
 
-    @Redirect(method = "<clinit>",
+    @Inject(method = "<clinit>",
             at = @At(
-                    value = "INVOKE",
+                    value = "RETURN",
                     target = "Lnet/minecraft/world/level/block/Block;getLootTable()Lnet/minecraft/resources/ResourceKey;"
             )
     )
-    private static ResourceKey<LootTable> impl$initializeTrackerState(final Block block) {
-        final boolean randomlyTicking = ((BlockBehaviourAccessor) block).invoker$isRandomlyTicking(block.defaultBlockState());
+    private static void impl$initializeTrackerState(final CallbackInfo ci) {
+        for (final Block block : BuiltInRegistries.BLOCK) {
+            final boolean randomlyTicking = ((BlockBehaviourAccessor) block).invoker$isRandomlyTicking(block.defaultBlockState());
 
-        // TODO Not the best check but the tracker options only matter during block ticks...
-        if (randomlyTicking) {
-            final var trackableBridge = (RegistryBackedTrackableBridge<Block>) block;
-            trackableBridge.bridge$refreshTrackerStates();
+            // TODO Not the best check but the tracker options only matter during block ticks...
+            if (randomlyTicking) {
+                final var trackableBridge = (RegistryBackedTrackableBridge<Block>) block;
+                trackableBridge.bridge$refreshTrackerStates();
+            }
         }
-
-        return block.getLootTable();
     }
 }

@@ -48,7 +48,7 @@ public class SpongeShapedRecipe extends ShapedRecipe implements ResultFunctionRe
     public static final MapCodec<SpongeShapedRecipe> SPONGE_CODEC = RecordCodecBuilder.mapCodec(
             $$0 -> $$0.group(
                             Codec.STRING.fieldOf(Constants.Recipe.SPONGE_TYPE).forGetter(t -> "custom"), // important to fail early when decoding vanilla recipes
-                            Codec.STRING.optionalFieldOf(Constants.Recipe.GROUP, "").forGetter(ShapedRecipe::getGroup),
+                            Codec.STRING.optionalFieldOf(Constants.Recipe.GROUP, "").forGetter(ShapedRecipe::group),
                             CraftingBookCategory.CODEC.fieldOf(Constants.Recipe.CATEGORY).orElse(CraftingBookCategory.MISC).forGetter(ShapedRecipe::category),
                             ShapedRecipePattern.MAP_CODEC.forGetter($$0x -> ((ShapedRecipeBridge) $$0x).bridge$pattern()),
                             ItemStack.CODEC.fieldOf(Constants.Recipe.RESULT).forGetter($$0x -> ((RecipeResultBridge)$$0x).bridge$result()),
@@ -116,14 +116,6 @@ public class SpongeShapedRecipe extends ShapedRecipe implements ResultFunctionRe
             return IngredientResultUtil.cachedResultFunction(this.resultFunctionId).apply($$0);
         }
         return super.assemble($$0, $$1);
-    }
-
-    @Override
-    public ItemStack getResultItem(final HolderLookup.Provider $$0) {
-        if (this.resultFunctionId != null) {
-            return ItemStack.EMPTY;
-        }
-        return super.getResultItem($$0);
     }
 
 }

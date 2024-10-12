@@ -101,7 +101,7 @@ public final class SpongeCommon {
     }
 
     public static <E> Registry<E> vanillaRegistry(ResourceKey<? extends Registry<? extends E>> key) {
-        return SpongeCommon.vanillaRegistryAccess().registryOrThrow(key);
+        return SpongeCommon.vanillaRegistryAccess().lookupOrThrow(key);
     }
 
     public static ServerScheduler serverScheduler() {

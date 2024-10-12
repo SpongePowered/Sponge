@@ -40,6 +40,7 @@ import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.accessor.world.entity.decoration.ItemFrameAccessor;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.entity.TrackableEntityBridge;
@@ -124,7 +125,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
 
     @Override
     public void postBlockTransactionApplication(
-        final EntityTickContext context, final BlockChange blockChange,
+        final EntityTickContext context, final ServerWorld serverWorld, final BlockChange blockChange,
         final BlockTransactionReceipt transaction
     ) {
         if (blockChange == BlockChange.BREAK) {
@@ -159,12 +160,11 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                         return false;
                     });
             for (final HangingEntity entityHanging : hangingEntities) {
-                if (entityHanging instanceof ItemFrame) {
-                    final ItemFrame itemFrame = (ItemFrame) entityHanging;
-                    if (!itemFrame.isRemoved()) {
-                        ((ItemFrameAccessor) itemFrame).invoker$dropItem((net.minecraft.world.entity.Entity) tickingEntity, true);
+                if (entityHanging instanceof ItemFrame iframe) {
+                    if (!iframe.isRemoved()) {
+                        ((ItemFrameAccessor) iframe).invoker$dropItem((ServerLevel) serverWorld, (net.minecraft.world.entity.Entity) tickingEntity, true);
                     }
-                    itemFrame.remove(net.minecraft.world.entity.Entity.RemovalReason.DISCARDED);
+                    iframe.remove(net.minecraft.world.entity.Entity.RemovalReason.DISCARDED);
                 }
             }
         }

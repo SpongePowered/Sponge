@@ -28,6 +28,6 @@ import net.minecraft.world.entity.animal.MushroomCow;
 import org.spongepowered.api.data.type.MooshroomType;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(MushroomCow.MushroomType.class)
+@Mixin(MushroomCow.Variant.class)
 public abstract class MushroomCow_MushroomTypeMixin_API implements MooshroomType {
 }

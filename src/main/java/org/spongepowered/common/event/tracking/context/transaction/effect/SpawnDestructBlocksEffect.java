@@ -54,9 +54,9 @@ public final class SpawnDestructBlocksEffect implements ProcessingSideEffect {
         final int limit
     ) {
         final ServerLevel world = pipeline.getServerWorld();
-        final BlockPos pos = oldState.pos;
+        final BlockPos pos = oldState.pos();
 
-        final List<ItemStack> drops = oldState.drops;
+        final List<ItemStack> drops = oldState.drops();
 
         drops.forEach(drop -> Block.popResource(world, pos, drop));
 

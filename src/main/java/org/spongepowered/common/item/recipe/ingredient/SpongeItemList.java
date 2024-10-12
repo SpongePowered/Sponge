@@ -26,13 +26,25 @@ package org.spongepowered.common.item.recipe.ingredient;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.mojang.datafixers.util.Either;
+import net.minecraft.Util;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderOwner;
+import net.minecraft.core.HolderSet;
+import net.minecraft.tags.TagKey;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
-public abstract class SpongeItemList implements Ingredient.Value {
+public abstract class SpongeItemList implements HolderSet<Item> {
 
     public static final String INGREDIENT_TYPE = "sponge:type";
     public static final String INGREDIENT_ITEM = "sponge:item";
@@ -44,6 +56,62 @@ public abstract class SpongeItemList implements Ingredient.Value {
     }
 
     @Override
+    public Stream<Holder<Item>> stream() {
+        return Arrays.stream(this.stacks)
+            .map(ItemStack::getItemHolder);
+    }
+
+    @Override
+    public int size() {
+        return this.stacks.length;
+    }
+
+    @Override
+    public boolean isBound() {
+        return true;
+    }
+
+    @Override
+    public Either<TagKey<Item>, List<Holder<Item>>> unwrap() {
+        return Either.right(this.stream().toList());
+    }
+
+    @Override
+    public Optional<Holder<Item>> getRandomElement(RandomSource source) {
+        return this.stacks.length == 0 ? Optional.empty() :
+            Optional.of(Util.getRandom(this.stacks, source)).
+                map(ItemStack::getItemHolder);
+    }
+
+    @Override
+    public Holder<Item> get(int var1) {
+        final var stack = this.stacks[var1];
+        return stack.getItemHolder();
+    }
+
+    @Override
+    public boolean contains(Holder<Item> var1) {
+        return false;
+    }
+
+    @Override
+    public boolean canSerializeIn(HolderOwner<Item> var1) {
+        // TODO - maybe? What's this for?
+        return true;
+    }
+
+    @Override
+    public Optional<TagKey<Item>> unwrapKey() {
+        return Optional.empty();
+    }
+
+    @Override
+    public @NotNull Iterator<Holder<Item>> iterator() {
+        return Arrays.stream(this.stacks)
+            .map(ItemStack::getItemHolder)
+            .iterator();
+    }
+
     public Collection<ItemStack> getItems() {
         return Arrays.asList(this.stacks);
     }

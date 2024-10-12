@@ -27,7 +27,7 @@ package org.spongepowered.vanilla.mixin.core.server.commands;
 import net.minecraft.server.commands.SpreadPlayersCommand;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.RelativeMovement;
+import net.minecraft.world.entity.Relative;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
@@ -41,14 +41,14 @@ import java.util.Set;
 @Mixin(SpreadPlayersCommand.class)
 public abstract class SpreadPlayersCommandMixin_Vanilla {
 
-    @Redirect(method = "setPlayerPositions", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;teleportTo(Lnet/minecraft/server/level/ServerLevel;DDDLjava/util/Set;FF)Z"))
+    @Redirect(method = "setPlayerPositions", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;teleportTo(Lnet/minecraft/server/level/ServerLevel;DDDLjava/util/Set;FFZ)Z"))
     private static boolean vanilla$createCauseFrameForTeleport(
         final Entity instance, final ServerLevel level, final double x, final double y,
-        final double z, final Set<RelativeMovement> relativeMovements, final float yRot, final float xRot) {
+        final double z, final Set<Relative> relativeMovements, final float yRot, final float xRot, final boolean setCamera) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.COMMAND);
 
-            return instance.teleportTo(level, x, y, z, relativeMovements, yRot, xRot);
+            return instance.teleportTo(level, x, y, z, relativeMovements, yRot, xRot, setCamera);
         }
     }
 }

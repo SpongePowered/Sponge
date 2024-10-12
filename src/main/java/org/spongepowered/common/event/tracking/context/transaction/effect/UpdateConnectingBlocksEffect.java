@@ -48,12 +48,12 @@ public final class UpdateConnectingBlocksEffect implements ProcessingSideEffect 
         final BlockState newState, final SpongeBlockChangeFlag flag, final int limit
     ) {
         final ServerLevel world = pipeline.getServerWorld();
-        final BlockPos pos = oldState.pos;
+        final BlockPos pos = oldState.pos();
         if (flag.updateNeighboringShapes() && limit > 0) {
             // int i = p_241211_3_ & -34; // Vanilla negates 34 to flip neighbor notification and and "state drops"
             final int withoutNeighborDropsAndNestedNeighborUpdates = flag.asNestedNeighborUpdates().getRawFlag();
             // blockstate.updateIndirectNeighbourShapes(this, p_241211_1_, i, p_241211_4_ - 1);
-            oldState.state.updateIndirectNeighbourShapes(world, pos, withoutNeighborDropsAndNestedNeighborUpdates, limit - 1);
+            oldState.state().updateIndirectNeighbourShapes(world, pos, withoutNeighborDropsAndNestedNeighborUpdates, limit - 1);
             // p_241211_2_.updateNeighbourShapes(this, p_241211_1_, i, p_241211_4_ - 1);
             newState.updateNeighbourShapes(world, pos, withoutNeighborDropsAndNestedNeighborUpdates, limit - 1);
             // p_241211_2_.updateIndirectNeighbourShapes(this, p_241211_1_, i, p_241211_4_ - 1);

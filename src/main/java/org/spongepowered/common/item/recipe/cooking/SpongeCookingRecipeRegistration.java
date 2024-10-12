@@ -47,7 +47,6 @@ import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.util.SpongeTicks;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.function.Function;
 
 public class SpongeCookingRecipeRegistration extends SpongeRecipeRegistration<AbstractCookingRecipe> implements SpongeRecipeRegistration.ResultFunctionRegistration<SingleRecipeInput>{
@@ -118,7 +117,7 @@ public class SpongeCookingRecipeRegistration extends SpongeRecipeRegistration<Ab
         final int ticksCookingTime = SpongeTicks.toSaturatedIntOrInfinite(this.cookingTime);
         final String resultFunctionId = this.resultFunction == null ? null : this.key.toString();
 
-        final List<Ingredient> ingredientList = Collections.singletonList(ingredient);
+        final var ingredientList = Collections.singletonList(ingredient);
         final boolean isVanilla = SpongeRecipeRegistration.isVanillaSerializer(this.spongeResult, this.resultFunction, null, ingredientList);
 
         if (type == RecipeType.BLASTING) {

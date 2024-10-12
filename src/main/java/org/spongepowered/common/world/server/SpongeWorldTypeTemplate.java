@@ -139,7 +139,7 @@ public record SpongeWorldTypeTemplate(
             this.data = DataManipulator.mutableOf();
             this.key = null;
             this.pack = DataPacks.WORLD_TYPE;
-            final DimensionType defaultOverworld = SpongeCommon.vanillaRegistry(Registries.DIMENSION_TYPE).get(BuiltinDimensionTypes.OVERWORLD);
+            final DimensionType defaultOverworld = SpongeCommon.vanillaRegistry(Registries.DIMENSION_TYPE).getValue(BuiltinDimensionTypes.OVERWORLD);
             this.fromValue((WorldType) (Object) defaultOverworld);
             return this;
         }

@@ -91,7 +91,7 @@ public class SelectTradeTransaction extends ContainerBasedTransaction {
         if (!(context instanceof InventoryPacketContext)) {
             return false;
         }
-        final int containerId = ((InventoryPacketContext) context).<ServerboundPlaceRecipePacket>getPacket().getContainerId();
+        final int containerId = ((InventoryPacketContext) context).<ServerboundPlaceRecipePacket>getPacket().containerId();
         return containerId != this.player.containerMenu.containerId;
     }
 }

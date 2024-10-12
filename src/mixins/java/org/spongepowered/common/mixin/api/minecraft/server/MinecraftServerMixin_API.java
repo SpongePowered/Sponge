@@ -118,7 +118,7 @@ import java.util.stream.Stream;
 public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRegistryHolder {
 
     // @formatter:off
-    @Shadow @Final public long[] tickTimesNanos;
+    @Shadow @Final private long[] tickTimesNanos;
     @Shadow @Final protected WorldData worldData;
 
     @Shadow public abstract net.minecraft.world.item.crafting.RecipeManager shadow$getRecipeManager();
@@ -133,7 +133,6 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
     @Shadow public abstract boolean shadow$isPvpAllowed();
     @Shadow public abstract boolean shadow$isCommandBlockEnabled();
     @Shadow public abstract boolean shadow$isSpawningMonsters();
-    @Shadow public abstract boolean shadow$isSpawningAnimals();
     @Shadow public abstract Commands shadow$getCommands();
     @Shadow public abstract PackRepository shadow$getPackRepository();
     @Shadow public abstract net.minecraft.server.packs.resources.ResourceManager shadow$getResourceManager();
@@ -270,7 +269,7 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
 
     @Override
     public boolean isAnimalSpawnsEnabled() {
-        return this.shadow$isSpawningAnimals();
+        return true;
     }
 
     /**
@@ -286,7 +285,7 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
         final WorldData overworldData = this.shadow$getWorldData();
 
         final WorldGenSettings settings = new WorldGenSettings(overworldData.worldGenOptions(),
-                new WorldDimensions(this.registryAccess().registryOrThrow(Registries.LEVEL_STEM)));
+                new WorldDimensions(this.registryAccess().lookupOrThrow(Registries.LEVEL_STEM)));
 
         return (WorldGenerationConfig) (Object) settings;
     }

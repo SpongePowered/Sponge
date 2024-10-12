@@ -62,12 +62,11 @@ import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.animal.horse.Markings;
 import net.minecraft.world.entity.animal.horse.Variant;
 import net.minecraft.world.entity.monster.SpellcasterIllager;
-import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.Rarity;
-import net.minecraft.world.item.Tiers;
 import net.minecraft.world.item.component.FireworkExplosion;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.block.entity.trialspawner.TrialSpawnerState;
@@ -167,11 +166,11 @@ public final class GeneratorMain {
         final LayeredRegistryAccess<RegistryLayer> staticRegistries = RegistryLayer.createRegistryAccess();
         final LayeredRegistryAccess<RegistryLayer> withWorldgen = staticRegistries.replaceFrom(
             RegistryLayer.WORLDGEN,
-            RegistryDataLoader.load(resourceManager, staticRegistries.getAccessForLoading(RegistryLayer.WORLDGEN), RegistryDataLoader.WORLDGEN_REGISTRIES)
+            RegistryDataLoader.load(resourceManager, staticRegistries.getAccessForLoading(RegistryLayer.WORLDGEN).listRegistries().toList(), RegistryDataLoader.WORLDGEN_REGISTRIES)
         );
         final LayeredRegistryAccess<RegistryLayer> withDimensions = withWorldgen.replaceFrom(
             RegistryLayer.DIMENSIONS,
-            RegistryDataLoader.load(resourceManager, staticRegistries.getAccessForLoading(RegistryLayer.DIMENSIONS), RegistryDataLoader.DIMENSION_REGISTRIES)
+            RegistryDataLoader.load(resourceManager, staticRegistries.getAccessForLoading(RegistryLayer.DIMENSIONS).listRegistries().toList(), RegistryDataLoader.DIMENSION_REGISTRIES)
         );
 
 
@@ -179,6 +178,7 @@ public final class GeneratorMain {
         final var resourcesFuture = ReloadableServerResources.loadResources(
             resourceManager,
             withDimensions,
+            List.of(),
             packRepository.getRequestedFeatureFlags(),
             CommandSelection.ALL,
             2, // functionPermissionLevel
@@ -189,7 +189,7 @@ public final class GeneratorMain {
                 resourceManager.close();
             }
         }).thenApply(resources -> {
-            resources.updateRegistryTags();
+            resources.updateStaticRegistryTags();
             return resources;
         });
 
@@ -216,7 +216,7 @@ public final class GeneratorMain {
         // Prepare a set of generators
         // We are starting out by just generating Vanilla registry-backed catalogs
         // Enum-backed (automatically-named) catalogs can be added later as necessary
-        return List.of(
+        return List.<Generator>of(
             new MapEntriesValidator<>(
                 "world.gamerule",
                 "GameRules",
@@ -244,20 +244,6 @@ public final class GeneratorMain {
                  MobCategory.class,
                  "getSerializedName",
                  "sponge"
-            ),
-            new EnumEntriesValidator<>(
-                 "data.type",
-                 "BoatTypes",
-                 Boat.Type.class,
-                 "getSerializedName",
-                 "sponge"
-            ),
-            new RegistryEntriesGenerator<>(
-                 "data.type",
-                 "ArmorMaterials",
-                 "ARMOR_MATERIAL",
-                 context.relativeClass("data.type", "ArmorMaterial"),
-                 Registries.ARMOR_MATERIAL
             ),
             new RegistryEntriesGenerator<>(
                  "map.decoration",
@@ -318,14 +304,14 @@ public final class GeneratorMain {
             new EnumEntriesValidator<>(
                  "data.type",
                  "MooshroomTypes",
-                 MushroomCow.MushroomType.class,
+                 MushroomCow.Variant.class,
                  "getSerializedName",
                  "sponge"
             ),
             new EnumEntriesValidator<>(
                  "data.type",
                  "FoxTypes",
-                 Fox.Type.class,
+                 Fox.Variant.class,
                  "getSerializedName",
                  "sponge"
             ),
@@ -377,6 +363,13 @@ public final class GeneratorMain {
                  TropicalFish.Pattern.class,
                  "getSerializedName",
                  "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                "world.explosion",
+                "BlockInteractions",
+                Explosion.BlockInteraction.class,
+                "name",
+                "sponge"
             ),
             new RegistryEntriesGenerator<>(
                 "data.type",
@@ -789,13 +782,14 @@ public final class GeneratorMain {
                     "getSerializedName",
                     "sponge"
             ),
-            new EnumEntriesValidator<>(
-                    "data.type",
-                    "ItemTiers",
-                    Tiers.class,
-                    "name",
-                    "sponge"
-            ),
+// TODO - Figure out this change since ToolMaterials aren't registered, nor an enum anymore. - Snapshot 24w34a
+//            new EnumEntriesValidator<>(
+//                    "data.type",
+//                    "ItemTiers",
+//                    ToolMaterial.class,
+//                    "name",
+//                    "sponge"
+//            ),
             new EnumEntriesValidator<>(
                     "entity.display",
                     "BillboardTypes",

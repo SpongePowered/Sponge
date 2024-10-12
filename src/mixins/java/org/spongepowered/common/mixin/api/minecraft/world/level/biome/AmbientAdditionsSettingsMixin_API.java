@@ -43,7 +43,7 @@ public abstract class AmbientAdditionsSettingsMixin_API implements SoundConfig.A
 
     @Override
     public SoundType sound() {
-        return (SoundType) this.soundEvent.value();
+        return (SoundType) (Object) this.soundEvent.value();
     }
 
     @Override

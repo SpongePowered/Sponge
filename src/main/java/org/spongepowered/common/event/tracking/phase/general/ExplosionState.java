@@ -39,7 +39,7 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.common.accessor.world.level.ExplosionAccessor;
+import org.spongepowered.common.accessor.world.level.ServerExplosionAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -88,8 +88,8 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
         final Explosion explosion = phaseContext.getExplosion();
         lootBuilder.withOptionalParameter(LootContextParams.THIS_ENTITY, explosion.getDirectSourceEntity());
 
-        if (((ExplosionAccessor) explosion).accessor$blockInteraction() == net.minecraft.world.level.Explosion.BlockInteraction.DESTROY) {
-            lootBuilder.withParameter(LootContextParams.EXPLOSION_RADIUS, ((ExplosionAccessor) explosion).accessor$radius());
+        if (((ServerExplosionAccessor) explosion).accessor$blockInteraction() == net.minecraft.world.level.Explosion.BlockInteraction.DESTROY) {
+            lootBuilder.withParameter(LootContextParams.EXPLOSION_RADIUS, ((ServerExplosionAccessor) explosion).accessor$radius());
         }
     }
 

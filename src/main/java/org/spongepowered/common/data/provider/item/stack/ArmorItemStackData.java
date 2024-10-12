@@ -24,11 +24,18 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.equipment.Equippable;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.type.ArmorMaterial;
-import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
+import org.spongepowered.api.item.inventory.equipment.EquipmentType;
+import org.spongepowered.api.registry.RegistryEntry;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class ArmorItemStackData {
@@ -42,37 +49,38 @@ public final class ArmorItemStackData {
                 .asMutable(ItemStack.class)
                     .create(Keys.ARMOR_MATERIAL)
                         .get(h -> {
-                            if (h.getItem() instanceof ArmorItem armorItem) {
-                                return (ArmorMaterial) (Object) armorItem.getMaterial().value();
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return null;
                             }
-                            return null;
+                            return equippable.model()
+                                .map(rl -> (ResourceKey) (Object) rl)
+                                .flatMap(rk -> RegistryTypes.ARMOR_MATERIAL.get().findEntry(rk))
+                                .map(RegistryEntry::value)
+                                .orElse(null);
                         })
                         .supports(h -> h.getItem() instanceof ArmorItem)
                     .create(Keys.DAMAGE_ABSORPTION)
                         .get(h -> {
-                            if (h.getItem() instanceof ArmorItem armorItem) {
-                                return (double) armorItem.getDefense();
+                            final @Nullable ItemAttributeModifiers modifiersContainer = h.get(DataComponents.ATTRIBUTE_MODIFIERS);
+                            if (modifiersContainer == null) {
+                                return null;
                             }
-                            return null;
+                            return modifiersContainer.modifiers().stream()
+                                .filter(e1 -> e1.attribute() == Attributes.ARMOR)
+                                .findFirst()
+                                .map(e -> e.modifier().amount())
+                                .orElse(null);
                         })
                         .supports(h -> h.getItem() instanceof ArmorItem)
                     .create(Keys.EQUIPMENT_TYPE)
                         .get(h -> {
-                            if (h.getItem() instanceof ArmorItem armorItem) {
-                                switch (armorItem.getEquipmentSlot()) {
-                                    case FEET:
-                                        return EquipmentTypes.FEET.get();
-                                    case LEGS:
-                                        return EquipmentTypes.LEGS.get();
-                                    case CHEST:
-                                        return EquipmentTypes.CHEST.get();
-                                    case HEAD:
-                                        return EquipmentTypes.HEAD.get();
-                                    default:
-                                        break;
-                                }
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return null;
                             }
-                            return null;
+
+                            return (EquipmentType) (Object) equippable.slot();
                         })
                         .supports(h -> h.getItem() instanceof ArmorItem);
     }

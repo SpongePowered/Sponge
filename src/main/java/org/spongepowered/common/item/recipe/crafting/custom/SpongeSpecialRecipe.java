@@ -36,14 +36,11 @@ import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import org.spongepowered.api.item.recipe.crafting.RecipeInput;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.MissingImplementationException;
 
 import java.util.List;
 import java.util.function.BiPredicate;
@@ -91,12 +88,6 @@ public final class SpongeSpecialRecipe extends CustomRecipe {
         return ItemStackUtil.toNative(this.resultFunction.apply(InventoryUtil.toSponge(input)));
     }
 
-    @OnlyIn(Dist.CLIENT)
-    @Override
-    public boolean canCraftInDimensions(int width, int height) {
-        throw new MissingImplementationException("SpongeSpecialRecipe", "canFit");
-    }
-
     @Override
     public NonNullList<ItemStack> getRemainingItems(final CraftingInput input) {
         if (this.remainingItemsFunction == null) {
@@ -109,7 +100,7 @@ public final class SpongeSpecialRecipe extends CustomRecipe {
     }
 
     @Override
-    public RecipeSerializer<?> getSerializer() {
+    public RecipeSerializer<? extends CustomRecipe> getSerializer() {
         // Fake special crafting serializer
         // because of Unknown recipe serializer when using our serializer with a vanilla client
         // return Registry.RECIPE_SERIALIZER.getOrDefault(this.id());

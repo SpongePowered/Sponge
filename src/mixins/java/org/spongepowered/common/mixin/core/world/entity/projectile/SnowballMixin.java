@@ -37,7 +37,7 @@ public abstract class SnowballMixin extends ThrowableProjectileMixin implements 
     private boolean impl$damageSet = false;
 
     @ModifyArg(method = "onHitEntity", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
+            target = "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)V"))
     private float impl$onAttackEntityFromUseCustomDamage(float damage) {
         return this.impl$damageSet ? (float) this.impl$damageAmount : damage;
     }

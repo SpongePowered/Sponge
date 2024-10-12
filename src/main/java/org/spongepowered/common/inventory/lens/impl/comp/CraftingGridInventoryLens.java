@@ -28,7 +28,7 @@ import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
-import org.spongepowered.common.accessor.world.inventory.CraftingMenuAccessor;
+import org.spongepowered.common.accessor.world.inventory.AbstractCraftingMenuAccessor;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.fabric.OffsetFabric;
 import org.spongepowered.common.inventory.lens.impl.AbstractLens;
@@ -70,7 +70,7 @@ public class CraftingGridInventoryLens extends AbstractLens {
             return ((CraftingGridInventory) ((InventoryMenu) fabric).getCraftSlots());
         }
         if (fabric instanceof CraftingMenu) {
-            return ((CraftingGridInventory) ((CraftingMenuAccessor) fabric).accessor$craftSlots());
+            return ((CraftingGridInventory) ((AbstractCraftingMenuAccessor) fabric).accessor$craftSlots());
         }
         throw new IllegalStateException(fabric.getClass().getName() + " is not a known CraftingGridInventory.");
     }

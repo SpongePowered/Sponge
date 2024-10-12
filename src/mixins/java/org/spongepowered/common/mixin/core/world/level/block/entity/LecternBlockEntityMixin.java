@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world.level.block.entity;
 
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.LecternBlockEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -37,14 +38,14 @@ import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 public abstract class LecternBlockEntityMixin implements CommandSourceProviderBridge {
 
     @Shadow
-    private CommandSourceStack createCommandSourceStack(@Nullable final Player playerEntity) {
+    private CommandSourceStack createCommandSourceStack(@Nullable final Player playerEntity, final ServerLevel $$1) {
         throw new AssertionError("This method should be a shadow.");
     }
 
     @Override
     public CommandSourceStack bridge$getCommandSource(final Cause cause) {
         // We assume that if a player is in the Cause, they're the one reading the book.
-        return this.createCommandSourceStack(cause.first(Player.class).orElse(null));
+        return this.createCommandSourceStack(cause.first(Player.class).orElse(null), cause.first(ServerLevel.class).orElse(null));
     }
 
 }

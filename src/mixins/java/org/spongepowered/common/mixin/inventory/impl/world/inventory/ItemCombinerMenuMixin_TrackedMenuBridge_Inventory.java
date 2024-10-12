@@ -29,9 +29,9 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.ItemCombinerMenu;
+import net.minecraft.world.inventory.ItemCombinerMenuSlotDefinition;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.ResultContainer;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -49,7 +49,8 @@ public abstract class ItemCombinerMenuMixin_TrackedMenuBridge_Inventory {
     // @formatter:on
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void inventory$attachContainerMenu(final @Nullable MenuType<?> $$0, final int $$1, final Inventory $$2, final ContainerLevelAccess $$3, final CallbackInfo ci) {
+    private void inventory$attachContainerMenu(
+        MenuType $$0, int $$1, Inventory $$2, ContainerLevelAccess $$3, ItemCombinerMenuSlotDefinition $$4, CallbackInfo ci) {
         if ($$2 instanceof final TrackedMenuBridge trackedMenu) {
             trackedMenu.bridge$trackContainerMenu((AbstractContainerMenu) (Object) this);
         }

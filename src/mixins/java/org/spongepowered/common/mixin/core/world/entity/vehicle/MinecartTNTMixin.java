@@ -24,28 +24,22 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.vehicle;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.vehicle.MinecartTNT;
-import net.minecraft.world.level.ExplosionDamageCalculator;
-import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.entity.vehicle.minecart.TNTMinecart;
-import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.DamageEventUtil;
@@ -61,18 +55,18 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
     @Shadow public abstract void shadow$primeFuse();
     // @formatter:on
 
-    @Nullable private Integer impl$explosionRadius = null;
+    @Nullable private Float impl$explosionRadius = null; // override for fixed radius
     private int impl$fuseDuration = Constants.Entity.Minecart.DEFAULT_FUSE_DURATION;
     private boolean impl$detonationCancelled;
     @Nullable private Object impl$primeCause;
 
     @Override
-    public Optional<Integer> bridge$getExplosionRadius() {
+    public Optional<Float> bridge$getExplosionRadius() {
         return Optional.ofNullable(this.impl$explosionRadius);
     }
 
     @Override
-    public void bridge$setExplosionRadius(final @Nullable Integer radius) {
+    public void bridge$setExplosionRadius(final @Nullable Float radius) {
         this.impl$explosionRadius = radius;
     }
 
@@ -105,8 +99,9 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
     }
 
 
-    @Inject(method = "hurt", at = @At("HEAD"))
-    private void impl$onAttackSetPrimeCause(final DamageSource damageSource, final float amount, final CallbackInfoReturnable<Boolean> ci) {
+    @Inject(method = "hurtServer", at = @At("HEAD"))
+    private void impl$onAttackSetPrimeCause(final ServerLevel level, final DamageSource damageSource,
+                                            final float amount, final CallbackInfoReturnable<Boolean> ci) {
         this.impl$primeCause = damageSource;
     }
 
@@ -140,28 +135,9 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
         }
     }
 
-    @Redirect(
-        method = "explode(Lnet/minecraft/world/damagesource/DamageSource;D)V",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/level/Level;explode(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;Lnet/minecraft/world/level/ExplosionDamageCalculator;DDDFZLnet/minecraft/world/level/Level$ExplosionInteraction;)Lnet/minecraft/world/level/Explosion;"
-        )
-    )
-    private net.minecraft.world.level.@Nullable Explosion impl$useSpongeExplosion(final net.minecraft.world.level.Level world, final Entity entityIn,
-        final DamageSource damageSource, final ExplosionDamageCalculator calculator,
-        final double xIn, final double yIn, final double zIn, final float explosionRadius, final boolean fire, final Level.ExplosionInteraction modeIn) {
-        // TODO ExplosionDamageCalculator & fire
-        return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
-                .location(ServerLocation.of((ServerWorld) world, xIn, yIn, zIn))
-                .sourceExplosive((TNTMinecart) this)
-                .radius(this.impl$explosionRadius != null ? this.impl$explosionRadius : explosionRadius)
-                .shouldPlaySmoke(modeIn.ordinal() > Level.ExplosionInteraction.NONE.ordinal())
-                .shouldBreakBlocks(modeIn.ordinal() > Level.ExplosionInteraction.NONE.ordinal()))
-                .orElseGet(() -> {
-                            this.impl$detonationCancelled = true;
-                            return null;
-                        }
-                );
+    @Override
+    public void bridge$cancelExplosion() {
+        this.impl$detonationCancelled = true;
     }
 
     @Inject(method = "explode(Lnet/minecraft/world/damagesource/DamageSource;D)V", at = @At("RETURN"))
@@ -172,9 +148,9 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
         }
     }
 
-    @Inject(method = "hurt", cancellable = true, at = @At(value = "INVOKE",
+    @Inject(method = "hurtServer", cancellable = true, at = @At(value = "INVOKE",
         target = "Lnet/minecraft/world/entity/vehicle/MinecartTNT;explode(Lnet/minecraft/world/damagesource/DamageSource;D)V"))
-    private void attackImpl$postOnAttackEntityFrom(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
+    private void attackImpl$postOnAttackEntityFrom(final ServerLevel level, final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
         if (DamageEventUtil.callOtherAttackEvent((Entity) (Object) this, source, amount).isCancelled()) {
             cir.setReturnValue(true);
         }

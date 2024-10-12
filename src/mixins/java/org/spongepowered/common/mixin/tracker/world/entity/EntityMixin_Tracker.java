@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.tracker.world.entity;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -88,16 +89,16 @@ public abstract class EntityMixin_Tracker implements DelegatingConfigTrackableBr
     protected @MonotonicNonNull EffectTransactor tracker$dropsTransactor = null;
 
     @Inject(
-        method = "spawnAtLocation(Lnet/minecraft/world/item/ItemStack;F)Lnet/minecraft/world/entity/item/ItemEntity;",
+        method = "spawnAtLocation(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;F)Lnet/minecraft/world/entity/item/ItemEntity;",
         at = @At("HEAD")
     )
-    private void tracker$logEntityDropTransactionIfNecessary(final ItemStack stack, final float offsetY,
-        final CallbackInfoReturnable<ItemEntity> cir) {
+    private void tracker$logEntityDropTransactionIfNecessary(final ServerLevel level, final ItemStack stack, final float offsetY,
+                                                             final CallbackInfoReturnable<ItemEntity> cir) {
         final PhaseTracker instance = PhaseTracker.SERVER;
         if (!instance.onSidedThread()) {
             return;
         }
-        if (((LevelBridge) this.shadow$level()).bridge$isFake()) {
+        if (((LevelBridge) level).bridge$isFake()) {
             return;
         }
         final PhaseContext<@NonNull ?> context = instance.getPhaseContext();

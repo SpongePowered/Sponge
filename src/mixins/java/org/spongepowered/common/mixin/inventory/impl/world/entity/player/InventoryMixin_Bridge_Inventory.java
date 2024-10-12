@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.inventory.impl.world.entity.player;
 
 import net.minecraft.core.NonNullList;
-import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
+import net.minecraft.network.protocol.game.ClientboundSetHeldSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
@@ -85,7 +85,7 @@ public abstract class InventoryMixin_Bridge_Inventory implements PlayerInventory
     public void bridge$setSelectedItem(int itemIndex, final boolean notify) {
         itemIndex = itemIndex % 9;
         if (notify && this.player instanceof ServerPlayer) {
-            final ClientboundSetCarriedItemPacket packet = new ClientboundSetCarriedItemPacket(itemIndex);
+            final var packet = new ClientboundSetHeldSlotPacket(itemIndex);
             ((ServerPlayer)this.player).connection.send(packet);
         }
         this.selected = itemIndex;

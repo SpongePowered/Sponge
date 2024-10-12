@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world.level.block;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.level.Explosion;
@@ -81,12 +82,12 @@ public abstract class TntBlockMixin extends BlockMixin {
 
     @Inject(
         method = "wasExploded",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z"),
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z"),
         locals = LocalCapture.CAPTURE_FAILSOFT,
         cancellable = true
     )
     private void impl$CheckIfCanPrimeFromExplosion(
-        final Level worldIn, final BlockPos pos, final Explosion explosionIn, final CallbackInfo ci, final PrimedTnt tnt) {
+        final ServerLevel worldIn, final BlockPos pos, final Explosion explosionIn, final CallbackInfo ci, final PrimedTnt tnt) {
         if (ShouldFire.PRIME_EXPLOSIVE_EVENT_PRE) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.addContext(EventContextKeys.DAMAGE_TYPE, DamageTypes.EXPLOSION);
@@ -110,7 +111,7 @@ public abstract class TntBlockMixin extends BlockMixin {
         return this.impl$onRemove(world, pos, isMoving);
     }
 
-    @Redirect(method = "use", at = @At(value = "INVOKE",
+    @Redirect(method = "useItemOn", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/level/Level;setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;I)Z"))
     private boolean impl$removeActivated(final Level world, final BlockPos pos, final BlockState state, final int flag) {
         // Called when player manually ignites TNT

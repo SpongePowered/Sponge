@@ -60,7 +60,7 @@ public final class PlayerData {
                         .get(h -> (HandPreference) (Object) h.getMainArm())
                         .set((h, v) -> h.setMainArm((HumanoidArm) (Object) v))
                     .create(Keys.EXHAUSTION)
-                        .get(h -> (double) h.getFoodData().getExhaustionLevel())
+                        .get(h -> (double) ((FoodDataAccessor) h.getFoodData()).accessor$exhaustionLevel())
                         .set((h, v) -> ((FoodDataAccessor) h.getFoodData()).accessor$exhaustionLevel(v.floatValue()))
                     .create(Keys.EXPERIENCE)
                         .get(h -> h.totalExperience)

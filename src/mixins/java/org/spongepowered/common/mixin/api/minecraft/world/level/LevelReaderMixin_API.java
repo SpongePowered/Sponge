@@ -89,7 +89,7 @@ public interface LevelReaderMixin_API<R extends Region<R>> extends Region<R> {
         return PaletteWrapper.of(
             PaletteTypes.BLOCK_STATE_PALETTE.get(),
             Block.BLOCK_STATE_REGISTRY,
-            (Registry<BlockType>) this.shadow$registryAccess().registryOrThrow(Registries.BLOCK)
+            (Registry<BlockType>) this.shadow$registryAccess().lookupOrThrow(Registries.BLOCK)
         );
     }
 

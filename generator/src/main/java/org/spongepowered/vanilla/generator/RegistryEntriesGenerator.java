@@ -121,9 +121,9 @@ class RegistryEntriesGenerator<V> implements Generator {
         clazz.addAnnotation(Types.suppressWarnings("unused"));
 
         final RegistryScope scopeType;
-        Registry<V> registry = (Registry<V>) BuiltInRegistries.REGISTRY.get(this.registry.location());
+        Registry<V> registry = (Registry<V>) BuiltInRegistries.REGISTRY.get(this.registry.location()).orElse(null);
         if (registry == null) {
-            registry = ctx.registries().registry(this.registry).orElse(null);
+            registry = ctx.registries().lookup(this.registry).orElse(null);
             if (registry == null) {
                 throw new IllegalArgumentException("Unknown registry " + this.registry);
             }

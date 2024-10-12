@@ -41,7 +41,6 @@ import org.spongepowered.api.world.biome.climate.TemperatureModifier;
 import org.spongepowered.api.world.biome.spawner.NaturalSpawnCost;
 import org.spongepowered.api.world.biome.spawner.NaturalSpawner;
 import org.spongepowered.api.world.generation.carver.Carver;
-import org.spongepowered.api.world.generation.carver.CarvingStep;
 import org.spongepowered.api.world.generation.feature.DecorationStep;
 import org.spongepowered.api.world.generation.feature.PlacedFeature;
 import org.spongepowered.common.accessor.world.level.biome.BiomeAccessor;
@@ -116,15 +115,9 @@ public final class BiomeData {
     }
     // @formatter:on
 
-    private static Map<CarvingStep, List<Carver>> carvers(final Biome biome) {
+    public static List<Carver> carvers(final Biome biome) {
         final var settings = biome.getGenerationSettings();
-        return Arrays.stream(GenerationStep.Carving.values())
-                .collect(Collectors.toMap(step -> (CarvingStep) (Object) step,
-                                          step -> BiomeData.carverList(settings, step)));
-    }
-
-    private static List<Carver> carverList(final BiomeGenerationSettings settings, final GenerationStep.Carving step) {
-        final var carvers = settings.getCarvers(step);
+        final var carvers = settings.getCarvers();
         return StreamSupport.stream(carvers.spliterator(), false)
                 .map(carver -> (Carver) (Object) carver.value())
                 .collect(Collectors.toList());

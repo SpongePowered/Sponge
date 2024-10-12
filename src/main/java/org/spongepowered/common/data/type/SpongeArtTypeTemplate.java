@@ -44,6 +44,7 @@ import org.spongepowered.common.util.Preconditions;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 
 public record SpongeArtTypeTemplate(ResourceKey key, PaintingVariant representedType, DataPack<ArtTypeTemplate> pack) implements ArtTypeTemplate {
@@ -130,7 +131,7 @@ public record SpongeArtTypeTemplate(ResourceKey key, PaintingVariant represented
             Preconditions.checkArgument(this.width >= 0, "width must set");
             Preconditions.checkArgument(this.height >= 0, "height must set");
             Objects.requireNonNull(this.assetId, "assetId");
-            return new SpongeArtTypeTemplate(this.key, new PaintingVariant(this.width, this.height, this.assetId), this.pack);
+            return new SpongeArtTypeTemplate(this.key, new PaintingVariant(this.width, this.height, this.assetId, Optional.empty(), Optional.empty()), this.pack);
         }
     }
 }

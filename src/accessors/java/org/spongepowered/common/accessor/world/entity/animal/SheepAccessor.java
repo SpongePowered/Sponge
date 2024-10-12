@@ -26,22 +26,14 @@ package org.spongepowered.common.accessor.world.entity.animal;
 
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.world.entity.animal.Sheep;
-import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.level.ItemLike;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.common.UntransformedAccessorError;
-
-import java.util.Map;
 
 @Mixin(Sheep.class)
 public interface SheepAccessor {
 
     @Accessor("DATA_WOOL_ID") static EntityDataAccessor<Byte> accessor$DATA_WOOL_ID() {
-        throw new UntransformedAccessorError();
-    }
-
-    @Accessor("ITEM_BY_DYE") static Map<DyeColor, ItemLike> accessor$ITEM_BY_DYE() {
         throw new UntransformedAccessorError();
     }
 

@@ -51,8 +51,8 @@ public final class SetAndRegisterBlockEntityToLevelChunk implements ProcessingSi
         final int limit
     ) {
         final ServerLevel serverWorld = pipeline.getServerWorld();
-        final @Nullable BlockEntity blockEntity = oldState.tileEntity;
-        final BlockPos pos = oldState.pos;
+        final @Nullable BlockEntity blockEntity = oldState.tileEntity();
+        final BlockPos pos = oldState.pos();
         if (serverWorld.isOutsideBuildHeight(pos)) {
             return EffectResult.NULL_RETURN;
         }

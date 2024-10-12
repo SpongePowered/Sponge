@@ -27,14 +27,8 @@ package org.spongepowered.common.bridge.block;
 import net.minecraft.world.level.block.Block;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataManipulator.Immutable;
-import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.function.BiConsumer;
 
 /**
  * A quasi interface to mix into every possible {@link Block} such that their
@@ -52,65 +46,7 @@ import java.util.function.BiConsumer;
  * they already know the type they need to focus on.</p>
  */
 public interface BlockBridge {
-
-    /**
-     * Gets all the {@link Immutable}s for the provided
-     * {@link BlockState}.
-     *
-     * @param blockState The block state being passed in
-     * @return The list of immutable manipulators
-     */
-    List<Immutable> bridge$getManipulators(BlockState blockState);
-
-    /**
-     * A simple check whether the class is supported by the block or not.
-     *
-     * @param immutable The immutable class
-     * @return True if the data possibly represented by an instance of the class is supported
-     */
-    boolean bridge$supports(Class<? extends Immutable> immutable);
-
-    /**
-     * Instead of delegating to a block processor, we can delegate to the block
-     * to retrieve the correct {@link BlockState} if supported. Considering
-     * block processors would require to know of the blocks themselves, it is
-     * easier to use the block to understand what data is being offered,
-     * and the current block state being used. Since all of the data is already
-     * relatively kept in the block state instance, it is therefor very well
-     * possible to cycle according to the block instance.
-     *
-     * @param blockState The block state to use as a base
-     * @param key The key to the data
-     * @param value The value
-     * @param <E> The type of value, for type checking
-     * @return The blockstate with the new value, if available and compatible
-     */
-    <E> Optional<BlockState> bridge$getStateWithValue(BlockState blockState, Key<? extends Value<E>> key, E value);
-
-    /**
-     * Again, another delegate method directly to the block, usually not all
-     * required, but it does help if the block does support the manipulator
-     * in the first place. Considering that most manipulators are single
-     * data typed, it is discernible for the block to easily check what
-     * data is being offered and therefor validate whether the data is
-     * allowed for the specific block state. The block state passed in
-     * is not changed, but rather used as a blueprint so to speak due to
-     * the various pre-set data that the block state may contain, such as
-     * red stone power levels, plant types, etc. etc. etc.
-     *
-     * @param blockState The block state to base off of
-     * @param manipulator The manipulator being offered
-     * @return The block state with the requested data, if available
-     */
-    Optional<org.spongepowered.api.block.BlockState> bridge$getStateWithData(BlockState blockState, Immutable manipulator);
-
     // Normal API methods
-
-    boolean bridge$isVanilla();
-
-    boolean bridge$hasCollideLogic();
-
-    boolean bridge$hasCollideWithStateLogic();
 
     /**
      * Used only for Forge's dummy air block that is acting as a surrogate block for missing
@@ -122,8 +58,4 @@ public interface BlockBridge {
         return false;
     }
 
-    default BiConsumer<CauseStackManager.StackFrame, ServerLevelBridge> bridge$getTickFrameModifier() {
-        return (frame, world) -> {
-        };
-    }
 }

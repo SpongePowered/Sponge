@@ -28,6 +28,6 @@ import org.spongepowered.api.entity.living.aquatic.Squid;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(net.minecraft.world.entity.animal.Squid.class)
-public abstract class SquidMixin_API extends WaterAnimalMixin_API implements Squid {
+public abstract class SquidMixin_API extends AgeableWaterCreatureMixin_API implements Squid {
 
 }

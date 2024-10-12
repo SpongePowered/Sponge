@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.accessor.world.level.block.entity.trialspawner;
 
+import net.minecraft.core.Holder;
 import net.minecraft.world.level.block.entity.trialspawner.TrialSpawner;
 import net.minecraft.world.level.block.entity.trialspawner.TrialSpawnerConfig;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,6 +34,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(TrialSpawner.class)
 public interface TrialSpawnerAccessor {
 
-    @Mutable @Accessor("normalConfig") void accessor$normalConfig(TrialSpawnerConfig normalConfig);
-    @Mutable @Accessor("ominousConfig") void accessor$ominousConfig(TrialSpawnerConfig ominousConfig);
+    @Mutable @Accessor("normalConfig") void accessor$normalConfig(Holder<TrialSpawnerConfig> normalConfig);
+    @Mutable @Accessor("ominousConfig") void accessor$ominousConfig(Holder<TrialSpawnerConfig> ominousConfig);
 }

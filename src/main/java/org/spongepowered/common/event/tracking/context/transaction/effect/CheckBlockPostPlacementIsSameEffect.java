@@ -44,9 +44,9 @@ public final class CheckBlockPostPlacementIsSameEffect implements ProcessingSide
         final SpongeBlockChangeFlag flag, final int limit
     ) {
         final LevelChunkSection chunkSection = pipeline.getAffectedSection();
-        final int x = oldState.pos.getX() & 15;
-        final int y = oldState.pos.getY() & 15;
-        final int z = oldState.pos.getZ() & 15;
+        final int x = oldState.pos().getX() & 15;
+        final int y = oldState.pos().getY() & 15;
+        final int z = oldState.pos().getZ() & 15;
         final BlockState currentState = chunkSection.getBlockState(x, y, z);
         if (!currentState.is(newState.getBlock())) {
             return new EffectResult(newState, true);

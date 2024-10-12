@@ -102,6 +102,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
     @Shadow @Final public InventoryMenu inventoryMenu;
     @Shadow @Final private GameProfile gameProfile;
     @Shadow public abstract boolean shadow$isSpectator();
+    @Shadow protected abstract int shadow$getPermissionLevel();
     @Shadow public abstract int shadow$getXpNeededForNextLevel();
     @Shadow @Nullable public abstract ItemEntity shadow$drop(final ItemStack droppedItem, final boolean dropAround, final boolean traceItem);
     @Shadow public abstract FoodData shadow$getFoodData();
@@ -227,7 +228,6 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
         method = {
             "playSound(Lnet/minecraft/sounds/SoundEvent;FF)V",
             "giveExperienceLevels(I)V",
-            "eat(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/item/ItemStack;"
         },
         at = @At(
             value = "INVOKE",

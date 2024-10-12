@@ -56,8 +56,8 @@ public final class PotionItemStackData {
                 .asMutable(ItemStack.class)
                     .create(Keys.COLOR)
                         .get(h -> Color.ofRgb(h.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).getColor()))
-                        .set((h, v) -> h.update(DataComponents.POTION_CONTENTS, PotionContents.EMPTY, contents -> new PotionContents(contents.potion(), Optional.of(v.rgb()), contents.customEffects())))
-                        .delete(h -> h.update(DataComponents.POTION_CONTENTS, PotionContents.EMPTY, contents -> new PotionContents(contents.potion(), Optional.empty(), contents.customEffects())))
+                        .set((h, v) -> h.update(DataComponents.POTION_CONTENTS, PotionContents.EMPTY, contents -> new PotionContents(contents.potion(), Optional.of(v.rgb()), contents.customEffects(), contents.customName())))
+                        .delete(h -> h.update(DataComponents.POTION_CONTENTS, PotionContents.EMPTY, contents -> new PotionContents(contents.potion(), Optional.empty(), contents.customEffects(), contents.customName())))
                         .supports(h -> h.getItem() == Items.POTION || h.getItem() == Items.SPLASH_POTION || h.getItem() == Items.LINGERING_POTION || h.getItem() == Items.TIPPED_ARROW)
                     .create(Keys.CUSTOM_POTION_EFFECTS)
                         .get(h -> {
@@ -66,17 +66,17 @@ public final class PotionItemStackData {
                         })
                         .set((h, v) -> {
                             final var mcList = v.stream().map(MobEffectInstance.class::cast).toList();
-                            h.update(DataComponents.POTION_CONTENTS, PotionContents.EMPTY, contents -> new PotionContents(contents.potion(), contents.customColor(), mcList));
+                            h.update(DataComponents.POTION_CONTENTS, PotionContents.EMPTY, contents -> new PotionContents(contents.potion(), contents.customColor(), mcList, contents.customName()));
                         })
-                        .delete(h -> h.update(DataComponents.POTION_CONTENTS, PotionContents.EMPTY, contents -> new PotionContents(contents.potion(), contents.customColor(), Collections.emptyList())))
+                        .delete(h -> h.update(DataComponents.POTION_CONTENTS, PotionContents.EMPTY, contents -> new PotionContents(contents.potion(), contents.customColor(), Collections.emptyList(), contents.customName())))
                         .supports(h -> h.getItem() == Items.POTION || h.getItem() == Items.SPLASH_POTION || h.getItem() == Items.LINGERING_POTION || h.getItem() == Items.TIPPED_ARROW)
                     .create(Keys.POTION_TYPE)
                         .get(h -> (PotionType) h.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).potion().map(Holder::value).orElse(null)) // TODO empty POTION gone?
                         .set((h, v) -> {
                             final var potion = Optional.ofNullable(v).map(Potion.class::cast).map(BuiltInRegistries.POTION::wrapAsHolder); // TODO set empty POTION? same as delete?
-                            h.update(DataComponents.POTION_CONTENTS, PotionContents.EMPTY, contents -> new PotionContents(potion, contents.customColor(), contents.customEffects()));
+                            h.update(DataComponents.POTION_CONTENTS, PotionContents.EMPTY, contents -> new PotionContents(potion, contents.customColor(), contents.customEffects(), contents.customName()));
                         })
-                        .delete(h -> h.update(DataComponents.POTION_CONTENTS, PotionContents.EMPTY, contents -> new PotionContents(Optional.empty(), contents.customColor(), contents.customEffects())))
+                        .delete(h -> h.update(DataComponents.POTION_CONTENTS, PotionContents.EMPTY, contents -> new PotionContents(Optional.empty(), contents.customColor(), contents.customEffects(), contents.customName())))
                         .supports(h -> h.getItem() == Items.POTION || h.getItem() == Items.SPLASH_POTION ||
                                 h.getItem() == Items.LINGERING_POTION || h.getItem() == Items.TIPPED_ARROW)
                     .create(Keys.POTION_EFFECTS)

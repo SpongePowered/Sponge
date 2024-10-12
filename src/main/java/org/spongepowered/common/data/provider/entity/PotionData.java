@@ -46,7 +46,7 @@ public final class PotionData {
                         .get(h -> Streams.of(h.getItem().getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).getAllEffects()).map(PotionEffect.class::cast).toList())
                         .set((h, v) -> {
                             final var mcEffects = v.stream().map(MobEffectInstance.class::cast).toList();
-                            h.getItem().update(DataComponents.POTION_CONTENTS, PotionContents.EMPTY, contents -> new PotionContents(contents.potion(), contents.customColor(), mcEffects));
+                            h.getItem().update(DataComponents.POTION_CONTENTS, PotionContents.EMPTY, contents -> new PotionContents(contents.potion(), contents.customColor(), mcEffects, contents.customName()));
                         });
     }
     // @formatter:on

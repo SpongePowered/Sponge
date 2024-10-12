@@ -27,7 +27,7 @@ package org.spongepowered.common.world.portal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.portal.TeleportTransition;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.world.portal.Portal;
@@ -50,7 +50,7 @@ public final class SpongeCompositePortalLogic implements net.minecraft.world.lev
     }
 
     @Nullable @Override
-    public DimensionTransition getPortalDestination(final ServerLevel sourceLevel, final Entity entity, final BlockPos portalPos) {
+    public TeleportTransition getPortalDestination(final ServerLevel sourceLevel, final Entity entity, final BlockPos portalPos) {
         return this.rules.stream()
                 .map(p -> p.getPortalDestination(sourceLevel, entity, portalPos))
                 .filter(Objects::nonNull)

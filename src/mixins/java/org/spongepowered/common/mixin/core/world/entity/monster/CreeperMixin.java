@@ -24,16 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.monster;
 
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.entity.living.monster.Creeper;
-import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.api.world.server.ServerLocation;
-import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -42,8 +36,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
-import org.spongepowered.common.bridge.world.entity.GrieferBridge;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
@@ -68,13 +60,13 @@ public abstract class CreeperMixin extends MonsterMixin implements FusedExplosiv
     // FusedExplosive Impl
 
     @Override
-    public Optional<Integer> bridge$getExplosionRadius() {
-        return Optional.of(this.explosionRadius);
+    public Optional<Float> bridge$getExplosionRadius() {
+        return Optional.of((float) this.explosionRadius);
     }
 
     @Override
-    public void bridge$setExplosionRadius(@Nullable final Integer radius) {
-        this.explosionRadius = radius == null ? Constants.Entity.Creeper.DEFAULT_EXPLOSION_RADIUS : radius;
+    public void bridge$setExplosionRadius(final @Nullable Float radius) {
+        this.explosionRadius = radius == null ? Constants.Entity.Creeper.DEFAULT_EXPLOSION_RADIUS : radius.intValue();
     }
 
     @Override
@@ -140,25 +132,16 @@ public abstract class CreeperMixin extends MonsterMixin implements FusedExplosiv
         }
     }
 
-    @Redirect(method = "explodeCreeper", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;explode(Lnet/minecraft/world/entity/Entity;DDDFLnet/minecraft/world/level/Level$ExplosionInteraction;)Lnet/minecraft/world/level/Explosion;"))
-    private net.minecraft.world.level.@Nullable Explosion impl$useSpongeExplosion(final net.minecraft.world.level.Level world, final Entity self, final double x,
-        final double y, final double z, final float strength, final Level.ExplosionInteraction mode) {
-        return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
-                .location(ServerLocation.of((ServerWorld) world, x, y, z))
-                .sourceExplosive(((Creeper) this))
-                .radius(strength)
-                .shouldPlaySmoke(mode != Level.ExplosionInteraction.NONE)
-                .shouldBreakBlocks(mode != Level.ExplosionInteraction.NONE && ((GrieferBridge) this).bridge$canGrief()))
-                .orElseGet(() -> {
-                    this.impl$detonationCancelled = true;
-                    return null;
-                });
+    @Override
+    public void bridge$cancelExplosion() {
+        this.impl$detonationCancelled = true;
     }
 
     @Inject(method = "explodeCreeper", at = @At("RETURN"))
     private void impl$postExplode(final CallbackInfo ci) {
         if (this.impl$detonationCancelled) {
             this.impl$detonationCancelled = this.dead = false;
+            this.shadow$unsetRemoved();
         }
     }
 

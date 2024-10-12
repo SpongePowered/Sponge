@@ -61,7 +61,7 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
     @Override
     public ConfigurableBiomeProvider<MultiNoiseBiomeConfig> overworld() {
         final var registry = SpongeCommon.vanillaRegistry(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
-        final var holder = registry.getHolderOrThrow(MultiNoiseBiomeSourceParameterLists.OVERWORLD);
+        final var holder = registry.getOrThrow(MultiNoiseBiomeSourceParameterLists.OVERWORLD);
         return (ConfigurableBiomeProvider<MultiNoiseBiomeConfig>) MultiNoiseBiomeSource.createFromPreset(holder);
     }
 
@@ -77,7 +77,7 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
     @Override
     public ConfigurableBiomeProvider<MultiNoiseBiomeConfig> nether() {
         final var registry = SpongeCommon.vanillaRegistry(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
-        final var holder = registry.getHolderOrThrow(MultiNoiseBiomeSourceParameterLists.NETHER);
+        final var holder = registry.getOrThrow(MultiNoiseBiomeSourceParameterLists.NETHER);
         return (ConfigurableBiomeProvider<MultiNoiseBiomeConfig>) MultiNoiseBiomeSource.createFromPreset(holder);
     }
 
@@ -94,7 +94,7 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
 
     @Override
     public ConfigurableBiomeProvider<EndStyleBiomeConfig> end() {
-        return (ConfigurableBiomeProvider<EndStyleBiomeConfig>) TheEndBiomeSource.create(this.registry().asLookup());
+        return (ConfigurableBiomeProvider<EndStyleBiomeConfig>) TheEndBiomeSource.create(this.registry());
     }
 
     @Override
@@ -114,6 +114,6 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
     }
 
     private Holder<Biome> biomeHolder(final RegistryReference<org.spongepowered.api.world.biome.Biome> biome) {
-        return this.registry().getHolderOrThrow(ResourceKey.create(Registries.BIOME, (ResourceLocation) (Object) biome.location()));
+        return this.registry().getOrThrow(ResourceKey.create(Registries.BIOME, (ResourceLocation) (Object) biome.location()));
     }
 }

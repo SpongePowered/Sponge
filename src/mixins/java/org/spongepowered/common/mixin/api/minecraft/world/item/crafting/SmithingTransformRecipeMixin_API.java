@@ -25,11 +25,36 @@
 package org.spongepowered.common.mixin.api.minecraft.world.item.crafting;
 
 import net.minecraft.world.item.crafting.SmithingTransformRecipe;
+import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.api.item.recipe.smithing.SmithingRecipe;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+
+import java.util.Optional;
 
 @Mixin(SmithingTransformRecipe.class)
 public abstract class SmithingTransformRecipeMixin_API implements SmithingRecipe {
 
+    // @formatter:off
+    @Shadow @Final Optional<net.minecraft.world.item.crafting.Ingredient> addition;
+    @Shadow @Final Optional<net.minecraft.world.item.crafting.Ingredient> template;
+    @Shadow @Final Optional<net.minecraft.world.item.crafting.Ingredient> base;
+    // @formatter:on
+
+    @Override
+    public Optional<Ingredient> templateIngredient() {
+        return this.template.map(Ingredient.class::cast);
+    }
+
+    @Override
+    public Optional<Ingredient> baseIngredient() {
+        return this.base.map(Ingredient.class::cast);
+    }
+
+    @Override
+    public Optional<Ingredient> additionalIngredient() {
+        return this.addition.map(Ingredient.class::cast);
+    }
 
 }

@@ -50,10 +50,6 @@ public interface ArmorStandAccessor {
 
     @Invoker("setSmall") void invoker$setSmall(final boolean small);
 
-    @Invoker("setShowArms") void invoker$setShowArms(final boolean showArms);
-
-    @Invoker("setNoBasePlate") void invoker$setNoBasePlate(final boolean noBasePlate);
-
     @Invoker("setMarker") void invoker$setMarker(final boolean marker);
 
     @Invoker("hasPhysics") boolean invoker$hasPhysics();
