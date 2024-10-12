@@ -33,19 +33,19 @@ import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.advancements.AdvancementType;
 import net.minecraft.commands.Commands.CommandSelection;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.LayeredRegistryAccess;
+import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryDataLoader;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.Bootstrap;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.RegistryLayer;
-import net.minecraft.server.ReloadableServerResources;
+import net.minecraft.server.*;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.server.packs.resources.CloseableResourceManager;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
+import net.minecraft.tags.TagLoader;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageEffects;
 import net.minecraft.world.damagesource.DamageScaling;
@@ -69,6 +69,7 @@ import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.WorldDataConfiguration;
+import net.minecraft.world.level.block.CreakingHeartBlock;
 import net.minecraft.world.level.block.entity.trialspawner.TrialSpawnerState;
 import net.minecraft.world.level.block.state.properties.BambooLeaves;
 import net.minecraft.world.level.block.state.properties.DripstoneThickness;
@@ -90,6 +91,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A generator that will output source code containing constants used in <em>Minecraft: Java Edition</em>.
@@ -160,25 +162,28 @@ public final class GeneratorMain {
         // We don't currently try to load any datapacks here
         final var packRepository = ServerPacksSource.createVanillaTrustedRepository();
         MinecraftServer.configurePackRepository(packRepository, WorldDataConfiguration.DEFAULT, /* safeMode = */ false, true);
-        final CloseableResourceManager resourceManager = new MultiPackResourceManager(PackType.SERVER_DATA, packRepository.openAllSelected());
+        final CloseableResourceManager rm = new MultiPackResourceManager(PackType.SERVER_DATA, packRepository.openAllSelected());
 
         // WorldLoader.load
         final LayeredRegistryAccess<RegistryLayer> staticRegistries = RegistryLayer.createRegistryAccess();
-        final LayeredRegistryAccess<RegistryLayer> withWorldgen = staticRegistries.replaceFrom(
-            RegistryLayer.WORLDGEN,
-            RegistryDataLoader.load(resourceManager, staticRegistries.getAccessForLoading(RegistryLayer.WORLDGEN).listRegistries().toList(), RegistryDataLoader.WORLDGEN_REGISTRIES)
-        );
-        final LayeredRegistryAccess<RegistryLayer> withDimensions = withWorldgen.replaceFrom(
-            RegistryLayer.DIMENSIONS,
-            RegistryDataLoader.load(resourceManager, staticRegistries.getAccessForLoading(RegistryLayer.DIMENSIONS).listRegistries().toList(), RegistryDataLoader.DIMENSION_REGISTRIES)
-        );
-
+        List<Registry.PendingTags<?>> pendingTags = TagLoader.loadTagsForExistingRegistries(rm, staticRegistries.getLayer(RegistryLayer.STATIC));
+        final var wga = staticRegistries.getAccessForLoading(RegistryLayer.WORLDGEN);
+        List<HolderLookup.RegistryLookup<?>> tl = TagLoader.buildUpdatedLookups(wga, pendingTags);
+        RegistryAccess.Frozen wgr = RegistryDataLoader.load(rm, tl, RegistryDataLoader.WORLDGEN_REGISTRIES);
+        tl = TagLoader.buildUpdatedLookups(wgr, pendingTags);
+        List<HolderLookup.RegistryLookup<?>> cl = Stream.concat(tl.stream(), wgr.listRegistries()).toList();
+        final LayeredRegistryAccess<RegistryLayer> withWorldGen = staticRegistries.replaceFrom(RegistryLayer.WORLDGEN, wgr);
+        pendingTags = TagLoader.loadTagsForExistingRegistries(rm, staticRegistries.getLayer(RegistryLayer.WORLDGEN));
+        RegistryAccess.Frozen da = RegistryDataLoader.load(rm, cl, RegistryDataLoader.DIMENSION_REGISTRIES);
+        TagLoader.buildUpdatedLookups(da, pendingTags);
+        final LayeredRegistryAccess<RegistryLayer> withDimensions = withWorldGen.replaceFrom(RegistryLayer.DIMENSIONS, da);
+        pendingTags = TagLoader.loadTagsForExistingRegistries(rm, staticRegistries.getLayer(RegistryLayer.DIMENSIONS));
 
         final RegistryAccess.Frozen compositeRegistries = withDimensions.getAccessForLoading(RegistryLayer.RELOADABLE);
         final var resourcesFuture = ReloadableServerResources.loadResources(
-            resourceManager,
+            rm,
             withDimensions,
-            List.of(),
+            pendingTags,
             packRepository.getRequestedFeatureFlags(),
             CommandSelection.ALL,
             2, // functionPermissionLevel
@@ -186,7 +191,7 @@ public final class GeneratorMain {
             Runnable::run // applyExecutor
         ).whenComplete((result, ex) -> {
             if (ex != null) {
-                resourceManager.close();
+                rm.close();
             }
         }).thenApply(resources -> {
             resources.updateStaticRegistryTags();
@@ -244,6 +249,13 @@ public final class GeneratorMain {
                  MobCategory.class,
                  "getSerializedName",
                  "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                "data.type",
+                "CreakingHearts",
+                CreakingHeartBlock.CreakingHeartState.class,
+                "getSerializedName",
+                "sponge"
             ),
             new RegistryEntriesGenerator<>(
                  "map.decoration",
