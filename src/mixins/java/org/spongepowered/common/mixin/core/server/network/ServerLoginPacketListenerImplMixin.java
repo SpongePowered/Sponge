@@ -111,6 +111,7 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
     private static final int NEGOTIATION_HANDSHAKE = 2;
 
     private static final int INTENT_SYNC_PLUGIN_DATA = 0;
+    private static final int INTENT_DONE = 1;
 
     // Handshake state:
     // 1. Sync registered plugin channels
@@ -121,9 +122,14 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
     private static final int HANDSHAKE_SYNC_CHANNEL_REGISTRATIONS = 2;
     private static final int HANDSHAKE_CHANNEL_REGISTRATION = 3;
     private static final int HANDSHAKE_SYNC_PLUGIN_DATA = 4;
+    private static final int HANDSHAKE_DONE = 5;
 
-    private volatile int impl$negotiationPhase = ServerLoginPacketListenerImplMixin.NEGOTIATION_NOT_STARTED;
-    private volatile int impl$negotiationState;
+    //Packed long. Avoids subtle threading related problems with
+    //two separate fields.
+    //Bits 63-32 are for the phase.
+    //Bits 31-0 are for the state.
+    private volatile long impl$negotiationValue = ServerLoginPacketListenerImplMixin.impl$packNegotiationValue(
+        ServerLoginPacketListenerImplMixin.NEGOTIATION_NOT_STARTED, 0);
 
     @Override
     public Connection bridge$getConnection() {
@@ -155,16 +161,12 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
         if (store.isEmpty()) {
             this.impl$processVerification();
         } else {
+            this.impl$changeNegotiationPhase(ServerLoginPacketListenerImplMixin.NEGOTIATION_INTENT, ServerLoginPacketListenerImplMixin.INTENT_SYNC_PLUGIN_DATA);
             this.state = ServerLoginPacketListenerImpl.State.NEGOTIATING;
-            this.impl$negotiationPhase = ServerLoginPacketListenerImplMixin.NEGOTIATION_INTENT;
-            this.impl$negotiationState = ServerLoginPacketListenerImplMixin.INTENT_SYNC_PLUGIN_DATA;
         }
     }
 
     private void impl$processVerification() {
-        this.impl$negotiationPhase = ServerLoginPacketListenerImplMixin.NEGOTIATION_HANDSHAKE;
-        this.impl$negotiationState = ServerLoginPacketListenerImplMixin.HANDSHAKE_NOT_STARTED;
-
         ((PlayerListBridge) this.server.getPlayerList()).bridge$canPlayerLogin(this.connection.getRemoteAddress(), this.authenticatedProfile)
             .handle((componentOpt, throwable) -> {
                 if (throwable != null) {
@@ -214,6 +216,7 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
             return;
         }
 
+        this.impl$changeNegotiationPhase(ServerLoginPacketListenerImplMixin.NEGOTIATION_HANDSHAKE, ServerLoginPacketListenerImplMixin.HANDSHAKE_NOT_STARTED);
         this.state = ServerLoginPacketListenerImpl.State.NEGOTIATING;
     }
 
@@ -298,46 +301,51 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
     @Inject(method = "tick", at = @At("HEAD"))
     private void impl$onTick(final CallbackInfo ci) {
         if (this.state == ServerLoginPacketListenerImpl.State.NEGOTIATING) {
-            if (this.impl$negotiationPhase == ServerLoginPacketListenerImplMixin.NEGOTIATION_INTENT) {
-                this.impl$handleIntentNegotiation();
-            } else if (this.impl$negotiationPhase == ServerLoginPacketListenerImplMixin.NEGOTIATION_HANDSHAKE) {
-                this.impl$handleHandshakeNegotiation();
+            final long value = this.impl$negotiationValue;
+            final int phase = ServerLoginPacketListenerImplMixin.impl$readNegotiationPhase(value);
+            final int state = ServerLoginPacketListenerImplMixin.impl$readNegotiationState(value);
+            if (phase == ServerLoginPacketListenerImplMixin.NEGOTIATION_INTENT) {
+                this.impl$handleIntentNegotiation(state);
+            } else if (phase == ServerLoginPacketListenerImplMixin.NEGOTIATION_HANDSHAKE) {
+                this.impl$handleHandshakeNegotiation(state);
             }
         }
     }
 
-    private void impl$handleIntentNegotiation() {
-        if (this.impl$negotiationState == ServerLoginPacketListenerImplMixin.INTENT_SYNC_PLUGIN_DATA) {
+    private void impl$handleIntentNegotiation(final int state) {
+        if (state == ServerLoginPacketListenerImplMixin.INTENT_SYNC_PLUGIN_DATA) {
             final ServerSideConnection connection = (ServerSideConnection) ((ConnectionBridge) this.connection).bridge$getEngineConnection();
             final TransactionStore store = ConnectionUtil.getTransactionStore(connection);
             if (store.isEmpty()) {
+                this.impl$changeNegotiationState(ServerLoginPacketListenerImplMixin.INTENT_DONE);
                 this.impl$processVerification();
             }
         }
     }
 
-    private void impl$handleHandshakeNegotiation() {
+    private void impl$handleHandshakeNegotiation(final int state) {
         final ServerSideConnection connection = (ServerSideConnection) ((ConnectionBridge) this.connection).bridge$getEngineConnection();
-        if (this.impl$negotiationState == ServerLoginPacketListenerImplMixin.HANDSHAKE_NOT_STARTED) {
-            this.impl$negotiationState = ServerLoginPacketListenerImplMixin.HANDSHAKE_CLIENT_TYPE;
+        if (state == ServerLoginPacketListenerImplMixin.HANDSHAKE_NOT_STARTED) {
+            this.impl$changeNegotiationState(ServerLoginPacketListenerImplMixin.HANDSHAKE_CLIENT_TYPE);
 
             ((SpongeChannelManager) Sponge.channelManager()).requestClientType(connection).thenAccept(result -> {
-                this.impl$negotiationState = ServerLoginPacketListenerImplMixin.HANDSHAKE_SYNC_CHANNEL_REGISTRATIONS;
+                this.impl$changeNegotiationState(ServerLoginPacketListenerImplMixin.HANDSHAKE_SYNC_CHANNEL_REGISTRATIONS);
             });
 
-        } else if (this.impl$negotiationState == ServerLoginPacketListenerImplMixin.HANDSHAKE_SYNC_CHANNEL_REGISTRATIONS) {
-            this.impl$negotiationState = ServerLoginPacketListenerImplMixin.HANDSHAKE_CHANNEL_REGISTRATION;
+        } else if (state == ServerLoginPacketListenerImplMixin.HANDSHAKE_SYNC_CHANNEL_REGISTRATIONS) {
+            this.impl$changeNegotiationState(ServerLoginPacketListenerImplMixin.HANDSHAKE_CHANNEL_REGISTRATION);
 
             ((SpongeChannelManager) Sponge.channelManager()).sendLoginChannelRegistry(connection).thenAccept(result -> {
                 final Cause cause = Cause.of(EventContext.empty(), this);
                 final ServerSideConnectionEvent.Handshake event =
                     SpongeEventFactory.createServerSideConnectionEventHandshake(cause, connection, SpongeGameProfile.of(this.authenticatedProfile));
                 SpongeCommon.post(event);
-                this.impl$negotiationState = ServerLoginPacketListenerImplMixin.HANDSHAKE_SYNC_PLUGIN_DATA;
+                this.impl$changeNegotiationState(ServerLoginPacketListenerImplMixin.HANDSHAKE_SYNC_PLUGIN_DATA);
             });
-        } else if (this.impl$negotiationState == ServerLoginPacketListenerImplMixin.HANDSHAKE_SYNC_PLUGIN_DATA) {
+        } else if (state == ServerLoginPacketListenerImplMixin.HANDSHAKE_SYNC_PLUGIN_DATA) {
             final TransactionStore store = ConnectionUtil.getTransactionStore(connection);
             if (store.isEmpty()) {
+                this.impl$changeNegotiationState(ServerLoginPacketListenerImplMixin.HANDSHAKE_DONE);
                 this.state = ServerLoginPacketListenerImpl.State.VERIFYING;
             }
         }
@@ -345,6 +353,27 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
 
     @Override
     public boolean bridge$isIntentDone() {
-        return this.impl$negotiationState > ServerLoginPacketListenerImplMixin.NEGOTIATION_INTENT;
+        final int phase = ServerLoginPacketListenerImplMixin.impl$readNegotiationPhase(this.impl$negotiationValue);
+        return phase > ServerLoginPacketListenerImplMixin.NEGOTIATION_INTENT;
+    }
+
+    private void impl$changeNegotiationPhase(final int phase, final int state) {
+        this.impl$negotiationValue = ServerLoginPacketListenerImplMixin.impl$packNegotiationValue(phase, state);
+    }
+
+    private void impl$changeNegotiationState(final int state) {
+        this.impl$changeNegotiationPhase(ServerLoginPacketListenerImplMixin.impl$readNegotiationPhase(this.impl$negotiationValue), state);
+    }
+
+    private static long impl$packNegotiationValue(final int phase, final int state) {
+        return Integer.toUnsignedLong(phase) << 32 | Integer.toUnsignedLong(state);
+    }
+
+    private static int impl$readNegotiationPhase(final long value) {
+        return (int) (value >>> 32);
+    }
+
+    private static int impl$readNegotiationState(final long value) {
+        return (int) value;
     }
 }
