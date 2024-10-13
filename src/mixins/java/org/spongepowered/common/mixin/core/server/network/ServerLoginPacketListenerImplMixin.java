@@ -211,6 +211,9 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
         final ServerSideConnectionEvent.Auth event = SpongeEventFactory.createServerSideConnectionEventAuth(
                 cause, disconnectMessage, disconnectMessage, (ServerSideConnection) connection,
                 SpongeGameProfile.of(this.authenticatedProfile));
+        if (kickReason != null) {
+            event.setCancelled(true);
+        }
         if (connection.postGuardedEvent(event)) {
             this.impl$disconnectClient(event.message());
             return;
