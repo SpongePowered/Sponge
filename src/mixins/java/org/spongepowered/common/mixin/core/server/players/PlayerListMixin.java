@@ -76,7 +76,6 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.service.permission.PermissionService;
-import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
