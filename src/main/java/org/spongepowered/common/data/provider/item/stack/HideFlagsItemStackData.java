@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.provider.item.stack;
 
 import net.minecraft.advancements.critereon.BlockPredicate;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.Unit;
 import net.minecraft.world.item.AdventureModePredicate;
@@ -55,10 +56,10 @@ public final class HideFlagsItemStackData {
                         .set((h, v) -> h.update(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY, p -> new ItemAttributeModifiers(p.modifiers(), !v)))
                     .create(Keys.HIDE_CAN_DESTROY)
                         .get(h -> h.has(DataComponents.CAN_BREAK) && !h.get(DataComponents.CAN_BREAK).showInTooltip())
-                        .set((h, v) -> h.set(DataComponents.CAN_BREAK, HideFlagsItemStackData.newAdventureModePredicate(h, !v)))
+                        .set((h, v) -> h.set(DataComponents.CAN_BREAK, HideFlagsItemStackData.newAdventureModePredicate(h, DataComponents.CAN_BREAK, !v)))
                     .create(Keys.HIDE_CAN_PLACE)
-                        .get(h -> h.has(DataComponents.CAN_PLACE_ON) && !h.get(DataComponents.CAN_BREAK).showInTooltip())
-                        .set((h, v) -> h.set(DataComponents.CAN_PLACE_ON, HideFlagsItemStackData.newAdventureModePredicate(h, !v)))
+                        .get(h -> h.has(DataComponents.CAN_PLACE_ON) && !h.get(DataComponents.CAN_PLACE_ON).showInTooltip())
+                        .set((h, v) -> h.set(DataComponents.CAN_PLACE_ON, HideFlagsItemStackData.newAdventureModePredicate(h, DataComponents.CAN_PLACE_ON, !v)))
                     .create(Keys.HIDE_ENCHANTMENTS)
                         .get(h -> ((ItemEnchantmentsAccessor)h.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY)).accessor$showInTooltip())
                         .set((h, v) -> h.set(DataComponents.ENCHANTMENTS, HideFlagsItemStackData.newItemEnchantments(h, !v)))
@@ -86,10 +87,9 @@ public final class HideFlagsItemStackData {
     // @formatter:on
 
     @NotNull
-    private static AdventureModePredicate newAdventureModePredicate(final ItemStack h, final boolean showInTooltip) {
-        if (h.has(DataComponents.CAN_BREAK)) {
-            final List<BlockPredicate> $$0 = ((AdventureModePredicateAccessor) h.get(DataComponents.CAN_BREAK)).accessor$predicates();
-            return new AdventureModePredicate($$0, showInTooltip);
+    private static AdventureModePredicate newAdventureModePredicate(final ItemStack h, final DataComponentType<AdventureModePredicate> type, final boolean showInTooltip) {
+        if (h.has(type)) {
+            return h.get(type).withTooltip(showInTooltip);
         }
         return new AdventureModePredicate(Collections.emptyList(), showInTooltip);
     }
