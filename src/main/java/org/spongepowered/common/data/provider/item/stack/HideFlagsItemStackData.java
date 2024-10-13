@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import net.minecraft.advancements.critereon.BlockPredicate;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.Unit;
@@ -35,12 +34,10 @@ import net.minecraft.world.item.component.Unbreakable;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.world.item.AdventureModePredicateAccessor;
 import org.spongepowered.common.accessor.world.item.enchantment.ItemEnchantmentsAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 import java.util.Collections;
-import java.util.List;
 
 public final class HideFlagsItemStackData {
 
