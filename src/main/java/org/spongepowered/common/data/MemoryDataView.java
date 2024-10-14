@@ -255,8 +255,12 @@ public class MemoryDataView implements DataView {
             // always have to copy a data view to avoid overwriting existing
             // views and to set the interior path correctly.
             final Collection<DataQuery> valueKeys = ((DataView) serialized).keys(true);
-            for (final DataQuery oldKey : valueKeys) {
-                this.set(path.then(oldKey), ((DataView) serialized).get(oldKey).get());
+            if (!valueKeys.isEmpty()) {
+                for (final DataQuery oldKey : valueKeys) {
+                    this.set(path.then(oldKey), ((DataView) serialized).get(oldKey).get());
+                }
+            } else {
+                this.createView(path);
             }
         } else {
             this.map.put(key, serialized);
