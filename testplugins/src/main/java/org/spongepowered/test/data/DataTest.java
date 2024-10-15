@@ -373,7 +373,7 @@ public final class DataTest  {
         this.checkOfferData(ravager, Keys.CAN_JOIN_RAID, true);
         this.checkOfferData(ravager, Keys.CAN_JOIN_RAID, false);
 
-        final Entity boat = world.createEntity(EntityTypes.BOAT.get(), position);
+        final Entity boat = world.createEntity(EntityTypes.OAK_BOAT.get(), position);
         this.checkOfferData(boat, Keys.CAN_MOVE_ON_LAND, true);
         this.checkOfferData(boat, Keys.CAN_MOVE_ON_LAND, false);
 

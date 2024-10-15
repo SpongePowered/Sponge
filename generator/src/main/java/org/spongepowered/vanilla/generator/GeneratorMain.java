@@ -170,14 +170,11 @@ public final class GeneratorMain {
         final var wga = staticRegistries.getAccessForLoading(RegistryLayer.WORLDGEN);
         List<HolderLookup.RegistryLookup<?>> tl = TagLoader.buildUpdatedLookups(wga, pendingTags);
         RegistryAccess.Frozen wgr = RegistryDataLoader.load(rm, tl, RegistryDataLoader.WORLDGEN_REGISTRIES);
-        tl = TagLoader.buildUpdatedLookups(wgr, pendingTags);
         List<HolderLookup.RegistryLookup<?>> cl = Stream.concat(tl.stream(), wgr.listRegistries()).toList();
         final LayeredRegistryAccess<RegistryLayer> withWorldGen = staticRegistries.replaceFrom(RegistryLayer.WORLDGEN, wgr);
-        pendingTags = TagLoader.loadTagsForExistingRegistries(rm, staticRegistries.getLayer(RegistryLayer.WORLDGEN));
         RegistryAccess.Frozen da = RegistryDataLoader.load(rm, cl, RegistryDataLoader.DIMENSION_REGISTRIES);
-        TagLoader.buildUpdatedLookups(da, pendingTags);
         final LayeredRegistryAccess<RegistryLayer> withDimensions = withWorldGen.replaceFrom(RegistryLayer.DIMENSIONS, da);
-        pendingTags = TagLoader.loadTagsForExistingRegistries(rm, staticRegistries.getLayer(RegistryLayer.DIMENSIONS));
+        TagLoader.loadTagsForExistingRegistries(rm, withDimensions.getLayer(RegistryLayer.WORLDGEN));
 
         final RegistryAccess.Frozen compositeRegistries = withDimensions.getAccessForLoading(RegistryLayer.RELOADABLE);
         final var resourcesFuture = ReloadableServerResources.loadResources(
@@ -378,7 +375,7 @@ public final class GeneratorMain {
             ),
             new EnumEntriesValidator<>(
                 "world.explosion",
-                "BlockInteractions",
+                "ExplosionBlockInteractions",
                 Explosion.BlockInteraction.class,
                 "name",
                 "sponge"
