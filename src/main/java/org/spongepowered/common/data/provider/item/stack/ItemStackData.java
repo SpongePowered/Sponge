@@ -30,6 +30,7 @@ import net.minecraft.core.HolderSet;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.StringUtil;
 import net.minecraft.util.Unit;
@@ -46,6 +47,7 @@ import net.minecraft.world.item.component.DamageResistant;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.component.Unbreakable;
+import net.minecraft.world.item.component.UseCooldown;
 import net.minecraft.world.item.component.UseRemainder;
 import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
 import net.minecraft.world.item.consume_effects.ClearAllStatusEffectsConsumeEffect;
@@ -55,7 +57,10 @@ import net.minecraft.world.item.consume_effects.RemoveStatusEffectsConsumeEffect
 import net.minecraft.world.item.consume_effects.TeleportRandomlyConsumeEffect;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Platform;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.item.ItemRarity;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -67,6 +72,7 @@ import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.List;
+import java.util.Optional;
 
 @SuppressWarnings({"unchecked", "UnstableApiUsage"})
 public final class ItemStackData {
@@ -276,7 +282,56 @@ public final class ItemStackData {
                         })
                         .set((h, value) -> h.set(DataComponents.ITEM_NAME, SpongeAdventure.asVanillaMutable(value)))
                         .delete(stack -> stack.remove(DataComponents.ITEM_NAME))
-                    ;
+                    .create(Keys.COOLDOWN_GROUP)
+                        .get(h -> {
+                            final @Nullable UseCooldown cooldown = h.get(DataComponents.USE_COOLDOWN);
+                            if (cooldown == null) {
+                                return null;
+                            }
+                            return (ResourceKey) (Object) cooldown.cooldownGroup().orElse(null);
+                        })
+                        .set((h, value) -> {
+                            if (value == null) {
+                                h.remove(DataComponents.USE_COOLDOWN);
+                                return;
+                            }
+                            h.set(DataComponents.USE_COOLDOWN, new UseCooldown(1, Optional.of((ResourceLocation) (Object) value)));
+                        })
+                        .deleteAndGet(ItemStackData::deleteAndTransactUseCooldown)
+                    .create(Keys.COOLDOWN)
+                        .get(h -> {
+                            final @Nullable UseCooldown cooldown = h.get(DataComponents.USE_COOLDOWN);
+                            if (cooldown == null) {
+                                return null;
+                            }
+                            return Ticks.of(cooldown.ticks());
+                        })
+                        .setAndGet((h, value) -> {
+                            if (value == null) {
+                                return ItemStackData.deleteAndTransactUseCooldown(h);
+                            }
+                            final var existing = h.get(DataComponents.USE_COOLDOWN);
+                            var builder = DataTransactionResult.builder()
+                                .success(Value.immutableOf(Keys.COOLDOWN, value));
+                            if (existing != null) {
+                                h.set(DataComponents.USE_COOLDOWN, new UseCooldown(value.ticks(), existing.cooldownGroup()));
+                                builder.replace(existing.cooldownGroup().map(ResourceKey.class::cast)
+                                    .map(group ->
+                                        List.of(
+                                            Value.immutableOf(Keys.COOLDOWN, Ticks.of(existing.ticks())),
+                                            Value.immutableOf(Keys.COOLDOWN_GROUP, group)
+                                        )
+                                    )
+                                    .orElseGet(() -> List.of(
+                                        Value.immutableOf(Keys.COOLDOWN, Ticks.of(existing.ticks()))
+                                    )));
+                            } else {
+                                h.set(DataComponents.USE_COOLDOWN, new UseCooldown(value.ticks(), Optional.empty()));
+                            }
+                            return builder.build();
+                        })
+                        .deleteAndGet(ItemStackData::deleteAndTransactUseCooldown)
+        ;
     }
     // @formatter:on
 
@@ -301,6 +356,20 @@ public final class ItemStackData {
         } else {
             stack.remove(DataComponents.UNBREAKABLE);
         }
+    }
+
+    private static DataTransactionResult deleteAndTransactUseCooldown(final ItemStack stack) {
+        final @Nullable UseCooldown cooldown = stack.remove(DataComponents.USE_COOLDOWN);
+        if (cooldown == null) {
+            return DataTransactionResult.successNoData();
+        }
+        return cooldown.cooldownGroup()
+            .map(group -> DataTransactionResult.successRemove(List.of(
+                Value.immutableOf(Keys.COOLDOWN, Ticks.of(cooldown.ticks())),
+                Value.immutableOf(Keys.COOLDOWN_GROUP, (ResourceKey) (Object) group)
+            ))).orElseGet(() -> DataTransactionResult.successRemove(List.of(
+                Value.immutableOf(Keys.COOLDOWN, Ticks.of(cooldown.ticks()))
+            )));
     }
 
 }
