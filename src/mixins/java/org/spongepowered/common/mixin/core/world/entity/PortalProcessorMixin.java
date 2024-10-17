@@ -142,8 +142,8 @@ public abstract class PortalProcessorMixin implements PortalProcessorBridge {
             return new DimensionTransition((ServerLevel) tpEvent.destinationWorld(),
                     VecHelper.toVanillaVector3d(tpEvent.destinationPosition()),
                     VecHelper.toVanillaVector3d(tpEvent.exitSpeed()),
-                    (float) tpEvent.toRotation().x(),
                     (float) tpEvent.toRotation().y(),
+                    (float) tpEvent.toRotation().x(),
                     transition.missingRespawnBlock(),
                     transition.postDimensionTransition());
         }
