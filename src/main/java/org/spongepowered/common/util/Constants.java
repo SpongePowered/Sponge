@@ -38,6 +38,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.server.level.ChunkLevel;
+import net.minecraft.server.level.FullChunkStatus;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -440,7 +442,7 @@ public final class Constants {
 
     public static final class ChunkTicket {
 
-        public static final int MAX_FULL_CHUNK_TICKET_LEVEL = 33;
+        public static final int MAX_FULL_CHUNK_TICKET_LEVEL = ChunkLevel.byStatus(FullChunkStatus.ENTITY_TICKING);
 
         // Highest ticket level that will cause loading a full chunk, plus one.
         public static final int MAX_FULL_CHUNK_DISTANCE = ChunkTicket.MAX_FULL_CHUNK_TICKET_LEVEL + 1;
