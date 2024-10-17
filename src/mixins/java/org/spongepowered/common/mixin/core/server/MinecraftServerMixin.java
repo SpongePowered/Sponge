@@ -64,6 +64,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
@@ -228,7 +229,10 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         ci.cancel();
     }
 
-    @ModifyConstant(method = "tickServer", constant = @Constant(intValue = 0, ordinal = 0))
+    @ModifyConstant(method = "tickServer", constant = @Constant(intValue = 0, ordinal = 0, expandZeroConditions = Constant.Condition.LESS_THAN_OR_EQUAL_TO_ZERO),
+        slice = @Slice(
+            from = @At(value = "FIELD", target = "Lnet/minecraft/server/MinecraftServer;ticksUntilAutosave:I"),
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;computeNextAutosaveInterval()I")))
     private int getSaveTickInterval(final int zero) {
         if (!this.shadow$isDedicatedServer()) {
             return zero;
