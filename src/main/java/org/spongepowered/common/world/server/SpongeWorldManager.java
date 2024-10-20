@@ -55,6 +55,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.PatrolSpawner;
@@ -816,8 +817,14 @@ public abstract class SpongeWorldManager implements WorldManager {
             dataTag = null; // ((MinecraftServerAccessor) this.server).accessor$storageSource().getDataTag(); // Fallback to overworld level.dat
         }
         final PrimaryLevelData levelData = this.getOrCreateLevelData(dataTag, levelStem, directoryName);
+        final List<CustomSpawner> spawners;
+        if (levelStem.type().is(BuiltinDimensionTypes.OVERWORLD) || levelStem.type().is(BuiltinDimensionTypes.OVERWORLD_CAVES)) {
+            spawners = ImmutableList.of(new PhantomSpawner(), new PatrolSpawner(), new CatSpawner(), new VillageSiege(), new WanderingTraderSpawner(levelData));
+        } else {
+            spawners = ImmutableList.of();
+        }
         ((ResourceKeyBridge) levelData).bridge$setKey(worldKey);
-        return this.createLevel(registryKey, levelStem, worldKey, worldTypeKey, storageSource, levelData, ImmutableList.of(), chunkStatusListener);
+        return this.createLevel(registryKey, levelStem, worldKey, worldTypeKey, storageSource, levelData, spawners, chunkStatusListener);
     }
 
     private ServerLevel createLevel(

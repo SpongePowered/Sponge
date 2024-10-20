@@ -56,6 +56,9 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.accessor.world.level.LevelSettingsAccessor;
@@ -405,5 +408,19 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
                 .add("hardcore=" + ((LevelData) this).isHardcore())
                 .add("difficulty=" + ((LevelData) this).getDifficulty())
                 .toString();
+    }
+
+    @Inject(method = "isRaining", at = @At(value = "HEAD"), cancellable = true)
+    private void impl$onIsRaining(final CallbackInfoReturnable<Boolean> cir) {
+        if (this.impl$dimensionType.hasCeiling()) {
+            cir.setReturnValue(false);
+        }
+    }
+
+    @Inject(method = "isThundering", at = @At(value = "HEAD"), cancellable = true)
+    private void impl$onIsThundering(final CallbackInfoReturnable<Boolean> cir) {
+        if (this.impl$dimensionType.hasCeiling()) {
+            cir.setReturnValue(false);
+        }
     }
 }
