@@ -25,16 +25,16 @@
 package org.spongepowered.common.mixin.core.world.entity.decoration;
 
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.decoration.BlockAttachedEntity;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.event.cause.entity.damage.SpongeDamageTracker;
 import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
-import org.spongepowered.common.util.DamageEventUtil;
 
 @Mixin(BlockAttachedEntity.class)
 public abstract class BlockAttachedEntityMixin extends EntityMixin {
@@ -56,8 +56,8 @@ public abstract class BlockAttachedEntityMixin extends EntityMixin {
 
     @Inject(method = "hurt", cancellable = true, at = @At(value = "INVOKE",
         target = "Lnet/minecraft/world/entity/decoration/BlockAttachedEntity;kill()V"))
-    private void attackImpl$postEventOnAttackEntityFrom(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
-        if (DamageEventUtil.callOtherAttackEvent((Entity) (Object) this, source, amount).isCancelled()) {
+    private void attack$onHurt(final DamageSource source, final float damage, final CallbackInfoReturnable<Boolean> cir) {
+        if (SpongeDamageTracker.callDamageEvents((Entity) this, source, damage) == null) {
             cir.setReturnValue(true);
         }
     }

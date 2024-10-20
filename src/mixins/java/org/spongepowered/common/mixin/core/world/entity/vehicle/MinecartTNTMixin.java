@@ -46,9 +46,9 @@ import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.cause.entity.damage.SpongeDamageTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.DamageEventUtil;
 
 import java.util.Optional;
 
@@ -174,8 +174,8 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
 
     @Inject(method = "hurt", cancellable = true, at = @At(value = "INVOKE",
         target = "Lnet/minecraft/world/entity/vehicle/MinecartTNT;explode(Lnet/minecraft/world/damagesource/DamageSource;D)V"))
-    private void attackImpl$postOnAttackEntityFrom(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
-        if (DamageEventUtil.callOtherAttackEvent((Entity) (Object) this, source, amount).isCancelled()) {
+    private void attack$onHurt(final DamageSource source, final float damage, final CallbackInfoReturnable<Boolean> cir) {
+        if (SpongeDamageTracker.callDamageEvents((org.spongepowered.api.entity.Entity) this, source, damage) == null) {
             cir.setReturnValue(true);
         }
     }

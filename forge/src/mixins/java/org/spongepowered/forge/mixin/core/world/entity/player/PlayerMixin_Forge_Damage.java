@@ -24,25 +24,27 @@
  */
 package org.spongepowered.forge.mixin.core.world.entity.player;
 
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.util.DamageEventUtil;
+import org.spongepowered.asm.mixin.injection.Constant;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.forge.mixin.core.world.entity.LivingEntityMixin_Forge_Damage;
 
 @Mixin(Player.class)
-public class PlayerMixin_Forge_Attack_Impl {
-    private DamageEventUtil.Attack<Player> attackImpl$attack;
+public abstract class PlayerMixin_Forge_Damage extends LivingEntityMixin_Forge_Damage {
 
-    @Redirect(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/common/ForgeHooks;getCriticalHit(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/entity/Entity;ZF)Lnet/minecraftforge/event/entity/player/CriticalHitEvent;"))
-    private CriticalHitEvent attackImpl$critHook(final Player player, final Entity target, final boolean vanillaCritical, final float damageModifier) {
-        final CriticalHitEvent event = ForgeHooks.getCriticalHit(player, target, vanillaCritical, damageModifier);
-        if (event != null) {
-            this.attackImpl$attack.functions().add(DamageEventUtil.provideCriticalAttackFunction(this.attackImpl$attack.sourceEntity(), event.getDamageModifier()));
-        }
-        return event;
+    @ModifyConstant(method = "actuallyHurt", constant = @Constant(floatValue = 0), slice = @Slice(
+        from = @At(value = "INVOKE", target = "Lnet/minecraftforge/common/ForgeHooks;onLivingHurt(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/damagesource/DamageSource;F)F"),
+        to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getDamageAfterArmorAbsorb(Lnet/minecraft/world/damagesource/DamageSource;F)F")))
+    private float damage$doNotReturnEarly(final float constant) {
+        return Float.NaN;
+    }
+
+    @ModifyArg(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/common/ForgeHooks;onLivingDamage(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/damagesource/DamageSource;F)F"))
+    private float damage$firePostEvent_Player(final float damage) {
+        return this.damage$firePostEvent(damage);
     }
 }
