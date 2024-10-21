@@ -25,15 +25,16 @@
 package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.server.level.ServerPlayer;
-import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.persistence.DataQuery;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Identifiable;
-import org.spongepowered.common.SpongeServer;
+import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.entity.player.SpongeUserData;
 
 import java.time.Instant;
-import java.util.UUID;
 
 public final class IdentifiableData {
 
@@ -45,21 +46,23 @@ public final class IdentifiableData {
         registrator
                 .asMutable(Identifiable.class)
                     .create(Keys.FIRST_DATE_JOINED)
-                        .get(h -> ((SpongeServer) Sponge.server()).getPlayerDataManager().getFirstJoined(h.uniqueId()).orElse(null))
-                        .set((h, v) -> {
-                            final UUID id = h.uniqueId();
-                            final Instant played = ((SpongeServer) Sponge.server()).getPlayerDataManager().getFirstJoined(id).orElse(v);
-                            ((SpongeServer) Sponge.server()).getPlayerDataManager().setPlayerInfo(id, played, v);
-                        })
+                        .get(h -> ((SpongeDataHolderBridge) h).bridge$get(Keys.FIRST_DATE_JOINED).orElse(null))
+                        .set((h, v) -> ((SpongeDataHolderBridge) h).bridge$offer(Keys.FIRST_DATE_JOINED, v))
                         .supports(h -> h instanceof ServerPlayer || h instanceof SpongeUserData)
                     .create(Keys.LAST_DATE_PLAYED)
-                        .get(h -> ((SpongeServer) Sponge.server()).getPlayerDataManager().getLastPlayed(h.uniqueId()).orElse(null))
-                        .set((h, v) -> {
-                            final UUID id = h.uniqueId();
-                            final Instant played = ((SpongeServer) Sponge.server()).getPlayerDataManager().getFirstJoined(id).orElse(v);
-                            ((SpongeServer) Sponge.server()).getPlayerDataManager().setPlayerInfo(id, played, v);
-                        })
+                        .get(h -> ((SpongeDataHolderBridge) h).bridge$get(Keys.LAST_DATE_PLAYED).orElse(null))
+                        .set((h, v) -> ((SpongeDataHolderBridge) h).bridge$offer(Keys.LAST_DATE_PLAYED, v))
                         .supports(h -> h instanceof ServerPlayer || h instanceof SpongeUserData);
+
+        IdentifiableData.registerSpongeDataStore(registrator, Keys.FIRST_DATE_JOINED);
+        IdentifiableData.registerSpongeDataStore(registrator, Keys.LAST_DATE_PLAYED);
     }
     // @formatter:on
+
+    private static void registerSpongeDataStore(final DataProviderRegistrator registrator, final Key<Value<Instant>> key) {
+        registrator.spongeDataStore(key.key(), 1, Identifiable.class, builder -> {
+            final DataQuery query = DataQuery.of(key.key().value());
+            builder.key(key, (view, value) -> view.set(query, value.toEpochMilli()), view -> view.getLong(query).map(Instant::ofEpochMilli));
+        }, key);
+    }
 }

@@ -95,12 +95,18 @@ public class DataProviderRegistrator {
     }
 
     public void spongeDataStore(final ResourceKey datastoreKey, final int version, final DataContentUpdater[] contentUpdater, final Class dataHolder, final Key<? extends Value<?>>... dataKeys) {
+        this.spongeDataStore(datastoreKey, version, dataHolder, builder -> {
+            builder.updater(contentUpdater);
+            for (final Key dataKey : dataKeys) {
+                builder.key(dataKey, dataKey.key().value());
+            }
+        }, dataKeys);
+    }
+
+    public void spongeDataStore(final ResourceKey datastoreKey, final int version, final Class dataHolder, final Consumer<SpongeDataStoreBuilder> consumer, final Key<? extends Value<?>>... dataKeys) {
         final SpongeDataStoreBuilder builder = ((SpongeDataStoreBuilder) DataStore.builder()).pluginData(datastoreKey, version);
-        builder.updater(contentUpdater);
         builder.holder(dataHolder);
-        for (Key dataKey : dataKeys) {
-            builder.key(dataKey, dataKey.key().value());
-        }
+        consumer.accept(builder);
         SpongeDataManager.getDatastoreRegistry().register(builder.build(), Arrays.asList(dataKeys));
     }
 

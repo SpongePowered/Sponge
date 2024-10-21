@@ -86,7 +86,6 @@ import org.spongepowered.api.world.server.WorldManager;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.accessor.world.level.storage.LevelStorageSource_LevelStorageAccessAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
@@ -764,7 +763,6 @@ public abstract class SpongeWorldManager implements WorldManager {
         }
 
         ((SpongeUserManager) Sponge.server().userManager()).init();
-        ((SpongeServer) SpongeCommon.server()).getPlayerDataManager().load();
     }
 
     private PrimaryLevelData getOrCreateLevelData(@Nullable final Dynamic<?> dynamicLevelData, final LevelStem levelStem, final String directoryName) {

@@ -60,6 +60,7 @@ import org.objectweb.asm.Opcodes;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.Audiences;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
@@ -254,7 +255,9 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     private Optional<CompoundTag> impl$setPlayerDataForNewPlayers(final PlayerList playerList, final net.minecraft.server.level.ServerPlayer playerIn) {
         final Optional<CompoundTag> compound = this.shadow$load(playerIn);
         if (compound.isEmpty()) {
-            ((SpongeServer) SpongeCommon.server()).getPlayerDataManager().setPlayerInfo(playerIn.getUUID(), Instant.now(), Instant.now());
+            final Instant now = Instant.now();
+            ((ServerPlayer) playerIn).offer(Keys.FIRST_DATE_JOINED, now);
+            ((ServerPlayer) playerIn).offer(Keys.LAST_DATE_PLAYED, now);
         }
         return compound;
     }
@@ -480,7 +483,11 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     private void impl$setSpongePlayerDataForSinglePlayer(final net.minecraft.server.level.ServerPlayer entity, final CompoundTag compound) {
         entity.load(compound);
 
-        ((SpongeServer) this.shadow$getServer()).getPlayerDataManager().readPlayerData(compound, entity.getUUID(), null);
+        if (((ServerPlayer) entity).get(Keys.FIRST_DATE_JOINED).isEmpty()) {
+            ((SpongeServer) this.shadow$getServer()).getPlayerDataManager().readLegacyPlayerData((ServerPlayer) entity, compound, null);
+        }
+
+        ((ServerPlayer) entity).offer(Keys.LAST_DATE_PLAYED, Instant.now());
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")

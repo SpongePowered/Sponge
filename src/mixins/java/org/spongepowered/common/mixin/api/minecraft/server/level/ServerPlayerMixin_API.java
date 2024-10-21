@@ -72,7 +72,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.server.network.ServerCommonPacketListenerImplAccessor;
 import org.spongepowered.common.accessor.server.network.ServerGamePacketListenerImplAccessor;
 import org.spongepowered.common.accessor.world.level.border.WorldBorderAccessor;
@@ -202,11 +201,12 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
 
     @Override
     public boolean hasPlayedBefore() {
-        final Instant instant = ((SpongeServer) this.shadow$getServer()).getPlayerDataManager().getFirstJoined(this.uniqueId()).get();
-        final Instant toTheMinute = instant.truncatedTo(ChronoUnit.MINUTES);
-        final Instant now = Instant.now().truncatedTo(ChronoUnit.MINUTES);
-        final Duration timeSinceFirstJoined = Duration.of(now.minusMillis(toTheMinute.toEpochMilli()).toEpochMilli(), ChronoUnit.MINUTES);
-        return timeSinceFirstJoined.getSeconds() > 0;
+        return this.get(Keys.FIRST_DATE_JOINED).map(instant -> {
+            final Instant toTheMinute = instant.truncatedTo(ChronoUnit.MINUTES);
+            final Instant now = Instant.now().truncatedTo(ChronoUnit.MINUTES);
+            final Duration timeSinceFirstJoined = Duration.of(now.minusMillis(toTheMinute.toEpochMilli()).toEpochMilli(), ChronoUnit.MINUTES);
+            return timeSinceFirstJoined.getSeconds() > 0;
+        }).orElse(false);
     }
 
     @Override
