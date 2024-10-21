@@ -238,7 +238,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
             return zero;
         } else if (!this.shadow$isRunning()) {
             // Don't autosave while server is stopping
-            return Integer.MAX_VALUE;
+            return Integer.MIN_VALUE;
         }
 
         final int autoPlayerSaveInterval = SpongeConfigs.getCommon().get().world.playerAutoSaveInterval;
@@ -253,7 +253,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         this.isSaving = false;
 
         // force check to fail as we handle everything above
-        return Integer.MAX_VALUE;
+        return Integer.MIN_VALUE;
     }
 
     /**
