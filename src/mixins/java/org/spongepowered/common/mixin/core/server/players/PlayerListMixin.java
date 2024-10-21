@@ -76,7 +76,6 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.service.permission.PermissionService;
-import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
@@ -212,27 +211,29 @@ public abstract class PlayerListMixin implements PlayerListBridge {
                     return CompletableFuture.completedFuture(var3);
                 }
 
-                return CompletableFuture.supplyAsync(() -> {
-                    if (!Sponge.server().isWhitelistEnabled()) {
-                        return true;
-                    }
-                    final PermissionService permissionService = Sponge.server().serviceProvider().permissionService();
-                    Subject subject = permissionService.userSubjects().subject(param1.getId().toString()).orElse(null);
-                    if (subject == null) {
-                        subject = permissionService.defaults();
-                    }
-                    return subject.hasPermission(LoginPermissions.BYPASS_WHITELIST_PERMISSION);
-                }, SpongeCommon.server()).thenCompose(w -> {
-                    if (w) {
-                        return CompletableFuture.completedFuture(null);
-                    }
-                    return Sponge.server().serviceProvider().whitelistService().isWhitelisted(profile).<net.minecraft.network.chat.Component>thenApply(whitelisted -> {
-                        if (!whitelisted) {
-                            return net.minecraft.network.chat.Component.translatable("multiplayer.disconnect.not_whitelisted");
+                return CompletableFuture.supplyAsync(() -> Sponge.server().isWhitelistEnabled(), SpongeCommon.server())
+                    .thenCompose(whitelistEnabled -> {
+                        if (!whitelistEnabled) {
+                            return CompletableFuture.completedFuture(null);
                         }
-                        return null;
+                        final PermissionService permissionService = Sponge.server().serviceProvider().permissionService();
+                        return permissionService.userSubjects().loadSubject(param1.getId().toString()).handle((subject, ex) -> {
+                            if (ex == null) {
+                                return subject.hasPermission(LoginPermissions.BYPASS_WHITELIST_PERMISSION);
+                            }
+                            return permissionService.defaults().hasPermission(LoginPermissions.BYPASS_WHITELIST_PERMISSION);
+                        }).thenCompose(whitelistBypass -> {
+                            if (whitelistBypass) {
+                                return CompletableFuture.completedFuture(null);
+                            }
+                            return Sponge.server().serviceProvider().whitelistService().isWhitelisted(profile).<net.minecraft.network.chat.Component>thenApply(whitelisted -> {
+                                if (!whitelisted) {
+                                    return net.minecraft.network.chat.Component.translatable("multiplayer.disconnect.not_whitelisted");
+                                }
+                                return null;
+                            });
+                        });
                     });
-                });
             });
         }).thenApplyAsync(component -> {
             if (component != null) {

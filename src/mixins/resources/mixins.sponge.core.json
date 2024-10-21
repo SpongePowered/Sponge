@@ -68,6 +68,8 @@
         "server.commands.KickCommandMixin",
         "server.commands.SaveAllCommandMixin",
         "server.commands.TeleportCommandMixin",
+        "server.commands.WeatherCommandMixin",
+        "server.commands.WorldBorderCommandMixin",
         "server.dedicated.DedicatedPlayerListMixin",
         "server.level.ChunkHolderMixin",
         "server.level.ChunkMap_TrackedEntityMixin",

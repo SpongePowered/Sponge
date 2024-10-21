@@ -106,6 +106,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow public abstract void shadow$lookAt(EntityAnchorArgument.Anchor param0, Vec3 param1);
     @Shadow public abstract CompoundTag shadow$saveWithoutId(CompoundTag $$0);
     @Shadow public abstract Level shadow$level();
+    @Shadow public abstract Vec3 shadow$position();
     // @formatter:on
 
     @Override

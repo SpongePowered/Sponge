@@ -26,7 +26,6 @@
         "server.commands.SpreadPlayersCommandMixin_Vanilla",
         "server.level.ServerPlayerMixin_Vanilla",
         "server.network.ServerGamePacketListenerImplMixin_Vanilla",
-        "server.network.ServerLoginPacketListenerImplMixin_Vanilla",
         "server.packs.repository.PackRepositoryMixin_Vanilla",
         "world.entity.EntityMixin_Vanilla",
         "world.entity.EntityTypeMixin_Vanilla",

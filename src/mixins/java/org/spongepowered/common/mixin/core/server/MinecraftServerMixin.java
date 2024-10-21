@@ -230,7 +230,10 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     }
 
     @ModifyConstant(method = "tickServer",
-        slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/server/MinecraftServer;ticksUntilAutosave:I", ordinal = 0)),
+        slice = @Slice(
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;autoSave()V", ordinal = 1),
+            from = @At(value = "FIELD", target = "Lnet/minecraft/server/MinecraftServer;ticksUntilAutosave:I", ordinal = 0)
+        ),
         constant = @Constant(intValue = 0, ordinal = 0, expandZeroConditions = Constant.Condition.LESS_THAN_OR_EQUAL_TO_ZERO))
     private int impl$getSaveTickInterval(final int zero) {
         if (!this.shadow$isDedicatedServer()) {

@@ -70,7 +70,8 @@ public final class UpdateLightSideEffect implements ProcessingSideEffect {
         //         )
         //     ) {
         if (LightEngine.hasDifferentLightProperties(oldState.state(), currentState)) {
-            ProfilerFiller filler = Profiler.get();
+            // ProfilerFiller $$12 = this.level.getProfiler();
+            final ProfilerFiller filler = Profiler.get();
 
             filler.push("updateSkyLightSources");
 //            this.skyLightSources.update(this, $$6, $$3, $$8);

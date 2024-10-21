@@ -35,6 +35,11 @@ import java.util.Set;
 
 public final class ConnectionUtil {
 
+    public static boolean isIntentPhase(final EngineConnection connection) {
+        final EngineConnectionState state = (EngineConnectionState) ((SpongeEngineConnection) connection).connection().getPacketListener();
+        return state instanceof EngineConnectionState.Intent;
+    }
+
     public static boolean isLoginPhase(final EngineConnection connection) {
         final EngineConnectionState state = (EngineConnectionState) ((SpongeEngineConnection) connection).connection().getPacketListener();
         return state instanceof EngineConnectionState.Login;
@@ -48,6 +53,12 @@ public final class ConnectionUtil {
     public static TransactionStore getTransactionStore(final EngineConnection connection) {
         final Connection networkManager = ((SpongeEngineConnection) connection).connection();
         return ((ConnectionBridge) networkManager).bridge$getTransactionStore();
+    }
+
+    public static void checkHandshakeOrIntentPhase(final EngineConnection connection) {
+        if (!ConnectionUtil.isIntentPhase(connection) && !ConnectionUtil.isLoginPhase(connection)) {
+            throw new IllegalStateException("This dispatcher may only be used for connections in the handshake phase.");
+        }
     }
 
     public static void checkHandshakePhase(final EngineConnection connection) {

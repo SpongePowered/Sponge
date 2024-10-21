@@ -22,29 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.neoforge.mixin.core.server.network;
+package org.spongepowered.common.mixin.core.server.commands;
 
-import net.minecraft.network.protocol.login.ServerLoginPacketListener;
-import net.minecraft.server.network.ServerLoginPacketListenerImpl;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.commands.WorldBorderCommand;
+import net.minecraft.server.level.ServerLevel;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.network.ServerLoginPacketListenerImplBridge;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(ServerLoginPacketListenerImpl.class)
-public abstract class ServerLoginPacketListenerImplMixin_Neo implements ServerLoginPacketListener, ServerLoginPacketListenerImplBridge {
+@Mixin(WorldBorderCommand.class)
+public abstract class WorldBorderCommandMixin {
 
-    // @formatter:off
-    @Shadow private ServerLoginPacketListenerImpl.State state;
-    // @formatter:on
-
-    @Inject(method = "tick", at = @At("HEAD"))
-    private void impl$onTick(final CallbackInfo ci) {
-        // In SpongeVanilla we do channel registration during this state, not sure if we need to do anything in SpongeNeo
-        if (this.state == ServerLoginPacketListenerImpl.State.NEGOTIATING) {
-            this.state = ServerLoginPacketListenerImpl.State.VERIFYING;
-        }
+    @Redirect(method = {
+        "setDamageBuffer",
+        "setDamageAmount",
+        "setWarningTime",
+        "setWarningDistance",
+        "getSize",
+        "setCenter",
+        "setSize"
+    }, at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;overworld()Lnet/minecraft/server/level/ServerLevel;"))
+    private static ServerLevel impl$useCurrentWorld(final MinecraftServer instance, final CommandSourceStack $$0) {
+        return $$0.getLevel();
     }
 }

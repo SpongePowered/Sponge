@@ -25,7 +25,6 @@
         "server.commands.SpreadPlayersCommandMixin_Forge",
         "server.level.ServerPlayerMixin_Forge",
         "server.network.ServerGamePacketListenerImplMixin_Forge",
-        "server.network.ServerLoginPacketListenerImplMixin_Forge",
         "world.entity.LivingEntityMixin_Forge",
         "world.entity.LivingEntityMixin_Forge_Attack_Impl",
         "world.entity.item.ItemEntityMixin_Forge",
