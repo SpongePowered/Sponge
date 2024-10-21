@@ -37,4 +37,6 @@ public interface FoodDataAccessor {
 
     @Accessor("exhaustionLevel") void accessor$exhaustionLevel(final float exhaustionLevel);
 
+    @Accessor("exhaustionLevel") float accessor$exhaustionLevel();
+
 }

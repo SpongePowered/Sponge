@@ -53,10 +53,10 @@ public final class NotifyNeighborSideEffect implements ProcessingSideEffect {
         // if (!this.isClientSide && (flags & 1) != 0) {
         if (flag.updateNeighbors()) {
             // this.notifyNeighbors(pos, originalState.getBlock());
-            world.blockUpdated(oldState.pos, oldState.state.getBlock());
+            world.blockUpdated(oldState.pos(), oldState.state().getBlock());
             if (newState.hasAnalogOutputSignal()) {
                 // this.updateComparatorOutputLevel(pos, block);
-                world.updateNeighbourForOutputSignal(oldState.pos, newState.getBlock());
+                world.updateNeighbourForOutputSignal(oldState.pos(), newState.getBlock());
             }
         }
         return EffectResult.NULL_PASS;

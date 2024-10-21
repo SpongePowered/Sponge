@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.inventory.event.world.inventory;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
@@ -33,11 +34,11 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -64,6 +65,10 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
 
     @Shadow @Final private net.minecraft.world.inventory.CraftingContainer craftSlots;
 
+    @Shadow private NonNullList<ItemStack> shadow$getRemainingItems(CraftingInput input, Level level) {
+        throw new IllegalStateException("Untransformed shadow method!");
+    }
+
     public ResultSlotMixin_Inventory(final Container inventoryIn, final int index, final int xPosition, final int yPosition) {
         super(inventoryIn, index, xPosition, yPosition);
     }
@@ -87,8 +92,11 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
 
     @Inject(method = "onTake", at = @At("HEAD"))
     private void impl$beforeTake(final Player thePlayer, final ItemStack stack, final CallbackInfo ci) {
+        if (!(thePlayer.level() instanceof ServerLevel sl)) {
+            return;
+        }
         if (this.impl$onTakeRecipe == null || !this.impl$onTakeRecipe.value().matches(this.craftSlots.asCraftInput(), thePlayer.level())) {
-            final RecipeManager manager = thePlayer.level().getRecipeManager();
+            final RecipeManager manager = sl.recipeAccess();
             this.impl$onTakeRecipe = manager.getRecipeFor(RecipeType.CRAFTING, this.craftSlots.asCraftInput(), thePlayer.level()).orElse(null);
         }
 
@@ -105,12 +113,12 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
         stack.shrink(1);
     }
 
-    @Redirect(method = "onTake", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/crafting/RecipeManager;getRemainingItemsFor(Lnet/minecraft/world/item/crafting/RecipeType;Lnet/minecraft/world/item/crafting/RecipeInput;Lnet/minecraft/world/level/Level;)Lnet/minecraft/core/NonNullList;"))
-    private <I extends RecipeInput, T extends Recipe<I>> NonNullList<ItemStack> impl$onGetRemainingItems(final RecipeManager recipeManager, final RecipeType<T> recipeTypeIn, final I recipeInput, final net.minecraft.world.level.Level worldIn) {
+    @Redirect(method = "onTake", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/ResultSlot;getRemainingItems(Lnet/minecraft/world/item/crafting/CraftingInput;Lnet/minecraft/world/level/Level;)Lnet/minecraft/core/NonNullList;"))
+    private NonNullList<ItemStack> impl$onGetRemainingItems(ResultSlot instance, CraftingInput $$0, Level $$1) {
         if (this.impl$onTakeRecipe == null) {
-            return NonNullList.withSize(recipeInput.size(), ItemStack.EMPTY);
+            return NonNullList.withSize($$0.size(), ItemStack.EMPTY);
         }
-        return worldIn.getRecipeManager().getRemainingItemsFor(recipeTypeIn, recipeInput, worldIn);
+        return this.shadow$getRemainingItems($$0, $$1);
     }
 
     @Inject(method = "onTake", cancellable = true, at = @At("RETURN"))

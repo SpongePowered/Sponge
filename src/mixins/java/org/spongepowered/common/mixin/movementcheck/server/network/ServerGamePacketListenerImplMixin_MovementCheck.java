@@ -42,7 +42,7 @@ public abstract class ServerGamePacketListenerImplMixin_MovementCheck {
     @ModifyConstant(method = "handleMovePlayer", constant = @Constant(floatValue = 100.0F, ordinal = 0), slice =
         @Slice(
             from = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;isFallFlying()Z", ordinal = 0),
-            to = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;isSingleplayerOwner()Z", ordinal = 0)
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;getBoundingBox()Lnet/minecraft/world/phys/AABB;", ordinal = 0)
         )
     )
     private float movementCheck$onMovedTooQuickly(final float value) {
@@ -55,7 +55,7 @@ public abstract class ServerGamePacketListenerImplMixin_MovementCheck {
 
     @ModifyConstant(method = "handleMovePlayer", constant = @Constant(doubleValue = 0.0625D, ordinal = 0), slice =
         @Slice(
-            from = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;isChangingDimension()Z", ordinal = 1),
+            from = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;isChangingDimension()Z", ordinal = 0),
             to = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;isSleeping()Z", ordinal = 1)
         )
     )

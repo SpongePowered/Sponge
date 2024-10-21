@@ -30,7 +30,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
@@ -82,7 +81,7 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
 
     @Inject(method = "useItem", cancellable = true,
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/item/ItemCooldowns;isOnCooldown(Lnet/minecraft/world/item/Item;)Z"))
+                    target = "Lnet/minecraft/world/item/ItemCooldowns;isOnCooldown(Lnet/minecraft/world/item/ItemStack;)Z"))
     public void impl$callInteractItemSecondary(final ServerPlayer player, final Level level, final ItemStack stack, final InteractionHand hand,
         final CallbackInfoReturnable<InteractionResult> cir
     ) {
@@ -137,14 +136,14 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
             final boolean flag1 = playerIn.isSecondaryUseActive() && flag;
             final ItemStack copiedStack = stackIn.copy();
             if (useBlock != Tristate.FALSE && !flag1) { // Sponge check useBlock
-                final ItemInteractionResult result = blockstate.useItemOn(playerIn.getItemInHand(handIn), worldIn, playerIn, handIn, blockRaytraceResultIn);
+                final InteractionResult result = blockstate.useItemOn(playerIn.getItemInHand(handIn), worldIn, playerIn, handIn, blockRaytraceResultIn);
 
                 if (result.consumesAction()) {
                     CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(playerIn, blockpos, copiedStack);
-                    return result.result();
+                    return result;
                 }
 
-                if (result == ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION && handIn == InteractionHand.MAIN_HAND) {
+                if (result instanceof InteractionResult.TryEmptyHandInteraction && handIn == InteractionHand.MAIN_HAND) {
                     final AbstractContainerMenu lastOpenContainer = playerIn.containerMenu; // Sponge
                     final InteractionResult result2 = blockstate.useWithoutItem(worldIn, playerIn, blockRaytraceResultIn);
                     if (result2.consumesAction()) {
@@ -169,7 +168,7 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
                 }
             }
 
-            if (!stackIn.isEmpty() && !playerIn.getCooldowns().isOnCooldown(stackIn.getItem())) {
+            if (!stackIn.isEmpty() && !playerIn.getCooldowns().isOnCooldown(stackIn)) {
                 // Sponge start
                 if (useItem == Tristate.FALSE) {
                     ((ServerPlayerGameModeBridge) this).bridge$setInteractBlockRightClickCancelled(true);

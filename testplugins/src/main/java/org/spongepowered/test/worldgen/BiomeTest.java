@@ -79,14 +79,12 @@ public final class BiomeTest {
                 });
             }
         });
-        biome.carvers().forEach((step, list) -> {
-            if (!list.isEmpty()) {
-                ctx.sendMessage(Identity.nil(), Component.text("Carvers Step:", NamedTextColor.DARK_AQUA));
-                list.forEach(configuredCarver -> {
-                    ctx.sendMessage(Identity.nil(), Component.text(" - " + configuredCarver.type().getClass().getSimpleName(), NamedTextColor.GRAY));
-                });
-            }
-        });
+        if (!biome.carvers().isEmpty()) {
+            ctx.sendMessage(Identity.nil(), Component.text("Carvers Step:", NamedTextColor.DARK_AQUA));
+            biome.carvers().forEach(configuredCarver -> {
+                ctx.sendMessage(Identity.nil(), Component.text(" - " + configuredCarver.type().getClass().getSimpleName(), NamedTextColor.GRAY));
+            });
+        }
 
         biome.ambientMood().ifPresent(mood -> {
             ctx.sendMessage(Identity.nil(), Component.text("Mood: " + mood, NamedTextColor.DARK_AQUA));
@@ -112,7 +110,7 @@ public final class BiomeTest {
 
         final BiomeTemplate template = BiomeTemplate.builder().fromValue(defaultBiome)
                 .add(Keys.FEATURES, Map.of(DecorationSteps.LAKES.get(), List.of(PlacedFeatures.LAKE_LAVA_SURFACE.get())))
-                .add(Keys.CARVERS, Map.of())
+                .add(Keys.CARVERS, List.of())
                 .add(Keys.NATURAL_SPAWNERS, Map.of(EntityCategories.MONSTER.get(), spawner))
                 .add(Keys.AMBIENT_ADDITIONAL_SOUND, SoundConfig.factory().ofAdditional(SoundTypes.ENTITY_CREEPER_PRIMED.get(), 0.001))
                 .add(Keys.AMBIENT_PARTICLE, ParticleConfig.of(ParticleTypes.BUBBLE.get(), 0.01f))

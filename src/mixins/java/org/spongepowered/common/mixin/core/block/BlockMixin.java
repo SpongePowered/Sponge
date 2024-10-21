@@ -46,15 +46,10 @@ import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.util.ReflectionUtil;
 import org.spongepowered.math.vector.Vector3d;
 
 @Mixin(value = Block.class)
 public abstract class BlockMixin implements BlockBridge, TrackableBridge {
-
-    private final boolean impl$isVanilla = this.getClass().getName().startsWith("net.minecraft.");
-    private final boolean impl$hasCollideLogic = ReflectionUtil.isStepOnDeclared(this.getClass());
-    private final boolean impl$hasCollideWithStateLogic = ReflectionUtil.isEntityInsideDeclared(this.getClass());
 
     /**
      * We captured the dye color when creating the Block.Properties.
@@ -131,18 +126,4 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge {
         }
     }
 
-    @Override
-    public boolean bridge$isVanilla() {
-        return this.impl$isVanilla;
-    }
-
-    @Override
-    public boolean bridge$hasCollideLogic() {
-        return this.impl$hasCollideLogic;
-    }
-
-    @Override
-    public boolean bridge$hasCollideWithStateLogic() {
-        return this.impl$hasCollideWithStateLogic;
-    }
 }

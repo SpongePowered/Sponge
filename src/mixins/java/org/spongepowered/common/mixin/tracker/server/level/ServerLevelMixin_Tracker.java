@@ -26,14 +26,22 @@ package org.spongepowered.common.mixin.tracker.server.level;
 
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundExplodePacket;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockEventData;
 import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.ExplosionDamageCalculator;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerExplosion;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.block.piston.PistonBaseBlock;
@@ -48,6 +56,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.entity.BlockEntity;
+import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -55,9 +64,8 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -66,8 +74,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.TrackableBridge;
+import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
+import org.spongepowered.common.bridge.world.entity.GrieferBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge;
 import org.spongepowered.common.bridge.world.level.block.state.BlockStateBridge;
@@ -99,6 +109,7 @@ import org.spongepowered.common.event.tracking.context.transaction.pipeline.Chun
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.TileEntityPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.WorldPipeline;
+import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.mixin.tracker.world.level.LevelMixin_Tracker;
 import org.spongepowered.common.util.Constants;
@@ -111,14 +122,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 @Mixin(ServerLevel.class)
 public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implements TrackedWorldBridge {
 
-    // @formatting:off
-    @Shadow @Final List<ServerPlayer> players;
-    // @formatting:on
 
     @Redirect(
             // This normally would target this.entityTickList.forEach((var2x) ->
@@ -162,9 +169,9 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
 
     @Redirect(method = "tickFluid(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/material/Fluid;)V",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/level/material/FluidState;tick(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)V"))
-    private void tracker$wrapFluidTick(final FluidState fluidState, final net.minecraft.world.level.Level level, final BlockPos pos) {
-        TrackingUtil.updateTickFluid(this, fluidState, pos);
+            target = "Lnet/minecraft/world/level/material/FluidState;tick(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)V"))
+    private void tracker$wrapFluidTick(final FluidState fluidState, final ServerLevel level, final BlockPos pos, final BlockState blockState) {
+        TrackingUtil.updateTickFluid(this, fluidState, pos, blockState);
     }
 
     private <T> ScheduledTick<T> tracker$createTick(final BlockPos pos, final T type, final int triggerTick, final TickPriority priority) {
@@ -222,10 +229,10 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
 
     @Redirect(method = "tickChunk(Lnet/minecraft/world/level/chunk/LevelChunk;I)V",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/level/material/FluidState;randomTick(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/util/RandomSource;)V"
+            target = "Lnet/minecraft/world/level/material/FluidState;randomTick(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Lnet/minecraft/util/RandomSource;)V"
         )
     )
-    private void tracker$wrapFluidRandomTick(final FluidState fluidState, final net.minecraft.world.level.Level worldIn, final BlockPos pos, final RandomSource random) {
+    private void tracker$wrapFluidRandomTick(final FluidState fluidState, final ServerLevel worldIn, final BlockPos pos, final RandomSource random) {
         TrackingUtil.randomTickFluid(this, fluidState, pos, this.random);
     }
 
@@ -329,81 +336,102 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         return list.add(blockEventData);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Override
-    public Explosion tracker$triggerInternalExplosion(org.spongepowered.api.world.explosion.Explosion explosion,
-        final Function<? super Explosion, ? extends PhaseContext<@NonNull ?>> contextCreator) {
-        // Sponge start
-        final Explosion originalExplosion = (Explosion) explosion;
+    @Redirect(method = "explode", at = @At(value = "NEW",
+        target = "(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;Lnet/minecraft/world/level/ExplosionDamageCalculator;Lnet/minecraft/world/phys/Vec3;FZLnet/minecraft/world/level/Explosion$BlockInteraction;)Lnet/minecraft/world/level/ServerExplosion;"))
+    private ServerExplosion tracker$onExplode(final ServerLevel $$0, final Entity entity, final DamageSource $$2,
+        final ExplosionDamageCalculator $$3, final Vec3 $$4, final float radius, final boolean $$6,
+        final Explosion.BlockInteraction blockInteraction) {
+        final var cannotGrief = entity instanceof GrieferBridge grieferBridge && !grieferBridge.bridge$canGrief();
+        var finalRadius = radius;
+        if (entity instanceof ExplosiveBridge bridge) {
+            finalRadius = bridge.bridge$getExplosionRadius().orElse(finalRadius);
+        }
+
+        return new ServerExplosion($$0, entity, $$2, $$3, $$4, finalRadius, $$6, cannotGrief ? Explosion.BlockInteraction.KEEP : blockInteraction);
+    }
+
+    private org.spongepowered.api.world.explosion.Explosion tracker$apiExplosion;
+
+    @Redirect(method = "explode", at = @At(value = "INVOKE",
+        target = "Lnet/minecraft/world/level/ServerExplosion;explode()V"))
+    private void tracker$onExplode(final ServerExplosion instance) {
+        var mcExplosion = instance;
+        final var entity = instance.getDirectSourceEntity();
+        // TODO entity can be null, what is our API explosive then?
+        // TODO API explosive can be smth. that is not an entity?
+        final var thisWorld = (ServerWorld) this;
+
+        final var explosionBuilder = org.spongepowered.api.world.explosion.Explosion.builder().from((org.spongepowered.api.world.explosion.Explosion) mcExplosion);
+
+        Explosive apiExplosive = (Explosive) entity;
+        final var detonateEvent = SpongeEventFactory.createDetonateExplosiveEvent(PhaseTracker.getCauseStackManager().currentCause(),
+                explosionBuilder, apiExplosive, (org.spongepowered.api.world.explosion.Explosion) instance);
+        if (Sponge.eventManager().post(detonateEvent)) {
+            this.tracker$cancelExplosionEffects(entity);
+            return;
+        }
+
+        // Build the explosion from event
+        var apiExplosion = detonateEvent.explosionBuilder().build();
+        if (apiExplosion.radius() <= 0) {
+            this.tracker$cancelExplosionEffects(entity);
+            return;
+        }
+
         if (ShouldFire.EXPLOSION_EVENT_PRE) {
             // Set up the pre event
-            final ExplosionEvent.Pre
-                    event =
-                    SpongeEventFactory.createExplosionEventPre(
-                            PhaseTracker.SERVER.currentCause(),
-                            explosion, ((org.spongepowered.api.world.server.ServerWorld) this));
+            final ExplosionEvent.Pre event =
+                SpongeEventFactory.createExplosionEventPre(PhaseTracker.SERVER.currentCause(), apiExplosion, thisWorld);
             if (SpongeCommon.post(event)) {
-                return (Explosion) explosion;
+                this.tracker$cancelExplosionEffects(entity);
+                return;
             }
-            explosion = event.explosion();
-        }
-        final Explosion mcExplosion;
-        try {
-            // Since we already have the API created implementation Explosion, let's use it.
-            mcExplosion = (Explosion) explosion;
-        } catch (final Exception e) {
-            new org.spongepowered.asm.util.PrettyPrinter(60).add("Explosion not compatible with this implementation").centre().hr()
-                .add("An explosion that was expected to be used for this implementation does not")
-                .add("originate from this implementation.")
-                .add(e)
-                .trace();
-            return originalExplosion;
+
+            try {
+                // Since we already have the API created implementation Explosion, let's use it.
+                mcExplosion = (ServerExplosion) event.explosion();
+                apiExplosion = event.explosion();
+            } catch (final ClassCastException e) {
+                new org.spongepowered.asm.util.PrettyPrinter(60).add("Explosion not compatible with this implementation").centre().hr()
+                    .add("An explosion that was expected to be used for this implementation does not originate from this implementation.")
+                    .trace();
+                mcExplosion = (ServerExplosion) detonateEvent.explosionBuilder().build();
+            }
         }
 
-        try (final PhaseContext<@NonNull ?> ignored = contextCreator.apply(mcExplosion)
-            .source(((Optional) explosion.sourceExplosive()).orElse(this))) {
-            ignored.buildAndSwitch();
-            final boolean damagesTerrain = explosion.shouldBreakBlocks();
-            // Sponge End
+        try (final PhaseContext<@NonNull ?> ctx = GeneralPhase.State.EXPLOSION.createPhaseContext(PhaseTracker.SERVER).explosion(mcExplosion)
+            .source(((Optional) apiExplosion.sourceExplosive()).orElse(this))) {
+            ctx.buildAndSwitch();
 
             mcExplosion.explode();
-            mcExplosion.finalizeExplosion(true);
-
-            if (!damagesTerrain) {
-                mcExplosion.clearToBlow();
-            }
-
-            // Sponge Start - Don't send explosion packets, they're spammy, we can replicate it on the server entirely
-            /*
-            for (EntityPlayer entityplayer : this.playerEntities) {
-                if (entityplayer.getDistanceSq(x, y, z) < 4096.0D) {
-                    ((EntityPlayerMP) entityplayer).connection
-                        .sendPacket(new SPacketExplosion(x, y, z, strength, mcExplosion.getAffectedBlockPositions(),
-                            mcExplosion.getPlayerKnockbackMap().get(entityplayer)));
-                }
-            }
-
-             */
-            // Use the knockback map and set velocities, since the explosion packet isn't sent, we need to replicate
-            // the players being moved.
-            for (final ServerPlayer playerEntity : this.players) {
-                final Vec3 knockback = mcExplosion.getHitPlayers().get(playerEntity);
-                if (knockback != null) {
-                    // In Vanilla, doExplosionB always updates the 'motion[xyz]' fields for every entity in range.
-                    // However, this field is completely ignored for players (since 'velocityChanged') is never set, and
-                    // a completely different value is sent through 'SPacketExplosion'.
-
-                    // To replicate this behavior, we manually send a velocity packet. It's critical that we don't simply
-                    // add to the 'motion[xyz]' fields, as that will end up using the value set by 'doExplosionB', which must be
-                    // ignored.
-                    playerEntity.connection.send(new ClientboundSetEntityMotionPacket(playerEntity.getId(), new Vec3(knockback.x, knockback.y, knockback.z)));
-                }
-            }
-            // Sponge End
-
         }
-        // Sponge End
-        return mcExplosion;
+
+        this.tracker$apiExplosion = apiExplosion;
+    }
+
+    /**
+     * See {@link net.minecraft.client.multiplayer.ClientPacketListener#handleExplosion} for client side handling
+     */
+    @Redirect(method = "explode", at = @At(value = "INVOKE",
+        target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;send(Lnet/minecraft/network/protocol/Packet;)V"))
+    private void tracker$onClientboundExplodePacket(final ServerGamePacketListenerImpl instance, final Packet packet) {
+        final var originalPacket = (ClientboundExplodePacket) packet;
+        ((ServerLevelBridge) this).bridge$handleExplosionPacket(instance, this.tracker$apiExplosion, originalPacket);
+    }
+
+    @Inject(method = "explode", at = @At(value = "RETURN"))
+    private void tracker$afterExplodeCleanup(final Entity $$0, final DamageSource $$1,
+        final ExplosionDamageCalculator $$2, final double $$3, final double $$4, final double $$5, final float $$6,
+        final boolean $$7, final Level.ExplosionInteraction $$8, final ParticleOptions $$9, final ParticleOptions $$10,
+        final Holder<SoundEvent> $$11, final CallbackInfo ci) {
+        this.tracker$apiExplosion = null;
+    }
+
+    private void tracker$cancelExplosionEffects(final Entity entity) {
+        // TODO cancel effects
+        if (entity instanceof ExplosiveBridge explosiveBridge) {
+            explosiveBridge.bridge$cancelExplosion();
+        }
     }
 
     @Override
@@ -619,7 +647,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
             final TileEntityPipeline pipeline = TileEntityPipeline.kickOff((ServerLevel) (Object) this, immutable)
                 .addEffect(RemoveTileEntityFromChunkEffect.getInstance())
                 .build();
-            pipeline.processEffects(current, new PipelineCursor(tileentity.getBlockState(), 0,immutable, tileentity, (Entity) null, Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT));
+            pipeline.processEffects(current, new PipelineCursor(tileentity.getBlockState(), immutable, tileentity, (Entity) null, Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT));
             return;
         }
         super.shadow$removeBlockEntity(immutable);
@@ -650,7 +678,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
                 final TileEntityPipeline pipeline = TileEntityPipeline.kickOff((ServerLevel) (Object) this, immutable)
                     .addEffect(SetAndRegisterBlockEntityToLevelChunk.getInstance())
                     .build();
-                pipeline.processEffects(current, new PipelineCursor(proposed.getBlockState(), 0,immutable, proposed, (Entity) null, Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT));
+                pipeline.processEffects(current, new PipelineCursor(proposed.getBlockState(), immutable, proposed, (Entity) null, Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT));
                 return;
             }
         }

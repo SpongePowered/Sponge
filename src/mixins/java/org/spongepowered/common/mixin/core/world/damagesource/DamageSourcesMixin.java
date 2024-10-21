@@ -31,7 +31,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.accessor.world.level.ExplosionAccessor;
+import org.spongepowered.common.accessor.world.level.ServerExplosionAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 
@@ -45,7 +45,7 @@ public abstract class DamageSourcesMixin {
         // When indirect source is not set
         if (explosion.getIndirectSourceEntity() == null
                 && explosion.getDirectSourceEntity() instanceof CreatorTrackedBridge creatorBridge
-                && !((LevelBridge) ((ExplosionAccessor) explosion).accessor$level()).bridge$isFake()) {
+                && !((LevelBridge) ((ServerExplosionAccessor) explosion).accessor$level()).bridge$isFake()) {
             // check creator
             var indirectSource = creatorBridge.tracker$getCreatorUUID().flatMap(x -> Sponge.server().player(x));
             if (indirectSource.isPresent()) {

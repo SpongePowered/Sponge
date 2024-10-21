@@ -26,10 +26,12 @@ package org.spongepowered.common.bridge.world.item.crafting;
 
 import net.minecraft.world.item.crafting.Ingredient;
 
+import java.util.Optional;
+
 public interface SmithingRecipeBridge extends RecipeResultBridge {
 
-    Ingredient bridge$template();
-    Ingredient bridge$base();
-    Ingredient bridge$addition();
+    Optional<Ingredient> bridge$template();
+    Optional<Ingredient> bridge$base();
+    Optional<Ingredient> bridge$addition();
 
 }

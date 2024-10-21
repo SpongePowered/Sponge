@@ -54,12 +54,11 @@ import net.minecraft.world.entity.monster.SpellcasterIllager;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.raid.Raid;
-import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.Rarity;
-import net.minecraft.world.item.Tiers;
 import net.minecraft.world.item.component.FireworkExplosion;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
@@ -142,6 +141,17 @@ public final class VanillaRegistryLoader {
             map.put(EnderDragonPhase.HOVERING, "hover");
         }, phase -> CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, ((EnderDragonPhaseAccessor) phase).accessor$name()));
         this.holder.createRegistry(RegistryTypes.FIREWORK_SHAPE, VanillaRegistryLoader.fireworkShape());
+//        final var materials = new HashMap<ArmorMaterial, String>();
+//        materials.put(ArmorMaterials.LEATHER, ArmorMaterials.LEATHER.modelId().toString());
+//        materials.put(ArmorMaterials.CHAIN, ArmorMaterials.CHAIN.modelId().toString());
+//        materials.put(ArmorMaterials.IRON, ArmorMaterials.IRON.modelId().toString());
+//        materials.put(ArmorMaterials.GOLD, ArmorMaterials.GOLD.modelId().toString());
+//        materials.put(ArmorMaterials.DIAMOND, ArmorMaterials.DIAMOND.modelId().toString());
+//        materials.put(ArmorMaterials.TURTLE_SCUTE, ResourceKey.minecraft("turtle").toString());
+//        materials.put(ArmorMaterials.NETHERITE, ArmorMaterials.NETHERITE.modelId().toString());
+//        materials.put(ArmorMaterials.ARMADILLO_SCUTE, ArmorMaterials.ARMADILLO_SCUTE.modelId().toString());
+//
+//        this.naming(RegistryTypes.ARMOR_MATERIAL, materials.keySet().toArray(new ArmorMaterial[]{}), materials);
         this.knownName(RegistryTypes.GAME_RULE, GameRulesAccessor.accessor$GAME_RULE_TYPES().keySet(), rule -> CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, rule.getId()));
     }
 
@@ -155,7 +165,6 @@ public final class VanillaRegistryLoader {
             map.put(AttributeModifier.Operation.ADD_MULTIPLIED_BASE, "multiply_base");
             map.put(AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, "multiply_total");
         });
-        this.automaticName(RegistryTypes.BOAT_TYPE, Boat.Type.values());
         this.automaticName(RegistryTypes.CHEST_ATTACHMENT_TYPE, ChestType.values());
         this.automaticName(RegistryTypes.COLLISION_RULE, Team.CollisionRule.values());
         this.automaticName(RegistryTypes.COMPARATOR_MODE, ComparatorMode.values());
@@ -165,15 +174,16 @@ public final class VanillaRegistryLoader {
         this.automaticName(RegistryTypes.DRIPSTONE_SEGMENT, DripstoneThickness.values());
         this.automaticName(RegistryTypes.EQUIPMENT_GROUP, EquipmentSlot.Type.values());
         this.automaticName(RegistryTypes.EQUIPMENT_TYPE, EquipmentSlot.values());
-        this.automaticName(RegistryTypes.FOX_TYPE, Fox.Type.values());
+        this.automaticName(RegistryTypes.FOX_TYPE, Fox.Variant.values());
         this.automaticName(RegistryTypes.GAME_MODE, GameType.values());
         this.automaticName(RegistryTypes.HAND_PREFERENCE, HumanoidArm.values());
         this.automaticName(RegistryTypes.HAND_TYPE, InteractionHand.values());
         this.automaticName(RegistryTypes.INSTRUMENT_TYPE, NoteBlockInstrument.values());
         this.automaticName(RegistryTypes.ITEM_RARITY, Rarity.values());
-        this.automaticName(RegistryTypes.ITEM_TIER, Tiers.values());
+        // TODO - Figure out if we should make a registry - Snapshot 24w34a
+//        this.automaticName(RegistryTypes.ITEM_TIER, ToolMaterial.values());
         this.automaticName(RegistryTypes.JIGSAW_BLOCK_ORIENTATION, FrontAndTop.values());
-        this.automaticName(RegistryTypes.MOOSHROOM_TYPE, MushroomCow.MushroomType.values());
+        this.automaticName(RegistryTypes.MOOSHROOM_TYPE, MushroomCow.Variant.values());
         this.automaticName(RegistryTypes.OBJECTIVE_DISPLAY_MODE, ObjectiveCriteria.RenderType.values());
         this.automaticName(RegistryTypes.PANDA_GENE, Panda.Gene.values());
         this.automaticName(RegistryTypes.PHANTOM_PHASE, Phantom.AttackPhase.values());
@@ -202,7 +212,6 @@ public final class VanillaRegistryLoader {
         this.automaticName(RegistryTypes.GRASS_COLOR_MODIFIER, BiomeSpecialEffects.GrassColorModifier.values());
         this.automaticName(RegistryTypes.PRECIPITATION, Biome.Precipitation.values());
         this.automaticName(RegistryTypes.TEMPERATURE_MODIFIER, Biome.TemperatureModifier.values());
-        this.automaticName(RegistryTypes.CARVING_STEP, GenerationStep.Carving.values());
         this.automaticName(RegistryTypes.DECORATION_STEP, GenerationStep.Decoration.values());
         this.automaticName(RegistryTypes.PARROT_TYPE, Parrot.Variant.values());
         this.automaticName(RegistryTypes.RABBIT_TYPE, Rabbit.Variant.values());
@@ -219,6 +228,7 @@ public final class VanillaRegistryLoader {
         this.automaticName(RegistryTypes.PUSH_REACTION, PushReaction.values());
         this.automaticName(RegistryTypes.TRIAL_SPAWNER_STATE, TrialSpawnerState.values());
         this.automaticName(RegistryTypes.VAULT_STATE, VaultState.values());
+        this.automaticName(RegistryTypes.EXPLOSION_BLOCK_INTERACTION, Explosion.BlockInteraction.values());
     }
 
     private static RegistryLoader<Criterion> criterion() {

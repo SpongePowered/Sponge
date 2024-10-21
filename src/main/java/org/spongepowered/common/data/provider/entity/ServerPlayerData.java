@@ -32,13 +32,11 @@ import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.network.protocol.game.ClientboundSetExperiencePacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
-import net.minecraft.network.protocol.game.CommonPlayerSpawnInfo;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.stats.Stat;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.biome.BiomeManager;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.chat.ChatVisibilities;
@@ -143,16 +141,8 @@ public final class ServerPlayerData {
             // Add Entity
             h.serverLevel().getChunkSource().addEntity(h);
             // Reconnect local player
-            h.connection.send(new ClientboundRespawnPacket(new CommonPlayerSpawnInfo(
-                    h.level().dimensionTypeRegistration(),
-                    h.level().dimension(),
-                    BiomeManager.obfuscateSeed(h.serverLevel().getSeed()),
-                    h.gameMode.getGameModeForPlayer(),
-                    h.gameMode.getPreviousGameModeForPlayer(),
-                    h.serverLevel().isDebug(),
-                    h.serverLevel().isFlat(),
-                    h.getLastDeathLocation(),
-                    h.getPortalCooldown()), (byte) 0));
+            final var commonSpawnInfo = h.createCommonSpawnInfo(h.serverLevel());
+            h.connection.send(new ClientboundRespawnPacket(commonSpawnInfo, (byte) 0));
             // tp - just in case
             h.connection.teleport(h.getX(), h.getY(), h.getZ(), h.getYRot(), h.getXRot());
             // resend remaining player data... (see ServerPlayer#changeDimension)

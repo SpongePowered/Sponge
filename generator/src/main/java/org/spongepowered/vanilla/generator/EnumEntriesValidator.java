@@ -136,7 +136,11 @@ class EnumEntriesValidator<V> implements Generator {
 
         // Sort field entries and add them back to the class
         processedFields.sort(Comparator.comparing(field -> field.getVariable(0).getNameAsString()));
-        primaryTypeDeclaration.getMembers().addAll(lastNonFieldIndex, processedFields);
+        var indextoAddAt = lastNonFieldIndex;
+        if (indextoAddAt == -1) {
+            indextoAddAt = 0;
+        }
+        primaryTypeDeclaration.getMembers().addAll(indextoAddAt, processedFields);
 
         if (!added.isEmpty()) {
             Logger.info("Added {} entries to {} that will require manual action to implement: {}", added.size(), this.targetClassSimpleName, added);

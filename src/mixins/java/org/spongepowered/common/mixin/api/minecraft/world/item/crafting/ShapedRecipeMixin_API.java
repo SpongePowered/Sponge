@@ -26,10 +26,16 @@ package org.spongepowered.common.mixin.api.minecraft.world.item.crafting;
 
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapedRecipePattern;
+import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Mixin(ShapedRecipe.class)
 public abstract class ShapedRecipeMixin_API implements ShapedCraftingRecipe {
@@ -50,6 +56,12 @@ public abstract class ShapedRecipeMixin_API implements ShapedCraftingRecipe {
         final int recipeItemIndex = x + y * this.width();
 
         return ((org.spongepowered.api.item.recipe.crafting.Ingredient)(Object) this.pattern.ingredients().get(recipeItemIndex));
+    }
+
+    @Override
+    public List<Ingredient> ingredients() {
+        return this.pattern.ingredients().stream().filter(Optional::isPresent).map(Optional::get)
+            .map(IngredientUtil::fromNative).collect(Collectors.toList());
     }
 
     @Override

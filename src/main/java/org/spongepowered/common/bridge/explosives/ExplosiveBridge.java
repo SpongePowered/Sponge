@@ -31,7 +31,10 @@ import java.util.Optional;
 
 public interface ExplosiveBridge {
 
-    Optional<Integer> bridge$getExplosionRadius();
+    Optional<Float> bridge$getExplosionRadius();
 
-    void bridge$setExplosionRadius(@Nullable Integer radius);
+    void bridge$setExplosionRadius(@Nullable Float radius);
+
+    default void bridge$cancelExplosion() {}
+
 }

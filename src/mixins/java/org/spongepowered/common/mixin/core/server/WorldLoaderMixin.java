@@ -57,4 +57,15 @@ public abstract class WorldLoaderMixin {
     }
 
 
+    @Redirect(method = "load", at = @At(value = "INVOKE",
+        target = "Lnet/minecraft/core/LayeredRegistryAccess;replaceFrom(Ljava/lang/Object;[Lnet/minecraft/core/RegistryAccess$Frozen;)Lnet/minecraft/core/LayeredRegistryAccess;"))
+    private static <T> LayeredRegistryAccess<T> impl$afterLoadDimensionRegistries(final LayeredRegistryAccess instance,
+        final T $$0, final RegistryAccess.Frozen[] $$1) {
+        final var lifecycle = Launch.instance().lifecycle();
+        lifecycle.establishGlobalRegistries($$1[0], RegistryLayer.DIMENSIONS);
+        return instance.replaceFrom($$0, $$1);
+    }
+
+
+
 }

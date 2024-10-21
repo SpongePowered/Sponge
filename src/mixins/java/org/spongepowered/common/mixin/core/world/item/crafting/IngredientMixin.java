@@ -27,26 +27,33 @@ package org.spongepowered.common.mixin.core.world.item.crafting;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import net.minecraft.world.item.crafting.Ingredient;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
 
 @Mixin(Ingredient.class)
 public abstract class IngredientMixin {
 
-    @Inject(method = "codec", at = @At(value = "RETURN"), cancellable = true)
-    private static void impl$modifyCodec(final boolean $$0, final CallbackInfoReturnable<Codec<Ingredient>> cir) {
-        final Codec<Ingredient> original = cir.getReturnValue();
-        var combinedCodec = Codec.xor(SpongeIngredient.CODEC, original).xmap(to -> to.map(si -> si, i -> i),
-                fr -> {
-                    if (fr instanceof SpongeIngredient si) {
-                        return Either.left(si);
-                    } else {
-                        return Either.right(fr);
-                    }
-                });
-        cir.setReturnValue(combinedCodec);
+    //@formatter:off
+    @Shadow @Final @Mutable public static Codec<Ingredient> CODEC;
+    //@formatter:on
+
+    @Redirect(
+        method = "<clinit>",
+        at = @At(value = "FIELD", target = "Lnet/minecraft/world/item/crafting/Ingredient;CODEC:Lcom/mojang/serialization/Codec;")
+    )
+    private static void impl$modifyCodec(Codec<Ingredient> value) {
+        CODEC = Codec.xor(SpongeIngredient.CODEC, value).xmap(to -> to.map(si -> si, i -> i),
+            fr -> {
+                if (fr instanceof SpongeIngredient si) {
+                    return Either.left(si);
+                } else {
+                    return Either.right(fr);
+                }
+            });
     }
 }

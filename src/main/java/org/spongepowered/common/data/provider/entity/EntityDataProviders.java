@@ -49,6 +49,7 @@ public final class EntityDataProviders extends DataProviderRegistratorBuilder {
         CatData.register(this.registrator);
         ChickenData.register(this.registrator);
         CommandBlockMinecartData.register(this.registrator);
+        CreakingData.register(this.registrator);
         CreeperData.register(this.registrator);
         DamagingProjectileData.register(this.registrator);
         DolphinData.register(this.registrator);

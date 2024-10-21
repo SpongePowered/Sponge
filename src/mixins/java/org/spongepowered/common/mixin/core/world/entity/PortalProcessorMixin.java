@@ -29,10 +29,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PortalProcessor;
+import net.minecraft.world.entity.Relative;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Portal;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.portal.TeleportTransition;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -51,6 +52,8 @@ import org.spongepowered.common.event.tracking.phase.entity.TeleportContext;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
+
+import java.util.EnumSet;
 
 @Mixin(PortalProcessor.class)
 public abstract class PortalProcessorMixin implements PortalProcessorBridge {
@@ -73,8 +76,8 @@ public abstract class PortalProcessorMixin implements PortalProcessorBridge {
 
 
     @Redirect(method = "getPortalDestination",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Portal;getPortalDestination(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/portal/DimensionTransition;"))
-    public DimensionTransition impl$onGetPortalDestination(final Portal instance, final ServerLevel serverLevel, final Entity entity, final BlockPos blockPos) {
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Portal;getPortalDestination(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/portal/TeleportTransition;"))
+    public TeleportTransition impl$onGetPortalDestination(final Portal instance, final ServerLevel serverLevel, final Entity entity, final BlockPos blockPos) {
         final var spongEntity = (org.spongepowered.api.entity.Entity) entity;
 
         var finalPortal = instance;
@@ -128,10 +131,10 @@ public abstract class PortalProcessorMixin implements PortalProcessorBridge {
                     spongEntity.position(),
                     spongEntity.rotation(),
                     (ServerWorld) transition.newLevel(),
-                    VecHelper.toVector3d(transition.pos()),
-                    VecHelper.toVector3d(transition.pos()),
+                    VecHelper.toVector3d(transition.position()),
+                    VecHelper.toVector3d(transition.position()),
                     preWorldChangeEvent.destinationWorld(), // with modified preWorldChangeEvent destination world
-                    VecHelper.toVector3d(transition.speed()),
+                    VecHelper.toVector3d(transition.deltaMovement()),
                     (PortalLogic) finalPortal);
             if (SpongeCommon.post(tpEvent)) {
                 wrapperTransaction.markCancelled();
@@ -139,13 +142,15 @@ public abstract class PortalProcessorMixin implements PortalProcessorBridge {
             }
 
             // modify transition after event
-            return new DimensionTransition((ServerLevel) tpEvent.destinationWorld(),
+            return new TeleportTransition((ServerLevel) tpEvent.destinationWorld(),
                     VecHelper.toVanillaVector3d(tpEvent.destinationPosition()),
                     VecHelper.toVanillaVector3d(tpEvent.exitSpeed()),
                     (float) tpEvent.toRotation().y(),
                     (float) tpEvent.toRotation().x(),
                     transition.missingRespawnBlock(),
-                    transition.postDimensionTransition());
+                    transition.asPassenger(),
+                    EnumSet.noneOf(Relative.class),
+                    transition.postTeleportTransition());
         }
     }
 

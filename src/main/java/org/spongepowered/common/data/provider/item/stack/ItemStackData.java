@@ -25,47 +25,60 @@
 package org.spongepowered.common.data.provider.item.stack;
 
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.StringUtil;
 import net.minecraft.util.Unit;
-import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.ChargedProjectiles;
+import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.CustomModelData;
+import net.minecraft.world.item.component.DamageResistant;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.component.Unbreakable;
-import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
+import net.minecraft.world.item.component.UseCooldown;
+import net.minecraft.world.item.component.UseRemainder;
+import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
+import net.minecraft.world.item.consume_effects.ClearAllStatusEffectsConsumeEffect;
+import net.minecraft.world.item.consume_effects.ConsumeEffect;
+import net.minecraft.world.item.consume_effects.PlaySoundConsumeEffect;
+import net.minecraft.world.item.consume_effects.RemoveStatusEffectsConsumeEffect;
+import net.minecraft.world.item.consume_effects.TeleportRandomlyConsumeEffect;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Platform;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.effect.potion.PotionEffect;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.item.ItemRarity;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.util.Ticks;
-import org.spongepowered.api.util.weighted.ChanceTable;
-import org.spongepowered.api.util.weighted.NestedTableEntry;
-import org.spongepowered.api.util.weighted.TableEntry;
-import org.spongepowered.api.util.weighted.WeightedObject;
-import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @SuppressWarnings({"unchecked", "UnstableApiUsage"})
 public final class ItemStackData {
 
-    public static final FoodProperties DEFAULT_FOOD_PROPERTIES = new FoodProperties(0, 0, false, 1.6F, Optional.empty(), List.of());
+    public static final FoodProperties DEFAULT_FOOD_PROPERTIES = new FoodProperties(0, 0, false);
+    public static final Consumable DEFAULT_CONSUMABLE_PROPERTIES = new Consumable(1.6F, ItemUseAnimation.EAT, null, true, List.of());
 
     private ItemStackData() {
     }
@@ -87,51 +100,21 @@ public final class ItemStackData {
         // TODO DataComponents.RECIPES - for Items.KNOWLEDGE_BOOK
         // TODO DataComponents.MAX_STACK_SIZE; incompatible with MAX_DAMAGE?
         // TODO DataComponents.OMINOUS_BOTTLE_AMPLIFIER 1.21
+
+        // TODO rework applicable potion effects to consume effects
+        final var applicablePotionEffects = Keys.APPLICABLE_POTION_EFFECTS;
+        ConsumeEffect newPotionEffects = new ApplyStatusEffectsConsumeEffect(List.of());
+        ConsumeEffect teleportRand = new TeleportRandomlyConsumeEffect(5);
+        ConsumeEffect removeStatusEffects = new RemoveStatusEffectsConsumeEffect(HolderSet.empty());
+        ConsumeEffect clearStatusEffects = new ClearAllStatusEffectsConsumeEffect();
+        ConsumeEffect playSoundEffect = new PlaySoundConsumeEffect(Holder.direct(null));
+
         registrator
                 .asMutable(ItemStack.class)
-                    .create(Keys.APPLICABLE_POTION_EFFECTS)
-                        .get(h -> {
-                            if (h.has(DataComponents.FOOD)) {
-                                final var itemEffects = h.get(DataComponents.FOOD).effects();
-                                final WeightedTable<PotionEffect> effects = new WeightedTable<>();
-                                final ChanceTable<PotionEffect> chance = new ChanceTable<>();
-                                for (final var effect : itemEffects) {
-                                    chance.add((PotionEffect) effect.effect(), effect.probability());
-                                }
-                                effects.add(new NestedTableEntry<>(1, chance));
-
-
-                                return effects;
-                            }
-                            return null;
-                        })
-                        .set((h, v) -> {
-                            List<FoodProperties.PossibleEffect> newEffects = new ArrayList<>();
-                            for (final TableEntry<PotionEffect> entry : v.entries()) {
-                                if (entry instanceof NestedTableEntry<PotionEffect> nestedTableEntry) {
-                                    if (nestedTableEntry.getNestedTable() instanceof ChanceTable<PotionEffect> chanceTable) {
-                                        for (final TableEntry<PotionEffect> te : chanceTable.entries()) {
-                                            if (te instanceof WeightedObject<PotionEffect> wo) {
-                                                newEffects.add(new FoodProperties.PossibleEffect((MobEffectInstance) wo.get(), (float) te.weight()));
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            h.update(DataComponents.FOOD, DEFAULT_FOOD_PROPERTIES,
-                                    fp -> new FoodProperties(fp.nutrition(), fp.saturation(), fp.canAlwaysEat(), fp.eatSeconds(), fp.usingConvertsTo(), newEffects));
-                        })
-
                     .create(Keys.BURN_TIME)
-                        .get(h -> {
-                            final Integer burnTime = AbstractFurnaceBlockEntity.getFuel().get(h.getItem());
-                            if (burnTime != null && burnTime > 0) {
-                                return burnTime;
-                            }
-                            return null;
-                        })
+                        .get(h -> SpongeCommon.server().fuelValues().burnDuration(h))
                     .create(Keys.CONTAINER_ITEM)
-                        .get(h -> (ItemType) h.getItem().getCraftingRemainingItem())
+                        .get(h -> (ItemType) h.getItem().getCraftingRemainder().getItem())
                     .create(Keys.DISPLAY_NAME)
                         .get(h -> SpongeAdventure.asAdventure(h.getDisplayName()))
                     .create(Keys.CUSTOM_MODEL_DATA)
@@ -213,37 +196,35 @@ public final class ItemStackData {
                             return food == null ? null : food.nutrition();
                         })
                         .set((h, v) -> h.update(DataComponents.FOOD, DEFAULT_FOOD_PROPERTIES,
-                                fp -> new FoodProperties(v, fp.saturation(), fp.canAlwaysEat(), fp.eatSeconds(), fp.usingConvertsTo(), fp.effects())))
+                                fp -> new FoodProperties(v, fp.saturation(), fp.canAlwaysEat())))
                     .create(Keys.REPLENISHED_SATURATION)
                         .get(h -> {
                             final var food = h.get(DataComponents.FOOD);
                             return food == null ? null : (double) food.saturation();
                             })
                         .set((h, v) -> h.update(DataComponents.FOOD, DEFAULT_FOOD_PROPERTIES,
-                                fp -> new FoodProperties(fp.nutrition(), v.floatValue(), fp.canAlwaysEat(), fp.eatSeconds(), fp.usingConvertsTo(), fp.effects())))
+                                fp -> new FoodProperties(fp.nutrition(), v.floatValue(), fp.canAlwaysEat())))
                     .create(Keys.CAN_ALWAYS_EAT)
                         .get(h -> {
                             final var food = h.get(DataComponents.FOOD);
                             return food == null ? null : food.canAlwaysEat();
                         })
                         .set((h, v) -> h.update(DataComponents.FOOD, DEFAULT_FOOD_PROPERTIES,
-                                fp -> new FoodProperties(fp.nutrition(), fp.saturation(), v, fp.eatSeconds(), fp.usingConvertsTo(), fp.effects())))
+                                fp -> new FoodProperties(fp.nutrition(), fp.saturation(), v)))
                     .create(Keys.EATING_TIME)
                         .get(h -> {
-                            final var food = h.get(DataComponents.FOOD);
-                            return food == null ? null : Ticks.of(food.eatDurationTicks());
+                            final var consumable = h.get(DataComponents.CONSUMABLE);
+                            return consumable == null ? null : Ticks.of(consumable.consumeTicks());
                         })
-                        .set((h, v) -> h.update(DataComponents.FOOD, DEFAULT_FOOD_PROPERTIES,
-                                fp -> new FoodProperties(fp.nutrition(), fp.saturation(), fp.canAlwaysEat(), v.ticks() / 20f, fp.usingConvertsTo(), fp.effects())))
+                        .set((h, v) -> h.update(DataComponents.CONSUMABLE, DEFAULT_CONSUMABLE_PROPERTIES,
+                                c -> new Consumable(v.ticks() / 20f, c.animation(), c.sound(), c.hasConsumeParticles(), c.onConsumeEffects())))
                     .create(Keys.FOOD_CONVERTS_TO)
                         .get(h -> {
-                            final var food = h.get(DataComponents.FOOD);
-                            return food == null ? null : food.usingConvertsTo().map(ItemStackUtil::fromNative).orElse(null);
+                            final var remainder = h.get(DataComponents.USE_REMAINDER);
+                            return remainder == null ? null : ItemStackUtil.fromNative(remainder.convertInto());
                         })
-                        .set((h, v) -> h.update(DataComponents.FOOD, DEFAULT_FOOD_PROPERTIES,
-                            fp -> new FoodProperties(fp.nutrition(), fp.saturation(), fp.canAlwaysEat(), fp.eatSeconds(), Optional.ofNullable(ItemStackUtil.toNative(v)), fp.effects())))
-                        .delete(h -> h.update(DataComponents.FOOD, DEFAULT_FOOD_PROPERTIES,
-                                fp -> new FoodProperties(fp.nutrition(), fp.saturation(), fp.canAlwaysEat(), fp.eatSeconds(), Optional.empty(), fp.effects())))
+                        .set((h, v) -> h.set(DataComponents.USE_REMAINDER, new UseRemainder(ItemStackUtil.toNative(v))))
+                        .delete(h -> h.remove(DataComponents.USE_REMAINDER))
                     .create(Keys.REPAIR_COST)
                         .get(h -> h.getOrDefault(DataComponents.REPAIR_COST, 0))
                         .set((stack, cost) -> stack.set(DataComponents.REPAIR_COST, cost))
@@ -274,18 +255,26 @@ public final class ItemStackData {
                         })
                         .delete(stack -> stack.remove(DataComponents.CONTAINER))
                     .create(Keys.FIRE_RESISTANT)
-                        .get(h -> h.get(DataComponents.FIRE_RESISTANT) != null)
+                        .get(h -> {
+                            final @Nullable DamageResistant resist = h.get(DataComponents.DAMAGE_RESISTANT);
+                            if (resist == null) {
+                                return false;
+                            }
+                            return resist.types().location().equals(DamageTypes.IN_FIRE.location());
+                        })
                         .set((h, value) -> {
                             if (value) {
-                                h.set(DataComponents.FIRE_RESISTANT, Unit.INSTANCE);
+                                h.applyComponents(DataComponentPatch.builder()
+                                    .set(DataComponents.DAMAGE_RESISTANT, new DamageResistant(DamageTypeTags.IS_FIRE))
+                                    .build());
                             } else {
-                                h.remove(DataComponents.FIRE_RESISTANT);
+                                h.remove(DataComponents.DAMAGE_RESISTANT);
                             }
                         })
-                        .delete(stack -> stack.remove(DataComponents.FIRE_RESISTANT))
+                        .delete(stack -> stack.remove(DataComponents.DAMAGE_RESISTANT))
                     .create(Keys.ITEM_NAME)
                         .get(h -> {
-                            final Component component = h.get(DataComponents.ITEM_NAME);
+                            final @Nullable Component component = h.get(DataComponents.ITEM_NAME);
                             if (component == null) {
                                 return null;
                             }
@@ -293,7 +282,56 @@ public final class ItemStackData {
                         })
                         .set((h, value) -> h.set(DataComponents.ITEM_NAME, SpongeAdventure.asVanillaMutable(value)))
                         .delete(stack -> stack.remove(DataComponents.ITEM_NAME))
-                    ;
+                    .create(Keys.COOLDOWN_GROUP)
+                        .get(h -> {
+                            final @Nullable UseCooldown cooldown = h.get(DataComponents.USE_COOLDOWN);
+                            if (cooldown == null) {
+                                return null;
+                            }
+                            return (ResourceKey) (Object) cooldown.cooldownGroup().orElse(null);
+                        })
+                        .set((h, value) -> {
+                            if (value == null) {
+                                h.remove(DataComponents.USE_COOLDOWN);
+                                return;
+                            }
+                            h.set(DataComponents.USE_COOLDOWN, new UseCooldown(1, Optional.of((ResourceLocation) (Object) value)));
+                        })
+                        .deleteAndGet(ItemStackData::deleteAndTransactUseCooldown)
+                    .create(Keys.COOLDOWN)
+                        .get(h -> {
+                            final @Nullable UseCooldown cooldown = h.get(DataComponents.USE_COOLDOWN);
+                            if (cooldown == null) {
+                                return null;
+                            }
+                            return Ticks.of(cooldown.ticks());
+                        })
+                        .setAndGet((h, value) -> {
+                            if (value == null) {
+                                return ItemStackData.deleteAndTransactUseCooldown(h);
+                            }
+                            final var existing = h.get(DataComponents.USE_COOLDOWN);
+                            var builder = DataTransactionResult.builder()
+                                .success(Value.immutableOf(Keys.COOLDOWN, value));
+                            if (existing != null) {
+                                h.set(DataComponents.USE_COOLDOWN, new UseCooldown(value.ticks(), existing.cooldownGroup()));
+                                builder.replace(existing.cooldownGroup().map(ResourceKey.class::cast)
+                                    .map(group ->
+                                        List.of(
+                                            Value.immutableOf(Keys.COOLDOWN, Ticks.of(existing.ticks())),
+                                            Value.immutableOf(Keys.COOLDOWN_GROUP, group)
+                                        )
+                                    )
+                                    .orElseGet(() -> List.of(
+                                        Value.immutableOf(Keys.COOLDOWN, Ticks.of(existing.ticks()))
+                                    )));
+                            } else {
+                                h.set(DataComponents.USE_COOLDOWN, new UseCooldown(value.ticks(), Optional.empty()));
+                            }
+                            return builder.build();
+                        })
+                        .deleteAndGet(ItemStackData::deleteAndTransactUseCooldown)
+        ;
     }
     // @formatter:on
 
@@ -318,6 +356,20 @@ public final class ItemStackData {
         } else {
             stack.remove(DataComponents.UNBREAKABLE);
         }
+    }
+
+    private static DataTransactionResult deleteAndTransactUseCooldown(final ItemStack stack) {
+        final @Nullable UseCooldown cooldown = stack.remove(DataComponents.USE_COOLDOWN);
+        if (cooldown == null) {
+            return DataTransactionResult.successNoData();
+        }
+        return cooldown.cooldownGroup()
+            .map(group -> DataTransactionResult.successRemove(List.of(
+                Value.immutableOf(Keys.COOLDOWN, Ticks.of(cooldown.ticks())),
+                Value.immutableOf(Keys.COOLDOWN_GROUP, (ResourceKey) (Object) group)
+            ))).orElseGet(() -> DataTransactionResult.successRemove(List.of(
+                Value.immutableOf(Keys.COOLDOWN, Ticks.of(cooldown.ticks()))
+            )));
     }
 
 }

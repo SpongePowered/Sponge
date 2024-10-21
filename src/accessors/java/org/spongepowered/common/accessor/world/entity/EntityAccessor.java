@@ -87,8 +87,6 @@ public interface EntityAccessor {
 
     @Invoker("getFireImmuneTicks") int invoker$getFireImmuneTicks();
 
-    @Invoker("getPermissionLevel") int invoker$getPermissionLevel();
-
     @Invoker("unsetRemoved") void invoker$unsetRemoved();
 
 }

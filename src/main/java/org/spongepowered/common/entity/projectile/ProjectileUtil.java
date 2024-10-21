@@ -197,7 +197,7 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<Egg> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final ThrownEgg egg = new ThrownEgg(source.level(), source);
+                final ThrownEgg egg = new ThrownEgg(source.level(), source, new ItemStack(Items.EGG));
                 egg.shoot(source.getXRot(), source.getYRot(), 0.0F, 1.5F, 0);
                 return ProjectileUtil.doLaunch(loc.world(), (Egg) egg);
             }
@@ -226,7 +226,8 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<Snowball> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final net.minecraft.world.entity.projectile.Snowball snowball = new net.minecraft.world.entity.projectile.Snowball(source.level(), source);
+                final net.minecraft.world.entity.projectile.Snowball snowball = new net.minecraft.world.entity.projectile.Snowball(
+                    source.level(), source, new ItemStack(Items.SNOWBALL));
                 snowball.shoot(source.getXRot(), source.getYRot(), 0.0F, 1.5F, 0);
                 return ProjectileUtil.doLaunch(loc.world(), (Snowball) snowball);
             }
@@ -236,7 +237,7 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<ExperienceBottle> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final ThrownExperienceBottle expBottle = new ThrownExperienceBottle(source.level(), source);
+                final ThrownExperienceBottle expBottle = new ThrownExperienceBottle(source.level(), source, new ItemStack(Items.EXPERIENCE_BOTTLE));
                 expBottle.shoot(source.getXRot(), source.getYRot(), -20.0F, 0.7F, 0);
                 return ProjectileUtil.doLaunch(loc.world(), (ExperienceBottle) expBottle);
             }
@@ -247,7 +248,7 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<EnderPearl> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final ThrownEnderpearl pearl = new ThrownEnderpearl(source.level(), source);
+                final ThrownEnderpearl pearl = new ThrownEnderpearl(source.level(), source, new ItemStack(Items.ENDER_PEARL));
                 pearl.shoot(source.getXRot(), source.getYRot(), 0.0F, 1.5F, 0);
                 return ProjectileUtil.doLaunch(loc.world(), (EnderPearl) pearl);
             }
@@ -295,7 +296,7 @@ public final class ProjectileUtil {
             @Override
             protected Optional<FishingBobber> createProjectile(final LivingEntity source, final ServerLocation loc) {
                 if (source instanceof Player) {
-                    final FishingHook hook = new FishingHook((Player) source, source.level(), 0, 0);
+                    final FishingHook hook = new FishingHook((Player) source, source.level(), 0, 0, new ItemStack(Items.FISHING_ROD));
                     hook.setPos(loc.x(), loc.y(), loc.z());
                     return ProjectileUtil.doLaunch(loc.world(), (FishingBobber) hook);
                 }
@@ -306,7 +307,7 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<Potion> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final ThrownPotion potion = new ThrownPotion(source.level(), source);
+                final ThrownPotion potion = new ThrownPotion(source.level(), source, new ItemStack(this.item));
                 potion.setItem(new ItemStack(Items.SPLASH_POTION, 1));
                 potion.shoot(source.getXRot(), source.getYRot(), -20.0F, 0.5F, 0);
                 return ProjectileUtil.doLaunch(loc.world(), (Potion) potion);

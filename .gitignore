@@ -11,6 +11,7 @@ dist
 lib
 out
 run
+run_snap
 /target
 *.com
 *.class

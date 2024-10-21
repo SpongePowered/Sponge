@@ -12,9 +12,8 @@ accessible class net/minecraft/server/network/ServerLoginPacketListenerImpl$Stat
 extendable method net/minecraft/server/players/IpBanList getIpFromAddress (Ljava/net/SocketAddress;)Ljava/lang/String;
 accessible class net/minecraft/server/commands/TeleportCommand$LookAt
 extendable class net/minecraft/world/item/crafting/Ingredient
-extendable method net/minecraft/world/item/crafting/Ingredient <init> (Ljava/util/stream/Stream;)V
-accessible field net/minecraft/world/item/crafting/Ingredient values [Lnet/minecraft/world/item/crafting/Ingredient$Value;
-accessible class net/minecraft/world/item/crafting/Ingredient$Value
+extendable method net/minecraft/world/item/crafting/Ingredient <init> (Lnet/minecraft/core/HolderSet;)V
+accessible field net/minecraft/world/item/crafting/Ingredient values Lnet/minecraft/core/HolderSet;
 accessible method net/minecraft/world/level/biome/Biome getTemperature (Lnet/minecraft/core/BlockPos;)F
 accessible class net/minecraft/server/level/ServerLevel$EntityCallbacks
 accessible class net/minecraft/network/protocol/game/ServerboundInteractPacket$Action

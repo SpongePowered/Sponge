@@ -61,6 +61,7 @@ import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.util.Codec;
 import net.kyori.adventure.util.TriState;
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.arguments.selector.SelectorPattern;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -264,7 +265,7 @@ public final class SpongeAdventure {
             return net.minecraft.network.chat.Component.score($this.name(), $this.objective());
         }
         if (component instanceof final SelectorComponent $this) {
-            return net.minecraft.network.chat.Component.selector($this.pattern(), SpongeAdventure.asVanillaOpt($this.separator()));
+            return net.minecraft.network.chat.Component.selector(SelectorPattern.parse($this.pattern()).getOrThrow(), SpongeAdventure.asVanillaOpt($this.separator()));
         }
         if (component instanceof NBTComponent<?, ?>) {
             if (component instanceof final BlockNBTComponent $this) {
@@ -320,11 +321,11 @@ public final class SpongeAdventure {
             return Component.keybind().keybind(kc.getName());
         }
         if (contents instanceof final ScoreContents sc) {
-            return Component.score().name(sc.getName()).objective(sc.getObjective());
+            return Component.score().name(sc.name().mapLeft(SelectorPattern::pattern).orThrow()).objective(sc.objective());
         }
         if (contents instanceof final SelectorContents sc) {
-            return Component.selector().pattern(sc.getPattern())
-                                              .separator(SpongeAdventure.asAdventure(sc.getSeparator()));
+            return Component.selector().pattern(sc.selector().pattern())
+                                              .separator(SpongeAdventure.asAdventure(sc.separator()));
         }
         if (contents instanceof final NbtContents nc) {
             NBTComponentBuilder<?, ?> nbtBuilder;
@@ -547,7 +548,7 @@ public final class SpongeAdventure {
             return new net.minecraft.network.chat.HoverEvent(
                 Action.SHOW_ENTITY,
                 new net.minecraft.network.chat.HoverEvent.EntityTooltipInfo(
-                    entityTypeRegistry.get(SpongeAdventure.asVanilla(value.type())),
+                    entityTypeRegistry.getValue(SpongeAdventure.asVanilla(value.type())),
                     value.id(),
                     SpongeAdventure.asVanillaNullable(value.name())
                 )
@@ -558,7 +559,7 @@ public final class SpongeAdventure {
             return new net.minecraft.network.chat.HoverEvent(
                 Action.SHOW_ITEM,
                 HoverEvent_ItemStackInfoAccessor.invoker$new(
-                    Holder.direct(itemRegistry.get(SpongeAdventure.asVanilla(value.item()))),
+                    Holder.direct(itemRegistry.getValue(SpongeAdventure.asVanilla(value.item()))),
                     value.count(),
                     SpongeAdventure.asVanilla(value.dataComponents())
                 )
@@ -730,12 +731,11 @@ public final class SpongeAdventure {
             return DataComponentPatch.EMPTY;
         }
         final DataComponentPatch.Builder builder = DataComponentPatch.builder();
-        componentMap.forEach((key, value) -> {
-            final DataComponentType type = BuiltInRegistries.DATA_COMPONENT_TYPE.get(SpongeAdventure.asVanilla(key));
-            if (type != null && value instanceof SpongeDataComponentValue dcv) {
-                builder.set(type, dcv.value.orElse(null));
+        componentMap.forEach((key, value) -> BuiltInRegistries.DATA_COMPONENT_TYPE.getOptional(SpongeAdventure.asVanilla(key)).ifPresent(type -> {
+            if (value instanceof SpongeDataComponentValue dcv) {
+                builder.set((DataComponentType) type, dcv.value.orElse(null));
             }
-        });
+        }));
         return builder.build();
     }
 

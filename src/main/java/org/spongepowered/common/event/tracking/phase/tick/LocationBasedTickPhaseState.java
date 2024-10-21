@@ -35,6 +35,7 @@ import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge;
@@ -122,7 +123,7 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
 
     @Override
     public void postBlockTransactionApplication(
-        final T context, final BlockChange blockChange,
+        final T context, ServerWorld serverWorld, final BlockChange blockChange,
         final BlockTransactionReceipt receipt
     ) {
         // If we do not have a notifier at this point then there is no need to attempt to retrieve one from the chunk

@@ -25,15 +25,18 @@
 package org.spongepowered.common.mixin.api.minecraft.world.item;
 
 
-import net.minecraft.world.item.Item;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemCooldowns;
-import org.spongepowered.api.item.ItemType;
+import net.minecraft.world.item.ItemStack;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.item.ItemCooldowns_CooldownInstanceAccessor;
 import org.spongepowered.common.bridge.world.item.ItemCooldownsBridge;
+import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.SpongeTicks;
 
 import java.util.Map;
@@ -45,25 +48,55 @@ import java.util.OptionalDouble;
 public abstract class ItemCooldownsMixin_API implements org.spongepowered.api.entity.living.player.CooldownTracker {
 
     // @formatter:off
-    @Shadow @Final private Map<Item, ?> cooldowns;
     @Shadow private int tickCount;
 
-    @Shadow public abstract boolean shadow$isOnCooldown(Item itemIn);
-    @Shadow public abstract float shadow$getCooldownPercent(Item itemIn, float partialTicks);
-    @Shadow public abstract void shadow$addCooldown(final Item item, final int ticks);
+    @Shadow public abstract boolean shadow$isOnCooldown(ItemStack stack);
+    @Shadow public abstract float shadow$getCooldownPercent(ItemStack stack, float partialTicks);
+    @Shadow public abstract void shadow$addCooldown(final ItemStack stack, final int ticks);
+    @Shadow public abstract void shadow$addCooldown(final ResourceLocation group, final int ticks);
+    @Shadow @Final private Map<ResourceLocation, ItemCooldowns_CooldownInstanceAccessor> cooldowns;
+
     // @formatter:on
 
+
+    @Shadow public abstract ResourceLocation getCooldownGroup(final ItemStack $$0);
+
     @Override
-    public boolean hasCooldown(final ItemType type) {
-        Objects.requireNonNull(type, "Item type cannot be null!");
-        return this.shadow$isOnCooldown((Item) type);
+    public boolean hasCooldown(final org.spongepowered.api.item.inventory.ItemStack stack) {
+        Objects.requireNonNull(stack, "ItemStack cannot be null!");
+        return this.shadow$isOnCooldown(ItemStackUtil.toNative(stack));
+    }
+
+    /**
+     * see {@link ItemCooldowns#getCooldownPercent(ItemStack, float)}
+     */
+    @Override
+    public boolean hasCooldown(final ResourceKey group) {
+        Objects.requireNonNull(group, "group cannot be null!");
+        return impl$getCooldownPercent((Object) group) > 0;
+    }
+
+    private float impl$getCooldownPercent(final Object group) {
+        final var cooldown = this.cooldowns.get((ResourceLocation) group);
+        if (cooldown != null) {
+            float $$4 = (float)(cooldown.accessor$endTime() - cooldown.accessor$startTime());
+            float $$5 = (float)cooldown.accessor$endTime() - ((float)this.tickCount);
+            return Mth.clamp($$5 / $$4, 0.0F, 1.0F);
+        }
+        return 0;
     }
 
     @Override
-    public Optional<Ticks> cooldown(final ItemType type) {
-        Objects.requireNonNull(type, "Item type cannot be null!");
+    public Optional<Ticks> cooldown(final org.spongepowered.api.item.inventory.ItemStack stack) {
+        Objects.requireNonNull(stack, "ItemStack cannot be null!");
+        final var group = this.getCooldownGroup(ItemStackUtil.toNative(stack));
+        return this.cooldown((ResourceKey) (Object) group);
+    }
 
-        final ItemCooldowns_CooldownInstanceAccessor cooldown = (ItemCooldowns_CooldownInstanceAccessor) this.cooldowns.get((Item) type);
+    @Override
+    public Optional<Ticks> cooldown(final ResourceKey group) {
+        Objects.requireNonNull(group, "group cannot be null!");
+        final var cooldown = this.cooldowns.get(group);
 
         if (cooldown != null) {
             final int remainingCooldown = cooldown.accessor$endTime() - this.tickCount;
@@ -75,22 +108,32 @@ public abstract class ItemCooldownsMixin_API implements org.spongepowered.api.en
     }
 
     @Override
-    public boolean setCooldown(final ItemType type, final Ticks ticks) {
-        Objects.requireNonNull(type, "Item type cannot be null!");
-        this.shadow$addCooldown((Item) type, SpongeTicks.toSaturatedIntOrInfinite(ticks));
+    public boolean setCooldown(final org.spongepowered.api.item.inventory.ItemStack stack, final Ticks ticks) {
+        Objects.requireNonNull(stack, "ItemStack cannot be null!");
+        this.shadow$addCooldown(ItemStackUtil.toNative(stack), SpongeTicks.toSaturatedIntOrInfinite(ticks));
         return ((ItemCooldownsBridge) this).bridge$getSetCooldownResult();
     }
 
-
     @Override
-    public boolean resetCooldown(final ItemType type) {
-        return this.setCooldown(type, Ticks.zero());
+    public boolean setCooldown(final ResourceKey group, final Ticks ticks) {
+        Objects.requireNonNull(group, "group cannot be null!");
+        this.shadow$addCooldown((ResourceLocation) (Object) group, SpongeTicks.toSaturatedIntOrInfinite(ticks));
+        return ((ItemCooldownsBridge) this).bridge$getSetCooldownResult();
+    }
+    @Override
+    public boolean resetCooldown(final org.spongepowered.api.item.inventory.ItemStack stack) {
+        return this.setCooldown(stack, Ticks.zero());
     }
 
     @Override
-    public OptionalDouble fractionRemaining(final ItemType type) {
-        Objects.requireNonNull(type, "Item type cannot be null!");
-        final float cooldown = this.shadow$getCooldownPercent((Item) type, 0);
+    public boolean resetCooldown(final ResourceKey group) {
+        return this.setCooldown(group, Ticks.zero());
+    }
+
+    @Override
+    public OptionalDouble fractionRemaining(final org.spongepowered.api.item.inventory.ItemStack stack) {
+        Objects.requireNonNull(stack, "ItemStack cannot be null!");
+        final float cooldown = this.shadow$getCooldownPercent(ItemStackUtil.toNative(stack), 0);
 
         if (cooldown > 0.0F) {
             return OptionalDouble.of(cooldown);
@@ -98,5 +141,13 @@ public abstract class ItemCooldownsMixin_API implements org.spongepowered.api.en
         return OptionalDouble.empty();
     }
 
-
+    @Override
+    public OptionalDouble fractionRemaining(final ResourceKey group) {
+        Objects.requireNonNull(group, "group cannot be null!");
+        final float cooldown = this.impl$getCooldownPercent(group);
+        if (cooldown > 0.0F) {
+            return OptionalDouble.of(cooldown);
+        }
+        return OptionalDouble.empty();
+    }
 }

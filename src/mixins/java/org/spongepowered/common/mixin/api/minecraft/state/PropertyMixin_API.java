@@ -30,6 +30,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -44,7 +45,7 @@ public abstract class PropertyMixin_API<T extends Comparable<T>> implements Stat
 
     // @formatter:off
     @Shadow public abstract Class<T> shadow$getValueClass();
-    @Shadow public abstract Collection<T> shadow$getPossibleValues();
+    @Shadow public abstract List<T> shadow$getPossibleValues();
     @Shadow public abstract String shadow$getName();
     // @formatter:on
 

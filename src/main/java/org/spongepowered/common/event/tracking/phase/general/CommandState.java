@@ -35,6 +35,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -66,7 +67,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
 
     @Override
     public void postBlockTransactionApplication(
-        final CommandPhaseContext context, final BlockChange blockChange,
+        final CommandPhaseContext context, ServerWorld serverWorld, final BlockChange blockChange,
         final BlockTransactionReceipt transaction
     ) {
         // We want to investigate if there is a user on the cause stack

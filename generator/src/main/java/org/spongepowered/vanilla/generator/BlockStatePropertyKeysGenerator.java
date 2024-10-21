@@ -33,6 +33,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeVariableName;
 import net.minecraft.core.Direction;
 import net.minecraft.core.FrontAndTop;
+import net.minecraft.world.level.block.CreakingHeartBlock;
 import net.minecraft.world.level.block.entity.trialspawner.TrialSpawnerState;
 import net.minecraft.world.level.block.entity.vault.VaultState;
 import net.minecraft.world.level.block.state.BlockState;
@@ -129,6 +130,7 @@ public class BlockStatePropertyKeysGenerator implements Generator {
         vanillaEnumTypeMapping.put(StructureMode.class, BlockStatePropertyKeysGenerator.inDataTypePkg("StructureMode"));
         vanillaEnumTypeMapping.put(PistonType.class, BlockStatePropertyKeysGenerator.inDataTypePkg("PistonType"));
         vanillaEnumTypeMapping.put(BambooLeaves.class, BlockStatePropertyKeysGenerator.inDataTypePkg("BambooLeavesType"));
+        vanillaEnumTypeMapping.put(CreakingHeartBlock.CreakingHeartState.class, BlockStatePropertyKeysGenerator.inDataTypePkg("CreakingHeart"));
         vanillaEnumTypeMapping.put(WallSide.class, BlockStatePropertyKeysGenerator.inDataTypePkg("WallConnectionState"));
         vanillaEnumTypeMapping.put(RailShape.class, BlockStatePropertyKeysGenerator.inDataTypePkg("RailDirection"));
         vanillaEnumTypeMapping.put(AttachFace.class, BlockStatePropertyKeysGenerator.inDataTypePkg("AttachmentSurface"));

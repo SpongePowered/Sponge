@@ -56,7 +56,7 @@ public final class OldBlockOnReplaceEffect implements ProcessingSideEffect {
         // However, since we know we're not on the client (ChunkPipeline is not
         // used outside of server world context)
         // we can safely just do oldState.onRemove(this.level, var1, var2, var3).
-        oldState.state.onRemove(pipeline.getServerWorld(), oldState.pos, newState, flag.movingBlocks());
+        oldState.state().onRemove(pipeline.getServerWorld(), oldState.pos(), newState, flag.movingBlocks());
         return EffectResult.NULL_PASS;
     }
 }

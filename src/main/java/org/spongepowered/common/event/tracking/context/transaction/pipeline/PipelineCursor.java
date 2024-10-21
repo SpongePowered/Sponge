@@ -33,57 +33,20 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.StringJoiner;
 
-public final class PipelineCursor {
-    public final BlockState state;
-    public final int opacity;
-    public final BlockPos pos;
-    public final @Nullable BlockEntity tileEntity;
-    public final @Nullable Entity destroyer;
-    public final List<ItemStack> drops;
-    public final int limit;
-
-    public PipelineCursor(final BlockState state, final int opacity, final BlockPos pos,
-        final @Nullable BlockEntity tileEntity,
-        final @Nullable Entity destroyer, final int limit
+public record PipelineCursor(
+    BlockState state,
+    BlockPos pos,
+    @Nullable BlockEntity tileEntity,
+    @Nullable Entity destroyer,
+    List<ItemStack> drops,
+    int limit
+) {
+    public PipelineCursor(final BlockState state, final BlockPos pos,
+                          final @Nullable BlockEntity tileEntity,
+                          final @Nullable Entity destroyer, final int limit
     ) {
-        this.state = state;
-        this.opacity = opacity;
-        this.pos = pos;
-        this.tileEntity = tileEntity;
-        this.destroyer = destroyer;
-        this.drops = Collections.emptyList();
-        this.limit = limit;
+        this(state, pos, tileEntity, destroyer, Collections.emptyList(), limit);
     }
 
-    public PipelineCursor(final BlockState state, final int opacity, final BlockPos pos,
-        final @Nullable BlockEntity tileEntity,
-        final @Nullable Entity destroyer,
-        final List<ItemStack> drops,
-        final int limit
-    ) {
-        this.state = state;
-        this.opacity = opacity;
-        this.pos = pos;
-        this.tileEntity = tileEntity;
-        this.drops = drops;
-        this.limit = limit;
-        this.destroyer = destroyer;
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(
-            ", ",
-            PipelineCursor.class.getSimpleName() + "[",
-            "]"
-        )
-            .add("state=" + this.state)
-            .add("opacity=" + this.opacity)
-            .add("pos=" + this.pos)
-            .add("tileEntity=" + this.tileEntity)
-            .add("drops=" + this.drops)
-            .toString();
-    }
 }

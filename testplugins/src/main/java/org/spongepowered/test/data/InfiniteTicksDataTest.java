@@ -169,6 +169,7 @@ public final class InfiniteTicksDataTest implements LoadableModule {
         final Parameter.Value<PotionEffectType> potionEffectParameter = Parameter.registryElement(TypeToken.get(PotionEffectType.class), RegistryTypes.POTION_EFFECT_TYPE, "minecraft").key("potionEffectType").build();
         final Parameter.Value<ItemType> itemTypeParameter = Parameter.registryElement(TypeToken.get(ItemType.class), RegistryTypes.ITEM_TYPE, "minecraft").key("itemType").build();
         final Parameter.Value<WeatherType> weatherTypeParameter = Parameter.registryElement(TypeToken.get(WeatherType.class), RegistryTypes.WEATHER_TYPE, "sponge").key("weatherType").build();
+        final Parameter.Value<ResourceKey> resourceKeyParameter = Parameter.resourceKey().key("resourceKey").build();
 
         event.register(this.plugin, Command.builder()
                 .addParameter(entityParameter)
@@ -250,11 +251,11 @@ public final class InfiniteTicksDataTest implements LoadableModule {
                 }).build(), "offerInfiniteRangedAttackDelay");
 
         event.register(this.plugin, Command.builder()
-                .addParameter(itemTypeParameter)
+                .addParameter(resourceKeyParameter)
                 .executor(context -> {
                     final ServerPlayer player = context.cause().first(ServerPlayer.class).get();
-                    final ItemType itemType = context.requireOne(itemTypeParameter);
-                    if (player.cooldownTracker().setCooldown(itemType, Ticks.infinite())) {
+                    final ResourceKey group = context.requireOne(resourceKeyParameter);
+                    if (player.cooldownTracker().setCooldown(group, Ticks.infinite())) {
                         context.sendMessage(Component.text("Applied!", NamedTextColor.GREEN));
                         return CommandResult.success();
                     } else {

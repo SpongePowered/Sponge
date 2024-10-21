@@ -47,8 +47,8 @@ public final class WorldDestroyBlockLevelEffect implements ProcessingSideEffect 
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
         final SpongeBlockChangeFlag flag, final int limit
     ) {
-        if (!(oldState.state.getBlock() instanceof BaseFireBlock)) {
-            pipeline.getServerWorld().levelEvent(2001, oldState.pos, Block.getId(oldState.state));
+        if (!(oldState.state().getBlock() instanceof BaseFireBlock)) {
+            pipeline.getServerWorld().levelEvent(2001, oldState.pos(), Block.getId(oldState.state()));
         }
         return EffectResult.NULL_PASS;
     }

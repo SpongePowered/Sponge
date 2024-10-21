@@ -31,6 +31,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.redstone.NeighborUpdater;
+import net.minecraft.world.level.redstone.Orientation;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -50,20 +51,12 @@ public interface NeighborUpdaterMixin_Tracker {
     /**
      * Logs a transaction to the {@link PhaseContext} for neighbor notifications. Otherwise,
      * we will fail to create notification events in the API. This avoids a redirect or overwrite
-     *
-     * @param level
-     * @param targetState
-     * @param targetPos
-     * @param fromBlock
-     * @param fromPos
-     * @param movement
-     * @param ci
      */
     @Inject(method = "executeUpdate", at = @At(
         value = "INVOKE",
-        target = "Lnet/minecraft/world/level/block/state/BlockState;handleNeighborChanged(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/Block;Lnet/minecraft/core/BlockPos;Z)V"
+        target = "Lnet/minecraft/world/level/block/state/BlockState;handleNeighborChanged(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/Block;Lnet/minecraft/world/level/redstone/Orientation;Z)V"
     ))
-    private static void tracker$wrapNeighborUpdateInSideEffect(Level level, BlockState targetState, BlockPos targetPos, Block fromBlock, BlockPos fromPos, boolean movement, CallbackInfo ci) {
+    private static void tracker$wrapNeighborUpdateInSideEffect(Level level, BlockState targetState, BlockPos targetPos, Block fromBlock, @Nullable Orientation orientation, boolean movement, CallbackInfo ci) {
         // Sponge start - prepare notification
         final PhaseContext<@NonNull ?> peek = PhaseTracker.getInstance().getPhaseContext();
         if (!(level instanceof ServerLevel serverLevel)) {
@@ -76,6 +69,8 @@ public interface NeighborUpdaterMixin_Tracker {
             targetPos,
             LevelChunk.EntityCreationType.CHECK
         );
+
+        var fromPos = targetPos; // TODO fromPos is gone THIS IS ALMOST CERTAINLY WRONG
         peek.getTransactor().logNeighborNotification(worldSupplier, fromPos, fromBlock, targetPos, targetState, existingTile);
 
         peek.associateNeighborStateNotifier(fromPos, targetState.getBlock(), targetPos, serverLevel, PlayerTracker.Type.NOTIFIER);

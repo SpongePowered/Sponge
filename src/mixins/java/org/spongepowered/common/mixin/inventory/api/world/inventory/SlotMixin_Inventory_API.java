@@ -77,7 +77,7 @@ public abstract class SlotMixin_Inventory_API implements org.spongepowered.api.i
         remaining -= push;
 
         if (remaining > 0) {
-            result.reject(ItemStackUtil.cloneDefensive(nativeStack, remaining));
+            result.reject((ItemStackLike) ItemStackUtil.cloneDefensive(nativeStack, remaining));
         }
 
         return result.build();

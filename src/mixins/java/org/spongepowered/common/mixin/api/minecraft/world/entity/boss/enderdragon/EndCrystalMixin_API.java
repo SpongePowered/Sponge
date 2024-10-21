@@ -39,8 +39,7 @@ public abstract class EndCrystalMixin_API extends EntityMixin_API implements End
     @Override
     public void detonate() {
         this.shadow$discard();
-        ((EndCrystalBridge) this).bridge$throwExplosionEventAndExplode(this.shadow$getCommandSenderWorld(), null, this.shadow$getX(),
-                this.shadow$getY(), this.shadow$getZ(), true, null);
+        ((EndCrystalBridge) this).bridge$wrappedExplode(this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), null, null);
     }
 
     @Override

@@ -56,7 +56,7 @@ public final class ArrowData {
                         .set((h, v) -> {
                             final PotionContents previousContents = ((ArrowAccessor) h).invoker$getPotionContents();
                             final List<MobEffectInstance> list = v.stream().map(effect -> ArrowData.clone((MobEffectInstance) effect)).toList();
-                            ((ArrowAccessor) h).invoker$setPotionContents(new PotionContents(previousContents.potion(), previousContents.customColor(), list));
+                            ((ArrowAccessor) h).invoker$setPotionContents(new PotionContents(previousContents.potion(), previousContents.customColor(), list, previousContents.customName()));
                         });
     }
     // @formatter:on

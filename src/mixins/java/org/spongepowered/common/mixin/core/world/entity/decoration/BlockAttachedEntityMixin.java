@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.decoration;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.decoration.BlockAttachedEntity;
@@ -54,9 +55,9 @@ public abstract class BlockAttachedEntityMixin extends EntityMixin {
         return this.shadow$survives() && !this.impl$ignorePhysics;
     }
 
-    @Inject(method = "hurt", cancellable = true, at = @At(value = "INVOKE",
-        target = "Lnet/minecraft/world/entity/decoration/BlockAttachedEntity;kill()V"))
-    private void attackImpl$postEventOnAttackEntityFrom(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "hurtServer", cancellable = true, at = @At(value = "INVOKE",
+        target = "Lnet/minecraft/world/entity/decoration/BlockAttachedEntity;kill(Lnet/minecraft/server/level/ServerLevel;)V"))
+    private void attackImpl$postEventOnAttackEntityFrom(final ServerLevel level, final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
         if (DamageEventUtil.callOtherAttackEvent((Entity) (Object) this, source, amount).isCancelled()) {
             cir.setReturnValue(true);
         }

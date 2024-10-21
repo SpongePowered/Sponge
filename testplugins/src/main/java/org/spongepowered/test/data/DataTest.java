@@ -373,7 +373,7 @@ public final class DataTest  {
         this.checkOfferData(ravager, Keys.CAN_JOIN_RAID, true);
         this.checkOfferData(ravager, Keys.CAN_JOIN_RAID, false);
 
-        final Entity boat = world.createEntity(EntityTypes.BOAT.get(), position);
+        final Entity boat = world.createEntity(EntityTypes.OAK_BOAT.get(), position);
         this.checkOfferData(boat, Keys.CAN_MOVE_ON_LAND, true);
         this.checkOfferData(boat, Keys.CAN_MOVE_ON_LAND, false);
 
@@ -548,7 +548,7 @@ public final class DataTest  {
         this.checkGetData(player, Keys.EXPERIENCE, 7);
         this.checkOfferData(player, Keys.EXPERIENCE_SINCE_LEVEL, 1);
 
-        this.checkOfferData(tntEntity, Keys.EXPLOSION_RADIUS, 1);
+        this.checkOfferData(tntEntity, Keys.EXPLOSION_RADIUS, 1f);
 
         this.checkGetData(player, Keys.EYE_HEIGHT, (double)1.62f);
         this.checkGetData(sheep, Keys.EYE_HEIGHT,  (double)(1.3f * 0.95f));

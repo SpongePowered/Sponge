@@ -217,7 +217,7 @@ public final class CommandRegistryLoader {
     public static RegistryLoader<CommandCompletionProvider> clientSuggestionProvider() {
         return RegistryLoader.of(l -> {
             // TODO based on SuggestionProviders.PROVIDERS_BY_NAME instead
-            l.add(CommandCompletionProviders.ALL_RECIPES, k -> (CommandCompletionProvider) SuggestionProviders.ALL_RECIPES);
+//            l.add(CommandCompletionProviders.ALL_RECIPES, k -> (CommandCompletionProvider) SuggestionProviders.ALL_RECIPES);
             l.add(CommandCompletionProviders.AVAILABLE_SOUNDS, k -> (CommandCompletionProvider) SuggestionProviders.AVAILABLE_SOUNDS);
             l.add(CommandCompletionProviders.SUMMONABLE_ENTITIES, k -> (CommandCompletionProvider) SuggestionProviders.SUMMONABLE_ENTITIES);
         });
@@ -293,7 +293,7 @@ public final class CommandRegistryLoader {
     // Helper
 
     static ArgumentType<?> argumentTypeFromKey(ResourceKey key, CommandBuildContext ctx) {
-        final ArgumentTypeInfo<?,?> argumentTypeInfo = BuiltInRegistries.COMMAND_ARGUMENT_TYPE.get((ResourceLocation) (Object) key);
+        final ArgumentTypeInfo<?,?> argumentTypeInfo = BuiltInRegistries.COMMAND_ARGUMENT_TYPE.getValue((ResourceLocation) (Object) key);
         if (argumentTypeInfo instanceof SingletonArgumentInfo<?> s) {
             return s.unpack(null).instantiate(ctx);
         }

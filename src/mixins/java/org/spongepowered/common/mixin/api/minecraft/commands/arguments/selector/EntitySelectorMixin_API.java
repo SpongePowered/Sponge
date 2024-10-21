@@ -28,6 +28,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCause;
@@ -63,7 +64,7 @@ public abstract class EntitySelectorMixin_API implements Selector {
     @Override
     @NonNull
     public Collection<Entity> select(@NonNull final Entity entity) throws IllegalStateException {
-        return this.api$select(((net.minecraft.world.entity.Entity) entity).createCommandSourceStack());
+        return this.api$select(((net.minecraft.world.entity.Entity) entity).createCommandSourceStackForNameResolution(((ServerLevel) ((net.minecraft.world.entity.Entity) entity).level())));
     }
 
     @Override

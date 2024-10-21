@@ -29,6 +29,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -93,8 +94,9 @@ public final class TagGenerator implements Generator {
                 ).build();
 
 
-        ctx.registries().registryOrThrow(this.taggedRegistry).getTagNames()
-            .<ResourceLocation>map(TagKey::location)
+        ctx.registries().lookupOrThrow(this.taggedRegistry).getTags()
+            .<TagKey<?>>map(HolderSet.Named::key)
+            .map(TagKey::location)
             .sorted(Comparator.naturalOrder())
             .map(v -> this.makeField(this.targetClassSimpleName, fieldType, factoryMethod, v))
             .forEachOrdered(clazz::addField);

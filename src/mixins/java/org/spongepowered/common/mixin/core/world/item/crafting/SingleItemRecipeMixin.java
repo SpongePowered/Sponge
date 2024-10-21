@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world.item.crafting;
 
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.SingleItemRecipe;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,8 +39,8 @@ import org.spongepowered.common.bridge.world.item.crafting.RecipeResultBridge;
 public abstract class SingleItemRecipeMixin implements RecipeResultBridge {
 
     // @formatter=off
-    @Shadow @Final protected ItemStack result;
-
+    @Shadow @Final private ItemStack result;
+    @Shadow public abstract Ingredient shadow$input();
     // @formatter=on
 
 

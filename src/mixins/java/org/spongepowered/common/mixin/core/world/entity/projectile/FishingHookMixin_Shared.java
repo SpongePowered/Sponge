@@ -47,6 +47,6 @@ public abstract class FishingHookMixin_Shared extends ProjectileMixin {
             this.shadow$discard();
             return ProjectileDeflection.NONE;
         }
-        return this.hitTargetOrDeflectSelf(hitResult);
+        return this.shadow$hitTargetOrDeflectSelf(hitResult);
     }
 }

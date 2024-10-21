@@ -34,6 +34,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -242,7 +243,7 @@ public final class VolumeStreamUtils {
         return shouldCarbonCopy ? (pos, entity) -> {
             final CompoundTag nbt = new CompoundTag();
             entity.save(nbt);
-            final net.minecraft.world.entity.@Nullable Entity cloned = entity.getType().create(level);
+            final net.minecraft.world.entity.@Nullable Entity cloned = entity.getType().create(level, EntitySpawnReason.COMMAND);
             Objects.requireNonNull(
                 cloned,
                 () -> String.format(
@@ -320,7 +321,7 @@ public final class VolumeStreamUtils {
     ) {
         final boolean result = VolumeStreamUtils.setBiome(chunk.getSection(chunk.getSectionIndex(y)), x, y, z, biome);
         if (result) {
-            chunk.setUnsaved(true);
+            chunk.markUnsaved();
         }
         return result;
     }
@@ -508,7 +509,7 @@ public final class VolumeStreamUtils {
         final Vector3i size = max.sub(min).add(1, 1 ,1);
         final @MonotonicNonNull ObjectArrayMutableBiomeBuffer backingVolume;
         if (shouldCarbonCopy) {
-            final Registry<Biome> biomeRegistry = reader.registryAccess().registryOrThrow(Registries.BIOME);
+            final Registry<Biome> biomeRegistry = reader.registryAccess().lookupOrThrow(Registries.BIOME);
             backingVolume = new ObjectArrayMutableBiomeBuffer(min, size, VolumeStreamUtils.nativeToSpongeRegistry(biomeRegistry));
         } else {
             backingVolume = null;

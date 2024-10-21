@@ -25,9 +25,10 @@
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.lighting.LightEngine;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -53,10 +54,8 @@ public final class UpdateLightSideEffect implements ProcessingSideEffect {
         if (!flag.updateLighting()) {
             return EffectResult.NULL_PASS;
         }
-        final int originalOpactiy = oldState.opacity;
         final ServerLevel serverWorld = pipeline.getServerWorld();
-        final LevelChunk chunk = pipeline.getAffectedChunk();
-        final BlockState currentState = chunk.getBlockState(oldState.pos);
+        final BlockState currentState = pipeline.getAffectedChunk().getBlockState(oldState.pos());
         // local variable notes:
         // var2 = oldState.state
         // var3 = currentState
@@ -70,24 +69,26 @@ public final class UpdateLightSideEffect implements ProcessingSideEffect {
         //          || var2.useShapeForLightOcclusion()
         //         )
         //     ) {
-        if (oldState.state != currentState
-            && (currentState.getLightBlock(serverWorld, oldState.pos) != originalOpactiy
-            || currentState.getLightEmission() != oldState.state.getLightEmission()
-            || currentState.useShapeForLightOcclusion()
-            || oldState.state.useShapeForLightOcclusion()
-        )) {
-            final int x = oldState.pos.getX() & 15;
-            final int y = oldState.pos.getY();
-            final int z = oldState.pos.getZ() & 15;
+        if (LightEngine.hasDifferentLightProperties(oldState.state(), currentState)) {
             // ProfilerFiller $$12 = this.level.getProfiler();
-            final ProfilerFiller profiler = serverWorld.getProfiler();
-            profiler.push("updateSkyLightSources");
-            // this.skyLightSources.update(this, x, y, z);
-            chunk.getSkyLightSources().update(chunk, x, y, z);
-            profiler.popPush("queueCheckLight");
-            // this.level.getChunkProvider().getLightManager().checkBlock(pos);
-            serverWorld.getChunkSource().getLightEngine().checkBlock(oldState.pos);
-            profiler.pop();
+            final ProfilerFiller filler = Profiler.get();
+
+            filler.push("updateSkyLightSources");
+//            this.skyLightSources.update(this, $$6, $$3, $$8);
+            final var pos = oldState.pos();
+            final var x = pos.getX() & 15;
+            final var y = pos.getY() & 15;
+            final var z = pos.getZ() & 15;
+
+            final var levelChunk = serverWorld.getChunk(pos);
+            levelChunk.getSkyLightSources().update(levelChunk, x, y, z);
+//            serverWorld.getChunkSource().update(this, $$6, $$3, $$8);
+            // this.profiler.startSection("queueCheckLight");
+            filler.push("queueCheckLight");
+            // this.getChunkProvider().getLightManager().checkBlock(pos);
+            serverWorld.getChunkSource().getLightEngine().checkBlock(pos);
+            // this.profiler.endSection();
+            filler.pop();
         }
         return EffectResult.NULL_PASS;
     }

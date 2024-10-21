@@ -39,6 +39,7 @@ import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 public class SpongeShapedCraftingRecipeRegistration extends SpongeRecipeRegistration<ShapedRecipe> implements
@@ -79,7 +80,8 @@ public class SpongeShapedCraftingRecipeRegistration extends SpongeRecipeRegistra
 
     @Override
     public Recipe recipe() {
-        if (SpongeRecipeRegistration.isVanillaSerializer(this.spongeResult, this.resultFunction, this.remainingItemsFunction, this.pattern.ingredients())) {
+        final var ingredients = this.pattern.ingredients().stream().filter(Optional::isPresent).map(Optional::get).toList();
+        if (SpongeRecipeRegistration.isVanillaSerializer(this.spongeResult, this.resultFunction, this.remainingItemsFunction, ingredients)) {
             return (ShapedCraftingRecipe) new ShapedRecipe(this.group, this.craftingBookCategory, this.pattern, this.spongeResult, this.showNotification);
         }
         this.ensureCached();

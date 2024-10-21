@@ -30,20 +30,18 @@ import net.minecraft.world.level.saveddata.SavedData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.data.DataUtil;
 
-import java.io.File;
-
 @Mixin(SavedData.class)
 public abstract class SavedDataMixin {
 
-    @Inject(method = "save(Ljava/io/File;Lnet/minecraft/core/HolderLookup$Provider;)V",
+    @Inject(method = "save(Lnet/minecraft/core/HolderLookup$Provider;)Lnet/minecraft/nbt/CompoundTag;",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/saveddata/SavedData;save(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/core/HolderLookup$Provider;)Lnet/minecraft/nbt/CompoundTag;"),
             locals = LocalCapture.CAPTURE_FAILHARD)
-    public void impl$writeAdditionalMapNBT(File file, HolderLookup.Provider registry, final CallbackInfo cir, CompoundTag compound) {
+    public void impl$writeAdditionalMapNBT(HolderLookup.Provider registry, final CallbackInfoReturnable<CompoundTag> cir, CompoundTag compound) {
         if (this instanceof DataCompoundHolder) {
             if (DataUtil.syncDataToTag(this)) {
                 compound.merge(((DataCompoundHolder) this).data$getCompound());

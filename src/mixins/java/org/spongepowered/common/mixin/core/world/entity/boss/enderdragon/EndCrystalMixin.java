@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.boss.enderdragon;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
@@ -31,9 +32,6 @@ import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.api.world.server.ServerLocation;
-import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -41,7 +39,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.world.entity.boss.enderdragon.EndCrystalBridge;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
@@ -52,55 +49,50 @@ import java.util.Optional;
 @Mixin(EndCrystal.class)
 public abstract class EndCrystalMixin extends EntityMixin implements ExplosiveBridge, EndCrystalBridge {
 
-    private int impl$explosionStrength = Constants.Entity.EnderCrystal.DEFAULT_EXPLOSION_STRENGTH;
+    private float impl$explosionRadius = Constants.Entity.EnderCrystal.DEFAULT_EXPLOSION_STRENGTH;
 
     // Explosive Impl
 
     @Override
-    public Optional<Integer> bridge$getExplosionRadius() {
-        return Optional.of(this.impl$explosionStrength);
+    public Optional<Float> bridge$getExplosionRadius() {
+        return Optional.of(this.impl$explosionRadius);
     }
 
     @Override
-    public void bridge$setExplosionRadius(@Nullable final Integer radius) {
-        this.impl$explosionStrength = radius == null ? Constants.Entity.EnderCrystal.DEFAULT_EXPLOSION_STRENGTH : radius;
+    public void bridge$setExplosionRadius(final @Nullable Float radius) {
+        this.impl$explosionRadius = radius == null ? Constants.Entity.EnderCrystal.DEFAULT_EXPLOSION_STRENGTH : radius;
     }
 
-    @Redirect(method = "hurt",
+    @Redirect(method = "hurtServer",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/level/Level;explode(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;Lnet/minecraft/world/level/ExplosionDamageCalculator;DDDFZLnet/minecraft/world/level/Level$ExplosionInteraction;)Lnet/minecraft/world/level/Explosion;"
+            target = "Lnet/minecraft/server/level/ServerLevel;explode(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;Lnet/minecraft/world/level/ExplosionDamageCalculator;DDDFZLnet/minecraft/world/level/Level$ExplosionInteraction;)V"
         )
     )
-    private net.minecraft.world.level.@Nullable Explosion impl$throwEventWithEntity(final net.minecraft.world.level.Level world,
-        final Entity entityIn, final DamageSource damageSource, final ExplosionDamageCalculator exDamageCalc, final double xIn, final double yIn, final double zIn, final float explosionRadius,
-            final boolean fire, final Level.ExplosionInteraction modeIn) {
-        // TODO fire?
-        // TODO smoking value correct?
-        return this.bridge$throwExplosionEventAndExplode(world, entityIn, xIn, yIn, zIn, modeIn.compareTo(Level.ExplosionInteraction.TNT) <= 0, damageSource);
+    private void impl$onHurtExplode(
+        final ServerLevel instance, final Entity entity, final DamageSource damageSource,
+        final ExplosionDamageCalculator explosionDamageCalculator, final double xIn, double yIn, double zIn,
+        float v, boolean b, Level.ExplosionInteraction explosionInteraction, final ServerLevel level,
+        final DamageSource source, final float amount) {
+        this.bridge$wrappedExplode(xIn, yIn, zIn, damageSource, source);
     }
 
     @Override
-    public net.minecraft.world.level.@Nullable Explosion bridge$throwExplosionEventAndExplode(final net.minecraft.world.level.Level world,
-        @Nullable final Entity nil, final double x, final double y, final double z, final boolean smoking,
-        @Nullable final DamageSource source) {
+    public void bridge$wrappedExplode(final double x, final double y, final double z,
+        @Nullable final DamageSource source, final DamageSource causeSource) {
         final CauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();
         try (final CauseStackManager.StackFrame frame = causeStackManager.pushCauseFrame()) {
             frame.pushCause(this);
             if (source != null) {
-                frame.pushCause(source);
+                frame.pushCause(causeSource);
             }
-            return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
-                .location(ServerLocation.of((ServerWorld) world, x, y, z))
-                .radius(this.impl$explosionStrength)
-                .shouldPlaySmoke(smoking))
-                .orElse(null);
+            this.level().explode( (Entity) (Object) this, source, null, x, y, z, this.impl$explosionRadius, false, Level.ExplosionInteraction.BLOCK);
         }
     }
 
-    @Inject(method = "hurt", cancellable = true, at = @At(value = "INVOKE",
+    @Inject(method = "hurtServer", cancellable = true, at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/entity/boss/enderdragon/EndCrystal;remove(Lnet/minecraft/world/entity/Entity$RemovalReason;)V"))
-    private void attackImpl$onAttackEntityFrom(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
+    private void attackImpl$onAttackEntityFrom(final ServerLevel level, final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
         if (DamageEventUtil.callOtherAttackEvent((Entity) (Object) this, source, amount).isCancelled()) {
             cir.setReturnValue(true);
         }

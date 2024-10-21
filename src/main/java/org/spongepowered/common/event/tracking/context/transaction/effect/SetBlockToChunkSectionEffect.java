@@ -46,9 +46,9 @@ public final class SetBlockToChunkSectionEffect implements ProcessingSideEffect 
         final SpongeBlockChangeFlag flag, final int limit
     ) {
         final LevelChunkSection chunkSection = pipeline.getAffectedSection();
-        final int x = oldState.pos.getX() & 15;
-        final int y = oldState.pos.getY() & 15;
-        final int z = oldState.pos.getZ() & 15;
+        final int x = oldState.pos().getX() & 15;
+        final int y = oldState.pos().getY() & 15;
+        final int z = oldState.pos().getZ() & 15;
         final BlockState oldStateReturned = chunkSection.setBlockState(x, y, z, newState);
         if (oldStateReturned == newState) {
             return EffectResult.NULL_RETURN;

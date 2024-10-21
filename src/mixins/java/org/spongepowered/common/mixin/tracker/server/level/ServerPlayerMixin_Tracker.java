@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.tracker.server.level;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.CauseStackManager;
@@ -59,12 +58,12 @@ public abstract class ServerPlayerMixin_Tracker extends PlayerMixin_Tracker {
         method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/player/Player;drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;"
+            target = "Lnet/minecraft/server/level/ServerPlayer;createItemStackToDrop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;"
         )
     )
     @Nullable
     private ItemEntity tracker$throwItemDrop(
-        final Player thisPlayer, final ItemStack droppedItem, final boolean dropAround, final boolean traceItem
+        final ServerPlayer thisPlayer, final ItemStack droppedItem, final boolean dropAround, final boolean traceItem
     ) {
         if (droppedItem.isEmpty()) {
             return null;

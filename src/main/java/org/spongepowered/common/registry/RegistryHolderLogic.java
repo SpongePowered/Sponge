@@ -94,14 +94,12 @@ public final class RegistryHolderLogic implements RegistryHolder {
 
     @Override
     public <T> Registry<T> registry(final RegistryType<T> type) {
-        final net.minecraft.core.Registry<net.minecraft.core.Registry<?>> root = this.roots.get(Objects.requireNonNull(type, "type").root());
+        final var root = this.roots.get(Objects.requireNonNull(type, "type").root());
         if (root == null) {
             throw new ValueNotFoundException(String.format("No '%s' root registry has been defined", type.root()));
         }
-        final net.minecraft.core.Registry<?> registry = root.get((ResourceLocation) (Object) type.location());
-        if (registry == null) {
-            throw new ValueNotFoundException(String.format("No '%s' registry has been defined in root '%s'", type.location(), type.root()));
-        }
+        final var registry = root.getOptional((ResourceLocation) (Object) type.location())
+            .orElseThrow(() -> new ValueNotFoundException(String.format("No '%s' registry has been defined in root '%s'", type.location(), type.root())));
         return (Registry<T>) registry;
     }
 
@@ -161,7 +159,7 @@ public final class RegistryHolderLogic implements RegistryHolder {
         if (root == null) {
             throw new ValueNotFoundException(String.format("No '%s' root registry has been defined", type.root()));
         }
-        net.minecraft.core.Registry<?> registry = root.get((ResourceLocation) (Object) type.location());
+        var registry = root.getValue((ResourceLocation) (Object) type.location());
         final boolean exists = registry != null;
         if (!replace && exists) {
             throw new DuplicateRegistrationException(String.format("Registry '%s' in root '%s' has already been defined", type.location(), type.root()));

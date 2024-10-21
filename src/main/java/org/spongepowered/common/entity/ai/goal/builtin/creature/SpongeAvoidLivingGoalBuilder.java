@@ -29,6 +29,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.AvoidLivingGoal;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.PathfinderAgent;
+import org.spongepowered.api.world.server.ServerWorld;
 
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -69,7 +70,7 @@ public final class SpongeAvoidLivingGoalBuilder implements AvoidLivingGoal.Build
 
     @Override
     public AvoidLivingGoal.Builder from(AvoidLivingGoal value) {
-        return this.targetSelector(value.targetSelector())
+        return this.targetSelector((e) -> value.targetSelector().test(e, (ServerWorld) e.world()))
             .searchDistance(value.searchDistance())
             .closeRangeSpeed(value.closeRangeSpeed())
             .farRangeSpeed(value.farRangeSpeed());
