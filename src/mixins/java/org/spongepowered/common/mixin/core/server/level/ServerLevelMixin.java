@@ -29,12 +29,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.bossevents.CustomBossEvents;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.server.level.progress.ChunkProgressListener;
+import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.ProgressListener;
 import net.minecraft.world.RandomSequences;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
@@ -536,5 +538,15 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
                 .add("key=" + this.shadow$dimension())
                 .add("worldType=" + worldTypeKey.map(ResourceKey::toString).orElse("inline"))
                 .toString();
+    }
+
+    @Redirect(method = {
+        "advanceWeatherCycle",
+        "globalLevelEvent",
+        "setDefaultSpawnPos"
+    }, at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastAll(Lnet/minecraft/network/protocol/Packet;)V"))
+    private void impl$broadcastAllCurrentDimensionOnly(final PlayerList instance, final Packet<?> $$0) {
+        //Weather, game rules and spawns are per world in Sponge.
+        instance.broadcastAll($$0, this.shadow$dimension());
     }
 }
