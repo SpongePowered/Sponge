@@ -35,7 +35,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
  * entities as those can be captured safely to allow plugins final say in whether
  * the entities spawn. Likewise, Forge requires the entities to still throw
  * spawn events, so we must oblige in both Forge's requirements and Plugins requirements.
- * Note that {@link State#TERRAIN_GENERATION} and {@link State#POPULATOR_RUNNING} are
+ * Note that {@link State#TERRAIN_GENERATION} is
  * re-entrant and should allow for re-entrance. Re-entrance is defined in this case when
  * while a chunk is being generated/populated, the generator and/or populator require
  * a neighboring chunk to be generated/populated, which requires a re-entrance of the
@@ -43,7 +43,6 @@ import org.spongepowered.common.event.tracking.IPhaseState;
  */
 public final class GenerationPhase {
 
-    @SuppressWarnings("unchecked")
     public static final class State {
 
         public static final IPhaseState<ChunkLoadContext> CHUNK_LOADING = new ChunkLoadPhaseState();
@@ -52,17 +51,11 @@ public final class GenerationPhase {
 
         public static final IPhaseState<GenericGenerationContext> CHUNK_REGENERATING_LOAD_EXISTING = new ChunkRegeneratingLoadExistingPhaseState();
 
-        public static final IPhaseState<ChunkRegenerateContext> CHUNK_REGENERATING = new ChunkRegeneratePhaseState();
-
         public static final IPhaseState<GenericGenerationContext> WORLD_SPAWNER_SPAWNING = new WorldSpawnerPhaseState();
-
-        public static final IPhaseState<PopulatorPhaseContext> POPULATOR_RUNNING = new PopulatorGenerationPhaseState("POPULATOR_RUNNING");
 
         public static final IPhaseState<FeaturePhaseContext> FEATURE_PLACEMENT = new FeatureGenerationPhaseState("FEATURE_PLACEMENT");
 
         public static final IPhaseState<GenericGenerationContext> TERRAIN_GENERATION = new TerrainGenerationState();
-
-        public static final IPhaseState<GenerationCompatibileContext> GENERATION_COMPATIBILITY = new GenerationCompatibilityState();
 
     }
 
