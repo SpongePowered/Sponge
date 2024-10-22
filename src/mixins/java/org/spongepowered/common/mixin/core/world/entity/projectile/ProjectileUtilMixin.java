@@ -70,7 +70,7 @@ public abstract class ProjectileUtilMixin {
                 final Vec3 to = from.add(velocity);
                 final Vec3 direction = from.subtract(to);
 
-                cir.setReturnValue(BlockHitResult.miss(to, Direction.getNearest(direction.x, direction.y, direction.z), BlockPos.containing(to)));
+                cir.setReturnValue(BlockHitResult.miss(to, Direction.getApproximateNearest(direction.x, direction.y, direction.z), BlockPos.containing(to)));
             }
         }
     }

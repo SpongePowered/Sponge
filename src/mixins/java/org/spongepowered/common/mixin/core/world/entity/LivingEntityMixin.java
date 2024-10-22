@@ -29,8 +29,6 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageSource;
@@ -105,12 +103,12 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Shadow public abstract int shadow$getUseItemRemainingTicks();
     @Shadow public abstract float shadow$getHealth();
     @Shadow public abstract CombatTracker shadow$getCombatTracker();
-    @Shadow public void shadow$kill() { }
+    @Shadow public void shadow$kill(ServerLevel level) { }
     @Shadow public abstract InteractionHand shadow$getUsedItemHand();
     @Shadow public abstract Optional<BlockPos> shadow$getSleepingPos();
     @Shadow protected abstract void shadow$spawnItemParticles(ItemStack stack, int count);
     @Shadow public abstract ItemStack shadow$getItemInHand(InteractionHand hand);
-    @Shadow protected abstract void shadow$dropEquipment();
+    @Shadow protected abstract void shadow$dropEquipment(ServerLevel level);
     @Shadow protected abstract void shadow$dropAllDeathLoot(ServerLevel level, DamageSource damageSourceIn);
     @Shadow @Nullable public abstract LivingEntity shadow$getKillCredit();
     @Shadow protected abstract void shadow$createWitherRose(@Nullable LivingEntity p_226298_1_);
@@ -173,14 +171,14 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
     @Redirect(method = "dropAllDeathLoot",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/entity/LivingEntity;dropEquipment()V"
+                    target = "Lnet/minecraft/world/entity/LivingEntity;dropEquipment(Lnet/minecraft/server/level/ServerLevel;)V"
             )
     )
-    private void tracker$dropInventory(final LivingEntity thisEntity) {
+    private void tracker$dropInventory(final LivingEntity thisEntity, final ServerLevel level) {
         if (thisEntity instanceof PlayerBridge && ((PlayerBridge) thisEntity).bridge$keepInventory()) {
             return;
         }
-        this.shadow$dropEquipment();
+        this.shadow$dropEquipment(level);
     }
 
     @Inject(method = "pushEntities", at = @At("HEAD"), cancellable = true)
@@ -190,14 +188,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         }
     }
 
-    @Redirect(method = "triggerItemUseEffects",
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/LivingEntity;spawnItemParticles(Lnet/minecraft/world/item/ItemStack;I)V"))
-    private void impl$hideItemParticlesIfVanished(final LivingEntity livingEntity, final ItemStack stack, final int count) {
-        if (this.bridge$vanishState().createsParticles()) {
-            this.shadow$spawnItemParticles(stack, count);
-        }
-    }
+
 
     @Inject(method = "randomTeleport", at = @At("HEAD"))
     private void impl$snapshotPositionBeforeVanillaTeleportLogic(final double x, final double y, final double z, final boolean changeState,
@@ -246,23 +237,6 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         if (this.bridge$vanishState().ignoresCollisions()) {
             cir.setReturnValue(false);
         }
-    }
-
-    @Redirect(
-        method = "eat(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/food/FoodProperties;)Lnet/minecraft/world/item/ItemStack;",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/level/Level;playSound(Lnet/minecraft/world/entity/player/Player;DDDLnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FF)V"
-        )
-    )
-    private void impl$ignoreExperienceLevelSoundsWhileVanished(final net.minecraft.world.level.Level world,
-        final net.minecraft.world.entity.player.Player player, final double x, final double y, final double z,
-        final SoundEvent sound, final SoundSource category, final float volume, final float pitch
-    ) {
-        if (!this.bridge$vanishState().createsSounds()) {
-            return;
-        }
-        world.playSound(player, x, y, z, sound, category, volume, pitch);
     }
 
     @Redirect(method = "checkFallDamage",
@@ -399,7 +373,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Inject(method = "completeUsingItem",
         cancellable = true,
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/LivingEntity;triggerItemUseEffects(Lnet/minecraft/world/item/ItemStack;I)V"))
+            target = "Lnet/minecraft/world/item/ItemStack;finishUsingItem(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/LivingEntity;)Lnet/minecraft/world/item/ItemStack;"))
     private void impl$onUpdateItemUse(final CallbackInfo ci) {
         if (this.shadow$level().isClientSide) {
             return;

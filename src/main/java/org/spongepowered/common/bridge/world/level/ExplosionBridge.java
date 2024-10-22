@@ -24,11 +24,10 @@
  */
 package org.spongepowered.common.bridge.world.level;
 
+
 public interface ExplosionBridge {
 
-    boolean bridge$getShouldDamageBlocks();
 
-    void bridge$setShouldBreakBlocks(boolean shouldBreakBlocks);
 
     boolean bridge$getShouldPlaySmoke();
 

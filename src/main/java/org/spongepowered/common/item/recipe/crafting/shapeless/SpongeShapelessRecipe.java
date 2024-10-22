@@ -25,7 +25,6 @@
 package org.spongepowered.common.item.recipe.crafting.shapeless;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.HolderLookup;
@@ -36,6 +35,7 @@ import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.level.Level;
+import org.spongepowered.common.accessor.world.item.crafting.ShapelessRecipeAccessor;
 import org.spongepowered.common.bridge.world.item.crafting.RecipeResultBridge;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
@@ -60,26 +60,12 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
     public static final MapCodec<SpongeShapelessRecipe> SPONGE_CODEC = RecordCodecBuilder.mapCodec(
             $$0 -> $$0.group(
                             Codec.STRING.fieldOf(Constants.Recipe.SPONGE_TYPE).forGetter(t -> "custom"), // important to fail early when decoding vanilla recipes
-                            Codec.STRING.optionalFieldOf("group", "").forGetter(ShapelessRecipe::getGroup),
+                            Codec.STRING.optionalFieldOf("group", "").forGetter(ShapelessRecipe::group),
                             CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(ShapelessRecipe::category),
                             ItemStack.CODEC.fieldOf(Constants.Recipe.RESULT).forGetter($$0x -> ((RecipeResultBridge)$$0x).bridge$result()),
-                            Ingredient.CODEC_NONEMPTY
-                                    .listOf()
+                            Ingredient.CODEC.listOf(1,9)
                                     .fieldOf(Constants.Recipe.SHAPELESS_INGREDIENTS)
-                                    .flatXmap(
-                                            $$0x -> {
-                                                Ingredient[] $$1 = $$0x.stream().filter($$0xx -> !$$0xx.isEmpty()).toArray(Ingredient[]::new);
-                                                if ($$1.length == 0) {
-                                                    return DataResult.error(() -> "No ingredients for shapeless recipe");
-                                                } else {
-                                                    return $$1.length > 9
-                                                            ? DataResult.error(() -> "Too many ingredients for shapeless recipe")
-                                                            : DataResult.success(NonNullList.of(Ingredient.EMPTY, $$1));
-                                                }
-                                            },
-                                            DataResult::success
-                                    )
-                                    .forGetter(ShapelessRecipe::getIngredients),
+                                    .forGetter(sr -> ((ShapelessRecipeAccessor) sr).accessor$ingredients()),
                             IngredientResultUtil.CACHED_RESULT_FUNC_CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULTFUNCTION).forGetter(SpongeShapelessRecipe::resultFunctionId),
                             IngredientResultUtil.CACHED_REMAINING_FUNC_CODEC.optionalFieldOf(Constants.Recipe.SPONGE_REMAINING_ITEMS).forGetter(SpongeShapelessRecipe::remainingItemsFunctionId)
                     )
@@ -96,7 +82,7 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
            final String groupIn,
            final CraftingBookCategory category,
            final ItemStack recipeOutputIn,
-           final NonNullList<Ingredient> recipeItemsIn,
+           final List<Ingredient> recipeItemsIn,
            final Optional<String> resultFunctionId,
            final Optional<String> remainingItemsFunctionId)
     {
@@ -106,7 +92,7 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
 
     public SpongeShapelessRecipe(final String groupIn,
             final CraftingBookCategory category,
-            final NonNullList<Ingredient> recipeItemsIn,
+            final List<Ingredient> recipeItemsIn,
             final ItemStack spongeResultStack,
             final String resultFunctionId,
             final String remainingItemsFunctionId) {
@@ -129,7 +115,7 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
         if (this.onlyVanillaIngredients) {
             return super.matches($$0, $$1);
         }
-        return SpongeShapelessRecipe.matches($$0.items(), this.getIngredients());
+        return SpongeShapelessRecipe.matches($$0.items(), ((ShapelessRecipeAccessor) this).accessor$ingredients());
     }
 
     @Override
@@ -147,14 +133,6 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
             return IngredientResultUtil.cachedResultFunction(this.resultFunctionId).apply($$0);
         }
         return super.assemble($$0, $$1);
-    }
-
-    @Override
-    public ItemStack getResultItem(final HolderLookup.Provider $$1) {
-//        if (this.resultFunctionId != null) {
-//            return ItemStack.EMPTY;
-//        }
-        return super.getResultItem($$1);
     }
 
     private static boolean

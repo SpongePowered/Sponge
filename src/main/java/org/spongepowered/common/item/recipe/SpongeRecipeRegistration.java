@@ -35,6 +35,7 @@ import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
@@ -71,9 +72,10 @@ public abstract class SpongeRecipeRegistration<R extends Recipe<? extends Recipe
         this.key = key;
         this.serializer = serializer;
         this.pack = pack;
+        var rKey = net.minecraft.resources.ResourceKey.create(Registries.RECIPE, key);
         this.advancement = Advancement.Builder.advancement()
-                .addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(key))
-                .rewards(AdvancementRewards.Builder.recipe(key))
+                .addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(rKey))
+                .rewards(AdvancementRewards.Builder.recipe(rKey))
                 .build(ResourceLocation.fromNamespaceAndPath(key.getNamespace(), "recipes/" + recipeCategory.getFolderName() + "/" + key.getPath()));
         this.group = group == null ? "" : group;
     }
@@ -101,12 +103,7 @@ public abstract class SpongeRecipeRegistration<R extends Recipe<? extends Recipe
         if (!resultStack.getComponents().isEmpty() || resultFunction != null || remainingItemsFunction != null) {
             return false;
         }
-        for (final Ingredient value : ingredients) {
-            if (value instanceof SpongeIngredient) {
-                return false;
-            }
-        }
-        return true;
+        return ingredients.stream().noneMatch(value -> value instanceof SpongeIngredient);
     }
 
     @Override

@@ -279,7 +279,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         // First find a loaded level-stem / To load based on a datapack load using the WorldTemplate instead
 
         final net.minecraft.resources.ResourceKey<LevelStem> rKey = net.minecraft.resources.ResourceKey.create(Registries.LEVEL_STEM, (ResourceLocation) (Object) key);
-        final LevelStem levelStem = SpongeCommon.vanillaRegistry(Registries.LEVEL_STEM).get(rKey);
+        final LevelStem levelStem = SpongeCommon.vanillaRegistry(Registries.LEVEL_STEM).getValue(rKey);
         if (levelStem != null) {
             return this.loadWorld0(registryKey, levelStem);
         }
@@ -337,7 +337,7 @@ public abstract class SpongeWorldManager implements WorldManager {
                 hardcore == null ? defaultLevelData.isHardcore() : hardcore,
                 difficulty == null ? defaultLevelData.getDifficulty() : difficulty,
                 allowCommands == null ? defaultLevelData.isAllowCommands() : allowCommands,
-                defaultLevelData.getGameRules().copy(),
+                defaultLevelData.getGameRules().copy(defaultLevelData.enabledFeatures()),
                 defaultLevelData.getDataConfiguration());
     }
 
@@ -795,7 +795,7 @@ public abstract class SpongeWorldManager implements WorldManager {
     }
 
     private PrimaryLevelData loadLevelData(final RegistryAccess.Frozen access, final WorldDataConfiguration datapackConfig, final Dynamic<?> dataTag) {
-        final LevelDataAndDimensions levelData = LevelStorageSource.getLevelDataAndDimensions(dataTag, datapackConfig, access.registryOrThrow(Registries.LEVEL_STEM), access);
+        final LevelDataAndDimensions levelData = LevelStorageSource.getLevelDataAndDimensions(dataTag, datapackConfig, access.lookupOrThrow(Registries.LEVEL_STEM), access);
         return (PrimaryLevelData) levelData.worldData();
     }
 
@@ -888,7 +888,7 @@ public abstract class SpongeWorldManager implements WorldManager {
                     }
                 } else if (levelData.worldGenOptions().generateBonusChest()) {
                     final BlockPos pos = levelData.getSpawnPos();
-                    final ConfiguredFeature<?, ?> bonusChestFeature = SpongeCommon.vanillaRegistry(Registries.CONFIGURED_FEATURE).get(MiscOverworldFeatures.BONUS_CHEST);
+                    final ConfiguredFeature<?, ?> bonusChestFeature = SpongeCommon.vanillaRegistry(Registries.CONFIGURED_FEATURE).getValue(MiscOverworldFeatures.BONUS_CHEST);
                     bonusChestFeature.place(world, world.getChunkSource().getGenerator(), world.random, pos);
                 }
                 levelData.setInitialized(true);

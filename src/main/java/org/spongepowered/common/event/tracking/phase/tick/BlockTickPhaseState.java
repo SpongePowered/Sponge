@@ -26,7 +26,7 @@ package org.spongepowered.common.event.tracking.phase.tick;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BonemealableBlock;
@@ -73,9 +73,9 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
             if (newBlock instanceof BonemealableBlock) {
                 return BlockChange.GROW;
             } else if (phaseContext.tickingBlock instanceof final StemBlock stemBlock) {
-                final Registry<Block> registry = ((Level) phaseContext.world).registryAccess().registryOrThrow(Registries.BLOCK);
-                final @Nullable Block fruitBlock = registry.get(((StemBlockAccessor) stemBlock).accessor$fruit());
-                final @Nullable Block attachedStemBlock = registry.get(((StemBlockAccessor) stemBlock).accessor$attachedStem());
+                final Registry<Block> registry = ((ServerLevel) phaseContext.world).registryAccess().lookupOrThrow(Registries.BLOCK);
+                final @Nullable Block fruitBlock = registry.getValue(((StemBlockAccessor) stemBlock).accessor$fruit());
+                final @Nullable Block attachedStemBlock = registry.getValue(((StemBlockAccessor) stemBlock).accessor$attachedStem());
                 if (newBlock == fruitBlock || newBlock == attachedStemBlock) {
                     return BlockChange.GROW;
                 }

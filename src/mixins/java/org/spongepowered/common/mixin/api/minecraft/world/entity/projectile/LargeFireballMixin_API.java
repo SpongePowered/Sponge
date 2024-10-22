@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.projectile;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -39,14 +40,13 @@ import java.util.Set;
 @Mixin(LargeFireball.class)
 public abstract class LargeFireballMixin_API extends FireballMixin_API implements ExplosiveFireball {
 
-    @Shadow public int explosionPower;
+    @Shadow private int explosionPower;
 
     @Override
     public void detonate() {
-        final boolean flag = this.shadow$getCommandSenderWorld().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
-        final Level.ExplosionInteraction mode = flag ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE;
-        ((LargeFireballBridge) this).bridge$throwExplosionEventAndExplode(this.shadow$getCommandSenderWorld(), null, this.shadow$getX(),
-                this.shadow$getY(), this.shadow$getZ(), this.explosionPower, flag, mode);
+        if (this.shadow$level() instanceof ServerLevel sl && sl.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+            ((LargeFireballBridge) this).bridge$wrappedExplode(this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), this.explosionPower, true, Level.ExplosionInteraction.MOB);
+        }
         this.shadow$discard();
     }
 

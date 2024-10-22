@@ -38,11 +38,11 @@ public abstract class GameRuleCommandMixin {
 
     @Redirect(method = "setRule", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getGameRules()Lnet/minecraft/world/level/GameRules;"))
     private static GameRules impl$usePerWorldGameRules(final MinecraftServer server, final CommandContext<CommandSourceStack> context) {
-        return context.getSource().getLevel().getLevelData().getGameRules();
+        return context.getSource().getLevel().getGameRules();
     }
 
     @Redirect(method = "queryRule", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getGameRules()Lnet/minecraft/world/level/GameRules;"))
     private static GameRules impl$usePerWorldGameRules(final MinecraftServer server, final CommandSourceStack source) {
-        return source.getLevel().getLevelData().getGameRules();
+        return source.getLevel().getGameRules();
     }
 }

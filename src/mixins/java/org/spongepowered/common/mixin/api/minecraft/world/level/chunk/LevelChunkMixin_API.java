@@ -129,7 +129,7 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
         return PaletteWrapper.of(
             PaletteTypes.BLOCK_STATE_PALETTE.get(),
             Block.BLOCK_STATE_REGISTRY,
-            (org.spongepowered.api.registry.Registry<BlockType>) this.level.registryAccess().registry(Registries.BLOCK).get()
+            (org.spongepowered.api.registry.Registry<BlockType>) this.level.registryAccess().lookupOrThrow(Registries.BLOCK)
         );
     }
 
@@ -143,7 +143,7 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
 
     @Override
     public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
-        return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, biome, () -> this.getSection(this.getSectionIndex(y)), () -> this.setUnsaved(true));
+        return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, biome, () -> this.getSection(this.getSectionIndex(y)), this::markUnsaved);
     }
 
     @Intrinsic
@@ -339,7 +339,7 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
         final Vector3i size = max.sub(min).add(1, 1 ,1);
         final @MonotonicNonNull ObjectArrayMutableBiomeBuffer backingVolume;
         if (shouldCarbonCopy) {
-            final Registry<net.minecraft.world.level.biome.Biome> biomeRegistry = this.level.registryAccess().registryOrThrow(Registries.BIOME);
+            final Registry<net.minecraft.world.level.biome.Biome> biomeRegistry = this.level.registryAccess().lookupOrThrow(Registries.BIOME);
             backingVolume = new ObjectArrayMutableBiomeBuffer(min, size, VolumeStreamUtils.nativeToSpongeRegistry(biomeRegistry));
         } else {
             backingVolume = null;
@@ -377,7 +377,7 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
     public Vector3i min() {
         if (this.api$blockMin == null) {
             if (this.api$chunkLayout == null) {
-                this.api$chunkLayout = new SpongeChunkLayout(this.level.getMinBuildHeight(), this.level.getHeight());
+                this.api$chunkLayout = new SpongeChunkLayout(this.level.getMinY(), this.level.getHeight());
             }
             this.api$blockMin = this.api$chunkLayout.forceToWorld(this.chunkPosition());
         }
@@ -388,7 +388,7 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
     public Vector3i max() {
         if (this.api$blockMax == null) {
             if (this.api$chunkLayout == null) {
-                this.api$chunkLayout = new SpongeChunkLayout(this.level.getMinBuildHeight(), this.level.getHeight());
+                this.api$chunkLayout = new SpongeChunkLayout(this.level.getMinY(), this.level.getHeight());
             }
             this.api$blockMax = this.min().add(this.api$chunkLayout.chunkSize()).sub(1, 1, 1);
         }
@@ -398,7 +398,7 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
     @Override
     public Vector3i size() {
         if (this.api$chunkLayout == null) {
-            this.api$chunkLayout = new SpongeChunkLayout(this.level.getMinBuildHeight(), this.level.getHeight());
+            this.api$chunkLayout = new SpongeChunkLayout(this.level.getMinY(), this.level.getHeight());
         }
         return this.api$chunkLayout.chunkSize();
     }

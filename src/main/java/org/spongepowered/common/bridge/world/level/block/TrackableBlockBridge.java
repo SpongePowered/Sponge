@@ -26,8 +26,6 @@ package org.spongepowered.common.bridge.world.level.block;
 
 public interface TrackableBlockBridge {
 
-    boolean bridge$overridesNeighborNotificationLogic();
-
     boolean bridge$hasEntityInsideLogic();
 
 }

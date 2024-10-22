@@ -24,8 +24,10 @@
  */
 package org.spongepowered.common.bridge.server.level;
 
+import net.minecraft.network.protocol.game.ClientboundExplodePacket;
 import net.minecraft.server.bossevents.CustomBossEvents;
 import net.minecraft.server.level.progress.ChunkProgressListener;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -41,6 +43,9 @@ public interface ServerLevelBridge {
     CustomBossEvents bridge$getBossBarManager();
 
     void bridge$triggerExplosion(Explosion explosion);
+
+    void bridge$handleExplosionPacket(final ServerGamePacketListenerImpl instance, Explosion apiExplosion,
+        final ClientboundExplodePacket packet);
 
     void bridge$setManualSave(boolean state);
 

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.projectile;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
@@ -37,12 +38,14 @@ import java.util.Set;
 public abstract class FireworkRocketEntityMixin_API extends ProjectileMixin_API implements FireworkRocket {
 
     // @formatter:off
-    @Shadow protected abstract void shadow$explode();
+    @Shadow protected abstract void shadow$explode(ServerLevel level);
     // @formatter:on
 
     @Override
     public void detonate() {
-        this.shadow$explode();
+        if (this.shadow$level() instanceof ServerLevel sl) {
+            this.shadow$explode(sl);
+        }
     }
 
     @Override

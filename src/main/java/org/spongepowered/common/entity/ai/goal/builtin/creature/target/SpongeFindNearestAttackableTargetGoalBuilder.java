@@ -28,6 +28,7 @@ package org.spongepowered.common.entity.ai.goal.builtin.creature.target;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.target.FindNearestAttackableTargetGoal;
 import org.spongepowered.api.entity.living.Living;
@@ -40,7 +41,7 @@ import java.util.function.Predicate;
 public final class SpongeFindNearestAttackableTargetGoalBuilder extends SpongeTargetGoalBuilder<FindNearestAttackableTargetGoal, FindNearestAttackableTargetGoal.Builder>
         implements FindNearestAttackableTargetGoal.Builder {
 
-    private static final Predicate<LivingEntity> ALWAYS_TRUE = e -> true;
+    private static final TargetingConditions.Selector ALWAYS_TRUE = (e, l) -> true;
 
     private Class<? extends Living> targetClass;
     private int chance;
@@ -94,6 +95,6 @@ public final class SpongeFindNearestAttackableTargetGoalBuilder extends SpongeTa
         Objects.requireNonNull(this.targetClass);
 
         return (FindNearestAttackableTargetGoal) new NearestAttackableTargetGoal((PathfinderMob) owner, this.targetClass, this.chance,
-            this.checkSight, this.checkOnlyNearby, this.predicate == null ? SpongeFindNearestAttackableTargetGoalBuilder.ALWAYS_TRUE : this.predicate);
+            this.checkSight, this.checkOnlyNearby, this.predicate == null ? SpongeFindNearestAttackableTargetGoalBuilder.ALWAYS_TRUE : (e, l) -> ((Predicate) this.predicate).test(l));
     }
 }

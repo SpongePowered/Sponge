@@ -59,12 +59,5 @@ public class SpongeBlastingRecipe extends BlastingRecipe implements ResultFuncti
         return super.assemble($$0, $$1);
     }
 
-    @Override
-    public ItemStack getResultItem(final HolderLookup.Provider $$1) {
-//        if (this.resultFunction != null) {
-//            return ItemStack.EMPTY;
-//        }
-        return super.getResultItem($$1);
-    }
 
 }

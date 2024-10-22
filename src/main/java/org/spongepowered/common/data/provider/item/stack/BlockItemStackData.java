@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.provider.item.stack;
 
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.LockCode;
 import net.minecraft.world.item.BannerItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -52,18 +51,18 @@ public final class BlockItemStackData {
                             return ((DyeColorBlockBridge) block).bridge$getDyeColor().orElse(null);
                         })
                         .supports(h -> h.getItem() instanceof BlockItem && !(h.getItem() instanceof BannerItem))
-                    .create(Keys.LOCK_TOKEN)
-                        .get(h -> {
-                            var component = h.getOrDefault(DataComponents.LOCK, LockCode.NO_LOCK);
-                            return component.key().isEmpty() ? null : component.key();
-                        })
-                        .set((h, v) -> {
-                            if (v.isEmpty()) {
-                                h.remove(DataComponents.LOCK);
-                                return;
-                            }
-                            h.set(DataComponents.LOCK, new LockCode(v));
-                        })
+                    .create(Keys.LOCK_TOKEN) // TODO - Implement Item Predicates
+//                        .get(h -> {
+//                            var component = h.getOrDefault(DataComponents.LOCK, LockCode.NO_LOCK);
+//                            return component.key().isEmpty() ? null : component.key();
+//                        })
+//                        .set((h, v) -> {
+//                            if (v.isEmpty()) {
+//                                h.remove(DataComponents.LOCK);
+//                                return;
+//                            }
+//                            h.set(DataComponents.LOCK, new LockCode(v));
+//                        })
                         .delete(h -> h.remove(DataComponents.LOCK))
                         .supports(h -> {
                             if (!(h.getItem() instanceof BlockItem)) {

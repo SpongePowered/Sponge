@@ -34,6 +34,7 @@ import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.NameableBlockEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.common.accessor.world.level.biome.BiomeAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.CustomNameableBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
@@ -66,7 +67,7 @@ public final class ServerLocationData {
                             final Level world = (Level) h.world();
                             final BlockPos pos = VecHelper.toBlockPos(h);
                             final Biome biome = world.getBiome(pos).unwrap().right().get();
-                            return (double) biome.getTemperature(pos);
+                            return (double) ((BiomeAccessor) (Object) biome).shadow$getTemperature(pos, world.getSeaLevel());
                         })
                     .create(Keys.SKY_LIGHT)
                         .get(h -> {
@@ -79,7 +80,7 @@ public final class ServerLocationData {
                             final BlockState block = (BlockState) h.block();
                             final Level world = (Level) h.world();
                             final BlockPos pos = VecHelper.toBlockPos(h.position());
-                            return block.isSolidRender(world, pos);
+                            return block.isSolidRender();
                         })
                     .create(Keys.IS_INDIRECTLY_POWERED)
                         .get(h -> {

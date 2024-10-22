@@ -99,7 +99,7 @@ public final class SpongePacketHandler {
                         return;
                     }
 
-                    final DimensionType dimensionType = SpongeCommon.vanillaRegistry(Registries.DIMENSION_TYPE).get(packet.dimensionLogic);
+                    final DimensionType dimensionType = SpongeCommon.vanillaRegistry(Registries.DIMENSION_TYPE).getValue(packet.dimensionLogic);
                     ((ClientLevelAccessor) world).accessor$effects(DimensionSpecialEffects.forType(dimensionType));
                 }
         );

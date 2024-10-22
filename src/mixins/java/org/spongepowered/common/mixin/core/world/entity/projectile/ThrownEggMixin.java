@@ -37,7 +37,7 @@ public abstract class ThrownEggMixin extends ThrowableProjectileMixin {
 
     @ModifyArg(method = "onHitEntity",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z")
+            target = "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)V")
     )
     private float onAttackEntityFromUseDamage(final float damage) {
         return (float) this.impl$damageAmount;

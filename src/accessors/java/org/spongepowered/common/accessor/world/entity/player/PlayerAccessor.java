@@ -29,6 +29,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedAccessorError;
 
 @Mixin(Player.class)
@@ -57,6 +58,7 @@ public interface PlayerAccessor {
     @Accessor("DATA_SHOULDER_RIGHT") static EntityDataAccessor<CompoundTag> accessor$DATA_SHOULDER_RIGHT() {
         throw new UntransformedAccessorError();
     }
+    @Invoker("getPermissionLevel") int invoker$getPermissionLevel();
 
     @Accessor("sleepCounter") void accessor$sleepCounter(final int sleepCounter);
 

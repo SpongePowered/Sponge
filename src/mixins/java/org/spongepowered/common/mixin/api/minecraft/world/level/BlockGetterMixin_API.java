@@ -51,13 +51,7 @@ public interface BlockGetterMixin_API extends PrimitiveGameVolume {
     @Shadow BlockState shadow$getBlockState(BlockPos p_180495_1_);
     @Shadow net.minecraft.world.level.material.FluidState shadow$getFluidState(BlockPos p_204610_1_);
     @Shadow int shadow$getLightEmission(BlockPos p_217298_1_);
-    @Shadow int shadow$getMaxLightLevel();
     //@formatter:on
-
-    @Override
-    default int maximumLight() {
-        return this.shadow$getMaxLightLevel();
-    }
 
     @Override
     default int emittedLight(final Vector3i position) {
@@ -71,7 +65,7 @@ public interface BlockGetterMixin_API extends PrimitiveGameVolume {
 
     @Override
     default int height() {
-        return ((LevelHeightAccessor) this).getMaxBuildHeight();
+        return ((LevelHeightAccessor) this).getHeight();
     }
 
     @Override

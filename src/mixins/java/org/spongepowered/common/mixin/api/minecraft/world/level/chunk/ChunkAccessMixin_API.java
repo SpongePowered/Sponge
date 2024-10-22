@@ -67,7 +67,7 @@ public abstract class ChunkAccessMixin_API<P extends Chunk<P>> implements Chunk<
     @Shadow public abstract ChunkPos shadow$getPos();
     @Shadow public abstract int shadow$getHeight(Heightmap.Types var1, int var2, int var3);
     @Shadow public abstract LevelChunkSection shadow$getSection(int p_187657_);
-    @Shadow public abstract void shadow$setUnsaved(boolean p_62094_);
+    @Shadow public abstract void shadow$markUnsaved();
     // @formatter:on
     @SuppressWarnings("unchecked")
     @Override
@@ -96,7 +96,7 @@ public abstract class ChunkAccessMixin_API<P extends Chunk<P>> implements Chunk<
 
     @Override
     public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
-        return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, biome, () -> this.shadow$getSection(this.getSectionIndex(y)), () -> this.shadow$setUnsaved(true));
+        return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, biome, () -> this.shadow$getSection(this.getSectionIndex(y)), this::shadow$markUnsaved);
     }
 
     @Override

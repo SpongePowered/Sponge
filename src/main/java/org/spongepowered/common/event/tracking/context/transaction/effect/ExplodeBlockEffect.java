@@ -56,9 +56,9 @@ public final class ExplodeBlockEffect implements ProcessingSideEffect {
         final PhaseContext<@NonNull ?> phaseContext = PhaseTracker.getInstance().getPhaseContext();
 
         final ServerLevel world = pipeline.getServerWorld();
-        final BlockPos pos = oldState.pos;
+        final BlockPos pos = oldState.pos();
         if (phaseContext instanceof ExplosionContext) {
-            oldState.state.getBlock().wasExploded(world, pos, ((ExplosionContext) phaseContext).getExplosion());
+            oldState.state().getBlock().wasExploded(world, pos, ((ExplosionContext) phaseContext).getExplosion());
         }
 
         return EffectResult.NULL_PASS;

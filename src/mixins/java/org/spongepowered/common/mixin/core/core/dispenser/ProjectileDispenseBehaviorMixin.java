@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.core.dispenser;
 
+import net.minecraft.core.Direction;
+import net.minecraft.core.Position;
 import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.dispenser.ProjectileDispenseBehavior;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ProjectileItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.spongepowered.api.data.Keys;
@@ -42,13 +44,17 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public abstract class ProjectileDispenseBehaviorMixin extends DefaultDispenseItemBehavior {
 
     @Redirect(method = "execute", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/level/Level;addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z"))
-    private boolean impl$spawnEntityAndSetShooter(final Level world, final Entity entity, final BlockSource source, final ItemStack stack) {
+            target = "Lnet/minecraft/world/item/ProjectileItem;asProjectile(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/Position;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/core/Direction;)Lnet/minecraft/world/entity/projectile/Projectile;"))
+    private net.minecraft.world.entity.projectile.Projectile impl$spawnEntityAndSetShooter(final ProjectileItem instance, final Level level,
+        final Position position, final ItemStack stack, final Direction direction, final BlockSource source) {
+        final var entity = instance.asProjectile(level, position, stack, direction);
+
         final BlockEntity tileEntity = source.blockEntity();
         if (entity instanceof Projectile && tileEntity instanceof ProjectileSource) {
             ((Projectile) entity).offer(Keys.SHOOTER, (ProjectileSource) tileEntity);
         }
-        return world.addFreshEntity(entity);
+
+        return entity;
     }
 
 }

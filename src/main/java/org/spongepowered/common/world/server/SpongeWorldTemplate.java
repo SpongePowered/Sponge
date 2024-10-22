@@ -289,12 +289,12 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
 
         @NonNull
         private static Holder<DimensionType> dimensionTypeHolder(final WorldType worldType) {
-            final Registry<DimensionType> dimensionTypeRegistry = SpongeCommon.server().registryAccess().registryOrThrow(Registries.DIMENSION_TYPE);
+            final Registry<DimensionType> dimensionTypeRegistry = SpongeCommon.server().registryAccess().lookupOrThrow(Registries.DIMENSION_TYPE);
             final ResourceLocation key = dimensionTypeRegistry.getKey((DimensionType) (Object) worldType);
             if (key == null) {
                 return Holder.direct((DimensionType) (Object) worldType);
             }
-            return dimensionTypeRegistry.getHolderOrThrow(net.minecraft.resources.ResourceKey.create(Registries.DIMENSION_TYPE, key));
+            return dimensionTypeRegistry.getOrThrow(net.minecraft.resources.ResourceKey.create(Registries.DIMENSION_TYPE, key));
         }
 
     }

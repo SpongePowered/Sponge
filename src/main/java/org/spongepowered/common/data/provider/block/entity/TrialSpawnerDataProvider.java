@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.provider.block.entity;
 
+import net.minecraft.core.Holder;
 import net.minecraft.world.level.block.entity.TrialSpawnerBlockEntity;
 import net.minecraft.world.level.block.entity.trialspawner.TrialSpawnerConfig;
 import org.spongepowered.api.data.Keys;
@@ -68,8 +69,8 @@ public final class TrialSpawnerDataProvider {
                             final var newOminiousConfig = new TrialSpawnerConfig(v.intValue(), ominousConfig.totalMobs(), ominousConfig.simultaneousMobs(), ominousConfig.totalMobsAddedPerPlayer(), ominousConfig.simultaneousMobsAddedPerPlayer(), ominousConfig.ticksBetweenSpawn(), ominousConfig.spawnPotentialsDefinition(), ominousConfig.lootTablesToEject(), ominousConfig.itemsToDropWhenOminous());
 
                             final var accessor = (TrialSpawnerAccessor) (Object) h.getTrialSpawner();
-                            accessor.accessor$normalConfig(newNormalConfig);
-                            accessor.accessor$ominousConfig(newOminiousConfig);
+                            accessor.accessor$normalConfig(Holder.direct(newNormalConfig));
+                            accessor.accessor$ominousConfig(Holder.direct(newOminiousConfig));
                         })
                     // TODO totalMobs
                     // TODO simultaneousMobs
@@ -91,8 +92,8 @@ public final class TrialSpawnerDataProvider {
                             final var newOminiousConfig = new TrialSpawnerConfig(ominousConfig.spawnRange(), ominousConfig.totalMobs(), ominousConfig.simultaneousMobs(), ominousConfig.totalMobsAddedPerPlayer(), ominousConfig.simultaneousMobsAddedPerPlayer(), ominousConfig.ticksBetweenSpawn(), spawnPotentials, ominousConfig.lootTablesToEject(), ominousConfig.itemsToDropWhenOminous());
 
                             final var accessor = (TrialSpawnerAccessor) (Object) h.getTrialSpawner();
-                            accessor.accessor$normalConfig(newNormalConfig);
-                            accessor.accessor$ominousConfig(newOminiousConfig);
+                            accessor.accessor$normalConfig(Holder.direct(newNormalConfig));
+                            accessor.accessor$ominousConfig(Holder.direct(newOminiousConfig));
                         });
                     // TODO lootTablesToEject
                     // TODO itemsToDropWhenOminous

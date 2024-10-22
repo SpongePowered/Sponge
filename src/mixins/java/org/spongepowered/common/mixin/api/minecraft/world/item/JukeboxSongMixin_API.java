@@ -40,6 +40,6 @@ public abstract class JukeboxSongMixin_API implements MusicDisc {
 
     @Override
     public SoundType sound() {
-        return (SoundType) this.soundEvent.value();
+        return (SoundType) (Object) this.soundEvent.value();
     }
 }

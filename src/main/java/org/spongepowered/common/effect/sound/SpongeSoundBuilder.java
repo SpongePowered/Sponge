@@ -33,6 +33,6 @@ public final class SpongeSoundBuilder extends AbstractResourceKeyedBuilder<Sound
 
     @Override
     public SoundType build0() {
-        return (SoundType) SoundEventAccessor.accessor$createVariableRangeEvent((ResourceLocation) (Object) this.key);
+        return (SoundType) (Object) SoundEventAccessor.accessor$createVariableRangeEvent((ResourceLocation) (Object) this.key);
     }
 }

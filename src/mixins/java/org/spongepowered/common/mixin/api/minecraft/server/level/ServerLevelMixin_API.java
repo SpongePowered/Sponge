@@ -331,7 +331,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     public ChunkLayout chunkLayout() {
         if (this.api$chunkLayout == null) {
             final var height = ((ServerLevel) (Object) this).getHeight();
-            final var min = ((ServerLevel) (Object) this).getMinBuildHeight();
+            final var min = ((ServerLevel) (Object) this).getMinY();
             this.api$chunkLayout = new SpongeChunkLayout(min, height);
         }
         return this.api$chunkLayout;

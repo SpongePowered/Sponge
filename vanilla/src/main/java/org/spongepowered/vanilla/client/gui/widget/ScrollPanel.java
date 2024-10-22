@@ -36,7 +36,6 @@ import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
 
 import java.util.Collections;
 import java.util.List;
@@ -189,7 +188,7 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
         RenderSystem.enableScissor((int) (this.left * scale), (int) (this.client.getWindow().getHeight() - (this.bottom * scale)), (int) (this.width * scale),
             (int) (this.height * scale));
 
-        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+// TODO fix me       RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         RenderSystem.setShaderTexture(0, Screen.MENU_BACKGROUND);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         final float texScale = 32.0F;
@@ -219,7 +218,7 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
             }
 
 //            RenderSystem.disableTexture();
-            RenderSystem.setShader(GameRenderer::getPositionColorShader);
+            // TODO fix me            RenderSystem.setShader(GameRenderer::getPositionColorShader);
             worldr = tess.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
             worldr.addVertex(this.barLeft, this.bottom, 0.0f).setColor(0x00, 0x00, 0x00, 0xFF);
             worldr.addVertex(this.barLeft + this.barWidth, this.bottom, 0.0f).setColor(0x00, 0x00, 0x00, 0xFF);

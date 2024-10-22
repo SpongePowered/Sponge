@@ -74,13 +74,13 @@ public abstract class NearestAttackableTargetGoalMixin_API extends TargetGoalMix
 
     @Override
     public FindNearestAttackableTargetGoal filter(Predicate<Living> predicate) {
-        this.targetConditions.selector(((Predicate<LivingEntity>) (Object) predicate));
+        this.targetConditions.selector((e, l) -> predicate.test((Living) l));
         return this;
     }
 
     @Override
     public Predicate<Living> filter() {
-        final Predicate<LivingEntity> predicate = ((TargetingConditionsAccessor) this.targetConditions).accessor$selector();
+        final TargetingConditions.Selector predicate = ((TargetingConditionsAccessor) this.targetConditions).accessor$selector();
         return (Predicate<Living>) (Object) (predicate == null ? NearestAttackableTargetGoalMixin_API.ALWAYS_TRUE : predicate);
     }
 }

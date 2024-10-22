@@ -91,18 +91,8 @@ public abstract class FoodDataMixin implements FoodDataBridge {
         this.saturationLevel = this.impl$fireEventAndGetValue(Keys.SATURATION, (double) this.saturationLevel, (double) value).floatValue();
     }
 
-    @Redirect(method = "setExhaustion", at = @At(value = "FIELD", target = "Lnet/minecraft/world/food/FoodData;exhaustionLevel:F", opcode = Opcodes.PUTFIELD))
-    private void impl$setExhaustion(final FoodData self, final float value) {
-        this.exhaustionLevel = this.impl$fireEventAndGetValue(Keys.EXHAUSTION, (double) this.exhaustionLevel, (double) value).floatValue();
-    }
-
     @Redirect(method = "addExhaustion", at = @At(value = "FIELD", target = "Lnet/minecraft/world/food/FoodData;exhaustionLevel:F", opcode = Opcodes.PUTFIELD))
-    private void impl$addExhaustion(final FoodData self, final float value) {
-        this.exhaustionLevel = this.impl$fireEventAndGetValue(Keys.EXHAUSTION, (double) this.exhaustionLevel, (double) value).floatValue();
-    }
-
-    @Redirect(method = "tick", at = @At(value = "FIELD", target = "Lnet/minecraft/world/food/FoodData;exhaustionLevel:F", opcode = Opcodes.PUTFIELD))
-    private void impl$tickDrainExhaustion(final FoodData self, final float value) {
+    private void impl$setExhaustion(final FoodData self, final float value) {
         this.exhaustionLevel = this.impl$fireEventAndGetValue(Keys.EXHAUSTION, (double) this.exhaustionLevel, (double) value).floatValue();
     }
 

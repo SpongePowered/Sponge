@@ -63,7 +63,6 @@ import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
-import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
@@ -85,7 +84,6 @@ import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
-import org.spongepowered.api.event.entity.explosive.DetonateExplosiveEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.event.sound.PlaySoundEvent;
@@ -97,13 +95,11 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.DefaultWorldKeys;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.map.MapIdTrackerBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
@@ -116,7 +112,6 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.map.SpongeMapStorage;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
@@ -508,7 +503,7 @@ public final class SpongeCommonEventFactory {
 
             final DestructEntityEvent.Death event = SpongeEventFactory.createDestructEntityEventDeath(frame.currentCause(),
                     originalChannel, Optional.of(originalChannel), originalMessage, originalMessage, (Living) entity,
-                    entity.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY), messageCancelled);
+                ((ServerLevel) entity.level()).getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY), messageCancelled);
             SpongeCommon.post(event);
 
             return event;
@@ -527,7 +522,7 @@ public final class SpongeCommonEventFactory {
             return false;
         }
 
-        if (world.isClientSide() || pos.getY() < world.getMinBuildHeight()) {
+        if (world.isClientSide() || pos.getY() < world.getMinY()) {
             return false;
         }
 
@@ -591,7 +586,7 @@ public final class SpongeCommonEventFactory {
             if (movingObjectType == HitResult.Type.BLOCK) {
                 final BlockHitResult blockMovingObjectPosition = (BlockHitResult) movingObjectPosition;
                 final BlockPos blockPos = blockMovingObjectPosition.getBlockPos();
-                if (blockPos.getY() < projectile.level().getMinBuildHeight()) {
+                if (blockPos.getY() < projectile.level().getMinY()) {
                     return false;
                 }
 
@@ -624,24 +619,6 @@ public final class SpongeCommonEventFactory {
         final SetAITargetEvent event = SpongeEventFactory.createSetAITargetEvent(PhaseTracker.getCauseStackManager().currentCause(), agent, Optional.ofNullable(target));
         SpongeCommon.post(event);
         return event;
-    }
-
-    public static Optional<net.minecraft.world.level.Explosion> detonateExplosive(final ExplosiveBridge explosiveBridge, final Explosion.Builder builder) {
-        final DetonateExplosiveEvent event = SpongeEventFactory.createDetonateExplosiveEvent(
-                PhaseTracker.getCauseStackManager().currentCause(), builder, (Explosive) explosiveBridge, builder.build()
-        );
-        if (!Sponge.eventManager().post(event)) {
-            final Explosion explosion = event.explosionBuilder().build();
-            if (explosion.radius() > 0) {
-                ((TrackedWorldBridge) ((Explosive) explosiveBridge).world())
-                    .tracker$triggerInternalExplosion(
-                        explosion,
-                        e -> GeneralPhase.State.EXPLOSION.createPhaseContext(PhaseTracker.SERVER).explosion(e)
-                    );
-            }
-            return Optional.of((net.minecraft.world.level.Explosion) explosion);
-        }
-        return Optional.empty();
     }
 
     /**
@@ -740,14 +717,14 @@ public final class SpongeCommonEventFactory {
         final SoundEvent name, final float pitch, final float volume) {
         final ServerLocation location = ServerLocation.of((ServerWorld) worldMixin, x, y, z);
         final PlaySoundEvent.AtEntity event = SpongeEventFactory.createPlaySoundEventAtEntity(cause, location,
-            Optional.ofNullable((ServerPlayer) entity), SpongeAdventure.asAdventure(category), (SoundType) name, pitch, volume);
+            Optional.ofNullable((ServerPlayer) entity), SpongeAdventure.asAdventure(category), (SoundType) (Object) name, pitch, volume);
         SpongeCommon.post(event);
         return event;
     }
 
     public static PlaySoundEvent.NoteBlock callPlaySoundNoteBlockEvent(final Cause cause, final World world, final BlockPos pos, final SoundEvent soundEvent, final InstrumentType instrument, final NotePitch notePitch, final Float pitch) {
         final ServerLocation location = ServerLocation.of((ServerWorld) world, pos.getX(), pos.getY(), pos.getZ());
-        final PlaySoundEvent.NoteBlock event = SpongeEventFactory.createPlaySoundEventNoteBlock(cause, instrument, location, notePitch, Sound.Source.RECORD, (SoundType)soundEvent, pitch, 3.0F);
+        final PlaySoundEvent.NoteBlock event = SpongeEventFactory.createPlaySoundEventNoteBlock(cause, instrument, location, notePitch, Sound.Source.RECORD, (SoundType) (Object) soundEvent, pitch, 3.0F);
         SpongeCommon.post(event);
         return event;
     }

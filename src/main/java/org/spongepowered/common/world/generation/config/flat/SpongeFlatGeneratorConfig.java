@@ -138,10 +138,10 @@ public final class SpongeFlatGeneratorConfig {
                 throw new IllegalStateException("Flat generation requires at least 1 Layer!");
             }
             final Registry<Biome> biomeRegistry = SpongeCommon.vanillaRegistry(Registries.BIOME);
-            final HolderLookup.RegistryLookup<PlacedFeature> placedFeatureRegistryLookup = SpongeCommon.vanillaRegistry(Registries.PLACED_FEATURE).asLookup();
+            final HolderLookup.RegistryLookup<PlacedFeature> placedFeatureRegistryLookup = SpongeCommon.vanillaRegistry(Registries.PLACED_FEATURE);
 
             final Holder.Reference<Biome> biome =
-                    biomeRegistry.asLookup().getOrThrow(ResourceKey.create(Registries.BIOME, (ResourceLocation) (Object) this.biome.location()));
+                    biomeRegistry.getOrThrow(ResourceKey.create(Registries.BIOME, (ResourceLocation) (Object) this.biome.location()));
             return (FlatGeneratorConfig) FlatLevelGeneratorSettingsAccessor.invoker$new(
                     this.structureSets == null ? Optional.empty() : Optional.of(HolderSet.direct((Function) Holder::direct, this.structureSets)),
                     (List<FlatLayerInfo>) (Object) this.layers,

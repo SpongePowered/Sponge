@@ -26,12 +26,11 @@ package org.spongepowered.common.mixin.core.world.level;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.NaturalSpawner;
-import net.minecraft.world.level.chunk.LevelChunk;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.accessor.world.level.NaturalSpawner_SpawnStateAccessor;
 import org.spongepowered.common.bridge.world.level.NaturalSpawner_SpawnStateBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
@@ -40,46 +39,23 @@ import org.spongepowered.common.config.inheritable.SpawnerCategory;
 @Mixin(NaturalSpawner.class)
 public abstract class NaturalSpawnerMixin {
 
-    // @formatter:off
-    @Shadow @Final private static MobCategory[] SPAWNING_CATEGORIES;
-    @Shadow static public void spawnCategoryForChunk(final MobCategory p_234967_0_, final ServerLevel p_234967_1_, final LevelChunk p_234967_2_,
-            final NaturalSpawner.SpawnPredicate p_234967_3_, final NaturalSpawner.AfterSpawnCallback p_234967_4_) {
-    }
-    // @formatter:on
-
-    /**
-     * @author morph - January 3rd, 2021 - Minecraft 1.16.4
-     * @reason Use world configured spawn limits
-     */
-    @Overwrite
-    public static void spawnForChunk(final ServerLevel world, final LevelChunk chunk, final NaturalSpawner.SpawnState manager, final boolean spawnFriendlies, final boolean spawnEnemies, final boolean doMobSpawning) {
-        world.getProfiler().push("spawner");
-
-        for (final MobCategory entityclassification : SPAWNING_CATEGORIES) {
-            if ((spawnFriendlies || !entityclassification.isFriendly()) && (spawnEnemies || entityclassification.isFriendly()) && (doMobSpawning || !entityclassification.isPersistent()) && NaturalSpawnerMixin.impl$canSpawnInLevel(manager, entityclassification, world, chunk)) {
-                //                 spawnCategoryForChunk(var0, param0, param1, (param1x, param2x, param3x) -> param2.canSpawn(param1x, param2x,
-                //                 param3x), (param1x, param2x) -> param2.afterSpawn(param1x, param2x));
-                NaturalSpawnerMixin.spawnCategoryForChunk(entityclassification, world, chunk,
-                        (p_234969_1_, p_234969_2_, p_234969_3_) -> ((NaturalSpawner_SpawnStateAccessor) manager).invoker$canSpawn(p_234969_1_, p_234969_2_, p_234969_3_),
-                        (p_234970_1_, p_234970_2_) -> ((NaturalSpawner_SpawnStateAccessor) manager).invoker$afterSpawn(p_234970_1_, p_234970_2_)
-                );
-            }
-        }
-
-        world.getProfiler().pop();
+    @Redirect(method = "spawnForChunk", at = @At(value = "INVOKE",
+        target = "Lnet/minecraft/world/level/NaturalSpawner$SpawnState;canSpawnForCategoryLocal(Lnet/minecraft/world/entity/MobCategory;Lnet/minecraft/world/level/ChunkPos;)Z"))
+    private static boolean impl$canSpawnForCategoryLocal(final NaturalSpawner.SpawnState instance, final MobCategory $$0, final ChunkPos $$1, final ServerLevel level) {
+        return NaturalSpawnerMixin.impl$canSpawnInLevel(instance, $$0, level, $$1);
     }
 
-    private static boolean impl$canSpawnInLevel(final NaturalSpawner.SpawnState manager, final MobCategory classification, final ServerLevel level, final LevelChunk chunk) {
+    private static boolean impl$canSpawnInLevel(final NaturalSpawner.SpawnState spawnState, final MobCategory classification, final ServerLevel level, final ChunkPos chunkPos) {
         final int tick = NaturalSpawnerMixin.impl$getSpawningTickRate(classification, level);
         // Unknown category/use default
         if (tick == -1) {
-            return ((NaturalSpawner_SpawnStateAccessor) manager).invoker$canSpawnForCategory(classification, chunk.getPos());
+            return ((NaturalSpawner_SpawnStateAccessor) spawnState).invoker$canSpawnForCategoryLocal(classification, chunkPos);
         }
         // Turn off spawns
         if (tick == 0) {
             return false;
         }
-        return level.getGameTime() % tick  == 0L && ((NaturalSpawner_SpawnStateBridge) manager).bridge$canSpawnForCategoryInWorld(classification, level);
+        return level.getGameTime() % tick  == 0L && ((NaturalSpawner_SpawnStateBridge) spawnState).bridge$canSpawnForCategoryInWorld(classification, level);
     }
 
     private static int impl$getSpawningTickRate(final MobCategory classification, final ServerLevel world) {

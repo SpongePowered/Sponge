@@ -98,8 +98,8 @@ public final class WorldPipeline implements BlockPipeline {
         if (oldState == null) {
             return false;
         }
-        final int oldOpacity = oldState.getLightBlock(serverWorld, pos);
-        PipelineCursor formerState = new PipelineCursor(oldState, oldOpacity, pos, existing, destroyer, limit);
+        final int oldOpacity = oldState.getLightBlock();
+        PipelineCursor formerState = new PipelineCursor(oldState, pos, existing, destroyer, limit);
 
         for (final ResultingTransactionBySideEffect effect : this.worldEffects) {
             try (final EffectTransactor ignored = context.getTransactor().pushEffect(effect)) {
@@ -113,8 +113,8 @@ public final class WorldPipeline implements BlockPipeline {
                 if (result.hasResult) {
                     return result.resultingState != null;
                 }
-                if (formerState.drops.isEmpty() && !result.drops.isEmpty()) {
-                    formerState = new PipelineCursor(oldState, oldOpacity, pos, existing, formerState.destroyer, result.drops, limit);
+                if (formerState.drops().isEmpty() && !result.drops.isEmpty()) {
+                    formerState = new PipelineCursor(oldState, pos, existing, formerState.destroyer(), result.drops, limit);
                 }
             }
         }

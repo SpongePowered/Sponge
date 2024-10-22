@@ -71,7 +71,7 @@ public final class ChangeBlock extends BlockEventBasedTransaction {
         this.original = attachedSnapshot;
         this.newState = newState;
         this.blockChangeFlag = blockChange;
-        this.originalOpacity = this.originalState.getLightBlock(this.original.getServerWorld().get(), this.affectedPosition);
+        this.originalOpacity = this.originalState.getLightBlock();
     }
 
     public BlockState getNewState() {

@@ -27,10 +27,12 @@ package org.spongepowered.vanilla.mixin.core.world.level.block.entity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -56,6 +58,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.world.level.block.entity.BaseContainerBlockEntityMixin;
+import org.spongepowered.vanilla.accessor.world.level.block.entity.AbstractFurnaceBlockEntityAccessor_Vanilla;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -68,9 +71,6 @@ public abstract class AbstractFurnaceBlockEntityMixin_Vanilla extends BaseContai
     // @formatter:off
     @Shadow protected NonNullList<ItemStack> items;
     @Shadow int cookingProgress;
-    @Shadow private static boolean canBurn(final RegistryAccess registryAccess, @Nullable final RecipeHolder<?> recipe, final NonNullList<ItemStack> slots, final int maxStackSize) {
-        throw new UnsupportedOperationException("Shadowed canBurn");
-    }
     // @formatter:on
 
     private boolean vanilla$filledWaterBucket;
@@ -78,10 +78,13 @@ public abstract class AbstractFurnaceBlockEntityMixin_Vanilla extends BaseContai
     // Tick up and Start
     @Redirect(method = "serverTick",
             at = @At(value = "INVOKE",
-                target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;canBurn(Lnet/minecraft/core/RegistryAccess;Lnet/minecraft/world/item/crafting/RecipeHolder;Lnet/minecraft/core/NonNullList;I)Z",
+                target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;canBurn(Lnet/minecraft/core/RegistryAccess;Lnet/minecraft/world/item/crafting/RecipeHolder;Lnet/minecraft/world/item/crafting/SingleRecipeInput;Lnet/minecraft/core/NonNullList;I)Z",
                 ordinal = 1))
-    private static boolean vanilla$checkIfCanSmelt(final RegistryAccess registryAccess, @Nullable final RecipeHolder<?> recipe, final NonNullList<ItemStack> slots, final int maxStackSize, final Level level, final BlockPos entityPos, final BlockState state, final AbstractFurnaceBlockEntity entityIn) {
-        if (!AbstractFurnaceBlockEntityMixin_Vanilla.canBurn(registryAccess, recipe, slots, maxStackSize)) {
+    private static boolean vanilla$checkIfCanSmelt(
+        final RegistryAccess registryAccess, @Nullable final RecipeHolder<?> recipe, final SingleRecipeInput input,
+        final NonNullList<ItemStack> slots, final int maxStackSize, final ServerLevel level, final BlockPos entityPos,
+        final BlockState state, final AbstractFurnaceBlockEntity entityIn) {
+        if (!AbstractFurnaceBlockEntityAccessor_Vanilla.invoker$canBurn(registryAccess, recipe, input, slots, maxStackSize)) {
             return false;
         }
 
@@ -105,8 +108,10 @@ public abstract class AbstractFurnaceBlockEntityMixin_Vanilla extends BaseContai
 
     // Tick down
     @Redirect(method = "serverTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;clamp(III)I"))
-    private static int vanilla$resetCookTimeIfCancelled(final int newCookTime, final int zero, final int totalCookTime,
-                                                            final Level level, final BlockPos entityPos, final BlockState state, final AbstractFurnaceBlockEntity entityIn) {
+    private static int vanilla$resetCookTimeIfCancelled(
+        final int newCookTime, final int zero, final int totalCookTime,
+        final ServerLevel level, final BlockPos entityPos, final BlockState state,
+        final AbstractFurnaceBlockEntity entityIn) {
         final int clampedCookTime = Mth.clamp(newCookTime, zero, totalCookTime);
         final var entity = (AbstractFurnaceBlockEntityMixin_Vanilla) (Object) entityIn;
         final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(entity.items.get(1));
@@ -128,7 +133,10 @@ public abstract class AbstractFurnaceBlockEntityMixin_Vanilla extends BaseContai
         slice = @Slice(
             from = @At(value = "FIELD", target = "Lnet/minecraft/world/level/block/Blocks;WET_SPONGE:Lnet/minecraft/world/level/block/Block;", opcode = Opcodes.GETSTATIC)
     ))
-    private static void vanilla$captureBucketFill(final RegistryAccess registryAccess, final RecipeHolder<?> recipe, final NonNullList<ItemStack> slots, final int maxStackSize, final CallbackInfoReturnable<Boolean> cir) {
+    private static void vanilla$captureBucketFill(
+        final RegistryAccess registryAccess, final RecipeHolder<?> recipe,
+        final SingleRecipeInput input, final NonNullList<ItemStack> slots, final int maxStackSize,
+        final CallbackInfoReturnable<Boolean> cir) {
         final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
         final FurnaceBlockEntity entity = cause.first(FurnaceBlockEntity.class)
             .orElseThrow(() -> new IllegalStateException("Expected to have a FurnaceBlockEntity in the Cause"));
@@ -136,9 +144,13 @@ public abstract class AbstractFurnaceBlockEntityMixin_Vanilla extends BaseContai
     }
 
     @Inject(method = "burn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;shrink(I)V", shift = At.Shift.AFTER))
-    private static void vanilla$afterSmeltItem(final RegistryAccess registryAccess, final RecipeHolder<?> recipe, final NonNullList<ItemStack> slots, final int maxStackSize, final CallbackInfoReturnable<Boolean> cir) {
+    // final RegistryAccess registryAccess, final RecipeHolder<?> recipe, final NonNullList<ItemStack> slots, final int var2, final CallbackInfoReturnable<Boolean> cir
+    private static void vanilla$afterSmeltItem(
+        final RegistryAccess registryAccess, final RecipeHolder<? extends AbstractCookingRecipe> recipe,
+        final SingleRecipeInput input, final NonNullList<ItemStack> slots, final int $$4,
+        final CallbackInfoReturnable<Boolean> cir) {
         final ItemStack itemIn = slots.get(0);
-        final ItemStack recipeResult = recipe.value().getResultItem(registryAccess);
+        final ItemStack recipeResult = recipe.value().assemble(input, registryAccess);
         final ItemStack itemOut = slots.get(2);
 
         final Cause cause = PhaseTracker.getCauseStackManager().currentCause();

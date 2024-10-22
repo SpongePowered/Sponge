@@ -54,7 +54,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.accessor.commands.CommandSourceStackAccessor;
-import org.spongepowered.common.accessor.world.entity.EntityAccessor;
+import org.spongepowered.common.accessor.world.entity.player.PlayerAccessor;
 import org.spongepowered.common.bridge.commands.CommandSourceBridge;
 import org.spongepowered.common.bridge.commands.CommandSourceStackBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -116,9 +116,9 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
 
         context.get(EventContextKeys.ROTATION).ifPresent(x -> this.rotation = new Vec2((float) x.x(), (float) x.y()));
         context.get(EventContextKeys.SUBJECT).ifPresent(x -> {
-            if (x instanceof EntityAccessor) {
-                this.permissionLevel = ((EntityAccessor) x).invoker$getPermissionLevel();
-            } else if (x instanceof MinecraftServer && !((MinecraftServer) x).isSingleplayer()) {
+            if (x instanceof PlayerAccessor pa) {
+                this.permissionLevel = pa.invoker$getPermissionLevel();
+            } else if (x instanceof MinecraftServer ms && !ms.isSingleplayer()) {
                 this.permissionLevel = 4;
             }
         });

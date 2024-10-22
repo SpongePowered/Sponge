@@ -30,20 +30,14 @@ import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.projectile.Projectile;
-import org.spongepowered.api.entity.projectile.explosive.fireball.ExplosiveFireball;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.api.world.server.ServerLocation;
-import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
-import org.spongepowered.common.bridge.world.entity.GrieferBridge;
 import org.spongepowered.common.bridge.world.entity.projectile.LargeFireballBridge;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 
@@ -53,54 +47,38 @@ import java.util.Optional;
 public abstract class LargeFireballMixin extends AbstractHurtingProjectileMixin implements LargeFireballBridge, ExplosiveBridge {
 
     // @formatter:off
-    @Shadow public int explosionPower;
+    @Shadow private int explosionPower;
     // @formatter:on
 
-    /**
-     * @author gabizou April 13th, 2018
-     * @reason Due to changes from Forge, we have to redirect osr modify the gamerule check,
-     * but since forge doesn't allow us to continue to check the gamerule method call here,
-     * we have to modify the arguments passed in (the two booleans). There may be a better way,
-     * which may include redirecting the world.newExplosion method call instead of modifyargs,
-     * but, it is what it is.
-     */
     @Redirect(method = "onHit",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/level/Level;explode(Lnet/minecraft/world/entity/Entity;DDDFZLnet/minecraft/world/level/Level$ExplosionInteraction;)Lnet/minecraft/world/level/Explosion;"
+            target = "Lnet/minecraft/world/level/Level;explode(Lnet/minecraft/world/entity/Entity;DDDFZLnet/minecraft/world/level/Level$ExplosionInteraction;)V"
         )
     )
-    public net.minecraft.world.level.@Nullable Explosion impl$throwExplosionEventAndExplode(final net.minecraft.world.level.Level worldObj, @Nullable final Entity nil,
-        final double x, final double y, final double z, final float strength, final boolean flaming, final Level.ExplosionInteraction mode) {
-        return this.bridge$throwExplosionEventAndExplode(worldObj, nil, x, y, z, strength, flaming, mode);
+    public void impl$onHitExplode(final Level world, final Entity thisEntity,
+        final double x, final double y, final double z, final float explosionRadius, final boolean causesFire,
+        final Level.ExplosionInteraction mode) {
+        this.bridge$wrappedExplode(x, y, z, explosionRadius, causesFire, mode);
     }
 
     @Override
-    public net.minecraft.world.level.Explosion bridge$throwExplosionEventAndExplode(net.minecraft.world.level.Level worldObj, @Nullable Entity nil,
-            double x, double y, double z, float strength, boolean flaming, Level.ExplosionInteraction mode) {
-        final boolean griefer = ((GrieferBridge) this).bridge$canGrief();
+    public void bridge$wrappedExplode(final double x, final double y, final double z,
+        final float explosionRadius, final boolean causesFire, final Level.ExplosionInteraction mode) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
             ((Projectile) this).get(Keys.SHOOTER).ifPresent(shooter -> frame.addContext(EventContextKeys.PROJECTILE_SOURCE, shooter));
-            final Optional<net.minecraft.world.level.Explosion> ex = SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
-                    .location(ServerLocation.of((ServerWorld) worldObj, x, y, z))
-                    .sourceExplosive(((ExplosiveFireball) this))
-                    .radius(strength)
-                    .canCauseFire(flaming && griefer)
-                    .shouldPlaySmoke(mode != Level.ExplosionInteraction.NONE && griefer)
-                    .shouldBreakBlocks(mode != Level.ExplosionInteraction.NONE && griefer));
-
-            return ex.orElse(null);
+            this.level().explode((LargeFireball) (Object) this, x, y, z, explosionRadius, causesFire, mode);
         }
     }
 
     @Override
-    public Optional<Integer> bridge$getExplosionRadius() {
-        return Optional.of(this.explosionPower);
+    public Optional<Float> bridge$getExplosionRadius() {
+        return Optional.of((float) this.explosionPower);
     }
 
     @Override
-    public void bridge$setExplosionRadius(@Nullable final Integer radius) {
-        this.explosionPower = radius == null ? Constants.Entity.Fireball.DEFAULT_EXPLOSION_RADIUS : radius;
+    public void bridge$setExplosionRadius(final @Nullable Float radius) {
+        this.explosionPower = radius == null ? Constants.Entity.Fireball.DEFAULT_EXPLOSION_RADIUS : radius.intValue();
     }
 
 }

@@ -67,7 +67,6 @@ public abstract class MobMixin extends LivingEntityMixin {
     @Shadow protected abstract void shadow$registerGoals();
     // @formatter:on
 
-
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Mob;registerGoals()V"))
     private void impl$registerGoals(final Mob this$0) {
         this.impl$setupGoalSelectors();

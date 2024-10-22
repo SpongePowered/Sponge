@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.vehicle;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.vehicle.MinecartFurnace;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -47,9 +48,9 @@ public abstract class MinecartFurnaceMixin extends AbstractMinecartMixin {
      */
     @Override
     @Overwrite
-    protected double getMaxSpeed() {
+    protected double getMaxSpeed(ServerLevel level) {
         // Return our custom value from EntityMinecart
-        return super.getMaxSpeed();
+        return super.getMaxSpeed(level);
     }
 
 }

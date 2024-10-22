@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.projectile;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.ShulkerBullet;
@@ -50,9 +51,9 @@ public abstract class ShulkerBulletMixin extends ProjectileMixin {
         }
     }
 
-    @Inject(method = "hurt", cancellable = true, at = @At(value = "INVOKE",
+    @Inject(method = "hurtServer", cancellable = true, at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/entity/projectile/ShulkerBullet;playSound(Lnet/minecraft/sounds/SoundEvent;FF)V"))
-    private void attackImpl$onAttackEntityFrom(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
+    private void attackImpl$onAttackEntityFrom(final ServerLevel level, final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
         if (DamageEventUtil.callOtherAttackEvent((Entity) (Object) this, source, amount).isCancelled()) {
             cir.setReturnValue(true);
         }

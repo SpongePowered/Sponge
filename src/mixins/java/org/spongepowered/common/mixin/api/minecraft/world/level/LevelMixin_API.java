@@ -222,7 +222,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
 
     private SpongeChunkLayout api$chunkLayout() {
         if (this.api$chunkLayout == null) {
-            final var min = ((Level) (Object) this).getMinBuildHeight();
+            final var min = ((Level) (Object) this).getMinY();
             final var height = ((Level) (Object) this).getHeight();
             this.api$chunkLayout = new SpongeChunkLayout(min, height);
         }

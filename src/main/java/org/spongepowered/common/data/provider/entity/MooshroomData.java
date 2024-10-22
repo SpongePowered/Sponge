@@ -40,7 +40,7 @@ public final class MooshroomData {
                 .asMutable(MushroomCow.class)
                     .create(Keys.MOOSHROOM_TYPE)
                         .get(h -> (MooshroomType) (Object) h.getVariant())
-                        .set((h, v) -> h.setVariant((MushroomCow.MushroomType) (Object) v));
+                        .set((h, v) -> h.setVariant((MushroomCow.Variant) (Object) v));
     }
     // @formatter:on
 }

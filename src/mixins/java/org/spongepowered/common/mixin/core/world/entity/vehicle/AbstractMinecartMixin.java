@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.vehicle;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.api.data.Keys;
@@ -54,7 +55,7 @@ public abstract class AbstractMinecartMixin extends VehicleEntityMixin implement
      * @reason Use our custom maximum speed for the Minecart.
      */
     @Overwrite
-    protected double getMaxSpeed() {
+    protected double getMaxSpeed(ServerLevel level) {
         return this.impl$maxSpeed;
     }
 
@@ -86,15 +87,6 @@ public abstract class AbstractMinecartMixin extends VehicleEntityMixin implement
     )
     private Vec3 impl$applyDerailedModifierInAir(final Vec3 vec3d, final double factor) {
         return vec3d.multiply(this.impl$airborneMod.x(), this.impl$airborneMod.y(), this.impl$airborneMod.z());
-    }
-
-    @Redirect(method = "applyNaturalSlowdown",
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/vehicle/AbstractMinecart;isVehicle()Z"
-        )
-    )
-    private boolean impl$applyDragIfEmpty(final AbstractMinecart self) {
-        return !this.impl$slowWhenEmpty || this.shadow$isVehicle();
     }
 
     @Override

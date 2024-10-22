@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.tracker.server.level;
 
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -36,33 +37,33 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 
+import java.util.List;
+
 @Mixin(ServerChunkCache.class)
 public abstract class ServerChunkCacheMixin_Tracker {
 
     @Redirect(
-        method = "tickChunks",
+        method = "tickChunks(Lnet/minecraft/util/profiling/ProfilerFiller;JLjava/util/List;)V",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/level/NaturalSpawner;spawnForChunk(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/chunk/LevelChunk;Lnet/minecraft/world/level/NaturalSpawner$SpawnState;ZZZ)V"
+            target = "Lnet/minecraft/world/level/NaturalSpawner;spawnForChunk(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/chunk/LevelChunk;Lnet/minecraft/world/level/NaturalSpawner$SpawnState;Ljava/util/List;)V"
         )
     )
     private void tracker$wrapEntitySpawner(
         final ServerLevel serverWorld,
         final LevelChunk targetChunk,
-        final NaturalSpawner.SpawnState manager,
-        final boolean something,
-        final boolean somethingElse,
-        final boolean somethingLast
+        final NaturalSpawner.SpawnState spawnState,
+        final List<MobCategory> mobCategories
     ) {
         try (final PhaseContext<@NonNull ?> context = GenerationPhase.State.WORLD_SPAWNER_SPAWNING.createPhaseContext(PhaseTracker.SERVER)
             .world(serverWorld)) {
             context.buildAndSwitch();
-            NaturalSpawner.spawnForChunk(serverWorld, targetChunk, manager, something, somethingElse, somethingLast);
+            NaturalSpawner.spawnForChunk(serverWorld, targetChunk, spawnState, mobCategories);
         }
     }
 
     @Redirect(
-        method = "tickChunks",
+        method = "tickChunks(Lnet/minecraft/util/profiling/ProfilerFiller;JLjava/util/List;)V",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/server/level/ServerLevel;tickCustomSpawners(ZZ)V"

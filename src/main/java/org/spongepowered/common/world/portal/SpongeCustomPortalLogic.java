@@ -27,7 +27,7 @@ package org.spongepowered.common.world.portal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.portal.TeleportTransition;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.world.portal.Portal;
@@ -60,7 +60,7 @@ public final class SpongeCustomPortalLogic implements net.minecraft.world.level.
     }
 
     @Nullable @Override
-    public DimensionTransition getPortalDestination(final ServerLevel fromLevel, final Entity entity, final BlockPos fromPos) {
+    public TeleportTransition getPortalDestination(final ServerLevel fromLevel, final Entity entity, final BlockPos fromPos) {
         final var spongeEntity = (org.spongepowered.api.entity.Entity) entity;
         // Calculate desired portal location
         // Then find existing portal or generate if not found
@@ -70,14 +70,14 @@ public final class SpongeCustomPortalLogic implements net.minecraft.world.level.
                 ).orElse(null);
     }
 
-    private static DimensionTransition generateTransition(final Entity entity, final ServerLocation finalExit) {
-        return new DimensionTransition(
+    private static TeleportTransition generateTransition(final Entity entity, final ServerLocation finalExit) {
+        return new TeleportTransition(
                 (ServerLevel) finalExit.world(),
                 VecHelper.toVanillaVector3d(finalExit.position()),
                 entity.getDeltaMovement(),
                 entity.getYRot(),
                 entity.getXRot(),
-                DimensionTransition.PLACE_PORTAL_TICKET);
+            TeleportTransition.PLACE_PORTAL_TICKET);
     }
 
     @Override

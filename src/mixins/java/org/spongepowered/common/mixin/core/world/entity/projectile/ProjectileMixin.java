@@ -53,7 +53,6 @@ public abstract class ProjectileMixin extends EntityMixin {
     @Shadow public abstract @Nullable Entity shadow$getOwner();
     @Shadow protected abstract ProjectileDeflection shadow$hitTargetOrDeflectSelf(HitResult result);
     @Shadow protected abstract void onHit(HitResult result);
-    @Shadow protected abstract ProjectileDeflection hitTargetOrDeflectSelf(HitResult result);
 
     // @formatter:on
     private ProjectileSource impl$projectileSource = UnknownProjectileSource.UNKNOWN;

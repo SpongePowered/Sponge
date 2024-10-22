@@ -72,26 +72,26 @@ public final class SpongeChunkGeneratorFactory implements ChunkGenerator.Factory
     public ConfigurableChunkGenerator<NoiseGeneratorConfig> overworld() {
         var noiseGeneratorSettingsRegistry = SpongeCommon.vanillaRegistry(Registries.NOISE_SETTINGS);
         final var registry = SpongeCommon.vanillaRegistry(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
-        final var holder = registry.getHolderOrThrow(MultiNoiseBiomeSourceParameterLists.OVERWORLD);
+        final var holder = registry.getOrThrow(MultiNoiseBiomeSourceParameterLists.OVERWORLD);
         final var biomeSource = MultiNoiseBiomeSource.createFromPreset(holder);
-        return this.noiseBasedChunkGenerator(biomeSource, noiseGeneratorSettingsRegistry.getHolderOrThrow(NoiseGeneratorSettings.OVERWORLD));
+        return this.noiseBasedChunkGenerator(biomeSource, noiseGeneratorSettingsRegistry.getOrThrow(NoiseGeneratorSettings.OVERWORLD));
     }
 
     @Override
     public ConfigurableChunkGenerator<NoiseGeneratorConfig> theNether() {
         var noiseGeneratorSettingsRegistry = SpongeCommon.vanillaRegistry(Registries.NOISE_SETTINGS);
         final var registry = SpongeCommon.vanillaRegistry(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
-        final var holder = registry.getHolderOrThrow(MultiNoiseBiomeSourceParameterLists.NETHER);
+        final var holder = registry.getOrThrow(MultiNoiseBiomeSourceParameterLists.NETHER);
         final var biomeSource = MultiNoiseBiomeSource.createFromPreset(holder);
-        return this.noiseBasedChunkGenerator(biomeSource, noiseGeneratorSettingsRegistry.getHolderOrThrow(NoiseGeneratorSettings.NETHER));
+        return this.noiseBasedChunkGenerator(biomeSource, noiseGeneratorSettingsRegistry.getOrThrow(NoiseGeneratorSettings.NETHER));
     }
 
     @Override
     public ConfigurableChunkGenerator<NoiseGeneratorConfig> theEnd() {
         var biomeRegistry = SpongeCommon.vanillaRegistry(Registries.BIOME);
         var noiseGeneratorSettingsRegistry = SpongeCommon.vanillaRegistry(Registries.NOISE_SETTINGS);
-        var biomeSource = TheEndBiomeSource.create(biomeRegistry.asLookup());
-        return this.noiseBasedChunkGenerator(biomeSource, noiseGeneratorSettingsRegistry.getHolderOrThrow(NoiseGeneratorSettings.END));
+        var biomeSource = TheEndBiomeSource.create(biomeRegistry);
+        return this.noiseBasedChunkGenerator(biomeSource, noiseGeneratorSettingsRegistry.getOrThrow(NoiseGeneratorSettings.END));
     }
 
     @Override

@@ -50,7 +50,7 @@ public final class AreaEffectCloudData {
                         .get(h -> Color.ofRgb(((AreaEffectCloudAccessor) h).accessor$potionContents().getColor()))
                         .set((h, v) -> {
                             var contents = ((AreaEffectCloudAccessor) h).accessor$potionContents();
-                            h.setPotionContents(new PotionContents(contents.potion(), Optional.of(v.rgb()), contents.customEffects()));
+                            h.setPotionContents(new PotionContents(contents.potion(), Optional.of(v.rgb()), contents.customEffects(), contents.customName()));
                         })
                     .create(Keys.DURATION)
                         .get(x -> new SpongeTicks(x.getDuration()))
@@ -97,7 +97,7 @@ public final class AreaEffectCloudData {
                         .get(h -> PotionEffectUtil.copyAsPotionEffects(Streams.stream(h.accessor$potionContents().getAllEffects()).toList()))
                         .set((h, v) -> {
                             final PotionContents contents = h.accessor$potionContents();
-                            ((AreaEffectCloud) h).setPotionContents(new PotionContents(contents.potion(), contents.customColor(), PotionEffectUtil.copyAsEffectInstances(v)));
+                            ((AreaEffectCloud) h).setPotionContents(new PotionContents(contents.potion(), contents.customColor(), PotionEffectUtil.copyAsEffectInstances(v), contents.customName()));
                         })
                     .create(Keys.REAPPLICATION_DELAY)
                         .get(h -> new SpongeTicks(h.accessor$reapplicationDelay()))

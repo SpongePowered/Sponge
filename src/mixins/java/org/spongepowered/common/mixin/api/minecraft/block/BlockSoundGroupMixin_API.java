@@ -56,26 +56,26 @@ public abstract class BlockSoundGroupMixin_API implements BlockSoundGroup {
 
     @Override
     public org.spongepowered.api.effect.sound.SoundType breakSound() {
-        return (org.spongepowered.api.effect.sound.SoundType) this.breakSound;
+        return (org.spongepowered.api.effect.sound.SoundType) (Object) this.breakSound;
     }
 
     @Override
     public org.spongepowered.api.effect.sound.SoundType stepSound() {
-        return (org.spongepowered.api.effect.sound.SoundType) this.stepSound;
+        return (org.spongepowered.api.effect.sound.SoundType) (Object) this.stepSound;
     }
 
     @Override
     public org.spongepowered.api.effect.sound.SoundType placeSound() {
-        return (org.spongepowered.api.effect.sound.SoundType) this.placeSound;
+        return (org.spongepowered.api.effect.sound.SoundType) (Object) this.placeSound;
     }
 
     @Override
     public org.spongepowered.api.effect.sound.SoundType hitSound() {
-        return (org.spongepowered.api.effect.sound.SoundType) this.hitSound;
+        return (org.spongepowered.api.effect.sound.SoundType) (Object) this.hitSound;
     }
 
     @Override
     public org.spongepowered.api.effect.sound.SoundType fallSound() {
-        return (org.spongepowered.api.effect.sound.SoundType) this.fallSound;
+        return (org.spongepowered.api.effect.sound.SoundType) (Object) this.fallSound;
     }
 }

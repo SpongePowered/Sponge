@@ -45,7 +45,7 @@ public abstract class AmbientMoodSettingsMixin_API implements SoundConfig.Mood {
 
     @Override
     public SoundType sound() {
-        return (SoundType) this.soundEvent.value();
+        return (SoundType) (Object) this.soundEvent.value();
     }
 
     @Override

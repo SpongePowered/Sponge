@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.vehicle;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.vehicle.VehicleEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,9 +37,10 @@ import org.spongepowered.common.util.DamageEventUtil;
 @Mixin(VehicleEntity.class)
 public abstract class VehicleEntityMixin extends EntityMixin {
 
-    @Inject(method = "hurt", cancellable = true, at = @At(value = "INVOKE",
+    @Inject(method = "hurtServer", cancellable = true, at = @At(value = "INVOKE",
         target = "Lnet/minecraft/world/entity/vehicle/VehicleEntity;shouldSourceDestroy(Lnet/minecraft/world/damagesource/DamageSource;)Z"))
-    private void attackImpl$postOnAttackEntityFrom(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
+    private void attackImpl$postOnAttackEntityFrom(final ServerLevel level, final DamageSource source,
+                                                   final float amount, final CallbackInfoReturnable<Boolean> cir) {
         if (DamageEventUtil.callOtherAttackEvent((net.minecraft.world.entity.Entity) (Object) this, source, amount).isCancelled()) {
             cir.setReturnValue(true);
         }

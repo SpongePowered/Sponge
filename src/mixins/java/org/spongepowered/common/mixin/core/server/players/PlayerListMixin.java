@@ -490,10 +490,9 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         ((ServerPlayer) entity).offer(Keys.LAST_DATE_PLAYED, Instant.now());
     }
 
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Inject(method = "respawn",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/level/ServerPlayer;findRespawnPositionAndUseSpawnBlock(ZLnet/minecraft/world/level/portal/DimensionTransition$PostDimensionTransition;)Lnet/minecraft/world/level/portal/DimensionTransition;"
+            target = "Lnet/minecraft/server/level/ServerPlayer;findRespawnPositionAndUseSpawnBlock(ZLnet/minecraft/world/level/portal/TeleportTransition$PostTeleportTransition;)Lnet/minecraft/world/level/portal/TeleportTransition;"
         )
     )
     private void impl$flagIfRespawnPositionIsGameMechanic(final net.minecraft.server.level.ServerPlayer $$0, final boolean $$1,

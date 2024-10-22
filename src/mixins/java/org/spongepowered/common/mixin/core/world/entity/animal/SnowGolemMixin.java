@@ -28,19 +28,16 @@ import net.minecraft.world.entity.animal.SnowGolem;
 import net.minecraft.world.level.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.entity.GrieferBridge;
 import org.spongepowered.common.mixin.core.world.entity.MobMixin;
 
 @Mixin(SnowGolem.class)
 public abstract class SnowGolemMixin extends MobMixin {
 
-    @Inject(method = "aiStep()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;floor(D)I", ordinal = 3),
-            cancellable = true)
-    private void impl$onCanGrief(CallbackInfo ci) {
-        if (!this.shadow$level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) || !((GrieferBridge) this).bridge$canGrief()) {
-            ci.cancel();
-        }
+    @Redirect(method = "aiStep()V", at = @At(
+        value = "INVOKE", target = "Lnet/minecraft/world/level/GameRules;getBoolean(Lnet/minecraft/world/level/GameRules$Key;)Z"))
+    private boolean impl$checkCanGrief(final GameRules gameRules, final GameRules.Key<GameRules.BooleanValue> key) {
+        return gameRules.getBoolean(key) && ((GrieferBridge) this).bridge$canGrief();
     }
 }

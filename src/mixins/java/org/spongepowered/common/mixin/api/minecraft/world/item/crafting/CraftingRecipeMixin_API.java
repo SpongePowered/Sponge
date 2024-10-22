@@ -24,13 +24,20 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.item.crafting;
 
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.RecipeType;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
+import org.spongepowered.api.item.recipe.crafting.RecipeInput;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.item.util.ItemStackUtil;
 
+import java.util.List;
 import java.util.Optional;
 
 @Mixin(net.minecraft.world.item.crafting.CraftingRecipe.class)
@@ -38,7 +45,15 @@ public interface CraftingRecipeMixin_API extends CraftingRecipe {
 
     // @formatter:off
     @Shadow net.minecraft.world.item.crafting.RecipeType<?> shadow$getType();
+    @Shadow NonNullList<ItemStack> shadow$getRemainingItems(CraftingInput $$0);
     // @formatter:on
+
+    @Override
+    default List<ItemStackSnapshot> remainingItems(RecipeInput.Crafting inventory) {
+        return this.shadow$getRemainingItems((CraftingInput) inventory).stream()
+            .map(ItemStackUtil::snapshotOf)
+            .toList();
+    }
 
     default RecipeType<? extends CraftingRecipe> type() {
         return (RecipeType<? extends CraftingRecipe>) this.shadow$getType();
@@ -47,10 +62,10 @@ public interface CraftingRecipeMixin_API extends CraftingRecipe {
     default Optional<String> group() {
         String group = "";
         if (this instanceof ShapedRecipe sr) {
-            group = sr.getGroup();
+            group = sr.group();
         }
         if (this instanceof ShapelessRecipe sr) {
-            group = sr.getGroup();
+            group = sr.group();
         }
         if (group.isEmpty()) {
             return Optional.empty();

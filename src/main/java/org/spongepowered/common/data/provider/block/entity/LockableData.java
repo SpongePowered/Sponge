@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.provider.block.entity;
 
-import net.minecraft.world.LockCode;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.world.level.block.entity.BaseContainerBlockEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -38,9 +37,9 @@ public final class LockableData {
     public static void register(final DataProviderRegistrator registrator) {
         registrator
                 .asMutable(BaseContainerBlockEntityAccessor.class)
-                    .create(Keys.LOCK_TOKEN)
-                        .get(h -> h.accessor$lockKey().key())
-                        .set((h, v) -> h.accessor$lockKey(v.isEmpty() ? LockCode.NO_LOCK : new LockCode(v)));
+                    .create(Keys.LOCK_TOKEN);// TODO - Implement Item Predicates
+//                        .get(h -> h.accessor$lockKey().key())
+//                        .set((h, v) -> h.accessor$lockKey(v.isEmpty() ? LockCode.NO_LOCK : new LockCode(v)));
     }
     // @formatter:on
 }

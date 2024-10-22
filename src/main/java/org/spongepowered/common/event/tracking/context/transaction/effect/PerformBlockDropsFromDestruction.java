@@ -46,7 +46,7 @@ public final class PerformBlockDropsFromDestruction implements ProcessingSideEff
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState,
         final BlockState newState, final SpongeBlockChangeFlag flag, final int limit
     ) {
-        Block.dropResources(oldState.state, pipeline.getServerWorld(), oldState.pos, oldState.tileEntity, oldState.destroyer, ItemStack.EMPTY);
+        Block.dropResources(oldState.state(), pipeline.getServerWorld(), oldState.pos(), oldState.tileEntity(), oldState.destroyer(), ItemStack.EMPTY);
         return EffectResult.NULL_PASS;
     }
 

@@ -25,9 +25,20 @@
 package org.spongepowered.common.mixin.api.minecraft.world.entity.projectile.windcharge;
 
 import net.minecraft.world.entity.projectile.windcharge.AbstractWindCharge;
+import net.minecraft.world.phys.Vec3;
+import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.entity.projectile.windcharge.WindChargeLike;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.mixin.api.minecraft.world.entity.EntityMixin_API;
 
 @Mixin(AbstractWindCharge.class)
-public abstract class AbstractWindChargeMixin_API implements WindChargeLike {
+public abstract class AbstractWindChargeMixin_API extends EntityMixin_API implements WindChargeLike, Explosive {
+
+    @Shadow protected abstract void shadow$explode(Vec3 var1);
+
+    @Override
+    public void detonate() {
+        this.shadow$explode(this.shadow$position());
+    }
 }

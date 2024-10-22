@@ -57,9 +57,9 @@ public class SpongeStonecuttingRecipe extends StonecutterRecipe implements Resul
     public static final MapCodec<SpongeStonecuttingRecipe> SPONGE_CODEC = RecordCodecBuilder.mapCodec(
             $$1 -> $$1.group(
                             Codec.STRING.fieldOf(SPONGE_TYPE).forGetter(a -> "custom"),
-                            Codec.STRING.optionalFieldOf("group", "").forGetter(SingleItemRecipe::getGroup),
-                            Ingredient.CODEC_NONEMPTY.fieldOf(Constants.Recipe.STONECUTTING_INGREDIENT).forGetter($$0x -> $$0x.getIngredients().get(0)),
-                            RESULT_CODEC.forGetter($$0x -> ((RecipeResultBridge)$$0x).bridge$result()),
+                            Codec.STRING.optionalFieldOf("group", "").forGetter(SingleItemRecipe::group),
+                            Ingredient.CODEC.fieldOf(Constants.Recipe.STONECUTTING_INGREDIENT).forGetter(SingleItemRecipe::input),
+                            RESULT_CODEC.forGetter($$0x -> $$0x.result()),
                             ItemStack.CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULT, ItemStack.EMPTY).forGetter($$0x -> ((RecipeResultBridge)$$0x).bridge$spongeResult()),
                             IngredientResultUtil.CACHED_RESULT_FUNC_CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULTFUNCTION).forGetter(ResultFunctionRecipe::resultFunctionId)
                     )
@@ -93,14 +93,6 @@ public class SpongeStonecuttingRecipe extends StonecutterRecipe implements Resul
             return IngredientResultUtil.cachedResultFunction(this.resultFunctionId).apply($$0);
         }
         return super.assemble($$0, $$1);
-    }
-
-    @Override
-    public ItemStack getResultItem(final HolderLookup.Provider $$1) {
-//        if (this.resultFunctionId != null) {
-//            return ItemStack.EMPTY;
-//        }
-        return super.getResultItem($$1);
     }
 
 }

@@ -11,15 +11,30 @@ jobs:
     # Only run on PRs if the source branch is on someone else's repo
     if: "${{ github.event_name != 'pull_request' || github.repository != github.event.pull_request.head.repo.full_name }}"
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        project:
+          - vanilla
+          - forge
+          - neoforge
+        include:
+          - project: vanilla
+            gradleProject: SpongeVanilla
+          - project: forge
+            gradleProject: SpongeForge
+          - project: neoforge
+            gradleProject: SpongeNeo
     steps:
       - name: setup
         id: setup
         uses: SpongePowered/.github/.github/actions/setup-java-env@master
+        if: "!startsWith(github.ref, 'refs/heads/update/') || matrix.project == 'vanilla'"
         with:
           runtime_version: 21
           publishing_branch_regex: 'api-\d+'
       - name: setup / cache minecraft dependencies
         uses: "actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9" # v4.0.2
+        if: "!startsWith(github.ref, 'refs/heads/update/') || matrix.project == 'vanilla'"
         with:
           path: |
             ${{ github.workspace}}/buildSrc/.gradle/
@@ -28,15 +43,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-minecraft-${{ env.CACHE_REV }}-
       - name: setup / environment
+        if: "!startsWith(github.ref, 'refs/heads/update/') || matrix.project == 'vanilla'"
         run: |
           echo "GIT_COMMIT=${GITHUB_SHA}" >> $GITHUB_ENV
           echo "GIT_BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
           echo "BUILD_NUMBER=${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
       - name: build with Gradle
-        run: ./gradlew -Pprojects=vanilla,forge,neoforge,testplugins build --stacktrace
+        if: "!startsWith(github.ref, 'refs/heads/update/') || matrix.project == 'vanilla'"
+        run: ./gradlew -Pprojects=${{ matrix.project }},testplugins build --stacktrace
         env:
           CI_SYSTEM: Github Actions
       - name: Archive artifacts for build
+        if: "!startsWith(github.ref, 'refs/heads/update/') || matrix.project == 'vanilla'"
         uses: "actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3" # v4.3.1
         with:
           name: Sponge Jars
@@ -46,22 +64,14 @@ jobs:
             ${{ github.workspace }}/vanilla/build/libs/*.jar
             ${{ github.workspace }}/forge/build/libs/*.jar
             ${{ github.workspace }}/neoforge/build/libs/*.jar
-      - name: SpongeVanilla Production Jar
+      - name: ${{ matrix.gradleProject }} Production Jar
+        if: "!startsWith(github.ref, 'refs/heads/update/') || matrix.project == 'vanilla'"
         uses: "actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3" # v4.3.1
         with:
-          name: SpongeVanilla Production Jar
-          path: "${{ github.workspace }}/vanilla/build/libs/*-universal.jar"
-      - name: SpongeForge Production Jar
-        uses: "actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3" # v4.3.1
-        with:
-          name: SpongeForge Production Jar
-          path: "${{ github.workspace }}/forge/build/libs/*-universal.jar"
-      - name: SpongeNeo Production Jar
-        uses: "actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3" # v4.3.1
-        with:
-          name: SpongeNeo Production Jar
-          path: "${{ github.workspace }}/neoforge/build/libs/*-universal.jar"
+          name: ${{ matrix.gradleProject }} Production Jar
+          path: "${{ github.workspace }}/${{ matrix.project }}/build/libs/*-universal.jar"
       - name: SpongeVanilla libraries
+        if: "matrix.project == 'vanilla'"
         uses: "actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3" # v4.3.1
         with:
           name: SpongeVanilla installer libraries

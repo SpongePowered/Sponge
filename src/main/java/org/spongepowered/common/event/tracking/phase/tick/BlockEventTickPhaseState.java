@@ -34,6 +34,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
@@ -84,7 +85,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
 
     @Override
     public void postBlockTransactionApplication(
-        final BlockEventTickContext context, final BlockChange blockChange,
+        final BlockEventTickContext context, ServerWorld serverWorld, final BlockChange blockChange,
         final BlockTransactionReceipt receipt
     ) {
         final Block block = (Block) receipt.originalBlock().state().type();

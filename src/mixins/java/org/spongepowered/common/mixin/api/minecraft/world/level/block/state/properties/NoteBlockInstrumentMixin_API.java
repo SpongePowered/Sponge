@@ -41,6 +41,6 @@ public abstract class NoteBlockInstrumentMixin_API implements InstrumentType {
 
     @Override
     public SoundType sound() {
-        return (SoundType) this.shadow$getSoundEvent().value();
+        return (SoundType) (Object) this.shadow$getSoundEvent().value();
     }
 }

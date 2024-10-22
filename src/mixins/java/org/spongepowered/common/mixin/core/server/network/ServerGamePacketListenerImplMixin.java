@@ -55,7 +55,8 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.RelativeMovement;
+import net.minecraft.world.entity.PositionMoveRotation;
+import net.minecraft.world.entity.Relative;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
@@ -127,9 +128,8 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
     @Shadow private double vehicleFirstGoodX;
     @Shadow private double vehicleFirstGoodY;
     @Shadow private double vehicleFirstGoodZ;
-    @Shadow private int chatSpamTickCount;
 
-    @Shadow public abstract void shadow$teleport(double x, double y, double z, float yaw, float pitch, Set<RelativeMovement> relativeArguments);
+    @Shadow public abstract void shadow$teleport(PositionMoveRotation pitch, Set<Relative> relativeArguments);
     @Shadow protected abstract CompletableFuture<List<FilteredText>> shadow$filterTextPacket(final List<String> $$0);
     @Shadow protected abstract void shadow$performUnsignedChatCommand(final String $$0);
     @Shadow protected abstract void shadow$performSignedChatCommand(ServerboundChatCommandSignedPacket $$0, LastSeenMessages $$1);
@@ -258,9 +258,13 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
             this.player.absMoveTo(fromPosition.x(), fromPosition.y(), fromPosition.z());
             this.player.setXRot((float) originalToRotation.x());
             this.player.setYRot((float) originalToRotation.y());
-            this.shadow$teleport(fromPosition.x(), fromPosition.y(), fromPosition.z(),
-                    (float) toRotation.y(), (float) toRotation.x(),
-                    EnumSet.of(RelativeMovement.X_ROT, RelativeMovement.Y_ROT));
+            this.shadow$teleport(new PositionMoveRotation(
+                    VecHelper.toVanillaVector3d(fromPosition),
+                    Vec3.ZERO,
+                    (float) toRotation.y(), (float) toRotation.x()
+                ),
+                EnumSet.of(Relative.X_ROT, Relative.Y_ROT)
+            );
             ci.cancel();
             return;
         }
@@ -274,9 +278,11 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
             this.player.absMoveTo(originalToPosition.x(), originalToPosition.y(), originalToPosition.z());
             this.player.setXRot((float) originalToRotation.x());
             this.player.setYRot((float) originalToRotation.y());
-            this.shadow$teleport(toPosition.x(), toPosition.y(), toPosition.z(),
-                    (float) toRotation.y(), (float) toRotation.x(),
-                    EnumSet.allOf(RelativeMovement.class));
+            this.shadow$teleport(new PositionMoveRotation(
+                    VecHelper.toVanillaVector3d(toPosition),
+                    Vec3.ZERO,
+                    (float) toRotation.y(), (float) toRotation.x()),
+                EnumSet.allOf(Relative.class));
             ci.cancel();
         }
     }
