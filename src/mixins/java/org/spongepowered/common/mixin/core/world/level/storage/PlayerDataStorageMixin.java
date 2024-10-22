@@ -25,13 +25,10 @@
 package org.spongepowered.common.mixin.core.world.level.storage;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtAccounter;
-import net.minecraft.nbt.NbtIo;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.PlayerDataStorage;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.slf4j.Logger;
-import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -39,11 +36,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
-import org.spongepowered.common.util.FileUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,7 +45,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
-import java.util.Optional;
 
 @Mixin(PlayerDataStorage.class)
 public abstract class PlayerDataStorageMixin {
@@ -60,64 +53,22 @@ public abstract class PlayerDataStorageMixin {
     @Shadow @Final private File playerDir;
     // @formatter:on
 
-    @Nullable private Exception impl$capturedException;
-
     @Redirect(method = "lambda$load$1", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;load(Lnet/minecraft/nbt/CompoundTag;)V"))
     private void impl$readSpongePlayerData(final Player playerEntity, final CompoundTag compound) throws IOException {
         playerEntity.load(compound);
-        final Path file = new File(this.playerDir, playerEntity.getStringUUID() + ".dat").toPath();
-        final Instant creationTime = Files.exists(file) ? Files.readAttributes(file, BasicFileAttributes.class).creationTime().toInstant() : null;
-        ((SpongeServer) SpongeCommon.server()).getPlayerDataManager().readPlayerData(compound, null, creationTime);
-    }
-
-    @Redirect(method = "load(Lnet/minecraft/world/entity/player/Player;Ljava/lang/String;)Ljava/util/Optional;", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NbtIo;readCompressed(Ljava/nio/file/Path;Lnet/minecraft/nbt/NbtAccounter;)Lnet/minecraft/nbt/CompoundTag;"))
-    private CompoundTag impl$wrapFileRead(final Path path, final NbtAccounter accounter) throws IOException {
-        try {
-            return NbtIo.readCompressed(path, accounter);
-        } catch (final IOException exception) {
-            FileUtil.copyCorruptedFile(path);
-            // handled below.
-            throw exception;
+        if (((ServerPlayer) playerEntity).get(Keys.FIRST_DATE_JOINED).isEmpty()) {
+            final Path file = new File(this.playerDir, playerEntity.getStringUUID() + ".dat").toPath();
+            final Instant creationTime = Files.exists(file) ? Files.readAttributes(file, BasicFileAttributes.class).creationTime().toInstant() : null;
+            ((SpongeServer) SpongeCommon.server()).getPlayerDataManager().readLegacyPlayerData((ServerPlayer) playerEntity, compound, creationTime);
         }
-    }
-
-    @Inject(method = "load(Lnet/minecraft/world/entity/player/Player;Ljava/lang/String;)Ljava/util/Optional;",
-            at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;)V", shift = At.Shift.AFTER),
-            locals = LocalCapture.CAPTURE_FAILHARD
-    )
-    private void impl$onFailedLoad(final Player param0, final String param1, final CallbackInfoReturnable<Optional<CompoundTag>> cir, final File file, final Exception exception) {
-        throw new RuntimeException(exception);
+        ((ServerPlayer) playerEntity).offer(Keys.LAST_DATE_PLAYED, Instant.now());
     }
 
     @Inject(method = "save",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/nbt/NbtIo;writeCompressed(Lnet/minecraft/nbt/CompoundTag;Ljava/nio/file/Path;)V",
+            target = "Lnet/minecraft/Util;safeReplaceFile(Ljava/nio/file/Path;Ljava/nio/file/Path;Ljava/nio/file/Path;)V",
             shift = At.Shift.AFTER))
     private void impl$saveSpongePlayerData(final Player player, final CallbackInfo callbackInfo) {
-        ((SpongeServer) Sponge.server()).getPlayerDataManager().saveSpongePlayerData(player.getUUID());
+        ((SpongeServer) SpongeCommon.server()).getPlayerDataManager().deleteLegacyPlayerData((ServerPlayer) player);
     }
-
-    @Inject(
-        method = "save",
-        at = @At(value = "INVOKE",
-            target = "Lorg/slf4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;)V",
-            remap = false),
-        locals = LocalCapture.CAPTURE_FAILHARD)
-    private void impl$trackExceptionForLogging(final Player player, final CallbackInfo ci, final Exception exception) {
-        this.impl$capturedException = exception;
-    }
-
-    @Redirect(
-        method = "save",
-        at = @At(
-            value = "INVOKE",
-            target = "Lorg/slf4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;)V",
-            remap = false
-        )
-    )
-    private void impl$useStoredException(final Logger logger, final String message, final Object param) {
-        logger.warn(message, param, this.impl$capturedException);
-        this.impl$capturedException = null;
-    }
-
 }

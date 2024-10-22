@@ -122,8 +122,6 @@ import org.spongepowered.common.registry.provider.DataTranslatorProvider;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.server.SpongeServerLocationBuilder;
-import org.spongepowered.common.world.storage.SpongePlayerData;
-import org.spongepowered.common.world.storage.SpongePlayerDataBuilder;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -397,7 +395,6 @@ public final class SpongeDataManager implements DataManager {
         this.registerBuilder(ItemStackSnapshot.class, new SpongeItemStackSnapshotDataBuilder());
         this.registerBuilder(EntitySnapshot.class, new SpongeEntitySnapshotBuilder());
         this.registerBuilder(EntityArchetype.class, SpongeEntityArchetypeBuilder.unpooled());
-        this.registerBuilder(SpongePlayerData.class, new SpongePlayerDataBuilder());
         this.registerBuilder(BlockState.class, new SpongeBlockStateBuilder());
         this.registerBuilder(MapDecoration.class, new SpongeMapDecorationDataBuilder());
         this.registerBuilder(MapCanvas.class, new SpongeMapCanvasDataBuilder());
