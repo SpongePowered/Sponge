@@ -22,22 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.entity.animal;
+package org.spongepowered.neoforge.mixin.core.world.entity.vehicle;
 
-import net.minecraft.world.entity.animal.SnowGolem;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.vehicle.AbstractBoat;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.world.entity.GrieferBridge;
-import org.spongepowered.common.mixin.core.world.entity.MobMixin;
+import org.spongepowered.common.bridge.world.entity.vehicle.AbstractBoatBridge;
 
-@Mixin(SnowGolem.class)
-public abstract class SnowGolemMixin extends MobMixin {
+@Mixin(AbstractBoat.class)
+public abstract class AbstractBoatMixin_Neo implements AbstractBoatBridge {
 
-    @Redirect(method = "aiStep()V", at = @At(
-        value = "INVOKE", target = "Lnet/minecraft/world/level/GameRules;getBoolean(Lnet/minecraft/world/level/GameRules$Key;)Z"))
-    private boolean impl$checkCanGrief(final GameRules gameRules, final GameRules.Key<GameRules.BooleanValue> key) {
-        return gameRules.getBoolean(key) && ((GrieferBridge) this).bridge$canGrief();
+    @Redirect(method = "getGroundFriction", at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/level/block/state/BlockState;getFriction(Lnet/minecraft/world/level/LevelReader;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;)F")
+    )
+    private float neo$getBlockFrictionIfBoatIsNotOverridingMovingOnLand(BlockState caller, LevelReader level, BlockPos pos, Entity entity) {
+        final boolean movesOnLand = this.bridge$getMoveOnLand();
+        final float friction = caller.getFriction(level, pos, entity);
+        if (movesOnLand && friction == 0.6f) {
+            return Blocks.ICE.getFriction(caller, level, pos, entity);
+        }
+        return friction;
     }
 }

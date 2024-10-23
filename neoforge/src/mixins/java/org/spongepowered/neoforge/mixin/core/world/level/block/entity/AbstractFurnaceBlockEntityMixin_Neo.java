@@ -27,9 +27,12 @@ package org.spongepowered.neoforge.mixin.core.world.level.block.entity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -56,6 +59,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.world.level.block.entity.BaseContainerBlockEntityMixin;
+import org.spongepowered.neoforge.accessor.world.level.block.entity.AbstractFurnaceBlockEntityAccessor_Neo;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -68,9 +72,6 @@ public abstract class AbstractFurnaceBlockEntityMixin_Neo extends BaseContainerB
     // @formatter:off
     @Shadow protected NonNullList<ItemStack> items;
     @Shadow int cookingProgress;
-    @Shadow private static boolean shadow$canBurn(final RegistryAccess registryAccess, @Nullable final RecipeHolder<?> recipe, final NonNullList<ItemStack> slots, final int maxStackSize, final AbstractFurnaceBlockEntity furnace) {
-        throw new UnsupportedOperationException("Shadowed canBurn");
-    }
     // @formatter:on
 
     private boolean neo$filledWaterBucket;
@@ -78,10 +79,14 @@ public abstract class AbstractFurnaceBlockEntityMixin_Neo extends BaseContainerB
     // Tick up and Start
     @Redirect(method = "serverTick",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;canBurn(Lnet/minecraft/core/RegistryAccess;Lnet/minecraft/world/item/crafting/RecipeHolder;Lnet/minecraft/core/NonNullList;ILnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;)Z",
+            target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;canBurn(Lnet/minecraft/core/RegistryAccess;Lnet/minecraft/world/item/crafting/RecipeHolder;Lnet/minecraft/world/item/crafting/SingleRecipeInput;Lnet/minecraft/core/NonNullList;I)Z",
             ordinal = 1))
-    private static boolean neo$checkIfCanSmelt(final RegistryAccess registryAccess, @Nullable final RecipeHolder<?> recipe, final NonNullList<ItemStack> slots, final int maxStackSize, final AbstractFurnaceBlockEntity entityIn) {
-        if (!AbstractFurnaceBlockEntityMixin_Neo.shadow$canBurn(registryAccess, recipe, slots, maxStackSize, entityIn)) {
+    private static boolean neo$checkIfCanSmelt(
+        final RegistryAccess registryAccess, @Nullable final RecipeHolder<?> recipe, final SingleRecipeInput input,
+        final NonNullList<ItemStack> slots, final int maxStackSize, final ServerLevel level, final BlockPos entityPos,
+        final BlockState state, final AbstractFurnaceBlockEntity entityIn
+    ) {
+        if (!AbstractFurnaceBlockEntityAccessor_Neo.invoker$canBurn(registryAccess, recipe, input, slots, maxStackSize)) {
             return false;
         }
 
@@ -105,8 +110,11 @@ public abstract class AbstractFurnaceBlockEntityMixin_Neo extends BaseContainerB
 
     // Tick down
     @Redirect(method = "serverTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;clamp(III)I"))
-    private static int neo$resetCookTimeIfCancelled(final int newCookTime, final int zero, final int totalCookTime,
-                                                            final Level level, final BlockPos entityPos, final BlockState state, final AbstractFurnaceBlockEntity entityIn) {
+    private static int neo$resetCookTimeIfCancelled(
+        final int newCookTime, final int zero, final int totalCookTime,
+        final ServerLevel level, final BlockPos entityPos, final BlockState state,
+        final AbstractFurnaceBlockEntity entityIn
+    ) {
         final int clampedCookTime = Mth.clamp(newCookTime, zero, totalCookTime);
         final var entity = (AbstractFurnaceBlockEntityMixin_Neo) (Object) entityIn;
         final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(entity.items.get(1));
@@ -128,18 +136,29 @@ public abstract class AbstractFurnaceBlockEntityMixin_Neo extends BaseContainerB
         slice = @Slice(
             from = @At(value = "FIELD", target = "Lnet/minecraft/world/level/block/Blocks;WET_SPONGE:Lnet/minecraft/world/level/block/Block;", opcode = Opcodes.GETSTATIC)
         ))
-    private static void neo$captureBucketFill(final RegistryAccess registryAccess, final RecipeHolder<?> recipe, final NonNullList<ItemStack> slots, final int maxStackSize, final AbstractFurnaceBlockEntity entityIn, final CallbackInfoReturnable<Boolean> cir) {
-        ((AbstractFurnaceBlockEntityMixin_Neo) (Object) entityIn).neo$filledWaterBucket = true;
+    private static void neo$captureBucketFill(
+        final RegistryAccess registryAccess, final RecipeHolder<?> recipe, final SingleRecipeInput arg3,
+        final NonNullList<ItemStack> slots, final int maxStackSize, final CallbackInfoReturnable<Boolean> cir
+    ) {
+        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
+        final FurnaceBlockEntity entity = cause.first(FurnaceBlockEntity.class)
+            .orElseThrow(() -> new IllegalStateException("Expected to have a FurnaceBlockEntity in the Cause"));
+        ((AbstractFurnaceBlockEntityMixin_Neo) entity).neo$filledWaterBucket = true;
     }
 
     @Inject(method = "burn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;shrink(I)V", shift = At.Shift.AFTER))
-    private static void neo$afterSmeltItem(final RegistryAccess registryAccess, final RecipeHolder<?> recipe, final NonNullList<ItemStack> slots, final int maxStackSize, final AbstractFurnaceBlockEntity entityIn, final CallbackInfoReturnable<Boolean> cir) {
+    private static void neo$afterSmeltItem(
+        final RegistryAccess registryAccess, final RecipeHolder<? extends AbstractCookingRecipe> recipe,
+        final SingleRecipeInput input, final NonNullList<ItemStack> slots, final int maxStackSize,
+        final CallbackInfoReturnable<Boolean> cir
+    ) {
         final ItemStack itemIn = slots.get(0);
-        final ItemStack recipeResult = recipe.value().getResultItem(registryAccess);
+        final ItemStack recipeResult = recipe.value().assemble(input, registryAccess);
         final ItemStack itemOut = slots.get(2);
 
         final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
-        final FurnaceBlockEntity entity = (FurnaceBlockEntity) entityIn;
+        final FurnaceBlockEntity entity = cause.first(FurnaceBlockEntity.class)
+            .orElseThrow(() -> new IllegalStateException("Expected to have a FurnaceBlockEntity in the Cause"));
 
         final List<SlotTransaction> transactions = new ArrayList<>();
         itemIn.grow(1);

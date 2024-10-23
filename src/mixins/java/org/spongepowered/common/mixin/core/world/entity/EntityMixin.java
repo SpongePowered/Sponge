@@ -934,18 +934,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         return !this.impl$transient;
     }
 
-
-    @Redirect(method = "thunderHit",
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/Entity;hurtServer(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
-    private boolean impl$ThrowDamageEventWithLightingSource(
-        final Entity entity, final ServerLevel serverLevel, final DamageSource source, final float damage,
-        final ServerLevel level, final LightningBolt lightningBolt
-    ) {
-        var entitySource = new DamageSource(source.typeHolder(), lightningBolt);
-        return entity.hurtServer(serverLevel, entitySource, damage);
-    }
-
     @Inject(method = "getFireImmuneTicks", at = @At(value = "HEAD"), cancellable = true)
     private void impl$getFireImmuneTicks(final CallbackInfoReturnable<Integer> ci) {
         if (this.impl$hasCustomFireImmuneTicks) {

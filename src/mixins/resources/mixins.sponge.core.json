@@ -140,7 +140,6 @@
         "world.entity.animal.OcelotMixin",
         "world.entity.animal.ParrotMixin",
         "world.entity.animal.Rabbit_RaidGardenGoalMixin",
-        "world.entity.animal.SnowGolemMixin",
         "world.entity.animal.WolfMixin",
         "world.entity.animal.horse.AbstractHorseMixin",
         "world.entity.boss.enderdragon.EndCrystalMixin",

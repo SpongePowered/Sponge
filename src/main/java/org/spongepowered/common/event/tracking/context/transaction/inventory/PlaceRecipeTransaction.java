@@ -53,10 +53,10 @@ public class PlaceRecipeTransaction extends ContainerBasedTransaction {
     private final ServerPlayer player;
     private final ItemStackSnapshot originalCursor;
     private boolean shift;
-    private RecipeHolder<Recipe<?>> recipe;
+    private RecipeHolder<?> recipe;
     private CraftingInventory craftingInventory;
 
-    public PlaceRecipeTransaction(final ServerPlayer player, final boolean shift, final RecipeHolder<Recipe<?>> recipe, CraftingInventory craftingInventory) {
+    public PlaceRecipeTransaction(final ServerPlayer player, final boolean shift, final RecipeHolder<?> recipe, CraftingInventory craftingInventory) {
         super(player.containerMenu);
         this.player = player;
         this.originalCursor = ItemStackUtil.snapshotOf(player.containerMenu.getCarried());

@@ -26,6 +26,8 @@ package org.spongepowered.neoforge;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.neoforged.bus.api.IEventBus;
@@ -139,7 +141,7 @@ public final class SpongeNeoMod {
                 .sized(0.6F, 1.8F)
                 .clientTrackingRange(org.spongepowered.common.util.Constants.Entity.Player.TRACKING_RANGE)
                 .updateInterval(2)
-                .build("sponge:human");
+                .build(ResourceKey.create(Registries.ENTITY_TYPE, ResourceLocation.parse("sponge:human")));
 
             event.register(Registries.ENTITY_TYPE, helper -> helper.register(HumanEntity.KEY, SpongeEntityTypes.HUMAN));
         }
