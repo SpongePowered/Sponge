@@ -22,26 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.entity.animal.frog;
+package org.spongepowered.common.data.provider.entity;
 
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.animal.FrogVariant;
+import net.minecraft.world.entity.animal.frog.Frog;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.entity.living.animal.frog.Frog;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.api.minecraft.world.entity.animal.AnimalMixin_API;
+import org.spongepowered.api.data.type.FrogType;
+import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
-import java.util.Set;
+public final class FrogData {
 
-@Mixin(net.minecraft.world.entity.animal.frog.Frog.class)
-public abstract class FrogMixin_API extends AnimalMixin_API implements Frog {
-
-    @Override
-    protected Set<Value.Immutable<?>> api$getVanillaValues() {
-        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
-
-        values.add(this.requireValue(Keys.FROG_TYPE).asImmutable());
-
-        return values;
+    private FrogData() {
     }
 
+    // @formatter:off
+    public static void register(final DataProviderRegistrator registrator) {
+        registrator
+                .asMutable(Frog.class)
+                    .create(Keys.FROG_TYPE)
+                        .get(h -> (FrogType) (Object) h.getVariant().value())
+                        .set((h, v) -> h.setVariant(BuiltInRegistries.FROG_VARIANT.wrapAsHolder((FrogVariant) (Object) v)));
+    }
+    // @formatter:on
 }

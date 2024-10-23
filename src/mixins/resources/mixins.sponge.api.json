@@ -182,6 +182,7 @@
         "minecraft.world.entity.animal.FlyingAnimalMixin_API",
         "minecraft.world.entity.animal.Fox_TypeMixin_API",
         "minecraft.world.entity.animal.FoxMixin_API",
+        "minecraft.world.entity.animal.FrogVariantMixin_API",
         "minecraft.world.entity.animal.IronGolemMixin_API",
         "minecraft.world.entity.animal.MushroomCow_MushroomTypeMixin_API",
         "minecraft.world.entity.animal.MushroomCowMixin_API",

@@ -66,6 +66,7 @@ public final class EntityDataProviders extends DataProviderRegistratorBuilder {
         FireworkRocketData.register(this.registrator);
         FishingBobberData.register(this.registrator);
         FoxData.register(this.registrator);
+        FrogData.register(this.registrator);
         FurnaceMinecartData.register(this.registrator);
         FusedExplosiveData.register(this.registrator);
         GrieferData.register(this.registrator);
