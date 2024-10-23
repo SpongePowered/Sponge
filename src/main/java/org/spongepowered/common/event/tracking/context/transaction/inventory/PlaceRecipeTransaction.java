@@ -26,7 +26,6 @@ package org.spongepowered.common.event.tracking.context.transaction.inventory;
 
 import net.minecraft.network.protocol.game.ServerboundPlaceRecipePacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;

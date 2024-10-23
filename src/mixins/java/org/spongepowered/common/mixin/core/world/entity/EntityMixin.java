@@ -46,7 +46,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.PortalProcessor;
 import net.minecraft.world.entity.item.ItemEntity;
