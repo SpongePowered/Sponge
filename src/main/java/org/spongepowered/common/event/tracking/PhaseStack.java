@@ -78,8 +78,8 @@ final class PhaseStack {
 
     PhaseStack push(IPhaseState<?> state, PhaseContext<?> context) {
         Objects.requireNonNull(context, "Tuple cannot be null!");
-        Preconditions.checkArgument(context.state == state, String.format("Illegal IPhaseState not matching PhaseContext: %s", context));
-        Preconditions.checkArgument(context.isComplete(), String.format("Phase context must be complete: %s", context));
+        Preconditions.checkArgument(context.state == state, () -> String.format("Illegal IPhaseState not matching PhaseContext: %s", context));
+        Preconditions.checkArgument(context.isComplete(), () -> String.format("Phase context must be complete: %s", context));
         this.phases.push(context);
         return this;
     }
