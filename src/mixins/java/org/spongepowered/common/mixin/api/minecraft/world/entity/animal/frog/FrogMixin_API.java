@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.animal.frog;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.frog.Frog;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,6 +38,8 @@ public abstract class FrogMixin_API extends AnimalMixin_API implements Frog {
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.requireValue(Keys.FROG_TYPE).asImmutable());
 
         return values;
     }

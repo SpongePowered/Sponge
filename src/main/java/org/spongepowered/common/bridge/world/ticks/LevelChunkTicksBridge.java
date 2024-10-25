@@ -22,20 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.block;
+package org.spongepowered.common.bridge.world.ticks;
 
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.context.GeneralizedContext;
+import net.minecraft.world.ticks.LevelTicks;
 
-import java.util.function.BiConsumer;
+public interface LevelChunkTicksBridge<T> {
 
-public final class TileEntityInvalidatingPhaseState extends BlockPhaseState {
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public BiConsumer<CauseStackManager.StackFrame, GeneralizedContext> getFrameModifier() {
-        return (BiConsumer<CauseStackManager.StackFrame, GeneralizedContext>) IPhaseState.DEFAULT_OWNER_NOTIFIER;
-    }
-
+    void bridge$setTickList(LevelTicks<T> tickList);
 }

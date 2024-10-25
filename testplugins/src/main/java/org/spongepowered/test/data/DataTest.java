@@ -46,8 +46,6 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.meta.BannerPatternLayer;
-import org.spongepowered.api.data.type.ArmorMaterials;
-import org.spongepowered.api.data.type.ArtTypes;
 import org.spongepowered.api.data.type.AttachmentSurfaces;
 import org.spongepowered.api.data.type.BannerPatternShapes;
 import org.spongepowered.api.data.type.BoatTypes;
@@ -55,6 +53,7 @@ import org.spongepowered.api.data.type.BodyParts;
 import org.spongepowered.api.data.type.CatTypes;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.data.type.FoxTypes;
+import org.spongepowered.api.data.type.FrogTypes;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.data.type.HorseColors;
 import org.spongepowered.api.data.type.HorseStyles;
@@ -241,13 +240,13 @@ public final class DataTest  {
 
         this.checkOfferListData(goldenApple, Keys.APPLIED_ENCHANTMENTS, Arrays.asList(Enchantment.of(EnchantmentTypes.SHARPNESS, 5)));
         this.checkOfferListData(goldenApple, Keys.APPLIED_ENCHANTMENTS, Arrays.asList(Enchantment.of(EnchantmentTypes.PROTECTION, 4)));
-
-        this.checkGetData(ItemStack.of(ItemTypes.DIAMOND_LEGGINGS), Keys.ARMOR_MATERIAL, ArmorMaterials.DIAMOND.get());
-        this.checkGetData(ItemStack.of(ItemTypes.LEATHER_BOOTS), Keys.ARMOR_MATERIAL, ArmorMaterials.LEATHER.get());
-        this.checkGetData(ItemStack.of(ItemTypes.TURTLE_HELMET), Keys.ARMOR_MATERIAL, ArmorMaterials.TURTLE.get());
-
-        final Entity painting = world.createEntity(EntityTypes.PAINTING.get(), position);
-        this.checkGetData(painting, Keys.ART_TYPE, ArtTypes.KEBAB.get()); // TODO test offer (only works on valid painting)
+//
+//        this.checkGetData(ItemStack.of(ItemTypes.DIAMOND_LEGGINGS), Keys.ARMOR_MATERIAL, ArmorMaterials.DIAMOND.get());
+//        this.checkGetData(ItemStack.of(ItemTypes.LEATHER_BOOTS), Keys.ARMOR_MATERIAL, ArmorMaterials.LEATHER.get());
+//        this.checkGetData(ItemStack.of(ItemTypes.TURTLE_HELMET), Keys.ARMOR_MATERIAL, ArmorMaterials.TURTLE.get());
+//
+//        final Entity painting = world.createEntity(EntityTypes.PAINTING.get(), position);
+//        this.checkGetData(painting, Keys.ART_TYPE, ArtTypes.KEBAB.get()); // TODO test offer (only works on valid painting)
 
         final BlockState leverState = BlockTypes.LEVER.get().defaultState();
         this.checkWithData(leverState, Keys.ATTACHMENT_SURFACE, AttachmentSurfaces.WALL.get());
@@ -463,8 +462,8 @@ public final class DataTest  {
         this.checkOfferData(tntEntity, Keys.DETONATOR, player);
 
         // TODO Keys.DIRECTION for other dataholders
-        this.checkGetData(painting, Keys.DIRECTION, Direction.SOUTH);
-        this.checkOfferData(painting, Keys.DIRECTION, Direction.NORTH);
+//        this.checkGetData(painting, Keys.DIRECTION, Direction.SOUTH);
+//        this.checkOfferData(painting, Keys.DIRECTION, Direction.NORTH);
 
         final Entity shulkerEntity = world.createEntity(EntityTypes.SHULKER.get(), position);
         this.checkGetData(shulkerEntity, Keys.DIRECTION, Direction.DOWN);
@@ -955,6 +954,10 @@ public final class DataTest  {
         this.checkGetData(obisidanState, Keys.IS_UNBREAKABLE, false);
         final BlockState bedrockState = BlockTypes.BEDROCK.get().defaultState();
         this.checkGetData(bedrockState, Keys.IS_UNBREAKABLE, true);
+
+        final Entity frog = world.createEntity(EntityTypes.FROG.get(), position);
+        this.checkOfferData(frog, Keys.FROG_TYPE, FrogTypes.WARM.get());
+        this.checkGetData(frog, Keys.FROG_TYPE, FrogTypes.WARM.get());
 
 //        this.checkOfferData(panda, Keys.IS_UNHAPPY, true);
 

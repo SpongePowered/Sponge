@@ -22,18 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.generation;
+package org.spongepowered.common.data.provider.entity;
 
-import org.spongepowered.common.event.tracking.PhaseTracker;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.animal.FrogVariant;
+import net.minecraft.world.entity.animal.frog.Frog;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.FrogType;
+import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
-final class GenerationCompatibilityState extends GeneralGenerationPhaseState<GenerationCompatibileContext> {
+public final class FrogData {
 
-    GenerationCompatibilityState() {
-        super("COMPATIBILITY_POPULATOR");
+    private FrogData() {
     }
 
-    @Override
-    public GenerationCompatibileContext createNewContext(final PhaseTracker tracker) {
-        return new GenerationCompatibileContext(this, tracker);
+    // @formatter:off
+    public static void register(final DataProviderRegistrator registrator) {
+        registrator
+                .asMutable(Frog.class)
+                    .create(Keys.FROG_TYPE)
+                        .get(h -> (FrogType) (Object) h.getVariant().value())
+                        .set((h, v) -> h.setVariant(BuiltInRegistries.FROG_VARIANT.wrapAsHolder((FrogVariant) (Object) v)));
     }
+    // @formatter:on
 }

@@ -31,6 +31,7 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundExplodePacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.MinecraftServer;
@@ -41,6 +42,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.server.players.PlayerList;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.ProgressListener;
 import net.minecraft.world.RandomSequences;
@@ -559,5 +561,15 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
                 .add("key=" + this.shadow$dimension())
                 .add("worldType=" + worldTypeKey.map(ResourceKey::toString).orElse("inline"))
                 .toString();
+    }
+
+    @Redirect(method = {
+        "advanceWeatherCycle",
+        "globalLevelEvent",
+        "setDefaultSpawnPos"
+    }, at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastAll(Lnet/minecraft/network/protocol/Packet;)V"))
+    private void impl$broadcastAllCurrentDimensionOnly(final PlayerList instance, final Packet<?> $$0) {
+        //Weather, game rules and spawns are per world in Sponge.
+        instance.broadcastAll($$0, this.shadow$dimension());
     }
 }

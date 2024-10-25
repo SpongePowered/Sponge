@@ -32,10 +32,8 @@ public final class PluginPhase {
 
         public static final BlockWorkerPhaseState BLOCK_WORKER = new BlockWorkerPhaseState();
         public static final IPhaseState<VolumeStreamApplicationState.Context> VOLUME_STREAM_APPLICATION = new VolumeStreamApplicationState();
-        public static final IPhaseState<BasicPluginContext> CUSTOM_SPAWN = new BasicPluginState();
         public static final IPhaseState<BasicPluginContext> SCHEDULED_TASK = new ScheduledTaskPhaseState();
         public static final IPhaseState<DelayedTaskPhaseState.Context> DELAYED_TASK = new DelayedTaskPhaseState();
-        public static final IPhaseState<BasicPluginContext> TELEPORT = new BasicPluginState();
 
         private State() {
         }

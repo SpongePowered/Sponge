@@ -240,6 +240,8 @@
         "world.level.block.MagmaBlockMixin",
         "world.level.block.NetherPortalBlockMixin",
         "world.level.block.NoteBlockMixin",
+        "world.level.block.PointedDripstoneBlockMixin",
+        "world.level.block.SweetBerryBushBlockMixin",
         "world.level.block.TntBlockMixin",
         "world.level.block.entity.AbstractFurnaceBlockEntityMixin",
         "world.level.block.entity.BannerBlockEntityMixin",
@@ -285,6 +287,7 @@
         "world.scores.ObjectiveMixin",
         "world.scores.PlayerTeamMixin",
         "world.scores.ScoreboardMixin",
+        "world.ticks.LevelChunkTicksMixin",
         "world.ticks.LevelTicksMixin",
         "world.ticks.ScheduledTickMixin"
     ],

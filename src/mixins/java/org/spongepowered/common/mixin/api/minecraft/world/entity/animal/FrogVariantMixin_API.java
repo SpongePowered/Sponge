@@ -22,20 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.general;
+package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
 
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.PooledPhaseState;
+import net.minecraft.world.entity.animal.FrogVariant;
+import org.spongepowered.api.data.type.FrogType;
+import org.spongepowered.asm.mixin.Mixin;
 
-public class SaveHandlerCreationPhase extends PooledPhaseState<SaveHandlerCreationContext> {
-
-    @Override
-    protected SaveHandlerCreationContext createNewContext(final PhaseTracker phaseTracker) {
-        return new SaveHandlerCreationContext(this, phaseTracker);
-    }
-
-    @Override
-    public void unwind(SaveHandlerCreationContext phaseContext) {
-    }
-
+@Mixin(FrogVariant.class)
+public abstract class FrogVariantMixin_API implements FrogType {
 }
