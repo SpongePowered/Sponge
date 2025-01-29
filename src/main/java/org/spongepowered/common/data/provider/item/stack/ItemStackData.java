@@ -119,21 +119,21 @@ public final class ItemStackData {
                     .create(Keys.DISPLAY_NAME)
                         .get(h -> SpongeAdventure.asAdventure(h.getDisplayName()))
                     .create(Keys.CUSTOM_MODEL_DATA_FLOATS)
-                        .get(h -> h.getOrDefault(DataComponents.CUSTOM_MODEL_DATA, CustomModelData.EMPTY).floats())
+                        .get(h -> List.copyOf(h.getOrDefault(DataComponents.CUSTOM_MODEL_DATA, CustomModelData.EMPTY).floats()))
                         .set((h, v) -> {
                             final CustomModelData current = h.getOrDefault(DataComponents.CUSTOM_MODEL_DATA, CustomModelData.EMPTY);
 
                             h.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(List.copyOf(v), current.flags(), current.strings(), current.colors()));
                         })
                     .create(Keys.CUSTOM_MODEL_DATA_FLAGS)
-                        .get(h -> h.getOrDefault(DataComponents.CUSTOM_MODEL_DATA, CustomModelData.EMPTY).flags())
+                        .get(h -> List.copyOf(h.getOrDefault(DataComponents.CUSTOM_MODEL_DATA, CustomModelData.EMPTY).flags()))
                         .set((h, v) -> {
                             final CustomModelData current = h.getOrDefault(DataComponents.CUSTOM_MODEL_DATA, CustomModelData.EMPTY);
 
                             h.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(current.floats(), List.copyOf(v), current.strings(), current.colors()));
                         })
                     .create(Keys.CUSTOM_MODEL_DATA_STRINGS)
-                        .get(h -> h.getOrDefault(DataComponents.CUSTOM_MODEL_DATA, CustomModelData.EMPTY).strings())
+                        .get(h -> List.copyOf(h.getOrDefault(DataComponents.CUSTOM_MODEL_DATA, CustomModelData.EMPTY).strings()))
                         .set((h, v) -> {
                             final CustomModelData current = h.getOrDefault(DataComponents.CUSTOM_MODEL_DATA, CustomModelData.EMPTY);
 
