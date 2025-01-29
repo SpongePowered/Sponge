@@ -42,6 +42,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.ChargedProjectiles;
 import net.minecraft.world.item.component.Consumable;
+import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.item.component.DamageResistant;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.item.component.ItemLore;
@@ -64,6 +65,7 @@ import org.spongepowered.api.item.ItemRarity;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
@@ -116,10 +118,38 @@ public final class ItemStackData {
                         .get(h -> (ItemType) h.getItem().getCraftingRemainder().getItem())
                     .create(Keys.DISPLAY_NAME)
                         .get(h -> SpongeAdventure.asAdventure(h.getDisplayName()))
-//                    .create(Keys.CUSTOM_MODEL_DATA)
-//                        .get(h -> h.getOrDefault(DataComponents.CUSTOM_MODEL_DATA, CustomModelData.EMPTY))
-//                        .set((h, v) -> h.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(v)))
-//                        .delete(h -> h.remove(DataComponents.CUSTOM_MODEL_DATA))
+                    .create(Keys.CUSTOM_MODEL_DATA_FLOATS)
+                        .get(h -> h.getOrDefault(DataComponents.CUSTOM_MODEL_DATA, CustomModelData.EMPTY).floats())
+                        .set((h, v) -> {
+                            final CustomModelData current = h.getOrDefault(DataComponents.CUSTOM_MODEL_DATA, CustomModelData.EMPTY);
+
+                            h.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(List.copyOf(v), current.flags(), current.strings(), current.colors()));
+                        })
+                    .create(Keys.CUSTOM_MODEL_DATA_FLAGS)
+                        .get(h -> h.getOrDefault(DataComponents.CUSTOM_MODEL_DATA, CustomModelData.EMPTY).flags())
+                        .set((h, v) -> {
+                            final CustomModelData current = h.getOrDefault(DataComponents.CUSTOM_MODEL_DATA, CustomModelData.EMPTY);
+
+                            h.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(current.floats(), List.copyOf(v), current.strings(), current.colors()));
+                        })
+                    .create(Keys.CUSTOM_MODEL_DATA_STRINGS)
+                        .get(h -> h.getOrDefault(DataComponents.CUSTOM_MODEL_DATA, CustomModelData.EMPTY).strings())
+                        .set((h, v) -> {
+                            final CustomModelData current = h.getOrDefault(DataComponents.CUSTOM_MODEL_DATA, CustomModelData.EMPTY);
+
+                            h.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(current.floats(), current.flags(), List.copyOf(v), current.colors()));
+                        })
+                    .create(Keys.CUSTOM_MODEL_DATA_COLORS)
+                        .get(h -> h.getOrDefault(DataComponents.CUSTOM_MODEL_DATA, CustomModelData.EMPTY).colors().stream()
+                            .map(Color::ofRgb)
+                            .toList())
+                        .set((h, v) -> {
+                            final CustomModelData current = h.getOrDefault(DataComponents.CUSTOM_MODEL_DATA, CustomModelData.EMPTY);
+
+                            h.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(current.floats(), current.flags(), current.strings(), v.stream()
+                                .map(Color::rgb)
+                                .toList()));
+                        })
                     .create(Keys.CUSTOM_NAME)
                         .get(h -> {
                             if (h.has(DataComponents.CUSTOM_NAME)) {

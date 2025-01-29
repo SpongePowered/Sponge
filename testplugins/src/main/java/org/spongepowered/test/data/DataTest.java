@@ -435,7 +435,10 @@ public final class DataTest  {
         this.checkOfferData(shulkerBullet, Keys.CUSTOM_NAME, Component.text("Angry Shulker Bullet"));
 
         final ItemStack redFlard = ItemStack.of(ItemTypes.SLIME_BLOCK);
-        this.checkOfferData(redFlard, Keys.CUSTOM_MODEL_DATA, 123456);
+        this.checkOfferListData(redFlard, Keys.CUSTOM_MODEL_DATA_FLOATS, List.of(0.5f, 1.0f, 1.5f));
+        this.checkOfferListData(redFlard, Keys.CUSTOM_MODEL_DATA_FLAGS, List.of(true, false, true));
+        this.checkOfferListData(redFlard, Keys.CUSTOM_MODEL_DATA_STRINGS, List.of("abc", "bce"));
+        this.checkOfferListData(redFlard, Keys.CUSTOM_MODEL_DATA_COLORS, List.of(Color.LIME, Color.ofRgb(123, 231, 90)));
         redFlard.offer(Keys.CUSTOM_NAME, Component.text("Red FLARD", NamedTextColor.DARK_RED));
         redFlard.offer(Keys.LORE, Arrays.asList(Component.text("May ignite holder! Handle with care", NamedTextColor.GOLD)));
         player.inventory().offer(redFlard);
