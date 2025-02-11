@@ -56,9 +56,9 @@ public abstract class LivingEntityMixin_Vanilla_Damage implements TrackedDamageB
             return true;
         }
 
-        final SpongeDamageStep step = tracker.newStep(DamageStepTypes.SHIELD, (float) tracker.preEvent().baseDamage(), ItemStackUtil.snapshotOf(self.getUseItem()));
-        step.applyModifiersBefore();
-        step.applyModifiersAfter(0);
+        final SpongeDamageStep step = tracker.newStep(DamageStepTypes.SHIELD, ItemStackUtil.snapshotOf(self.getUseItem()));
+        step.applyChildrenBefore((float) tracker.preEvent().baseDamage());
+        step.applyChildrenAfter(0);
         return !step.isSkipped();
     }
 
@@ -72,7 +72,7 @@ public abstract class LivingEntityMixin_Vanilla_Damage implements TrackedDamageB
             return damage;
         }
         final SpongeDamageStep step = tracker.currentStep(DamageStepTypes.SHIELD);
-        return step == null ? damage : (float) Math.max(step.damageBeforeStep(), 0);
+        return step == null ? damage : (float) Math.max(step.damageBeforeSelf().getAsDouble(), 0);
     }
 
     @ModifyVariable(method = "hurtServer", at = @At("STORE"), slice = @Slice(
@@ -85,7 +85,7 @@ public abstract class LivingEntityMixin_Vanilla_Damage implements TrackedDamageB
             return blocked;
         }
         final SpongeDamageStep step = tracker.currentStep(DamageStepTypes.SHIELD);
-        return step == null ? blocked : step.damageAfterModifiers() <= 0;
+        return step == null ? blocked : step.damageAfterChildren().getAsDouble() <= 0;
     }
 
     @ModifyVariable(method = "actuallyHurt", at = @At("LOAD"), argsOnly = true, slice = @Slice(

@@ -30,7 +30,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.entity.damage.DamageStep;
+import org.spongepowered.api.event.cause.entity.damage.DamageStepTypes;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.api.event.entity.DamageCalculationEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -39,8 +39,6 @@ import org.spongepowered.common.bridge.world.entity.TrackedAttackBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import java.util.List;
-
 public class SpongeAttackTracker extends SpongeDamageTracker {
     private final ItemStack weapon;
     private final ItemStackSnapshot weaponSnapshot;
@@ -48,8 +46,8 @@ public class SpongeAttackTracker extends SpongeDamageTracker {
     private float attackStrength;
     private boolean strongSprint = false;
 
-    public SpongeAttackTracker(final DamageCalculationEvent.Pre preEvent, final ItemStack weapon) {
-        super(preEvent);
+    public SpongeAttackTracker(final DamageCalculationEvent.Pre preEvent, final DamageSource source, final ItemStack weapon) {
+        super(preEvent, source);
         this.weapon = weapon;
         this.weaponSnapshot = ItemStackUtil.snapshotOf(weapon);
     }
@@ -88,14 +86,18 @@ public class SpongeAttackTracker extends SpongeDamageTracker {
         this.strongSprint = strongSprint;
     }
 
-    public boolean callAttackPostEvent(final Entity entity, final DamageSource source, final float finalDamage, final float knockbackModifier) {
-        final List<DamageStep> steps = this.preparePostEvent();
+    public boolean callAttackPostEvent(final Entity entity, final DamageSource source, float finalDamage, final float knockbackModifier) {
+        if (this.postEvent != null) {
+            throw new IllegalStateException("Post event already fired");
+        }
 
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        finalDamage = (float) this.newStep(DamageStepTypes.END).apply(finalDamage);
+
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             SpongeDamageTracker.generateCauseFor(source, frame);
 
             final AttackEntityEvent.Post event = SpongeEventFactory.createAttackEntityEventPost(frame.currentCause(),
-                this.preEvent.originalBaseDamage(), this.preEvent.baseDamage(), finalDamage, finalDamage, knockbackModifier, knockbackModifier, entity, steps);
+                knockbackModifier, knockbackModifier, entity, this, this.preEvent.baseDamage(), finalDamage);
 
             this.postEvent = event;
             return SpongeCommon.post(event);
@@ -103,16 +105,20 @@ public class SpongeAttackTracker extends SpongeDamageTracker {
     }
 
     public static @Nullable SpongeAttackTracker callAttackPreEvent(final Entity entity, final DamageSource source, final float baseDamage, final ItemStack weapon) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        final SpongeAttackTracker tracker;
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             SpongeDamageTracker.generateCauseFor(source, frame);
 
-            final AttackEntityEvent.Pre event = SpongeEventFactory.createAttackEntityEventPre(frame.currentCause(), baseDamage, baseDamage, entity);
+            final AttackEntityEvent.Pre event = SpongeEventFactory.createAttackEntityEventPre(frame.currentCause(), entity, baseDamage);
             if (SpongeCommon.post(event)) {
                 return null;
             }
 
-            return new SpongeAttackTracker(event, weapon);
+            tracker = new SpongeAttackTracker(event, source, weapon);
         }
+
+        tracker.newStep(DamageStepTypes.START).apply(baseDamage);
+        return tracker;
     }
 
     public static @Nullable SpongeAttackTracker of(final DamageSource source) {

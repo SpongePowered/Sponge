@@ -62,11 +62,11 @@ public abstract class EnchantmentMixin_Attack {
             return;
         }
 
-        final SpongeDamageStep step = tracker.newStep(DamageStepTypes.WEAPON_ENCHANTMENT, damage.floatValue(), ItemStackUtil.snapshotOf(weapon), self);
-        damage.setValue((float) step.applyModifiersBefore());
+        final SpongeDamageStep step = tracker.newStep(DamageStepTypes.WEAPON_ENCHANTMENT, ItemStackUtil.snapshotOf(weapon), self);
+        damage.setValue((float) step.applyChildrenBefore(damage.floatValue()));
         if (!step.isSkipped()) {
             this.shadow$modifyDamageFilteredValue(component, level, enchantmentLevel, weapon, target, source, damage);
         }
-        damage.setValue((float) step.applyModifiersAfter(damage.floatValue()));
+        damage.setValue((float) step.applyChildrenAfter(damage.floatValue()));
     }
 }

@@ -155,12 +155,12 @@ public abstract class PlayerMixin_Attack extends LivingEntityMixin_Damage implem
             return item.getAttackDamageBonus(target, originalDamage, source);
         }
 
-        final SpongeDamageStep step = tracker.newStep(DamageStepTypes.WEAPON_BONUS, originalDamage, tracker.weaponSnapshot());
-        float damage = (float) step.applyModifiersBefore();
+        final SpongeDamageStep step = tracker.newStep(DamageStepTypes.WEAPON_BONUS, tracker.weaponSnapshot());
+        float damage = (float) step.applyChildrenBefore(originalDamage);
         if (!step.isSkipped()) {
             damage += item.getAttackDamageBonus(target, damage, source);
         }
-        return (float) step.applyModifiersAfter(damage) - originalDamage;
+        return (float) step.applyChildrenAfter(damage) - originalDamage;
     }
 
     @ModifyVariable(method = "attack", at = @At(value = "LOAD", ordinal = 0), ordinal = 0, slice = @Slice(
@@ -249,21 +249,21 @@ public abstract class PlayerMixin_Attack extends LivingEntityMixin_Damage implem
         damage = (float) sweepTracker.preEvent().baseDamage();
 
         // In vanilla, this step is outside the loop, but we move it to here so it can be modified per target
-        SpongeDamageStep step = sweepTracker.newStep(DamageStepTypes.SWEEPING, damage, sweepTracker.weaponSnapshot());
-        damage = (float) step.applyModifiersBefore();
+        SpongeDamageStep step = sweepTracker.newStep(DamageStepTypes.SWEEPING, sweepTracker.weaponSnapshot());
+        damage = (float) step.applyChildrenBefore(damage);
         if (!step.isSkipped()) {
             damage = 1.0F + (float) this.shadow$getAttributeValue(Attributes.SWEEPING_DAMAGE_RATIO) * damage;
         }
-        damage = (float) step.applyModifiersAfter(damage);
+        damage = (float) step.applyChildrenAfter(damage);
 
         damage = this.shadow$getEnchantedDamage(sweepTarget, damage, source);
 
-        step = sweepTracker.newStep(DamageStepTypes.ENCHANTMENT_COOLDOWN, damage, sweepTracker.weaponSnapshot());
-        damage = (float) step.applyModifiersBefore();
+        step = sweepTracker.newStep(DamageStepTypes.ENCHANTMENT_COOLDOWN, sweepTracker.weaponSnapshot());
+        damage = (float) step.applyChildrenBefore(damage);
         if (!step.isSkipped()) {
             damage *= mainTracker.attackStrength();
         }
-        damage = (float) step.applyModifiersAfter(damage);
+        damage = (float) step.applyChildrenAfter(damage);
 
         if (sweepTracker.callAttackPostEvent((org.spongepowered.api.entity.Entity) sweepTarget, source, damage, 0.4F)) {
             this.attack$trackers.removeLast();

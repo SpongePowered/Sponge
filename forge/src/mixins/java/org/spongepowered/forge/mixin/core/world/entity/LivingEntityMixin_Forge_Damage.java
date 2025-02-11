@@ -59,8 +59,8 @@ public abstract class LivingEntityMixin_Forge_Damage implements TrackedDamageBri
             return ForgeEventFactory.onShieldBlock(self, source, originalDamage);
         }
 
-        final SpongeDamageStep step = tracker.newStep(DamageStepTypes.SHIELD, originalDamage, ItemStackUtil.snapshotOf(self.getUseItem()));
-        float damage = (float) step.applyModifiersBefore();
+        final SpongeDamageStep step = tracker.newStep(DamageStepTypes.SHIELD, ItemStackUtil.snapshotOf(self.getUseItem()));
+        float damage = (float) step.applyChildrenBefore(originalDamage);
         final ShieldBlockEvent event;
         if (step.isSkipped()) {
             event = new ShieldBlockEvent(self, source, damage);
@@ -71,7 +71,7 @@ public abstract class LivingEntityMixin_Forge_Damage implements TrackedDamageBri
                 damage -= event.getBlockedDamage();
             }
         }
-        step.applyModifiersAfter(damage);
+        step.applyChildrenAfter(damage);
         return event;
     }
 

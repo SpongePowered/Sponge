@@ -66,8 +66,8 @@ public abstract class LivingEntityMixin_Neo_Damage implements TrackedDamageBridg
         }
 
         final float originalDamage = container.getNewDamage();
-        final SpongeDamageStep step = tracker.newStep(DamageStepTypes.SHIELD, originalDamage, ItemStackUtil.snapshotOf(self.getUseItem()));
-        float damage = (float) step.applyModifiersBefore();
+        final SpongeDamageStep step = tracker.newStep(DamageStepTypes.SHIELD, ItemStackUtil.snapshotOf(self.getUseItem()));
+        float damage = (float) step.applyChildrenBefore(originalDamage);
         container.setNewDamage(damage);
         final LivingShieldBlockEvent event;
         if (step.isSkipped()) {
@@ -78,7 +78,7 @@ public abstract class LivingEntityMixin_Neo_Damage implements TrackedDamageBridg
             container.setBlockedDamage(event);
             damage = container.getNewDamage();
         }
-        step.applyModifiersAfter(damage);
+        step.applyChildrenAfter(damage);
         return event;
     }
 

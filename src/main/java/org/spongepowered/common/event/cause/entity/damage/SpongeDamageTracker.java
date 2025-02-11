@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.cause.entity.damage;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.player.Player;
@@ -32,13 +31,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.damage.DamageStep;
+import org.spongepowered.api.event.cause.entity.damage.DamageStepHistory;
 import org.spongepowered.api.event.cause.entity.damage.DamageStepType;
+import org.spongepowered.api.event.cause.entity.damage.DamageStepTypes;
 import org.spongepowered.api.event.entity.DamageCalculationEvent;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.registry.DefaultedRegistryReference;
@@ -51,17 +50,25 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-public class SpongeDamageTracker {
+public class SpongeDamageTracker implements DamageStepHistory {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    protected final List<SpongeDamageStep> steps = new ArrayList<>();
+    private final List<SpongeDamageStep> rootSteps = new ArrayList<>();
     protected final DamageCalculationEvent.Pre preEvent;
+    protected final DamageSource source;
     protected DamageCalculationEvent.Post postEvent;
 
-    public SpongeDamageTracker(final DamageCalculationEvent.Pre preEvent) {
+    public SpongeDamageTracker(final DamageCalculationEvent.Pre preEvent, final DamageSource source) {
         this.preEvent = preEvent;
+        this.source = source;
+    }
+
+    @Override
+    public List<DamageStep> rootSteps() {
+        return Collections.unmodifiableList(this.rootSteps);
     }
 
     public DamageCalculationEvent.Pre preEvent() {
@@ -75,40 +82,41 @@ public class SpongeDamageTracker {
         return this.postEvent;
     }
 
-    public SpongeDamageStep newStep(final DefaultedRegistryReference<DamageStepType> typeRef, final float damage, final Object... causes) {
+    public SpongeDamageStep newStep(final DefaultedRegistryReference<DamageStepType> typeRef, final Object... causes) {
         final DamageStepType type = typeRef.get();
-        final SpongeDamageStep step = new SpongeDamageStep(type, damage, Cause.of(EventContext.empty(), List.of(causes)), this.preEvent.modifiersBefore(type), this.preEvent.modifiersAfter(type));
+        final SpongeDamageStep step = new SpongeDamageStep(this, type, causes);
+        step.populateChildren();
 
         if (this.postEvent != null) {
-            LOGGER.warn("A new step {} is being captured after the post event.", step);
+            LOGGER.warn("A new root step {} is being captured after the post event.", step);
         }
 
-        if (!this.steps.isEmpty()) {
-            final SpongeDamageStep previous = this.steps.getLast();
-            if (previous.state() != SpongeDamageStep.State.END) {
-                LOGGER.warn("A new step {} is being captured but previous step {} hasn't finished.", step, previous);
-                this.steps.removeLast();
+        if (!this.rootSteps.isEmpty()) {
+            final SpongeDamageStep previous = this.rootSteps.getLast();
+            if (previous.damageAfterChildren().isEmpty()) {
+                LOGGER.warn("A new root step {} is being captured but previous root step {} hasn't finished.", step, previous);
+                this.rootSteps.removeLast();
             }
         }
 
-        this.steps.add(step);
+        this.rootSteps.add(step);
         return step;
     }
 
     public float startStep(final DefaultedRegistryReference<DamageStepType> typeRef, final float damage, final Object... causes) {
-        return (float) this.newStep(typeRef, damage, causes).applyModifiersBefore();
+        return (float) this.newStep(typeRef, causes).applyChildrenBefore(damage);
     }
 
     public @Nullable SpongeDamageStep currentStep(final DefaultedRegistryReference<DamageStepType> typeRef) {
-        if (this.steps.isEmpty()) {
-            LOGGER.warn("Expected a current step of type {} but no step has been captured yet.", typeRef.location());
+        if (this.rootSteps.isEmpty()) {
+            LOGGER.warn("Expected a current root step of type {} but no step has been captured yet.", typeRef.location());
             return null;
         }
 
         final DamageStepType type = typeRef.get();
-        final SpongeDamageStep step = this.steps.getLast();
+        final SpongeDamageStep step = this.rootSteps.getLast();
         if (step.type() != type) {
-            LOGGER.warn("Expected a current step of type {} but got {}.", type, step);
+            LOGGER.warn("Expected a current root step of type {} but got {}.", type, step);
             return null;
         }
         return step;
@@ -116,7 +124,7 @@ public class SpongeDamageTracker {
 
     public float endStep(final DefaultedRegistryReference<DamageStepType> typeRef, final float damage) {
         final SpongeDamageStep step = this.currentStep(typeRef);
-        return step == null ? damage : (float) step.applyModifiersAfter(damage);
+        return step == null ? damage : (float) step.applyChildrenAfter(damage);
     }
 
     public boolean isSkipped(final DefaultedRegistryReference<DamageStepType> typeRef) {
@@ -126,8 +134,8 @@ public class SpongeDamageTracker {
 
     public @Nullable SpongeDamageStep lastStep(final DefaultedRegistryReference<DamageStepType> typeRef) {
         final DamageStepType type = typeRef.get();
-        for (int i = this.steps.size() - 1; i >= 0; i--) {
-            final SpongeDamageStep step = this.steps.get(i);
+        for (int i = this.rootSteps.size() - 1; i >= 0; i--) {
+            final SpongeDamageStep step = this.rootSteps.get(i);
             if (step.type() == type) {
                 return step;
             }
@@ -137,33 +145,21 @@ public class SpongeDamageTracker {
 
     public float damageAfter(final DefaultedRegistryReference<DamageStepType> typeRef) {
         final SpongeDamageStep step = this.lastStep(typeRef);
-        return step == null ? 0 : (float) step.damageAfterModifiers();
+        return step == null ? 0 : (float) step.damageAfterChildren().orElse(0);
     }
 
-    protected List<DamageStep> preparePostEvent() {
+    public float callDamagePostEvent(final Entity entity, float finalDamage) {
         if (this.postEvent != null) {
             throw new IllegalStateException("Post event already fired");
         }
 
-        if (!this.steps.isEmpty()) {
-            final SpongeDamageStep last = this.steps.getLast();
-            if (last.state() != SpongeDamageStep.State.END) {
-                LOGGER.warn("Calling post event but last step {} hasn't finished.", last);
-                return ImmutableList.copyOf(this.steps.subList(0, this.steps.size() - 1));
-            }
-        }
+        finalDamage = (float) this.newStep(DamageStepTypes.END).apply(finalDamage);
 
-        return ImmutableList.copyOf(this.steps);
-    }
-
-    public float callDamagePostEvent(final Entity entity, final float finalDamage) {
-        final List<DamageStep> steps = this.preparePostEvent();
-
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             SpongeDamageTracker.generateCauseFor((DamageSource) this.preEvent.source(), frame);
 
             final DamageEntityEvent.Post event = SpongeEventFactory.createDamageEntityEventPost(frame.currentCause(),
-                this.preEvent.originalBaseDamage(), this.preEvent.baseDamage(), finalDamage, finalDamage, entity, steps);
+                entity, this, this.preEvent.baseDamage(), finalDamage);
 
             this.postEvent = event;
             if (SpongeCommon.post(event)) {
@@ -190,34 +186,30 @@ public class SpongeDamageTracker {
     }
 
     public static @Nullable SpongeDamageTracker callDamagePreEvent(final Entity entity, final DamageSource source, final float baseDamage) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        final SpongeDamageTracker tracker;
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             SpongeDamageTracker.generateCauseFor(source, frame);
 
-            final DamageEntityEvent.Pre event = SpongeEventFactory.createDamageEntityEventPre(frame.currentCause(), baseDamage, baseDamage, entity);
+            final DamageEntityEvent.Pre event = SpongeEventFactory.createDamageEntityEventPre(frame.currentCause(), entity, baseDamage);
             if (SpongeCommon.post(event)) {
                 return null;
             }
 
-            return new SpongeDamageTracker(event);
+            tracker = new SpongeDamageTracker(event, source);
         }
+
+        tracker.newStep(DamageStepTypes.START).apply(baseDamage);
+        return tracker;
     }
 
     public static DamageEntityEvent.@Nullable Post callDamageEvents(final Entity entity, final DamageSource source, final float baseDamage) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            SpongeDamageTracker.generateCauseFor(source, frame);
-
-            final DamageEntityEvent.Pre preEvent = SpongeEventFactory.createDamageEntityEventPre(frame.currentCause(), baseDamage, baseDamage, entity);
-            if (SpongeCommon.post(preEvent)) {
-                return null;
-            }
-
-            final DamageEntityEvent.Post postEvent = SpongeEventFactory.createDamageEntityEventPost(frame.currentCause(),
-                preEvent.originalBaseDamage(), preEvent.baseDamage(), preEvent.baseDamage(), preEvent.baseDamage(), entity, List.of());
-            if (SpongeCommon.post(postEvent)) {
-                return null;
-            }
-
-            return postEvent;
+        final @Nullable SpongeDamageTracker tracker = SpongeDamageTracker.callDamagePreEvent(entity, source, baseDamage);
+        if (tracker == null) {
+            return null;
         }
+        final DamageStep step = tracker.currentStep(DamageStepTypes.START);
+        final float finalDamage = step == null ? baseDamage : (float) step.damageAfterChildren().orElse(baseDamage);
+        tracker.callDamagePostEvent(entity, finalDamage);
+        return (DamageEntityEvent.Post) tracker.postEvent;
     }
 }

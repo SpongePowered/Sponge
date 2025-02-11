@@ -108,7 +108,7 @@ public abstract class LivingEntityMixin_Damage extends EntityMixin implements Li
             return damage;
         }
         final SpongeDamageStep step = tracker.currentStep(DamageStepTypes.SHIELD);
-        return step == null ? damage : (float) step.damageAfterModifiers();
+        return step == null ? damage : (float) step.damageAfterChildren().getAsDouble();
     }
 
     @ModifyVariable(method = "hurtServer", at = @At("LOAD"), argsOnly = true, slice = @Slice(
@@ -195,12 +195,12 @@ public abstract class LivingEntityMixin_Damage extends EntityMixin implements Li
             return CombatRules.getDamageAfterMagicAbsorb(damage, protection);
         }
 
-        final SpongeDamageStep step = tracker.newStep(DamageStepTypes.ARMOR_ENCHANTMENT, damage, this);
-        damage = (float) step.applyModifiersBefore();
+        final SpongeDamageStep step = tracker.newStep(DamageStepTypes.ARMOR_ENCHANTMENT, this);
+        damage = (float) step.applyChildrenBefore(damage);
         if (!step.isSkipped()) {
             damage = CombatRules.getDamageAfterMagicAbsorb(damage, protection);
         }
-        return (float) step.applyModifiersAfter(damage);
+        return (float) step.applyChildrenAfter(damage);
     }
 
     @Redirect(method = "hurtServer", at = @At(value = "INVOKE",  target = "Lnet/minecraft/world/entity/LivingEntity;playHurtSound(Lnet/minecraft/world/damagesource/DamageSource;)V"))
