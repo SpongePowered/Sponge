@@ -88,12 +88,13 @@ public class DisplayEntityTest {
                         var textDisplay = spawnEntity(player.world(), EntityTypes.TEXT_DISPLAY, centerPos, forwardDir, -4, -1);
                         textDisplay.offer(Keys.DISPLAY_NAME, Component.text("DisplayEntityTest").color(NamedTextColor.GOLD));
                         textDisplay.offer(Keys.SEE_THROUGH_BLOCKS, true);
-                        textDisplay.offer(Keys.TEXT_ALIGNMENT, TextAlignments.LEFT.get());
-                        textDisplay.offer(Keys.TEXT_BACKGROUND_COLOR, Color.GRAY);
+                        textDisplay.offer(Keys.TEXT_BACKGROUND_COLOR, Color.CYAN);
+                        textDisplay.offer(Keys.TEXT_BACKGROUND_OPACITY, (byte) 255);
 
                         textDisplay = spawnEntity(player.world(), EntityTypes.TEXT_DISPLAY, centerPos, forwardDir, col0, 0);
                         textDisplay.offer(Keys.DISPLAY_NAME, Component.text("Fixed"));
                         textDisplay.offer(Keys.BILLBOARD_TYPE, BillboardTypes.FIXED.get());
+                        textDisplay.offer(Keys.TEXT_BACKGROUND_OPACITY, (byte) 0);
 
                         var itemDisplay = spawnEntity(player.world(), EntityTypes.ITEM_DISPLAY, centerPos, forwardDir, col2, 0);
                         itemDisplay.offer(Keys.ITEM_STACK_SNAPSHOT, ItemStack.of(ItemTypes.NETHERITE_INGOT).asImmutable());
@@ -101,6 +102,7 @@ public class DisplayEntityTest {
 
                         textDisplay = spawnEntity(player.world(), EntityTypes.TEXT_DISPLAY, centerPos, forwardDir, col1, 0);
                         textDisplay.offer(Keys.DISPLAY_NAME, Component.text("default\nlight"));
+                        textDisplay.offer(Keys.TEXT_ALIGNMENT, TextAlignments.RIGHT.get());
 
                         textDisplay = spawnEntity(player.world(), EntityTypes.TEXT_DISPLAY, centerPos, forwardDir, col0, 1);
                         textDisplay.offer(Keys.DISPLAY_NAME, Component.text("Center"));
