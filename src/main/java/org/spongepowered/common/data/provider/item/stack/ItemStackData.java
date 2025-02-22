@@ -85,7 +85,6 @@ public final class ItemStackData {
         // TODO DataComponents.TRIM + TrimMaterial + TrimPattern + showInToolTip @HideFlagsItemStackData
         // TODO DataComponents.INSTRUMENT goat horn + API type + duration + range
         // TODO DataComponents.RECIPES - for Items.KNOWLEDGE_BOOK
-        // TODO DataComponents.MAX_STACK_SIZE; incompatible with MAX_DAMAGE?
         // TODO DataComponents.OMINOUS_BOTTLE_AMPLIFIER 1.21
         registrator
                 .asMutable(ItemStack.class)
@@ -188,6 +187,7 @@ public final class ItemStackData {
                             h.set(DataComponents.MAX_DAMAGE, v);
                             return true;
                         })
+                        .delete(h -> h.remove(DataComponents.MAX_DAMAGE))
                         .supports(h -> h.getOrDefault(DataComponents.MAX_STACK_SIZE, 1) == 1)
                     .create(Keys.MAX_STACK_SIZE)
                         .get(ItemStack::getMaxStackSize)
@@ -199,6 +199,7 @@ public final class ItemStackData {
                             h.set(DataComponents.MAX_STACK_SIZE, v);
                             return true;
                         })
+                        .delete(h -> h.remove(DataComponents.MAX_STACK_SIZE))
                         .supports(h -> !h.has(DataComponents.MAX_DAMAGE))
                     .create(Keys.ITEM_DURABILITY)
                         .get(stack -> stack.getMaxDamage() - stack.getDamageValue())
@@ -218,7 +219,7 @@ public final class ItemStackData {
                         .get(h -> {
                             final var food = h.get(DataComponents.FOOD);
                             return food == null ? null : (double) food.saturation();
-                            })
+                        })
                         .set((h, v) -> h.update(DataComponents.FOOD, DEFAULT_FOOD_PROPERTIES,
                                 fp -> new FoodProperties(fp.nutrition(), v.floatValue(), fp.canAlwaysEat(), fp.eatSeconds(), fp.usingConvertsTo(), fp.effects())))
                     .create(Keys.CAN_ALWAYS_EAT)
