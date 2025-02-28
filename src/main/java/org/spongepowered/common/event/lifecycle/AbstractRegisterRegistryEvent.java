@@ -25,12 +25,15 @@
 package org.spongepowered.common.event.lifecycle;
 
 import io.leangen.geantyref.TypeToken;
+import org.spongepowered.api.Client;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.lifecycle.RegisterRegistryEvent;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryRoots;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.common.registry.RegistryLoader;
@@ -38,6 +41,7 @@ import org.spongepowered.common.registry.SpongeRegistryHolder;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public abstract class AbstractRegisterRegistryEvent extends AbstractLifecycleEvent implements RegisterRegistryEvent {
@@ -68,6 +72,19 @@ public abstract class AbstractRegisterRegistryEvent extends AbstractLifecycleEve
         return type;
     }
 
+    @Override
+    public <T> RegistryType<T> register(final ResourceKey key, final boolean isDynamic,
+            final Function<RegistryHolder, Map<ResourceKey, T>> defaultValues, final RegistryType<?>... dependencies) throws DuplicateRegistrationException {
+        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(defaultValues, "defaultValues");
+        Objects.requireNonNull(dependencies, "dependencies");
+
+        final SpongeRegistryHolder holder = this.getHolder();
+        final RegistryType<T> type = RegistryType.of(RegistryRoots.SPONGE, key);
+        holder.createRegistry(type, defaultValues, isDynamic);
+        return null;
+    }
+
     protected abstract SpongeRegistryHolder getHolder();
 
     public static final class GameScopedImpl extends AbstractRegisterRegistryEvent implements RegisterRegistryEvent.GameScoped {
@@ -85,13 +102,12 @@ public abstract class AbstractRegisterRegistryEvent extends AbstractLifecycleEve
     public static final class EngineScopedImpl<E extends Engine> extends AbstractRegisterRegistryEvent implements RegisterRegistryEvent.EngineScoped<E> {
 
         private final TypeToken<E> token;
-        private final E engine;
+        private final RegistryHolder registryHolder;
 
-        public EngineScopedImpl(final Cause cause, final Game game, final E engine) {
+        public EngineScopedImpl(final Cause cause, final Game game, final RegistryHolder registryHolder, final TypeToken<E> token) {
             super(cause, game);
-
-            this.token = TypeToken.get((Class<E>) engine.getClass());
-            this.engine = engine;
+            this.token = token;
+            this.registryHolder = registryHolder;
         }
 
         @Override
@@ -101,7 +117,15 @@ public abstract class AbstractRegisterRegistryEvent extends AbstractLifecycleEve
 
         @Override
         protected SpongeRegistryHolder getHolder() {
-            return (SpongeRegistryHolder) this.engine;
+            return (SpongeRegistryHolder) this.registryHolder;
+        }
+
+        public static EngineScopedImpl<Server> server(final Cause cause, final Game game, final RegistryHolder registryHolder) {
+            return new EngineScopedImpl<>(cause, game, registryHolder, TypeToken.get(Server.class));
+        }
+
+        public static EngineScopedImpl<Client> client(final Cause cause, final Game game, final RegistryHolder registryHolder) {
+            return new EngineScopedImpl<>(cause, game, registryHolder, TypeToken.get(Client.class));
         }
     }
 

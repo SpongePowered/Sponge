@@ -25,13 +25,14 @@
 package org.spongepowered.common.launch;
 
 import com.google.inject.Injector;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.level.WorldDataConfiguration;
 import org.spongepowered.api.Client;
 import org.spongepowered.api.Engine;
-import org.spongepowered.api.Server;
+import org.spongepowered.api.registry.Registry;
+import org.spongepowered.api.registry.RegistryHolder;
+
+import java.util.stream.Stream;
 
 
 /**
@@ -50,9 +51,6 @@ public interface Lifecycle {
     void callRegisterBuilderEvent();
 
     void establishEarlyGlobalRegistries();
-    void finalizeEarlyGlobalRegistries();
-
-    void establishGlobalRegistries(RegistryAccess.Frozen registryAccess, final RegistryLayer $$0);
 
     void establishDataProviders();
 
@@ -70,7 +68,11 @@ public interface Lifecycle {
 
     void callConstructEvent();
 
-    void establishServerRegistries(Server server);
+    void beginEstablishServerRegistries(RegistryHolder server);
+
+    void processServerRegistries(RegistryHolder server, Stream<? extends Registry<?>> registries);
+
+    void endEstablishServerRegistries(RegistryHolder server);
 
     void establishClientRegistries(Client client);
 

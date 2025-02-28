@@ -50,7 +50,6 @@ import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.advancement.AdvancementProgress;
-import org.spongepowered.api.advancement.AdvancementTemplate;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
@@ -64,6 +63,7 @@ import org.spongepowered.api.event.message.PlayerChatEvent;
 import org.spongepowered.api.event.world.ChangeWorldBorderEvent;
 import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.world.border.WorldBorder;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -236,9 +236,9 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     }
 
     @Override
-    public AdvancementProgress progress(final AdvancementTemplate advancement) {
+    public AdvancementProgress progress(final org.spongepowered.api.advancement.Advancement advancement) {
         Objects.requireNonNull(advancement, "advancement");
-        final AdvancementHolder holder = new AdvancementHolder((ResourceLocation) (Object) advancement.key(), (Advancement) (Object) advancement.advancement());
+        final AdvancementHolder holder = new AdvancementHolder((ResourceLocation) (Object) advancement.key(RegistryTypes.ADVAN), (Advancement) (Object) advancement);
         return (AdvancementProgress) this.advancements.getOrStartProgress(holder);
     }
 

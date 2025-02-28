@@ -35,6 +35,7 @@ import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNodeTypes;
+import org.spongepowered.api.registry.RegistryHolder;
 
 import java.util.Arrays;
 import java.util.List;
@@ -98,11 +99,11 @@ public class RawCommand implements Command.Raw {
     }
 
     @Override
-    public CommandTreeNode.@NonNull Root commandTree() {
-        final CommandTreeNode.Argument<?> firstStringKey = CommandTreeNodeTypes.STRING.get().createNode()
+    public CommandTreeNode.@NonNull Root commandTree(final RegistryHolder registryHolder) {
+        final CommandTreeNode.Argument<?> firstStringKey = CommandTreeNodeTypes.STRING.get(registryHolder).createNode()
                 .customCompletions().executable();
         final CommandTreeNode.Argument<?> secondStringKey =
-                CommandTreeNodeTypes.STRING.get().createNode().customCompletions().executable().redirect(firstStringKey);
+                CommandTreeNodeTypes.STRING.get(registryHolder).createNode().customCompletions().executable().redirect(firstStringKey);
         firstStringKey.child("s2", secondStringKey);
         return CommandTreeNode.root().executable().child("s1", firstStringKey);
     }

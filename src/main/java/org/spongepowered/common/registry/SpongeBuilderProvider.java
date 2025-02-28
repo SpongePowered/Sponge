@@ -27,13 +27,13 @@ package org.spongepowered.common.registry;
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.advancement.AdvancementTemplate;
+import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.DisplayInfo;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
-import org.spongepowered.api.adventure.ChatTypeTemplate;
+import org.spongepowered.api.adventure.ChatType;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntityArchetype;
@@ -50,7 +50,7 @@ import org.spongepowered.api.data.KeyValueMatcher;
 import org.spongepowered.api.data.MutableDataProviderBuilder;
 import org.spongepowered.api.data.meta.BannerPatternLayer;
 import org.spongepowered.api.data.persistence.DataStore;
-import org.spongepowered.api.data.type.ArtTypeTemplate;
+import org.spongepowered.api.data.type.ArtType;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.sound.SoundType;
@@ -68,7 +68,7 @@ import org.spongepowered.api.entity.ai.goal.builtin.creature.target.FindNearestA
 import org.spongepowered.api.entity.attribute.AttributeModifier;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
 import org.spongepowered.api.event.EventContextKey;
-import org.spongepowered.api.event.cause.entity.damage.DamageTypeTemplate;
+import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.fluid.FluidStack;
 import org.spongepowered.api.fluid.FluidStackSnapshot;
@@ -108,33 +108,19 @@ import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.api.util.transformation.Transformation;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.WorldTypeEffect;
-import org.spongepowered.api.world.WorldTypeTemplate;
-import org.spongepowered.api.world.biome.BiomeTemplate;
 import org.spongepowered.api.world.biome.provider.CheckerboardBiomeConfig;
 import org.spongepowered.api.world.biome.provider.EndStyleBiomeConfig;
 import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
 import org.spongepowered.api.world.border.WorldBorder;
 import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.api.world.generation.carver.CarverTemplate;
 import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.api.world.generation.config.flat.FlatGeneratorConfig;
-import org.spongepowered.api.world.generation.config.noise.DensityFunctionTemplate;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
-import org.spongepowered.api.world.generation.config.noise.NoiseGeneratorConfigTemplate;
-import org.spongepowered.api.world.generation.config.noise.NoiseTemplate;
-import org.spongepowered.api.world.generation.feature.FeatureTemplate;
-import org.spongepowered.api.world.generation.feature.PlacedFeatureTemplate;
-import org.spongepowered.api.world.generation.structure.SchematicTemplate;
 import org.spongepowered.api.world.generation.structure.StructurePlacement;
-import org.spongepowered.api.world.generation.structure.StructureSetTemplate;
-import org.spongepowered.api.world.generation.structure.StructureTemplate;
-import org.spongepowered.api.world.generation.structure.jigsaw.JigsawPoolTemplate;
-import org.spongepowered.api.world.generation.structure.jigsaw.ProcessorListTemplate;
 import org.spongepowered.api.world.portal.PortalLogic;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.server.TicketType;
-import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.common.advancement.SpongeAdvancementBuilder;
 import org.spongepowered.common.advancement.SpongeDisplayInfoBuilder;
@@ -142,7 +128,7 @@ import org.spongepowered.common.advancement.SpongeFilteredTriggerBuilder;
 import org.spongepowered.common.advancement.SpongeTriggerBuilder;
 import org.spongepowered.common.advancement.criterion.SpongeCriterionBuilder;
 import org.spongepowered.common.advancement.criterion.SpongeScoreCriterionBuilder;
-import org.spongepowered.common.adventure.SpongeChatTypeTemplate;
+import org.spongepowered.common.adventure.SpongeChatTypeBuilder;
 import org.spongepowered.common.ban.SpongeBanBuilder;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
@@ -162,7 +148,7 @@ import org.spongepowered.common.data.builder.meta.SpongePatternLayerBuilder;
 import org.spongepowered.common.data.key.SpongeKeyBuilder;
 import org.spongepowered.common.data.persistence.datastore.SpongeDataStoreBuilder;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.type.SpongeArtTypeTemplate;
+import org.spongepowered.common.data.type.SpongeArtTypeBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.effect.potion.SpongePotionBuilder;
 import org.spongepowered.common.effect.sound.SpongeSoundBuilder;
@@ -181,7 +167,7 @@ import org.spongepowered.common.entity.attribute.SpongeAttributeModifierBuilder;
 import org.spongepowered.common.entity.player.tab.TabListEntryBuilder;
 import org.spongepowered.common.event.SpongeEventContextKeyBuilder;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageSourceBuilder;
-import org.spongepowered.common.event.cause.entity.damage.SpongeDamageTypeTemplate;
+import org.spongepowered.common.event.cause.entity.damage.SpongeDamageTypeBuilder;
 import org.spongepowered.common.fluid.SpongeFluidStackBuilder;
 import org.spongepowered.common.fluid.SpongeFluidStackSnapshotBuilder;
 import org.spongepowered.common.fluid.SpongeFluidStateBuilder;
@@ -216,33 +202,19 @@ import org.spongepowered.common.scoreboard.builder.SpongeTeamBuilder;
 import org.spongepowered.common.util.transformation.SpongeTransformationBuilder;
 import org.spongepowered.common.world.SpongeExplosionBuilder;
 import org.spongepowered.common.world.SpongeWorldTypeEffect;
-import org.spongepowered.common.world.biome.SpongeBiomeTemplate;
 import org.spongepowered.common.world.biome.provider.SpongeCheckerboardBiomeConfig;
 import org.spongepowered.common.world.biome.provider.SpongeEndStyleBiomeConfig;
 import org.spongepowered.common.world.biome.provider.SpongeMultiNoiseBiomeConfig;
 import org.spongepowered.common.world.border.SpongeWorldBorderBuilder;
 import org.spongepowered.common.world.generation.SpongeWorldGenerationConfigBuilder;
-import org.spongepowered.common.world.generation.carver.SpongeCarverTemplate;
 import org.spongepowered.common.world.generation.config.flat.SpongeFlatGeneratorConfig;
-import org.spongepowered.common.world.generation.config.noise.SpongeDensityFunctionTemplate;
 import org.spongepowered.common.world.generation.config.noise.SpongeNoiseConfig;
-import org.spongepowered.common.world.generation.config.noise.SpongeNoiseGeneratorConfigTemplate;
-import org.spongepowered.common.world.generation.config.noise.SpongeNoiseTemplate;
-import org.spongepowered.common.world.generation.feature.SpongeFeatureTemplate;
-import org.spongepowered.common.world.generation.feature.SpongePlacedFeatureTemplate;
-import org.spongepowered.common.world.generation.structure.SpongeSchematicTemplate;
 import org.spongepowered.common.world.generation.structure.SpongeStructurePlacementBuilder;
-import org.spongepowered.common.world.generation.structure.SpongeStructureSetTemplate;
-import org.spongepowered.common.world.generation.structure.SpongeStructureTemplate;
-import org.spongepowered.common.world.generation.structure.jigsaw.SpongeJigsawPoolTemplate;
-import org.spongepowered.common.world.generation.structure.jigsaw.SpongeProcessorListTemplate;
 import org.spongepowered.common.world.portal.SpongePortalLogicBuilder;
 import org.spongepowered.common.world.schematic.SpongePaletteTypeBuilder;
 import org.spongepowered.common.world.schematic.SpongeSchematicBuilder;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.server.SpongeTicketTypeBuilder;
-import org.spongepowered.common.world.server.SpongeWorldTemplate;
-import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
 import org.spongepowered.common.world.volume.stream.SpongeStreamOptionsBuilder;
 
 import java.util.Map;
@@ -337,7 +309,7 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(Enchantment.Builder.class, SpongeEnchantmentBuilder::new)
                 .register(Enchantment.RandomListBuilder.class, SpongeRandomEnchantmentListBuilder::new)
                 .register(Key.Builder.class, SpongeKeyBuilder::new)
-                .register(AdvancementTemplate.Builder.class, SpongeAdvancementBuilder::new)
+                .register(Advancement.Builder.class, SpongeAdvancementBuilder::new)
                 .register(DisplayInfo.Builder.class, SpongeDisplayInfoBuilder::new)
                 .register(AdvancementCriterion.Builder.class, SpongeCriterionBuilder::new)
                 .register(ScoreAdvancementCriterion.Builder.class, SpongeScoreCriterionBuilder::new)
@@ -366,13 +338,13 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(FluidState.Builder.class, SpongeFluidStateBuilder::new)
                 .register(WorldGenerationConfig.Builder.class, SpongeWorldGenerationConfigBuilder::new)
                 .register(WorldTypeEffect.Builder.class, SpongeWorldTypeEffect.BuilderImpl::new)
-                .register(WorldTypeTemplate.Builder.class, SpongeWorldTypeTemplate.BuilderImpl::new)
-                .register(WorldTemplate.Builder.class, SpongeWorldTemplate.BuilderImpl::new)
+            // .register(WorldTypeTemplate.Builder.class, SpongeWorldTypeTemplate.BuilderImpl::new)
+            //.register(WorldTemplate.Builder.class, SpongeWorldTemplate.BuilderImpl::new)
                 .register(NoiseConfig.Builder.class, SpongeNoiseConfig.BuilderImpl::new)
                 .register(FlatGeneratorConfig.Builder.class, SpongeFlatGeneratorConfig.BuilderImpl::new)
-                .register(NoiseGeneratorConfigTemplate.Builder.class, SpongeNoiseGeneratorConfigTemplate.BuilderImpl::new)
-                .register(NoiseTemplate.Builder.class, SpongeNoiseTemplate.BuilderImpl::new)
-                .register(DensityFunctionTemplate.Builder.class, SpongeDensityFunctionTemplate.BuilderImpl::new)
+            // .register(NoiseGeneratorConfigTemplate.Builder.class, SpongeNoiseGeneratorConfigTemplate.BuilderImpl::new)
+            //  .register(NoiseTemplate.Builder.class, SpongeNoiseTemplate.BuilderImpl::new)
+            //  .register(DensityFunctionTemplate.Builder.class, SpongeDensityFunctionTemplate.BuilderImpl::new)
                 .register(CheckerboardBiomeConfig.Builder.class, SpongeCheckerboardBiomeConfig.BuilderImpl::new)
                 .register(EndStyleBiomeConfig.Builder.class, SpongeEndStyleBiomeConfig.BuilderImpl::new)
                 .register(MultiNoiseBiomeConfig.Builder.class, SpongeMultiNoiseBiomeConfig.BuilderImpl::new)
@@ -380,19 +352,19 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(MapDecoration.Builder.class, SpongeMapDecorationBuilder::new)
                 .register(MapCanvas.Builder.class, SpongeMapCanvasBuilder::new)
                 .register(Transformation.Builder.class, SpongeTransformationBuilder::new)
-                .register(BiomeTemplate.Builder.class, SpongeBiomeTemplate.BuilderImpl::new)
-                .register(CarverTemplate.Builder.class, SpongeCarverTemplate.BuilderImpl::new)
-                .register(FeatureTemplate.Builder.class, SpongeFeatureTemplate.BuilderImpl::new)
-                .register(PlacedFeatureTemplate.Builder.class, SpongePlacedFeatureTemplate.BuilderImpl::new)
-                .register(StructureTemplate.Builder.class, SpongeStructureTemplate.BuilderImpl::new)
-                .register(SchematicTemplate.Builder.class, SpongeSchematicTemplate.BuilderImpl::new)
-                .register(ProcessorListTemplate.Builder.class, SpongeProcessorListTemplate.BuilderImpl::new)
+            //  .register(BiomeTemplate.Builder.class, SpongeBiomeTemplate.BuilderImpl::new)
+            //  .register(CarverTemplate.Builder.class, SpongeCarverTemplate.BuilderImpl::new)
+            //  .register(FeatureTemplate.Builder.class, SpongeFeatureTemplate.BuilderImpl::new)
+            //  .register(PlacedFeatureTemplate.Builder.class, SpongePlacedFeatureTemplate.BuilderImpl::new)
+            //.register(StructureTemplate.Builder.class, SpongeStructureTemplate.BuilderImpl::new)
+            //.register(SchematicTemplate.Builder.class, SpongeSchematicTemplate.BuilderImpl::new)
+                //.register(ProcessorListTemplate.Builder.class, SpongeProcessorListTemplate.BuilderImpl::new)
                 .register(StructurePlacement.Builder.class, SpongeStructurePlacementBuilder::new)
-                .register(StructureSetTemplate.Builder.class, SpongeStructureSetTemplate.BuilderImpl::new)
-                .register(JigsawPoolTemplate.Builder.class, SpongeJigsawPoolTemplate.BuilderImpl::new)
-                .register(ChatTypeTemplate.Builder.class, SpongeChatTypeTemplate.BuilderImpl::new)
-                .register(DamageTypeTemplate.Builder.class, SpongeDamageTypeTemplate.BuilderImpl::new)
-                .register(ArtTypeTemplate.Builder.class, SpongeArtTypeTemplate.BuilderImpl::new)
+                //.register(StructureSetTemplate.Builder.class, SpongeStructureSetTemplate.BuilderImpl::new)
+                //.register(JigsawPoolTemplate.Builder.class, SpongeJigsawPoolTemplate.BuilderImpl::new)
+                .register(ChatType.Builder.class, SpongeChatTypeBuilder::new)
+                .register(DamageType.Builder.class, SpongeDamageTypeBuilder::new)
+                .register(ArtType.Builder.class, SpongeArtTypeBuilder::new)
                 .register(TicketType.Builder.class, SpongeTicketTypeBuilder::new)
                 .register(PortalLogic.Builder.class, SpongePortalLogicBuilder::new)
         ;

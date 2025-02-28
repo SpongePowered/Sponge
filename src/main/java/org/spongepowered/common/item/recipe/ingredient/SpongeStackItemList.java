@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.recipe.ingredient;
 
-import com.google.gson.JsonObject;
 import net.minecraft.world.item.ItemStack;
 
 public class SpongeStackItemList extends SpongeItemList {
@@ -33,13 +32,6 @@ public class SpongeStackItemList extends SpongeItemList {
 
     public SpongeStackItemList(ItemStack... stacks) {
         super(stacks);
-    }
-
-    @Override
-    public JsonObject serialize() {
-        final JsonObject jsonobject = super.serialize();
-        jsonobject.addProperty(SpongeItemList.INGREDIENT_TYPE, SpongeStackItemList.TYPE_STACK);
-        return jsonobject;
     }
 
     @Override

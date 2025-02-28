@@ -27,17 +27,13 @@ package org.spongepowered.test.worldgen;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.world.generation.config.noise.DensityFunctionTemplate;
 import org.spongepowered.api.world.generation.config.noise.DensityFunctions;
-import org.spongepowered.api.world.generation.config.noise.NoiseGeneratorConfigTemplate;
 import org.spongepowered.api.world.generation.config.noise.NoiseGeneratorConfigs;
-import org.spongepowered.api.world.generation.config.noise.NoiseTemplate;
 import org.spongepowered.api.world.generation.config.noise.Noises;
 import org.spongepowered.api.world.server.DataPackManager;
 
@@ -68,7 +64,7 @@ public class NoiseTest {
     private CommandResult registerNoise(final CommandContext commandContext) {
         final DataPackManager dpm = Sponge.server().dataPackManager();
 
-        final NoiseGeneratorConfigTemplate noiseGenCfgTemplate = NoiseGeneratorConfigTemplate.builder().fromValue(NoiseGeneratorConfigs.CAVES.get())
+        /*final NoiseGeneratorConfigTemplate noiseGenCfgTemplate = NoiseGeneratorConfigTemplate.builder().fromValue(NoiseGeneratorConfigs.CAVES.get())
                 .key(ResourceKey.of("noisetest", "test"))
                 .build();
 
@@ -86,7 +82,7 @@ public class NoiseTest {
             dpm.save(overWorldDensity);
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
 
         return CommandResult.success();
     }

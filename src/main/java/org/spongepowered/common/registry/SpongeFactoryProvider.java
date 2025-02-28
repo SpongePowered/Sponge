@@ -43,7 +43,6 @@ import org.spongepowered.api.command.selector.Selector;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.type.ToolRule;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.effect.ForwardingViewer;
 import org.spongepowered.api.effect.VanishState;
 import org.spongepowered.api.event.EventListenerRegistration;
@@ -61,6 +60,7 @@ import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.FactoryProvider;
 import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryReference;
+import org.spongepowered.api.registry.RegistryRegistrationSet;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.TypeNotFoundException;
 import org.spongepowered.api.resource.ResourcePath;
@@ -74,7 +74,6 @@ import org.spongepowered.api.state.EnumStateProperty;
 import org.spongepowered.api.state.IntegerStateProperty;
 import org.spongepowered.api.state.StateMatcher;
 import org.spongepowered.api.tag.Tag;
-import org.spongepowered.api.tag.TagTemplate;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.MinecraftDayTime;
 import org.spongepowered.api.util.Range;
@@ -101,7 +100,6 @@ import org.spongepowered.api.world.portal.PortalLogic;
 import org.spongepowered.api.world.schematic.PaletteReference;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerLocationCreator;
-import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.volume.archetype.entity.EntityArchetypeEntry;
 import org.spongepowered.api.world.volume.block.BlockVolumeFactory;
 import org.spongepowered.api.world.weather.Weather;
@@ -122,7 +120,6 @@ import org.spongepowered.common.command.selector.SpongeSelectorFactory;
 import org.spongepowered.common.data.manipulator.ImmutableDataManipulatorFactory;
 import org.spongepowered.common.data.manipulator.MutableDataManipulatorFactory;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.datapack.SpongeDataPackType;
 import org.spongepowered.common.effect.SpongeCustomForwardingViewer;
 import org.spongepowered.common.entity.effect.SpongeVanishState;
 import org.spongepowered.common.event.SpongeEventListenerRegistration;
@@ -145,7 +142,6 @@ import org.spongepowered.common.scoreboard.SpongeScoreFormatFactory;
 import org.spongepowered.common.service.server.permission.SpongeNodeTree;
 import org.spongepowered.common.state.SpongeStateMatcherFactory;
 import org.spongepowered.common.tag.SpongeTagFactory;
-import org.spongepowered.common.tag.SpongeTagTemplateFactory;
 import org.spongepowered.common.util.SpongeAABB;
 import org.spongepowered.common.util.SpongeDamageSourceFactory;
 import org.spongepowered.common.util.SpongeMinecraftDayTime;
@@ -172,7 +168,6 @@ import org.spongepowered.common.world.portal.SpongePortalLogicFactory;
 import org.spongepowered.common.world.schematic.SpongePaletteReferenceFactory;
 import org.spongepowered.common.world.server.SpongeServerLocation;
 import org.spongepowered.common.world.server.SpongeServerLocationCreatorFactory;
-import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.common.world.volume.archetype.entity.SpongeEntityArchetypeEntryFactory;
 import org.spongepowered.common.world.volume.block.SpongeBlockVolumeFactory;
 import org.spongepowered.common.world.weather.SpongeWeather;
@@ -247,7 +242,6 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(RegistryKey.Factory.class, new SpongeRegistryKey.FactoryImpl())
                 .registerFactory(RegistryType.Factory.class, new SpongeRegistryType.FactoryImpl())
                 .registerFactory(RegistryReference.Factory.class, new SpongeRegistryReference.FactoryImpl())
-                .registerFactory(DataPackType.Factory.class, new SpongeDataPackType.FactoryImpl())
                 .registerFactory(BlockVolumeFactory.class, new SpongeBlockVolumeFactory())
                 .registerFactory(DamageSource.Factory.class, new SpongeDamageSourceFactory())
                 .registerFactory(PaletteReference.Factory.class, new SpongePaletteReferenceFactory())
@@ -258,7 +252,6 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(BiomeAttributes.Factory.class, new SpongeBiomeAttributesFactory())
                 .registerFactory(BiomeProvider.Factory.class, new SpongeBiomeProviderFactory())
                 .registerFactory(WorldTypeEffect.Factory.class, new SpongeWorldTypeEffect.FactoryImpl())
-                .registerFactory(WorldTemplate.Factory.class, new SpongeWorldTemplate.FactoryImpl())
                 .registerFactory(LayerConfig.Factory.class, new SpongeLayerConfigFactory())
                 .registerFactory(SurfaceRule.Factory.class, new SpongeSurfaceRulesFactory())
                 .registerFactory(ChunkGenerator.Factory.class, new SpongeChunkGeneratorFactory())
@@ -268,7 +261,6 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(DisplaySlot.Factory.class, new SpongeDisplaySlotFactory())
                 .registerFactory(Weather.Factory.class, new SpongeWeather.FactoryImpl())
                 .registerFactory(NodeTree.Factory.class, new SpongeNodeTree.FactoryImpl())
-                .registerFactory(TagTemplate.Factory.class, new SpongeTagTemplateFactory())
                 .registerFactory(Tag.Factory.class, new SpongeTagFactory())
                 .registerFactory(EventListenerRegistration.Factory.class, new SpongeEventListenerRegistration.FactoryImpl())
                 .registerFactory(CommandResult.Factory.class, new SpongeCommandResultFactory())
@@ -293,6 +285,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(PortalLogic.Factory.class, new SpongePortalLogicFactory())
                 .registerFactory(RecipeInput.Factory.class, new SpongeRecipeInputFactory())
                 .registerFactory(ArmorTrim.Factory.class, new SpongeArmorTrimFactory())
+                .registerFactory(RegistryRegistrationSet.Factory.class, new SpongeRegistryRegistrationSet.FactoryImpl())
         ;
     }
 }

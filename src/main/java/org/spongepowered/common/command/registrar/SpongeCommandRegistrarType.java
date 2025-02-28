@@ -29,16 +29,17 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
 import org.spongepowered.api.command.registrar.CommandRegistrarType;
+import org.spongepowered.api.registry.RegistryHolder;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 public final class SpongeCommandRegistrarType<V> implements CommandRegistrarType<V> {
     private final TypeToken<V> handledType;
-    private final Function<CommandManager.Mutable, CommandRegistrar<V>> supplier;
+    private final BiFunction<CommandManager.Mutable, RegistryHolder, CommandRegistrar<V>> supplier;
 
     public SpongeCommandRegistrarType(
             final TypeToken<V> handledType,
-            final Function<CommandManager.Mutable, CommandRegistrar<V>> supplier
+            final BiFunction<CommandManager.Mutable, RegistryHolder, CommandRegistrar<V>> supplier
     ) {
         this.handledType = handledType;
         this.supplier = supplier;
@@ -46,7 +47,7 @@ public final class SpongeCommandRegistrarType<V> implements CommandRegistrarType
 
     public SpongeCommandRegistrarType(
             final Class<V> handledType,
-            final Function<CommandManager.Mutable, CommandRegistrar<V>> supplier
+            final BiFunction<CommandManager.Mutable, RegistryHolder, CommandRegistrar<V>> supplier
     ) {
         this(TypeToken.get(handledType), supplier);
     }
@@ -57,7 +58,7 @@ public final class SpongeCommandRegistrarType<V> implements CommandRegistrarType
     }
 
     @Override
-    public @NonNull CommandRegistrar<V> create(final CommandManager.@NonNull Mutable manager) {
-        return this.supplier.apply(manager);
+    public @NonNull CommandRegistrar<V> create(final CommandManager.@NonNull Mutable manager, final RegistryHolder registryHolder) {
+        return this.supplier.apply(manager, registryHolder);
     }
 }

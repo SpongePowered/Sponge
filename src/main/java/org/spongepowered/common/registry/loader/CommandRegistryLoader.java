@@ -84,6 +84,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.accessor.commands.arguments.DimensionArgumentAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.command.brigadier.argument.BindableValueParameter;
 import org.spongepowered.common.command.brigadier.argument.ClientNativeArgumentParser;
 import org.spongepowered.common.command.parameter.managed.clientcompletion.SpongeClientCompletionType;
 import org.spongepowered.common.command.parameter.managed.operator.SpongeAdditionOperator;
@@ -134,11 +135,11 @@ import java.util.stream.Collectors;
 public final class CommandRegistryLoader {
 
     @SuppressWarnings("ConstantConditions")
-    public static RegistryLoader<ValueParameter<?>> valueParameter(final CommandBuildContext cbCtx) {
+    public static RegistryLoader<ValueParameter<?>> valueParameter() {
         return RegistryLoader.of(l -> {
             l.add(ResourceKeyedValueParameters.BIG_DECIMAL, SpongeBigDecimalValueParameter::new);
             l.add(ResourceKeyedValueParameters.BIG_INTEGER, SpongeBigIntegerValueParameter::new);
-            l.add(ResourceKeyedValueParameters.BLOCK_STATE, k -> ClientNativeArgumentParser.createConverter(k, BlockStateArgument.block(cbCtx), (reader, cause, state) -> (BlockState) state.getState()));
+            l.add(ResourceKeyedValueParameters.BLOCK_STATE, k -> new BindableValueParameter<>(k, h -> ClientNativeArgumentParser.createConverter(k, BlockStateArgument.block(null), (reader, cause, state) -> (BlockState) state.getState())));
             l.add(ResourceKeyedValueParameters.BOOLEAN, k -> ClientNativeArgumentParser.createIdentity(k, BoolArgumentType.bool()));
             l.add(ResourceKeyedValueParameters.COLOR, SpongeColorValueParameter::new);
             l.add(ResourceKeyedValueParameters.DATA_CONTAINER, SpongeDataContainerValueParameter::new);
@@ -149,7 +150,7 @@ public final class CommandRegistryLoader {
             l.add(ResourceKeyedValueParameters.GAME_PROFILE, SpongeGameProfileValueParameter::new);
             l.add(ResourceKeyedValueParameters.INTEGER, k -> ClientNativeArgumentParser.createIdentity(k, IntegerArgumentType.integer()));
             l.add(ResourceKeyedValueParameters.IP, SpongeIPAddressValueParameter::new);
-            l.add(ResourceKeyedValueParameters.ITEM_STACK_SNAPSHOT, k -> ClientNativeArgumentParser.createConverter(k, ItemArgument.item(cbCtx), (reader, cause, converter) -> new SpongeItemStackSnapshot((ItemStack) (Object) converter.createItemStack(1, true))));
+            l.add(ResourceKeyedValueParameters.ITEM_STACK_SNAPSHOT, k -> new BindableValueParameter<>(k, h -> ClientNativeArgumentParser.createConverter(k, ItemArgument.item(null), (reader, cause, converter) -> new SpongeItemStackSnapshot((ItemStack) (Object) converter.createItemStack(1, true)))));
             l.add(ResourceKeyedValueParameters.LOCATION, SpongeServerLocationValueParameter::new);
             l.add(ResourceKeyedValueParameters.LONG, k -> ClientNativeArgumentParser.createIdentity(k, LongArgumentType.longArg()));
             l.add(ResourceKeyedValueParameters.MANY_ENTITIES, k -> ClientNativeArgumentParser.createConverter(k, EntityArgument.entities(), (reader, cause, selector) -> selector.findEntities((CommandSourceStack) cause).stream().map(x -> (Entity) x).collect(
@@ -172,7 +173,7 @@ public final class CommandRegistryLoader {
             l.add(ResourceKeyedValueParameters.TARGET_PLAYER, k -> new SpongeTargetEntityValueParameter(k, true));
             l.add(ResourceKeyedValueParameters.TEXT_FORMATTING_CODE, k -> ClientNativeArgumentParser.createConverter(k, StringArgumentType.string(), (reader, cause, result) -> LegacyComponentSerializer.legacyAmpersand().deserialize(result)));
             l.add(ResourceKeyedValueParameters.TEXT_FORMATTING_CODE_ALL, k -> ClientNativeArgumentParser.createConverter(k, StringArgumentType.greedyString(), (reader, cause, result) -> LegacyComponentSerializer.legacyAmpersand().deserialize(result)));
-            l.add(ResourceKeyedValueParameters.TEXT_JSON, k -> ClientNativeArgumentParser.createConverter(k, ComponentArgument.textComponent(cbCtx), (reader, cause, result) -> SpongeAdventure.asAdventure(result)));
+            l.add(ResourceKeyedValueParameters.TEXT_JSON, k -> new BindableValueParameter<>(k, h -> ClientNativeArgumentParser.createConverter(k, ComponentArgument.textComponent(null), (reader, cause, result) -> SpongeAdventure.asAdventure(result))));
             l.add(ResourceKeyedValueParameters.TEXT_JSON_ALL, k -> ClientNativeArgumentParser.createConverter(k, StringArgumentType.greedyString(), (reader, cause, result) -> GsonComponentSerializer.gson().deserialize(result)));
             l.add(ResourceKeyedValueParameters.URL, k -> ClientNativeArgumentParser.createConverter(k, StringArgumentType.string(),
                     (reader, cause, input) -> {

@@ -30,29 +30,22 @@ import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
-import org.spongepowered.common.item.recipe.ResultFunctionRecipe;
-import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 
-import java.util.Optional;
+import java.util.function.Function;
 
-public class SpongeSmeltingRecipe extends SmeltingRecipe implements ResultFunctionRecipe {
+public class SpongeSmeltingRecipe extends SmeltingRecipe {
 
-    private final String resultFunctionId;
+    private final Function<SingleRecipeInput, ItemStack> function;
 
-    public SpongeSmeltingRecipe(final String group, final CookingBookCategory category, final Ingredient ingredient, final ItemStack result, final float experience, final int cookingTime, final String resultFunctionId) {
+    public SpongeSmeltingRecipe(final String group, final CookingBookCategory category, final Ingredient ingredient, final ItemStack result, final float experience, final int cookingTime, final Function<SingleRecipeInput, ItemStack> function) {
         super(group, category, ingredient, result, experience, cookingTime);
-        this.resultFunctionId = resultFunctionId;
-    }
-
-    @Override
-    public Optional<String> resultFunctionId() {
-        return Optional.ofNullable(this.resultFunctionId);
+        this.function = function;
     }
 
     @Override
     public ItemStack assemble(final SingleRecipeInput $$0, final HolderLookup.Provider $$1) {
-        if (this.resultFunctionId != null) {
-            final ItemStack result = IngredientResultUtil.cachedResultFunction(this.resultFunctionId).apply($$0);
+        if (this.function != null) {
+            final ItemStack result = this.function.apply($$0);
             result.setCount(1);
             return result;
         }

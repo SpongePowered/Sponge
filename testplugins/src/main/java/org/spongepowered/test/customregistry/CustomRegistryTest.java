@@ -64,7 +64,7 @@ public final class CustomRegistryTest {
 
     @Listener
     public void onRegisterRegistryValuesGameScoped(final RegisterRegistryValueEvent.GameScoped event) {
-        event.registry(GAME_CUSTOM_REGISTRY).register(GAME_CUSTOM_VALUE.location(), 10);
+        event.registry(GAME_CUSTOM_REGISTRY, r -> r.register(GAME_CUSTOM_VALUE.location(), 10));
     }
 
     @Listener
@@ -74,7 +74,7 @@ public final class CustomRegistryTest {
 
     @Listener
     public void onRegisterRegistryValuesServerScoped(final RegisterRegistryValueEvent.EngineScoped<Server> event) {
-        event.registry(SERVER_CUSTOM_REGISTRY).register(SERVER_CUSTOM_VALUE.location(), 5);
+        event.registry(SERVER_CUSTOM_REGISTRY, r -> r.register(SERVER_CUSTOM_VALUE.location(), 5));
     }
 
     @Listener
@@ -84,7 +84,7 @@ public final class CustomRegistryTest {
 
     @Listener
     public void onRegisterRegistryValuesClientScoped(final RegisterRegistryValueEvent.EngineScoped<Client> event) {
-        event.registry(CLIENT_CUSTOM_REGISTRY).register(CLIENT_CUSTOM_VALUE.location(), 3);
+        event.registry(CLIENT_CUSTOM_REGISTRY, r -> r.register(CLIENT_CUSTOM_VALUE.location(), 3));
     }
 
     @Listener

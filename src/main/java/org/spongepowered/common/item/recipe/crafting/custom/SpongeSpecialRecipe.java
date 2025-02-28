@@ -24,12 +24,8 @@
  */
 package org.spongepowered.common.item.recipe.crafting.custom;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
@@ -40,7 +36,6 @@ import org.spongepowered.api.item.recipe.crafting.RecipeInput;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.function.BiPredicate;
@@ -48,35 +43,19 @@ import java.util.function.Function;
 
 public final class SpongeSpecialRecipe extends CustomRecipe {
 
-    public static final MapCodec<SpongeSpecialRecipe> SPONGE_CODEC = RecordCodecBuilder.mapCodec(
-            $$0 -> $$0.group(
-                            Codec.STRING.fieldOf(Constants.Recipe.SPONGE_TYPE).forGetter(SpongeSpecialRecipe::id), // important to fail early when decoding vanilla recipes
-                            CraftingBookCategory.CODEC.fieldOf(Constants.Recipe.CATEGORY).orElse(CraftingBookCategory.MISC).forGetter(SpongeSpecialRecipe::category)
-                    )
-                    .apply($$0, SpongeSpecialCraftingRecipeRegistration::get)
-    );
-
-    private final String id;
     private final BiPredicate<RecipeInput.Crafting, ServerWorld> biPredicate;
     private final Function<RecipeInput.Crafting, List<org.spongepowered.api.item.inventory.ItemStack>> remainingItemsFunction;
     private final Function<RecipeInput.Crafting, org.spongepowered.api.item.inventory.ItemStack> resultFunction;
 
-    public SpongeSpecialRecipe(ResourceLocation key,
-            CraftingBookCategory category,
+    public SpongeSpecialRecipe(CraftingBookCategory category,
             BiPredicate<RecipeInput.Crafting, ServerWorld> biPredicate,
             Function<RecipeInput.Crafting, List<org.spongepowered.api.item.inventory.ItemStack>> remainingItemsFunction,
             Function<RecipeInput.Crafting, org.spongepowered.api.item.inventory.ItemStack> resultFunction) {
         super(category);
-        this.id = key.toString();
         this.biPredicate = biPredicate;
         this.remainingItemsFunction = remainingItemsFunction;
         this.resultFunction = resultFunction;
     }
-
-    public String id() {
-        return id;
-    }
-
 
     @Override
     public boolean matches(final CraftingInput input, final Level level) {

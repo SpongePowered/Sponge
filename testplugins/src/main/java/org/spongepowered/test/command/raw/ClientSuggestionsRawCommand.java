@@ -36,6 +36,7 @@ import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.registrar.tree.CommandCompletionProviders;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNodeTypes;
+import org.spongepowered.api.registry.RegistryHolder;
 
 import java.util.Collections;
 import java.util.List;
@@ -76,9 +77,9 @@ public class ClientSuggestionsRawCommand implements Command.Raw {
     }
 
     @Override
-    public CommandTreeNode.Root commandTree() {
+    public CommandTreeNode.Root commandTree(final RegistryHolder registryHolder) {
         return CommandTreeNode.root()
-                .child("s1", CommandTreeNodeTypes.RESOURCE_LOCATION.get().createNode()
+                .child("s1", CommandTreeNodeTypes.RESOURCE_LOCATION.get(registryHolder).createNode()
                 .executable()
                 .completions(CommandCompletionProviders.ALL_RECIPES));
     }

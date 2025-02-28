@@ -40,9 +40,7 @@ import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryRoots;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.ValueNotFoundException;
-import org.spongepowered.common.accessor.core.MappedRegistryAccessor;
 import org.spongepowered.common.accessor.resources.ResourceKeyAccessor;
-import org.spongepowered.common.bridge.core.MappedRegistryBridge;
 import org.spongepowered.common.bridge.core.WritableRegistryBridge;
 
 import java.util.Map;
@@ -92,6 +90,17 @@ public final class RegistryHolderLogic implements RegistryHolder {
         this.roots.put(RegistryRoots.MINECRAFT, rootRegistry);
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public void setRootMinecraftRegistry(final RegistryAccess registryAccess) {
+        final MappedRegistry rootRegistry = new MappedRegistry<>(
+            net.minecraft.resources.ResourceKey.createRegistryKey((ResourceLocation) (Object) RegistryRoots.MINECRAFT),
+            Lifecycle.experimental()
+        );
+        registryAccess.registries().forEach(r -> rootRegistry.register(r.key(), r.value(), RegistrationInfo.BUILT_IN));
+        rootRegistry.freeze();
+        this.roots.put(RegistryRoots.MINECRAFT, rootRegistry);
+    }
+
     @Override
     public <T> Registry<T> registry(final RegistryType<T> type) {
         final var root = this.roots.get(Objects.requireNonNull(type, "type").root());
@@ -113,6 +122,11 @@ public final class RegistryHolderLogic implements RegistryHolder {
     }
 
     @Override
+    public Stream<Registry<?>> streamRegistries() {
+        return this.roots.values().stream().flatMap(r -> (Stream<Registry<?>>) (Object) r.stream());
+    }
+
+    @Override
     public Stream<Registry<?>> streamRegistries(final ResourceKey root) {
         final net.minecraft.core.Registry<net.minecraft.core.Registry<?>> rootRegistry = this.roots.get(Objects.requireNonNull(root, "root"));
         if (rootRegistry == null) {
@@ -131,7 +145,7 @@ public final class RegistryHolderLogic implements RegistryHolder {
 
     public <T> Registry<T> createRegistry(final RegistryType<T> type, final @Nullable Supplier<Map<ResourceKey, T>> defaultValues,
         final boolean isDynamic) {
-        return this.createRegistry(type, InitialRegistryData.noIds(defaultValues), this.registrySupplier(isDynamic, null), false);
+        return this.createRegistry(type, InitialRegistryData.noIds(defaultValues), this.registrySupplier(isDynamic, null));
     }
 
     @SuppressWarnings("unchecked")
@@ -141,27 +155,29 @@ public final class RegistryHolderLogic implements RegistryHolder {
         if (callback == null) {
             return (key) -> {
                 final MappedRegistry<T> reg = new MappedRegistry<>(key, Lifecycle.stable());
-                ((WritableRegistryBridge<T>)reg).bridge$setDynamic(isDynamic);
+                ((WritableRegistryBridge<T>) reg).bridge$setDynamic(isDynamic);
+                ((WritableRegistryBridge<T>) reg).bridge$setRegistryHolder(this);
                 return reg;
             };
         } else {
             return (key) -> {
                 final CallbackRegistry<T> reg = new CallbackRegistry<>(key, Lifecycle.stable(), callback);
                 ((WritableRegistryBridge<T>) (Object) reg).bridge$setDynamic(isDynamic);
+                ((WritableRegistryBridge<T>) (Object) reg).bridge$setRegistryHolder(this);
                 return reg;
             };
         }
     }
 
     public <T> Registry<T> createRegistry(final RegistryType<T> type, final @Nullable InitialRegistryData<T> defaultValues,
-            final Function<net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<T>>, net.minecraft.core.Registry<T>> registrySupplier, final boolean replace) {
+            final Function<net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<T>>, net.minecraft.core.Registry<T>> registrySupplier) {
         final net.minecraft.core.Registry<net.minecraft.core.Registry<?>> root = this.roots.get(Objects.requireNonNull(type, "type").root());
         if (root == null) {
             throw new ValueNotFoundException(String.format("No '%s' root registry has been defined", type.root()));
         }
         var registry = root.getValue((ResourceLocation) (Object) type.location());
         final boolean exists = registry != null;
-        if (!replace && exists) {
+        if (exists) {
             throw new DuplicateRegistrationException(String.format("Registry '%s' in root '%s' has already been defined", type.location(), type.root()));
         }
         final net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<T>> key;
@@ -191,19 +207,10 @@ public final class RegistryHolderLogic implements RegistryHolder {
             });
         }
 
-        // This is so wrong and dirty and only because we don't have layered registries...
-        final boolean frozen = ((MappedRegistryAccessor<net.minecraft.core.Registry<T>>) root).accessor$frozen();
-
-        if (replace && exists) {
-            ((MappedRegistryAccessor<net.minecraft.core.Registry<T>>) root).accessor$frozen(false);
-            ((MappedRegistryBridge<net.minecraft.core.Registry<T>>) root).bridge$forceRemoveValue(key);
-        }
-
         ((WritableRegistry) root).register(key, registry, RegistrationInfo.BUILT_IN);
         if (registry instanceof CallbackRegistry) {
             ((CallbackRegistry<?>) registry).setCallbackEnabled(true);
         }
-        ((MappedRegistryAccessor<net.minecraft.core.Registry<T>>) root).accessor$frozen(frozen);
 
         return (Registry<T>) registry;
     }

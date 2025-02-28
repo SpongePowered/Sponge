@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.advancements;
 
-import com.google.gson.JsonElement;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRequirements;
@@ -35,16 +34,12 @@ import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.data.persistence.DataContainer;
-import org.spongepowered.api.data.persistence.DataFormats;
-import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.advancement.SpongeAdvancementTemplate;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.advancements.AdvancementBridge;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -87,19 +82,7 @@ public abstract class AdvancementMixin_API implements org.spongepowered.api.adva
     }
 
     @Override
-    public int contentVersion() {
-        return 0;
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        final JsonElement json = SpongeAdvancementTemplate.encode((Advancement) (Object) this);
-        try {
-            final DataContainer container = DataFormats.JSON.get().read(json.toString());
-            container.set(Queries.CONTENT_VERSION, this.contentVersion());
-            return container;
-        } catch (IOException e) {
-            throw new IllegalStateException("Could not read deserialized Advancement:\n" + json, e);
-        }
+    public Optional<DataContainer> toDataPack() {
+        return Optional.empty();
     }
 }

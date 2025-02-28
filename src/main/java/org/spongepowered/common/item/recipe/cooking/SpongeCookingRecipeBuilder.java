@@ -25,31 +25,32 @@
 package org.spongepowered.common.item.recipe.cooking;
 
 import net.minecraft.data.recipes.RecipeCategory;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.BlastingRecipe;
+import net.minecraft.world.item.crafting.CampfireCookingRecipe;
 import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
+import net.minecraft.world.item.crafting.SmeltingRecipe;
+import net.minecraft.world.item.crafting.SmokingRecipe;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.datapack.DataPack;
-import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStackLike;
-import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.item.recipe.RecipeType;
 import org.spongepowered.api.item.recipe.cooking.CookingRecipe;
 import org.spongepowered.api.item.recipe.crafting.RecipeInput;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.common.inventory.util.InventoryUtil;
+import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
+import org.spongepowered.common.util.SpongeTicks;
 
+import java.util.Collections;
 import java.util.Objects;
 import java.util.function.Function;
 
-public final class SpongeCookingRecipeBuilder extends AbstractResourceKeyedBuilder<RecipeRegistration, CookingRecipe.Builder>
-        implements CookingRecipe.Builder.ResultStep, CookingRecipe.Builder.IngredientStep, CookingRecipe.Builder.EndStep {
+public final class SpongeCookingRecipeBuilder implements CookingRecipe.Builder.ResultStep, CookingRecipe.Builder.IngredientStep, CookingRecipe.Builder.EndStep {
 
     private net.minecraft.world.item.crafting.RecipeType<?> type;
     private Ingredient ingredient;
@@ -59,7 +60,6 @@ public final class SpongeCookingRecipeBuilder extends AbstractResourceKeyedBuild
     private @Nullable Float experience;
     private @Nullable Ticks cookingTime;
     private @Nullable String group;
-    private DataPack<RecipeRegistration> pack = DataPacks.RECIPE;
 
     private RecipeCategory recipeCategory = RecipeCategory.MISC; // TODO support category
     private CookingBookCategory cookingCategory = CookingBookCategory.MISC; // TODO support category
@@ -72,7 +72,6 @@ public final class SpongeCookingRecipeBuilder extends AbstractResourceKeyedBuild
 
     @Override
     public CookingRecipe.Builder reset() {
-        super.reset();
         this.type = null;
         this.ingredient = null;
         this.result = null;
@@ -80,7 +79,6 @@ public final class SpongeCookingRecipeBuilder extends AbstractResourceKeyedBuild
         this.experience = null;
         this.cookingTime = null;
         this.group = null;
-        this.pack = DataPacks.RECIPE;
         return this;
     }
 
@@ -133,28 +131,40 @@ public final class SpongeCookingRecipeBuilder extends AbstractResourceKeyedBuild
     }
 
     @Override
-    public EndStep pack(final DataPack<RecipeRegistration> pack) {
-        this.pack = pack;
-        return this;
-    }
-
-    @Override
-    protected RecipeRegistration build0() {
+    public CookingRecipe build() {
         Objects.requireNonNull(this.type, "type");
         Objects.requireNonNull(this.ingredient, "ingredient");
         Objects.requireNonNull(this.result, "result");
 
-        return SpongeCookingRecipeRegistration.of((ResourceLocation) (Object) this.key,
-                this.type,
-                this.group,
-                this.ingredient,
-                this.experience,
-                this.cookingTime,
-                this.result,
-                this.resultFunction,
-                this.pack,
-                this.recipeCategory,
-                this.cookingCategory);
-    }
+        final int ticksCookingTime = SpongeTicks.toSaturatedIntOrInfinite(this.cookingTime);
 
+        final var ingredientList = Collections.singletonList(this.ingredient);
+        final boolean isVanilla = SpongeRecipeRegistration.isVanillaSerializer(this.result, this.resultFunction, null, ingredientList);
+
+        if (this.type == net.minecraft.world.item.crafting.RecipeType.BLASTING) {
+            if (!isVanilla) {
+                return (CookingRecipe) new SpongeBlastingRecipe(this.group, this.cookingCategory, this.ingredient, this.result, this.experience, ticksCookingTime, this.resultFunction);
+            }
+            return (CookingRecipe) new BlastingRecipe(this.group, this.cookingCategory, this.ingredient, this.result, this.experience, ticksCookingTime);
+        }
+        if (this.type == net.minecraft.world.item.crafting.RecipeType.CAMPFIRE_COOKING) {
+            if (!isVanilla) {
+                return (CookingRecipe) new SpongeCampfireCookingRecipe(this.group, this.cookingCategory, this.ingredient, this.result, this.experience, ticksCookingTime, this.resultFunction);
+            }
+            return (CookingRecipe) new CampfireCookingRecipe(this.group, this.cookingCategory, this.ingredient, this.result, this.experience, ticksCookingTime);
+        }
+        if (this.type == net.minecraft.world.item.crafting.RecipeType.SMOKING) {
+            if (!isVanilla) {
+                return (CookingRecipe) new SpongeSmokingRecipe(this.group, this.cookingCategory, this.ingredient, this.result, this.experience, ticksCookingTime, this.resultFunction);
+            }
+            return (CookingRecipe) new SmokingRecipe(this.group, this.cookingCategory, this.ingredient, this.result, this.experience, ticksCookingTime);
+        }
+        if (this.type == net.minecraft.world.item.crafting.RecipeType.SMELTING) {
+            if (!isVanilla) {
+                return (CookingRecipe) new SpongeSmeltingRecipe(this.group, this.cookingCategory, this.ingredient, this.result, this.experience, ticksCookingTime, this.resultFunction);
+            }
+            return (CookingRecipe) new SmeltingRecipe(this.group, this.cookingCategory, this.ingredient, this.result, this.experience, ticksCookingTime);
+        }
+        throw new IllegalArgumentException("Unknown RecipeType " + this.type);
+    }
 }

@@ -34,7 +34,6 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueParser;
@@ -56,11 +55,10 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.living.player.CooldownEvent;
 import org.spongepowered.api.event.item.inventory.UseItemStackEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
-import org.spongepowered.api.event.lifecycle.RegisterDataPackValueEvent;
+import org.spongepowered.api.event.lifecycle.RegisterRegistryValueEvent;
 import org.spongepowered.api.event.world.ChangeWeatherEvent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.item.recipe.RecipeType;
 import org.spongepowered.api.item.recipe.RecipeTypes;
 import org.spongepowered.api.item.recipe.cooking.CookingRecipe;
@@ -136,23 +134,15 @@ public final class InfiniteTicksDataTest implements LoadableModule {
     @Override
     public void enable(final CommandContext ctx) {
         this.enabled = true;
-        try {
-            Sponge.server().commandManager().process("reload");
-        } catch (final CommandException e) {
-            e.printStackTrace();
-        }
         Sponge.eventManager().registerListeners(this.plugin, new InfiniteTicksDataTest.Listeners());
+        Sponge.server().dataPackManager().reload();
     }
 
     @Override
     public void disable(final CommandContext ctx) {
         this.enabled = false;
-        try {
-            Sponge.server().commandManager().process("reload");
-        } catch (final CommandException e) {
-            e.printStackTrace();
-        }
-        Sponge.eventManager().registerListeners(this.plugin, new InfiniteTicksDataTest.Listeners());
+        Sponge.eventManager().unregisterListeners(this.plugin);
+        Sponge.server().dataPackManager().reload();
     }
 
     @Listener
@@ -325,24 +315,25 @@ public final class InfiniteTicksDataTest implements LoadableModule {
     }
 
     @Listener
-    private void onRecipeRegistry(final RegisterDataPackValueEvent<RecipeRegistration> event) {
+    private void onRecipeRegistry(final RegisterRegistryValueEvent event) {
         if (!this.enabled) {
             return;
         }
 
-        event.register(this.createCookingRecipe(RecipeTypes.BLASTING.get(), "infinite_blasting_sponge"));
-        event.register(this.createCookingRecipe(RecipeTypes.CAMPFIRE_COOKING.get(), "infinite_campire_cooking_sponge"));
-        event.register(this.createCookingRecipe(RecipeTypes.SMELTING.get(), "infinite_smelting_sponge"));
-        event.register(this.createCookingRecipe(RecipeTypes.SMOKING.get(), "infinite_smoking_sponge"));
+        event.registry(RegistryTypes.RECIPE, registry -> {
+            registry.register(ResourceKey.of(this.plugin, "infinite_blasting_sponge"), this.createCookingRecipe(RecipeTypes.BLASTING.get()));
+            registry.register(ResourceKey.of(this.plugin, "infinite_campire_cooking_sponge"), this.createCookingRecipe(RecipeTypes.CAMPFIRE_COOKING.get()));
+            registry.register(ResourceKey.of(this.plugin, "infinite_smelting_sponge"), this.createCookingRecipe(RecipeTypes.SMELTING.get()));
+            registry.register(ResourceKey.of(this.plugin, "infinite_smoking_sponge"), this.createCookingRecipe(RecipeTypes.SMOKING.get()));
+        });
     }
 
-    private RecipeRegistration createCookingRecipe(final RecipeType<CookingRecipe> type, final String key) {
+    private CookingRecipe createCookingRecipe(final RecipeType<CookingRecipe> type) {
         return CookingRecipe.builder()
                 .type(type)
                 .ingredient(ItemTypes.SPONGE.get())
                 .result(ItemTypes.WET_SPONGE.get())
                 .cookingTime(Ticks.infinite())
-                .key(ResourceKey.of(this.plugin, key))
                 .build();
     }
 

@@ -31,6 +31,7 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -39,6 +40,7 @@ import net.minecraft.server.commands.AdvancementCommands;
 import net.minecraft.server.level.ServerPlayer;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -88,12 +90,12 @@ public abstract class CommandsMixin implements CommandsBridge {
             args = "class=com/mojang/brigadier/CommandDispatcher",
             remap = false
     ))
-    private CommandDispatcher<CommandSourceStack> impl$useSpongeDispatcher() {
+    private CommandDispatcher<CommandSourceStack> impl$useSpongeDispatcher(final Commands.CommandSelection $$0, final CommandBuildContext $$1) {
         if (!Launch.instance().pluginManager().isReady()) {
             return new CommandDispatcher<>();
         }
         final SpongeCommandManager manager = Launch.instance().lifecycle().platformInjector().getInstance(SpongeCommandManager.class);
-        manager.init();
+        manager.init((RegistryHolder) $$1);
         this.impl$commandManager = manager;
         return new DelegatingCommandDispatcher(manager.getBrigadierRegistrar());
     }

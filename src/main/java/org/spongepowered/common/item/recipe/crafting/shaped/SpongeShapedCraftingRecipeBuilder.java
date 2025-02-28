@@ -29,23 +29,18 @@ import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap;
 import net.minecraft.core.NonNullList;
 import net.minecraft.data.recipes.RecipeCategory;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.ShapedRecipePattern;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.datapack.DataPack;
-import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackLike;
-import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.api.item.recipe.crafting.RecipeInput;
 import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 import org.spongepowered.common.util.Preconditions;
 
 import java.util.ArrayList;
@@ -58,7 +53,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public final class SpongeShapedCraftingRecipeBuilder extends AbstractResourceKeyedBuilder<RecipeRegistration, ShapedCraftingRecipe.Builder> implements
+public final class SpongeShapedCraftingRecipeBuilder implements
         ShapedCraftingRecipe.Builder, ShapedCraftingRecipe.Builder.AisleStep.ResultStep,
         ShapedCraftingRecipe.Builder.RowsStep.ResultStep, ShapedCraftingRecipe.Builder.EndStep {
 
@@ -71,7 +66,6 @@ public final class SpongeShapedCraftingRecipeBuilder extends AbstractResourceKey
     private Function<CraftingInput, net.minecraft.world.item.ItemStack> resultFunction;
 
     private String group;
-    private DataPack<RecipeRegistration> pack = DataPacks.RECIPE;
 
     private RecipeCategory recipeCategory = RecipeCategory.MISC; // TODO support category
     private CraftingBookCategory craftingBookCategory = CraftingBookCategory.MISC; // TODO support category
@@ -169,13 +163,7 @@ public final class SpongeShapedCraftingRecipeBuilder extends AbstractResourceKey
     }
 
     @Override
-    public EndStep pack(final DataPack<RecipeRegistration> pack) {
-        this.pack = pack;
-        return this;
-    }
-
-    @Override
-    public RecipeRegistration build0() {
+    public ShapedCraftingRecipe build() {
         Preconditions.checkState(!this.aisle.isEmpty(), "aisle has not been set");
         Preconditions.checkState(!this.ingredientMap.isEmpty(), "no ingredients set");
         Preconditions.checkState(!this.result.isEmpty(), "no result set");
@@ -197,20 +185,18 @@ public final class SpongeShapedCraftingRecipeBuilder extends AbstractResourceKey
         // Default space to Empty Ingredient
 //        ingredientsMap.putIfAbsent(' ', net.minecraft.item.crafting.Ingredient.EMPTY);
         final ShapedRecipePattern pattern = ShapedRecipePattern.of(ingredientsMap, this.aisle);
-        return new SpongeShapedCraftingRecipeRegistration((ResourceLocation) (Object) key, this.group, pattern,
-                ItemStackUtil.toNative(this.result), this.resultFunction, this.remainingItemsFunction, this.pack, this.recipeCategory, this.craftingBookCategory);
+        return (ShapedCraftingRecipe) new SpongeShapedRecipe(this.group, this.craftingBookCategory, pattern, true,
+                ItemStackUtil.toNative(this.result), this.resultFunction, this.remainingItemsFunction);
     }
 
     @Override
     public ShapedCraftingRecipe.Builder reset() {
-        super.reset();
         this.aisle = new ArrayList<>();
         this.ingredientMap.clear();
         this.result = ItemStack.empty();
         this.resultFunction = null;
         this.group = null;
         this.remainingItemsFunction = null;
-        this.pack = DataPacks.RECIPE;
         return this;
     }
 

@@ -31,16 +31,13 @@ import net.minecraft.advancements.Criterion;
 import net.minecraft.resources.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.advancement.AdvancementTemplate;
+import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.DisplayInfo;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
-import org.spongepowered.api.datapack.DataPack;
-import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.advancements.AdvancementBridge;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 import org.spongepowered.common.util.SpongeCriterionUtil;
 
 import java.util.List;
@@ -48,67 +45,70 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-public final class SpongeAdvancementBuilder extends AbstractResourceKeyedBuilder<AdvancementTemplate, AdvancementTemplate.Builder> implements AdvancementTemplate.Builder.RootStep {
+public final class SpongeAdvancementBuilder implements Advancement.Builder.RootStep {
 
     private @Nullable ResourceLocation parent;
     private AdvancementCriterion criterion;
     private @Nullable DisplayInfo displayInfo;
     private @Nullable ResourceLocation backgroundPath;
-    private DataPack<AdvancementTemplate> pack = DataPacks.ADVANCEMENT;
 
     public SpongeAdvancementBuilder() {
         this.reset();
     }
 
     @Override
-    public AdvancementTemplate.Builder parent(@Nullable AdvancementTemplate parent) {
-        return this.parent(parent.key());
-    }
-
-    @Override
-    public AdvancementTemplate.Builder parent(@Nullable ResourceKey parent) {
+    public Advancement.Builder parent(final ResourceKey parent) {
         this.parent = (ResourceLocation) (Object) parent;
         this.backgroundPath = null;
         return this;
     }
 
     @Override
-    public AdvancementTemplate.Builder.RootStep root() {
+    public Advancement.Builder.RootStep root() {
         this.parent = null;
         return this;
     }
 
     @Override
-    public AdvancementTemplate.Builder background(ResourceKey backgroundPath) {
+    public Advancement.Builder background(final ResourceKey backgroundPath) {
         this.backgroundPath = (ResourceLocation) (Object) backgroundPath;
         return this;
     }
 
     @Override
-    public AdvancementTemplate.Builder criterion(AdvancementCriterion criterion) {
+    public Advancement.Builder criterion(final AdvancementCriterion criterion) {
         Objects.requireNonNull(criterion, "criterion");
         this.criterion = criterion;
         return this;
     }
 
     @Override
-    public AdvancementTemplate.Builder displayInfo(@Nullable DisplayInfo displayInfo) {
+    public Advancement.Builder displayInfo(final @Nullable DisplayInfo displayInfo) {
         this.displayInfo = displayInfo;
         return this;
     }
 
     @Override
-    public AdvancementTemplate.Builder reset() {
-        this.criterion = AdvancementCriterion.empty();
-        this.displayInfo = null;
-        this.parent = null;
-        this.backgroundPath = null;
-        this.pack = DataPacks.ADVANCEMENT;
+    public Advancement.Builder from(final Advancement value) {
+        this.parent = (ResourceLocation) (Object) value.parent().orElse(null);
+        this.criterion = value.criterion();
+        this.displayInfo = value.displayInfo().orElse(null);
+        this.backgroundPath = ((net.minecraft.advancements.Advancement) (Object) value).display()
+            .map(net.minecraft.advancements.DisplayInfo::getBackground).map(Optional::get).orElse(null);
         return this;
     }
 
     @Override
-    public AdvancementTemplate build0() {
+    public Advancement.Builder reset() {
+        this.criterion = AdvancementCriterion.empty();
+        this.displayInfo = null;
+        this.parent = null;
+        this.backgroundPath = null;
+        return this;
+    }
+
+    @Override
+    public Advancement build() {
         final Tuple<Map<String, Criterion<?>>, List<List<String>>> result = SpongeCriterionUtil.toVanillaCriteriaData(this.criterion);
         final AdvancementRewards rewards = AdvancementRewards.EMPTY;
 
@@ -123,6 +123,6 @@ public final class SpongeAdvancementBuilder extends AbstractResourceKeyedBuilder
                 di.isHidden()));
         final var advancement = new net.minecraft.advancements.Advancement(Optional.ofNullable((this.parent)), displayInfo, rewards, result.first(), new AdvancementRequirements(result.second()), false);
         ((AdvancementBridge) (Object) advancement).bridge$setCriterion(this.criterion);
-        return new SpongeAdvancementTemplate(this.key, advancement, this.pack);
+        return (Advancement) (Object) advancement;
     }
 }

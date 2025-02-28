@@ -510,7 +510,7 @@ public class MapTest implements LoadableModule {
         }
         final Optional<ServerWorld> nether = Sponge.server().worldManager().world(DefaultWorldKeys.THE_NETHER);
         if (!nether.isPresent()) {
-            final CompletableFuture<ServerWorld> loadedNether = Sponge.server().worldManager().loadWorld(DefaultWorldKeys.THE_NETHER);
+            final CompletableFuture<Optional<ServerWorld>> loadedNether = Sponge.server().worldManager().loadWorld(DefaultWorldKeys.THE_NETHER);
             loadedNether.whenComplete((v, e) -> {
                 if (e != null) {
                     audience.sendMessage(Component.text("Failed to load nether world!", NamedTextColor.GREEN));

@@ -31,7 +31,6 @@ import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.Advancement;
-import org.spongepowered.api.advancement.AdvancementTemplate;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.TreeLayoutElement;
 import org.spongepowered.asm.mixin.Final;
@@ -92,11 +91,12 @@ public abstract class AdvancementNodeMixin_API implements AdvancementTree {
     }
 
     @Override
-    public Optional<TreeLayoutElement> layoutElement(final AdvancementTemplate advancement) {
-        if (advancement.advancement().displayInfo().isEmpty()) {
+    public Optional<TreeLayoutElement> layoutElement(final Advancement advancement) {
+        if (advancement.displayInfo().isEmpty()) {
             return Optional.empty();
         }
-        return this.layoutElement(advancement.key());
+        return this.impl$findElementInfo((AdvancementNode) (Object) this, (net.minecraft.advancements.Advancement) (Object) advancement)
+            .map(TreeLayoutElement.class::cast);
     }
 
     @Override
@@ -114,6 +114,19 @@ public abstract class AdvancementNodeMixin_API implements AdvancementTree {
         }
         for (final AdvancementNode child : node.children()) {
             final var info = this.impl$findElementInfo(child, key);
+            if (info.isPresent()) {
+                return info;
+            }
+        }
+        return Optional.empty();
+    }
+
+    private Optional<DisplayInfo> impl$findElementInfo(AdvancementNode node, net.minecraft.advancements.Advancement advancement) {
+        if (node.holder().value() == advancement) {
+            return node.advancement().display();
+        }
+        for (final AdvancementNode child : node.children()) {
+            final var info = this.impl$findElementInfo(child, advancement);
             if (info.isPresent()) {
                 return info;
             }

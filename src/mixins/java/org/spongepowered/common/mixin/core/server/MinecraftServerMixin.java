@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.server;
 
 import com.google.inject.Injector;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import net.kyori.adventure.resource.ResourcePackRequest;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.RegistryAccess;
@@ -35,6 +36,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.server.packs.resources.MultiPackResourceManager;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.thread.BlockableEventLoop;
@@ -52,6 +54,7 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.UnloadWorldEvent;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectProxy;
 import org.spongepowered.api.world.SerializationBehavior;
@@ -81,13 +84,13 @@ import org.spongepowered.common.bridge.server.players.GameProfileCacheBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
-import org.spongepowered.common.datapack.SpongeDataPackManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -388,13 +391,6 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         return this.impl$serviceProvider;
     }
 
-    @Inject(method = "reloadResources", at = @At(value = "HEAD"))
-    public void impl$reloadResources(final Collection<String> datapacksToLoad, final CallbackInfoReturnable<CompletableFuture<Void>> cir) {
-        final List<String> reloadablePacks = ((SpongeDataPackManager) this.dataPackManager()).registerPacks();
-        datapacksToLoad.addAll(reloadablePacks);
-        this.shadow$getPackRepository().reload();
-    }
-
     @Override
     public String toString() {
         return this.getClass().getSimpleName();
@@ -418,5 +414,12 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         if (this.impl$spongeMainThreadExecutor.pollTask()) {
             cir.setReturnValue(true);
         }
+    }
+
+    @ModifyExpressionValue(method = "lambda$reloadResources$28", at = @At(value = "NEW", target = "Lnet/minecraft/server/packs/resources/MultiPackResourceManager;"))
+    private MultiPackResourceManager impl$onReloadResources(final MultiPackResourceManager original) {
+        ((SpongeRegistryHolder) original).setRootMinecraftRegistry(this.shadow$registryAccess());
+        Launch.instance().lifecycle().beginEstablishServerRegistries((RegistryHolder) original);
+        return original;
     }
 }

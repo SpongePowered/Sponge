@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.recipe.ingredient;
 
-import com.google.gson.JsonObject;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.function.Predicate;
@@ -41,14 +40,6 @@ public class SpongePredicateItemList extends SpongeItemList {
         super(stacks);
         this.id = id;
         this.predicate = predicate;
-    }
-
-    @Override
-    public JsonObject serialize() {
-        final JsonObject jsonobject = super.serialize();
-        jsonobject.addProperty(SpongeItemList.INGREDIENT_TYPE, SpongePredicateItemList.TYPE_PREDICATE);
-        jsonobject.addProperty(SpongePredicateItemList.INGREDIENT_PREDICATE, this.id);
-        return jsonobject;
     }
 
     @Override

@@ -32,8 +32,10 @@ import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.RegistryEntry;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -46,16 +48,25 @@ import org.spongepowered.common.accessor.resources.ResourceKeyAccessor;
 import org.spongepowered.common.bridge.core.MappedRegistryBridge;
 import org.spongepowered.common.bridge.core.RegistryBridge;
 import org.spongepowered.common.bridge.core.WritableRegistryBridge;
+import org.spongepowered.common.registry.InitialRegistryData;
 import org.spongepowered.common.registry.SpongeRegistryEntry;
 import org.spongepowered.common.registry.SpongeRegistryType;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 @Mixin(MappedRegistry.class)
 public abstract class MappedRegistryMixin<T> implements RegistryBridge<T>, WritableRegistryBridge<T>, MappedRegistryBridge<T> {
+
+    // @formatter:off
+    @Shadow private boolean frozen;
 
     @Shadow @Final private ObjectList<Holder.Reference<T>> byId;
     @Shadow @Final private Reference2IntMap<T> toId;
@@ -63,9 +74,17 @@ public abstract class MappedRegistryMixin<T> implements RegistryBridge<T>, Writa
     @Shadow @Final private Map<net.minecraft.resources.ResourceKey<T>, Holder.Reference<T>> byKey;
     @Shadow @Final private Map<T, Holder.Reference<T>> byValue;
     @Shadow @Final private Map<net.minecraft.resources.ResourceKey<T>, RegistrationInfo> registrationInfos;
+    @Shadow @Final private net.minecraft.resources.ResourceKey<? extends Registry<T>> key;
 
+    @Shadow public abstract Holder.Reference<T> shadow$register(net.minecraft.resources.ResourceKey<T> arg, T object, RegistrationInfo arg2);
+    // @formatter:on
+
+    private RegistryHolder impl$registryHolder;
     private RegistryType<T> impl$type;
     private final Map<ResourceKey, RegistryEntry<T>> impl$entries = new LinkedHashMap<>();
+
+    private final Set<RegistryType<?>> impl$dependencies = new HashSet<>();
+    private final List<Runnable> impl$preFreezeTasks = new ArrayList<>();
 
     private boolean impl$isDynamic = true;
 
@@ -132,5 +151,45 @@ public abstract class MappedRegistryMixin<T> implements RegistryBridge<T>, Writa
         this.byValue.remove(value.value());
         this.registrationInfos.remove(key);
         this.impl$entries.remove((ResourceKey) (Object) key.location());
+    }
+
+    @Inject(method = "freeze", at = @At(value = "FIELD", target = "Lnet/minecraft/core/MappedRegistry;frozen:Z", opcode = Opcodes.PUTFIELD))
+    private void impl$onFreeze(final CallbackInfoReturnable<Registry<T>> cir) {
+        this.impl$dependencies.forEach(t -> {
+            if (!this.impl$registryHolder.findRegistry(t)
+                .map(r -> ((MappedRegistryMixin<?>) r).frozen)
+                .orElse(false)) {
+                throw null;
+            }
+        });
+        this.impl$preFreezeTasks.forEach(Runnable::run);
+        this.impl$preFreezeTasks.clear();
+    }
+
+    @Override
+    public void bridge$setRegistryHolder(final RegistryHolder registryHolder) {
+        this.impl$registryHolder = registryHolder;
+    }
+
+    @Override
+    public void bridge$addDependencies(final Supplier<InitialRegistryData<T>> supplier, final RegistryType<?>... dependencies) {
+        this.bridge$addDependencies(() ->
+            supplier.get().forEach((vk, vi, vv) ->
+                this.shadow$register(
+                    net.minecraft.resources.ResourceKey.create(this.key, (ResourceLocation) (Object) vk),
+                    vv,
+                    RegistrationInfo.BUILT_IN
+                )), dependencies);
+    }
+
+    @Override
+    public void bridge$addDependencies(final Runnable runnable, final RegistryType<?>... dependencies) {
+        this.impl$dependencies.addAll(List.of(dependencies));
+        this.impl$preFreezeTasks.add(runnable);
+    }
+
+    @Override
+    public Stream<RegistryType<?>> bridge$pendingDependencies() {
+        return this.impl$dependencies.stream();
     }
 }

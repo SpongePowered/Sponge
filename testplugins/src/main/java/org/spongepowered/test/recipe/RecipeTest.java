@@ -30,7 +30,6 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.meta.BannerPatternLayer;
@@ -38,14 +37,13 @@ import org.spongepowered.api.data.type.BannerPatternShapes;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.lifecycle.RegisterDataPackValueEvent;
+import org.spongepowered.api.event.lifecycle.RegisterRegistryValueEvent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
-import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.item.recipe.RecipeTypes;
 import org.spongepowered.api.item.recipe.cooking.CookingRecipe;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
@@ -82,192 +80,168 @@ public final class RecipeTest implements LoadableModule {
     @Override
     public void enable(final CommandContext ctx) {
         this.enabled = true;
-        try {
-            Sponge.server().commandManager().process("reload");
-        } catch (final CommandException e) {
-            e.printStackTrace();
-        }
+        Sponge.server().dataPackManager().reload();
     }
 
     @Override
     public void disable(final CommandContext ctx) {
         this.enabled = false;
-        try {
-            Sponge.server().commandManager().process("reload");
-        } catch (final CommandException e) {
-            e.printStackTrace();
-        }
+        Sponge.server().dataPackManager().reload();
     }
 
     @SuppressWarnings("unchecked")
     @Listener
-    private void onRecipeRegistry(final RegisterDataPackValueEvent<RecipeRegistration> event) {
+    private void onRecipeRegistry(final RegisterRegistryValueEvent event) {
 
         if (!this.enabled) {
             return;
         }
         // Standard recipes and ItemStack(with nbt) ingredient and results
+        event.registry(RegistryTypes.RECIPE, registry -> {
+            final Ingredient whiteRock = Ingredient.of(ItemTypes.POLISHED_DIORITE.get());
+            final Ingredient whiteBed = Ingredient.of(ItemTypes.WHITE_BED.get());
+            final ItemStack bedrock = ItemStack.of(ItemTypes.BEDROCK);
 
-        final Ingredient whiteRock = Ingredient.of(ItemTypes.POLISHED_DIORITE.get());
-        final Ingredient whiteBed = Ingredient.of(ItemTypes.WHITE_BED.get());
-        final ItemStack bedrock = ItemStack.of(ItemTypes.BEDROCK);
-
-        final RecipeRegistration whiteBedrockRecipe = CraftingRecipe.shapedBuilder().rows()
+            final CraftingRecipe whiteBedrockRecipe = CraftingRecipe.shapedBuilder().rows()
                 .row(whiteRock, whiteRock, whiteRock)
                 .row(whiteRock, whiteBed, whiteRock)
                 .row(whiteRock, whiteRock, whiteRock)
                 .result(bedrock.copy())
-                .key(ResourceKey.of(this.plugin, "white_bedrock"))
                 .build();
 
-        event.register(whiteBedrockRecipe);
+            registry.register(ResourceKey.of(this.plugin, "white_bedrock"), whiteBedrockRecipe);
 
-        final Ingredient redRock = Ingredient.of(ItemTypes.POLISHED_GRANITE);
-        final Ingredient redBed = Ingredient.of(ItemTypes.RED_BED);
-        final ItemStack redBedRock = bedrock.copy();
-        redBedRock.offer(Keys.CUSTOM_NAME, Component.text("Bedrock", NamedTextColor.RED));
+            final Ingredient redRock = Ingredient.of(ItemTypes.POLISHED_GRANITE);
+            final Ingredient redBed = Ingredient.of(ItemTypes.RED_BED);
+            final ItemStack redBedRock = bedrock.copy();
+            redBedRock.offer(Keys.CUSTOM_NAME, Component.text("Bedrock", NamedTextColor.RED));
 
-        final RecipeRegistration redBedrockRecipe = CraftingRecipe.shapedBuilder().rows()
+            final CraftingRecipe redBedrockRecipe = CraftingRecipe.shapedBuilder().rows()
                 .aisle("ggg", "gbg", "ggg")
                 .where('g', redRock)
                 .where('b', redBed)
                 .result(redBedRock)
-                .key(ResourceKey.of(this.plugin, "red_bedrock"))
                 .build();
 
-        event.register(redBedrockRecipe);
+            registry.register(ResourceKey.of(this.plugin, "red_bedrock"), redBedrockRecipe);
 
-        final ItemStack moreBedrock = bedrock.copy();
-        moreBedrock.setQuantity(9);
-        final RecipeRegistration moreBedrockRecipe = CraftingRecipe.shapedBuilder().rows()
+            final ItemStack moreBedrock = bedrock.copy();
+            moreBedrock.setQuantity(9);
+            final CraftingRecipe moreBedrockRecipe = CraftingRecipe.shapedBuilder().rows()
                 .aisle("ggg", "gbg", "ggg")
                 .where('g', redRock)
                 .where('b', Ingredient.of(bedrock.copy()))
                 .result(moreBedrock)
-                .key(ResourceKey.of(this.plugin, "more_red_bedrock"))
                 .build();
 
-        event.register(moreBedrockRecipe);
+            registry.register(ResourceKey.of(this.plugin, "more_red_bedrock"), moreBedrockRecipe);
 
-        final RecipeRegistration cheapGoldenAppleRecipe = CraftingRecipe.shapelessBuilder()
+            final CraftingRecipe cheapGoldenAppleRecipe = CraftingRecipe.shapelessBuilder()
                 .addIngredients(ItemTypes.YELLOW_WOOL, ItemTypes.APPLE)
                 .result(ItemStack.of(ItemTypes.GOLDEN_APPLE))
-                .key(ResourceKey.of(this.plugin, "cheap_golden_apple"))
                 .build();
 
-        event.register(cheapGoldenAppleRecipe);
+            registry.register(ResourceKey.of(this.plugin, "cheap_golden_apple"), cheapGoldenAppleRecipe);
 
-        final RecipeRegistration expensiveGoldenAppleRecipe = CraftingRecipe.shapelessBuilder()
+            final CraftingRecipe expensiveGoldenAppleRecipe = CraftingRecipe.shapelessBuilder()
                 .addIngredients(ItemTypes.YELLOW_WOOL, ItemTypes.ENCHANTED_GOLDEN_APPLE)
                 .result(ItemStack.of(ItemTypes.GOLDEN_APPLE))
-                .key(ResourceKey.of(this.plugin, "expensive_golden_apple"))
                 .build();
 
-        event.register(expensiveGoldenAppleRecipe);
+            registry.register(ResourceKey.of(this.plugin, "expensive_golden_apple"), expensiveGoldenAppleRecipe);
 
-        final Ingredient bedrocks = Ingredient.of(bedrock, redBedRock);
-        final RecipeRegistration bedrocksToGranite = CraftingRecipe.shapelessBuilder()
+            final Ingredient bedrocks = Ingredient.of(bedrock, redBedRock);
+            final CraftingRecipe bedrocksToGranite = CraftingRecipe.shapelessBuilder()
                 .addIngredients(bedrocks, bedrocks)
                 .result(ItemStack.of(ItemTypes.GRANITE, 13))
-                .key(ResourceKey.of(this.plugin, "bedrocks_to_granite"))
                 .build();
 
-        event.register(bedrocksToGranite);
+            registry.register(ResourceKey.of(this.plugin, "bedrocks_to_granite"), bedrocksToGranite);
 
-        final RecipeRegistration diamondToCoalRecipe = CookingRecipe.builder().type(RecipeTypes.SMELTING)
+            final CookingRecipe diamondToCoalRecipe = CookingRecipe.builder().type(RecipeTypes.SMELTING)
                 .ingredient(Ingredient.of(ItemTypes.DIAMOND))
                 .result(ItemTypes.COAL)
                 .experience(0)
-                .key(ResourceKey.of(this.plugin, "diamond_to_coal"))
                 .build();
 
-        event.register(diamondToCoalRecipe);
+            registry.register(ResourceKey.of(this.plugin, "diamond_to_coal"), diamondToCoalRecipe);
 
-        final RecipeRegistration burnPaperAndSticksRecipe = CookingRecipe.builder().type(RecipeTypes.SMELTING)
+            final CookingRecipe burnPaperAndSticksRecipe = CookingRecipe.builder().type(RecipeTypes.SMELTING)
                 .ingredient(Ingredient.of(ItemTypes.PAPER, ItemTypes.STICK))
                 .result(ItemTypes.GUNPOWDER)
                 .experience(1)
                 .cookingTime(Ticks.of(1))
-                .key(ResourceKey.of(this.plugin, "burn_paper_and_sticks"))
                 .build();
 
-        event.register(burnPaperAndSticksRecipe);
+            registry.register(ResourceKey.of(this.plugin, "burn_paper_and_sticks"), burnPaperAndSticksRecipe);
 
-        final RecipeRegistration charcoalToCoalRecipe = CookingRecipe.builder().type(RecipeTypes.BLASTING)
+            final CookingRecipe charcoalToCoalRecipe = CookingRecipe.builder().type(RecipeTypes.BLASTING)
                 .ingredient(Ingredient.of(ItemTypes.CHARCOAL))
                 .result(ItemTypes.COAL)
-                .key(ResourceKey.of(this.plugin, "charcoal_to_coal"))
                 .build();
 
-        event.register(charcoalToCoalRecipe);
+            registry.register(ResourceKey.of(this.plugin, "charcoal_to_coal"), charcoalToCoalRecipe);
 
-        final ItemStack redderBedrock = bedrock.copy();
-        redderBedrock.offer(Keys.CUSTOM_NAME, Component.text("Bedrock", NamedTextColor.DARK_RED));
+            final ItemStack redderBedrock = bedrock.copy();
+            redderBedrock.offer(Keys.CUSTOM_NAME, Component.text("Bedrock", NamedTextColor.DARK_RED));
 
-        final RecipeRegistration removeRedOnBedrock = CookingRecipe.builder().type(RecipeTypes.BLASTING)
+            final CookingRecipe removeRedOnBedrock = CookingRecipe.builder().type(RecipeTypes.BLASTING)
                 .ingredient(Ingredient.of(redBedRock))
                 .result(redderBedrock)
                 .cookingTime(Ticks.of(20))
                 .experience(100)
-                .key(ResourceKey.of(this.plugin, "redder_bedrock"))
                 .build();
 
-        event.register(removeRedOnBedrock);
+            registry.register(ResourceKey.of(this.plugin, "redder_bedrock"), removeRedOnBedrock);
 
-        final RecipeRegistration overcookedPorkchopRecipe = CookingRecipe.builder().type(RecipeTypes.SMOKING)
+            final CookingRecipe overcookedPorkchopRecipe = CookingRecipe.builder().type(RecipeTypes.SMOKING)
                 .ingredient(Ingredient.of(ItemTypes.COOKED_PORKCHOP))
                 .result(ItemTypes.COAL)
-                .key(ResourceKey.of(this.plugin, "overcooked_porkchop"))
                 .build();
 
-        event.register(overcookedPorkchopRecipe);
+            registry.register(ResourceKey.of(this.plugin, "overcooked_porkchop"), overcookedPorkchopRecipe);
 
-        final RecipeRegistration sticksToTorches = CookingRecipe.builder().type(RecipeTypes.CAMPFIRE_COOKING)
+            final CookingRecipe sticksToTorches = CookingRecipe.builder().type(RecipeTypes.CAMPFIRE_COOKING)
                 .ingredient(Ingredient.of(ItemTypes.STICK))
                 .result(ItemTypes.TORCH)
                 .cookingTime(Ticks.of(20))
-                .key(ResourceKey.of(this.plugin, "stick_to_torch"))
                 .build();
 
-        event.register(sticksToTorches);
+            registry.register(ResourceKey.of(this.plugin, "stick_to_torch"), sticksToTorches);
 
-        final RecipeRegistration stonecutter1 = StoneCutterRecipe.builder()
+            final StoneCutterRecipe stonecutter1 = StoneCutterRecipe.builder()
                 .ingredient(ItemTypes.BEDROCK)
                 .result(ItemStack.of(ItemTypes.BLACK_CONCRETE, 32))
-                .key(ResourceKey.of(this.plugin, "cut_bedrock_to_concrete"))
                 .build();
 
-        final RecipeRegistration stonecutter2 = StoneCutterRecipe.builder()
+            final StoneCutterRecipe stonecutter2 = StoneCutterRecipe.builder()
                 .ingredient(ItemTypes.BEDROCK)
                 .result(ItemStack.of(ItemTypes.BLACK_GLAZED_TERRACOTTA, 16))
-                .key(ResourceKey.of(this.plugin, "cut_bedrock_to_terracotta"))
                 .build();
 
-        final RecipeRegistration stonecutter3 = StoneCutterRecipe.builder()
+            final StoneCutterRecipe stonecutter3 = StoneCutterRecipe.builder()
                 .ingredient(ItemTypes.BEDROCK)
                 .result(ItemStack.of(ItemTypes.BLACK_WOOL, 64))
-                .key(ResourceKey.of(this.plugin, "cut_bedrock_wool"))
                 .build();
 
-        event.register(stonecutter1);
-        event.register(stonecutter2);
-        event.register(stonecutter3);
+            registry.register(ResourceKey.of(this.plugin, "cut_bedrock_to_concrete"), stonecutter1);
+            registry.register(ResourceKey.of(this.plugin, "cut_bedrock_to_terracotta"), stonecutter2);
+            registry.register(ResourceKey.of(this.plugin, "cut_bedrock_wool"), stonecutter3);
 
-        // Predicate Ingredients
+            // Predicate Ingredients
 
-        final Predicate<? super ItemStackLike> hardnessPredicate = stack -> stack.type().block().map(b -> b.defaultState().get(Keys.DESTROY_SPEED).orElse(0d) > 20).orElse(false); // e.g. obsidian
-        final Ingredient hardBlock = Ingredient.of(ResourceKey.of(this.plugin, "hardblock"), hardnessPredicate, ItemStack.of(ItemTypes.OBSIDIAN));
-        final RecipeRegistration hardblockToWool =
+            final Predicate<? super ItemStackLike> hardnessPredicate = stack -> stack.type().block().map(b -> b.defaultState().get(Keys.DESTROY_SPEED).orElse(0d) > 20).orElse(false); // e.g. obsidian
+            final Ingredient hardBlock = Ingredient.of(ResourceKey.of(this.plugin, "hardblock"), hardnessPredicate, ItemStack.of(ItemTypes.OBSIDIAN));
+            final CraftingRecipe hardblockToWool =
                 ShapelessCraftingRecipe.builder().addIngredients(hardBlock).result(ItemStack.of(ItemTypes.WHITE_WOOL))
-                        .key(ResourceKey.of(this.plugin, "hardblock_to_wool"))
-                        .build();
+                    .build();
 
-        event.register(hardblockToWool);
+            registry.register(ResourceKey.of(this.plugin, "hardblock_to_wool"), hardblockToWool);
 
-        // Function Results
+            // Function Results
 
-        final ItemStack villagerEgg = ItemStack.of(ItemTypes.VILLAGER_SPAWN_EGG);
-        final RecipeRegistration villagerSpawnEggRecipe = ShapedCraftingRecipe.builder()
+            final ItemStack villagerEgg = ItemStack.of(ItemTypes.VILLAGER_SPAWN_EGG);
+            final CraftingRecipe villagerSpawnEggRecipe = ShapedCraftingRecipe.builder()
                 .aisle(" e ", "eve", " e ")
                 .where('v', Ingredient.of(ItemTypes.BOOK))
                 .where('e', Ingredient.of(ItemTypes.EMERALD_BLOCK))
@@ -277,15 +251,14 @@ public final class RecipeTest implements LoadableModule {
                     villagerEgg.offer(Keys.CUSTOM_NAME, Component.text(name));
                     return villagerEgg.copy();
                 }, villagerEgg.copy())
-                .key(ResourceKey.of(this.plugin, "villager_spawn_egg"))
                 .build();
 
-        event.register(villagerSpawnEggRecipe);
+            registry.register(ResourceKey.of(this.plugin, "villager_spawn_egg"), villagerSpawnEggRecipe);
 
-        final ItemStack writtenBook = ItemStack.of(ItemTypes.WRITTEN_BOOK);
-        writtenBook.offer(Keys.CUSTOM_NAME, Component.text("Biome Data"));
-        writtenBook.offer(Keys.AUTHOR, Component.text("Herobrine"));
-        final RecipeRegistration biomeDetectorRecipe = ShapedCraftingRecipe.builder()
+            final ItemStack writtenBook = ItemStack.of(ItemTypes.WRITTEN_BOOK);
+            writtenBook.offer(Keys.CUSTOM_NAME, Component.text("Biome Data"));
+            writtenBook.offer(Keys.AUTHOR, Component.text("Herobrine"));
+            final CraftingRecipe biomeDetectorRecipe = ShapedCraftingRecipe.builder()
                 .aisle("d", "b")
                 .where('d', Ingredient.of(ItemTypes.DAYLIGHT_DETECTOR))
                 .where('b', Ingredient.of(ItemTypes.BOOK))
@@ -293,8 +266,8 @@ public final class RecipeTest implements LoadableModule {
                     final Optional<ServerPlayer> player = Sponge.server().causeStackManager().currentCause().first(ServerPlayer.class);
                     final Optional<Biome> biome = player.map(p -> p.world().biome(p.blockPosition()));
                     final String name = biome.map(present -> RegistryTypes.BIOME.keyFor(player.get().world(), present)).map(ResourceKey::toString).orElse("Unknown");
-                    final Integer biomeTemperature = biome.map(Biome::temperature).map(d -> (int) (d*10)).orElse(0);
-                    final Integer biomeHumidity = biome.map(Biome::humidity).map(d -> (int) (d*10)).orElse(0);
+                    final Integer biomeTemperature = biome.map(Biome::temperature).map(d -> (int) (d * 10)).orElse(0);
+                    final Integer biomeHumidity = biome.map(Biome::humidity).map(d -> (int) (d * 10)).orElse(0);
                     final TextComponent temperature = Component.text("Temperature: ").append(Component.text(biomeTemperature));
                     final TextComponent humidity = Component.text("Humidity: ").append(Component.text(biomeHumidity));
                     writtenBook.offer(Keys.CUSTOM_NAME, Component.text("Biome Data: " + name));
@@ -302,33 +275,30 @@ public final class RecipeTest implements LoadableModule {
                     writtenBook.offer(Keys.AUTHOR, Component.text(player.map(ServerPlayer::name).orElse("Herobrine")));
                     return writtenBook.copy();
                 }, writtenBook.copy())
-                .key(ResourceKey.of(this.plugin, "biome_detector"))
                 .build();
 
-        event.register(biomeDetectorRecipe);
-        final Ingredient blackOrWhite = Ingredient.of(ItemTypes.BLACK_WOOL, ItemTypes.WHITE_WOOL);
-        final RecipeRegistration blackOrWhiteRecipe = ShapelessCraftingRecipe.builder()
+            registry.register(ResourceKey.of(this.plugin, "biome_detector"), biomeDetectorRecipe);
+            final Ingredient blackOrWhite = Ingredient.of(ItemTypes.BLACK_WOOL, ItemTypes.WHITE_WOOL);
+            final CraftingRecipe blackOrWhiteRecipe = ShapelessCraftingRecipe.builder()
                 .addIngredients(blackOrWhite, blackOrWhite, blackOrWhite)
                 .result(grid -> {
                     final int blacks = grid.query(QueryTypes.ITEM_TYPE, ItemTypes.BLACK_WOOL).capacity();
                     final int whites = grid.query(QueryTypes.ITEM_TYPE, ItemTypes.WHITE_WOOL).capacity();
                     return blacks > whites ? ItemStack.of(ItemTypes.BLACK_WOOL, 3) : ItemStack.of(ItemTypes.WHITE_WOOL, 3);
                 }, ItemStack.of(ItemTypes.GRAY_WOOL))
-                .key(ResourceKey.of(this.plugin, "black_or_white"))
                 .build();
 
-        event.register(blackOrWhiteRecipe);
+            registry.register(ResourceKey.of(this.plugin, "black_or_white"), blackOrWhiteRecipe);
 
-        // Custom results dont work well in cooking recipes
-        final ItemStack anvil = ItemStack.of(ItemTypes.DAMAGED_ANVIL);
-        final RecipeRegistration cookedAnvilRecipe = CookingRecipe.builder().type(RecipeTypes.BLASTING)
+            // Custom results dont work well in cooking recipes
+            final ItemStack anvil = ItemStack.of(ItemTypes.DAMAGED_ANVIL);
+            final CookingRecipe cookedAnvilRecipe = CookingRecipe.builder().type(RecipeTypes.BLASTING)
                 .ingredient(ItemTypes.IRON_BLOCK)
                 .result(inv -> anvil.copy(), anvil.copy())
-                .key(ResourceKey.of(this.plugin, "cooked_anvil"))
                 .build();
-        event.register(cookedAnvilRecipe);
+            registry.register(ResourceKey.of(this.plugin, "cooked_anvil"), cookedAnvilRecipe);
 
-        final RecipeRegistration cutPlanksRecipe = StoneCutterRecipe.builder()
+            final StoneCutterRecipe cutPlanksRecipe = StoneCutterRecipe.builder()
                 .ingredient(ItemTypes.OAK_PLANKS)
                 .result(input -> {
                     if (new Random().nextBoolean()) {
@@ -336,11 +306,10 @@ public final class RecipeTest implements LoadableModule {
                     }
                     return ItemStack.of(ItemTypes.OAK_SLAB, 3);
                 }, ItemStack.of(ItemTypes.OAK_SLAB, 2))
-                .key(ResourceKey.of(this.plugin, "cut_planks"))
                 .build();
-        event.register(cutPlanksRecipe);
+            registry.register(ResourceKey.of(this.plugin, "cut_planks"), cutPlanksRecipe);
 
-        final RecipeRegistration stripedBannerRecipe = SpecialCraftingRecipe.builder()
+            final CraftingRecipe stripedBannerRecipe = SpecialCraftingRecipe.builder()
                 .matching((inv, world) -> {
                     if (inv.capacity() != 9) {
                         return false;
@@ -378,47 +347,43 @@ public final class RecipeTest implements LoadableModule {
                     banner.offer(Keys.BANNER_PATTERN_LAYERS, Arrays.asList(pattern));
                     return banner;
                 }))
-                .key(ResourceKey.of(this.plugin, "special"))
                 .build();
-        event.register(stripedBannerRecipe);
+            registry.register(ResourceKey.of(this.plugin, "special"), stripedBannerRecipe);
 
-        final RecipeRegistration squeezeSpongeRecipe = ShapelessCraftingRecipe.builder()
+            final CraftingRecipe squeezeSpongeRecipe = ShapelessCraftingRecipe.builder()
                 .addIngredients(ItemTypes.WET_SPONGE, ItemTypes.BUCKET)
                 .remainingItems(inv -> inv.slots().stream().map(Slot::peek)
-                        .map(item -> (item.type().isAnyOf(ItemTypes.WET_SPONGE) ? ItemTypes.SPONGE : ItemTypes.AIR).get())
-                        .map(ItemStack::of)
-                        .collect(Collectors.toList()))
+                    .map(item -> (item.type().isAnyOf(ItemTypes.WET_SPONGE) ? ItemTypes.SPONGE : ItemTypes.AIR).get())
+                    .map(ItemStack::of)
+                    .collect(Collectors.toList()))
                 .result(ItemStack.of(ItemTypes.WATER_BUCKET))
-                .key(ResourceKey.of(this.plugin, "squeeze_sponge_recipe"))
                 .build();
 
-        event.register(squeezeSpongeRecipe);
+            registry.register(ResourceKey.of(this.plugin, "squeeze_sponge_recipe"), squeezeSpongeRecipe);
 
-        // Smithing recipes
+            // Smithing recipes
 
-        final RecipeRegistration ironToGoldIngot = SmithingRecipe.builder()
+            final SmithingRecipe ironToGoldIngot = SmithingRecipe.builder()
                 .template(ItemTypes.PAPER)
                 .base(ItemTypes.IRON_INGOT)
                 .addition(ItemTypes.NETHERITE_INGOT)
                 .result(ItemStack.of(ItemTypes.GOLD_INGOT))
-                .key(ResourceKey.of(this.plugin, "iron_to_gold_ingot"))
                 .build();
 
-        event.register(ironToGoldIngot);
+            registry.register(ResourceKey.of(this.plugin, "iron_to_gold_ingot"), ironToGoldIngot);
 
-        final ItemStack chainMail = ItemStack.of(ItemTypes.CHAINMAIL_CHESTPLATE);
-        chainMail.offer(Keys.CUSTOM_NAME, Component.text("Heavy Chainmail", NamedTextColor.DARK_GRAY));
-        chainMail.offer(Keys.LORE, Arrays.asList(Component.text("Smithing occured", NamedTextColor.DARK_GRAY)));
-        final RecipeRegistration smithChainmail = SmithingRecipe.builder()
+            final ItemStack chainMail = ItemStack.of(ItemTypes.CHAINMAIL_CHESTPLATE);
+            chainMail.offer(Keys.CUSTOM_NAME, Component.text("Heavy Chainmail", NamedTextColor.DARK_GRAY));
+            chainMail.offer(Keys.LORE, Arrays.asList(Component.text("Smithing occured", NamedTextColor.DARK_GRAY)));
+            final SmithingRecipe smithChainmail = SmithingRecipe.builder()
                 .template(ItemTypes.PAPER)
                 .base(ItemTypes.IRON_CHESTPLATE)
                 .addition(ItemTypes.FIRE_CHARGE)
                 .result(chainMail)
-                .key(ResourceKey.of(this.plugin, "smith_chainmail"))
                 .build();
 
-        event.register(smithChainmail);
-
+            registry.register(ResourceKey.of(this.plugin, "smith_chainmail"), smithChainmail);
+        });
 
     }
 }

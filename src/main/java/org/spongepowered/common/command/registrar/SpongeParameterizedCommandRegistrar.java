@@ -39,6 +39,7 @@ import org.spongepowered.api.command.manager.CommandFailedRegistrationException;
 import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrarType;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.common.command.SpongeCommandCompletion;
 import org.spongepowered.common.command.SpongeParameterizedCommand;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
@@ -68,7 +69,7 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
     private final CommandManager.Mutable commandManager;
     private final Map<CommandMapping, Command.Parameterized> commandMap = new HashMap<>();
 
-    public SpongeParameterizedCommandRegistrar(final CommandManager.Mutable commandManager) {
+    public SpongeParameterizedCommandRegistrar(final CommandManager.Mutable commandManager, final RegistryHolder registryHolder) {
         this.commandManager = commandManager;
     }
 

@@ -28,35 +28,23 @@ import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.datapack.DataPackTypes;
-import org.spongepowered.api.datapack.DataPacks;
-import org.spongepowered.api.effect.particle.ParticleTypes;
-import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.EntityCategories;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.biome.Biome;
-import org.spongepowered.api.world.biome.BiomeTemplate;
 import org.spongepowered.api.world.biome.Biomes;
-import org.spongepowered.api.world.biome.ambient.ParticleConfig;
-import org.spongepowered.api.world.biome.ambient.SoundConfig;
 import org.spongepowered.api.world.biome.spawner.NaturalSpawner;
-import org.spongepowered.api.world.generation.feature.DecorationSteps;
 import org.spongepowered.api.world.generation.feature.FeatureType;
-import org.spongepowered.api.world.generation.feature.PlacedFeatures;
 import org.spongepowered.api.world.server.DataPackManager;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public final class BiomeTest {
@@ -108,7 +96,7 @@ public final class BiomeTest {
         Collections.shuffle(naturalSpawners);
         final List<NaturalSpawner> spawner = Arrays.asList(naturalSpawners.get(0));
 
-        final BiomeTemplate template = BiomeTemplate.builder().fromValue(defaultBiome)
+        /*final Biome template = Biome.builder().from(defaultBiome)
                 .add(Keys.FEATURES, Map.of(DecorationSteps.LAKES.get(), List.of(PlacedFeatures.LAKE_LAVA_SURFACE.get())))
                 .add(Keys.CARVERS, List.of())
                 .add(Keys.NATURAL_SPAWNERS, Map.of(EntityCategories.MONSTER.get(), spawner))
@@ -118,10 +106,10 @@ public final class BiomeTest {
         Sponge.server().dataPackManager().save(template);
 
         final Biome defaultBiome2 = Biomes.FLOWER_FOREST.get(Sponge.server());
-        final BiomeTemplate template2 = BiomeTemplate.builder().fromValue(defaultBiome2)
+        final Biome template2 = Biome.builder().from(defaultBiome2)
                 .add(Keys.NATURAL_SPAWNERS, Map.of(EntityCategories.MONSTER.get(), spawner))
                 .key(ResourceKey.of(NAMESPACE, CUSTOM_FOREST)).build();
-        Sponge.server().dataPackManager().save(template2);
+        Sponge.server().dataPackManager().save(template2);*/
 
         return CommandResult.success();
     }
@@ -135,14 +123,14 @@ public final class BiomeTest {
                 .forEach(e -> ctx.sendMessage(Identity.nil(), Component.text(" - " + e.key(), NamedTextColor.GRAY)));
 
         final DataPackManager dpm = Sponge.server().dataPackManager();
-        dpm.find(DataPackTypes.BIOME).forEach((pack, keys) -> {
+        /*dpm.find(DataPackTypes.BIOME).forEach((pack, keys) -> {
             ctx.sendMessage(Identity.nil(), Component.text(pack.name() + ": " + pack.description() , NamedTextColor.DARK_AQUA));
             keys.forEach(key -> ctx.sendMessage(Identity.nil(), Component.text(" - " + key, NamedTextColor.GRAY)));
         });
 
         dpm.load(DataPacks.BIOME, ResourceKey.of(NAMESPACE, CUSTOM_PLAINS)).join().ifPresent(template -> {
             ctx.sendMessage(Identity.nil(), Component.text("BiomeTemplate loaded from disk is present " + template.key(), NamedTextColor.DARK_AQUA));
-        });
+        });*/
         return CommandResult.success();
     }
 

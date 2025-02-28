@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.item.recipe.ingredient;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Either;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
@@ -114,16 +112,6 @@ public abstract class SpongeItemList implements HolderSet<Item> {
 
     public Collection<ItemStack> getItems() {
         return Arrays.asList(this.stacks);
-    }
-
-    public JsonObject serialize() {
-        final JsonObject jsonobject = new JsonObject();
-        final JsonArray stackArray = new JsonArray();
-        for (ItemStack stack : this.stacks) {
-            stackArray.add(IngredientResultUtil.serializeItemStack(stack));
-        }
-        jsonobject.add(SpongeItemList.INGREDIENT_ITEM, stackArray);
-        return jsonobject;
     }
 
     public abstract boolean test(ItemStack stack);

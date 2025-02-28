@@ -24,24 +24,31 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import net.minecraft.core.LayeredRegistryAccess;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.Registry;
+import net.minecraft.core.WritableRegistry;
 import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.ReloadableServerRegistries;
+import net.minecraft.server.packs.resources.ResourceManager;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.launch.Launch;
+
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.stream.Stream;
 
 @Mixin(ReloadableServerRegistries.class)
 public abstract class ReloadableServerRegistriesMixin {
 
-    @Redirect(method = "reload", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/core/LayeredRegistryAccess;getAccessForLoading(Ljava/lang/Object;)Lnet/minecraft/core/RegistryAccess$Frozen;"))
-    private static <T> RegistryAccess.Frozen impl$onGetAccess(final LayeredRegistryAccess instance, final T $$0) {
-        final RegistryAccess.Frozen registryAccess = instance.getAccessForLoading($$0);
-        final var lifecycle = Launch.instance().lifecycle();
-        lifecycle.establishGlobalRegistries(registryAccess, (RegistryLayer) $$0);
-        return registryAccess;
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @ModifyExpressionValue(method = "reload", at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;sequence(Ljava/util/List;)Ljava/util/concurrent/CompletableFuture;"))
+    private static CompletableFuture<List<WritableRegistry<?>>> impl$onReload(final CompletableFuture<List<WritableRegistry<?>>> original,
+            final LayeredRegistryAccess<RegistryLayer> $$0, final List<Registry.PendingTags<?>> $$1, final ResourceManager $$2, final Executor $$3) {
+        return original.thenApply(l -> Stream.concat(Stream.concat(l.stream(), (Stream) ((RegistryHolder) $$2).streamRegistries(ResourceKey.sponge("root"))), (Stream) Sponge.game().streamRegistries(ResourceKey.sponge("root"))).toList());
     }
 }

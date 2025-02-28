@@ -28,7 +28,6 @@ import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
@@ -40,10 +39,8 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.blockray.RayTrace;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.generation.feature.Feature;
-import org.spongepowered.api.world.generation.feature.FeatureTemplate;
 import org.spongepowered.api.world.generation.feature.Features;
 import org.spongepowered.api.world.generation.feature.PlacedFeature;
-import org.spongepowered.api.world.generation.feature.PlacedFeatureTemplate;
 import org.spongepowered.api.world.generation.feature.PlacedFeatures;
 import org.spongepowered.api.world.server.DataPackManager;
 import org.spongepowered.api.world.server.ServerLocation;
@@ -87,7 +84,7 @@ public class FeatureTest {
     CommandResult registerFeature(final CommandContext ctx) {
         final DataPackManager dpm = Sponge.server().dataPackManager();
 
-        final FeatureTemplate featureTemplate = FeatureTemplate.builder().fromValue(Features.TREES_PLAINS.get())
+        /*final FeatureTemplate featureTemplate = FeatureTemplate.builder().fromValue(Features.TREES_PLAINS.get())
                 .key(ResourceKey.of("featuretest", "test"))
                 .build();
 
@@ -103,7 +100,7 @@ public class FeatureTest {
 
         dpm.save(featureTemplate);
         dpm.save(placedFeatureTemplate1);
-        dpm.save(placedFeatureTemplate2);
+        dpm.save(placedFeatureTemplate2);*/
 
         return CommandResult.success();
     }

@@ -39,9 +39,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.adventure.ChatTypeTemplate;
+import org.spongepowered.api.adventure.ChatType;
 import org.spongepowered.api.adventure.ChatTypes;
 import org.spongepowered.api.adventure.ResolveOperations;
 import org.spongepowered.api.adventure.SpongeComponents;
@@ -58,11 +57,14 @@ import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.filter.data.GetValue;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
-import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
+import org.spongepowered.api.event.lifecycle.RegisterRegistryValueEvent;
 import org.spongepowered.api.event.message.PlayerChatEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.registry.DefaultedRegistryReference;
+import org.spongepowered.api.registry.RegistryRegistrationSet;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.locale.Locales;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
@@ -77,11 +79,26 @@ import java.util.ResourceBundle;
 @Plugin("chattest")
 public class ChatTest implements LoadableModule {
 
+    public static final class ChatTypes {
+
+        public static final class Holder {
+
+            public static final RegistryRegistrationSet<ChatType> CHAT_TYPES = ChatTypes.BUILDER.build();
+        }
+
+        private static final RegistryRegistrationSet.Builder<ChatType> BUILDER = RegistryRegistrationSet.builder(RegistryTypes.CHAT_TYPE, Sponge::server);
+
+        public static final DefaultedRegistryReference<ChatType> INVERTED_CHAT_ORDER = ChatTypes.BUILDER.register(
+            ResourceKey.of("chattest", "inverted"),
+            () -> ChatType.builder().translationKey("%s by <%s>")
+                .addContent().addSender()
+                .build());
+    }
+
     private static final Logger LOGGER = LogManager.getLogger();
 
     private static final BossBar INFO_BAR = BossBar.bossBar(Component.translatable("chattest.bars.info"), 1f, BossBar.Color.PINK,
                                                       BossBar.Overlay.PROGRESS);
-    public static final ResourceKey INVERTED_CHAT_ORDER = ResourceKey.of("chattest", "inverted");
 
     private final Game game;
     private final PluginContainer container;
@@ -103,14 +120,8 @@ public class ChatTest implements LoadableModule {
     }
 
     @Listener
-    private void onServerStarted(final StartedEngineEvent<Server> event)
-    {
-        // TODO register this earlier - static context?
-        final ChatTypeTemplate template = ChatTypeTemplate.builder().translationKey("%s by <%s>")
-                .addContent().addSender()
-                .key(INVERTED_CHAT_ORDER)
-                .build();
-        Sponge.server().dataPackManager().save(template);
+    private void onRegisterRegistryValueEvent(final RegisterRegistryValueEvent event) {
+        event.register(ChatTypes.Holder.CHAT_TYPES);
     }
 
     @Override
@@ -204,7 +215,7 @@ public class ChatTest implements LoadableModule {
                 event.setMessage(event.message().color(NamedTextColor.GREEN));
             } else if (event instanceof final PlayerChatEvent.Submit submitEvent) {
 
-                submitEvent.setChatType(ChatTypes.key(INVERTED_CHAT_ORDER));
+                submitEvent.setChatType(ChatTypes.INVERTED_CHAT_ORDER);
                 final Optional<Component> optPlayerName = event.player().flatMap(p -> p.get(Keys.DISPLAY_NAME));
                 final TextComponent name = Component.text("Prefix", NamedTextColor.RED)
                         .append(Component.text(" | ", NamedTextColor.GOLD))

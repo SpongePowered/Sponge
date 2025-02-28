@@ -37,6 +37,7 @@ import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
 import org.spongepowered.api.command.registrar.CommandRegistrarType;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -55,9 +56,11 @@ public final class SpongeRawCommandRegistrar implements CommandRegistrar<Command
 
     private final HashMap<CommandMapping, Command.Raw> commands = new HashMap<>();
     private final CommandManager.Mutable manager;
+    private final RegistryHolder registryHolder;
 
-    SpongeRawCommandRegistrar(final CommandManager.Mutable manager) {
+    SpongeRawCommandRegistrar(final CommandManager.Mutable manager, final RegistryHolder registryHolder) {
         this.manager = manager;
+        this.registryHolder = registryHolder;
     }
 
     @Override
@@ -75,7 +78,7 @@ public final class SpongeRawCommandRegistrar implements CommandRegistrar<Command
         final CommandMapping mapping = this.manager.registerAlias(
                 this,
                 container,
-                command.commandTree(),
+                command.commandTree(this.registryHolder),
                 primaryAlias,
                 secondaryAliases
         );

@@ -32,25 +32,25 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
-import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.cause.entity.damage.DamageScalings;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
-import org.spongepowered.api.event.cause.entity.damage.DamageTypeTemplate;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
-import org.spongepowered.api.event.lifecycle.RegisterDataPackValueEvent;
+import org.spongepowered.api.event.lifecycle.RegisterRegistryValueEvent;
+import org.spongepowered.api.event.lifecycle.RegisterTagEvent;
+import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.api.registry.RegistryKey;
+import org.spongepowered.api.registry.RegistryRegistrationSet;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.tag.DamageTypeTags;
-import org.spongepowered.api.tag.TagTemplate;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
@@ -60,6 +60,21 @@ import org.spongepowered.test.LoadableModule;
 @Plugin("damagetest")
 public class DamageTest implements LoadableModule {
     private static final ResourceKey EXHAUSTING_DAMAGE = ResourceKey.of("damagetest", "test");
+
+    class Test {
+
+        static final class Registry {
+            public static final RegistryRegistrationSet<DamageType> DAMAGE_TYPES = BUILDER.build();
+        }
+
+        private static final RegistryRegistrationSet.Builder<DamageType> BUILDER = RegistryRegistrationSet.builder(RegistryTypes.DAMAGE_TYPE, Sponge::server);
+
+        public static final DefaultedRegistryReference<DamageType> EXHAUSTING_DAMAGE = BUILDER.register(
+            ResourceKey.of("damagetest", "test"),
+            () -> DamageType.builder().name("test").scaling(DamageScalings.NEVER.get())
+                .exhaustion(100d)
+                .build());
+    }
 
     private final PluginContainer plugin;
     private final DamageListener listener = new DamageListener();
@@ -95,19 +110,13 @@ public class DamageTest implements LoadableModule {
     }
 
     @Listener
-    private void onDamageTypePack(final RegisterDataPackValueEvent<DamageTypeTemplate> event) {
-        final DamageTypeTemplate template = DamageTypeTemplate.builder().name("test").scaling(DamageScalings.NEVER.get())
-                .exhaustion(100d)
-                .key(EXHAUSTING_DAMAGE)
-                .build();
-        event.register(template);
+    private void onRegisterRegistryValueEvent(final RegisterRegistryValueEvent event) {
+        event.register(Test.Registry.DAMAGE_TYPES);
     }
 
     @Listener
-    private void onDamageTypeTagPack(final RegisterDataPackValueEvent<TagTemplate<DamageType>> event) {
-        final TagTemplate<DamageType> template = TagTemplate.builder(DataPacks.DAMAGE_TYPE_TAG).key(DamageTypeTags.BYPASSES_INVULNERABILITY.key())
-                .addValue(RegistryKey.of(RegistryTypes.DAMAGE_TYPE, EXHAUSTING_DAMAGE)).build();
-        event.register(template);
+    private void onRegisterTagEvent(final RegisterTagEvent event) {
+        event.tag(DamageTypeTags.BYPASSES_INVULNERABILITY).append(RegistryKey.of(RegistryTypes.DAMAGE_TYPE, EXHAUSTING_DAMAGE));
     }
 
     private static class DamageListener {

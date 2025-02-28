@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.resources;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.serialization.Decoder;
 import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.WritableRegistry;
@@ -35,13 +37,27 @@ import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.DependencySorter;
 import org.spongepowered.api.adventure.ChatTypes;
+import org.spongepowered.api.registry.Registry;
+import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.accessor.resources.RegistryDataLoader_LoaderAccessor;
+import org.spongepowered.common.bridge.core.WritableRegistryBridge;
+import org.spongepowered.common.bridge.resources.RegistryDataLoader_LoaderBridge;
+import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.launch.Lifecycle;
+import org.spongepowered.common.registry.SpongeRegistryDependencyEntry;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 @Mixin(RegistryDataLoader.class)
 public class RegistryDataLoaderMixin {
@@ -61,5 +77,26 @@ public class RegistryDataLoaderMixin {
             $$2.register(ResourceKey.create($$2.key(), (ResourceLocation) (Object) ChatTypes.CUSTOM_CHAT.location()), (E) new ChatType(ChatTypeDecoration.withSender("%s%s"), narration), RegistrationInfo.BUILT_IN);
             $$2.register(ResourceKey.create($$2.key(), (ResourceLocation) (Object) ChatTypes.CUSTOM_MESSAGE.location()), (E) new ChatType(ChatTypeDecoration.teamMessage("%s%s%s"), narration), RegistrationInfo.BUILT_IN);
         }
+    }
+
+    @WrapOperation(method = "load(Lnet/minecraft/resources/RegistryDataLoader$LoadingFunction;Ljava/util/List;Ljava/util/List;)Lnet/minecraft/core/RegistryAccess$Frozen;",
+        at = @At(value = "INVOKE", target = "Ljava/util/List;forEach(Ljava/util/function/Consumer;)V", ordinal = 1))
+    private static void impl$onLoad(final List<RegistryDataLoader_LoaderAccessor<?>> instance, final Consumer<?> consumer, final Operation<Void> original) {
+        final DependencySorter<RegistryType<?>, SpongeRegistryDependencyEntry<RegistryDataLoader_LoaderAccessor<?>>> dependencies = new DependencySorter<>();
+        final Lifecycle lifecycle = Launch.instance().lifecycle();
+        instance.stream()
+            .collect(Collectors.groupingBy(l -> ((RegistryDataLoader_LoaderBridge) l).bridge$registryHolder(), Collectors.toSet()))
+            .forEach((k, v) -> {
+                lifecycle.processServerRegistries(k, v.stream()
+                    .filter(l -> !l.accessor$data().key().equals(Registries.LEVEL_STEM)) // NOTE: Level Stems are special!
+                    .map(l -> (Registry<?>) l.accessor$registry()));
+                v.forEach(l -> dependencies.addEntry(((Registry<?>) l.accessor$registry()).type(),
+                    new SpongeRegistryDependencyEntry<>(l, ((WritableRegistryBridge<?>) l.accessor$registry()).bridge$pendingDependencies().toList())));
+            });
+
+        List<RegistryDataLoader_LoaderAccessor<?>> loaders = new ArrayList<>(instance.size());
+        dependencies.orderByDependencies(($, v) -> loaders.add(v.cookie()));
+
+        original.call(Collections.unmodifiableList(loaders), consumer);
     }
 }

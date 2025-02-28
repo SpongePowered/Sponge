@@ -24,22 +24,15 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.carver;
 
-import com.google.gson.JsonElement;
-import com.mojang.serialization.Codec;
 import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
-import org.spongepowered.api.data.persistence.DataFormats;
-import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.world.generation.carver.Carver;
 import org.spongepowered.api.world.generation.carver.CarverType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.world.generation.carver.SpongeCarverTemplate;
 
-import java.io.IOException;
 
 @Mixin(ConfiguredWorldCarver.class)
 public abstract class ConfiguredWorldCarverMixin_API<WC extends CarverConfiguration> implements Carver {
@@ -52,15 +45,5 @@ public abstract class ConfiguredWorldCarverMixin_API<WC extends CarverConfigurat
     @Override
     public CarverType type() {
         return (CarverType) this.worldCarver;
-    }
-
-    @Override
-    public DataView toContainer() {
-        final JsonElement serialized = SpongeCarverTemplate.encode((Codec<ConfiguredWorldCarver<?>>) (Object) this.worldCarver.configuredCodec(), (ConfiguredWorldCarver<WC>) (Object) this, SpongeCommon.server().registryAccess());
-        try {
-            return DataFormats.JSON.get().read(serialized.toString());
-        } catch (IOException e) {
-            throw new IllegalStateException("Could not read deserialized Carver: " + serialized, e);
-        }
     }
 }

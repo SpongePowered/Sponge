@@ -75,9 +75,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.datapack.DataPack;
-import org.spongepowered.api.datapack.DataPackTypes;
-import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.event.world.UnloadWorldEvent;
@@ -87,7 +84,6 @@ import org.spongepowered.api.world.DefaultWorldKeys;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.WorldManager;
-import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
@@ -128,7 +124,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -249,25 +244,7 @@ public abstract class SpongeWorldManager implements WorldManager {
     }
 
     @Override
-    public CompletableFuture<ServerWorld> loadWorld(final WorldTemplate template) {
-        final ResourceKey key = Objects.requireNonNull(template, "template").key();
-        final net.minecraft.resources.ResourceKey<Level> registryKey = SpongeWorldManager.createRegistryKey(key);
-        if (Level.OVERWORLD.equals(registryKey)) {
-            return FutureUtil.completedWithException(new IllegalArgumentException("The default world cannot be told to load!"));
-        }
-
-        final ServerLevel serverWorld = this.worlds.get(registryKey);
-        if (serverWorld != null) {
-            return CompletableFuture.completedFuture((ServerWorld) serverWorld);
-        }
-
-        this.saveTemplate(template);
-
-        return this.loadWorld0(registryKey, ((SpongeWorldTemplate) template).levelStem());
-    }
-
-    @Override
-    public CompletableFuture<ServerWorld> loadWorld(final ResourceKey key) {
+    public CompletableFuture<Optional<ServerWorld>> loadWorld(final ResourceKey key) {
         final net.minecraft.resources.ResourceKey<Level> registryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(key, "key"));
         if (Level.OVERWORLD.equals(registryKey)) {
             return FutureUtil.completedWithException(new IllegalArgumentException("The default world cannot be told to load!"));
@@ -275,25 +252,17 @@ public abstract class SpongeWorldManager implements WorldManager {
 
         final ServerLevel world = this.worlds.get(registryKey);
         if (world != null) {
-            return CompletableFuture.completedFuture((ServerWorld) world);
+            return CompletableFuture.completedFuture(Optional.of((ServerWorld) world));
         }
 
         // First find a loaded level-stem / To load based on a datapack load using the WorldTemplate instead
 
-        final net.minecraft.resources.ResourceKey<LevelStem> rKey = net.minecraft.resources.ResourceKey.create(Registries.LEVEL_STEM, (ResourceLocation) (Object) key);
-        final LevelStem levelStem = SpongeCommon.vanillaRegistry(Registries.LEVEL_STEM).getValue(rKey);
-        if (levelStem != null) {
-            return this.loadWorld0(registryKey, levelStem);
-        }
+        return CompletableFuture.completedFuture(Optional.empty());
+    }
 
-        // Then attempt to load from data pack
-        final DataPack<WorldTemplate> pack = this.findPack(key);
-        return this.loadTemplate(pack, key).thenCompose(template -> {
-            if (template.isEmpty()) {
-                return FutureUtil.completedWithException(new IOException(String.format("Failed to load a template for '%s'!", key)));
-            }
-            return this.loadWorld0(registryKey, ((SpongeWorldTemplate) template.get()).levelStem());
-        });
+    @Override
+    public CompletableFuture<Optional<ServerWorld>> loadWorld(final ResourceKey key, final ServerWorldProperties.LoadOptions propertiesLoadOptions) {
+        return null;
     }
 
     private CompletableFuture<ServerWorld> loadWorld0(final net.minecraft.resources.ResourceKey<Level> registryKey, final LevelStem levelStem) {
@@ -419,16 +388,12 @@ public abstract class SpongeWorldManager implements WorldManager {
             return CompletableFuture.completedFuture(Optional.empty());
         }
 
-        final DataPack<WorldTemplate> pack = this.findPack(key);
-        return this.loadTemplate(pack, key).thenCompose(template -> {
-            if (template.isPresent()) {
-                final LevelStem scratch = ((SpongeWorldTemplate) template.get()).levelStem();
-                ((PrimaryLevelDataBridge) levelData).bridge$populateFromLevelStem(scratch);
-            }
+        return FutureUtil.completedWithException(new IllegalArgumentException("TODO!"));
+    }
 
-            ((ResourceKeyBridge) levelData).bridge$setKey(key);
-            return CompletableFuture.completedFuture(Optional.of((ServerWorldProperties) levelData));
-        });
+    @Override
+    public CompletableFuture<Optional<ServerWorldProperties>> loadProperties(ResourceKey key, ServerWorldProperties.LoadOptions propertiesLoadOptions) {
+        return null;
     }
 
     @Override
@@ -446,15 +411,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         }
 
         // Properties doesn't have everything we need...namely the generator, load the template and set values we actually got
-        final DataPack<WorldTemplate> pack = this.findPack(properties.key());
-        return this.loadTemplate(pack, properties.key()).thenCompose(r -> {
-            final WorldTemplate template = r.orElse(null);
-            if (template != null) {
-                return this.saveTemplate(WorldTemplate.builder().from(template).from(properties).build());
-            }
-
-            return CompletableFuture.completedFuture(true);
-        });
+        return FutureUtil.completedWithException(new IllegalArgumentException("TODO!"));
     }
 
 
@@ -559,12 +516,6 @@ public abstract class SpongeWorldManager implements WorldManager {
                 throw new CompletionException(e);
             }
         }).thenApplyAsync($ -> {
-            try {
-                this.server().dataPackManager().copy(this.findPack(key), key, copyKey);
-            } catch (final IOException e) {
-                throw new CompletionException(e);
-            }
-
             return true;
         }, SpongeCommon.server());
     }
@@ -615,12 +566,6 @@ public abstract class SpongeWorldManager implements WorldManager {
                 throw new CompletionException(e);
             }
         }).thenApplyAsync($ -> {
-            try {
-                this.server().dataPackManager().move(this.findPack(key), key, movedKey);
-            } catch (final IOException e) {
-                throw new CompletionException(e);
-            }
-
             return true;
         }, SpongeCommon.server());
     }
@@ -667,12 +612,6 @@ public abstract class SpongeWorldManager implements WorldManager {
                 throw new CompletionException(e);
             }
         }).thenApplyAsync($ -> {
-            try {
-                this.server().dataPackManager().delete(this.findPack(key), key);
-            } catch (final IOException e) {
-                throw new CompletionException(e);
-            }
-
             //After vanilla has detected a new dimension from a data pack it "promotes" it
             //to the overworld's level data where the level persist even when the data pack is removed.
             //This forcible removes it from there too.
@@ -688,10 +627,6 @@ public abstract class SpongeWorldManager implements WorldManager {
 
             return true;
         }, SpongeCommon.server());
-    }
-
-    private DataPack<WorldTemplate> findPack(ResourceKey key) {
-        return this.server().dataPackManager().findPack(DataPackTypes.WORLD, key).orElse(DataPacks.WORLD);
     }
 
     private void unloadWorld0(final ServerLevel world) throws IOException {
@@ -1044,20 +979,6 @@ public abstract class SpongeWorldManager implements WorldManager {
                 serverChunkProvider.updateChunkForced(forceChunkPos, true);
             }
         }
-    }
-
-    private CompletionStage<Boolean> saveTemplate(final WorldTemplate template) {
-        return this.server().dataPackManager().save(template).thenApply(b -> true);
-    }
-
-    private CompletableFuture<Optional<WorldTemplate>> loadTemplate(final DataPack<WorldTemplate> pack, final ResourceKey key) {
-        if (this.server().dataPackManager().exists(pack, key)) {
-            return this.server().dataPackManager().load(pack, key).exceptionally(e -> {
-                e.printStackTrace();
-                return Optional.empty();
-            });
-        }
-        return CompletableFuture.completedFuture(Optional.empty());
     }
 
     public static net.minecraft.resources.ResourceKey<Level> createRegistryKey(final ResourceKey key) {

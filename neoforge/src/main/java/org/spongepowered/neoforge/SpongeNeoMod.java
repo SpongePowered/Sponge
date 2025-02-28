@@ -116,7 +116,6 @@ public final class SpongeNeoMod {
 
         lifecycle.establishServerFeatures();
 
-        lifecycle.establishServerRegistries((Server) event.getServer());
         lifecycle.callStartingEngineEvent((Server) event.getServer());
     }
 

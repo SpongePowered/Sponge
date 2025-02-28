@@ -44,6 +44,7 @@ import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
 import org.spongepowered.api.command.registrar.CommandRegistrarType;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.command.SpongeCommandCompletion;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
@@ -76,9 +77,9 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar<
             );
 
     private final SpongeCommandManager manager;
-    private SpongeCommandDispatcher dispatcher;
+    private final SpongeCommandDispatcher dispatcher;
 
-    public BrigadierCommandRegistrar(final CommandManager.Mutable manager) {
+    public BrigadierCommandRegistrar(final CommandManager.Mutable manager, final RegistryHolder registryHolder) {
         this.manager = (SpongeCommandManager) manager;
         this.dispatcher = new SpongeCommandDispatcher(this.manager);
     }

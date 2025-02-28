@@ -29,8 +29,8 @@ import net.kyori.adventure.text.Component;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementProgress;
-import org.spongepowered.api.advancement.AdvancementTemplate;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.AdvancementTypes;
 import org.spongepowered.api.advancement.DisplayInfo;
@@ -43,7 +43,6 @@ import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -58,13 +57,15 @@ import org.spongepowered.api.event.advancement.CriterionEvent;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
-import org.spongepowered.api.event.lifecycle.RegisterDataPackValueEvent;
+import org.spongepowered.api.event.lifecycle.RegisterDataEvent;
 import org.spongepowered.api.event.lifecycle.RegisterRegistryValueEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.BlockCarrier;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import org.spongepowered.api.registry.DefaultedRegistryReference;
+import org.spongepowered.api.registry.RegistryRegistrationSet;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
@@ -75,50 +76,194 @@ import java.util.Optional;
 @Plugin("advancementtest")
 public final class AdvancementTest implements LoadableModule {
 
+    public static final String NAMESPACE = "advancementtest";
+
+    public static final class Triggers {
+
+        public static final class Holder {
+
+            private static final RegistryRegistrationSet<Trigger<?>> TRIGGERS = Triggers.TRIGGER_BUILDER.build();
+        }
+
+        private static final RegistryRegistrationSet.Builder<Trigger<?>> TRIGGER_BUILDER = RegistryRegistrationSet.builder(RegistryTypes.TRIGGER, Sponge::game);
+
+        public static final DefaultedRegistryReference<Trigger<InventoryChangeTriggerConfig>> INVENTORY_CHANGE_TRIGGER = Triggers.TRIGGER_BUILDER.register(
+            ResourceKey.of(AdvancementTest.NAMESPACE, "my_inventory_trigger"),
+            () -> Trigger.builder()
+                .dataSerializableConfig(InventoryChangeTriggerConfig.class)
+                .listener(triggerEvent -> {
+                    final ItemStack stack = triggerEvent.trigger().configuration().stack;
+                    final int found = triggerEvent.player().inventory().query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY, stack).totalQuantity();
+                    triggerEvent.setResult(stack.quantity() <= found);
+                })
+                .name("my_inventory_trigger")
+                .build()
+        );
+    }
+
+    public static final class AdvancementCriteria {
+
+        public static final AdvancementCriterion SOME_DIRT = AdvancementCriterion.builder().trigger(
+            Triggers.INVENTORY_CHANGE_TRIGGER.get(),
+            FilteredTrigger.builder()
+                .config(new InventoryChangeTriggerConfig(ItemStack.of(ItemTypes.DIRT)))
+                .build()).name("some_dirt").build();
+
+        public static final AdvancementCriterion LOTS_OF_DIRT = AdvancementCriterion.builder().trigger(
+            Triggers.INVENTORY_CHANGE_TRIGGER.get(),
+            FilteredTrigger.builder()
+                .config(new InventoryChangeTriggerConfig(ItemStack.of(ItemTypes.DIRT, 64)))
+                .build()).name("lots_of_dirt").build();
+
+        public static final AdvancementCriterion TONS_OF_DIRT = AdvancementCriterion.builder().trigger(
+            Triggers.INVENTORY_CHANGE_TRIGGER.get(),
+            FilteredTrigger.builder()
+                .config(new InventoryChangeTriggerConfig(ItemStack.of(ItemTypes.DIRT, 64*9)))
+                .build()).name("tons_of_dirt").build();
+
+        public static final ScoreAdvancementCriterion COUNTER_1 = ScoreAdvancementCriterion.builder().goal(10).name("counter").build();
+        public static final AdvancementCriterion COUNTER_1_BYPASS = AdvancementCriterion.dummy();
+
+        public static final ScoreAdvancementCriterion COUNTER_2 = ScoreAdvancementCriterion.builder().goal(20).name("counter").build();
+
+        public static final AdvancementCriterion A = AdvancementCriterion.builder().name("A").build();
+        public static final AdvancementCriterion B = AdvancementCriterion.builder().name("B").build();
+        public static final AdvancementCriterion C = AdvancementCriterion.builder().name("C").build();
+        public static final AdvancementCriterion D = AdvancementCriterion.builder().name("D").build();
+        public static final AdvancementCriterion E = AdvancementCriterion.builder().name("E").build();
+        public static final AdvancementCriterion F = AdvancementCriterion.builder().name("F").build();
+
+        public static final AdvancementCriterion COMBINATION = OrCriterion.of(
+            AdvancementCriteria.A,
+            AndCriterion.of(AdvancementCriteria.B, OrCriterion.of(AdvancementCriteria.C, AdvancementCriteria.D)),
+            AndCriterion.of(AdvancementCriteria.E, AdvancementCriteria.F));
+    }
+
+    public static final class Advancements {
+
+        public static final class Holder {
+
+            private static final RegistryRegistrationSet<Advancement> ADVANCEMENTS = Advancements.ADVANCEMENT_BUILDER.build();
+        }
+
+        private static final RegistryRegistrationSet.Builder<Advancement> ADVANCEMENT_BUILDER = RegistryRegistrationSet.builder(RegistryTypes.ADVAN, Sponge::server);
+
+        public static final DefaultedRegistryReference<Advancement> ROOT_ADVANCEMENT = Advancements.ADVANCEMENT_BUILDER.register(
+            ResourceKey.of(AdvancementTest.NAMESPACE, "root"),
+            () -> Advancement.builder()
+                .criterion(AdvancementCriterion.dummy())
+                .displayInfo(DisplayInfo.builder()
+                    .icon(ItemTypes.COMMAND_BLOCK)
+                    .title(Component.text("Advancement Tests"))
+                    .description(Component.text("Dummy trigger. Granted manually after testplugin is enabled"))
+                    .build())
+                .root().background(ResourceKey.minecraft("textures/gui/advancements/backgrounds/stone.png"))
+                .build());
+
+        public static final DefaultedRegistryReference<Advancement> SOME_DIRT = Advancements.ADVANCEMENT_BUILDER.register(
+            ResourceKey.of(AdvancementTest.NAMESPACE, "some_dirt"),
+            () -> Advancement.builder()
+                .criterion(AdvancementCriteria.SOME_DIRT)
+                .displayInfo(DisplayInfo.builder()
+                    .icon(ItemTypes.DIRT)
+                    .title(Component.text("Got dirt!"))
+                    .type(AdvancementTypes.TASK)
+                    .build())
+                .parent(Advancements.ROOT_ADVANCEMENT.location())
+                .build());
+
+        public static final DefaultedRegistryReference<Advancement> LOTS_OF_DIRT = Advancements.ADVANCEMENT_BUILDER.register(
+            ResourceKey.of(AdvancementTest.NAMESPACE, "lots_of_dirt"),
+            () -> Advancement.builder()
+                .criterion(AdvancementCriteria.LOTS_OF_DIRT)
+                .displayInfo(DisplayInfo.builder()
+                    .icon(ItemTypes.DIRT)
+                    .title(Component.text("Got more dirt!"))
+                    .type(AdvancementTypes.GOAL)
+                    .build())
+                .parent(Advancements.SOME_DIRT.location())
+                .build());
+
+        public static final DefaultedRegistryReference<Advancement> TONS_OF_DIRT = Advancements.ADVANCEMENT_BUILDER.register(
+            ResourceKey.of(AdvancementTest.NAMESPACE, "tons_of_dirt"),
+            () -> Advancement.builder()
+                .criterion(AdvancementCriteria.TONS_OF_DIRT)
+                .displayInfo(DisplayInfo.builder()
+                    .icon(ItemTypes.DIRT)
+                    .title(Component.text("Got tons of dirt!"))
+                    .type(AdvancementTypes.CHALLENGE)
+                    .hidden(true)
+                    .build())
+                .parent(Advancements.LOTS_OF_DIRT.location())
+                .build());
+
+        public static final DefaultedRegistryReference<Advancement> COUNTER_1 = Advancements.ADVANCEMENT_BUILDER.register(
+            ResourceKey.of(AdvancementTest.NAMESPACE, "counting"),
+            () -> Advancement.builder()
+                .criterion(OrCriterion.of(AdvancementCriteria.COUNTER_1, AdvancementCriteria.COUNTER_1_BYPASS))
+                .displayInfo(DisplayInfo.builder()
+                    .icon(ItemTypes.CHEST)
+                    .title(Component.text("Open some chests."))
+                    .type(AdvancementTypes.GOAL)
+                    .build())
+                .parent(Advancements.ROOT_ADVANCEMENT.location())
+                .build());
+
+        public static final DefaultedRegistryReference<Advancement> COUNTER_2 = Advancements.ADVANCEMENT_BUILDER.register(
+            ResourceKey.of(AdvancementTest.NAMESPACE, "counting_more"),
+            () -> Advancement.builder()
+                .criterion(AdvancementCriteria.COUNTER_2)
+                .displayInfo(DisplayInfo.builder()
+                    .icon(ItemTypes.CHEST)
+                    .title(Component.text("Open more chests"))
+                    .type(AdvancementTypes.CHALLENGE)
+                    .build())
+                .parent(Advancements.COUNTER_1.location())
+                .build());
+
+        public static final DefaultedRegistryReference<Advancement> COMBINATION = Advancements.ADVANCEMENT_BUILDER.register(
+            ResourceKey.of(AdvancementTest.NAMESPACE, "combination"),
+            () -> Advancement.builder()
+                .criterion(AdvancementCriteria.COMBINATION)
+                .displayInfo(DisplayInfo.builder()
+                    .icon(ItemTypes.CHEST)
+                    .title(Component.text("A || (B & (C || D)) || (E & F)"))
+                    .description(Component.text("ABE ABF ACDE ACDF"))
+                    .type(AdvancementTypes.CHALLENGE)
+                    .build())
+                .parent(Advancements.COUNTER_1.location())
+                .build());
+    }
+
     @Inject private PluginContainer plugin;
     @Inject private Logger logger;
     private boolean enabled = false;
-    private AdvancementTemplate rootAdvancement;
-    private Trigger<InventoryChangeTriggerConfig> inventoryChangeTrigger;
     private TriggerListeners listeners = new TriggerListeners();
-    private ScoreAdvancementCriterion counter1;
-    private AdvancementCriterion counter1Bypass;
-    private ScoreAdvancementCriterion counter2;
-    private AdvancementTemplate counterAdvancement1;
-    private AdvancementTemplate counterAdvancement2;
 
     @Override
     public void enable(final CommandContext ctx) {
         this.enabled = true;
         Sponge.eventManager().registerListeners(this.plugin, this.listeners);
-        try {
-            Sponge.server().commandManager().process("reload");
-        } catch (final CommandException e) {
-            e.printStackTrace();
-        }
-        ctx.cause().first(ServerPlayer.class).map(player -> player.progress(this.rootAdvancement).grant());
+        Sponge.server().dataPackManager().reload().join();
+        ctx.cause().first(ServerPlayer.class).map(player -> player.progress(Advancements.ROOT_ADVANCEMENT.get()).grant());
     }
 
     @Override
     public void disable(final CommandContext ctx) {
         this.enabled = false;
         Sponge.eventManager().unregisterListeners(this.listeners);
-        try {
-            Sponge.server().commandManager().process("reload");
-        } catch (final CommandException e) {
-            e.printStackTrace();
-        }
+        Sponge.server().dataPackManager().reload();
     }
 
     @Listener
     private void onTreeAdjust(final AdvancementTreeEvent.GenerateLayout event) {
         final AdvancementTree tree = event.tree();
-        if (this.rootAdvancement != null && tree.key().equals(this.rootAdvancement.key())) {
-            final TreeLayoutElement layoutElement1 = tree.layoutElement(this.counterAdvancement1).get();
-            final TreeLayoutElement layoutElement2 = tree.layoutElement(this.counterAdvancement2).get();
+        Advancements.ROOT_ADVANCEMENT.find(event.registryHolder()).filter(tree.rootAdvancement()::equals).ifPresent(advancement -> {
+            final TreeLayoutElement layoutElement1 = tree.layoutElement(Advancements.COUNTER_1.get(event.registryHolder())).get();
+            final TreeLayoutElement layoutElement2 = tree.layoutElement(Advancements.COUNTER_2.get(event.registryHolder())).get();
             layoutElement1.setPosition(layoutElement2.position());
             layoutElement2.setPosition(layoutElement2.position().add(-1,2));
-        }
+        });
     }
 
     @Listener
@@ -137,170 +282,43 @@ public final class AdvancementTest implements LoadableModule {
     }
 
     @Listener
-    private void onTriggerRegistry(final RegisterRegistryValueEvent.BuiltIn<Trigger<?>> event) {
+    private void onTriggerRegistry(final RegisterDataEvent event) {
         Sponge.dataManager().registerBuilder(InventoryChangeTriggerConfig.class, new InventoryChangeTriggerConfig.Builder());
-        this.inventoryChangeTrigger = Trigger.builder()
-                .dataSerializableConfig(InventoryChangeTriggerConfig.class)
-                .listener(triggerEvent -> {
-                    final ItemStack stack = triggerEvent.trigger().configuration().stack;
-                    final int found = triggerEvent.player().inventory().query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY, stack).totalQuantity();
-                    triggerEvent.setResult(stack.quantity() <= found);
-                })
-                .name("my_inventory_trigger")
-                .build();
-        event.registry(RegistryTypes.TRIGGER).register(ResourceKey.of(this.plugin, "my_inventory_trigger"), this.inventoryChangeTrigger);
     }
 
 
     @Listener
-    private void onAdvancementRegistry(final RegisterDataPackValueEvent<AdvancementTemplate> event) {
+    private void onRegisterRegistryValueEvent(final RegisterRegistryValueEvent event) {
 
         if (!this.enabled) {
             return;
         }
 
-        AdvancementTemplate rootAdvancement = AdvancementTemplate.builder()
-                .criterion(AdvancementCriterion.dummy())
-                .displayInfo(DisplayInfo.builder()
-                                .icon(ItemTypes.COMMAND_BLOCK)
-                                .title(Component.text("Advancement Tests"))
-                                .description(Component.text("Dummy trigger. Granted manually after testplugin is enabled"))
-                                .build())
-                .root().background(ResourceKey.minecraft("textures/gui/advancements/backgrounds/stone.png"))
-                .key(ResourceKey.of(this.plugin, "root"))
-                .build();
-        event.register(rootAdvancement);
-        this.rootAdvancement = rootAdvancement;
-
-        final AdvancementCriterion someDirtCriterion = AdvancementCriterion.builder().trigger(
-                this.inventoryChangeTrigger,
-                FilteredTrigger.builder()
-                        .config(new InventoryChangeTriggerConfig(ItemStack.of(ItemTypes.DIRT)))
-                        .build()
-        ).name("some_dirt").build();
-
-        final AdvancementTemplate someDirt = AdvancementTemplate.builder()
-                .criterion(someDirtCriterion)
-                .displayInfo(DisplayInfo.builder()
-                        .icon(ItemTypes.DIRT)
-                        .title(Component.text("Got dirt!"))
-                        .type(AdvancementTypes.TASK)
-                        .build())
-                .parent(this.rootAdvancement)
-                .key(ResourceKey.of(this.plugin, "some_dirt"))
-                .build();
-        event.register(someDirt);
-
-        final AdvancementCriterion lotsOfDirtCriterion = AdvancementCriterion.builder().trigger(
-                this.inventoryChangeTrigger,
-                FilteredTrigger.builder()
-                        .config(new InventoryChangeTriggerConfig(ItemStack.of(ItemTypes.DIRT, 64)))
-                        .build()
-        ).name("lots_of_dirt").build();
-
-        final AdvancementTemplate lotsOfDirt = AdvancementTemplate.builder()
-                .criterion(lotsOfDirtCriterion)
-                .displayInfo(DisplayInfo.builder()
-                        .icon(ItemTypes.DIRT)
-                        .title(Component.text("Got more dirt!"))
-                        .type(AdvancementTypes.GOAL)
-                        .build())
-                .parent(someDirt)
-                .key(ResourceKey.of(this.plugin, "lots_of_dirt"))
-                .build();
-        event.register(lotsOfDirt);
-
-        final AdvancementCriterion tonsOfDirtCriterion = AdvancementCriterion.builder().trigger(
-                this.inventoryChangeTrigger,
-                FilteredTrigger.builder()
-                        .config(new InventoryChangeTriggerConfig(ItemStack.of(ItemTypes.DIRT, 64*9)))
-                        .build()
-        ).name("tons_of_dirt").build();
-
-        final AdvancementTemplate tonsOfDirt = AdvancementTemplate.builder()
-                .criterion(tonsOfDirtCriterion)
-                .displayInfo(DisplayInfo.builder()
-                        .icon(ItemTypes.DIRT)
-                        .title(Component.text("Got tons of dirt!"))
-                        .type(AdvancementTypes.CHALLENGE)
-                        .hidden(true)
-                        .build())
-                .parent(lotsOfDirt)
-                .key(ResourceKey.of(this.plugin, "tons_of_dirt"))
-                .build();
-        event.register(tonsOfDirt);
-
-        this.counter1 = ScoreAdvancementCriterion.builder().goal(10).name("counter").build();
-        this.counter1Bypass = AdvancementCriterion.dummy();
-        AdvancementTemplate counterAdvancement1 = AdvancementTemplate.builder()
-                .criterion(OrCriterion.of(this.counter1, this.counter1Bypass))
-                .displayInfo(DisplayInfo.builder()
-                        .icon(ItemTypes.CHEST)
-                        .title(Component.text("Open some chests."))
-                        .type(AdvancementTypes.GOAL)
-                        .build())
-                .parent(this.rootAdvancement)
-                .key(ResourceKey.of(this.plugin, "counting"))
-                .build();
-        event.register(counterAdvancement1);
-        this.counterAdvancement1 = counterAdvancement1;
-
-        this.counter2 = ScoreAdvancementCriterion.builder().goal(20).name("counter").build();
-        AdvancementTemplate counterAdvancement2 = AdvancementTemplate.builder()
-                .criterion(this.counter2)
-                .displayInfo(DisplayInfo.builder()
-                        .icon(ItemTypes.CHEST)
-                        .title(Component.text("Open more chests"))
-                        .type(AdvancementTypes.CHALLENGE)
-                        .build())
-                .parent(counterAdvancement1)
-                .key(ResourceKey.of(this.plugin, "counting_more"))
-                .build();
-        event.register(counterAdvancement2);
-        this.counterAdvancement2 = counterAdvancement2;
-
-        final AdvancementCriterion a = AdvancementCriterion.builder().name("A").build();
-        final AdvancementCriterion b = AdvancementCriterion.builder().name("B").build();
-        final AdvancementCriterion c = AdvancementCriterion.builder().name("C").build();
-        final AdvancementCriterion d = AdvancementCriterion.builder().name("D").build();
-        final AdvancementCriterion e = AdvancementCriterion.builder().name("E").build();
-        final AdvancementCriterion f = AdvancementCriterion.builder().name("F").build();
-        final AdvancementCriterion combinationCriterion = OrCriterion.of(a, AndCriterion.of(b, OrCriterion.of(c, d)), AndCriterion.of(e, f));
-        final AdvancementTemplate combinationAdvancement = AdvancementTemplate.builder()
-                .criterion(combinationCriterion)
-                .displayInfo(DisplayInfo.builder()
-                        .icon(ItemTypes.CHEST)
-                        .title(Component.text("A || (B & (C || D)) || (E & F)"))
-                        .description(Component.text("ABE ABF ACDE ACDF"))
-                        .type(AdvancementTypes.CHALLENGE)
-                        .build())
-                .parent(counterAdvancement1)
-                .key(ResourceKey.of(this.plugin, "combination"))
-                .build();
-        event.register(combinationAdvancement);
+        event.register(Triggers.Holder.TRIGGERS);
+        event.register(Advancements.Holder.ADVANCEMENTS);
     }
 
     class TriggerListeners {
 
         @Listener
         private void onContainerEvent(final ChangeInventoryEvent event, @First final ServerPlayer player) {
-            AdvancementTest.this.inventoryChangeTrigger.trigger(player);
+            Triggers.INVENTORY_CHANGE_TRIGGER.get().trigger(player);
         }
 
         @Listener
         private void onConainterEvent(final InteractContainerEvent.Open event, @First final ServerPlayer player) {
 
-            final AdvancementProgress progress1 = player.progress(AdvancementTest.this.counterAdvancement1);
+            final AdvancementProgress progress1 = player.progress(Advancements.COUNTER_1.get());
             if (progress1.achieved()) {
-                final AdvancementProgress progress2 = player.progress(AdvancementTest.this.counterAdvancement2);
-                progress2.require(AdvancementTest.this.counter2).add(1);
+                final AdvancementProgress progress2 = player.progress(Advancements.COUNTER_2.get());
+                progress2.require(AdvancementCriteria.COUNTER_2).add(1);
 
             } else {
-                progress1.require(AdvancementTest.this.counter1).add(1);
+                progress1.require(AdvancementCriteria.COUNTER_1).add(1);
                 final Object carrier = ((CarriedInventory) event.container()).carrier().orElse(null);
                 if (carrier instanceof BlockCarrier) {
                     if (((BlockCarrier) carrier).location().blockType().isAnyOf(BlockTypes.TRAPPED_CHEST)) {
-                        progress1.require(AdvancementTest.this.counter1Bypass).grant();
+                        progress1.require(AdvancementCriteria.COUNTER_1_BYPASS).grant();
                     }
                 }
             }

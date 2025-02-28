@@ -24,10 +24,24 @@
  */
 package org.spongepowered.common.bridge.core;
 
+import org.spongepowered.api.registry.RegistryHolder;
+import org.spongepowered.api.registry.RegistryType;
+import org.spongepowered.common.registry.InitialRegistryData;
+
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
 public interface WritableRegistryBridge<T> {
 
     boolean bridge$isDynamic();
 
     void bridge$setDynamic(boolean isDynamic);
 
+    void bridge$setRegistryHolder(RegistryHolder registryHolder);
+
+    void bridge$addDependencies(Supplier<InitialRegistryData<T>> supplier, RegistryType<?>... dependencies);
+
+    void bridge$addDependencies(Runnable runnable, RegistryType<?>... dependencies);
+
+    Stream<RegistryType<?>> bridge$pendingDependencies();
 }

@@ -36,7 +36,7 @@ public abstract class InitialRegistryData<T> {
 
     abstract @Nullable Map<ResourceKey, Integer> keyToId();
 
-    void forEach(final LoaderConsumer<T> consumer) {
+    public void forEach(final LoaderConsumer<T> consumer) {
         final Map<ResourceKey, T> kv = this.keyToValue();
         final Map<ResourceKey, Integer> ki = this.keyToId();
 
@@ -56,7 +56,7 @@ public abstract class InitialRegistryData<T> {
         }
     }
 
-    static <T> @Nullable InitialRegistryData<T> noIds(final @Nullable Supplier<Map<ResourceKey, T>> values) {
+    public static <T> @Nullable InitialRegistryData<T> noIds(final @Nullable Supplier<Map<ResourceKey, T>> values) {
         if (values == null) {
             return null;
         }
@@ -73,7 +73,7 @@ public abstract class InitialRegistryData<T> {
         };
     }
 
-    interface LoaderConsumer<T> {
+    public interface LoaderConsumer<T> {
         void accept(final ResourceKey key, final OptionalInt id, final T value);
     }
 }

@@ -219,6 +219,15 @@ public class LevelDataRegistries {
                 "FLUID_TYPE",
                 context.relativeClass("fluid", "FluidType"),
                 Registries.FLUID
+            ),
+            new RegistryEntriesGenerator<>(
+                "world.server",
+                "WorldArchetypeTypes",
+                "WORLD_ARCHETYPE_TYPE",
+                context.relativeClass("world.server", "WorldArchetypeType"),
+                Registries.LEVEL_STEM,
+                $ -> true,
+                RegistryScope.SERVER
             )
         );
     }

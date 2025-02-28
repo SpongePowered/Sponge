@@ -27,24 +27,19 @@ package org.spongepowered.common.item.recipe.crafting.shapeless;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.data.recipes.RecipeCategory;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.datapack.DataPack;
-import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStackLike;
-import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.item.recipe.crafting.RecipeInput;
 import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 import org.spongepowered.common.util.Preconditions;
 
 import java.util.List;
@@ -52,15 +47,13 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class SpongeShapelessCraftingRecipeBuilder extends AbstractResourceKeyedBuilder<RecipeRegistration, ShapelessCraftingRecipe.Builder>
-        implements ShapelessCraftingRecipe.Builder.EndStep, ShapelessCraftingRecipe.Builder.ResultStep {
+public class SpongeShapelessCraftingRecipeBuilder implements ShapelessCraftingRecipe.Builder.EndStep, ShapelessCraftingRecipe.Builder.ResultStep {
 
     private org.spongepowered.api.item.inventory.ItemStack result;
     private Function<CraftingInput, net.minecraft.world.item.ItemStack> resultFunction;
     private Function<CraftingInput, NonNullList<net.minecraft.world.item.ItemStack>> remainingItemsFunction;
     private final NonNullList<Ingredient> ingredients = NonNullList.create();
     private String group;
-    private DataPack<RecipeRegistration> pack = DataPacks.RECIPE;
 
     private RecipeCategory recipeCategory = RecipeCategory.MISC; // TODO support category
     private CraftingBookCategory craftingBookCategory = CraftingBookCategory.MISC; // TODO support category
@@ -121,28 +114,19 @@ public class SpongeShapelessCraftingRecipeBuilder extends AbstractResourceKeyedB
     }
 
     @Override
-    public EndStep pack(final DataPack<RecipeRegistration> pack) {
-        this.pack = pack;
-        return this;
-    }
-
-    @Override
-    public RecipeRegistration build0() {
+    public ShapelessCraftingRecipe build() {
         Preconditions.checkState(!this.ingredients.isEmpty(), "The ingredients are not set.");
-        return new SpongeShapelessCraftingRecipeRegistration((ResourceLocation) (Object) key, this.group, this.ingredients,
-                ItemStackUtil.toNative(this.result), this.resultFunction, this.remainingItemsFunction, this.pack,
-                this.recipeCategory, this.craftingBookCategory);
+        return (ShapelessCraftingRecipe) new SpongeShapelessRecipe(this.group, this.craftingBookCategory, this.ingredients,
+                ItemStackUtil.toNative(this.result), this.resultFunction, this.remainingItemsFunction);
     }
 
     @Override
     public ShapelessCraftingRecipe.Builder reset() {
-        super.reset();
         this.result = null;
         this.resultFunction = null;
         this.ingredients.clear();
         this.group = null;
         this.remainingItemsFunction = null;
-        this.pack = DataPacks.RECIPE;
         return this;
     }
 }

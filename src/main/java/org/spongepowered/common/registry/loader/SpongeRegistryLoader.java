@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.registry.loader;
 
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorPreset;
 import net.minecraft.world.level.material.MapColor;
@@ -80,7 +78,10 @@ import org.spongepowered.api.map.color.MapShade;
 import org.spongepowered.api.map.color.MapShades;
 import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientation;
 import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientations;
+import org.spongepowered.api.registry.Registry;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryKey;
+import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.service.ban.BanType;
@@ -580,13 +581,13 @@ public final class SpongeRegistryLoader {
         });
     }
 
-    public static RegistryLoader<FlatGeneratorConfig> flatGeneratorConfig(RegistryAccess registryAccess) {
-        final Registry<FlatLevelGeneratorPreset> registry = registryAccess.lookupOrThrow(Registries.FLAT_LEVEL_GENERATOR_PRESET);
-        return RegistryLoader.of(l -> {
-            for (final var entry : registry.entrySet()) {
-                l.add(RegistryKey.of(RegistryTypes.FLAT_GENERATOR_CONFIG, (ResourceKey) (Object) entry.getKey().location()), () -> (FlatGeneratorConfig) entry.getValue().settings());
-            }
-        });
+    public static RegistryLoader<FlatGeneratorConfig> flatGeneratorConfig(RegistryHolder registryAccess) {
+        final RegistryType<FlatLevelGeneratorPreset> registryType = RegistryType.of(
+            (ResourceKey) (Object) Registries.FLAT_LEVEL_GENERATOR_PRESET.registry(), (ResourceKey) (Object) Registries.FLAT_LEVEL_GENERATOR_PRESET.location());
+        final Registry<FlatLevelGeneratorPreset> registry = registryAccess.registry(registryType);
+        return RegistryLoader.of(l ->
+            registry.streamEntries().forEach(e ->
+                l.add(RegistryKey.of(RegistryTypes.FLAT_GENERATOR_CONFIG, e.key()), () -> (FlatGeneratorConfig) e.value().settings())));
     }
 
     // @formatter:on

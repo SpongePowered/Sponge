@@ -25,9 +25,6 @@
 package org.spongepowered.test.worldgen;
 
 import com.google.inject.Inject;
-import net.kyori.adventure.identity.Identity;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockTypes;
@@ -35,7 +32,6 @@ import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
@@ -43,33 +39,19 @@ import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.registry.RegistryTypes;
-import org.spongepowered.api.tag.BlockTypeTags;
 import org.spongepowered.api.util.RandomProvider;
-import org.spongepowered.api.util.Range;
-import org.spongepowered.api.world.DefaultWorldKeys;
-import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldType;
-import org.spongepowered.api.world.WorldTypeEffects;
-import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.api.world.WorldTypes;
 import org.spongepowered.api.world.biome.AttributedBiome;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.biome.BiomeAttributes;
 import org.spongepowered.api.world.biome.Biomes;
-import org.spongepowered.api.world.biome.provider.BiomeProvider;
 import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
-import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.generation.config.SurfaceRule;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
-import org.spongepowered.api.world.generation.config.noise.NoiseGeneratorConfig;
-import org.spongepowered.api.world.generation.config.noise.NoiseGeneratorConfigs;
-import org.spongepowered.api.world.server.ServerLocation;
-import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.WorldManager;
-import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
-import org.spongepowered.test.world.WorldTest;
 
 import java.util.List;
 import java.util.Optional;
@@ -117,60 +99,60 @@ public final class WorldGenTest {
 
     private CommandResult seededWorld(final CommandContext ctx, final Parameter.Value<String> stringParam) {
         final String seed = ctx.one(stringParam).orElse("random");
-        final WorldTemplate template =
-                WorldTemplate.builder().from(WorldTemplate.overworld()).add(Keys.SEED, (long) seed.hashCode())
-                        .key(ResourceKey.of(this.plugin, seed))
-                        .add(Keys.IS_LOAD_ON_STARTUP, false)
-                        .add(Keys.SERIALIZATION_BEHAVIOR, SerializationBehavior.NONE)
-                        .build();
-        final Optional<ServerPlayer> optPlayer = ctx.cause().first(ServerPlayer.class);
-        Sponge.server().worldManager().loadWorld(template).thenAccept(w -> optPlayer.ifPresent(player -> WorldTest.transportToWorld(player, w)));
+//        final WorldTemplate template =
+//                WorldTemplate.builder().from(WorldTemplate.overworld()).add(Keys.SEED, (long) seed.hashCode())
+//                        .key(ResourceKey.of(this.plugin, seed))
+//                        .add(Keys.IS_LOAD_ON_STARTUP, false)
+//                        .add(Keys.SERIALIZATION_BEHAVIOR, SerializationBehavior.NONE)
+//                        .build();
+//        final Optional<ServerPlayer> optPlayer = ctx.cause().first(ServerPlayer.class);
+//        Sponge.server().worldManager().loadWorld(template).thenAccept(w -> optPlayer.ifPresent(player -> WorldTest.transportToWorld(player, w)));
         return CommandResult.success();
     }
 
     private CommandResult worldType(final CommandContext commandContext) {
-        final WorldTypeTemplate.Builder builder = WorldTypeTemplate.builder()
-                .add(Keys.WORLD_TYPE_EFFECT, WorldTypeEffects.OVERWORLD)
-                .add(Keys.SCORCHING, true)
-                .add(Keys.NATURAL_WORLD_TYPE, false)
-                .add(Keys.COORDINATE_MULTIPLIER, 128d)
-                .add(Keys.HAS_SKYLIGHT, false)
-                .add(Keys.HAS_CEILING, false)
-                .add(Keys.PIGLIN_SAFE, true)
-                .add(Keys.BEDS_USABLE, false)
-                .add(Keys.RESPAWN_ANCHOR_USABLE, false)
-                .add(Keys.INFINIBURN, BlockTypeTags.WOOL)
-                .add(Keys.WORLD_FLOOR, 0)
-                .add(Keys.HAS_RAIDS, false)
-                .add(Keys.WORLD_HEIGHT, 2000)
-                .add(Keys.WORLD_LOGICAL_HEIGHT, 2000)
-                .add(Keys.SPAWN_LIGHT_LIMIT, 5)
-                .add(Keys.SPAWN_LIGHT_RANGE, Range.intRange(5, 10))
-                .add(Keys.AMBIENT_LIGHTING, 0.5f)
-                .add(Keys.CREATE_DRAGON_FIGHT, true)
-                .key(ResourceKey.of(this.plugin, "customworldtype"));
-        final WorldTypeTemplate template = builder.build();
-        Sponge.server().dataPackManager().save(template);
+//        final WorldTypeTemplate.Builder builder = WorldTypeTemplate.builder()
+//                .add(Keys.WORLD_TYPE_EFFECT, WorldTypeEffects.OVERWORLD)
+//                .add(Keys.SCORCHING, true)
+//                .add(Keys.NATURAL_WORLD_TYPE, false)
+//                .add(Keys.COORDINATE_MULTIPLIER, 128d)
+//                .add(Keys.HAS_SKYLIGHT, false)
+//                .add(Keys.HAS_CEILING, false)
+//                .add(Keys.PIGLIN_SAFE, true)
+//                .add(Keys.BEDS_USABLE, false)
+//                .add(Keys.RESPAWN_ANCHOR_USABLE, false)
+//                .add(Keys.INFINIBURN, BlockTypeTags.WOOL)
+//                .add(Keys.WORLD_FLOOR, 0)
+//                .add(Keys.HAS_RAIDS, false)
+//                .add(Keys.WORLD_HEIGHT, 2000)
+//                .add(Keys.WORLD_LOGICAL_HEIGHT, 2000)
+//                .add(Keys.SPAWN_LIGHT_LIMIT, 5)
+//                .add(Keys.SPAWN_LIGHT_RANGE, Range.intRange(5, 10))
+//                .add(Keys.AMBIENT_LIGHTING, 0.5f)
+//                .add(Keys.CREATE_DRAGON_FIGHT, true)
+//                .key(ResourceKey.of(this.plugin, "customworldtype"));
+//        final WorldTypeTemplate template = builder.build();
+//        Sponge.server().dataPackManager().save(template);
         return CommandResult.success();
     }
 
     private CommandResult world(CommandContext commandContext) {
-        final WorldManager wm = Sponge.server().worldManager();
-        final ResourceKey worldKey = ResourceKey.of(BiomeTest.NAMESPACE, BiomeTest.CUSTOM_PLAINS);
-        final Optional<Biome> customBiome = this.biomeRegistry().findValue(ResourceKey.of(BiomeTest.NAMESPACE, BiomeTest.CUSTOM_PLAINS));
-        final Optional<Biome> customBiome2 = this.biomeRegistry().findValue(ResourceKey.of(BiomeTest.NAMESPACE, BiomeTest.CUSTOM_FOREST));
-        if (customBiome.isPresent()) {
-            final RegistryReference<Biome> ref = RegistryReference.referenced(Sponge.server(), RegistryTypes.BIOME, customBiome.get());
-            final RegistryReference<Biome> ref2 = RegistryReference.referenced(Sponge.server(), RegistryTypes.BIOME, customBiome2.get());
-            final MultiNoiseBiomeConfig cfg = MultiNoiseBiomeConfig.builder()
-                    .addBiome(AttributedBiome.of(ref, BiomeAttributes.point(0.1f, -0.6f, 0.1f, -0.5f, 0f, -1f, 0.0f)))
-                    .addBiome(AttributedBiome.of(ref2, BiomeAttributes.point(0.4f, -1f, 0.5f, -0.2f, 0f, -0.95f, 0.0f)))
-                    .build();
-            final var chunkGen = ChunkGenerator.noise(BiomeProvider.multiNoise(cfg), ChunkGenerator.overworld().config());
-            final WorldTemplate template = WorldTemplate.builder().add(Keys.CHUNK_GENERATOR, chunkGen).key(worldKey).build();
-            final Optional<ServerPlayer> optPlayer = commandContext.cause().first(ServerPlayer.class);
-            wm.loadWorld(template).thenAccept(w -> optPlayer.ifPresent(player -> WorldTest.transportToWorld(player, w)));
-        }
+//        final WorldManager wm = Sponge.server().worldManager();
+//        final ResourceKey worldKey = ResourceKey.of(BiomeTest.NAMESPACE, BiomeTest.CUSTOM_PLAINS);
+//        final Optional<Biome> customBiome = this.biomeRegistry().findValue(ResourceKey.of(BiomeTest.NAMESPACE, BiomeTest.CUSTOM_PLAINS));
+//        final Optional<Biome> customBiome2 = this.biomeRegistry().findValue(ResourceKey.of(BiomeTest.NAMESPACE, BiomeTest.CUSTOM_FOREST));
+//        if (customBiome.isPresent()) {
+//            final RegistryReference<Biome> ref = RegistryReference.referenced(Sponge.server(), RegistryTypes.BIOME, customBiome.get());
+//            final RegistryReference<Biome> ref2 = RegistryReference.referenced(Sponge.server(), RegistryTypes.BIOME, customBiome2.get());
+//            final MultiNoiseBiomeConfig cfg = MultiNoiseBiomeConfig.builder()
+//                    .addBiome(AttributedBiome.of(ref, BiomeAttributes.point(0.1f, -0.6f, 0.1f, -0.5f, 0f, -1f, 0.0f)))
+//                    .addBiome(AttributedBiome.of(ref2, BiomeAttributes.point(0.4f, -1f, 0.5f, -0.2f, 0f, -0.95f, 0.0f)))
+//                    .build();
+//            final var chunkGen = ChunkGenerator.noise(BiomeProvider.multiNoise(cfg), ChunkGenerator.overworld().config());
+//            final WorldTemplate template = WorldTemplate.builder().add(Keys.CHUNK_GENERATOR, chunkGen).key(worldKey).build();
+//            final Optional<ServerPlayer> optPlayer = commandContext.cause().first(ServerPlayer.class);
+//            wm.loadWorld(template).thenAccept(w -> optPlayer.ifPresent(player -> WorldTest.transportToWorld(player, w)));
+//        }
         return CommandResult.success();
     }
 
@@ -232,14 +214,14 @@ public final class WorldGenTest {
         }
 
 
-        final NoiseGeneratorConfig noiseGenConfig = NoiseGeneratorConfig.builder()
-                .spawnTargets(NoiseGeneratorConfigs.OVERWORLD.get().spawnTargets())
-                .noiseConfig(noiseConfig)
-                .surfaceRule(customSurfaceRule)
-//                .seaLevel(random.nextInt(61 - 1) + 1 + random.nextInt(30)) // 2 rolls
-                .seaLevel(63)
-                .key(ResourceKey.of(this.plugin, "test"))
-                .build().config();
+//        final NoiseGeneratorConfig noiseGenConfig = NoiseGeneratorConfig.builder()
+//                .spawnTargets(NoiseGeneratorConfigs.OVERWORLD.get().spawnTargets())
+//                .noiseConfig(noiseConfig)
+//                .surfaceRule(customSurfaceRule)
+////                .seaLevel(random.nextInt(61 - 1) + 1 + random.nextInt(30)) // 2 rolls
+//                .seaLevel(63)
+//                .key(ResourceKey.of(this.plugin, "test"))
+//                .build().config();
 
         final ResourceKey worldKey = ResourceKey.of(this.plugin, owner.toLowerCase());
         final List<AttributedBiome> attributedBiomes = biomes.stream().map(biomeRef -> {
@@ -262,31 +244,31 @@ public final class WorldGenTest {
 
         final MultiNoiseBiomeConfig biomeCfg = MultiNoiseBiomeConfig.builder().addBiomes(attributedBiomes).build();
         final Optional<WorldType> customworldtype = WorldTypes.registry().findValue(ResourceKey.of(this.plugin, "customworldtype"));
-        final WorldTemplate customTemplate = WorldTemplate.builder()
-                .from(WorldTemplate.overworld())
-                .key(worldKey)
-                .add(Keys.WORLD_TYPE, customworldtype.orElse(WorldTypes.OVERWORLD.get()))
-                .add(Keys.SERIALIZATION_BEHAVIOR, SerializationBehavior.NONE)
-                .add(Keys.IS_LOAD_ON_STARTUP, false)
-                .add(Keys.PERFORM_SPAWN_LOGIC, true)
-                .add(Keys.SEED, random.nextLong())
-                .add(Keys.DISPLAY_NAME, Component.text("Custom world by " + owner))
-                .add(Keys.CHUNK_GENERATOR, ChunkGenerator.noise(BiomeProvider.multiNoise(biomeCfg), noiseGenConfig))
-                .build();
-
-        if (player.world().key().equals(worldKey)) {
-            final ServerWorld world = wm.world(DefaultWorldKeys.DEFAULT).get();
-            player.setLocation(ServerLocation.of(world, world.properties().spawnPosition()));
-        }
-        context.sendMessage(Identity.nil(), Component.text("Generating your world...").append(Component.newline())
-                .append(Component.text("with " + biomes.size() + " biomes")).append(Component.newline())
-        );
-        wm.deleteWorld(worldKey).thenCompose(b -> wm.loadWorld(customTemplate)).thenAccept(w -> WorldTest.transportToWorld(player, w)).exceptionally(e -> {
-                    context.sendMessage(Identity.nil(), Component.text("Failed to teleport!", NamedTextColor.DARK_RED));
-                    e.printStackTrace();
-                    return null;
-                }
-        );
+//        final WorldTemplate customTemplate = WorldTemplate.builder()
+//                .from(WorldTemplate.overworld())
+//                .key(worldKey)
+//                .add(Keys.WORLD_TYPE, customworldtype.orElse(WorldTypes.OVERWORLD.get()))
+//                .add(Keys.SERIALIZATION_BEHAVIOR, SerializationBehavior.NONE)
+//                .add(Keys.IS_LOAD_ON_STARTUP, false)
+//                .add(Keys.PERFORM_SPAWN_LOGIC, true)
+//                .add(Keys.SEED, random.nextLong())
+//                .add(Keys.DISPLAY_NAME, Component.text("Custom world by " + owner))
+//                .add(Keys.CHUNK_GENERATOR, ChunkGenerator.noise(BiomeProvider.multiNoise(biomeCfg), noiseGenConfig))
+//                .build();
+//
+//        if (player.world().key().equals(worldKey)) {
+//            final ServerWorld world = wm.world(DefaultWorldKeys.DEFAULT).get();
+//            player.setLocation(ServerLocation.of(world, world.properties().spawnPosition()));
+//        }
+//        context.sendMessage(Identity.nil(), Component.text("Generating your world...").append(Component.newline())
+//                .append(Component.text("with " + biomes.size() + " biomes")).append(Component.newline())
+//        );
+//        wm.deleteWorld(worldKey).thenCompose(b -> wm.loadWorld(customTemplate)).thenAccept(w -> WorldTest.transportToWorld(player, w)).exceptionally(e -> {
+//                    context.sendMessage(Identity.nil(), Component.text("Failed to teleport!", NamedTextColor.DARK_RED));
+//                    e.printStackTrace();
+//                    return null;
+//                }
+//        );
 
 
         return CommandResult.success();

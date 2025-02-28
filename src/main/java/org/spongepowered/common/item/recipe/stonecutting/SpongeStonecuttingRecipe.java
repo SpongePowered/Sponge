@@ -24,73 +24,28 @@
  */
 package org.spongepowered.common.item.recipe.stonecutting;
 
-import static org.spongepowered.common.util.Constants.Recipe.SPONGE_TYPE;
-
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.SingleItemRecipe;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
-import org.spongepowered.common.bridge.world.item.crafting.RecipeResultBridge;
-import org.spongepowered.common.item.recipe.ResultFunctionRecipe;
-import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
-import org.spongepowered.common.util.Constants;
 
-import java.util.Optional;
+import java.util.function.Function;
 
 
-public class SpongeStonecuttingRecipe extends StonecutterRecipe implements ResultFunctionRecipe {
+public class SpongeStonecuttingRecipe extends StonecutterRecipe {
 
-    private static final MapCodec<ItemStack> RESULT_CODEC = RecordCodecBuilder.mapCodec(
-            $$0 -> $$0.group(
-                            BuiltInRegistries.ITEM.byNameCodec().fieldOf(Constants.Recipe.RESULT).forGetter(ItemStack::getItem),
-                            Codec.INT.fieldOf(Constants.Recipe.COUNT).forGetter(ItemStack::getCount)
-                    )
-                    .apply($$0, ItemStack::new)
-    );
+    private Function<SingleRecipeInput, ItemStack> resultFunction;
 
-    public static final MapCodec<SpongeStonecuttingRecipe> SPONGE_CODEC = RecordCodecBuilder.mapCodec(
-            $$1 -> $$1.group(
-                            Codec.STRING.fieldOf(SPONGE_TYPE).forGetter(a -> "custom"),
-                            Codec.STRING.optionalFieldOf("group", "").forGetter(SingleItemRecipe::group),
-                            Ingredient.CODEC.fieldOf(Constants.Recipe.STONECUTTING_INGREDIENT).forGetter(SingleItemRecipe::input),
-                            RESULT_CODEC.forGetter($$0x -> $$0x.result()),
-                            ItemStack.CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULT, ItemStack.EMPTY).forGetter($$0x -> ((RecipeResultBridge)$$0x).bridge$spongeResult()),
-                            IngredientResultUtil.CACHED_RESULT_FUNC_CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULTFUNCTION).forGetter(ResultFunctionRecipe::resultFunctionId)
-                    )
-                    .apply($$1, SpongeStonecuttingRecipe::of)
-    );
-
-    private final String resultFunctionId;
-
-    public static SpongeStonecuttingRecipe of(final String spongeType,
-            final String groupIn,
-            final Ingredient ingredientIn,
-            final ItemStack resultIn,
-            final ItemStack spongeResult,
-            final Optional<String> resultFunctionId) {
-        return new SpongeStonecuttingRecipe(groupIn, ingredientIn, spongeResult.isEmpty() ? resultIn : spongeResult, resultFunctionId.orElse(null));
-    }
-
-    public SpongeStonecuttingRecipe(final String groupIn, final Ingredient ingredientIn, final ItemStack spongeResult, final String resultFunctionId) {
+    public SpongeStonecuttingRecipe(final String groupIn, final Ingredient ingredientIn, final ItemStack spongeResult, final Function<SingleRecipeInput, ItemStack> resultFunction) {
         super(groupIn, ingredientIn, spongeResult);
-        this.resultFunctionId = resultFunctionId;
-    }
-
-    @Override
-    public Optional<String> resultFunctionId() {
-        return Optional.ofNullable(this.resultFunctionId);
+        this.resultFunction = resultFunction;
     }
 
     @Override
     public ItemStack assemble(final SingleRecipeInput $$0, final HolderLookup.Provider $$1) {
-        if (this.resultFunctionId != null) {
-            return IngredientResultUtil.cachedResultFunction(this.resultFunctionId).apply($$0);
+        if (this.resultFunction != null) {
+            return this.resultFunction.apply($$0);
         }
         return super.assemble($$0, $$1);
     }

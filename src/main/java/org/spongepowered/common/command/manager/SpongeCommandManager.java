@@ -62,13 +62,13 @@ import org.spongepowered.api.command.manager.CommandFailedRegistrationException;
 import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
-import org.spongepowered.api.command.registrar.CommandRegistrarType;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.service.permission.Subject;
@@ -437,18 +437,17 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
         }
     }
 
-    public void init() {
+    public void init(final RegistryHolder registryHolder) {
         final Cause cause = PhaseTracker.getInstance().currentCause();
         final Set<TypeToken<?>> usedTokens = new HashSet<>();
-        Sponge.game().registry(RegistryTypes.COMMAND_REGISTRAR_TYPE).streamEntries().forEach(entry -> {
-            final CommandRegistrarType<?> type = entry.value();
+        registryHolder.registry(RegistryTypes.COMMAND_REGISTRAR_TYPE).stream().forEach(type -> {
             // someone's gonna do it, let's not let them take us down.
             final TypeToken<?> handledType = type.handledType();
             if (handledType == null) {
                 SpongeCommon.logger().error("Registrar '{}' did not provide a handledType, skipping...", type.getClass());
             } else if (usedTokens.add(handledType)) { // we haven't done it yet
                 // Add the command registrar
-                final CommandRegistrar<?> registrar = type.create(this);
+                final CommandRegistrar<?> registrar = type.create(this, registryHolder);
                 this.knownRegistrars.put(GenericTypeReflector.erase(type.handledType().getType()), registrar);
                 if (registrar instanceof BrigadierCommandRegistrar) {
                     this.brigadierRegistrar = (BrigadierCommandRegistrar) registrar;
