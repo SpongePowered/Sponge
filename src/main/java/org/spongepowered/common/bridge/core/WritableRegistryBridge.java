@@ -44,4 +44,10 @@ public interface WritableRegistryBridge<T> {
     void bridge$addDependencies(Runnable runnable, RegistryType<?>... dependencies);
 
     Stream<RegistryType<?>> bridge$pendingDependencies();
+
+    void bridge$markEventCalled();
+
+    boolean bridge$eventCalled();
+
+    void bridge$unfreeze();
 }

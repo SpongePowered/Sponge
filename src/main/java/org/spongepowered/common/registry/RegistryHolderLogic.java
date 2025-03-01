@@ -32,6 +32,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.DependencySorter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
@@ -40,6 +41,7 @@ import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryRoots;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.ValueNotFoundException;
+import org.spongepowered.common.accessor.core.MappedRegistryAccessor;
 import org.spongepowered.common.accessor.resources.ResourceKeyAccessor;
 import org.spongepowered.common.bridge.core.WritableRegistryBridge;
 
@@ -57,13 +59,13 @@ public final class RegistryHolderLogic implements RegistryHolder {
 
     public RegistryHolderLogic() {
         this.roots.put(
-            (ResourceKey) (Object) ResourceLocation.withDefaultNamespace("root"),
+            RegistryRoots.MINECRAFT,
             new MappedRegistry<>(
                 net.minecraft.resources.ResourceKey.createRegistryKey((ResourceLocation) (Object) RegistryRoots.MINECRAFT),
                 Lifecycle.experimental()
             )
         );
-        final ResourceLocation sponge = ResourceLocation.fromNamespaceAndPath("sponge", "root");
+        final ResourceLocation sponge = (ResourceLocation) (Object) RegistryRoots.SPONGE;
         this.roots.put(
             (ResourceKey) (Object) sponge,
             new MappedRegistry<>(
@@ -79,7 +81,7 @@ public final class RegistryHolderLogic implements RegistryHolder {
     public RegistryHolderLogic(final RegistryAccess dynamicAccess) {
         this();
 
-        final WritableRegistry root = (WritableRegistry) this.roots.get(ResourceLocation.withDefaultNamespace("root"));
+        final WritableRegistry root = (WritableRegistry) this.roots.get(RegistryRoots.MINECRAFT);
         // Add the dynamic registries. These are server-scoped in Vanilla
 
         dynamicAccess.registries().forEach(entry -> root.register(entry.key(), entry.value(), RegistrationInfo.BUILT_IN));
@@ -219,7 +221,14 @@ public final class RegistryHolderLogic implements RegistryHolder {
         this.roots.get(RegistryRoots.SPONGE).freeze();
     }
 
-    public void freezeSpongeDynamicRegistries() {
-        this.roots.get(RegistryRoots.SPONGE).forEach(net.minecraft.core.Registry::freeze);
+    public void freezeSpongeDynamicRegistries(final boolean force) {
+        final DependencySorter<RegistryType<?>, SpongeRegistryDependencyEntry<net.minecraft.core.Registry<?>>> dependencies = new DependencySorter<>();
+        final net.minecraft.core.Registry<net.minecraft.core.Registry<?>> registry = this.roots.get(RegistryRoots.SPONGE);
+        registry.stream()
+            .filter(r -> force || (((WritableRegistryBridge<?>) r).bridge$eventCalled() && ((WritableRegistryBridge<?>) r).bridge$pendingDependencies()
+                .allMatch(t -> this.findRegistry(t).map(v -> ((MappedRegistryAccessor<?>) v).accessor$frozen() || ((WritableRegistryBridge<?>) v).bridge$eventCalled()).orElse(false))))
+            .forEach(r -> dependencies.addEntry(
+                ((Registry<?>) r).type(), new SpongeRegistryDependencyEntry<>(r, ((WritableRegistryBridge<?>) r).bridge$pendingDependencies().toList())));
+        dependencies.orderByDependencies(($, v) -> v.cookie().freeze());
     }
 }

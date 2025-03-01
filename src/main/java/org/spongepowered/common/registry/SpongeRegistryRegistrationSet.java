@@ -33,16 +33,17 @@ import org.spongepowered.api.registry.RegistryRegistrationSet;
 import org.spongepowered.api.registry.RegistryType;
 
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
-public record SpongeRegistryRegistrationSet<T>(RegistryType<T> registryType, Map<ResourceKey, Supplier<T>> values) implements RegistryRegistrationSet<T> {
+public record SpongeRegistryRegistrationSet<T>(RegistryType<T> registryType, Map<ResourceKey, Function<RegistryHolder, T>> values) implements RegistryRegistrationSet<T> {
 
     public static final class BuilderImpl<T> implements RegistryRegistrationSet.Builder<T> {
 
         private final RegistryType<T> registryType;
         private final Supplier<RegistryHolder> defaultHolder;
 
-        private ImmutableMap.Builder<ResourceKey, Supplier<T>> builder = ImmutableMap.builder();
+        private ImmutableMap.Builder<ResourceKey, Function<RegistryHolder, T>> builder = ImmutableMap.builder();
 
         BuilderImpl(final RegistryType<T> registryType, final Supplier<RegistryHolder> defaultHolder) {
             this.registryType = registryType;
@@ -51,8 +52,8 @@ public record SpongeRegistryRegistrationSet<T>(RegistryType<T> registryType, Map
 
         @SuppressWarnings("unchecked")
         @Override
-        public <V extends T> DefaultedRegistryReference<V> register(final ResourceKey key, final Supplier<V> value) {
-            this.builder.put(key, (Supplier<T>) value);
+        public <V extends T> DefaultedRegistryReference<V> register(final ResourceKey key, final Function<RegistryHolder, V> value) {
+            this.builder.put(key, (Function<RegistryHolder, T>) value);
             return new SpongeDefaultedRegistryReference<>(new SpongeRegistryKey<>((RegistryType<V>) this.registryType, key), this.defaultHolder);
         }
 

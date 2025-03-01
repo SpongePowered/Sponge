@@ -26,10 +26,9 @@ package org.spongepowered.common.registry;
 
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.world.flag.FeatureFlagSet;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.registry.RegistryType;
+import org.spongepowered.api.advancement.Advancement;
+import org.spongepowered.api.item.recipe.Recipe;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.service.economy.Currency;
 import org.spongepowered.common.registry.loader.CommandRegistryLoader;
@@ -100,14 +99,17 @@ public final class SpongeRegistries {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static void registerServerRegistries(final SpongeRegistryHolder holder, final FeatureFlagSet featureFlags) {
-        final RegistryType<?> levelStemRegistry =
-            RegistryType.of((ResourceKey) (Object) Registries.LEVEL_STEM.registry(), (ResourceKey) (Object) Registries.LEVEL_STEM.location());
-
         holder.createFrozenRegistry(RegistryTypes.COMMAND_TREE_NODE_TYPE, (h) ->
             CommandRegistryLoader.clientCompletionKey(CommandBuildContext.simple(
-                new RegistryAccess.ImmutableRegistryAccess((List) h.streamRegistries().toList()), featureFlags)), levelStemRegistry);
+                new RegistryAccess.ImmutableRegistryAccess((List) h.streamRegistries().toList()), featureFlags)), RegistryTypes.WORLD_ARCHETYPE_TYPE);
 
-        holder.createFrozenRegistry(RegistryTypes.FLAT_GENERATOR_CONFIG, SpongeRegistryLoader::flatGeneratorConfig, levelStemRegistry);
+        holder.createFrozenRegistry(RegistryTypes.FLAT_GENERATOR_CONFIG, SpongeRegistryLoader::flatGeneratorConfig, RegistryTypes.WORLD_ARCHETYPE_TYPE);
+
+        SpongeRegistries.registerDynamicServerRegistries(holder);
     }
 
+    private static void registerDynamicServerRegistries(final SpongeRegistryHolder holder) {
+        holder.createRegistry(RegistryTypes.ADVANCEMENT, (RegistryLoader<Advancement>) null, true);
+        holder.createRegistry(RegistryTypes.RECIPE, (RegistryLoader<Recipe<?>>) null, true);
+    }
 }

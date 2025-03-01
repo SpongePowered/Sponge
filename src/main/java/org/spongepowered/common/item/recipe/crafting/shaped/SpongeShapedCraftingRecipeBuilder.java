@@ -185,7 +185,7 @@ public final class SpongeShapedCraftingRecipeBuilder implements
         // Default space to Empty Ingredient
 //        ingredientsMap.putIfAbsent(' ', net.minecraft.item.crafting.Ingredient.EMPTY);
         final ShapedRecipePattern pattern = ShapedRecipePattern.of(ingredientsMap, this.aisle);
-        return (ShapedCraftingRecipe) new SpongeShapedRecipe(this.group, this.craftingBookCategory, pattern, true,
+        return (ShapedCraftingRecipe) new SpongeShapedRecipe(this.group == null ? "": this.group, this.craftingBookCategory, pattern, true,
                 ItemStackUtil.toNative(this.result), this.resultFunction, this.remainingItemsFunction);
     }
 

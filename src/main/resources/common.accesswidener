@@ -19,3 +19,4 @@ accessible class net/minecraft/network/protocol/game/ServerboundInteractPacket$A
 accessible class net/minecraft/network/protocol/game/ServerboundInteractPacket$ActionType
 accessible class net/minecraft/world/entity/monster/SpellcasterIllager$IllagerSpell
 accessible class net/minecraft/world/level/biome/Biome$ClimateSettings
+accessible class net/minecraft/core/MappedRegistry$TagSet

@@ -88,7 +88,7 @@ public class RegistryDataLoaderMixin {
             .collect(Collectors.groupingBy(l -> ((RegistryDataLoader_LoaderBridge) l).bridge$registryHolder(), Collectors.toSet()))
             .forEach((k, v) -> {
                 lifecycle.processServerRegistries(k, v.stream()
-                    .filter(l -> !l.accessor$data().key().equals(Registries.LEVEL_STEM)) // NOTE: Level Stems are special!
+                    .filter(l -> !RegistryDataLoader.DIMENSION_REGISTRIES.contains(l.accessor$data())) // NOTE: DIMENSION_REGISTRIES are special!
                     .map(l -> (Registry<?>) l.accessor$registry()));
                 v.forEach(l -> dependencies.addEntry(((Registry<?>) l.accessor$registry()).type(),
                     new SpongeRegistryDependencyEntry<>(l, ((WritableRegistryBridge<?>) l.accessor$registry()).bridge$pendingDependencies().toList())));

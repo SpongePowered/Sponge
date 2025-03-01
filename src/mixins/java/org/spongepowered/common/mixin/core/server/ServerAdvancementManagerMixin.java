@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.advancements.Advancement;
@@ -32,20 +33,39 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.ServerAdvancementManager;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.advancement.AdvancementTreeEvent;
+import org.spongepowered.api.registry.Registry;
+import org.spongepowered.api.registry.RegistryEntry;
+import org.spongepowered.api.registry.RegistryHolder;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.registry.RegistryHolderLogic;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Mixin(ServerAdvancementManager.class)
 public abstract class ServerAdvancementManagerMixin {
+
+    @SuppressWarnings({"unchecked"})
+    @WrapMethod(method = "apply(Ljava/util/Map;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/util/profiling/ProfilerFiller;)V")
+    private void impl$onApply(final Map<ResourceLocation, Advancement> $$0, final ResourceManager $$1, final ProfilerFiller $$2, final Operation<Void> original) {
+        final RegistryHolderLogic registryHolder = ((SpongeRegistryHolder) $$1).registryHolder();
+        final Registry<Advancement> registry = (Registry<Advancement>) (Object) registryHolder.registry(RegistryTypes.ADVANCEMENT);
+        $$0.forEach((k, v) -> registry.register((ResourceKey) (Object) k, v));
+        Launch.instance().lifecycle().processServerRegistries((RegistryHolder) $$1, Stream.of(registry));
+        original.call(registry.streamEntries().collect(Collectors.toMap(RegistryEntry::key, RegistryEntry::value)), $$1, $$2);
+    }
 
     @WrapOperation(method = "apply(Ljava/util/Map;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/util/profiling/ProfilerFiller;)V",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/TreeNodePosition;run(Lnet/minecraft/advancements/AdvancementNode;)V"))

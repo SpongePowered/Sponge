@@ -91,7 +91,7 @@ public final class SpongeStoneCutterRecipeBuilder implements
 
     @Override
     public StoneCutterRecipe build() {
-        return (StoneCutterRecipe) new SpongeStonecuttingRecipe(this.group, this.ingredient,
+        return (StoneCutterRecipe) new SpongeStonecuttingRecipe(this.group == null ? "": this.group, this.ingredient,
                 ItemStackUtil.toNative(this.result), this.resultFunction);
     }
 

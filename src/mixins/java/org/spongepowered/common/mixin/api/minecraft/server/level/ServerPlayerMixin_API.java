@@ -238,7 +238,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     @Override
     public AdvancementProgress progress(final org.spongepowered.api.advancement.Advancement advancement) {
         Objects.requireNonNull(advancement, "advancement");
-        final AdvancementHolder holder = new AdvancementHolder((ResourceLocation) (Object) advancement.key(RegistryTypes.ADVAN), (Advancement) (Object) advancement);
+        final AdvancementHolder holder = new AdvancementHolder((ResourceLocation) (Object) advancement.key(RegistryTypes.ADVANCEMENT), (Advancement) (Object) advancement);
         return (AdvancementProgress) this.advancements.getOrStartProgress(holder);
     }
 

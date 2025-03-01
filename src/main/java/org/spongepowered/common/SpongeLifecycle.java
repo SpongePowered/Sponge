@@ -42,8 +42,11 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.registry.RegistryHolder;
+import org.spongepowered.api.registry.RegistryRoots;
 import org.spongepowered.api.registry.RegistryType;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.applaunch.plugin.DummyPluginContainer;
+import org.spongepowered.common.bridge.core.WritableRegistryBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.server.packs.resources.ResourceManagerBridge;
 import org.spongepowered.common.data.SpongeDataManager;
@@ -131,9 +134,7 @@ public final class SpongeLifecycle implements Lifecycle {
             holder.streamRegistries().collect(Collectors.toMap(org.spongepowered.api.registry.Registry::type, Function.identity()))));
 
         // Freeze Dynamic Registries - Values are now available
-        holder.registryHolder().freezeSpongeDynamicRegistries();
-
-        // TODO: Verify
+        holder.registryHolder().freezeSpongeDynamicRegistries(true);
     }
 
     @Override
@@ -193,6 +194,9 @@ public final class SpongeLifecycle implements Lifecycle {
             AbstractRegisterRegistryEvent.EngineScopedImpl.server(Cause.of(EventContext.empty(), this.game), this.game, server));
 
         ((SpongeRegistryHolder) server).registryHolder().freezeSpongeRootRegistry();
+
+        this.processServerRegistries(server, server.streamRegistries(RegistryRoots.SPONGE)
+            .filter(r -> !r.type().equals(RegistryTypes.ADVANCEMENT) && !r.type().equals(RegistryTypes.RECIPE)));
     }
 
     @Override
@@ -201,14 +205,14 @@ public final class SpongeLifecycle implements Lifecycle {
             registries.collect(Collectors.toMap(org.spongepowered.api.registry.Registry::type, Function.identity()));
         if (!map.isEmpty()) {
             this.game.eventManager().post(AbstractRegisterRegistryValueEvent.EngineScopedImpl.server(Cause.of(EventContext.empty(), this.game), this.game, server, map));
+            map.values().forEach(r -> ((WritableRegistryBridge<?>) r).bridge$markEventCalled());
+            ((SpongeRegistryHolder) server).registryHolder().freezeSpongeDynamicRegistries(false);
         }
     }
 
     @Override
     public void endEstablishServerRegistries(final RegistryHolder server) {
-        ((SpongeRegistryHolder) server).registryHolder().freezeSpongeDynamicRegistries();
-
-        // TODO: Verify
+        ((SpongeRegistryHolder) server).registryHolder().freezeSpongeDynamicRegistries(true);
     }
 
     @Override
@@ -221,7 +225,7 @@ public final class SpongeLifecycle implements Lifecycle {
         this.game.eventManager().post(AbstractRegisterRegistryValueEvent.EngineScopedImpl.client(Cause.of(EventContext.empty(), this.game),
                 this.game, client, Map.of()));
 
-        ((SpongeRegistryHolder) client).registryHolder().freezeSpongeDynamicRegistries();
+        ((SpongeRegistryHolder) client).registryHolder().freezeSpongeDynamicRegistries(true);
     }
 
     @Override

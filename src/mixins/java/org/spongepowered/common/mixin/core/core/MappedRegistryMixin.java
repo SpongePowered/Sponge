@@ -53,6 +53,7 @@ import org.spongepowered.common.registry.SpongeRegistryEntry;
 import org.spongepowered.common.registry.SpongeRegistryType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -67,7 +68,6 @@ public abstract class MappedRegistryMixin<T> implements RegistryBridge<T>, Writa
 
     // @formatter:off
     @Shadow private boolean frozen;
-
     @Shadow @Final private ObjectList<Holder.Reference<T>> byId;
     @Shadow @Final private Reference2IntMap<T> toId;
     @Shadow @Final private Map<ResourceLocation, Holder.Reference<T>> byLocation;
@@ -75,6 +75,7 @@ public abstract class MappedRegistryMixin<T> implements RegistryBridge<T>, Writa
     @Shadow @Final private Map<T, Holder.Reference<T>> byValue;
     @Shadow @Final private Map<net.minecraft.resources.ResourceKey<T>, RegistrationInfo> registrationInfos;
     @Shadow @Final private net.minecraft.resources.ResourceKey<? extends Registry<T>> key;
+    @Shadow MappedRegistry.TagSet<T> allTags;
 
     @Shadow public abstract Holder.Reference<T> shadow$register(net.minecraft.resources.ResourceKey<T> arg, T object, RegistrationInfo arg2);
     // @formatter:on
@@ -87,6 +88,7 @@ public abstract class MappedRegistryMixin<T> implements RegistryBridge<T>, Writa
     private final List<Runnable> impl$preFreezeTasks = new ArrayList<>();
 
     private boolean impl$isDynamic = true;
+    private boolean impl$eventCalled = false;
 
     @Override
     public boolean bridge$isDynamic() {
@@ -173,13 +175,22 @@ public abstract class MappedRegistryMixin<T> implements RegistryBridge<T>, Writa
 
     @Override
     public void bridge$addDependencies(final Supplier<InitialRegistryData<T>> supplier, final RegistryType<?>... dependencies) {
-        this.bridge$addDependencies(() ->
-            supplier.get().forEach((vk, vi, vv) ->
-                this.shadow$register(
-                    net.minecraft.resources.ResourceKey.create(this.key, (ResourceLocation) (Object) vk),
-                    vv,
-                    RegistrationInfo.BUILT_IN
-                )), dependencies);
+        if (Arrays.stream(dependencies).allMatch(d -> this.impl$registryHolder.findRegistry(d)
+            .map(r -> ((MappedRegistryMixin<?>) r).frozen)
+            .orElse(false))) {
+            this.impl$appendRegister(supplier);
+            return;
+        }
+        this.bridge$addDependencies(() -> this.impl$appendRegister(supplier), dependencies);
+    }
+
+    private void impl$appendRegister(final Supplier<InitialRegistryData<T>> supplier) {
+        supplier.get().forEach((vk, vi, vv) ->
+            this.shadow$register(
+                net.minecraft.resources.ResourceKey.create(this.key, (ResourceLocation) (Object) vk),
+                vv,
+                RegistrationInfo.BUILT_IN
+            ));
     }
 
     @Override
@@ -191,5 +202,21 @@ public abstract class MappedRegistryMixin<T> implements RegistryBridge<T>, Writa
     @Override
     public Stream<RegistryType<?>> bridge$pendingDependencies() {
         return this.impl$dependencies.stream();
+    }
+
+    @Override
+    public void bridge$markEventCalled() {
+        this.impl$eventCalled = true;
+    }
+
+    @Override
+    public boolean bridge$eventCalled() {
+        return this.impl$eventCalled;
+    }
+
+    @Override
+    public void bridge$unfreeze() {
+        this.frozen = false;
+        this.allTags = MappedRegistry.TagSet.unbound();
     }
 }

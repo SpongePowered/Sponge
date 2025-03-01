@@ -24,18 +24,35 @@
  */
 package org.spongepowered.common.mixin.core.world.item.crafting;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
+import org.spongepowered.api.registry.Registry;
+import org.spongepowered.api.registry.RegistryHolder;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.registry.RegistryHolderLogic;
+import org.spongepowered.common.registry.SpongeRegistryHolder;
+
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.stream.Stream;
 
 @Mixin(RecipeManager.class)
 public abstract class RecipeManagerMixin {
@@ -60,4 +77,17 @@ public abstract class RecipeManagerMixin {
         return parsed;
     }
 
+    @SuppressWarnings("unchecked")
+    @WrapOperation(method = "prepare(Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/util/profiling/ProfilerFiller;)Lnet/minecraft/world/item/crafting/RecipeMap;",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/packs/resources/SimpleJsonResourceReloadListener;scanDirectory(Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/resources/FileToIdConverter;Lcom/mojang/serialization/DynamicOps;Lcom/mojang/serialization/Codec;Ljava/util/Map;)V"))
+    private void impl$onPrepare(final ResourceManager $$0, final FileToIdConverter $$1, final DynamicOps<JsonElement> $$2, final Codec<Recipe<?>> $$3,
+            final Map<ResourceLocation, Recipe<?>> $$4, final Operation<Void> original) {
+        SortedMap<ResourceLocation, Recipe<?>> result = new TreeMap<>();
+        original.call($$0, $$1, $$2, $$3, result);
+        final RegistryHolderLogic registryHolder = ((SpongeRegistryHolder) $$0).registryHolder();
+        final Registry<Recipe<?>> registry = (Registry<Recipe<?>>) (Object) registryHolder.registry(RegistryTypes.RECIPE);
+        result.forEach((k, v) -> registry.register((org.spongepowered.api.ResourceKey) (Object) k, v));
+        Launch.instance().lifecycle().processServerRegistries((RegistryHolder) $$0, Stream.of(registry));
+        registry.streamEntries().forEach(e -> $$4.put((ResourceLocation) (Object) e.key(), e.value()));
+    }
 }

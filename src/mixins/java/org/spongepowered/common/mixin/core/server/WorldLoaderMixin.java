@@ -24,21 +24,22 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.core.LayeredRegistryAccess;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.WorldLoader;
 import net.minecraft.server.packs.resources.CloseableResourceManager;
 import net.minecraft.world.level.WorldDataConfiguration;
+import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.common.bridge.core.WritableRegistryBridge;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.Lifecycle;
-import org.spongepowered.common.registry.SpongeRegistryHolder;
+
 
 
 @Mixin(WorldLoader.class)
@@ -56,12 +57,12 @@ public abstract class WorldLoaderMixin {
         return pair;
     }
 
-    @WrapOperation(method = "load", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/LayeredRegistryAccess;replaceFrom(Ljava/lang/Object;[Lnet/minecraft/core/RegistryAccess$Frozen;)Lnet/minecraft/core/LayeredRegistryAccess;"))
-    private static <T> LayeredRegistryAccess<T> impl$onEstablishedRegistries(final LayeredRegistryAccess<T> instance, final T object,
-            final RegistryAccess.Frozen[] args, final Operation<LayeredRegistryAccess<T>> original, final @Local CloseableResourceManager closeableResourceManager) {
-        final LayeredRegistryAccess<T> finalRegistry = original.call(instance, object, args);
-        ((SpongeRegistryHolder) closeableResourceManager).setRootMinecraftRegistry(finalRegistry.compositeAccess());
-        Launch.instance().lifecycle().endEstablishServerRegistries((RegistryHolder) closeableResourceManager);
-        return finalRegistry;
+    @ModifyExpressionValue(method = "load", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/WorldLoader$WorldDataSupplier;get(Lnet/minecraft/server/WorldLoader$DataLoadContext;)Lnet/minecraft/server/WorldLoader$DataLoadOutput;"))
+    private static WorldLoader.DataLoadOutput<?> impl$onBakedDimensionRegistries(final WorldLoader.DataLoadOutput<?> original,
+            final @Local CloseableResourceManager resourceManager) {
+        original.finalDimensions().registries().forEach(r -> ((WritableRegistryBridge<?>) r.value()).bridge$unfreeze());
+        Launch.instance().lifecycle().processServerRegistries((RegistryHolder) resourceManager, original.finalDimensions().registries().map(e -> (Registry<?>) e.value()));
+        original.finalDimensions().registries().forEach(r -> r.value().freeze());
+        return original;
     }
 }

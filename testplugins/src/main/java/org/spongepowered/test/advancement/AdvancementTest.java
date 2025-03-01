@@ -146,7 +146,7 @@ public final class AdvancementTest implements LoadableModule {
             private static final RegistryRegistrationSet<Advancement> ADVANCEMENTS = Advancements.ADVANCEMENT_BUILDER.build();
         }
 
-        private static final RegistryRegistrationSet.Builder<Advancement> ADVANCEMENT_BUILDER = RegistryRegistrationSet.builder(RegistryTypes.ADVAN, Sponge::server);
+        private static final RegistryRegistrationSet.Builder<Advancement> ADVANCEMENT_BUILDER = RegistryRegistrationSet.builder(RegistryTypes.ADVANCEMENT, Sponge::server);
 
         public static final DefaultedRegistryReference<Advancement> ROOT_ADVANCEMENT = Advancements.ADVANCEMENT_BUILDER.register(
             ResourceKey.of(AdvancementTest.NAMESPACE, "root"),

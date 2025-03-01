@@ -70,7 +70,9 @@ public class LevelDataRegistries {
                 "Biomes",
                 "BIOME",
                 context.relativeClass("world.biome", "Biome"),
-                Registries.BIOME
+                Registries.BIOME,
+                a -> true,
+                RegistryScope.SERVER
             ),
             new RegistryEntriesGenerator<>(
                 "world.generation.carver",
