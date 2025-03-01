@@ -78,10 +78,13 @@ public abstract class CombineMapsCodec<A, B> extends MapCodec<A> {
     public <T> RecordBuilder<T> encode(final A input, final DynamicOps<T> ops, final RecordBuilder<T> prefix) {
         final RecordBuilder<T> firstResult = this.first.encode(input, ops, prefix);
 
-        final DataResult<T> secondResult = this.second.encode(this.encodeAction.apply(input), ops, ops.createMap(Collections.emptyMap()));
+        final B rawSecondData = this.encodeAction.apply(input);
+        if (rawSecondData != null) {
+            final DataResult<T> secondResult = this.second.encode(rawSecondData, ops, ops.createMap(Collections.emptyMap()));
 
-        // Need an actual result and not a builder:
-        firstResult.add(this.mergeKey(), secondResult);
+            // Need an actual result and not a builder:
+            firstResult.add(this.mergeKey(), secondResult);
+        }
 
         return firstResult;
     }

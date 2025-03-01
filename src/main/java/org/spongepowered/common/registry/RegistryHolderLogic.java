@@ -33,6 +33,8 @@ import net.minecraft.core.WritableRegistry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.DependencySorter;
+import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.flag.FeatureFlags;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
@@ -56,6 +58,8 @@ import java.util.stream.Stream;
 public final class RegistryHolderLogic implements RegistryHolder {
 
     private final Map<ResourceKey, net.minecraft.core.Registry<net.minecraft.core.Registry<?>>> roots = new Object2ObjectOpenHashMap<>();
+
+    private @Nullable FeatureFlagSet featureFlagSet;
 
     public RegistryHolderLogic() {
         this.roots.put(
@@ -86,6 +90,12 @@ public final class RegistryHolderLogic implements RegistryHolder {
 
         dynamicAccess.registries().forEach(entry -> root.register(entry.key(), entry.value(), RegistrationInfo.BUILT_IN));
         root.freeze();
+    }
+
+    public RegistryHolderLogic(final RegistryAccess dynamicAccess, final @Nullable FeatureFlagSet featureFlagSet) {
+        this(dynamicAccess);
+
+        this.featureFlagSet = featureFlagSet;
     }
 
     public void setRootMinecraftRegistry(final net.minecraft.core.Registry<net.minecraft.core.Registry<?>> rootRegistry) {
@@ -230,5 +240,13 @@ public final class RegistryHolderLogic implements RegistryHolder {
             .forEach(r -> dependencies.addEntry(
                 ((Registry<?>) r).type(), new SpongeRegistryDependencyEntry<>(r, ((WritableRegistryBridge<?>) r).bridge$pendingDependencies().toList())));
         dependencies.orderByDependencies(($, v) -> v.cookie().freeze());
+    }
+
+    public FeatureFlagSet featureFlagSet() {
+        return this.featureFlagSet == null ? FeatureFlags.VANILLA_SET : this.featureFlagSet;
+    }
+
+    public void featureFlagSet(final FeatureFlagSet featureFlagSet) {
+        this.featureFlagSet = featureFlagSet;
     }
 }

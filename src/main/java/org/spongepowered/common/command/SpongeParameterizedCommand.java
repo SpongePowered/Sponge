@@ -40,6 +40,7 @@ import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.common.command.brigadier.SpongeParameterTranslator;
 import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
@@ -66,6 +67,7 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
     private final @Nullable CommandExecutor executor;
     private final boolean isTerminal;
     private @Nullable SpongeCommandManager commandManager;
+    private @Nullable RegistryHolder registryHolder;
     private @Nullable SpongeCommandDispatcher cachedDispatcher;
 
     SpongeParameterizedCommand(
@@ -87,9 +89,10 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
         this.isTerminal = isTerminal;
     }
 
-    public void setCommandManager(final SpongeCommandManager commandManager) {
+    public void setCommandManager(final SpongeCommandManager commandManager, final RegistryHolder registryHolder) {
         this.cachedDispatcher = null;
         this.commandManager = commandManager;
+        this.registryHolder = registryHolder;
     }
 
     @Override
@@ -172,10 +175,10 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
     }
 
     public LiteralCommandNode<CommandSourceStack> buildWithAlias(final String primaryAlias) {
-        return this.buildWithAliases(Collections.singleton(primaryAlias)).iterator().next();
+        return this.buildWithAliases(this.registryHolder, Collections.singleton(primaryAlias)).iterator().next();
     }
 
-    public Collection<LiteralCommandNode<CommandSourceStack>> buildWithAliases(final Collection<String> aliases) {
-        return SpongeParameterTranslator.INSTANCE.createCommandTree(this, aliases);
+    public Collection<LiteralCommandNode<CommandSourceStack>> buildWithAliases(final RegistryHolder registryHolder, final Collection<String> aliases) {
+        return SpongeParameterTranslator.INSTANCE.createCommandTree(registryHolder, this, aliases);
     }
 }

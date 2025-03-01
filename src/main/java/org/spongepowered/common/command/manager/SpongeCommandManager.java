@@ -455,7 +455,7 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
                     this.registerInternalCommands((SpongeParameterizedCommandRegistrar) registrar);
                 }
 
-                this.game.eventManager().post(this.createEvent(cause, this.game, registrar));
+                this.game.eventManager().post(this.createEvent(cause, this.game, registrar, registryHolder));
             } else {
                 SpongeCommon.logger()
                         .warn("Command type '{}' has already been collected, skipping request from {}",
@@ -545,11 +545,12 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
         return aliases;
     }
 
-    private <C, R extends CommandRegistrar<C>> RegisterCommandEventImpl<C, R> createEvent(final Cause cause, final Game game, final R registrar) {
+    private <C, R extends CommandRegistrar<C>> RegisterCommandEventImpl<C, R> createEvent(final Cause cause, final Game game, final R registrar, final RegistryHolder registryHolder) {
         return new RegisterCommandEventImpl<>(
                 cause,
                 game,
-                registrar
+                registrar,
+                registryHolder
         );
     }
 

@@ -33,6 +33,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.common.command.brigadier.argument.ArgumentParser;
 import org.spongepowered.common.command.brigadier.argument.CustomArgumentParser;
 import org.spongepowered.common.command.brigadier.tree.SpongeArgumentCommandNode;
@@ -65,7 +66,8 @@ public final class SpongeParameterTranslator {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public Collection<LiteralCommandNode<CommandSourceStack>> createCommandTree(final Command.Parameterized command, final Collection<String> aliases) {
+    public Collection<LiteralCommandNode<CommandSourceStack>> createCommandTree(final RegistryHolder registryHolder,
+            final Command.Parameterized command, final Collection<String> aliases) {
         if (aliases.isEmpty()) {
             throw new IllegalArgumentException("Aliases must not be empty.");
         }
@@ -86,16 +88,16 @@ public final class SpongeParameterTranslator {
 
         final SpongeLiteralCommandNode commandNode = new SpongeLiteralCommandNode(basicNode);
         if (executor != null) {
-            this.createAndAttachNode(Collections.singleton(commandNode), command.parameters(), executor, true, true);
+            this.createAndAttachNode(registryHolder, Collections.singleton(commandNode), command.parameters(), executor, true, true);
         }
 
         for (final Parameter.Subcommand subcommand : command.subcommands()) {
             final Collection<LiteralCommandNode<CommandSourceStack>> builtSubcommand =
-                    this.createCommandTree(subcommand.command(), subcommand.aliases());
+                    this.createCommandTree(registryHolder, subcommand.command(), subcommand.aliases());
             builtSubcommand.forEach(commandNode::addChild);
         }
 
-        this.createFlags(commandNode, command.flags(), executor);
+        this.createFlags(registryHolder, commandNode, command.flags(), executor);
 
         final List<LiteralCommandNode<CommandSourceStack>> allCommandNodes = new ArrayList<>();
         allCommandNodes.add(commandNode);
@@ -126,7 +128,7 @@ public final class SpongeParameterTranslator {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private void createFlags(final LiteralCommandNode<CommandSourceStack> node, final List<Flag> flags,
+    private void createFlags(final RegistryHolder registryHolder, final LiteralCommandNode<CommandSourceStack> node, final List<Flag> flags,
             final @Nullable SpongeCommandExecutorWrapper wrapper) {
         final Collection<CommandNode<CommandSourceStack>> nodesToAddChildrenTo = new ArrayList<>();
         for (final Flag flag : flags) {
@@ -138,6 +140,7 @@ public final class SpongeParameterTranslator {
             final SpongeFlagLiteralCommandNode flagNode = new SpongeFlagLiteralCommandNode(flagLiteral, flag);
             if (flag.associatedParameter().isPresent()) {
                 toBeRedirected = this.createAndAttachNode(
+                        registryHolder,
                         Collections.singleton(flagNode),
                         Collections.singletonList(flag.associatedParameter().get()),
                         wrapper,
@@ -184,6 +187,7 @@ public final class SpongeParameterTranslator {
     }
 
     private Collection<? extends CommandNode<CommandSourceStack>> createAndAttachNode(
+            final RegistryHolder registryHolder,
             final Collection<? extends CommandNode<CommandSourceStack>> parents,
             final List<Parameter> children,
             final @Nullable SpongeCommandExecutorWrapper executorWrapper,
@@ -210,6 +214,7 @@ public final class SpongeParameterTranslator {
                 // If the child is a subcommand, get the subcommand and attach it. At this point,
                 // we're done with the chain and we break out.
                 final Collection<LiteralCommandNode<CommandSourceStack>> nodes = this.createCommandTree(
+                        registryHolder,
                         subcommands.command(),
                         subcommands.aliases()
                 );
@@ -231,6 +236,7 @@ public final class SpongeParameterTranslator {
                         parametersToAttachTo = new ArrayList<>();
                         for (final Parameter p : ((SpongeFirstOfParameter) parameter).childParameters()) {
                             final Collection<? extends CommandNode<CommandSourceStack>> branchNodesToAttachTo = this.createAndAttachNode(
+                                    registryHolder,
                                     nodesToAttachTo,
                                     Collections.singletonList(p),
                                     executorWrapper,
@@ -241,6 +247,7 @@ public final class SpongeParameterTranslator {
                     } else {
                         // not so fancy stuff, it's a sequence, returns the terminal nodes of the block
                         parametersToAttachTo = new ArrayList<>(this.createAndAttachNode(
+                                registryHolder,
                                 nodesToAttachTo,
                                 ((SpongeMultiParameter) parameter).childParameters(),
                                 executorWrapper,
@@ -278,7 +285,7 @@ public final class SpongeParameterTranslator {
                         key = key + suffix;
                     }
                     final SpongeArgumentCommandNodeBuilder<?> thisNode = SpongeParameterTranslator
-                            .createArgumentNodeBuilders(valueParameter, suffix == null ? null : suffix.toString());
+                            .createArgumentNodeBuilders(registryHolder, valueParameter, suffix == null ? null : suffix.toString());
 
                     if (isTerminal) {
                         thisNode.executes(executorWrapper);
@@ -334,20 +341,24 @@ public final class SpongeParameterTranslator {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static <T> @NonNull SpongeArgumentCommandNodeBuilder<T> createArgumentNodeBuilders(
+            final RegistryHolder registryHolder,
             final SpongeParameterValue<T> parameter,
             final @Nullable String suffix) {
 
         ArgumentParser<T> type = parameter.argumentTypeIfStandard();
 
         if (type == null) {
-            type = new CustomArgumentParser<>(parameter.parsers(), parameter.completer(), false);
+            type = new CustomArgumentParser<>(
+                (List) parameter.parsers().stream().map(p -> p.bind(registryHolder)).toList(), parameter.completer().bind(registryHolder), false);
+        } else {
+            type = type.bind(registryHolder);
         }
 
         final SpongeArgumentCommandNodeBuilder<T> argumentBuilder = new SpongeArgumentCommandNodeBuilder<>(
                 SpongeParameterKey.getSpongeKey(parameter.key()),
                 type,
-                parameter.completer(),
-                parameter.modifier().orElse(null),
+                parameter.completer().bind(registryHolder),
+                parameter.modifier().map(m -> m.bind(registryHolder)).orElse(null),
                 parameter.valueUsage().orElse(null),
                 suffix,
                 parameter.isOptional()

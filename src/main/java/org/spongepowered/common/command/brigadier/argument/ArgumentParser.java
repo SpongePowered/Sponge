@@ -33,6 +33,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueParameterModifier;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
 import org.spongepowered.common.util.Constants;
@@ -90,4 +91,7 @@ public interface ArgumentParser<T> {
         return false;
     }
 
+    default ArgumentParser<T> bind(RegistryHolder registryHolder) {
+        return this;
+    }
 }

@@ -31,6 +31,7 @@ import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Objects;
@@ -38,10 +39,17 @@ import java.util.Objects;
 public final class RegisterCommandEventImpl<C, R extends CommandRegistrar<C>> extends AbstractLifecycleEvent.GenericImpl<C> implements RegisterCommandEvent<C> {
 
     private final R registrar;
+    private final RegistryHolder registryHolder;
 
-    public RegisterCommandEventImpl(final Cause cause, final Game game, final R registrar) {
+    public RegisterCommandEventImpl(final Cause cause, final Game game, final R registrar, final RegistryHolder registryHolder) {
         super(cause, game, registrar.type().handledType());
         this.registrar = registrar;
+        this.registryHolder = registryHolder;
+    }
+
+    @Override
+    public RegistryHolder registryHolder() {
+        return this.registryHolder;
     }
 
     @Override

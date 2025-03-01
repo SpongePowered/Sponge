@@ -30,8 +30,6 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.dimension.LevelStem;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.data.DataManipulator;
-import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -145,37 +143,9 @@ public abstract class LevelStemMixin implements LevelStemBridge, SpongeDataHolde
     }
 
     @Override
-    public LevelStem bridge$decorateData(final DataManipulator data) {
-        this.impl$displayName = data.getOrNull(Keys.DISPLAY_NAME);
-        this.impl$gameMode = (GameType) (Object) data.get(Keys.GAME_MODE).orElse(null);
-        this.impl$difficulty = (Difficulty) (Object) data.get(Keys.WORLD_DIFFICULTY).orElse(null);
-        this.impl$serializationBehavior = data.getOrElse(Keys.SERIALIZATION_BEHAVIOR, SerializationBehavior.AUTOMATIC);
-        this.impl$viewDistance = data.getOrNull(Keys.VIEW_DISTANCE);
-        this.impl$spawnPosition = data.getOrNull(Keys.SPAWN_POSITION);
-        this.impl$loadOnStartup = data.getOrElse(Keys.IS_LOAD_ON_STARTUP, true);
-        this.impl$performsSpawnLogic = data.getOrElse(Keys.PERFORM_SPAWN_LOGIC, false);
-        this.impl$hardcore = data.getOrNull(Keys.HARDCORE);
-        this.impl$allowCommands = data.getOrNull(Keys.COMMANDS);
-        this.impl$pvp = data.getOrNull(Keys.PVP);
-        this.impl$seed = data.getOrNull(Keys.SEED);
-        return (LevelStem) (Object) this;
-    }
-
-    @Override
-    public SpongeWorldTemplate.SpongeDataSection bridge$createData() {
-        return new SpongeWorldTemplate.SpongeDataSection(
-            this.impl$displayName,
-            this.impl$gameMode,
-            this.impl$difficulty,
-            this.impl$serializationBehavior,
-            this.impl$viewDistance,
-            this.impl$spawnPosition,
-            this.impl$loadOnStartup,
-            this.impl$performsSpawnLogic,
-            this.impl$hardcore,
-            this.impl$allowCommands,
-            this.impl$pvp,
-            this.impl$seed
-        );
+    public boolean bridge$hasLegacyData() {
+        return this.impl$displayName != null || this.impl$gameMode != null || this.impl$difficulty != null || this.impl$serializationBehavior != null
+            || this.impl$viewDistance != null || this.impl$spawnPosition != null || this.impl$hardcore != null || this.impl$allowCommands != null
+            || this.impl$pvp != null || this.impl$seed != null;
     }
 }

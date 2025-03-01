@@ -36,6 +36,7 @@ import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
 import org.spongepowered.api.command.parameter.managed.ValueParameterModifier;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContext;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
@@ -94,4 +95,8 @@ public abstract class AbstractArgumentParser<T> implements ArgumentParser<T>, Su
         return false;
     }
 
+    @Override
+    public AbstractArgumentParser<T> bind(final RegistryHolder registryHolder) {
+        return this;
+    }
 }

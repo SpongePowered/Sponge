@@ -31,7 +31,6 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -46,11 +45,6 @@ import org.spongepowered.math.vector.Vector3i;
 import java.util.Optional;
 
 public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem) {
-
-    public static final Codec<LevelStem> CODEC = RecordCodecBuilder.create(
-            ($$0) -> $$0.group(DimensionType.CODEC.fieldOf("type").forGetter(LevelStem::type),
-                            net.minecraft.world.level.chunk.ChunkGenerator.CODEC.fieldOf("generator").forGetter(LevelStem::generator))
-                    .apply($$0, $$0.stable(LevelStem::new)));
 
     private static final Codec<SpongeDataSection> SPONGE_CODEC = RecordCodecBuilder
             .create(r -> r
@@ -82,7 +76,7 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem) {
 
     public static final Codec<LevelStem> DIRECT_CODEC = new MapCodec.MapCodecCodec<LevelStem>(new SpongeDataCodec<>(LevelStem.CODEC,
             SpongeWorldTemplate.SPONGE_CODEC, (type, data) -> ((LevelStemBridge) (Object) type).bridge$decorateData(data),
-            type -> ((LevelStemBridge) (Object) type).bridge$createData()));
+            type -> null));
 
     public record SpongeDataSection(@Nullable Component displayName,
                                     @Nullable GameType gameMode,
@@ -97,5 +91,4 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem) {
                                     @Nullable Boolean pvp,
                                     @Nullable Long seed) {
     }
-
 }

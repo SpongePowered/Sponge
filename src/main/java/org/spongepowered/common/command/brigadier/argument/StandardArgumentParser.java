@@ -41,6 +41,7 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
 import org.spongepowered.api.command.parameter.managed.ValueParameterModifier;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.command.SpongeCommandCompletion;
 import org.spongepowered.common.command.brigadier.SpongeStringReader;
@@ -142,6 +143,11 @@ public class StandardArgumentParser<S, T> implements ArgumentParser<T>, ValuePar
         } catch (final CommandSyntaxException e) {
             throw new ArgumentParseException(SpongeAdventure.asAdventure(e.getRawMessage()), e, e.getInput(), e.getCursor());
         }
+    }
+
+    @Override
+    public StandardArgumentParser<S, T> bind(final RegistryHolder registryHolder) {
+        return this;
     }
 
     @FunctionalInterface

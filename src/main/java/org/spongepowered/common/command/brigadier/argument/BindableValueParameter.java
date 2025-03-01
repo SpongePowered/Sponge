@@ -38,29 +38,33 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-public final class BindableValueParameter<T> implements ValueParameter.Bindable<T>, ResourceKeyedValueParameter<T> {
+public final class BindableValueParameter<T> implements ResourceKeyedValueParameter<T> {
 
-    public BindableValueParameter(final ResourceKey key, final Function<RegistryHolder, T> function) {
+    private final ResourceKey key;
+    private final Function<RegistryHolder, ValueParameter<T>> function;
 
+    public BindableValueParameter(final ResourceKey key, final Function<RegistryHolder, ValueParameter<T>> function) {
+        this.key = key;
+        this.function = function;
     }
 
     @Override
-    public ValueParameter<T> bind(RegistryHolder registryHolder) {
-        return null;
+    public ValueParameter<T> bind(final RegistryHolder registryHolder) {
+        return this.function.apply(registryHolder);
     }
 
     @Override
-    public List<CommandCompletion> complete(CommandContext context, String currentInput) {
+    public List<CommandCompletion> complete(final CommandContext context, final String currentInput) {
         return List.of();
     }
 
     @Override
-    public Optional<? extends T> parseValue(Parameter.Key<? super T> parameterKey, ArgumentReader.Mutable reader, CommandContext.Builder context) throws ArgumentParseException {
+    public Optional<? extends T> parseValue(final Parameter.Key<? super T> parameterKey, final ArgumentReader.Mutable reader, final CommandContext.Builder context) throws ArgumentParseException {
         return Optional.empty();
     }
 
     @Override
     public ResourceKey key() {
-        return null;
+        return this.key;
     }
 }

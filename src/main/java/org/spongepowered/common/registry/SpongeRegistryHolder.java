@@ -27,6 +27,7 @@ package org.spongepowered.common.registry;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.world.flag.FeatureFlagSet;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.RegistryHolder;
@@ -112,5 +113,9 @@ public interface SpongeRegistryHolder extends RegistryHolder {
     @Override
     default <T> org.spongepowered.api.registry.Registry<T> registry(final RegistryType<T> type) {
         return this.registryHolder().registry(Objects.requireNonNull(type, "type"));
+    }
+
+    default FeatureFlagSet featureFlagSet() {
+        return this.registryHolder().featureFlagSet();
     }
 }

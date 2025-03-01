@@ -29,7 +29,6 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.dimension.LevelStem;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.math.vector.Vector3i;
@@ -62,7 +61,5 @@ public interface LevelStemBridge {
 
     LevelStem bridge$decorateData(SpongeWorldTemplate.SpongeDataSection data);
 
-    LevelStem bridge$decorateData(DataManipulator data);
-
-    SpongeWorldTemplate.SpongeDataSection bridge$createData();
+    boolean bridge$hasLegacyData();
 }

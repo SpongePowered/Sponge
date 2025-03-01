@@ -190,6 +190,8 @@ public final class SpongeLifecycle implements Lifecycle {
     public void beginEstablishServerRegistries(final RegistryHolder server) {
         SpongeRegistries.registerServerRegistries((SpongeRegistryHolder) server, this.featureFlags);
 
+        ((SpongeRegistryHolder) server).registryHolder().featureFlagSet(this.featureFlags);
+
         this.game.eventManager().post(
             AbstractRegisterRegistryEvent.EngineScopedImpl.server(Cause.of(EventContext.empty(), this.game), this.game, server));
 
@@ -223,7 +225,7 @@ public final class SpongeLifecycle implements Lifecycle {
         ((SpongeRegistryHolder) client).registryHolder().freezeSpongeRootRegistry();
 
         this.game.eventManager().post(AbstractRegisterRegistryValueEvent.EngineScopedImpl.client(Cause.of(EventContext.empty(), this.game),
-                this.game, client, Map.of()));
+                this.game, client, client.streamRegistries(RegistryRoots.SPONGE).collect(Collectors.toMap(org.spongepowered.api.registry.Registry::type, Function.identity()))));
 
         ((SpongeRegistryHolder) client).registryHolder().freezeSpongeDynamicRegistries(true);
     }
