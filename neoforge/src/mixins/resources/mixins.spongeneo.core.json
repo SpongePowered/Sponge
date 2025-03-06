@@ -16,6 +16,7 @@
         "neoforge.event.world.BlockEvent_BreakEventMixin_Neo",
         "neoforge.event.world.BlockEventMixin_Neo",
         "neoforge.internal.BrandingControlMixin_Neo",
+        "neoforge.registries.GameDataMixin_Neo",
         "neoforge.registries.RegistryManagerMixin_Neo",
         "network.ConnectionMixin_Neo",
         "server.BootstrapMixin_Neo",

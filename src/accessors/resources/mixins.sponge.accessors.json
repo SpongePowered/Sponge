@@ -141,6 +141,7 @@
     "world.item.AdventureModePredicateAccessor",
     "world.item.ItemCooldowns_CooldownInstanceAccessor",
     "world.item.component.CustomDataAccessor",
+    "world.item.context.UseOnContextAccessor",
     "world.item.crafting.RecipeMapAccessor",
     "world.item.crafting.ShapelessRecipeAccessor",
     "world.item.enchantment.ItemEnchantmentsAccessor",

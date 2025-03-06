@@ -5,6 +5,5 @@
   "target": "@env(DEFAULT)",
   "priority": 1300,
   "mixins": [
-   "event.world.level.block.entity.HopperBlockEntityMixin_Inventory_Forge"
   ]
 }

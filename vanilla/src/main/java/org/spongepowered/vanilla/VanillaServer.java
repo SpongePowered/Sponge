@@ -25,10 +25,6 @@
 package org.spongepowered.vanilla;
 
 import org.spongepowered.common.SpongeServer;
-import org.spongepowered.common.world.server.SpongeWorldManager;
 
 public interface VanillaServer extends VanillaEngine, SpongeServer {
-
-    @Override
-    SpongeWorldManager worldManager();
 }

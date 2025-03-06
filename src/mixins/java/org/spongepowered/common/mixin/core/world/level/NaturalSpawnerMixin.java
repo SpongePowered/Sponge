@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.accessor.world.level.NaturalSpawner_SpawnStateAccessor;
 import org.spongepowered.common.bridge.world.level.NaturalSpawner_SpawnStateBridge;
-import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
+import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.config.inheritable.SpawnerCategory;
 
 @Mixin(NaturalSpawner.class)
@@ -58,8 +58,8 @@ public abstract class NaturalSpawnerMixin {
         return level.getGameTime() % tick  == 0L && ((NaturalSpawner_SpawnStateBridge) spawnState).bridge$canSpawnForCategoryInWorld(classification, level);
     }
 
-    private static int impl$getSpawningTickRate(final MobCategory classification, final ServerLevel world) {
-        final SpawnerCategory.TickRatesSubCategory tickRates = ((PrimaryLevelDataBridge) world.getLevelData()).bridge$configAdapter().get().spawner.tickRates;
+    private static int impl$getSpawningTickRate(final MobCategory classification, final ServerLevel level) {
+        final SpawnerCategory.TickRatesSubCategory tickRates = SpongeGameConfigs.getForWorld(level).get().spawner.tickRates;
         switch (classification) {
             case MONSTER:
                 return tickRates.monster;

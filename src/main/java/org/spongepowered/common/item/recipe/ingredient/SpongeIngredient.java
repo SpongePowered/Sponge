@@ -32,6 +32,7 @@ import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
 import org.apache.commons.lang3.NotImplementedException;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.inventory.ItemStackLike;
@@ -130,6 +131,11 @@ public class SpongeIngredient extends Ingredient {
         }
 
         return this.itemList.test(testStack);
+    }
+
+    @Override
+    public SlotDisplay display() {
+        return new SlotDisplay.Composite(this.itemList.getItems().stream().map(SlotDisplay.ItemStackSlotDisplay::new).map(SlotDisplay.class::cast).toList());
     }
 
     public static SpongeIngredient spongeFromStacks(net.minecraft.world.item.ItemStack... stacks) {

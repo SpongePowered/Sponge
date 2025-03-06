@@ -46,4 +46,8 @@ public interface ServerLevelAccessor {
 
     @Accessor("entityManager") PersistentEntitySectionManager<Entity> accessor$getEntityManager();
 
+    @Accessor("lastSpawnChunkRadius") int accessor$lastSpawnChunkRadius();
+
+    @Accessor("lastSpawnChunkRadius") void accessor$setLastSpawnChunkRadius(int value);
+
 }

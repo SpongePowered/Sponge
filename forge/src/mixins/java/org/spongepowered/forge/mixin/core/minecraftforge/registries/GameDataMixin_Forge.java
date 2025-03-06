@@ -22,14 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.neoforge.world.server;
+package org.spongepowered.forge.mixin.core.minecraftforge.registries;
 
-import net.minecraft.server.MinecraftServer;
-import org.spongepowered.common.world.server.SpongeWorldManager;
+import com.llamalad7.mixinextras.sugar.Local;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.entity.EntityType;
+import net.minecraftforge.registries.GameData;
+import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.entity.SpongeEntityTypes;
 
-public final class NeoWorldManager extends SpongeWorldManager {
+@Mixin(GameData.class)
+public class GameDataMixin_Forge {
 
-    public NeoWorldManager(final MinecraftServer server) {
-        super(server);
+    @Inject(method = "postRegisterEvents", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/fml/ModLoader;postEventWrapContainerInModOrder(Lnet/minecraftforge/eventbus/api/Event;)V", shift = At.Shift.AFTER))
+    private static void forge$registerSpongeTypesLast(final CallbackInfo ci, @Nullable @Local final Registry<?> vanillaRegistry) {
+        if (vanillaRegistry != null && Registries.ENTITY_TYPE.equals(vanillaRegistry.key())) {
+            SpongeEntityTypes.register((Registry<EntityType<?>>) vanillaRegistry);
+        }
     }
 }

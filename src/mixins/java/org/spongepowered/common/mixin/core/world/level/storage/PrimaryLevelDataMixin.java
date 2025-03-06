@@ -42,27 +42,21 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
-import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.WorldData;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.accessor.world.level.LevelSettingsAccessor;
-import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
@@ -73,7 +67,7 @@ import org.spongepowered.common.data.fixer.LegacyUUIDCodec;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MapUtil;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.server.SpongeWorldManager;
+import org.spongepowered.common.world.server.SpongeServerLevelData;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Collections;
@@ -82,7 +76,7 @@ import java.util.StringJoiner;
 import java.util.UUID;
 
 @Mixin(PrimaryLevelData.class)
-public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDataBridge, ResourceKeyBridge, DataCompoundHolder {
+public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldData, PrimaryLevelDataBridge, DataCompoundHolder {
 
     // @formatter:off
     @Shadow private LevelSettings settings;
@@ -93,10 +87,9 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     @Shadow public abstract void shadow$setSpawn(BlockPos p_176143_1_, float p_176143_2_);
     // @formatter:on
 
-    @Nullable private ResourceKey impl$key;
+    private final SpongeServerLevelData impl$spongeData = new SpongeServerLevelData();
+
     private DimensionType impl$dimensionType;
-    private UUID impl$uniqueId = UUID.randomUUID();
-    private InheritableConfigHandle<WorldConfig> impl$configAdapter;
 
     private final BiMap<Integer, UUID> impl$playerUniqueIdMap = HashBiMap.create();
 
@@ -106,43 +99,8 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     private @Nullable CompoundTag impl$compound;
 
     @Override
-    public boolean bridge$isVanilla() {
-        // Mods can extend/implement WorldData but may not implement Bridge appropriately
-        return ((PrimaryLevelData) (Object) this).getClass() == PrimaryLevelData.class;
-    }
-
-    @Override
-    public ResourceKey bridge$getKey() {
-        return this.impl$key;
-    }
-
-    @Override
-    public void bridge$setKey(final ResourceKey key) {
-        this.impl$key = key;
-    }
-
-    @Override
-    public boolean bridge$valid() {
-        return this.impl$key != null;
-    }
-
-    @Override
-    public @Nullable ServerLevel bridge$world() {
-        if (!Sponge.isServerAvailable()) {
-            throw new IllegalStateException("The server is not available yet!");
-        }
-
-        final ServerLevel world = SpongeCommon.server().getLevel(SpongeWorldManager.createRegistryKey(this.impl$key));
-        if (world == null) {
-            throw new IllegalStateException("The world is not available yet!");
-        }
-
-        final ServerLevelData levelData = (ServerLevelData) world.getLevelData();
-        if (levelData != this) {
-            throw new IllegalStateException(String.format("The reference for the data for key '%s' does not match this object. This object is stale.", this.impl$key));
-        }
-
-        return world;
+    public SpongeServerLevelData bridge$spongeData() {
+        return this.impl$spongeData;
     }
 
     @Override
@@ -153,11 +111,6 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     @Override
     public void bridge$dimensionType(final DimensionType type, final boolean updatePlayers) {
         this.impl$dimensionType = type;
-    }
-
-    @Override
-    public UUID bridge$uniqueId() {
-        return this.impl$uniqueId;
     }
 
     @Override
@@ -178,94 +131,74 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     @Override
     public void bridge$forceSetDifficulty(final Difficulty difficulty) {
         this.impl$customDifficulty = true;
-        ((LevelSettingsAccessor) (Object) this.settings).accessor$difficulty(difficulty);
-        this.impl$updateWorldForDifficultyChange(this.bridge$world(), this.shadow$isDifficultyLocked());
-    }
-
-    @Override
-    public Optional<Boolean> bridge$pvp() {
-        return Optional.ofNullable(this.impl$configAdapter.get().world.pvpEnabled);
-    }
-
-    @Override
-    public void bridge$setPvp(@Nullable final Boolean pvp) {
-        this.impl$configAdapter.get().world.pvpEnabled = pvp;
-    }
-
-    @Override
-    public boolean bridge$performsSpawnLogic() {
-        return this.impl$configAdapter.get().world.keepSpawnLoaded;
-    }
-
-    @Override
-    public void bridge$setPerformsSpawnLogic(final boolean performsSpawnLogic) {
-        this.impl$configAdapter.get().world.keepSpawnLoaded = performsSpawnLogic;
-    }
-
-    @Override
-    public boolean bridge$loadOnStartup() {
-        return this.impl$configAdapter.get().world.loadOnStartup;
-    }
-
-    @Override
-    public void bridge$setLoadOnStartup(final boolean loadOnStartup) {
-        this.impl$configAdapter.get().world.loadOnStartup = loadOnStartup;
-    }
-
-    @Override
-    public Optional<SerializationBehavior> bridge$serializationBehavior() {
-        return Optional.ofNullable(this.impl$configAdapter.get().world.serializationBehavior);
-    }
-
-    @Override
-    public void bridge$setSerializationBehavior(@Nullable final SerializationBehavior behavior) {
-        this.impl$configAdapter.get().world.serializationBehavior = behavior;
-    }
-
-    @Override
-    public Optional<Component> bridge$displayName() {
-        return Optional.ofNullable(this.impl$configAdapter.get().world.displayName);
-    }
-
-    @Override
-    public void bridge$setDisplayName(@Nullable final Component displayName) {
-        this.impl$configAdapter.get().world.displayName = displayName;
-    }
-
-    @Override
-    public Optional<Integer> bridge$viewDistance() {
-        return Optional.ofNullable(this.impl$configAdapter.get().world.viewDistance);
-    }
-
-    @Override
-    public void bridge$setViewDistance(@Nullable final Integer viewDistance) {
-        this.impl$configAdapter.get().world.viewDistance = viewDistance;
-        this.bridge$triggerViewDistanceLogic();
-    }
-
-    @Override
-    public void bridge$triggerViewDistanceLogic() {
-        final ServerLevel world = this.bridge$world();
-        if (world != null) {
-            final int actual = this.impl$configAdapter.get().world.viewDistance == null ? world.getServer().getPlayerList().getViewDistance() : this.impl$configAdapter.get().world.viewDistance;
-            world.getChunkSource().setViewDistance(actual);
-            final ClientboundSetChunkCacheRadiusPacket packet = new ClientboundSetChunkCacheRadiusPacket(actual);
-
-            world.players().forEach(p -> p.connection.send(packet));
+        this.settings = this.settings.withDifficulty(difficulty);
+        final ServerLevel level = this.bridge$level();
+        if (level != null) {
+            this.impl$updateWorldForDifficultyChange(level, this.shadow$isDifficultyLocked());
         }
     }
 
     @Override
-    public InheritableConfigHandle<WorldConfig> bridge$configAdapter() {
-        return this.impl$configAdapter;
+    public Optional<Boolean> bridge$pvp() {
+        return Optional.ofNullable(this.impl$spongeData.configAdapter().get().world.pvpEnabled);
     }
 
     @Override
-    public void bridge$configAdapter(final InheritableConfigHandle<WorldConfig> adapter) {
-        this.impl$configAdapter = adapter;
+    public void bridge$setPvp(@Nullable final Boolean pvp) {
+        this.impl$spongeData.configAdapter().get().world.pvpEnabled = pvp;
     }
 
     @Override
+    public boolean bridge$performsSpawnLogic() {
+        return this.impl$spongeData.configAdapter().get().world.keepSpawnLoaded;
+    }
+
+    @Override
+    public void bridge$setPerformsSpawnLogic(final boolean performsSpawnLogic) {
+        this.impl$spongeData.configAdapter().get().world.keepSpawnLoaded = performsSpawnLogic;
+    }
+
+    @Override
+    public boolean bridge$loadOnStartup() {
+        return this.impl$spongeData.configAdapter().get().world.loadOnStartup;
+    }
+
+    @Override
+    public void bridge$setLoadOnStartup(final boolean loadOnStartup) {
+        this.impl$spongeData.configAdapter().get().world.loadOnStartup = loadOnStartup;
+    }
+
+    @Override
+    public Optional<SerializationBehavior> bridge$serializationBehavior() {
+        return Optional.ofNullable(this.impl$spongeData.configAdapter().get().world.serializationBehavior);
+    }
+
+    @Override
+    public void bridge$setSerializationBehavior(@Nullable final SerializationBehavior behavior) {
+        this.impl$spongeData.configAdapter().get().world.serializationBehavior = behavior;
+    }
+
+    @Override
+    public Optional<Component> bridge$displayName() {
+        return Optional.ofNullable(this.impl$spongeData.configAdapter().get().world.displayName);
+    }
+
+    @Override
+    public void bridge$setDisplayName(@Nullable final Component displayName) {
+        this.impl$spongeData.configAdapter().get().world.displayName = displayName;
+    }
+
+    @Override
+    public Optional<Integer> bridge$viewDistance() {
+        return Optional.ofNullable(this.impl$spongeData.configAdapter().get().world.viewDistance);
+    }
+
+    @Override
+    public void bridge$setViewDistance(@Nullable final Integer viewDistance) {
+        this.impl$spongeData.configAdapter().get().world.viewDistance = viewDistance;
+        this.bridge$triggerViewDistanceLogic();
+    }
+
     public void bridge$populateFromLevelStem(final LevelStem dimension) {
         this.impl$dimensionType = dimension.type().value();
 
@@ -329,33 +262,24 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
         return Optional.ofNullable(this.impl$playerUniqueIdMap.get(index));
     }
 
-    @Override
-    public ServerLevelData overworldData() {
-        if (Level.OVERWORLD.location().equals(this.impl$key)) {
-            return (ServerLevelData) this;
-        }
-
-        return (ServerLevelData) SpongeCommon.server().getLevel(Level.OVERWORLD).getLevelData();
-    }
-
-    void impl$updateWorldForDifficultyChange(final ServerLevel world, final boolean isLocked) {
-        final MinecraftServer server = world.getServer();
-        final Difficulty difficulty = ((LevelData) this).getDifficulty();
+    void impl$updateWorldForDifficultyChange(final ServerLevel level, final boolean isLocked) {
+        final MinecraftServer server = level.getServer();
+        final Difficulty difficulty = this.getDifficulty();
 
         if (difficulty == Difficulty.HARD) {
-            world.setSpawnSettings(true); // set spawn enemies true
+            level.setSpawnSettings(true); // set spawn enemies true
         } else if (server.isSingleplayer()) {
-            world.setSpawnSettings(difficulty != Difficulty.PEACEFUL);
+            level.setSpawnSettings(difficulty != Difficulty.PEACEFUL);
         } else {
-            world.setSpawnSettings(((MinecraftServerAccessor) server).invoker$isSpawningMonsters());
+            level.setSpawnSettings(((MinecraftServerAccessor) server).invoker$isSpawningMonsters());
         }
 
-        world.players().forEach(player -> player.connection.send(new ClientboundChangeDifficultyPacket(difficulty, isLocked)));
+        level.players().forEach(player -> player.connection.send(new ClientboundChangeDifficultyPacket(difficulty, isLocked)));
     }
 
     @Override
     public void bridge$hardcore(final boolean hardcore) {
-        ((LevelSettingsAccessor) (Object) this.settings).accessor$harcore(hardcore);
+        ((LevelSettingsAccessor) (Object) this.settings).accessor$hardcore(hardcore);
     }
 
     @Override
@@ -367,7 +291,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     @SuppressWarnings("deprecated")
     public void bridge$readSpongeLevelData(final Dynamic<Tag> dynamic) {
         dynamic.get(Constants.Sponge.Data.V2.SPONGE_DATA).get().ifSuccess(v2 -> {
-            v2.get(Constants.Sponge.World.UNIQUE_ID).read(UUIDUtil.CODEC).result().ifPresent(value -> this.impl$uniqueId = value);
+            v2.get(Constants.Sponge.World.UNIQUE_ID).read(UUIDUtil.CODEC).result().ifPresent(this.impl$spongeData::setUniqueId);
 
             v2.get(Constants.Map.MAP_UUID_INDEX).readMap(Codec.STRING, UUIDUtil.CODEC).result().ifPresent(value -> {
                 final BiMap<Integer, UUID> mapIndex = HashBiMap.create();
@@ -392,7 +316,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     @Override
     public CompoundTag bridge$writeSpongeLevelData() {
         final CompoundTag data = new CompoundTag();
-        data.putUUID(Constants.Sponge.World.UNIQUE_ID, this.impl$uniqueId);
+        data.putUUID(Constants.Sponge.World.UNIQUE_ID, this.impl$spongeData.uniqueId());
 
         // Map Storage
         final CompoundTag mapUUIDIndexTag = new CompoundTag();
@@ -409,14 +333,13 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     @Override
     public String toString() {
         return new StringJoiner(", ", PrimaryLevelData.class.getSimpleName() + "[", "]")
-
-                .add("key=" + this.impl$key)
+                .add("key=" + this.impl$spongeData.key())
                 .add("worldType=" + this.impl$dimensionType)
-                .add("uniqueId=" + this.impl$uniqueId)
+                .add("uniqueId=" + this.impl$spongeData.uniqueId())
                 .add("spawn=" + VecHelper.toVector3i(this.spawnPos))
-                .add("gameType=" + ((ServerLevelData) this).getGameType())
-                .add("hardcore=" + ((LevelData) this).isHardcore())
-                .add("difficulty=" + ((LevelData) this).getDifficulty())
+                .add("gameType=" + this.getGameType())
+                .add("hardcore=" + this.isHardcore())
+                .add("difficulty=" + this.getDifficulty())
                 .toString();
     }
 

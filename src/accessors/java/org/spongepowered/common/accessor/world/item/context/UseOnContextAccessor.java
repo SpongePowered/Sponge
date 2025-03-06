@@ -22,28 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.mixin.api.minecraft.server;
+package org.spongepowered.common.accessor.world.item.context;
 
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.phys.BlockHitResult;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.forge.ForgeServer;
-import org.spongepowered.forge.world.server.ForgeWorldManager;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(MinecraftServer.class)
-public abstract class MinecraftServerMixin_Forge_API implements ForgeServer {
+@Mixin(UseOnContext.class)
+public interface UseOnContextAccessor {
 
-    private ForgeWorldManager forgeAPI$worldManager;
-
-    @Inject(method = "<init>", at = @At("TAIL"))
-    private void forgeAPI$setupSpongeFields(CallbackInfo ci) {
-        this.forgeAPI$worldManager = new ForgeWorldManager((MinecraftServer) (Object) this);
-    }
-
-    @Override
-    public ForgeWorldManager worldManager() {
-        return this.forgeAPI$worldManager;
-    }
+    @Accessor("hitResult") BlockHitResult accessor$hitResult();
 }

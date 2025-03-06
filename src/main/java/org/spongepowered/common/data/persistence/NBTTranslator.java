@@ -177,11 +177,10 @@ public final class NBTTranslator implements DataTranslator<CompoundTag> {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static void setInternal(Tag base, byte type, DataView view, String key) {
-        Objects.requireNonNull(base);
-        Objects.requireNonNull(view);
-        Objects.requireNonNull(key);
-        Preconditions.checkArgument(!key.isEmpty());
-        Preconditions.checkArgument(type > Constants.NBT.TAG_END && type <= Constants.NBT.TAG_LONG_ARRAY);
+        Objects.requireNonNull(base, "base");
+        Objects.requireNonNull(view, "view");
+        Objects.requireNonNull(key, "key");
+        Preconditions.checkArgument(!key.isEmpty(), "key is empty");
         switch (type) {
             case Constants.NBT.TAG_BYTE:
                 if (key.contains(NBTTranslator.BOOLEAN_IDENTIFIER)) {

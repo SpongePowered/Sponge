@@ -4,7 +4,6 @@
   "package": "org.spongepowered.vanilla.mixin.inventory",
   "priority": 1200,
   "mixins": [
-    "event.world.level.block.entity.HopperBlockEntityMixin_Inventory_Vanilla"
   ],
   "overwrites": {
     "conformVisibility": true

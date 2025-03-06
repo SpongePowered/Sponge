@@ -31,7 +31,6 @@ import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.crafting.RecipeManager.CachedCheck;
 import net.minecraft.world.item.crafting.RecipeMap;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
-import net.minecraft.world.level.Level;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.recipe.Recipe;
@@ -54,21 +53,22 @@ import java.util.stream.Collectors;
 public abstract class RecipeManagerMixin_API implements RecipeManager {
 
     // @formatter:off
-    @Shadow public abstract Collection<net.minecraft.world.item.crafting.Recipe<?>> shadow$getRecipes();
-    @Shadow public abstract <I extends RecipeInput, T extends net.minecraft.world.item.crafting.Recipe<I>> Optional<T> shadow$getRecipeFor(net.minecraft.world.item.crafting.RecipeType<T> recipeTypeIn, I inventoryIn, Level worldIn);
+    @Shadow public abstract Collection<net.minecraft.world.item.crafting.RecipeHolder<?>> shadow$getRecipes();
+    @Shadow public abstract <I extends RecipeInput, T extends net.minecraft.world.item.crafting.Recipe<I>> Optional<RecipeHolder<T>> shadow$getRecipeFor(net.minecraft.world.item.crafting.RecipeType<T> recipeTypeIn, I inventoryIn, net.minecraft.world.level.Level worldIn);
 
     // @formatter:on
 
     @Shadow
     private RecipeMap recipes;
 
+    @SuppressWarnings({"DataFlowIssue", "unchecked"})
     @Override
     public Optional<Recipe<?>> byKey(final ResourceKey key) {
         Objects.requireNonNull(key);
         // TODO - figure out how to do this better
         for (var entry : ((RecipeMapAccessor) this.recipes).accessor$byKey().entrySet()) {
             if (entry.getKey().location().equals(key)) {
-                return Optional.of(entry.getValue()).map(Recipe.class::cast);
+                return Optional.of(entry.getValue()).map(RecipeHolder::value).map(Recipe.class::cast);
             }
         }
         return Optional.empty();
@@ -77,14 +77,14 @@ public abstract class RecipeManagerMixin_API implements RecipeManager {
     @Override
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
     public Collection<Recipe<?>> all() {
-        return (Collection) this.shadow$getRecipes();
+        return (Collection) this.shadow$getRecipes().stream().map(RecipeHolder::value).toList();
     }
 
     @Override
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
     public <T extends Recipe<?>> Collection<T> allOfType(final RecipeType<T> type) {
         Objects.requireNonNull(type);
-        return this.recipes.byType((net.minecraft.world.item.crafting.RecipeType)type);
+        return this.recipes.byType((net.minecraft.world.item.crafting.RecipeType)type).stream().map(h -> ((RecipeHolder)h).value()).toList();
     }
 
     @Override
@@ -124,6 +124,6 @@ public abstract class RecipeManagerMixin_API implements RecipeManager {
         Objects.requireNonNull(ingredient);
 
         final SingleRecipeInput input = new SingleRecipeInput(ItemStackUtil.fromLikeToNative(ingredient));
-        return this.shadow$getRecipeFor((net.minecraft.world.item.crafting.RecipeType) type, input, null);
+        return this.shadow$getRecipeFor((net.minecraft.world.item.crafting.RecipeType) type, input, null).map(h -> ((RecipeHolder<?>)h).value());
     }
 }

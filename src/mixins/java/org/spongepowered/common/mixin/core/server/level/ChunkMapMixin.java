@@ -56,7 +56,7 @@ import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.DistanceManagerBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.bridge.world.level.chunk.storage.IOWorkerBridge;
-import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
+import org.spongepowered.common.bridge.world.level.storage.ServerLevelDataBridge;
 import org.spongepowered.common.bridge.world.server.ChunkMapBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -90,18 +90,18 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
 
     @Redirect(method = "save",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/ai/village/poi/PoiManager;flush(Lnet/minecraft/world/level/ChunkPos;)V"))
-    private void impl$useSerializationBehaviorForPOI(final PoiManager pointOfInterestManager, final ChunkPos p_219112_1_) {
-        final PrimaryLevelDataBridge infoBridge = (PrimaryLevelDataBridge) this.level.getLevelData();
+    private void impl$useSerializationBehaviorForPOI(final PoiManager pointOfInterestManager, final ChunkPos pos) {
+        final ServerLevelDataBridge infoBridge = (ServerLevelDataBridge) this.level.getLevelData();
         final SerializationBehavior serializationBehavior = infoBridge.bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
         if (serializationBehavior == SerializationBehavior.AUTOMATIC || serializationBehavior == SerializationBehavior.MANUAL) {
-            pointOfInterestManager.flush(p_219112_1_);
+            pointOfInterestManager.flush(pos);
         }
     }
 
     @Redirect(method = "save", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/server/level/ChunkMap;write(Lnet/minecraft/world/level/ChunkPos;Ljava/util/function/Supplier;)Ljava/util/concurrent/CompletableFuture;"))
     private CompletableFuture<Void> impl$doNotWriteIfWeHaveNoData(final ChunkMap chunkManager, final ChunkPos pos, final Supplier<CompoundTag> compound) {
-        final PrimaryLevelDataBridge infoBridge = (PrimaryLevelDataBridge) this.level.getLevelData();
+        final ServerLevelDataBridge infoBridge = (ServerLevelDataBridge) this.level.getLevelData();
         final SerializationBehavior serializationBehavior = infoBridge.bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
         if (serializationBehavior == SerializationBehavior.AUTOMATIC || serializationBehavior == SerializationBehavior.MANUAL) {
             return chunkManager.write(pos, compound);

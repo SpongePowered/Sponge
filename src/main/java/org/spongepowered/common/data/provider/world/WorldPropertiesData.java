@@ -39,6 +39,7 @@ import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
+import org.spongepowered.common.bridge.world.level.storage.ServerLevelDataBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.weather.SpongeWeather;
@@ -75,6 +76,21 @@ public final class WorldPropertiesData {
                     .create(Keys.WEATHER)
                         .get(SpongeWeather::of)
                         .set(SpongeWeather::apply)
+                .asMutable(ServerLevelDataBridge.class)
+                    .create(Keys.WORLD_TYPE)
+                        .get(h -> (WorldType) (Object) h.bridge$dimensionType())
+                    .create(Keys.PVP)
+                        .get(h -> h.bridge$pvp().orElseGet(() -> SpongeCommon.server().isPvpAllowed()))
+                    .create(Keys.SERIALIZATION_BEHAVIOR)
+                        .get(h -> h.bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC))
+                    .create(Keys.VIEW_DISTANCE)
+                        .get(h -> h.bridge$viewDistance().orElseGet(() -> SpongeCommon.server().getPlayerList().getViewDistance()))
+                    .create(Keys.DISPLAY_NAME)
+                        .get(h -> h.bridge$displayName().orElse(null))
+                    .create(Keys.PERFORM_SPAWN_LOGIC)
+                        .get(ServerLevelDataBridge::bridge$performsSpawnLogic)
+                    .create(Keys.IS_LOAD_ON_STARTUP)
+                        .get(ServerLevelDataBridge::bridge$loadOnStartup)
                 .asMutable(PrimaryLevelData.class)
                     .create(Keys.WORLD_DIFFICULTY)
                         .set((h, v) -> h.setDifficulty((net.minecraft.world.Difficulty) (Object) v))
@@ -82,32 +98,23 @@ public final class WorldPropertiesData {
                         .get(h -> (WorldGenerationConfig) h.worldGenOptions())
                 .asMutable(PrimaryLevelDataBridge.class)
                     .create(Keys.WORLD_TYPE)
-                        .get(h -> (WorldType) (Object) h.bridge$dimensionType())
                         .set((h, v) -> h.bridge$dimensionType((DimensionType) (Object) v, true))
                     .create(Keys.PVP)
-                        .get(h -> h.bridge$pvp().orElseGet(() -> SpongeCommon.server().isPvpAllowed()))
                         .set(PrimaryLevelDataBridge::bridge$setPvp)
                     .create(Keys.HARDCORE)
                         .set(PrimaryLevelDataBridge::bridge$hardcore)
                     .create(Keys.COMMANDS)
                         .set(PrimaryLevelDataBridge::bridge$allowCommands)
                     .create(Keys.SERIALIZATION_BEHAVIOR)
-                        .get(h -> h.bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC))
                         .set(PrimaryLevelDataBridge::bridge$setSerializationBehavior)
                     .create(Keys.VIEW_DISTANCE)
-                        .get(h -> h.bridge$viewDistance().orElseGet(() -> SpongeCommon.server().getPlayerList().getViewDistance()))
                         .set(PrimaryLevelDataBridge::bridge$setViewDistance)
                     .create(Keys.DISPLAY_NAME)
-                        .get(h -> h.bridge$displayName().orElse(null))
                         .set(PrimaryLevelDataBridge::bridge$setDisplayName)
                     .create(Keys.PERFORM_SPAWN_LOGIC)
-                        .get(PrimaryLevelDataBridge::bridge$performsSpawnLogic)
                         .set(PrimaryLevelDataBridge::bridge$setPerformsSpawnLogic)
                     .create(Keys.IS_LOAD_ON_STARTUP)
-                        .get(PrimaryLevelDataBridge::bridge$loadOnStartup)
                         .set(PrimaryLevelDataBridge::bridge$setLoadOnStartup)
-
-
         ;
     }
     // @formatter:on

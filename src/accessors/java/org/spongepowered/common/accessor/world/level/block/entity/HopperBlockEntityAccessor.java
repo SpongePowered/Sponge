@@ -24,17 +24,9 @@
  */
 package org.spongepowered.common.accessor.world.level.block.entity;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.Container;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedInvokerError;
 
 @Mixin(HopperBlockEntity.class)
 public interface HopperBlockEntityAccessor {
@@ -42,25 +34,4 @@ public interface HopperBlockEntityAccessor {
     @Accessor("cooldownTime") int accessor$cooldownTime();
 
     @Accessor("cooldownTime") void accessor$cooldownTime(final int cooldownTime);
-
-    @Invoker("tryMoveInItem")
-    static ItemStack invoker$tryMoveInItem(final @Nullable Container source, final Container destination, final ItemStack stack, final int index,
-            final @Nullable Direction direction) {
-        throw new UntransformedInvokerError();
-    }
-
-    @Invoker("getSlots")
-    static int[] invoker$getSlots(final Container inventory, final Direction side) {
-        throw new UntransformedInvokerError();
-    }
-
-    @Invoker("getContainerAt")
-    static Container invoker$getContainerAt(Level var0, BlockPos blockPos) {
-        throw new UntransformedInvokerError();
-    }
-
-    @Invoker("isFullContainer")
-    static boolean invoker$isFullContainer(Container param0, Direction param1) {
-        throw new UntransformedInvokerError();
-    }
 }

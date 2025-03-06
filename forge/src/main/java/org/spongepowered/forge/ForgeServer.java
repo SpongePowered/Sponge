@@ -25,10 +25,6 @@
 package org.spongepowered.forge;
 
 import org.spongepowered.common.SpongeServer;
-import org.spongepowered.forge.world.server.ForgeWorldManager;
 
 public interface ForgeServer extends ForgeEngine, SpongeServer {
-
-    @Override
-    ForgeWorldManager worldManager();
 }

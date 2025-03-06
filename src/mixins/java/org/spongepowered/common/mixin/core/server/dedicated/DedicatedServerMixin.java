@@ -73,12 +73,6 @@ public abstract class DedicatedServerMixin extends MinecraftServerMixin {
     }
 
     @Override
-    protected void loadLevel() {
-        // TODO replacement? this.shadow$detectBundledResources();
-        this.worldManager().loadLevel();
-    }
-
-    @Override
     public boolean bridge$performAutosaveChecks() {
         return this.shadow$isRunning();
     }

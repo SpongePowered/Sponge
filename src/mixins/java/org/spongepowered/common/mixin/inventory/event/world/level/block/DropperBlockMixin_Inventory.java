@@ -24,25 +24,22 @@
  */
 package org.spongepowered.common.mixin.inventory.event.world.level.block;
 
-import net.minecraft.core.BlockPos;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import net.minecraft.core.Direction;
-import net.minecraft.core.dispenser.BlockSource;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.DropperBlock;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.accessor.world.level.block.entity.HopperBlockEntityAccessor;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
@@ -51,69 +48,44 @@ import org.spongepowered.common.inventory.util.InventoryUtil;
 @Mixin(DropperBlock.class)
 public abstract class DropperBlockMixin_Inventory {
 
-    @Inject(method = "dispenseFrom", cancellable = true, locals = LocalCapture.CAPTURE_FAILEXCEPTION,
-            at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/level/block/entity/DispenserBlockEntity;setItem(ILnet/minecraft/world/item/ItemStack;)V"))
-    private void impl$afterDispense(final ServerLevel worldIn, final BlockState state, final BlockPos pos, final CallbackInfo callbackInfo,
-            final DispenserBlockEntity dispensertileentity, final BlockSource proxyblocksource, final int i, final ItemStack itemstack,
-            final Direction direction, final Container iinventory, final ItemStack itemstack1) {
-        // after setItem
-        dispensertileentity.setItem(i, itemstack1);
+    @WrapOperation(method = "dispenseFrom", at = @At(
+        value = "INVOKE",
+        target = "Lnet/minecraft/world/level/block/entity/HopperBlockEntity;addItem(Lnet/minecraft/world/Container;Lnet/minecraft/world/Container;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/core/Direction;)Lnet/minecraft/world/item/ItemStack;"
+    ))
+    private ItemStack impl$beforeDispense(
+        final Container dispenser, final Container container, final ItemStack stackToInsert, final Direction direction,
+        final Operation<ItemStack> original, @Share("container") LocalRef<Container> containerRef
+    ) {
+        if (ShouldFire.TRANSFER_INVENTORY_EVENT_PRE && InventoryEventFactory.callTransferPre(((Inventory) dispenser), ((Inventory) container)).isCancelled()) {
+            return stackToInsert;
+        }
+        containerRef.set(container);
+        return original.call(dispenser, container, stackToInsert, direction);
+    }
 
-        if (ShouldFire.TRANSFER_INVENTORY_EVENT_POST) {
+    @Inject(method = "dispenseFrom", at = @At(
+        value = "INVOKE",
+        target = "Lnet/minecraft/world/level/block/entity/DispenserBlockEntity;setItem(ILnet/minecraft/world/item/ItemStack;)V",
+        shift = At.Shift.AFTER
+    ))
+    private void impl$afterDispense(
+        final CallbackInfo ci, @Local final DispenserBlockEntity dispenser, @Local final int index,
+        @Local(ordinal = 0) final ItemStack stack, @Local(ordinal = 1) final ItemStack remainingStack,
+        @Share("container") final LocalRef<Container> containerRef
+    ) {
+        final Container container = containerRef.get();
+        if (ShouldFire.TRANSFER_INVENTORY_EVENT_POST && container != null) {
             // Transfer worked if remainder is one less than the original stack
-            if (itemstack1.getCount() == itemstack.getCount() - 1) {
-                final TrackedInventoryBridge capture = InventoryUtil.forCapture(dispensertileentity);
-                final Inventory sourceInv = ((Inventory) dispensertileentity);
-                final SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
-                InventoryEventFactory.callTransferPost(capture, sourceInv, ((Inventory) iinventory), itemstack, sourceSlotTransaction);
+            if (remainingStack.getCount() == stack.getCount() - 1) {
+                final TrackedInventoryBridge capture = InventoryUtil.forCapture(dispenser);
+                final SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, (Inventory) dispenser, index, stack);
+                InventoryEventFactory.callTransferPost(capture, (Inventory) dispenser, (Inventory) container, stack, sourceSlotTransaction);
             }
         }
 
-        InventoryUtil.updateInventoryNoEvents(dispensertileentity);
-        InventoryUtil.updateInventoryNoEvents(iinventory);
-
-        // dont call setItem twice
-        callbackInfo.cancel();
-    }
-
-    @Surrogate
-    private void afterDispense(final ServerLevel worldIn, final BlockState state, final BlockPos pos, final CallbackInfo callbackInfo,
-            final DispenserBlockEntity dispensertileentity, final BlockSource proxyblocksource, final int i, final ItemStack itemstack,
-            final ItemStack itemstack1) {
-        // after setItem
-        dispensertileentity.setItem(i, itemstack1);
-
-        final Direction enumfacing = worldIn.getBlockState(pos).getValue(DispenserBlock.FACING);
-        final BlockPos blockpos = pos.relative(enumfacing);
-        final Container iinventory = HopperBlockEntityAccessor.invoker$getContainerAt(worldIn, blockpos);
-
-        if (ShouldFire.TRANSFER_INVENTORY_EVENT_POST) {
-            // Transfer worked if remainder is one less than the original stack
-            if (itemstack1.getCount() == itemstack.getCount() - 1) {
-                final TrackedInventoryBridge capture = InventoryUtil.forCapture(dispensertileentity);
-                final Inventory sourceInv = ((Inventory) dispensertileentity);
-                final SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
-                InventoryEventFactory.callTransferPost(capture, sourceInv, ((Inventory) iinventory), itemstack, sourceSlotTransaction);
-            }
-        }
-
-        InventoryUtil.updateInventoryNoEvents(dispensertileentity);
-        InventoryUtil.updateInventoryNoEvents(iinventory);
-
-        // dont call setInventorySlotContents twice
-        callbackInfo.cancel();
-    }
-
-    @Inject(method = "dispenseFrom", cancellable = true, locals = LocalCapture.CAPTURE_FAILEXCEPTION,
-            at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/level/block/entity/HopperBlockEntity;addItem(Lnet/minecraft/world/Container;Lnet/minecraft/world/Container;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/core/Direction;)Lnet/minecraft/world/item/ItemStack;"))
-    private void onDispense(final ServerLevel world, final BlockState state, final BlockPos pos, final CallbackInfo ci,
-            final DispenserBlockEntity dispensertileentity, final BlockSource proxyblocksource, final int i, final ItemStack itemstack,
-            final Direction direction, final Container iinventory) {
-        // Before putStackInInventoryAllSlots
-        if (InventoryEventFactory.callTransferPre(((Inventory) dispensertileentity), ((Inventory) iinventory)).isCancelled()) {
-            ci.cancel();
+        InventoryUtil.updateInventoryNoEvents(dispenser);
+        if (container != null) {
+            InventoryUtil.updateInventoryNoEvents(container);
         }
     }
 }

@@ -25,6 +25,8 @@
 package org.spongepowered.common.mixin.core.world.entity;
 
 import com.google.common.collect.ImmutableList;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -177,7 +179,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract float shadow$getYRot();
     @Shadow public abstract float shadow$getXRot();
     @Shadow public abstract void shadow$setYRot(final float param0);
-    @Shadow protected abstract Vec3 shadow$collide(Vec3 param0);
     @Shadow public abstract boolean shadow$fireImmune();
     @Shadow public abstract boolean shadow$onGround();
     @Shadow @Nullable protected abstract String shadow$getEncodeId();
@@ -673,9 +674,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         return instance.hurtServer(serverLevel, source, damage);
     }
 
-    @Redirect(method = "move", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;collide(Lnet/minecraft/world/phys/Vec3;)Lnet/minecraft/world/phys/Vec3;"))
-    private Vec3 impl$onMoveCollide(final Entity entity, final Vec3 originalMove) {
-        final Vec3 afterCollide = this.shadow$collide(originalMove);
+    @ModifyExpressionValue(method = "move", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;collide(Lnet/minecraft/world/phys/Vec3;)Lnet/minecraft/world/phys/Vec3;"))
+    private Vec3 impl$onMoveCollide(final Vec3 afterCollide, @Local(argsOnly = true) final Vec3 originalMove) {
         if (ShouldFire.COLLIDE_BLOCK_EVENT_MOVE && !originalMove.equals(afterCollide)) {
             // We had a collision! Try to find the colliding block
             final Vec3 position = new Vec3(this.shadow$getX() + afterCollide.x, this.shadow$getY() + afterCollide.y, this.shadow$getZ() + afterCollide.z);
@@ -686,7 +686,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             for (final VoxelShape shape : this.shadow$level().getBlockCollisions((Entity) (Object) this, boundingBox)) {
                 final Optional<Vec3> shapeClosestPoint = shape.closestPointTo(position);
                 if (shapeClosestPoint.isPresent()) {
-                    if (!closestPoint.isPresent()) {
+                    if (closestPoint.isEmpty()) {
                         closestPoint = shapeClosestPoint;
                     } else if (position.distanceToSqr(closestPoint.get()) > position.distanceToSqr(shapeClosestPoint.get())) {
                         closestPoint = shapeClosestPoint;
