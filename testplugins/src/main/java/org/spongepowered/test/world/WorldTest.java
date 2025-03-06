@@ -160,7 +160,7 @@ public final class WorldTest {
             if (t != null) {
                 context.cause().audience().sendMessage(Identity.nil(), Component.text(t.getMessage()));
             } else {
-                if (r != null) {
+                if (r.isPresent()) {
                     context.cause().audience().sendMessage(Identity.nil(), Component.text("World loaded successfully!"));
                 } else {
                     context.cause().audience().sendMessage(Identity.nil(), Component.text("World failed to load!"));
@@ -179,7 +179,7 @@ public final class WorldTest {
         this.game.server().worldManager().loadWorld(key, ServerWorldProperties.LoadOptions.create(worldArchetypeType)).whenComplete((r, t) -> {
             if (t != null) {
                 context.cause().audience().sendMessage(Identity.nil(), Component.text(t.getMessage()));
-            } else if (r != null) {
+            } else if (r.isPresent()) {
                 context.cause().audience().sendMessage(Identity.nil(), Component.text("World created successfully!"));
             } else {
                 context.cause().audience().sendMessage(Identity.nil(), Component.text("World failed to create!"));

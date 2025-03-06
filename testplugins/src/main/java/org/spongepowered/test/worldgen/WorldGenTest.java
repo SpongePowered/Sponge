@@ -35,6 +35,7 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.api.event.lifecycle.RegisterRegistryValueEvent;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.api.registry.RegistryReference;
@@ -95,6 +96,15 @@ public final class WorldGenTest {
                         .build()
                 ,"wgentest")
         ;
+    }
+
+    @Listener
+    private void onRegisterRegistryValue(final RegisterRegistryValueEvent event) {
+        this.biomeTest.register(event);
+        this.carverTest.register(event);
+        this.featureTest.register(event);
+        this.noiseTest.register(event);
+        this.structureTest.register(event);
     }
 
     private CommandResult seededWorld(final CommandContext ctx, final Parameter.Value<String> stringParam) {

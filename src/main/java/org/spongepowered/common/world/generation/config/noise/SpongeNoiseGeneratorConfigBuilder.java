@@ -33,7 +33,6 @@ import org.spongepowered.api.world.generation.config.SurfaceRule;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfigs;
 import org.spongepowered.api.world.generation.config.noise.NoiseGeneratorConfig;
-import org.spongepowered.api.world.generation.config.noise.NoiseGeneratorConfigs;
 import org.spongepowered.api.world.generation.config.noise.NoiseRouter;
 
 import java.util.List;
@@ -130,7 +129,7 @@ public final class SpongeNoiseGeneratorConfigBuilder implements NoiseGeneratorCo
         this.aquifers = false;
         this.oreVeins = false;
         this.legacyRandomSource = false;
-        this.router = NoiseGeneratorConfigs.OVERWORLD.get().noiseRouter();
+        this.router = null;
         this.spawnTargets = (List) new OverworldBiomeBuilder().spawnTarget();
         return this;
     }
@@ -143,7 +142,10 @@ public final class SpongeNoiseGeneratorConfigBuilder implements NoiseGeneratorCo
         this.surfaceRule = value.surfaceRule();
         this.seaLevel = value.seaLevel();
         this.aquifers = value.aquifers();
+        this.oreVeins = value.oreVeins();
         this.legacyRandomSource = value.legacyRandomSource();
+        this.router = value.noiseRouter();
+        this.spawnTargets = value.spawnTargets();
         return this;
     }
 
@@ -153,7 +155,7 @@ public final class SpongeNoiseGeneratorConfigBuilder implements NoiseGeneratorCo
             (net.minecraft.world.level.levelgen.NoiseSettings) (Object) this.noiseConfig,
             (net.minecraft.world.level.block.state.BlockState) this.defaultBlock,
             (net.minecraft.world.level.block.state.BlockState) this.defaultFluid,
-            (net.minecraft.world.level.levelgen.NoiseRouter) (Object) this.router,
+            (net.minecraft.world.level.levelgen.NoiseRouter) (Object) Objects.requireNonNull(this.router, "router"),
             (net.minecraft.world.level.levelgen.SurfaceRules.RuleSource) this.surfaceRule,
             (List) this.spawnTargets,
             this.seaLevel,

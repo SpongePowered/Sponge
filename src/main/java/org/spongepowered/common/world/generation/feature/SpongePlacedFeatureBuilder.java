@@ -25,14 +25,10 @@
 package org.spongepowered.common.world.generation.feature;
 
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.placement.PlacementModifier;
 import org.spongepowered.api.world.generation.feature.Feature;
 import org.spongepowered.api.world.generation.feature.PlacedFeature;
-import org.spongepowered.common.SpongeCommon;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,13 +59,7 @@ public final class SpongePlacedFeatureBuilder implements PlacedFeature.Builder {
 
     @Override
     public PlacedFeature.Builder feature(final Feature feature) {
-        final Registry<ConfiguredFeature<?, ?>> registry = SpongeCommon.vanillaRegistry(Registries.CONFIGURED_FEATURE);
-        final ResourceLocation key = registry.getKey((ConfiguredFeature<?, ?>) (Object) feature);
-        if (key == null) {
-            this.feature = Holder.direct((ConfiguredFeature<?, ?>) (Object) feature);
-        } else {
-            this.feature = registry.getOrThrow(net.minecraft.resources.ResourceKey.create(Registries.CONFIGURED_FEATURE, key));
-        }
+        this.feature = Holder.direct((ConfiguredFeature<?, ?>) (Object) feature);
         return this;
     }
 

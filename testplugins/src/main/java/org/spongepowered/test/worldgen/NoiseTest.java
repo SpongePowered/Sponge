@@ -27,15 +27,18 @@ package org.spongepowered.test.worldgen;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.spongepowered.api.Sponge;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.event.lifecycle.RegisterRegistryValueEvent;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.generation.config.noise.DensityFunctions;
+import org.spongepowered.api.world.generation.config.noise.Noise;
+import org.spongepowered.api.world.generation.config.noise.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseGeneratorConfigs;
 import org.spongepowered.api.world.generation.config.noise.Noises;
-import org.spongepowered.api.world.server.DataPackManager;
 
 import java.util.Optional;
 
@@ -61,37 +64,21 @@ public class NoiseTest {
         return CommandResult.success();
     }
 
-    private CommandResult registerNoise(final CommandContext commandContext) {
-        final DataPackManager dpm = Sponge.server().dataPackManager();
+    public void register(final RegisterRegistryValueEvent event) {
+        event.registry(RegistryTypes.NOISE_GENERATOR_CONFIG, (h, s) ->
+            s.register(ResourceKey.of("noisetest", "test"), NoiseGeneratorConfig.builder().from(NoiseGeneratorConfigs.CAVES.get(h)).build()));
 
-        /*final NoiseGeneratorConfigTemplate noiseGenCfgTemplate = NoiseGeneratorConfigTemplate.builder().fromValue(NoiseGeneratorConfigs.CAVES.get())
-                .key(ResourceKey.of("noisetest", "test"))
-                .build();
+        event.registry(RegistryTypes.NOISE, (h, s) ->
+            s.register(ResourceKey.of("noisetest", "calcite_copy"), Noise.builder().from(Noises.CALCITE.get(h)).build()));
 
-        final NoiseTemplate noiseTemplate = NoiseTemplate.builder().fromValue(Noises.CALCITE.get())
-                .key(ResourceKey.of("noisetest", "calcite_copy"))
-                .build();
-
-        final DensityFunctionTemplate overWorldDensity = DensityFunctionTemplate.builder().fromValue(DensityFunctions.OVERWORLD_BASE_3D_NOISE.get())
-                .key(ResourceKey.of("noisetest", "overworld_base3d_copy"))
-                .build();
-
-        try {
-            dpm.save(noiseGenCfgTemplate);
-            dpm.save(noiseTemplate);
-            dpm.save(overWorldDensity);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
-
-        return CommandResult.success();
+//        event.registry(RegistryTypes.DENSITY_FUNCTION, (h, s) ->
+//            s.register(ResourceKey.of("noisetest", "overworld_base3d_copy"), DensityFunction.builder().build()));
     }
 
     Command.Parameterized noiseCmd() {
         final Parameter.Value<String> filter = Parameter.string().key("filter").optional().build();
         return Command.builder()
                 .addChild(Command.builder().addParameter(filter).executor(ctx -> this.listNoise(ctx, filter)).build(), "list")
-                .addChild(Command.builder().executor(this::registerNoise).build(), "register")
                 .build();
     }
 

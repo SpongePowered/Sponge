@@ -95,16 +95,12 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
 
     @Nullable private ResourceKey impl$key;
     private DimensionType impl$dimensionType;
-    @Nullable private SerializationBehavior impl$serializationBehavior;
-    @Nullable private Component impl$displayName;
-    @Nullable private Integer impl$viewDistance;
     private UUID impl$uniqueId = UUID.randomUUID();
-    private Boolean impl$pvp;
     private InheritableConfigHandle<WorldConfig> impl$configAdapter;
 
     private final BiMap<Integer, UUID> impl$playerUniqueIdMap = HashBiMap.create();
 
-    private boolean impl$customDifficulty = false, impl$customGameType = false, impl$customSpawnPosition = false, impl$loadOnStartup, impl$performsSpawnLogic;
+    private boolean impl$customDifficulty = false, impl$customGameType = false, impl$customSpawnPosition = false;
 
     private BiMap<Integer, UUID> impl$mapUUIDIndex = HashBiMap.create();
     private @Nullable CompoundTag impl$compound;
@@ -188,62 +184,62 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
 
     @Override
     public Optional<Boolean> bridge$pvp() {
-        return Optional.ofNullable(this.impl$pvp);
+        return Optional.ofNullable(this.impl$configAdapter.get().world.pvpEnabled);
     }
 
     @Override
     public void bridge$setPvp(@Nullable final Boolean pvp) {
-        this.impl$pvp = pvp;
+        this.impl$configAdapter.get().world.pvpEnabled = pvp;
     }
 
     @Override
     public boolean bridge$performsSpawnLogic() {
-        return this.impl$performsSpawnLogic;
+        return this.impl$configAdapter.get().world.keepSpawnLoaded;
     }
 
     @Override
     public void bridge$setPerformsSpawnLogic(final boolean performsSpawnLogic) {
-        this.impl$performsSpawnLogic = performsSpawnLogic;
+        this.impl$configAdapter.get().world.keepSpawnLoaded = performsSpawnLogic;
     }
 
     @Override
     public boolean bridge$loadOnStartup() {
-        return this.impl$loadOnStartup;
+        return this.impl$configAdapter.get().world.loadOnStartup;
     }
 
     @Override
     public void bridge$setLoadOnStartup(final boolean loadOnStartup) {
-        this.impl$loadOnStartup = loadOnStartup;
+        this.impl$configAdapter.get().world.loadOnStartup = loadOnStartup;
     }
 
     @Override
     public Optional<SerializationBehavior> bridge$serializationBehavior() {
-        return Optional.ofNullable(this.impl$serializationBehavior);
+        return Optional.ofNullable(this.impl$configAdapter.get().world.serializationBehavior);
     }
 
     @Override
     public void bridge$setSerializationBehavior(@Nullable final SerializationBehavior behavior) {
-        this.impl$serializationBehavior = behavior;
+        this.impl$configAdapter.get().world.serializationBehavior = behavior;
     }
 
     @Override
     public Optional<Component> bridge$displayName() {
-        return Optional.ofNullable(this.impl$displayName);
+        return Optional.ofNullable(this.impl$configAdapter.get().world.displayName);
     }
 
     @Override
     public void bridge$setDisplayName(@Nullable final Component displayName) {
-        this.impl$displayName = displayName;
+        this.impl$configAdapter.get().world.displayName = displayName;
     }
 
     @Override
     public Optional<Integer> bridge$viewDistance() {
-        return Optional.ofNullable(this.impl$viewDistance);
+        return Optional.ofNullable(this.impl$configAdapter.get().world.viewDistance);
     }
 
     @Override
     public void bridge$setViewDistance(@Nullable final Integer viewDistance) {
-        this.impl$viewDistance = viewDistance;
+        this.impl$configAdapter.get().world.viewDistance = viewDistance;
         this.bridge$triggerViewDistanceLogic();
     }
 
@@ -251,7 +247,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     public void bridge$triggerViewDistanceLogic() {
         final ServerLevel world = this.bridge$world();
         if (world != null) {
-            final int actual = this.impl$viewDistance == null ? world.getServer().getPlayerList().getViewDistance() : this.impl$viewDistance;
+            final int actual = this.impl$configAdapter.get().world.viewDistance == null ? world.getServer().getPlayerList().getViewDistance() : this.impl$configAdapter.get().world.viewDistance;
             world.getChunkSource().setViewDistance(actual);
             final ClientboundSetChunkCacheRadiusPacket packet = new ClientboundSetChunkCacheRadiusPacket(actual);
 
@@ -271,9 +267,14 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
 
     @Override
     public void bridge$populateFromLevelStem(final LevelStem dimension) {
-        final LevelStemBridge bridge = (LevelStemBridge) (Object) dimension;
         this.impl$dimensionType = dimension.type().value();
-        this.impl$displayName = bridge.bridge$displayName();
+
+        // Legacy back compat
+        final LevelStemBridge bridge = (LevelStemBridge) (Object) dimension;
+        if (!bridge.bridge$hasLegacyData()) {
+            return;
+        }
+        Optional.ofNullable(bridge.bridge$displayName()).ifPresent(this::bridge$setDisplayName);
         final Difficulty difficulty = bridge.bridge$difficulty();
         final GameType gameType = bridge.bridge$gameMode();
         final Boolean isHardcore = bridge.bridge$hardcore();
@@ -285,13 +286,13 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
             this.impl$customGameType = true;
         }
         this.settings = new LevelSettings(
-                this.settings.levelName(),
-                gameType == null ? this.settings.gameType() : gameType,
-                isHardcore == null ? this.settings.hardcore() : isHardcore,
-                difficulty == null ? this.settings.difficulty() : difficulty,
-                allowCommands == null ? this.settings.allowCommands() : allowCommands,
-                this.settings.gameRules(),
-                this.settings.getDataConfiguration());
+            this.settings.levelName(),
+            gameType == null ? this.settings.gameType() : gameType,
+            isHardcore == null ? this.settings.hardcore() : isHardcore,
+            difficulty == null ? this.settings.difficulty() : difficulty,
+            allowCommands == null ? this.settings.allowCommands() : allowCommands,
+            this.settings.gameRules(),
+            this.settings.getDataConfiguration());
 
         final Vector3i spawnPos = bridge.bridge$spawnPosition();
         if (spawnPos != null) {
@@ -299,11 +300,11 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
             this.impl$customSpawnPosition = true;
         }
 
-        this.impl$serializationBehavior = bridge.bridge$serializationBehavior();
-        this.impl$pvp = bridge.bridge$pvp();
-        this.impl$loadOnStartup = bridge.bridge$loadOnStartup();
-        this.impl$performsSpawnLogic = bridge.bridge$performsSpawnLogic();
-        this.impl$viewDistance = bridge.bridge$viewDistance();
+        Optional.ofNullable(bridge.bridge$serializationBehavior()).ifPresent(this::bridge$setSerializationBehavior);
+        Optional.ofNullable(bridge.bridge$pvp()).ifPresent(this::bridge$setPvp);
+        this.bridge$setLoadOnStartup(bridge.bridge$loadOnStartup());
+        this.bridge$setPerformsSpawnLogic(bridge.bridge$performsSpawnLogic());
+        this.bridge$setViewDistance(bridge.bridge$viewDistance());
     }
 
     @Override

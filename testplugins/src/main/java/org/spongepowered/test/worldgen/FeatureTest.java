@@ -28,12 +28,16 @@ import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.lifecycle.RegisterRegistryValueEvent;
+import org.spongepowered.api.registry.DefaultedRegistryReference;
+import org.spongepowered.api.registry.RegistryRegistrationSet;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.blockray.RayTrace;
@@ -42,13 +46,44 @@ import org.spongepowered.api.world.generation.feature.Feature;
 import org.spongepowered.api.world.generation.feature.Features;
 import org.spongepowered.api.world.generation.feature.PlacedFeature;
 import org.spongepowered.api.world.generation.feature.PlacedFeatures;
-import org.spongepowered.api.world.server.DataPackManager;
 import org.spongepowered.api.world.server.ServerLocation;
 
 import java.util.Optional;
 import java.util.function.BiFunction;
 
 public class FeatureTest {
+
+    public static final class CustomFeatures {
+
+        public static final class Holder {
+
+            public static final RegistryRegistrationSet<Feature> FEATURES = CustomFeatures.BUILDER.build();
+        }
+
+        private static final RegistryRegistrationSet.Builder<Feature> BUILDER = RegistryRegistrationSet.builder(RegistryTypes.FEATURE, Sponge::server);
+
+        public static final DefaultedRegistryReference<Feature> FEATURE = CustomFeatures.BUILDER.register(
+            ResourceKey.of("featuretest", "test"),
+            (h) -> Feature.builder().from(Features.TREES_PLAINS.get(h)).build());
+    }
+
+    public static final class CustomPlacedFeatures {
+
+        public static final class Holder {
+
+            public static final RegistryRegistrationSet<PlacedFeature> PLACED_FEATURES = CustomPlacedFeatures.BUILDER.build();
+        }
+
+        private static final RegistryRegistrationSet.Builder<PlacedFeature> BUILDER = RegistryRegistrationSet.builder(RegistryTypes.PLACED_FEATURE, Sponge::server);
+
+        public static final DefaultedRegistryReference<PlacedFeature> PLACED_FEATURE = CustomPlacedFeatures.BUILDER.register(
+            ResourceKey.of("featuretest", "test"),
+            (h) -> PlacedFeature.builder().from(PlacedFeatures.TREES_PLAINS.get(h)).build());
+
+        public static final DefaultedRegistryReference<PlacedFeature> PLACED_FEATURE_2 = CustomPlacedFeatures.BUILDER.register(
+            ResourceKey.of("featuretest", "test2"),
+            (h) -> PlacedFeature.builder().from(PlacedFeatures.TREES_PLAINS.get(h)).feature(CustomFeatures.FEATURE.get(h)).build());
+    }
 
     CommandResult placeFeature(final CommandContext commandContext, final Parameter.Value<Feature> param) {
         return FeatureTest.place(commandContext, param, Features.TREES_PLAINS.get(), Feature::place);
@@ -81,30 +116,6 @@ public class FeatureTest {
         return RayTrace.block().select(RayTrace.nonAir()).limit(100).sourceEyePosition(player).direction(player);
     }
 
-    CommandResult registerFeature(final CommandContext ctx) {
-        final DataPackManager dpm = Sponge.server().dataPackManager();
-
-        /*final FeatureTemplate featureTemplate = FeatureTemplate.builder().fromValue(Features.TREES_PLAINS.get())
-                .key(ResourceKey.of("featuretest", "test"))
-                .build();
-
-        final PlacedFeatureTemplate placedFeatureTemplate1 = PlacedFeatureTemplate.builder().fromValue(PlacedFeatures.TREES_PLAINS.get())
-                .key(ResourceKey.of("featuretest", "test"))
-                .build();
-
-        final PlacedFeatureTemplate placedFeatureTemplate2 = PlacedFeatureTemplate.builder().fromValue(PlacedFeatures.TREES_PLAINS.get())
-                .feature(featureTemplate)
-                .key(ResourceKey.of("featuretest", "test2"))
-                .build();
-
-
-        dpm.save(featureTemplate);
-        dpm.save(placedFeatureTemplate1);
-        dpm.save(placedFeatureTemplate2);*/
-
-        return CommandResult.success();
-    }
-
     private CommandResult listFeatures(CommandContext ctx, final Parameter.Value<String> filterParam) {
         final Optional<String> rawFilter = ctx.one(filterParam);
         final String filter = rawFilter.orElse("minecraft:").toUpperCase();
@@ -128,11 +139,11 @@ public class FeatureTest {
                 .addChild(Command.builder().addParameter(filter).executor(ctx -> this.listFeatures(ctx, filter)).build(), "list")
                 .addChild(Command.builder().addParameter(feature).executor(ctx -> this.placeFeature(ctx, feature)).build(), "placeFeature")
                 .addChild(Command.builder().addParameter(placedFeature).executor(ctx -> this.placePlaced(ctx, placedFeature)).build(), "placePlaced")
-                .addChild(Command.builder().executor(this::registerFeature).build(), "register")
                 .build();
     }
 
-
-
-
+    public void register(final RegisterRegistryValueEvent event) {
+        event.register(FeatureTest.CustomFeatures.Holder.FEATURES);
+        event.register(FeatureTest.CustomPlacedFeatures.Holder.PLACED_FEATURES, FeatureTest.CustomFeatures.Holder.FEATURES.registryType());
+    }
 }

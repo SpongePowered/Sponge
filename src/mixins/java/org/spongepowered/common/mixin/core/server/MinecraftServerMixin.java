@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.server;
 
 import com.google.inject.Injector;
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import net.kyori.adventure.resource.ResourcePackRequest;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.RegistryAccess;
@@ -36,7 +35,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.packs.repository.PackRepository;
-import net.minecraft.server.packs.resources.MultiPackResourceManager;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.thread.BlockableEventLoop;
@@ -416,10 +414,9 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         }
     }
 
-    @ModifyExpressionValue(method = "lambda$reloadResources$28", at = @At(value = "NEW", target = "Lnet/minecraft/server/packs/resources/MultiPackResourceManager;"))
-    private MultiPackResourceManager impl$onReloadResources(final MultiPackResourceManager original) {
-        ((SpongeRegistryHolder) original).setRootMinecraftRegistry(this.shadow$registryAccess());
-        Launch.instance().lifecycle().beginEstablishServerRegistries((RegistryHolder) original);
-        return original;
+    @Override
+    public void bridge$reloadServerRegistries(final RegistryHolder holder) {
+        ((SpongeRegistryHolder) holder).setRootMinecraftRegistry(this.shadow$registryAccess());
+        Launch.instance().lifecycle().beginEstablishServerRegistries((RegistryHolder) holder);
     }
 }

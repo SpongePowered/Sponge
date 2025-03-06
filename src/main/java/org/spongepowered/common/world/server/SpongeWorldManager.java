@@ -33,7 +33,6 @@ import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
 import net.minecraft.resources.ResourceLocation;
@@ -52,7 +51,6 @@ import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.ForcedChunksSavedData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
-import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
@@ -92,8 +90,6 @@ import org.spongepowered.common.bridge.world.level.chunk.storage.IOWorkerBridge;
 import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
-import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
-import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.hooks.PlatformHooks;
@@ -123,6 +119,7 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -253,20 +250,19 @@ public abstract class SpongeWorldManager implements WorldManager {
             }
         }
 
-        if (Level.OVERWORLD.equals(registryKey) && (propertiesLoadOption.loadOptions().isPresent() || propertiesLoadOption.createOperation().isPresent())) {
+        if (Level.OVERWORLD.equals(registryKey) && (propertiesLoadOption.loadOperation().isPresent() || propertiesLoadOption.createOperation().isPresent())) {
             return FutureUtil.completedWithException(new IllegalArgumentException("The default world cannot be told to load!"));
         }
 
-        final ServerWorldProperties.LoadOptions.@Nullable LoadOperation loadOperation = propertiesLoadOption.loadOptions().orElse(null);
-        if (loadOperation != null) {
+        final ServerWorldProperties.LoadOptions.@Nullable LoadOperation loadOperation = propertiesLoadOption.loadOperation().orElse(null);
+        if (loadOperation != null && this.worldExists(key)) {
             try {
                 final LevelStorageSource.LevelStorageAccess storageSource = this.getLevelStorageAccess(key);
                 try {
-                    final @Nullable Dynamic<?> dataTag = this.loadLevelTag(storageSource);
-                    if (dataTag != null) {
-                        final LevelDataAndStem levelData = this.loadLevelData(registryKey, dataTag);
-                        loadOperation.loadCallback().ifPresent(c -> c.accept((ServerWorldProperties) levelData.data()));
-                        return this.loadWorld0(registryKey, levelData, storageSource);
+                    final Optional<LevelDataLoadResult> result = this.loadLevelData(storageSource, registryKey);
+                    if (result.isPresent()) {
+                        loadOperation.loadCallback().ifPresent(c -> c.accept((ServerWorldProperties) result.get().data()));
+                        return this.loadWorld0(registryKey, result.get(), storageSource);
                     }
                 } catch (final Exception e) {
                     storageSource.close();
@@ -278,14 +274,13 @@ public abstract class SpongeWorldManager implements WorldManager {
         }
 
         final ServerWorldProperties.LoadOptions.@Nullable CreateOperation createOperation = propertiesLoadOption.createOperation().orElse(null);
-        if (createOperation != null) {
+        if (createOperation != null && !this.worldExists(key)) {
             try {
                 final LevelStorageSource.LevelStorageAccess storageSource = this.getLevelStorageAccess(key);
                 try {
-                    final LevelDataAndStem levelData = this.getOrCreateLevelData(
-                        registryKey, null, (LevelStem) (Object) createOperation.worldArchetype());
-                    createOperation.createCallback().ifPresent(c -> c.accept((ServerWorldProperties) levelData.data()));
-                    return this.loadWorld0(registryKey, levelData, storageSource);
+                    final LevelDataLoadResult result = this.loadLevelData(key, () -> this.createLevelData(registryKey, (LevelStem) (Object) createOperation.worldArchetype()));
+                    createOperation.createCallback().ifPresent(c -> c.accept((ServerWorldProperties) result.data()));
+                    return this.loadWorld0(registryKey, result, storageSource);
                 } catch (final Exception e) {
                     storageSource.close();
                     return CompletableFuture.failedFuture(e);
@@ -299,7 +294,7 @@ public abstract class SpongeWorldManager implements WorldManager {
     }
 
     private CompletableFuture<Optional<ServerWorld>> loadWorld0(final net.minecraft.resources.ResourceKey<Level> registryKey,
-            final LevelDataAndStem levelData, final LevelStorageSource.LevelStorageAccess storageSource) {
+            final LevelDataLoadResult levelData, final LevelStorageSource.LevelStorageAccess storageSource) {
         final ChunkProgressListener chunkStatusListener = ((MinecraftServerAccessor) this.server).accessor$progressListenerFactory().create(11);
         final ServerLevel world;
         try {
@@ -374,26 +369,24 @@ public abstract class SpongeWorldManager implements WorldManager {
             }
         }
 
-        if (this.worldExists(key)) {
-            final ServerWorldProperties.LoadOptions.@Nullable LoadOperation loadOperation = propertiesLoadOptions.loadOptions().orElse(null);
-            if (loadOperation != null) {
-                try (final LevelStorageSource.LevelStorageAccess storageSource = this.getLevelStorageAccess(key)) {
-                    final @Nullable Dynamic<?> levelTag = this.loadLevelTag(storageSource);
-                    if (levelTag != null) {
-                        final ServerWorldProperties properties = (ServerWorldProperties) this.loadLevelData(registryKey, levelTag).data();
-                        loadOperation.loadCallback().ifPresent(c -> c.accept(properties));
-                        return CompletableFuture.completedFuture(Optional.of(properties));
-                    }
-                } catch (final IOException e) {
-                    return FutureUtil.completedWithException(e);
+        final ServerWorldProperties.LoadOptions.@Nullable LoadOperation loadOperation = propertiesLoadOptions.loadOperation().orElse(null);
+        if (loadOperation != null && this.worldExists(key)) {
+            try {
+                final Optional<SpongeWorldManager.LevelDataLoadResult> result = this.loadLevelData(registryKey);
+                if (result.isPresent()) {
+                    final ServerWorldProperties properties = (ServerWorldProperties) result.get().data();
+                    loadOperation.loadCallback().ifPresent(c -> c.accept(properties));
+                    return CompletableFuture.completedFuture(Optional.of(properties));
                 }
+            } catch (final IOException e) {
+                return FutureUtil.completedWithException(e);
             }
         }
 
         final ServerWorldProperties.LoadOptions.@Nullable CreateOperation createOperation = propertiesLoadOptions.createOperation().orElse(null);
-        if (createOperation != null) {
-            final ServerWorldProperties properties = (ServerWorldProperties) this.getOrCreateLevelData(
-                registryKey, null, (LevelStem) (Object) createOperation.worldArchetype()).data();
+        if (createOperation != null && !this.worldExists(key)) {
+            final ServerWorldProperties properties = (ServerWorldProperties) this.loadLevelData(key, () -> this.createLevelData(
+                registryKey, (LevelStem) (Object) createOperation.worldArchetype())).data();
             createOperation.createCallback().ifPresent(c -> c.accept(properties));
             return CompletableFuture.completedFuture(Optional.of(properties));
         }
@@ -692,14 +685,14 @@ public abstract class SpongeWorldManager implements WorldManager {
             final net.minecraft.resources.ResourceKey<Level> registryKey = SpongeWorldManager.createRegistryKey(worldKey);
             if (isDefaultWorld) {
                 final LevelStorageSource.LevelStorageAccess storageSource = ((MinecraftServerAccessor) this.server).accessor$storageSource();
-                final LevelDataAndStem levelData = this.loadLevelData(worldKey, template, () -> new LevelDataAndStem((PrimaryLevelData) this.server.getWorldData(), template));
+                final LevelDataLoadResult levelData = this.loadLevelData(worldKey, () -> new LevelDataLoadResult((PrimaryLevelData) this.server.getWorldData(), template));
                 final ServerLevel world = this.createLevel(registryKey, levelData.stem(), storageSource, levelData.data(), chunkStatusListener);
                 this.prepareWorld(world);
             } else {
                 try {
                     final LevelStorageSource.LevelStorageAccess storageSource = this.getLevelStorageAccess(worldKey);
                     try {
-                        final LevelDataAndStem levelData = this.getOrCreateLevelData(registryKey, template, storageSource);
+                        final LevelDataLoadResult levelData = this.loadLevelData(storageSource, registryKey, () -> this.createLevelData(registryKey, template));
                         if (!((PrimaryLevelDataBridge) levelData.data()).bridge$loadOnStartup()) {
                             SpongeCommon.logger().warn("World '{}' has been disabled from loading at startup. Skipping...", worldKey);
                             continue;
@@ -732,22 +725,40 @@ public abstract class SpongeWorldManager implements WorldManager {
         ((SpongeUserManager) Sponge.server().userManager()).init();
     }
 
-    private LevelDataAndStem loadLevelData(final ResourceKey key, final Supplier<LevelDataAndStem> loader) {
-        final LevelDataAndStem levelData = loader.get();
-        ((ResourceKeyBridge) levelData.data()).bridge$setKey(key);
-        return levelData;
+    private LevelDataLoadResult loadLevelData(final ResourceKey key, final Supplier<LevelDataLoadResult> loader) {
+        return this.loadLevelData(key, loader, Optional::of);
     }
 
-    private LevelDataAndStem loadLevelData(final ResourceKey key, final LevelStem levelStem, final Supplier<LevelDataAndStem> loader) {
-        final LevelDataAndStem levelData = this.loadLevelData(key, loader);
-        ((PrimaryLevelDataBridge) levelData.data()).bridge$populateFromLevelStem(levelStem);
-        return levelData;
+    private <T> T loadLevelData(final ResourceKey key, final Supplier<T> loader, final Function<T, Optional<LevelDataLoadResult>> mapper) {
+        final T result = loader.get();
+        mapper.apply(result).ifPresent(r -> {
+            final Optional<ResourceKey> worldTypeKey = this.worldTypeKey(r.stem().type().value());
+            ((ResourceKeyBridge) r.data()).bridge$setKey(key);
+            ((PrimaryLevelDataBridge) r.data()).bridge$configAdapter(SpongeGameConfigs.createWorld(worldTypeKey.orElse(null), key));
+            ((PrimaryLevelDataBridge) r.data()).bridge$populateFromLevelStem(r.stem());
+        });
+        return result;
     }
 
-    private LevelDataAndStem getOrCreateLevelData(final net.minecraft.resources.ResourceKey<Level> registryKey,
-            final LevelStem levelStem, final LevelStorageSource.LevelStorageAccess storageSource) {
-        final @Nullable Dynamic<?> dataTag = this.loadLevelTag(storageSource);
-        return this.loadLevelData((ResourceKey) (Object) registryKey.location(), levelStem, () -> this.getOrCreateLevelData(registryKey, dataTag, levelStem));
+    private Optional<LevelDataLoadResult> loadLevelData(final net.minecraft.resources.ResourceKey<Level> registryKey) throws IOException {
+        try (final LevelStorageSource.LevelStorageAccess storageSource = this.getLevelStorageAccess((ResourceKey) (Object) registryKey.location())) {
+            return this.loadLevelData(storageSource, registryKey);
+        }
+    }
+
+    private Optional<LevelDataLoadResult> loadLevelData(final LevelStorageSource.LevelStorageAccess storageSource,
+            final net.minecraft.resources.ResourceKey<Level> registryKey) {
+        return this.loadLevelData((ResourceKey) (Object) registryKey.location(), () ->
+            Optional.ofNullable(this.loadLevelTag(storageSource))
+                .map(t -> this.readLevelData(registryKey, t)), Function.identity());
+    }
+
+    private LevelDataLoadResult loadLevelData(final LevelStorageSource.LevelStorageAccess storageSource,
+            final net.minecraft.resources.ResourceKey<Level> registryKey, final Supplier<LevelDataLoadResult> defaultSupplier) {
+        return this.loadLevelData((ResourceKey) (Object) registryKey.location(), () ->
+            Optional.ofNullable(this.loadLevelTag(storageSource))
+                .map(t -> this.readLevelData(registryKey, t))
+                .orElseGet(defaultSupplier));
     }
 
     private @Nullable Dynamic<?> loadLevelTag(final LevelStorageSource.LevelStorageAccess storageSource) {
@@ -764,24 +775,20 @@ public abstract class SpongeWorldManager implements WorldManager {
         }
     }
 
-    private LevelDataAndStem loadLevelData(final net.minecraft.resources.ResourceKey<Level> registryKey, final Dynamic<?> dynamicLevelData) {
+    private LevelDataLoadResult readLevelData(final net.minecraft.resources.ResourceKey<Level> registryKey, final Dynamic<?> dataTag) {
         final PrimaryLevelData defaultLevelData = (PrimaryLevelData) this.server.getWorldData();
-        try {
-            return this.readLevelData(registryKey, dynamicLevelData, this.server.registryAccess(), defaultLevelData.getDataConfiguration());
-        } catch (final Exception e) {
-            throw new RuntimeException("Failed to load level data from " + this.getDirectoryName((ResourceKey) (Object) registryKey.location()), e);
-        }
+        final net.minecraft.core. RegistryAccess.Frozen access = this.server.registryAccess();
+        final LevelDataAndDimensions levelData = LevelStorageSource.getLevelDataAndDimensions(
+            dataTag, defaultLevelData.getDataConfiguration(), access.lookupOrThrow(Registries.LEVEL_STEM), access);
+        return new LevelDataLoadResult((PrimaryLevelData) levelData.worldData(), levelData.dimensions().dimensions().getValueOrThrow(Registries.levelToLevelStem(registryKey)));
     }
 
-    private LevelDataAndStem getOrCreateLevelData(final net.minecraft.resources.ResourceKey<Level> registryKey,
-            final @Nullable Dynamic<?> dynamicLevelData, final LevelStem levelStem) {
-        if (dynamicLevelData != null) {
-            return this.loadLevelData(registryKey, dynamicLevelData);
-        }
 
+    private LevelDataLoadResult createLevelData(final net.minecraft.resources.ResourceKey<Level> registryKey,
+            final LevelStem levelStem) {
         final PrimaryLevelData defaultLevelData = (PrimaryLevelData) this.server.getWorldData();
         final LevelSettings levelSettings = this.createLevelSettings(defaultLevelData, this.getDirectoryName((ResourceKey) (Object) registryKey.location()));
-        return new LevelDataAndStem(
+        return new LevelDataLoadResult(
             new PrimaryLevelData(levelSettings, defaultLevelData.worldGenOptions(), SpongeWorldManager.specialWorldProperty(levelStem), Lifecycle.stable()), levelStem);
     }
 
@@ -794,12 +801,6 @@ public abstract class SpongeWorldManager implements WorldManager {
             defaultLevelData.isAllowCommands(),
             defaultLevelData.getGameRules().copy(defaultLevelData.enabledFeatures()),
             defaultLevelData.getDataConfiguration());
-    }
-
-    private LevelDataAndStem readLevelData(final net.minecraft.resources.ResourceKey<Level> registryKey,
-            final Dynamic<?> dataTag, final RegistryAccess.Frozen access, final WorldDataConfiguration datapackConfig) {
-        final LevelDataAndDimensions levelData = LevelStorageSource.getLevelDataAndDimensions(dataTag, datapackConfig, access.lookupOrThrow(Registries.LEVEL_STEM), access);
-        return new LevelDataAndStem((PrimaryLevelData) levelData.worldData(), levelData.dimensions().dimensions().getValueOrThrow(Registries.levelToLevelStem(registryKey)));
     }
 
     private ServerLevel createLevel(
@@ -820,9 +821,6 @@ public abstract class SpongeWorldManager implements WorldManager {
         } else {
             spawners = ImmutableList.of();
         }
-
-        final InheritableConfigHandle<WorldConfig> configAdapter = SpongeGameConfigs.createWorld(worldTypeKey.orElse(null), worldKey);
-        ((PrimaryLevelDataBridge) levelData).bridge$configAdapter(configAdapter);
 
         levelData.setModdedInfo(this.server.getServerModName(), this.server.getModdedStatus().shouldReportAsModified());
         final long seed = BiomeManager.obfuscateSeed(levelData.worldGenOptions().seed());
@@ -1062,7 +1060,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         }
     }
 
-    private record LevelDataAndStem(PrimaryLevelData data, LevelStem stem)
+    private record LevelDataLoadResult(PrimaryLevelData data, LevelStem stem)
     {
     }
 }

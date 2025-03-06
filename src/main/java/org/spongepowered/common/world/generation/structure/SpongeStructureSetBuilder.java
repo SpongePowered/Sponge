@@ -25,13 +25,10 @@
 package org.spongepowered.common.world.generation.structure;
 
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.generation.structure.Structure;
 import org.spongepowered.api.world.generation.structure.StructureSet;
-import org.spongepowered.common.SpongeCommon;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,15 +60,8 @@ public final class SpongeStructureSetBuilder implements StructureSet.Builder {
 
     @Override
     public StructureSet.Builder add(final Structure structure, final int weight) {
-        final Registry<net.minecraft.world.level.levelgen.structure.Structure> registry = SpongeCommon.vanillaRegistry(Registries.STRUCTURE);
         final var mcStructure = (net.minecraft.world.level.levelgen.structure.Structure) structure;
-        Holder<net.minecraft.world.level.levelgen.structure.Structure> holder;
-        try {
-            holder = registry.createIntrusiveHolder(mcStructure);
-        } catch (Exception e) {
-            holder = Holder.direct(mcStructure);
-        }
-        this.structureSelectionEntries.add(new net.minecraft.world.level.levelgen.structure.StructureSet.StructureSelectionEntry(holder, weight));
+        this.structureSelectionEntries.add(new net.minecraft.world.level.levelgen.structure.StructureSet.StructureSelectionEntry(Holder.direct(mcStructure), weight));
         return this;
     }
 

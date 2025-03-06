@@ -22,36 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.generation.config.noise;
+package org.spongepowered.common.mixin.api.minecraft.world.level.dimension;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.world.generation.config.noise.DensityFunction;
+import net.minecraft.core.Holder;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.dimension.LevelStem;
+import org.spongepowered.api.world.WorldType;
+import org.spongepowered.api.world.generation.ChunkGenerator;
+import org.spongepowered.api.world.server.WorldArchetypeType;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.Objects;
+@Mixin(LevelStem.class)
+public abstract class LevelStemMixin_API implements WorldArchetypeType {
 
-public final class SpongeDensityFunctionBuilder implements DensityFunction.Builder {
+    // @formatter:off
+    @Shadow @Final private Holder<DimensionType> type;
+    @Shadow @Final private net.minecraft.world.level.chunk.ChunkGenerator generator;
+    // @formatter:on
 
-    private net.minecraft.world.level.levelgen.@Nullable DensityFunction densityFunction;
-
-    public SpongeDensityFunctionBuilder() {
-        this.reset();
+    @Override
+    public WorldType worldType() {
+        return (WorldType) (Object) this.type.value();
     }
 
     @Override
-    public DensityFunction.Builder from(final org.spongepowered.api.world.generation.config.noise.DensityFunction densityFunction) {
-        this.densityFunction = (net.minecraft.world.level.levelgen.DensityFunction) densityFunction;
-        return this;
-    }
-
-    @Override
-    public DensityFunction.Builder reset() {
-        this.densityFunction = null;
-        return this;
-    }
-
-    @Override
-    public DensityFunction build() {
-        Objects.requireNonNull(this.densityFunction, "densityFunction");
-        return (DensityFunction) this.densityFunction;
+    public ChunkGenerator chunkGenerator() {
+        return (ChunkGenerator) this.generator;
     }
 }

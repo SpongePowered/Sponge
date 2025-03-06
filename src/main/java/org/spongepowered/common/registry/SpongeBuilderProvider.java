@@ -118,13 +118,11 @@ import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.generation.carver.Carver;
 import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.api.world.generation.config.flat.FlatGeneratorConfig;
-import org.spongepowered.api.world.generation.config.noise.DensityFunction;
 import org.spongepowered.api.world.generation.config.noise.Noise;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.feature.Feature;
 import org.spongepowered.api.world.generation.feature.PlacedFeature;
-import org.spongepowered.api.world.generation.structure.Structure;
 import org.spongepowered.api.world.generation.structure.StructurePlacement;
 import org.spongepowered.api.world.generation.structure.StructureSet;
 import org.spongepowered.api.world.generation.structure.jigsaw.JigsawPool;
@@ -134,6 +132,7 @@ import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.server.TicketType;
 import org.spongepowered.api.world.server.WorldArchetypeType;
+import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.common.advancement.SpongeAdvancementBuilder;
 import org.spongepowered.common.advancement.SpongeDisplayInfoBuilder;
@@ -223,13 +222,11 @@ import org.spongepowered.common.world.border.SpongeWorldBorderBuilder;
 import org.spongepowered.common.world.generation.SpongeWorldGenerationConfigBuilder;
 import org.spongepowered.common.world.generation.carver.SpongeCarverBuilder;
 import org.spongepowered.common.world.generation.config.flat.SpongeFlatGeneratorConfig;
-import org.spongepowered.common.world.generation.config.noise.SpongeDensityFunctionBuilder;
 import org.spongepowered.common.world.generation.config.noise.SpongeNoiseBuilder;
 import org.spongepowered.common.world.generation.config.noise.SpongeNoiseConfig;
 import org.spongepowered.common.world.generation.config.noise.SpongeNoiseGeneratorConfigBuilder;
 import org.spongepowered.common.world.generation.feature.SpongeFeatureBuilder;
 import org.spongepowered.common.world.generation.feature.SpongePlacedFeatureBuilder;
-import org.spongepowered.common.world.generation.structure.SpongeStructureBuilder;
 import org.spongepowered.common.world.generation.structure.SpongeStructurePlacementBuilder;
 import org.spongepowered.common.world.generation.structure.SpongeStructureSetBuilder;
 import org.spongepowered.common.world.generation.structure.jigsaw.SpongeJigsawPoolBuilder;
@@ -238,6 +235,7 @@ import org.spongepowered.common.world.portal.SpongePortalLogicBuilder;
 import org.spongepowered.common.world.schematic.SpongePaletteTypeBuilder;
 import org.spongepowered.common.world.schematic.SpongeSchematicBuilder;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
+import org.spongepowered.common.world.server.SpongeServerWorldPropertiesLoadOptions;
 import org.spongepowered.common.world.server.SpongeTicketTypeBuilder;
 import org.spongepowered.common.world.server.SpongeWorldArchetypeType;
 import org.spongepowered.common.world.server.SpongeWorldTypeBuilder;
@@ -370,7 +368,6 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(FlatGeneratorConfig.Builder.class, SpongeFlatGeneratorConfig.BuilderImpl::new)
                 .register(NoiseGeneratorConfig.Builder.class, SpongeNoiseGeneratorConfigBuilder::new)
                 .register(Noise.Builder.class, SpongeNoiseBuilder::new)
-                .register(DensityFunction.Builder.class, SpongeDensityFunctionBuilder::new)
                 .register(CheckerboardBiomeConfig.Builder.class, SpongeCheckerboardBiomeConfig.BuilderImpl::new)
                 .register(EndStyleBiomeConfig.Builder.class, SpongeEndStyleBiomeConfig.BuilderImpl::new)
                 .register(MultiNoiseBiomeConfig.Builder.class, SpongeMultiNoiseBiomeConfig.BuilderImpl::new)
@@ -382,7 +379,6 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(Carver.Builder.class, SpongeCarverBuilder::new)
                 .register(Feature.Builder.class, SpongeFeatureBuilder::new)
                 .register(PlacedFeature.Builder.class, SpongePlacedFeatureBuilder::new)
-                .register(Structure.Builder.class, SpongeStructureBuilder::new)
                 .register(ProcessorList.Builder.class, SpongeProcessorListBuilder::new)
                 .register(StructurePlacement.Builder.class, SpongeStructurePlacementBuilder::new)
                 .register(StructureSet.Builder.class, SpongeStructureSetBuilder::new)
@@ -392,6 +388,7 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(ArtType.Builder.class, SpongeArtTypeBuilder::new)
                 .register(TicketType.Builder.class, SpongeTicketTypeBuilder::new)
                 .register(PortalLogic.Builder.class, SpongePortalLogicBuilder::new)
+                .register(ServerWorldProperties.LoadOptions.Builder.class, SpongeServerWorldPropertiesLoadOptions.BuilderImpl::new)
         ;
     }
 }

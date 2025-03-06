@@ -25,8 +25,6 @@
 package org.spongepowered.common.world.biome;
 
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.sounds.Music;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.MobCategory;
@@ -53,7 +51,6 @@ import org.spongepowered.api.world.biome.spawner.NaturalSpawner;
 import org.spongepowered.api.world.generation.carver.Carver;
 import org.spongepowered.api.world.generation.feature.DecorationStep;
 import org.spongepowered.api.world.generation.feature.PlacedFeature;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderLookup;
 
@@ -141,9 +138,7 @@ public final class SpongeBiomeBuilder implements Biome.Builder {
         spawnerCosts.forEach((type, cost) -> spawnerBuilder.addMobCharge((net.minecraft.world.entity.EntityType<?>) (Object) type, cost.budget(),
             cost.charge()));
 
-        final Registry<net.minecraft.world.level.levelgen.placement.PlacedFeature> placedFeatureRegistry = SpongeCommon.vanillaRegistry(Registries.PLACED_FEATURE);
-        final Registry<ConfiguredWorldCarver<?>> configuredWorldCarverRegistry = SpongeCommon.vanillaRegistry(Registries.CONFIGURED_CARVER);
-        final BiomeGenerationSettings.Builder generationBuilder = new BiomeGenerationSettings.Builder(placedFeatureRegistry, configuredWorldCarverRegistry);
+        final BiomeGenerationSettings.PlainBuilder generationBuilder = new BiomeGenerationSettings.PlainBuilder();
         features.forEach((step, list) -> list.forEach(feature -> generationBuilder.addFeature((GenerationStep.Decoration) (Object) step,
             Holder.direct((net.minecraft.world.level.levelgen.placement.PlacedFeature) (Object) feature))));
         carvers.forEach((carver) -> generationBuilder.addCarver(Holder.direct((ConfiguredWorldCarver<?>) (Object) carver)));

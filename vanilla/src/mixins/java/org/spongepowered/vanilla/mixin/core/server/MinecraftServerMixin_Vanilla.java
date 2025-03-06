@@ -24,12 +24,16 @@
  */
 package org.spongepowered.vanilla.mixin.core.server;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.packs.resources.MultiPackResourceManager;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.vanilla.VanillaServer;
 
@@ -48,5 +52,11 @@ public abstract class MinecraftServerMixin_Vanilla implements VanillaServer {
     @Inject(method = "stopServer", at = @At(value = "HEAD"))
     private void vanilla$callStoppingEngineEvent(final CallbackInfo ci) {
         Launch.instance().lifecycle().callStoppingEngineEvent(this);
+    }
+
+    @ModifyExpressionValue(method = "lambda$reloadResources$28", at = @At(value = "NEW", target = "Lnet/minecraft/server/packs/resources/MultiPackResourceManager;"))
+    private MultiPackResourceManager impl$onReloadResources(final MultiPackResourceManager original) {
+        ((MinecraftServerBridge) this).bridge$reloadServerRegistries((RegistryHolder) original);
+        return original;
     }
 }

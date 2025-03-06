@@ -32,11 +32,13 @@ import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryType;
+import org.spongepowered.api.registry.ValueNotFoundException;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -136,6 +138,11 @@ public abstract class MappedRegistryMixin<T> implements RegistryBridge<T>, Writa
     }
 
     @Override
+    public @Nullable RegistryEntry<T> bridge$getEntry(final ResourceKey resourceKey) {
+        return this.impl$entries.get(resourceKey);
+    }
+
+    @Override
     public Stream<RegistryEntry<T>> bridge$streamEntries() {
         return this.impl$entries.values().stream();
     }
@@ -161,7 +168,7 @@ public abstract class MappedRegistryMixin<T> implements RegistryBridge<T>, Writa
             if (!this.impl$registryHolder.findRegistry(t)
                 .map(r -> ((MappedRegistryMixin<?>) r).frozen)
                 .orElse(false)) {
-                throw null;
+                throw new ValueNotFoundException(String.format("Dependency %s was not found!", t));
             }
         });
         this.impl$preFreezeTasks.forEach(Runnable::run);

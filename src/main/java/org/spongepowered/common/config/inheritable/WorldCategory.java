@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.config.inheritable;
 
+import net.kyori.adventure.text.Component;
+import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
@@ -50,4 +52,25 @@ public final class WorldCategory {
     @Setting("log-auto-save")
     @Comment("Log when a world auto-saves its chunk data. Note: This may be spammy depending on the auto-save-interval configured for world.")
     public final boolean logAutoSave = false;
+
+    @Setting(value = "load-on-startup")
+    @Comment("If 'true', this world will load on startup.")
+    public boolean loadOnStartup = true;
+
+    @Setting(value = "keep-spawn-loaded")
+    @Comment("If 'true', this worlds spawn will remain loaded with no players.")
+    public boolean keepSpawnLoaded = true;
+
+    @Setting(value = "pvp-enabled")
+    @Comment("If 'true', this world will allow PVP combat.")
+    public Boolean pvpEnabled;
+
+    @Setting(value = "view-distance")
+    public Integer viewDistance;
+
+    @Setting(value = "serialization-behavior")
+    public SerializationBehavior serializationBehavior;
+
+    @Setting("display-name")
+    public Component displayName;
 }

@@ -48,7 +48,7 @@ public final class SpongeProcessorListBuilder implements ProcessorList.Builder {
 
     @Override
     public ProcessorList.Builder from(final ProcessorList processorList) {
-        this.processorList = (StructureProcessorList) processorList;
+        this.processorList = new StructureProcessorList((List) processorList.processors());
         return this;
     }
 

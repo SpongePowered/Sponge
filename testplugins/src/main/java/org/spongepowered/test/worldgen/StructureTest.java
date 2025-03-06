@@ -36,9 +36,9 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.lifecycle.RegisterRegistryValueEvent;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryTypes;
-import org.spongepowered.api.tag.BiomeTags;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.blockray.RayTrace;
 import org.spongepowered.api.world.LocatableBlock;
@@ -46,6 +46,7 @@ import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.generation.feature.DecorationSteps;
 import org.spongepowered.api.world.generation.structure.Structure;
 import org.spongepowered.api.world.generation.structure.StructurePlacement;
+import org.spongepowered.api.world.generation.structure.StructureSet;
 import org.spongepowered.api.world.generation.structure.StructureSets;
 import org.spongepowered.api.world.generation.structure.StructureTypes;
 import org.spongepowered.api.world.generation.structure.Structures;
@@ -55,9 +56,7 @@ import org.spongepowered.api.world.generation.structure.jigsaw.JigsawPools;
 import org.spongepowered.api.world.generation.structure.jigsaw.ProcessorList;
 import org.spongepowered.api.world.generation.structure.jigsaw.ProcessorLists;
 import org.spongepowered.api.world.generation.structure.jigsaw.ProcessorTypes;
-import org.spongepowered.api.world.server.DataPackManager;
 import org.spongepowered.api.world.server.ServerLocation;
-import org.spongepowered.math.vector.Vector3i;
 
 import java.io.IOException;
 import java.util.List;
@@ -70,41 +69,44 @@ public class StructureTest {
         return FeatureTest.place(commandContext, param, Structures.DESERT_PYRAMID.get(), Structure::place);
     }
 
-    private CommandResult registerStructure(final CommandContext ctx) {
-        final DataPackManager dpm = Sponge.server().dataPackManager();
+    public void register(final RegisterRegistryValueEvent event) {
+//        event.registry(RegistryTypes.STRUCTURE, (h, s) ->
+//            s.register(ResourceKey.of("featuretest", "test"), Structure.builder().build()));
 
-        /*final StructureTemplate structureTemplate = StructureTemplate.builder().fromValue(Structures.IGLOO.get())
-                .key(ResourceKey.of("featuretest", "test"))
-                .build();
+        event.registry(RegistryTypes.STRUCTURE_SET, (h, s) -> {
+            s.register(ResourceKey.of("structuresettest", "igloo_2"), StructureSet.builder().from(StructureSets.IGLOOS.get(h)).build());
 
-        dpm.save(structureTemplate);*/
+            s.register(ResourceKey.of("structuresettest", "igloo_or_hut"), StructureSet.builder()
+                .add(Structures.IGLOO.get(h), 1)
+                .add(Structures.SWAMP_HUT.get(h), 1)
+                .placement(StructurePlacement.builder().randomSpread(1).spacing(16).separation(8).build())
+                .build());
+        }, RegistryTypes.STRUCTURE);
 
-        return CommandResult.success();
-    }
+        event.registry(RegistryTypes.PROCESSOR_LIST, (h, s) ->
+            s.register(ResourceKey.of("processortest", "test"), ProcessorList.builder().from(ProcessorLists.MOSSIFY_70_PERCENT.get(h)).build()));
 
-    private CommandResult registerStructureSets(final CommandContext ctx) {
-        final DataPackManager dpm = Sponge.server().dataPackManager();
+        event.registry(RegistryTypes.JIGSAW_POOL, (h, s) -> {
+            s.register(ResourceKey.of("jigsawtest", "test"), JigsawPool.builder().from(JigsawPools.VILLAGE_DESERT_DECOR.get(h)).build());
 
-        /*final StructureSetTemplate template1 = StructureSetTemplate.builder().fromValue(StructureSets.IGLOOS.get())
-                .key(ResourceKey.of("structuresettest", "igloo_2"))
-                .build();
+            final JigsawPoolElement.Projection projection = JigsawPoolElement.factory().rigid();
+            final ProcessorList noProcessing = ProcessorLists.EMPTY.get(h);
+            final JigsawPoolElement element1 = JigsawPoolElement.factory().single(ResourceKey.minecraft("village/desert/desert_lamp_1"), noProcessing).apply(projection);
+            final JigsawPoolElement element2 = JigsawPoolElement.factory().single(ResourceKey.minecraft("village/plains/plains_lamp_1"), noProcessing).apply(projection);
+            final JigsawPoolElement element3 = JigsawPoolElement.factory().single(ResourceKey.minecraft("village/snowy/snowy_lamp_post_01"), noProcessing).apply(projection);
+            final JigsawPoolElement element4 = JigsawPoolElement.factory().single(ResourceKey.minecraft("village/savanna/savanna_lamp_post_01"), noProcessing).apply(projection);
+            final JigsawPoolElement element5 = JigsawPoolElement.factory().single(ResourceKey.minecraft("village/taiga/taiga_lamp_post_1"), noProcessing).apply(projection);
 
-        final StructurePlacement placement = StructurePlacement.builder().randomSpread(1).spacing(16).separation(8).build();
-        final StructureSetTemplate template2 = StructureSetTemplate.builder()
-                .add(Structures.IGLOO.get(), 1)
-                .add(Structures.SWAMP_HUT.get(), 1)
-                .placement(placement)
-                .key(ResourceKey.of("structuresettest", "igloo_or_hut"))
-                .build();
-
-        dpm.save(template1);
-        dpm.save(template2);*/
-
-        final StructurePlacement strongholdPlacement = StructurePlacement.builder().concentricRings(Vector3i.ONE, 1)
-                .distance(32).spread(3).count(128).preferredBiomes(BiomeTags.STRONGHOLD_BIASED_TO)
-                .build();
-
-        return CommandResult.success();
+            final ResourceKey lamptest = ResourceKey.of("jigsawtest", "lamps");
+            s.register(lamptest, JigsawPool.builder()
+                .add(element1, 1)
+                .add(element2, 1)
+                .add(element3, 1)
+                .add(element4, 1)
+                .add(element5, 1)
+                .name(lamptest)
+                .build());
+        });
     }
 
     private CommandResult listStructures(CommandContext ctx, final Parameter.Value<String> filterParam) {
@@ -252,62 +254,12 @@ public class StructureTest {
         return CommandResult.success();
     }
 
-    private CommandResult registerProcessor(final CommandContext ctx) {
-        final DataPackManager dpm = Sponge.server().dataPackManager();
-
-
-//        final ProcessorListTemplate template = ProcessorListTemplate.builder()
-//                .fromValue(ProcessorLists.MOSSIFY_70_PERCENT.get())
-//                .key(ResourceKey.of("processortest", "test"))
-//                .build();
-//
-//        dpm.save(template);
-
-        return CommandResult.success();
-    }
-
-    private CommandResult registerJigsaw(final CommandContext ctx) {
-        final DataPackManager dpm = Sponge.server().dataPackManager();
-
-
-//        final JigsawPoolTemplate template1 = JigsawPoolTemplate.builder()
-//                .fromValue(JigsawPools.VILLAGE_DESERT_DECOR.get())
-//                .key(ResourceKey.of("jigsawtest", "test"))
-//                .build();
-//
-//
-//        final JigsawPoolElement.Projection projection = JigsawPoolElement.factory().rigid();
-//        final ProcessorList noProcessing = ProcessorLists.EMPTY.get();
-//        final JigsawPoolElement element1 = JigsawPoolElement.factory().single(ResourceKey.minecraft("village/desert/desert_lamp_1"), noProcessing).apply(projection);
-//        final JigsawPoolElement element2 = JigsawPoolElement.factory().single(ResourceKey.minecraft("village/plains/plains_lamp_1"), noProcessing).apply(projection);
-//        final JigsawPoolElement element3 = JigsawPoolElement.factory().single(ResourceKey.minecraft("village/snowy/snowy_lamp_post_01"), noProcessing).apply(projection);
-//        final JigsawPoolElement element4 = JigsawPoolElement.factory().single(ResourceKey.minecraft("village/savanna/savanna_lamp_post_01"), noProcessing).apply(projection);
-//        final JigsawPoolElement element5 = JigsawPoolElement.factory().single(ResourceKey.minecraft("village/taiga/taiga_lamp_post_1"), noProcessing).apply(projection);
-//        final ResourceKey lamptest = ResourceKey.of("jigsawtest", "lamps");
-//        final JigsawPoolTemplate template2 = JigsawPoolTemplate.builder()
-//                .add(element1, 1)
-//                .add(element2, 1)
-//                .add(element3, 1)
-//                .add(element4, 1)
-//                .add(element5, 1)
-//                .name(lamptest)
-//                .key(lamptest)
-//                .build();
-//
-//        dpm.save(template1);
-//        dpm.save(template2);
-
-        return CommandResult.success();
-    }
-
-
     Command.Parameterized structureCmd() {
         final Parameter.Value<Structure> structure = Parameter.registryElement(TypeToken.get(Structure.class), RegistryTypes.STRUCTURE, "minecraft").key("structure").optional().build();
         final Parameter.Value<String> filter = Parameter.string().key("filter").optional().build();
         return Command.builder()
                 .addChild(Command.builder().addParameter(structure).executor(ctx -> this.placeStructure(ctx, structure)).build(), "placeStructure")
                 .addChild(Command.builder().addParameter(filter).executor(ctx -> this.listStructures(ctx, filter)).build(), "list")
-                .addChild(Command.builder().executor(this::registerStructure).build(), "register")
                 .addChild(Command.builder().addParameter(structure).executor(ctx -> this.structureInfo(ctx, structure)).build(), "info")
                 .build();
     }
@@ -316,7 +268,6 @@ public class StructureTest {
         final Parameter.Value<String> filter = Parameter.string().key("filter").optional().build();
         return Command.builder()
                 .addChild(Command.builder().addParameter(filter).executor(ctx -> this.listStructureSets(ctx, filter)).build(), "list")
-                .addChild(Command.builder().executor(this::registerStructureSets).build(), "register")
                 .build();
     }
 
@@ -344,7 +295,6 @@ public class StructureTest {
         return Command.builder()
                 .addChild(Command.builder().addParameter(jigsawPool).executor(ctx -> this.placeJigsaw(ctx, jigsawPool)).build(), "place")
                 .addChild(Command.builder().addParameter(filter).executor(ctx -> this.listJigsaw(ctx, filter)).build(), "list")
-                .addChild(Command.builder().executor(this::registerJigsaw).build(), "register")
                 .build();
     }
 
@@ -352,7 +302,6 @@ public class StructureTest {
         final Parameter.Value<String> filter = Parameter.string().key("filter").optional().build();
         return Command.builder()
                 .addChild(Command.builder().addParameter(filter).executor(ctx -> this.listProcessors(ctx, filter)).build(), "list")
-                .addChild(Command.builder().executor(this::registerProcessor).build(), "register")
                 .build();
     }
 

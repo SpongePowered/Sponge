@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.bridge.core;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.api.registry.RegistryType;
@@ -38,6 +39,8 @@ public interface RegistryBridge<T> {
     void bridge$register(final RegistryEntry<T> entry);
 
     Optional<RegistryEntry<T>> bridge$get(ResourceKey key);
+
+    @Nullable RegistryEntry<T> bridge$getEntry(ResourceKey key);
 
     Stream<RegistryEntry<T>> bridge$streamEntries();
 
