@@ -28,23 +28,34 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.DynamicOps;
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
-import net.minecraft.network.protocol.game.ClientboundSetChunkCacheRadiusPacket;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
+import net.minecraft.world.level.levelgen.WorldDimensions;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.WorldData;
@@ -54,14 +65,13 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.accessor.world.level.LevelSettingsAccessor;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
-import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
-import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.fixer.LegacyUUIDCodec;
 import org.spongepowered.common.util.Constants;
@@ -71,9 +81,13 @@ import org.spongepowered.common.world.server.SpongeServerLevelData;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Mixin(PrimaryLevelData.class)
 public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldData, PrimaryLevelDataBridge, DataCompoundHolder {
@@ -87,9 +101,12 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
     @Shadow public abstract void shadow$setSpawn(BlockPos p_176143_1_, float p_176143_2_);
     // @formatter:on
 
+    @Shadow
+    private boolean difficultyLocked;
     private final SpongeServerLevelData impl$spongeData = new SpongeServerLevelData();
 
     private DimensionType impl$dimensionType;
+    private ChunkGenerator impl$chunkGenerator;
 
     private final BiMap<Integer, UUID> impl$playerUniqueIdMap = HashBiMap.create();
 
@@ -201,6 +218,7 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
 
     public void bridge$populateFromLevelStem(final LevelStem dimension) {
         this.impl$dimensionType = dimension.type().value();
+        this.impl$chunkGenerator = dimension.generator();
 
         // Legacy back compat
         final LevelStemBridge bridge = (LevelStemBridge) (Object) dimension;
@@ -365,5 +383,18 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
     @Override
     public void data$setCompound(final CompoundTag nbt) {
         this.impl$compound = nbt;
+    }
+
+    @Redirect(method = "setTagData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/levelgen/WorldGenSettings;encode(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/world/level/levelgen/WorldOptions;Lnet/minecraft/core/RegistryAccess;)Lcom/mojang/serialization/DataResult;"))
+    private DataResult<?> impl$onEncodeWorldGenSettings(final DynamicOps<?> $$0, final WorldOptions $$1, final RegistryAccess $$2) {
+        final Map<ResourceKey<LevelStem>, LevelStem> dimensions = $$2.lookupOrThrow(Registries.LEVEL_STEM)
+            .listElements()
+            .collect(Collectors.toMap(Holder.Reference::key, Holder.Reference::value));
+        if (this.impl$dimensionType != null && this.impl$chunkGenerator != null) {
+            dimensions.put(
+                ResourceKey.create(Registries.LEVEL_STEM, (ResourceLocation) (Object) this.impl$spongeData.key()),
+                new LevelStem(Holder.direct(this.impl$dimensionType), this.impl$chunkGenerator));
+        }
+        return WorldGenSettings.encode($$0, $$1, new WorldDimensions(dimensions));
     }
 }

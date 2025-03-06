@@ -456,6 +456,6 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Override
     public void bridge$reloadServerRegistries(final RegistryHolder holder) {
         ((SpongeRegistryHolder) holder).setRootMinecraftRegistry(this.shadow$registryAccess());
-        Launch.instance().lifecycle().beginEstablishServerRegistries((RegistryHolder) holder);
+        Launch.instance().lifecycle().beginEstablishServerRegistries(holder);
     }
 }
