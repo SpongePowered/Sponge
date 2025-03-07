@@ -34,11 +34,13 @@ import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.advancements.AdvancementBridge;
+import org.spongepowered.common.util.DataPackUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -82,7 +84,7 @@ public abstract class AdvancementMixin_API implements org.spongepowered.api.adva
     }
 
     @Override
-    public Optional<DataContainer> toDataPack() {
-        return Optional.empty();
+    public Optional<DataContainer> toDataPack(final RegistryHolder registryHolder) {
+        return DataPackUtil.toDataContainer(registryHolder, Advancement.CODEC, (Advancement) (Object) this);
     }
 }

@@ -275,7 +275,7 @@ public final class WorldTest {
     private CommandResult worldTypes(final CommandContext commandContext) {
         for (final WorldType wt : WorldTypes.registry().stream().toList()) {
             final ResourceKey key = wt.key(RegistryTypes.WORLD_TYPE);
-            wt.toDataPack().ifPresentOrElse(d -> {
+            wt.toDataPack(Sponge.server()).ifPresentOrElse(d -> {
                 try {
                     System.out.println(String.format("%s: ", DataFormats.JSON.get().write(d)));
                 } catch (IOException e) {
@@ -289,7 +289,7 @@ public final class WorldTest {
     private CommandResult worldTemplates(final CommandContext commandContext) {
         for (final WorldArchetypeType archetypeType : WorldArchetypeTypes.registry().stream().toList()) {
             final ResourceKey key = archetypeType.key(RegistryTypes.WORLD_ARCHETYPE_TYPE);
-            archetypeType.toDataPack().ifPresentOrElse(d -> {
+            archetypeType.toDataPack(Sponge.server()).ifPresentOrElse(d -> {
                 try {
                     System.out.println(String.format("%s: ", DataFormats.JSON.get().write(d)));
                 } catch (IOException e) {

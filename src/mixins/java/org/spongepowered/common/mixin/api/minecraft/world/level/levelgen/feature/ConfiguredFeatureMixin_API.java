@@ -33,8 +33,10 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.world.generation.feature.Feature;
 import org.spongepowered.api.world.generation.feature.FeatureType;
 import org.spongepowered.api.world.server.ServerLocation;
@@ -43,10 +45,12 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.util.DataPackUtil;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Mixin(ConfiguredFeature.class)
 public abstract class ConfiguredFeatureMixin_API<
@@ -85,5 +89,11 @@ public abstract class ConfiguredFeatureMixin_API<
     @Override
     public boolean place(final ServerLocation location) {
         return this.place(location.world(), location.blockPosition());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Optional<DataContainer> toDataPack(final RegistryHolder registryHolder) {
+        return DataPackUtil.toDataContainer(registryHolder, ConfiguredFeature.DIRECT_CODEC, (ConfiguredFeature<FC, F>) (Object) this);
     }
 }

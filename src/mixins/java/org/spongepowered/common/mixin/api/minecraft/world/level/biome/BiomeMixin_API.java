@@ -28,15 +28,19 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.registry.DefaultedRegistryType;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.tag.Tag;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.holder.SpongeDataHolder;
+import org.spongepowered.common.util.DataPackUtil;
 
 import java.util.Collection;
+import java.util.Optional;
 
 @Mixin(net.minecraft.world.level.biome.Biome.class)
 public abstract class BiomeMixin_API implements Biome, SpongeDataHolder {
@@ -56,5 +60,10 @@ public abstract class BiomeMixin_API implements Biome, SpongeDataHolder {
         final Registry<net.minecraft.world.level.biome.Biome> registry = SpongeCommon.vanillaRegistry(Registries.BIOME);
         final Holder.Reference<net.minecraft.world.level.biome.Biome> holder = registry.createIntrusiveHolder((net.minecraft.world.level.biome.Biome) (Object) this);
         return holder.is(((TagKey<net.minecraft.world.level.biome.Biome>) (Object) tag));
+    }
+
+    @Override
+    public Optional<DataContainer> toDataPack(final RegistryHolder registryHolder) {
+        return DataPackUtil.toDataContainer(registryHolder, net.minecraft.world.level.biome.Biome.DIRECT_CODEC, (net.minecraft.world.level.biome.Biome) (Object) this);
     }
 }

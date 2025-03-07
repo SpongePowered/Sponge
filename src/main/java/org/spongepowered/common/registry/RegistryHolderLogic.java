@@ -26,6 +26,7 @@ package org.spongepowered.common.registry;
 
 import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.RegistryAccess;
@@ -55,7 +56,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public final class RegistryHolderLogic implements RegistryHolder {
+public final class RegistryHolderLogic implements RegistryHolder, HolderLookup.Provider {
 
     private final Map<ResourceKey, net.minecraft.core.Registry<net.minecraft.core.Registry<?>>> roots = new Object2ObjectOpenHashMap<>();
 
@@ -248,5 +249,18 @@ public final class RegistryHolderLogic implements RegistryHolder {
 
     public void featureFlagSet(final FeatureFlagSet featureFlagSet) {
         this.featureFlagSet = featureFlagSet;
+    }
+
+    @Override
+    public Stream<net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<?>>> listRegistryKeys() {
+        return this.streamRegistries().map(k ->
+            ResourceKeyAccessor.invoker$create((ResourceLocation) (Object) k.type().root(), (ResourceLocation) (Object) k.type().location()));
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Override
+    public <T> Optional<? extends HolderLookup.RegistryLookup<T>> lookup(
+            final net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<? extends T>> resourceKey) {
+        return (Optional) this.findRegistry(RegistryType.of((ResourceKey) (Object) resourceKey.registry(), (ResourceKey) (Object) resourceKey.location()));
     }
 }

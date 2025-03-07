@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.registry;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -42,7 +43,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public interface SpongeRegistryHolder extends RegistryHolder {
+public interface SpongeRegistryHolder extends RegistryHolder, HolderLookup.Provider {
 
     RegistryHolderLogic registryHolder();
 
@@ -117,5 +118,16 @@ public interface SpongeRegistryHolder extends RegistryHolder {
 
     default FeatureFlagSet featureFlagSet() {
         return this.registryHolder().featureFlagSet();
+    }
+
+    @Override
+    default Stream<net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<?>>> listRegistryKeys() {
+        return this.registryHolder().listRegistryKeys();
+    }
+
+    @Override
+    default <T> Optional<? extends HolderLookup.RegistryLookup<T>> lookup(
+            final net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<? extends T>> resourceKey) {
+        return this.registryHolder().lookup(resourceKey);
     }
 }

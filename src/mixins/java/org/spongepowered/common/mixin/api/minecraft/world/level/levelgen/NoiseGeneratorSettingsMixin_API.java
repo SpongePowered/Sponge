@@ -30,6 +30,8 @@ import net.minecraft.world.level.levelgen.NoiseRouter;
 import net.minecraft.world.level.levelgen.NoiseSettings;
 import net.minecraft.world.level.levelgen.SurfaceRules;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.world.biome.BiomeAttributes;
 import org.spongepowered.api.world.generation.config.SurfaceRule;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
@@ -41,8 +43,10 @@ import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.util.DataPackUtil;
 
 import java.util.List;
+import java.util.Optional;
 
 @Mixin(NoiseGeneratorSettings.class)
 @Implements(@Interface(iface = NoiseGeneratorConfig.class, prefix = "noiseGeneratorConfig$", remap = Remap.NONE))
@@ -115,5 +119,10 @@ public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorC
     @Intrinsic
     public SurfaceRule surfaceRule() {
         return (SurfaceRule) this.surfaceRule;
+    }
+
+    @Override
+    public Optional<DataContainer> toDataPack(final RegistryHolder registryHolder) {
+        return DataPackUtil.toDataContainer(registryHolder, NoiseGeneratorSettings.DIRECT_CODEC, (NoiseGeneratorSettings) (Object) this);
     }
 }

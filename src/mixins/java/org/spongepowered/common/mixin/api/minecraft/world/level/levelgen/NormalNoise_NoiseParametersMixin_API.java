@@ -26,12 +26,16 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen;
 
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.world.generation.config.noise.Noise;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.util.DataPackUtil;
 
 import java.util.List;
+import java.util.Optional;
 
 @Mixin(NormalNoise.NoiseParameters.class)
 public abstract class NormalNoise_NoiseParametersMixin_API implements Noise {
@@ -49,5 +53,10 @@ public abstract class NormalNoise_NoiseParametersMixin_API implements Noise {
     @Override
     public List<Double> amplitudes() {
         return this.amplitudes;
+    }
+
+    @Override
+    public Optional<DataContainer> toDataPack(final RegistryHolder registryHolder) {
+        return DataPackUtil.toDataContainer(registryHolder, NormalNoise.NoiseParameters.DIRECT_CODEC, (NormalNoise.NoiseParameters) (Object) this);
     }
 }

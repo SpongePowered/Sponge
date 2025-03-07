@@ -32,10 +32,13 @@ import net.minecraft.network.chat.ChatTypeDecoration;
 import net.minecraft.network.chat.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.util.DataPackUtil;
 
 import java.util.Optional;
 
@@ -90,5 +93,10 @@ public abstract class ChatTypeMixin_API implements org.spongepowered.api.adventu
             return this.shadow$targetName().map(SpongeAdventure::asAdventure).orElse(null);
         }
 
+    }
+
+    @Override
+    public Optional<DataContainer> toDataPack(final RegistryHolder registryHolder) {
+        return DataPackUtil.toDataContainer(registryHolder, ChatType.DIRECT_CODEC, (ChatType) (Object) this);
     }
 }

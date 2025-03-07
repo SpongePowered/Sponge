@@ -25,9 +25,14 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen;
 
 import net.minecraft.world.level.levelgen.DensityFunction;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.util.DataPackUtil;
 import org.spongepowered.math.vector.Vector3i;
+
+import java.util.Optional;
 
 @Mixin(DensityFunction.class)
 public interface DensityFunctionMixin_API extends org.spongepowered.api.world.generation.config.noise.DensityFunction {
@@ -56,5 +61,10 @@ public interface DensityFunctionMixin_API extends org.spongepowered.api.world.ge
     @Override
     default double compute(final int x, final int y, final int z) {
         return this.shadow$compute(new DensityFunction.SinglePointContext(x, y, z));
+    }
+
+    @Override
+    default Optional<DataContainer> toDataPack(final RegistryHolder registryHolder) {
+        return DataPackUtil.toDataContainer(registryHolder, DensityFunction.DIRECT_CODEC, (DensityFunction) this);
     }
 }

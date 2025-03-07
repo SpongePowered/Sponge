@@ -29,13 +29,17 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.holder.SpongeDataHolder;
+import org.spongepowered.common.util.DataPackUtil;
 
 import java.util.Objects;
+import java.util.Optional;
 
 @Mixin(DimensionType.class)
 public abstract class DimensionTypeMixin_API implements WorldType, SpongeDataHolder {
@@ -58,4 +62,9 @@ public abstract class DimensionTypeMixin_API implements WorldType, SpongeDataHol
         return registry.getKey((DimensionType) (Object) this);
     }
 
+
+    @Override
+    public Optional<DataContainer> toDataPack(final RegistryHolder registryHolder) {
+        return DataPackUtil.toDataContainer(registryHolder, DimensionType.DIRECT_CODEC, (DimensionType) (Object) this);
+    }
 }

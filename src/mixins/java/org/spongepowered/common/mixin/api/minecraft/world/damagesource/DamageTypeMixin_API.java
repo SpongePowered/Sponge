@@ -25,17 +25,21 @@
 package org.spongepowered.common.mixin.api.minecraft.world.damagesource;
 
 import net.minecraft.world.damagesource.DamageEffects;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.event.cause.entity.damage.DamageEffect;
 import org.spongepowered.api.event.cause.entity.damage.DamageScaling;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.registry.DefaultedRegistryType;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.tag.Tag;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.util.DataPackUtil;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -85,5 +89,10 @@ public abstract class DamageTypeMixin_API implements DamageType {
     @Override
     public Collection<Tag<DamageType>> tags() {
         return this.registryType().get().tags().filter(this::is).collect(Collectors.toSet());
+    }
+
+    @Override
+    public Optional<DataContainer> toDataPack(final RegistryHolder registryHolder) {
+        return DataPackUtil.toDataContainer(registryHolder, net.minecraft.world.damagesource.DamageType.DIRECT_CODEC, (net.minecraft.world.damagesource.DamageType) (Object) this);
     }
 }

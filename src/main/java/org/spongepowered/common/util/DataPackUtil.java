@@ -22,37 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.structure.templatesystem;
+package org.spongepowered.common.util;
 
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
+import com.google.gson.JsonElement;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.JsonOps;
 import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.registry.RegistryHolder;
-import org.spongepowered.api.world.generation.structure.jigsaw.Processor;
-import org.spongepowered.api.world.generation.structure.jigsaw.ProcessorList;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.util.DataPackUtil;
+import org.spongepowered.common.registry.SpongeRegistryHolder;
 
-import java.util.List;
+import java.io.IOException;
 import java.util.Optional;
 
-@Mixin(StructureProcessorList.class)
-public abstract class StructureProcessorListMixin_API implements ProcessorList {
+public final class DataPackUtil {
 
-    // @formatter:off
-    @Shadow @Final private List<StructureProcessor> list;
-    // @formatter:on
-
-    @Override
-    public List<Processor> processors() {
-        return (List) this.list;
+    public static <T> Optional<DataContainer> toDataContainer(final RegistryHolder registryHolder, final Codec<T> codec, final T value) {
+        final DataResult<JsonElement> result = codec.encodeStart(
+            ((SpongeRegistryHolder) registryHolder).createSerializationContext(JsonOps.INSTANCE), value);
+        if (result.isSuccess()) {
+            try {
+                return Optional.of(DataFormats.JSON.get().read(result.getOrThrow().toString()));
+            } catch (final IOException ignored) {
+            }
+        }
+        return Optional.empty();
     }
 
-    @Override
-    public Optional<DataContainer> toDataPack(final RegistryHolder registryHolder) {
-        return DataPackUtil.toDataContainer(registryHolder, StructureProcessorType.LIST_OBJECT_CODEC, (StructureProcessorList) (Object) this);
+    private DataPackUtil() {
     }
 }

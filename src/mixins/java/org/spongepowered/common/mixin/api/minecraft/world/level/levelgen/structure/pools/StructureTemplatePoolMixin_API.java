@@ -28,14 +28,18 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.Holder;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.api.world.generation.structure.jigsaw.JigsawPool;
 import org.spongepowered.api.world.generation.structure.jigsaw.JigsawPoolElement;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.util.DataPackUtil;
 
 import java.util.List;
+import java.util.Optional;
 
 @Mixin(StructureTemplatePool.class)
 public abstract class StructureTemplatePoolMixin_API implements JigsawPool {
@@ -57,5 +61,10 @@ public abstract class StructureTemplatePoolMixin_API implements JigsawPool {
             weightedTable.add((JigsawPoolElement) pair.getFirst(), pair.getSecond());
         }
         return weightedTable;
+    }
+
+    @Override
+    public Optional<DataContainer> toDataPack(final RegistryHolder registryHolder) {
+        return DataPackUtil.toDataContainer(registryHolder, StructureTemplatePool.DIRECT_CODEC, (StructureTemplatePool) (Object) this);
     }
 }

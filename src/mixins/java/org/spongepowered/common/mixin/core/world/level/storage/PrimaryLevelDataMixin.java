@@ -388,9 +388,8 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
             .listElements()
             .collect(Collectors.toMap(Holder.Reference::key, Holder.Reference::value));
         if (this.impl$dimensionType != null && this.impl$chunkGenerator != null) {
-            dimensions.put(
-                ResourceKey.create(Registries.LEVEL_STEM, (ResourceLocation) (Object) this.impl$spongeData.key()),
-                new LevelStem(Holder.direct(this.impl$dimensionType), this.impl$chunkGenerator));
+            dimensions.computeIfAbsent(ResourceKey.create(Registries.LEVEL_STEM, (ResourceLocation) (Object) this.impl$spongeData.key()),
+                $ -> new LevelStem($$2.lookupOrThrow(Registries.DIMENSION_TYPE).wrapAsHolder(this.impl$dimensionType), this.impl$chunkGenerator));
         }
         return WorldGenSettings.encode($$0, $$1, new WorldDimensions(dimensions));
     }

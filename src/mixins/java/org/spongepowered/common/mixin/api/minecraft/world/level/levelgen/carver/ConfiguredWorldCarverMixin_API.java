@@ -27,11 +27,16 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.carver
 import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.world.generation.carver.Carver;
 import org.spongepowered.api.world.generation.carver.CarverType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.util.DataPackUtil;
+
+import java.util.Optional;
 
 
 @Mixin(ConfiguredWorldCarver.class)
@@ -45,5 +50,11 @@ public abstract class ConfiguredWorldCarverMixin_API<WC extends CarverConfigurat
     @Override
     public CarverType type() {
         return (CarverType) this.worldCarver;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Optional<DataContainer> toDataPack(final RegistryHolder registryHolder) {
+        return DataPackUtil.toDataContainer(registryHolder, ConfiguredWorldCarver.DIRECT_CODEC, (ConfiguredWorldCarver<WC>) (Object) this);
     }
 }

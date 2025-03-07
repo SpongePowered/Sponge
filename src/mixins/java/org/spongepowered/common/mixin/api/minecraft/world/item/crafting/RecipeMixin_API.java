@@ -30,9 +30,11 @@ import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.crafting.display.RecipeDisplay;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.Recipe;
 import org.spongepowered.api.item.recipe.RecipeType;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -40,8 +42,10 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.recipe.crafting.RecipeUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.util.DataPackUtil;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 @Mixin(net.minecraft.world.item.crafting.Recipe.class)
@@ -100,5 +104,10 @@ public interface RecipeMixin_API<I extends RecipeInput, I2 extends org.spongepow
     @Override
     default RecipeType<? extends Recipe> type() {
         return (RecipeType) this.shadow$getType();
+    }
+
+    @Override
+    default Optional<DataContainer> toDataPack(final RegistryHolder registryHolder) {
+        return DataPackUtil.toDataContainer(registryHolder, net.minecraft.world.item.crafting.Recipe.CODEC, (net.minecraft.world.item.crafting.Recipe<?>) this);
     }
 }

@@ -24,10 +24,19 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.decoration;
 
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.type.ArtType;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.util.DataPackUtil;
+
+import java.util.Optional;
 
 @Mixin(net.minecraft.world.entity.decoration.PaintingVariant.class)
 public abstract class PaintingVariantMixin_API implements ArtType {
 
+    @Override
+    public Optional<DataContainer> toDataPack(final RegistryHolder registryHolder) {
+        return DataPackUtil.toDataContainer(registryHolder, net.minecraft.world.entity.decoration.PaintingVariant.DIRECT_CODEC, (net.minecraft.world.entity.decoration.PaintingVariant) (Object) this);
+    }
 }

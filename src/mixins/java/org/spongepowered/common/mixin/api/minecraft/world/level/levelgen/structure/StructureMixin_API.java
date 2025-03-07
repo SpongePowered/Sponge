@@ -42,9 +42,11 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureSpawnOverride;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.entity.EntityCategory;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.world.generation.feature.DecorationStep;
 import org.spongepowered.api.world.generation.structure.StructureType;
 import org.spongepowered.api.world.server.ServerLocation;
@@ -52,12 +54,14 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.util.DataPackUtil;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 
 @Mixin(Structure.class)
 public abstract class StructureMixin_API implements org.spongepowered.api.world.generation.structure.Structure {
@@ -143,5 +147,10 @@ public abstract class StructureMixin_API implements org.spongepowered.api.world.
     private <T extends Structure> Codec<T> api$codec() {
         final var type = (net.minecraft.world.level.levelgen.structure.StructureType<T>) this.shadow$type();
         return type.codec().codec();
+    }
+
+    @Override
+    public Optional<DataContainer> toDataPack(final RegistryHolder registryHolder) {
+        return DataPackUtil.toDataContainer(registryHolder, Structure.DIRECT_CODEC, (Structure) (Object) this);
     }
 }

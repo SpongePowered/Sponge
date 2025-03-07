@@ -30,6 +30,8 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.world.generation.feature.Feature;
 import org.spongepowered.api.world.generation.feature.FeatureType;
 import org.spongepowered.api.world.generation.feature.PlacementModifier;
@@ -38,10 +40,12 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.util.DataPackUtil;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.List;
+import java.util.Optional;
 
 @Mixin(PlacedFeature.class)
 public abstract class PlacedFeatureMixin_API implements org.spongepowered.api.world.generation.feature.PlacedFeature {
@@ -70,5 +74,10 @@ public abstract class PlacedFeatureMixin_API implements org.spongepowered.api.wo
     @Override
     public boolean place(final ServerLocation location) {
         return this.place(location.world(), location.blockPosition());
+    }
+
+    @Override
+    public Optional<DataContainer> toDataPack(final RegistryHolder registryHolder) {
+        return DataPackUtil.toDataContainer(registryHolder, PlacedFeature.DIRECT_CODEC, (PlacedFeature) (Object) this);
     }
 }
