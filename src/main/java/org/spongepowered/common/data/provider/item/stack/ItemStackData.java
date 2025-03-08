@@ -190,9 +190,9 @@ public final class ItemStackData {
                         .delete(h -> h.remove(DataComponents.MAX_DAMAGE))
                         .supports(h -> h.getOrDefault(DataComponents.MAX_STACK_SIZE, 1) == 1)
                     .create(Keys.MAX_STACK_SIZE)
-                        .get(ItemStack::getMaxStackSize)
+                        .get(h -> h.get(DataComponents.MAX_STACK_SIZE))
                         .setAnd((h, v) -> {
-                            if (v <= 0 || v > 99) {
+                            if (v <= 0 || v > 99 || h.has(DataComponents.MAX_DAMAGE)) {
                                 return false;
                             }
 
@@ -200,7 +200,6 @@ public final class ItemStackData {
                             return true;
                         })
                         .delete(h -> h.remove(DataComponents.MAX_STACK_SIZE))
-                        .supports(h -> !h.has(DataComponents.MAX_DAMAGE))
                     .create(Keys.ITEM_DURABILITY)
                         .get(stack -> stack.getMaxDamage() - stack.getDamageValue())
                         .set((stack, durability) -> stack.setDamageValue(stack.getMaxDamage() - durability))
