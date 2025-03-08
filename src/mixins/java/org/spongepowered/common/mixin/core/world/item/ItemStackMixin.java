@@ -30,7 +30,6 @@ import net.minecraft.core.component.PatchedDataComponentMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
-import net.minecraft.world.level.ItemLike;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -99,7 +98,7 @@ public abstract class ItemStackMixin implements SpongeDataHolderBridge, DataComp
 
     @Override
     public void data$setCompound(final CompoundTag nbt) {
-        this.components.set(DataComponents.CUSTOM_DATA, nbt == null ? CustomData.EMPTY : CustomDataAccessor.invoker$new(nbt));
+        this.components.set(DataComponents.CUSTOM_DATA, nbt == null ? null : CustomDataAccessor.invoker$new(nbt));
     }
 
     // Add our manipulators when creating copies from this ItemStack:
@@ -117,7 +116,7 @@ public abstract class ItemStackMixin implements SpongeDataHolderBridge, DataComp
 
     // Read custom data from nbt
     @Inject(method = "<init>(Lnet/minecraft/world/level/ItemLike;ILnet/minecraft/core/component/PatchedDataComponentMap;)V", at = @At("RETURN"))
-    private void impl$onRead(final ItemLike $$0, final int $$1, final PatchedDataComponentMap $$2, final CallbackInfo ci) {
+    private void impl$onRead(final CallbackInfo ci) {
         if (!this.shadow$isEmpty()) {
             DataUtil.syncTagToData(this); // Deserialize
             DataUtil.syncDataToTag(this); // Sync back after reading
@@ -125,8 +124,8 @@ public abstract class ItemStackMixin implements SpongeDataHolderBridge, DataComp
     }
 
     @Inject(method = "set", at = @At("RETURN"))
-    private <T> void impl$onSetCustomData(final DataComponentType<? super T> $$0, final T $$1, final CallbackInfoReturnable<T> cir) {
-        if ($$0.equals(DataComponents.CUSTOM_DATA)) {
+    private <T> void impl$onSetCustomData(final DataComponentType<? super T> type, final T value, final CallbackInfoReturnable<T> cir) {
+        if (type.equals(DataComponents.CUSTOM_DATA)) {
             this.bridge$clear();
             DataUtil.syncTagToData(this); // Deserialize
             DataUtil.syncDataToTag(this); // Sync back after reading

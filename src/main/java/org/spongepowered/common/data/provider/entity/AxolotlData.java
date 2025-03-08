@@ -22,13 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.level;
+package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.animal.axolotl.Axolotl;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.AxolotlVariant;
+import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
-public interface NaturalSpawner_SpawnStateBridge {
+public class AxolotlData {
+    private AxolotlData() {
+    }
 
-    boolean bridge$canSpawnForCategoryInWorld(MobCategory category, ServerLevel level);
-
+    // @formatter:off
+    public static void register(final DataProviderRegistrator registrator) {
+        registrator
+            .asMutable(Axolotl.class)
+                .create(Keys.AXOLOTL_VARIANT)
+                    .get(a -> (AxolotlVariant) (Object) a.getVariant())
+                    .set((h, v) -> h.setVariant((Axolotl.Variant)  (Object) v));
+    }
+    // @formatter:on
 }

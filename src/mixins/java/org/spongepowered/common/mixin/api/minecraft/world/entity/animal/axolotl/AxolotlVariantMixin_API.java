@@ -22,26 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.item;
+package org.spongepowered.common.mixin.api.minecraft.world.entity.animal.axolotl;
 
-import net.minecraft.world.item.Item;
+import net.minecraft.world.entity.animal.axolotl.Axolotl;
+import org.spongepowered.api.data.type.AxolotlVariant;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.item.ItemBridge;
 
-import java.util.StringJoiner;
+@Mixin(Axolotl.Variant.class)
+public abstract class AxolotlVariantMixin_API implements AxolotlVariant {
 
-@Mixin(Item.class)
-public abstract class ItemMixin implements ItemBridge {
-
-    // @formatter:off
-    @Shadow private String descriptionId;
-    // @formatter:on
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", this.getClass().getSimpleName() + "[", "]")
-                .add("name=" + this.descriptionId)
-                .toString();
-    }
 }

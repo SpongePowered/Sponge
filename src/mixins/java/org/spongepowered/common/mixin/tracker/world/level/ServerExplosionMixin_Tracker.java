@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.tracker.world.level;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
@@ -35,7 +37,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -52,30 +53,26 @@ import java.util.function.BiConsumer;
 @Mixin(ServerExplosion.class)
 public abstract class ServerExplosionMixin_Tracker {
 
-
     // TODO sounds & particles?
 
-    @Redirect(method = "interactWithBlocks",
+    @WrapOperation(method = "interactWithBlocks",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;popResource(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/item/ItemStack;)V"))
-    private void tracker$onPopResource(final Level $$0, final BlockPos $$1, final ItemStack $$2) {
+    private void tracker$onPopResource(final Level level, final BlockPos pos, final ItemStack item, final Operation<Void> original) {
         // This is built into the SpawnDestructBlocksEffect
-        // Block.popResource(this.level, $$3.pos, $$3.stack);
     }
 
-
-    @Redirect(method = "interactWithBlocks",
+    @WrapOperation(method = "interactWithBlocks",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;onExplosionHit(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/Explosion;Ljava/util/function/BiConsumer;)V"))
-    private void tracker$onExplosionHit(final BlockState instance, final ServerLevel serverLevel,
-        final BlockPos blockPos, final Explosion explosion, final BiConsumer biConsumer) {
+    private void tracker$onExplosionHit(final BlockState block, final ServerLevel level,
+        final BlockPos pos, final Explosion explosion, final BiConsumer<ItemStack, BlockPos> dropConsumer, final Operation<BlockState> original) {
         if (explosion.getBlockInteraction() == Explosion.BlockInteraction.TRIGGER_BLOCK) {
-            instance.onExplosionHit(serverLevel, blockPos, explosion, biConsumer);
+            original.call(block, level, pos, explosion, dropConsumer);
             return;
         }
-        // this.level.getBlockState($$2).onExplosionHit(this.level, $$2, this, ($$1x, $$2x) -> addOrAppendStack($$1, $$1x, $$2x));
 
         // TODO addOrAppendStack? ItemStack pre merging
         final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
-        ((TrackedWorldBridge) serverLevel).bridge$startBlockChange(blockPos, Blocks.AIR.defaultBlockState(), 3)
+        ((TrackedWorldBridge) level).bridge$startBlockChange(pos, Blocks.AIR.defaultBlockState(), 3)
             .ifPresent(builder -> {
                 final WorldPipeline build = builder
                     .addEffect(AddBlockLootDropsEffect.getInstance())
@@ -83,12 +80,10 @@ public abstract class ServerExplosionMixin_Tracker {
                     .addEffect(SpawnDestructBlocksEffect.getInstance())
                     .addEffect(WorldBlockChangeCompleteEffect.getInstance())
                     .build();
-                build.processEffects(context, instance, Blocks.AIR.defaultBlockState(), blockPos,
+                build.processEffects(context, block, Blocks.AIR.defaultBlockState(), pos,
                     null,
                     BlockChangeFlagManager.fromNativeInt(3),
                     Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT);
             });
     }
-
-
 }

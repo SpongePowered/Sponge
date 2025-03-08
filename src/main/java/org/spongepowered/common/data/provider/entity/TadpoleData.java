@@ -22,14 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.item;
+package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.item.ItemStack;
-import org.spongepowered.api.data.DataManipulator.Mutable;
+import net.minecraft.world.entity.animal.frog.Tadpole;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.accessor.world.entity.animal.frog.TadpoleAccessor;
+import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.util.SpongeTicks;
 
-import java.util.List;
+public class TadpoleData {
 
-public interface ItemBridge {
-
-    void bridge$gatherManipulators(ItemStack itemStack, List<Mutable> manipulators);
+    public static void register(final DataProviderRegistrator registrator) {
+        // @formatter:off
+        registrator
+            .asMutable(TadpoleAccessor.class)
+            .create(Keys.BABY_TICKS)
+            .get(h -> h.accessor$getAge() < 0 ? new SpongeTicks(Tadpole.ticksToBeFrog-h.accessor$getAge()) : null)
+            .setAnd((h, v) -> {
+                final int ticks = SpongeTicks.toSaturatedIntOrInfinite(v);
+                if (v.isInfinite() || ticks < 0) {
+                    return false;
+                }
+                h.accessor$setAge(-ticks);
+                return true;
+            })
+        ;
+        // @formatter:on
+    }
 }

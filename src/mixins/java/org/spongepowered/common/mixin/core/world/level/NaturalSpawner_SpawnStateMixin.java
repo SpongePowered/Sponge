@@ -45,32 +45,18 @@ public abstract class NaturalSpawner_SpawnStateMixin implements NaturalSpawner_S
     // @formatter:on
 
     @Override
-    public boolean bridge$canSpawnForCategoryInWorld(final MobCategory classification, final ServerLevel world) {
-        final SpawnerCategory.SpawnLimitsSubCategory spawnLimits = SpongeGameConfigs.getForWorld(world).get().spawner.spawnLimits;
-        final int maxInstancesPerChunk;
-        switch (classification) {
-            case MONSTER:
-                maxInstancesPerChunk = spawnLimits.monster;
-                break;
-            case CREATURE:
-                maxInstancesPerChunk = spawnLimits.creature;
-                break;
-            case AMBIENT:
-                maxInstancesPerChunk = spawnLimits.ambient;
-                break;
-            case UNDERGROUND_WATER_CREATURE:
-                maxInstancesPerChunk = spawnLimits.undergroundAquaticCreature;
-                break;
-            case WATER_CREATURE:
-                maxInstancesPerChunk = spawnLimits.aquaticCreature;
-                break;
-            case WATER_AMBIENT:
-                maxInstancesPerChunk = spawnLimits.aquaticAmbient;
-                break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + classification);
-        }
+    public boolean bridge$canSpawnForCategoryInWorld(final MobCategory category, final ServerLevel level) {
+        final SpawnerCategory.SpawnLimitsSubCategory spawnLimits = SpongeGameConfigs.getForWorld(level).get().spawner.spawnLimits;
+        final int maxInstancesPerChunk = switch (category) {
+            case MONSTER -> spawnLimits.monster;
+            case CREATURE -> spawnLimits.creature;
+            case AMBIENT -> spawnLimits.ambient;
+            case UNDERGROUND_WATER_CREATURE -> spawnLimits.undergroundAquaticCreature;
+            case WATER_CREATURE -> spawnLimits.aquaticCreature;
+            case WATER_AMBIENT -> spawnLimits.aquaticAmbient;
+            default -> throw new IllegalStateException("Unexpected value: " + category);
+        };
         final int i = maxInstancesPerChunk * this.spawnableChunkCount / NaturalSpawnerAccessor.accessor$MAGIC_NUMBER();
-        return this.mobCategoryCounts.getInt(classification) < i;
+        return this.mobCategoryCounts.getInt(category) < i;
     }
 }

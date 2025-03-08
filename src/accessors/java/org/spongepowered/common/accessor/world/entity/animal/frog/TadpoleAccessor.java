@@ -22,13 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.level;
+package org.spongepowered.common.accessor.world.entity.animal.frog;
 
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.animal.frog.Tadpole;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public interface NaturalSpawner_SpawnStateBridge {
+@Mixin(Tadpole.class)
+public interface TadpoleAccessor {
 
-    boolean bridge$canSpawnForCategoryInWorld(MobCategory category, ServerLevel level);
+    @Accessor("age") int accessor$getAge();
+
+    @Accessor("age") void accessor$setAge(int age);
 
 }

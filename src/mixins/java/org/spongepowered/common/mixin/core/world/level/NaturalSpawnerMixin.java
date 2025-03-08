@@ -24,14 +24,15 @@
  */
 package org.spongepowered.common.mixin.core.world.level;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.NaturalSpawner;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.accessor.world.level.NaturalSpawner_SpawnStateAccessor;
 import org.spongepowered.common.bridge.world.level.NaturalSpawner_SpawnStateBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.config.inheritable.SpawnerCategory;
@@ -39,42 +40,31 @@ import org.spongepowered.common.config.inheritable.SpawnerCategory;
 @Mixin(NaturalSpawner.class)
 public abstract class NaturalSpawnerMixin {
 
-    @Redirect(method = "spawnForChunk", at = @At(value = "INVOKE",
-        target = "Lnet/minecraft/world/level/NaturalSpawner$SpawnState;canSpawnForCategoryLocal(Lnet/minecraft/world/entity/MobCategory;Lnet/minecraft/world/level/ChunkPos;)Z"))
-    private static boolean impl$canSpawnForCategoryLocal(final NaturalSpawner.SpawnState instance, final MobCategory $$0, final ChunkPos $$1, final ServerLevel level) {
-        return NaturalSpawnerMixin.impl$canSpawnInLevel(instance, $$0, level, $$1);
-    }
-
-    private static boolean impl$canSpawnInLevel(final NaturalSpawner.SpawnState spawnState, final MobCategory classification, final ServerLevel level, final ChunkPos chunkPos) {
-        final int tick = NaturalSpawnerMixin.impl$getSpawningTickRate(classification, level);
+    @WrapOperation(method = "spawnForChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/NaturalSpawner$SpawnState;canSpawnForCategoryLocal(Lnet/minecraft/world/entity/MobCategory;Lnet/minecraft/world/level/ChunkPos;)Z"))
+    private static boolean impl$spawnTickRate(final NaturalSpawner.SpawnState state, final MobCategory category, final ChunkPos pos,
+                                              final Operation<Boolean> original, @Local(argsOnly = true) final ServerLevel level) {
+        final int tickRate = NaturalSpawnerMixin.impl$getSpawningTickRate(category, level);
         // Unknown category/use default
-        if (tick == -1) {
-            return ((NaturalSpawner_SpawnStateAccessor) spawnState).invoker$canSpawnForCategoryLocal(classification, chunkPos);
+        if (tickRate == -1) {
+            return original.call(state, category, pos);
         }
         // Turn off spawns
-        if (tick == 0) {
+        if (tickRate == 0) {
             return false;
         }
-        return level.getGameTime() % tick  == 0L && ((NaturalSpawner_SpawnStateBridge) spawnState).bridge$canSpawnForCategoryInWorld(classification, level);
+        return level.getGameTime() % tickRate == 0L && ((NaturalSpawner_SpawnStateBridge) state).bridge$canSpawnForCategoryInWorld(category, level);
     }
 
-    private static int impl$getSpawningTickRate(final MobCategory classification, final ServerLevel level) {
+    private static int impl$getSpawningTickRate(final MobCategory category, final ServerLevel level) {
         final SpawnerCategory.TickRatesSubCategory tickRates = SpongeGameConfigs.getForWorld(level).get().spawner.tickRates;
-        switch (classification) {
-            case MONSTER:
-                return tickRates.monster;
-            case CREATURE:
-                return tickRates.creature;
-            case AMBIENT:
-                return tickRates.ambient;
-            case UNDERGROUND_WATER_CREATURE:
-                return tickRates.undergroundAquaticCreature;
-            case WATER_CREATURE:
-                return tickRates.aquaticCreature;
-            case WATER_AMBIENT:
-                return tickRates.aquaticAmbient;
-            default:
-                return -1;
-        }
+        return switch (category) {
+            case MONSTER -> tickRates.monster;
+            case CREATURE -> tickRates.creature;
+            case AMBIENT -> tickRates.ambient;
+            case UNDERGROUND_WATER_CREATURE -> tickRates.undergroundAquaticCreature;
+            case WATER_CREATURE -> tickRates.aquaticCreature;
+            case WATER_AMBIENT -> tickRates.aquaticAmbient;
+            default -> -1;
+        };
     }
 }

@@ -22,13 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.level;
+package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.animal.Salmon;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.SalmonSize;
+import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
-public interface NaturalSpawner_SpawnStateBridge {
+public final class SalmonData {
 
-    boolean bridge$canSpawnForCategoryInWorld(MobCategory category, ServerLevel level);
+    private SalmonData() {}
 
+    // @formatter:off
+    public static void register(final DataProviderRegistrator registrator) {
+        registrator
+            .asMutable(Salmon.class)
+            .create(Keys.SALMON_SIZE)
+                .get(h -> (SalmonSize) (Object) h.getVariant())
+                .set((h, v) -> h.setVariant((Salmon.Variant) (Object) v))
+            ;
+    }
+    // @formatter:on
 }
