@@ -102,7 +102,7 @@ import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.server.players.PlayerListBridge;
-import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
+import org.spongepowered.common.bridge.world.level.storage.ServerLevelDataBridge;
 import org.spongepowered.common.entity.player.LoginPermissions;
 import org.spongepowered.common.entity.player.SpongeUserView;
 import org.spongepowered.common.event.ShouldFire;
@@ -381,8 +381,8 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     }
 
     @Redirect(method = "placeNewPlayer", at = @At(value = "FIELD", target = "Lnet/minecraft/server/players/PlayerList;viewDistance:I"))
-    private int impl$usePerWorldViewDistance(final PlayerList instance, final Connection $$0, final net.minecraft.server.level.ServerPlayer $$1, final CommonListenerCookie $$2) {
-        return ((PrimaryLevelDataBridge) $$1.serverLevel().getLevelData()).bridge$viewDistance().orElse( instance.getViewDistance());
+    private int impl$usePerWorldViewDistance(final PlayerList self, final Connection co, final net.minecraft.server.level.ServerPlayer player, final CommonListenerCookie cookie) {
+        return ((ServerLevelDataBridge) player.serverLevel().getLevelData()).bridge$viewDistance().orElse(self.getViewDistance());
     }
 
     @Redirect(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()Lnet/minecraft/server/bossevents/CustomBossEvents;"))

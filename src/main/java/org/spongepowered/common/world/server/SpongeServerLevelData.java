@@ -22,18 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.level;
+package org.spongepowered.common.world.server;
 
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
+import org.spongepowered.common.config.inheritable.WorldConfig;
 
-public interface PlatformServerLevelBridge {
-    default void bridge$removeEntity(final Entity entity, final Entity.RemovalReason removalReason, final boolean keepData) {
-        if (entity instanceof ServerPlayer) {
-            ((ServerLevel) this).removePlayerImmediately((ServerPlayer) entity, removalReason);
-        } else {
-            entity.remove(removalReason);
-        }
+import java.util.UUID;
+
+public final class SpongeServerLevelData {
+    private @Nullable ResourceKey key;
+    private UUID uniqueId = UUID.randomUUID();
+    private @Nullable InheritableConfigHandle<WorldConfig> configAdapter;
+
+    public @Nullable ResourceKey key() {
+        return this.key;
+    }
+
+    public void setKey(final ResourceKey key) {
+        this.key = key;
+    }
+
+    public UUID uniqueId() {
+        return this.uniqueId;
+    }
+
+    public void setUniqueId(final UUID uniqueId) {
+        this.uniqueId = uniqueId;
+    }
+
+    public @Nullable InheritableConfigHandle<WorldConfig> configAdapter() {
+        return this.configAdapter;
+    }
+
+    public void setConfigAdapter(final InheritableConfigHandle<WorldConfig> adapter) {
+        this.configAdapter = adapter;
     }
 }

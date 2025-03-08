@@ -34,7 +34,7 @@ public interface ServerLevelBridge {
 
     LevelStorageSource.LevelStorageAccess bridge$getLevelSave();
 
-    ChunkProgressListener bridge$getChunkStatusListener();
+    ChunkProgressListener bridge$getChunkProgressListener();
 
     boolean bridge$isLoaded();
 

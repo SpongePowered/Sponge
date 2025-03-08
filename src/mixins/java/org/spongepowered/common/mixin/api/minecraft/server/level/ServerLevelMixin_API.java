@@ -80,7 +80,7 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
 import org.spongepowered.common.bridge.world.level.chunk.storage.RegionFileBridge;
-import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
+import org.spongepowered.common.bridge.world.level.storage.ServerLevelDataBridge;
 import org.spongepowered.common.data.holder.SpongeServerLocationBaseDataHolder;
 import org.spongepowered.common.mixin.api.minecraft.world.level.LevelMixin_API;
 import org.spongepowered.common.util.VecHelper;
@@ -213,7 +213,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     }
 
     private boolean impl$save(final boolean flush) {
-        final SerializationBehavior behavior = ((PrimaryLevelDataBridge) this.serverLevelData).bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
+        final SerializationBehavior behavior = ((ServerLevelDataBridge) this.serverLevelData).bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
         ((ServerLevelBridge) this).bridge$setManualSave(true);
         this.shadow$save(null, flush, false);
         return !behavior.equals(SerializationBehavior.NONE);

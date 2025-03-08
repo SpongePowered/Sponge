@@ -58,7 +58,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.math.vector.Vector3d;
 
 @Mixin(EnderEyeItem.class)
-public abstract class EnderEyeItemMixin extends ItemMixin {
+public abstract class EnderEyeItemMixin {
 
     /**
      * @author gabizou - June 10th, 2019 - 1.12.2

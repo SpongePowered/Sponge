@@ -29,8 +29,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.storage.CommandStorage;
-import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.WorldData;
@@ -51,12 +49,9 @@ public interface MinecraftServerAccessor {
         throw new UntransformedAccessorError();
     }
 
-    @Invoker("setInitialSpawn") static void invoker$setInitialSpawn(final ServerLevel serverWorld, final ServerLevelData levelData, final boolean generateBonusChest,
-        final boolean nonDebugSpawn) {
+    @Invoker("setInitialSpawn") static void invoker$setInitialSpawn(final ServerLevel serverWorld, final ServerLevelData levelData, final boolean generateBonusChest, final boolean debugWorld) {
         throw new UntransformedInvokerError();
     }
-
-    @Accessor("commandStorage") void accessor$commandStorage(final CommandStorage commandStorage);
 
     @Accessor("storageSource") LevelStorageSource.LevelStorageAccess accessor$storageSource();
 
@@ -73,8 +68,6 @@ public interface MinecraftServerAccessor {
     @Invoker("setupDebugLevel") void invoker$setupDebugLevel(final WorldData serverConfiguration);
 
     @Invoker("forceDifficulty") void invoker$forceDifficulty();
-
-    @Invoker("readScoreboard") void accessor$readScoreboard(final DimensionDataStorage manager);
 
     @Invoker("waitUntilNextTick") void accessor$waitUntilNextTick();
 }

@@ -62,7 +62,7 @@ public abstract class LevelStorageSource_LevelStorageAccessMixin {
             )
     )
     private void impl$saveSpongeLevelData(final LevelStorageSource.LevelStorageAccess instance, final CompoundTag root, final Operation<Void> original,
-            final RegistryAccess $$0, final WorldData levelData, final @Nullable CompoundTag $$2) {
+            final RegistryAccess registry, final WorldData levelData, final @Nullable CompoundTag tag) {
         root.put(Constants.Sponge.Data.V2.SPONGE_DATA, ((PrimaryLevelDataBridge) levelData).bridge$writeSpongeLevelData());
         if (DataUtil.syncDataToTag(levelData)) {
             root.merge(((DataCompoundHolder) levelData).data$getCompound());

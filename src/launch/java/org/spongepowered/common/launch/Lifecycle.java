@@ -52,7 +52,7 @@ public interface Lifecycle {
     void establishEarlyGlobalRegistries();
     void finalizeEarlyGlobalRegistries();
 
-    void establishGlobalRegistries(RegistryAccess.Frozen registryAccess, final RegistryLayer $$0);
+    void establishGlobalRegistries(RegistryAccess.Frozen registryAccess, final RegistryLayer layer);
 
     void establishDataProviders();
 

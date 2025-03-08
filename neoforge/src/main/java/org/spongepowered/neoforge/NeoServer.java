@@ -25,10 +25,6 @@
 package org.spongepowered.neoforge;
 
 import org.spongepowered.common.SpongeServer;
-import org.spongepowered.neoforge.world.server.NeoWorldManager;
 
 public interface NeoServer extends NeoEngine, SpongeServer {
-
-    @Override
-    NeoWorldManager worldManager();
 }

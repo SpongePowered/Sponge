@@ -29,6 +29,6 @@ import net.minecraft.world.entity.MobCategory;
 
 public interface NaturalSpawner_SpawnStateBridge {
 
-    boolean bridge$canSpawnForCategoryInWorld(MobCategory p_234991_1_, ServerLevel world);
+    boolean bridge$canSpawnForCategoryInWorld(MobCategory category, ServerLevel level);
 
 }

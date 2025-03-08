@@ -31,7 +31,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
+import org.spongepowered.common.bridge.world.level.storage.ServerLevelDataBridge;
 import org.spongepowered.common.config.inheritable.BaseConfig;
 import org.spongepowered.common.config.inheritable.GlobalConfig;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
@@ -43,6 +43,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -71,8 +72,8 @@ public final class SpongeGameConfigs {
         return SpongeGameConfigs.getForWorld((net.minecraft.world.level.Level) spongeWorld);
     }
 
-    public static InheritableConfigHandle<WorldConfig> getForWorld(final net.minecraft.world.level.Level mcWorld) {
-        return ((PrimaryLevelDataBridge) mcWorld.getLevelData()).bridge$configAdapter();
+    public static InheritableConfigHandle<WorldConfig> getForWorld(final net.minecraft.world.level.Level level) {
+        return Objects.requireNonNull(((ServerLevelDataBridge) level.getLevelData()).bridge$spongeData().configAdapter());
     }
 
     public static boolean doesWorldConfigExist(final ResourceKey world) {

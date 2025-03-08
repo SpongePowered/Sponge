@@ -27,7 +27,6 @@ package org.spongepowered.common.entity;
 import net.minecraft.core.Registry;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import org.slf4j.LoggerFactory;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.util.Constants;
 
@@ -41,7 +40,6 @@ public class SpongeEntityTypes {
         .build("sponge:human");
 
     public static void register(Registry<EntityType<?>> registry) {
-        LoggerFactory.getLogger("SpongeEntityTypes").info("Registering SpongeEntityTypes");
         Registry.register(registry, HumanEntity.KEY, SpongeEntityTypes.HUMAN);
     }
 }

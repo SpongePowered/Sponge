@@ -22,14 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.world.server;
+package org.spongepowered.common.mixin.core.world.level.storage;
 
-import net.minecraft.server.MinecraftServer;
-import org.spongepowered.common.world.server.SpongeWorldManager;
+import net.minecraft.world.level.storage.DerivedLevelData;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.world.level.storage.ServerLevelDataBridge;
+import org.spongepowered.common.world.server.SpongeServerLevelData;
 
-public final class ForgeWorldManager extends SpongeWorldManager {
+@Mixin(DerivedLevelData.class)
+public class DerivedLevelDataMixin implements ServerLevelDataBridge {
 
-    public ForgeWorldManager(final MinecraftServer server) {
-        super(server);
+    private final SpongeServerLevelData impl$spongeData = new SpongeServerLevelData();
+
+    @Override
+    public SpongeServerLevelData bridge$spongeData() {
+        return this.impl$spongeData;
     }
 }

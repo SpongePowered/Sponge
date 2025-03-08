@@ -151,7 +151,6 @@
     "world.level.GameRulesAccessor",
     "world.level.LevelAccessor",
     "world.level.LevelSettingsAccessor",
-    "world.level.NaturalSpawner_SpawnStateAccessor",
     "world.level.NaturalSpawnerAccessor",
     "world.level.biome.Biome_ClimateSettingsAccessor",
     "world.level.biome.BiomeAccessor",

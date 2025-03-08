@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.server.level;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
@@ -34,7 +37,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.entity.living.human.HumanEntity;
@@ -44,7 +46,7 @@ import java.util.stream.Stream;
 @Mixin(targets = "net/minecraft/server/level/ChunkMap$TrackedEntity")
 public abstract class ChunkMap_TrackedEntityMixin {
 
-    @Shadow @Final private Entity entity;
+    @Shadow @Final Entity entity;
 
     /**
      * @author gabizou
@@ -55,13 +57,11 @@ public abstract class ChunkMap_TrackedEntityMixin {
      *  2) We already have the players being iterated
      *  3) This achieves the same functionality without adding new accessors etc.
      */
-    @Redirect(method = "broadcast(Lnet/minecraft/network/protocol/Packet;)V", at = @At(value = "INVOKE",
+    @Inject(method = "broadcast(Lnet/minecraft/network/protocol/Packet;)V", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
             target = "Lnet/minecraft/server/network/ServerPlayerConnection;send(Lnet/minecraft/network/protocol/Packet;)V"))
-    private void impl$sendQueuedHumanPackets(final ServerPlayerConnection serverPlayNetHandler, final Packet<?> packetIn) {
-        serverPlayNetHandler.send(packetIn);
-
-        if (this.entity instanceof HumanEntity && serverPlayNetHandler instanceof ServerGamePacketListenerImpl) {
-            final ServerPlayer player = ((ServerGamePacketListenerImpl) serverPlayNetHandler).player;
+    private void impl$sendQueuedHumanPackets(final CallbackInfo ci, @Local final ServerPlayerConnection connection) {
+        if (this.entity instanceof HumanEntity && connection instanceof ServerGamePacketListenerImpl) {
+            final ServerPlayer player = ((ServerGamePacketListenerImpl) connection).player;
             final Stream<Packet<?>> packets = ((HumanEntity) this.entity).popQueuedPackets(player);
             packets.forEach(player.connection::send);
         }
@@ -75,7 +75,7 @@ public abstract class ChunkMap_TrackedEntityMixin {
      * "untracked". This safeguards the players being updated erroneously.
      */
     @Inject(method = "broadcast(Lnet/minecraft/network/protocol/Packet;)V", at = @At("HEAD"), cancellable = true)
-    private void impl$ignoreVanished(final Packet<?> p_219391_1_, final CallbackInfo ci) {
+    private void impl$ignoreVanished(final Packet<?> packet, final CallbackInfo ci) {
         if (this.entity instanceof VanishableBridge) {
             if (((VanishableBridge) this.entity).bridge$vanishState().invisible()) {
                 ci.cancel();
@@ -83,17 +83,18 @@ public abstract class ChunkMap_TrackedEntityMixin {
         }
     }
 
-    @Redirect(method = "updatePlayer(Lnet/minecraft/server/level/ServerPlayer;)V",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/world/entity/Entity;broadcastToPlayer(Lnet/minecraft/server/level/ServerPlayer;)Z"))
-    private boolean impl$isSpectatedOrVanished(final Entity entity, final ServerPlayer player) {
+    @WrapOperation(
+        method = "updatePlayer(Lnet/minecraft/server/level/ServerPlayer;)V",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;broadcastToPlayer(Lnet/minecraft/server/level/ServerPlayer;)Z"),
+        require = 0 // mod compat
+    )
+    private boolean impl$isSpectatedOrVanished(final Entity entity, final ServerPlayer player, Operation<Boolean> original) {
         if (entity instanceof VanishableBridge) {
             if (((VanishableBridge) entity).bridge$vanishState().invisible()) {
                 return false;
             }
         }
-        return entity.broadcastToPlayer(player);
+        return original.call(entity, player);
     }
 
 }

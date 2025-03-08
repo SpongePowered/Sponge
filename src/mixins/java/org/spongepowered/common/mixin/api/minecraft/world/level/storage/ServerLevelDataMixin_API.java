@@ -26,15 +26,18 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.storage;
 
 import net.minecraft.world.level.storage.ServerLevelData;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.trader.WanderingTrader;
 import org.spongepowered.api.util.MinecraftDayTime;
 import org.spongepowered.api.util.Ticks;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.WeatherType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.world.level.storage.ServerLevelDataBridge;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeTicks;
 
@@ -55,6 +58,26 @@ public interface ServerLevelDataMixin_API extends ServerWorldProperties {
     @Shadow @Nullable UUID shadow$getWanderingTraderId();
     @Shadow void shadow$setDayTime(long p_76068_1_);
     // @formatter:on
+
+    @Override
+    default ResourceKey key() {
+        return Objects.requireNonNull(((ServerLevelDataBridge) this).bridge$spongeData().key());
+    }
+
+    @Override
+    default Optional<ServerWorld> world() {
+        return Optional.ofNullable((ServerWorld) ((ServerLevelDataBridge) this).bridge$level());
+    }
+
+    @Override
+    default String name() {
+        return this.key().asString();
+    }
+
+    @Override
+    default UUID uniqueId() {
+        return ((ServerLevelDataBridge) this).bridge$spongeData().uniqueId();
+    }
 
     @Override
     default void setDayTime(final MinecraftDayTime dayTime) {

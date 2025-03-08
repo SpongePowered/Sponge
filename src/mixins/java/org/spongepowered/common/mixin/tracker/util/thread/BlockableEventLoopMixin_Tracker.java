@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.tracker.util.thread;
 
 import net.minecraft.util.thread.BlockableEventLoop;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -36,8 +35,6 @@ import org.spongepowered.common.hooks.PlatformHooks;
 
 @Mixin(BlockableEventLoop.class)
 public abstract class BlockableEventLoopMixin_Tracker<R extends Runnable> {
-
-    @Shadow protected void shadow$doRunTask(final R taskIn) {} // Shadow
 
     @Redirect(method = "execute",
             at = @At(
