@@ -113,7 +113,8 @@ public interface SpongeDataHolder extends DataHolder {
     default Set<Key<?>> getKeys() {
         return this.impl$delegateDataHolder().stream()
                 .flatMap(dh -> this.impl$getAllProviders(dh).stream()
-                        .filter(provider -> provider.get(dh).isPresent()).map(DataProvider::key))
+                        .map(DataProvider::key))
+                        .filter(this::supports)
                 .collect(ImmutableSet.toImmutableSet());
     }
 
