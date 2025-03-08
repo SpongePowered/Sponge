@@ -73,8 +73,8 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     private final int damageValue;
     private final ImmutableList<DataManipulator.Immutable> manipulators;
     private final transient ItemStack privateStack; // only for internal use since the processors have a huge say
-    private final ImmutableSet<Key<?>> keys;
-    private final ImmutableSet<org.spongepowered.api.data.value.Value.Immutable<?>> values;
+    private final Set<Key<?>> keys;
+    private final Set<org.spongepowered.api.data.value.Value.Immutable<?>> values;
     private final DataComponentPatch components;
     private @Nullable UUID creatorUniqueId;
 
@@ -95,17 +95,13 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         this.itemType = itemStack.type();
         this.quantity = itemStack.quantity();
         final ImmutableList.Builder<DataManipulator.Immutable> builder = ImmutableList.builder();
-        final ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
-        final ImmutableSet.Builder<org.spongepowered.api.data.value.Value.Immutable<?>> valueBuilder = ImmutableSet.builder();
         final DataManipulator.Mutable customData = ((SpongeDataHolderBridge) itemStack).bridge$getManipulator();
         builder.add(customData.asImmutable());
-        keyBuilder.addAll(customData.getKeys());
-        valueBuilder.addAll(customData.getValues());
         this.damageValue = ItemStackUtil.toNative(itemStack).getDamageValue();
         this.manipulators = builder.build();
         this.privateStack = itemStack.copy();
-        this.keys = keyBuilder.build();
-        this.values = valueBuilder.build();
+        this.keys = itemStack.getKeys();
+        this.values = itemStack.getValues();
         this.components = ItemStackUtil.toNative(this.privateStack).getComponentsPatch();
     }
 
