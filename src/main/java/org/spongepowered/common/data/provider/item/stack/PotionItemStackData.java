@@ -30,7 +30,6 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionContents;
 import org.spongepowered.api.data.Keys;
@@ -58,7 +57,6 @@ public final class PotionItemStackData {
                         .get(h -> Color.ofRgb(h.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).getColor()))
                         .set((h, v) -> h.update(DataComponents.POTION_CONTENTS, PotionContents.EMPTY, contents -> new PotionContents(contents.potion(), Optional.of(v.rgb()), contents.customEffects())))
                         .delete(h -> h.update(DataComponents.POTION_CONTENTS, PotionContents.EMPTY, contents -> new PotionContents(contents.potion(), Optional.empty(), contents.customEffects())))
-                        .supports(h -> h.getItem() == Items.POTION || h.getItem() == Items.SPLASH_POTION || h.getItem() == Items.LINGERING_POTION || h.getItem() == Items.TIPPED_ARROW)
                     .create(Keys.CUSTOM_POTION_EFFECTS)
                         .get(h -> {
                             final List<MobEffectInstance> effects = h.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).customEffects();
@@ -69,7 +67,6 @@ public final class PotionItemStackData {
                             h.update(DataComponents.POTION_CONTENTS, PotionContents.EMPTY, contents -> new PotionContents(contents.potion(), contents.customColor(), mcList));
                         })
                         .delete(h -> h.update(DataComponents.POTION_CONTENTS, PotionContents.EMPTY, contents -> new PotionContents(contents.potion(), contents.customColor(), Collections.emptyList())))
-                        .supports(h -> h.getItem() == Items.POTION || h.getItem() == Items.SPLASH_POTION || h.getItem() == Items.LINGERING_POTION || h.getItem() == Items.TIPPED_ARROW)
                     .create(Keys.POTION_TYPE)
                         .get(h -> (PotionType) h.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).potion().map(Holder::value).orElse(null)) // TODO empty POTION gone?
                         .set((h, v) -> {
@@ -77,14 +74,11 @@ public final class PotionItemStackData {
                             h.update(DataComponents.POTION_CONTENTS, PotionContents.EMPTY, contents -> new PotionContents(potion, contents.customColor(), contents.customEffects()));
                         })
                         .delete(h -> h.update(DataComponents.POTION_CONTENTS, PotionContents.EMPTY, contents -> new PotionContents(Optional.empty(), contents.customColor(), contents.customEffects())))
-                        .supports(h -> h.getItem() == Items.POTION || h.getItem() == Items.SPLASH_POTION ||
-                                h.getItem() == Items.LINGERING_POTION || h.getItem() == Items.TIPPED_ARROW)
                     .create(Keys.POTION_EFFECTS)
                         .get(h -> {
                             final Iterable<MobEffectInstance> effects = h.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).getAllEffects();
                             return ImmutableList.copyOf((List<PotionEffect>) (Object) effects);
                         })
-                        .supports(h -> h.getItem() == Items.POTION || h.getItem() == Items.SPLASH_POTION || h.getItem() == Items.LINGERING_POTION || h.getItem() == Items.TIPPED_ARROW)
         ;
     }
     // @formatter:on

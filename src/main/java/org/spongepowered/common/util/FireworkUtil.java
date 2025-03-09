@@ -58,14 +58,11 @@ public final class FireworkUtil {
 
         if (item.getItem() == Items.FIREWORK_STAR) {
             item.set(DataComponents.FIREWORK_EXPLOSION, (FireworkExplosion) (Object) effects.getFirst());
-            return true;
-        } else if (item.getItem() == Items.FIREWORK_ROCKET) {
+        } else {
             final List<FireworkExplosion> mcEffects = effects.stream().map(FireworkExplosion.class::cast).toList();
             item.update(DataComponents.FIREWORKS, new Fireworks(1, Collections.emptyList()), p -> new Fireworks(p.flightDuration(), mcEffects));
-            return true;
         }
-
-        return false;
+        return true;
     }
 
     public static Optional<List<FireworkEffect>> getFireworkEffects(final FireworkRocketEntity firework) {
@@ -77,20 +74,18 @@ public final class FireworkUtil {
             return Optional.empty();
         }
 
-        if (item.getItem() == Items.FIREWORK_ROCKET) {
-            final Fireworks fireworks = item.get(DataComponents.FIREWORKS);
-            if (fireworks == null || fireworks.explosions().isEmpty()) {
-                return Optional.empty();
+        if (item.getItem() == Items.FIREWORK_STAR) {
+            final FireworkExplosion fireworkExplosion = item.get(DataComponents.FIREWORK_EXPLOSION);
+            if (fireworkExplosion != null) {
+                return Optional.of(List.of((FireworkEffect) (Object) fireworkExplosion));
             }
-            return Optional.of(fireworks.explosions().stream().map(FireworkEffect.class::cast).toList());
         }
 
-        Preconditions.checkArgument(item.getItem() == Items.FIREWORK_STAR, "Item is not a firework star!");
-        final FireworkExplosion fireworkExplosion = item.get(DataComponents.FIREWORK_EXPLOSION);
-        if (fireworkExplosion == null) {
+        final Fireworks fireworks = item.get(DataComponents.FIREWORKS);
+        if (fireworks == null || fireworks.explosions().isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(List.of((FireworkEffect) (Object) fireworkExplosion));
+        return Optional.of(fireworks.explosions().stream().map(FireworkEffect.class::cast).toList());
     }
 
     public static boolean removeFireworkEffects(final FireworkRocketEntity firework) {
@@ -106,14 +101,12 @@ public final class FireworkUtil {
             item.remove(DataComponents.FIREWORK_EXPLOSION);
             return true;
         }
-        if (item.getItem() == Items.FIREWORK_ROCKET) {
-            if (item.has(DataComponents.FIREWORKS)) {
-                // keep flight duration
-                item.update(DataComponents.FIREWORKS, null, p -> new Fireworks(p.flightDuration(), Collections.emptyList()));
-            }
-            return true;
+
+        if (item.has(DataComponents.FIREWORKS)) {
+            // keep flight duration
+            item.update(DataComponents.FIREWORKS, null, p -> new Fireworks(p.flightDuration(), Collections.emptyList()));
         }
-        return false;
+        return true;
     }
 
     public static boolean setFlightModifier(final FireworkRocketEntity firework, final int modifier) {
@@ -127,11 +120,8 @@ public final class FireworkUtil {
             return false;
         }
 
-        if (item.getItem() == Items.FIREWORK_ROCKET) {
-            item.update(DataComponents.FIREWORKS, new Fireworks(1, Collections.emptyList()), p -> new Fireworks(modifier, p.explosions()));
-            return true;
-        }
-        return false;
+        item.update(DataComponents.FIREWORKS, new Fireworks(1, Collections.emptyList()), p -> new Fireworks(modifier, p.explosions()));
+        return true;
     }
 
     public static OptionalInt getFlightModifier(final FireworkRocketEntity firework) {

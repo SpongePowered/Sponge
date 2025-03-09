@@ -32,7 +32,6 @@ import net.minecraft.util.Unit;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.ChargedProjectiles;
 import net.minecraft.world.item.component.CustomModelData;
@@ -143,15 +142,13 @@ public final class ItemStackData {
                             if (h.has(DataComponents.CUSTOM_NAME)) {
                                 return SpongeAdventure.asAdventure(h.getHoverName());
                             }
-                            if (h.getItem() == Items.WRITTEN_BOOK) {
-                                // When no custom name is set on a written book fallback to its title
-                                // The custom name has a higher priority than the title so no setter is needed.
-                                var bookContent = h.get(DataComponents.WRITTEN_BOOK_CONTENT);
-                                if (bookContent != null) {
-                                    final String rawTitle = bookContent.title().raw();
-                                    if (!StringUtil.isBlank(rawTitle)) {
-                                        return LegacyComponentSerializer.legacySection().deserialize(rawTitle);
-                                    }
+                            // When no custom name is set on a written book fallback to its title
+                            // The custom name has a higher priority than the title so no setter is needed.
+                            var bookContent = h.get(DataComponents.WRITTEN_BOOK_CONTENT);
+                            if (bookContent != null) {
+                                final String rawTitle = bookContent.title().raw();
+                                if (!StringUtil.isBlank(rawTitle)) {
+                                    return LegacyComponentSerializer.legacySection().deserialize(rawTitle);
                                 }
                             }
                             return null;

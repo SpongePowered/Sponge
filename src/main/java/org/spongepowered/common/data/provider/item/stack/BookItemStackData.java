@@ -29,7 +29,6 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.network.Filterable;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.WritableBookContent;
 import net.minecraft.world.item.component.WrittenBookContent;
 import org.spongepowered.api.data.Keys;
@@ -61,7 +60,6 @@ public final class BookItemStackData {
                             h.set(DataComponents.WRITTEN_BOOK_CONTENT,
                                     new WrittenBookContent(content.title(), author, content.generation(), content.pages(), content.resolved()));
                         })
-                        .supports(h -> h.getItem() == Items.WRITTEN_BOOK)
                     .create(Keys.GENERATION)
                         .get(h -> {
                             final WrittenBookContent content = h.get(DataComponents.WRITTEN_BOOK_CONTENT);
@@ -79,7 +77,6 @@ public final class BookItemStackData {
                                     new WrittenBookContent(content.title(), content.author(), v, content.pages(), content.resolved()));
                             return true;
                         })
-                        .supports(h -> h.getItem() == Items.WRITTEN_BOOK)
                     .create(Keys.PAGES)
                         .get(h -> {
                             final WrittenBookContent content = h.get(DataComponents.WRITTEN_BOOK_CONTENT);
@@ -99,7 +96,6 @@ public final class BookItemStackData {
                             h.set(DataComponents.WRITTEN_BOOK_CONTENT,
                                     new WrittenBookContent(content.title(), content.author(), content.generation(), Collections.emptyList(), content.resolved()));
                         })
-                        .supports(h -> h.getItem() == Items.WRITTEN_BOOK)
                     .create(Keys.PLAIN_PAGES)
                         .get(h -> {
                             final WritableBookContent content = h.get(DataComponents.WRITABLE_BOOK_CONTENT);
@@ -109,8 +105,7 @@ public final class BookItemStackData {
                             return content.pages().stream().map(Filterable::raw).toList();
                         })
                         .set((h, v) -> h.set(DataComponents.WRITABLE_BOOK_CONTENT, new WritableBookContent(v.stream().map(Filterable::passThrough).toList())))
-                        .delete(h -> h.set(DataComponents.WRITABLE_BOOK_CONTENT, new WritableBookContent(Collections.emptyList())))
-                        .supports(h -> h.getItem() == Items.WRITABLE_BOOK);
+                        .delete(h -> h.set(DataComponents.WRITABLE_BOOK_CONTENT, new WritableBookContent(Collections.emptyList())));
     }
     // @formatter:on
 
