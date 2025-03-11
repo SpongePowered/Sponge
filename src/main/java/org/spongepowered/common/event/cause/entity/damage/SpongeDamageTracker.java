@@ -88,13 +88,13 @@ public class SpongeDamageTracker implements DamageStepHistory {
         step.populateChildren();
 
         if (this.postEvent != null) {
-            LOGGER.warn("A new root step {} is being captured after the post event.", step);
+            LOGGER.warn("A new root step {} is being captured after the post event.", step.type());
         }
 
         if (!this.rootSteps.isEmpty()) {
             final SpongeDamageStep previous = this.rootSteps.getLast();
             if (previous.damageAfterChildren().isEmpty()) {
-                LOGGER.warn("A new root step {} is being captured but previous root step {} hasn't finished.", step, previous);
+                LOGGER.warn("A new root step {} is being captured but previous root step {} hasn't finished.", step.type(), previous.type());
                 this.rootSteps.removeLast();
             }
         }
@@ -116,7 +116,7 @@ public class SpongeDamageTracker implements DamageStepHistory {
         final DamageStepType type = typeRef.get();
         final SpongeDamageStep step = this.rootSteps.getLast();
         if (step.type() != type) {
-            LOGGER.warn("Expected a current root step of type {} but got {}.", type, step);
+            LOGGER.warn("Expected a current root step of type {} but got {}.", type, step.type());
             return null;
         }
         return step;

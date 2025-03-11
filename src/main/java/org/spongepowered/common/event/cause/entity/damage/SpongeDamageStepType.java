@@ -34,7 +34,6 @@ public final class SpongeDamageStepType implements DamageStepType {
     public String toString() {
         return RegistryTypes.DAMAGE_STEP_TYPE.get().findValueKey(this)
                 .map(ResourceKey::toString)
-                .map("DamageStepType[%s]"::formatted)
                 .orElseGet(super::toString);
     }
 }

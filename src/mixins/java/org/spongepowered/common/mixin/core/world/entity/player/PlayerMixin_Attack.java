@@ -24,6 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.player;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
@@ -44,7 +48,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
@@ -92,9 +95,8 @@ public abstract class PlayerMixin_Attack extends LivingEntityMixin_Damage implem
         return tracker == null ? damage : (float) tracker.preEvent().baseDamage();
     }
 
-    @Redirect(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getAttackStrengthScale(F)F"))
-    private float attack$captureAttackStrength(final Player self, final float param) {
-        final float value = self.getAttackStrengthScale(param);
+    @ModifyExpressionValue(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getAttackStrengthScale(F)F"))
+    private float attack$captureAttackStrength(final float value) {
         final SpongeAttackTracker tracker = this.attack$tracker();
         if (tracker != null) {
             tracker.setAttackStrength(value);
@@ -104,7 +106,7 @@ public abstract class PlayerMixin_Attack extends LivingEntityMixin_Damage implem
 
     @ModifyVariable(method = "attack", at = @At("LOAD"), ordinal = 0, slice = @Slice(
         from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getAttackStrengthScale(F)F"),
-        to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;resetAttackStrengthTicker()V")
+        to = @At(value = "FIELD", target = "Lnet/minecraft/tags/EntityTypeTags;REDIRECTABLE_PROJECTILE:Lnet/minecraft/tags/TagKey;")
     ))
     private float attack$modifyBeforeBaseCooldown(final float damage) {
         final SpongeAttackTracker tracker = this.attack$tracker();
@@ -113,7 +115,7 @@ public abstract class PlayerMixin_Attack extends LivingEntityMixin_Damage implem
 
     @ModifyVariable(method = "attack", at = @At("STORE"), ordinal = 0, slice = @Slice(
         from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getAttackStrengthScale(F)F"),
-        to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;resetAttackStrengthTicker()V")
+        to = @At(value = "FIELD", target = "Lnet/minecraft/tags/EntityTypeTags;REDIRECTABLE_PROJECTILE:Lnet/minecraft/tags/TagKey;")
     ))
     private float attack$modifyAfterBaseCooldown(final float damage) {
         final SpongeAttackTracker tracker = this.attack$tracker();
@@ -122,7 +124,7 @@ public abstract class PlayerMixin_Attack extends LivingEntityMixin_Damage implem
 
     @ModifyVariable(method = "attack", at = @At("LOAD"), ordinal = 1, slice = @Slice(
         from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getAttackStrengthScale(F)F"),
-        to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;resetAttackStrengthTicker()V")
+        to = @At(value = "FIELD", target = "Lnet/minecraft/tags/EntityTypeTags;REDIRECTABLE_PROJECTILE:Lnet/minecraft/tags/TagKey;")
     ))
     private float attack$modifyBeforeEnchantmentCooldown(final float damage) {
         final SpongeAttackTracker tracker = this.attack$tracker();
@@ -131,7 +133,7 @@ public abstract class PlayerMixin_Attack extends LivingEntityMixin_Damage implem
 
     @ModifyVariable(method = "attack", at = @At("STORE"), ordinal = 1, slice = @Slice(
         from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getAttackStrengthScale(F)F"),
-        to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;resetAttackStrengthTicker()V")
+        to = @At(value = "FIELD", target = "Lnet/minecraft/tags/EntityTypeTags;REDIRECTABLE_PROJECTILE:Lnet/minecraft/tags/TagKey;")
     ))
     private float attack$modifyAfterEnchantmentCooldown(final float damage) {
         final SpongeAttackTracker tracker = this.attack$tracker();
@@ -148,17 +150,17 @@ public abstract class PlayerMixin_Attack extends LivingEntityMixin_Damage implem
         }
     }
 
-    @Redirect(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;getAttackDamageBonus(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;)F"))
-    private float attack$modifyBeforeAndAfterWeaponBonus(final Item item, final Entity target, final float originalDamage, final DamageSource source) {
+    @WrapOperation(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;getAttackDamageBonus(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;)F"))
+    private float attack$modifyBeforeAndAfterWeaponBonus(final Item item, final Entity target, final float originalDamage, final DamageSource source, final Operation<Float> operation) {
         final SpongeAttackTracker tracker = this.attack$tracker();
         if (tracker == null) {
-            return item.getAttackDamageBonus(target, originalDamage, source);
+            return operation.call(item, target, originalDamage, source);
         }
 
         final SpongeDamageStep step = tracker.newStep(DamageStepTypes.WEAPON_BONUS, tracker.weaponSnapshot());
         float damage = (float) step.applyChildrenBefore(originalDamage);
         if (!step.isSkipped()) {
-            damage += item.getAttackDamageBonus(target, damage, source);
+            damage += operation.call(item, target, damage, source);
         }
         return (float) step.applyChildrenAfter(damage) - originalDamage;
     }
@@ -181,12 +183,11 @@ public abstract class PlayerMixin_Attack extends LivingEntityMixin_Damage implem
         return tracker == null ? damage : tracker.endStep(DamageStepTypes.CRITICAL_HIT, damage);
     }
 
-    @SuppressWarnings("deprecation")
-    @Redirect(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;hurtOrSimulate(Lnet/minecraft/world/damagesource/DamageSource;F)Z"), slice = @Slice(
+    @WrapOperation(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;hurtOrSimulate(Lnet/minecraft/world/damagesource/DamageSource;F)Z"), slice = @Slice(
         from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getDeltaMovement()Lnet/minecraft/world/phys/Vec3;"),
         to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getKnockback(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;)F")
     ))
-    private boolean attack$firePostEvent(final Entity target, final DamageSource source, float damage) {
+    private boolean attack$firePostEvent(final Entity target, final DamageSource source, float damage, final Operation<Boolean> operation) {
         final SpongeAttackTracker tracker = this.attack$tracker();
         if (tracker != null) {
             final float knockbackModifier = this.shadow$getKnockback(target, source) + (tracker.isStrongSprint() ? 1.0F : 0.0F);
@@ -195,24 +196,22 @@ public abstract class PlayerMixin_Attack extends LivingEntityMixin_Damage implem
             }
             damage = (float) tracker.postEvent().finalDamage();
         }
-        return target.hurtOrSimulate(source, damage);
+        return operation.call(target, source, damage);
     }
 
-    @Redirect(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getKnockback(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;)F"))
-    private float attack$knockbackModifier(final Player self, final Entity target, final DamageSource source) {
+    @WrapOperation(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getKnockback(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;)F"))
+    private float attack$knockbackModifier(final Player self, final Entity target, final DamageSource source, final Operation<Float> operation) {
         final SpongeAttackTracker tracker = this.attack$tracker();
-        return tracker == null ? this.shadow$getKnockback(target, source) : ((float) tracker.postEvent().knockbackModifier() - (tracker.isStrongSprint() ? 1.0F : 0.0F));
+        return tracker == null ? operation.call(self, target, source) : ((float) tracker.postEvent().knockbackModifier() - (tracker.isStrongSprint() ? 1.0F : 0.0F));
     }
 
-    @Redirect(method = "attack",
+    @WrapWithCondition(method = "attack",
             slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;causeFoodExhaustion(F)V")),
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;playSound(Lnet/minecraft/world/entity/player/Player;DDDLnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FF)V"))
-    private void attack$preventSound(final Level level, final Player player, final double x, final double y, final double z,
+    private boolean attack$preventSound(final Level level, final Player player, final double x, final double y, final double z,
             final SoundEvent sound, final SoundSource source, final float volume, final float pitch) {
         final SpongeAttackTracker tracker = this.attack$tracker();
-        if (tracker == null || !tracker.postEvent().isCancelled()) {
-            level.playSound(player, x, y, z, sound, source, volume, pitch);
-        }
+        return tracker == null || !tracker.postEvent().isCancelled();
     }
 
     @Inject(method = "attack", at = @At("RETURN"), slice = @Slice(
@@ -222,11 +221,11 @@ public abstract class PlayerMixin_Attack extends LivingEntityMixin_Damage implem
         this.attack$trackers.removeLast();
     }
 
-    @Redirect(method = "attack",
+    @WrapOperation(method = "attack",
             slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getEntitiesOfClass(Ljava/lang/Class;Lnet/minecraft/world/phys/AABB;)Ljava/util/List;")),
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;distanceToSqr(Lnet/minecraft/world/entity/Entity;)D"))
-    private double sweepAttack$fireEvents(final Player self, final Entity sweepTarget) {
-        final double distanceSquared = self.distanceToSqr(sweepTarget);
+    private double sweepAttack$fireEvents(final Player self, final Entity sweepTarget, final Operation<Double> operation) {
+        final double distanceSquared = operation.call(self, sweepTarget);
         if (!(distanceSquared < this.attack$interactionRangeSquared())) {
             return distanceSquared;
         }
@@ -273,33 +272,32 @@ public abstract class PlayerMixin_Attack extends LivingEntityMixin_Damage implem
         return distanceSquared;
     }
 
-    @Redirect(method = "attack",
+    @WrapOperation(method = "attack",
             slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getEntitiesOfClass(Ljava/lang/Class;Lnet/minecraft/world/phys/AABB;)Ljava/util/List;")),
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getEnchantedDamage(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;)F"))
-    private float sweepAttack$cancelEnchantedDamage(final Player self, final Entity sweepTarget, final float damage, final DamageSource source) {
+    private float sweepAttack$cancelEnchantedDamage(final Player self, final Entity sweepTarget, final float damage, final DamageSource source, final Operation<Float> operation) {
         return damage; // We already did it above
     }
 
-    @Redirect(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;knockback(DDD)V"), slice = @Slice(
+    @WrapOperation(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;knockback(DDD)V"), slice = @Slice(
         from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getEntitiesOfClass(Ljava/lang/Class;Lnet/minecraft/world/phys/AABB;)Ljava/util/List;"),
         to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)V")))
-    private void sweepAttack$knockbackModifier(final LivingEntity sweepTarget, double modifier, final double dirX, final double dirZ) {
+    private void sweepAttack$knockbackModifier(final LivingEntity sweepTarget, double modifier, final double dirX, final double dirZ, final Operation<Void> operation) {
         final SpongeAttackTracker sweepTracker = this.attack$tracker();
         if (sweepTracker != null) {
             modifier = sweepTracker.postEvent().knockbackModifier();
         }
-        sweepTarget.knockback(modifier, dirX, dirZ);
+        operation.call(sweepTarget, modifier, dirX, dirZ);
     }
 
-    @SuppressWarnings("deprecation")
-    @Redirect(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)V"),
+    @WrapOperation(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)V"),
         slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getEntitiesOfClass(Ljava/lang/Class;Lnet/minecraft/world/phys/AABB;)Ljava/util/List;")))
-    private void sweepAttack$finalDamage(final LivingEntity sweepTarget, final DamageSource source, float damage) {
+    private void sweepAttack$finalDamage(final LivingEntity sweepTarget, final DamageSource source, float damage, final Operation<Void> operation) {
         final SpongeAttackTracker sweepTracker = this.attack$tracker();
         if (sweepTracker != null) {
             damage = (float) sweepTracker.postEvent().finalDamage();
         }
-        sweepTarget.hurt(source, damage);
+        operation.call(sweepTarget, source, damage);
         this.attack$trackers.removeLast();
     }
 

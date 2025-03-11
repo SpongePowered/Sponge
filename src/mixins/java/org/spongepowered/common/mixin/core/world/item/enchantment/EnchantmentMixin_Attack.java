@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world.item.enchantment;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
@@ -35,9 +37,7 @@ import net.minecraft.world.item.enchantment.effects.EnchantmentValueEffect;
 import org.apache.commons.lang3.mutable.MutableFloat;
 import org.spongepowered.api.event.cause.entity.damage.DamageStepTypes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.event.cause.entity.damage.SpongeAttackTracker;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageStep;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -47,25 +47,21 @@ import java.util.List;
 @Mixin(Enchantment.class)
 public abstract class EnchantmentMixin_Attack {
 
-    @Shadow protected abstract void shadow$modifyDamageFilteredValue(
-        final DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>> component,
-        final ServerLevel level, final int enchantmentLevel, final ItemStack weapon, final Entity target, final DamageSource source, final MutableFloat damage);
-
-    @Redirect(method = "modifyDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/enchantment/Enchantment;modifyDamageFilteredValue(Lnet/minecraft/core/component/DataComponentType;Lnet/minecraft/server/level/ServerLevel;ILnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;Lorg/apache/commons/lang3/mutable/MutableFloat;)V"))
+    @WrapOperation(method = "modifyDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/enchantment/Enchantment;modifyDamageFilteredValue(Lnet/minecraft/core/component/DataComponentType;Lnet/minecraft/server/level/ServerLevel;ILnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;Lorg/apache/commons/lang3/mutable/MutableFloat;)V"))
     private void attack$modifyWeaponEnchantment(
         final Enchantment self, final DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>> component,
-        final ServerLevel level, final int enchantmentLevel, final ItemStack weapon, final Entity target, final DamageSource source, final MutableFloat damage) {
+        final ServerLevel level, final int enchantmentLevel, final ItemStack weapon, final Entity target, final DamageSource source, final MutableFloat damage, final Operation<Void> operation) {
 
         final SpongeAttackTracker tracker = SpongeAttackTracker.of(source);
         if (tracker == null) {
-            this.shadow$modifyDamageFilteredValue(component, level, enchantmentLevel, weapon, target, source, damage);
+            operation.call(self, component, level, enchantmentLevel, weapon, target, source, damage);
             return;
         }
 
         final SpongeDamageStep step = tracker.newStep(DamageStepTypes.WEAPON_ENCHANTMENT, ItemStackUtil.snapshotOf(weapon), self);
         damage.setValue((float) step.applyChildrenBefore(damage.floatValue()));
         if (!step.isSkipped()) {
-            this.shadow$modifyDamageFilteredValue(component, level, enchantmentLevel, weapon, target, source, damage);
+            operation.call(self, component, level, enchantmentLevel, weapon, target, source, damage);
         }
         damage.setValue((float) step.applyChildrenAfter(damage.floatValue()));
     }
