@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.player;
 
+import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.api.event.cause.entity.damage.DamageStepTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageTracker;
 import org.spongepowered.common.mixin.core.world.entity.LivingEntityMixin_Damage;
@@ -47,21 +47,17 @@ public abstract class PlayerMixin_Shared_Damage extends LivingEntityMixin_Damage
         return tracker == null ? damage : tracker.startStep(DamageStepTypes.ABSORPTION, damage, this);
     }
 
-    @Redirect(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;setAbsorptionAmount(F)V"))
-    private void damage$skipAbsorption(final Player self, final float absorption) {
+    @WrapWithCondition(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;setAbsorptionAmount(F)V"))
+    private boolean damage$skipAbsorption(final Player self, final float absorption) {
         final SpongeDamageTracker tracker = this.damage$tracker();
-        if (tracker == null || !tracker.isSkipped(DamageStepTypes.ABSORPTION)) {
-            self.setAbsorptionAmount(absorption);
-        }
+        return tracker == null || !tracker.isSkipped(DamageStepTypes.ABSORPTION);
     }
 
-    @Redirect(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;awardStat(Lnet/minecraft/resources/ResourceLocation;I)V"), slice = @Slice(
+    @WrapWithCondition(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;awardStat(Lnet/minecraft/resources/ResourceLocation;I)V"), slice = @Slice(
         from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;setAbsorptionAmount(F)V"),
         to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;causeFoodExhaustion(F)V")))
-    private void damage$skipAbsorptionStat(final Player self, final ResourceLocation stat, final int amount) {
+    private boolean damage$skipAbsorptionStat(final Player self, final ResourceLocation stat, final int amount) {
         final SpongeDamageTracker tracker = this.damage$tracker();
-        if (tracker == null || !tracker.isSkipped(DamageStepTypes.ABSORPTION)) {
-            self.awardStat(stat, amount);
-        }
+        return tracker == null || !tracker.isSkipped(DamageStepTypes.ABSORPTION);
     }
 }

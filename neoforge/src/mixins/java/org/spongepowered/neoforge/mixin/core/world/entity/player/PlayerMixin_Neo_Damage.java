@@ -24,6 +24,7 @@
  */
 package org.spongepowered.neoforge.mixin.core.world.entity.player;
 
+import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.common.damagesource.DamageContainer;
@@ -32,7 +33,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.bridge.world.entity.TrackedAttackBridge;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageTracker;
@@ -55,14 +55,11 @@ public abstract class PlayerMixin_Neo_Damage extends LivingEntityMixin_Neo_Damag
         return tracker == null ? damage : tracker.startStep(DamageStepTypes.ABSORPTION, damage, this);
     }
 
-    @SuppressWarnings("UnstableApiUsage")
-    @Redirect(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/neoforged/neoforge/common/damagesource/DamageContainer;setReduction(Lnet/neoforged/neoforge/common/damagesource/DamageContainer$Reduction;F)V"), slice = @Slice(
+    @WrapWithCondition(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/neoforged/neoforge/common/damagesource/DamageContainer;setReduction(Lnet/neoforged/neoforge/common/damagesource/DamageContainer$Reduction;F)V"), slice = @Slice(
         from = @At(value = "INVOKE", target = "Lnet/neoforged/neoforge/common/CommonHooks;onLivingDamagePre(Lnet/minecraft/world/entity/LivingEntity;Lnet/neoforged/neoforge/common/damagesource/DamageContainer;)F")))
-    private void damage$skipAbsorption(final DamageContainer container, final DamageContainer.Reduction reduction, final float absorbed) {
+    private boolean damage$skipAbsorption(final DamageContainer container, final DamageContainer.Reduction reduction, final float absorbed) {
         final SpongeDamageTracker tracker = this.damage$tracker();
-        if (tracker == null || !tracker.isSkipped(DamageStepTypes.ABSORPTION)) {
-            container.setReduction(reduction, absorbed);
-        }
+        return tracker == null || !tracker.isSkipped(DamageStepTypes.ABSORPTION);
     }
 
     @ModifyVariable(method = "actuallyHurt", at = @At("LOAD"), ordinal = 3, slice = @Slice(

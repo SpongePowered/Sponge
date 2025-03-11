@@ -24,9 +24,10 @@
  */
 package org.spongepowered.forge.mixin.core.world.entity;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.living.ShieldBlockEvent;
 import org.spongepowered.api.event.cause.entity.damage.DamageStepTypes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -34,7 +35,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.bridge.world.entity.TrackedDamageBridge;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageStep;
@@ -51,12 +51,11 @@ public abstract class LivingEntityMixin_Forge_Damage implements TrackedDamageBri
         return Float.NaN;
     }
 
-    @SuppressWarnings("UnstableApiUsage")
-    @Redirect(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/event/ForgeEventFactory;onShieldBlock(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/damagesource/DamageSource;F)Lnet/minecraftforge/event/entity/living/ShieldBlockEvent;"))
-    private ShieldBlockEvent damage$modifyBeforeAndAfterShield(final LivingEntity self, final DamageSource source, final float originalDamage) {
+    @WrapOperation(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/event/ForgeEventFactory;onShieldBlock(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/damagesource/DamageSource;F)Lnet/minecraftforge/event/entity/living/ShieldBlockEvent;"))
+    private ShieldBlockEvent damage$modifyBeforeAndAfterShield(final LivingEntity self, final DamageSource source, final float originalDamage, final Operation<ShieldBlockEvent> operation) {
         final SpongeDamageTracker tracker = this.damage$tracker();
         if (tracker == null) {
-            return ForgeEventFactory.onShieldBlock(self, source, originalDamage);
+            return operation.call(self, source, originalDamage);
         }
 
         final SpongeDamageStep step = tracker.newStep(DamageStepTypes.SHIELD, ItemStackUtil.snapshotOf(self.getUseItem()));
@@ -66,7 +65,7 @@ public abstract class LivingEntityMixin_Forge_Damage implements TrackedDamageBri
             event = new ShieldBlockEvent(self, source, damage);
             event.setCanceled(true);
         } else {
-            event = ForgeEventFactory.onShieldBlock(self, source, damage);
+            event = operation.call(self, source, damage);
             if (!event.isCanceled()) {
                 damage -= event.getBlockedDamage();
             }

@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.decoration;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -97,13 +99,13 @@ public abstract class ArmorStandMixin extends LivingEntityMixin {
      * IGNITES_ARMOR_STANDS + isOnFire
      * BURNS_ARMOR_STANDS + health > 0.5
      */
-    @Redirect(method = "hurtServer",
+    @WrapOperation(method = "hurtServer",
             slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/tags/DamageTypeTags;IGNITES_ARMOR_STANDS:Lnet/minecraft/tags/TagKey;")),
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/decoration/ArmorStand;causeDamage(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)V"))
-    private void impl$fireDamageEventDamage(final ArmorStand self, final ServerLevel level, final DamageSource source, final float damage) {
+    private void impl$fireDamageEventDamage(final ArmorStand self, final ServerLevel level, final DamageSource source, final float damage, final Operation<Void> operation) {
         final DamageEntityEvent.Post event = SpongeDamageTracker.callDamageEvents((Entity) this, source, damage);
         if (event != null) {
-            this.shadow$causeDamage(level, source, (float) event.finalDamage());
+            operation.call(self, level, source, (float) event.finalDamage());
         }
     }
 

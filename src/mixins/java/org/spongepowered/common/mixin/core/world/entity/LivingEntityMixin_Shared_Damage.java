@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.entity;
 
+import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
@@ -31,7 +32,6 @@ import org.spongepowered.api.event.cause.entity.damage.DamageStepTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.bridge.world.entity.TrackedDamageBridge;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageTracker;
@@ -54,19 +54,15 @@ public abstract class LivingEntityMixin_Shared_Damage implements TrackedDamageBr
         return tracker == null ? damage : tracker.startStep(DamageStepTypes.ABSORPTION, damage, this);
     }
 
-    @Redirect(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;setAbsorptionAmount(F)V", ordinal = 0))
-    private void damage$skipAbsorption(final LivingEntity self, final float absorption) {
+    @WrapWithCondition(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;setAbsorptionAmount(F)V", ordinal = 0))
+    private boolean damage$skipAbsorption(final LivingEntity self, final float absorption) {
         final SpongeDamageTracker tracker = this.damage$tracker();
-        if (tracker == null || !tracker.isSkipped(DamageStepTypes.ABSORPTION)) {
-            self.setAbsorptionAmount(absorption);
-        }
+        return tracker == null || !tracker.isSkipped(DamageStepTypes.ABSORPTION);
     }
 
-    @Redirect(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;awardStat(Lnet/minecraft/resources/ResourceLocation;I)V"))
-    private void damage$skipAbsorptionStat(final ServerPlayer self, final ResourceLocation stat, final int amount) {
+    @WrapWithCondition(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;awardStat(Lnet/minecraft/resources/ResourceLocation;I)V"))
+    private boolean damage$skipAbsorptionStat(final ServerPlayer self, final ResourceLocation stat, final int amount) {
         final SpongeDamageTracker tracker = this.damage$tracker();
-        if (tracker == null || !tracker.isSkipped(DamageStepTypes.ABSORPTION)) {
-            self.awardStat(stat, amount);
-        }
+        return tracker == null || !tracker.isSkipped(DamageStepTypes.ABSORPTION);
     }
 }

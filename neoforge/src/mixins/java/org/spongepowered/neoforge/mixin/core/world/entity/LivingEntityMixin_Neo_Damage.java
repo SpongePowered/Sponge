@@ -24,8 +24,10 @@
  */
 package org.spongepowered.neoforge.mixin.core.world.entity;
 
+import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.world.entity.LivingEntity;
-import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.common.damagesource.DamageContainer;
 import net.neoforged.neoforge.event.entity.living.LivingShieldBlockEvent;
 import org.spongepowered.api.event.cause.entity.damage.DamageStepTypes;
@@ -33,7 +35,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.bridge.world.entity.TrackedDamageBridge;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageStep;
@@ -58,11 +59,11 @@ public abstract class LivingEntityMixin_Neo_Damage implements TrackedDamageBridg
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    @Redirect(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/neoforged/neoforge/common/CommonHooks;onDamageBlock(Lnet/minecraft/world/entity/LivingEntity;Lnet/neoforged/neoforge/common/damagesource/DamageContainer;Z)Lnet/neoforged/neoforge/event/entity/living/LivingShieldBlockEvent;"))
-    private LivingShieldBlockEvent damage$modifyBeforeAndAfterShield(final LivingEntity self, final DamageContainer container, final boolean blocked) {
+    @WrapOperation(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/neoforged/neoforge/common/CommonHooks;onDamageBlock(Lnet/minecraft/world/entity/LivingEntity;Lnet/neoforged/neoforge/common/damagesource/DamageContainer;Z)Lnet/neoforged/neoforge/event/entity/living/LivingShieldBlockEvent;"))
+    private LivingShieldBlockEvent damage$modifyBeforeAndAfterShield(final LivingEntity self, final DamageContainer container, final boolean blocked, final Operation<LivingShieldBlockEvent> operation) {
         final SpongeDamageTracker tracker = this.damage$tracker();
         if (tracker == null || !blocked) { // don't capture when vanilla wouldn't block
-            return CommonHooks.onDamageBlock(self, container, false);
+            return operation.call(self, container, false);
         }
 
         final float originalDamage = container.getNewDamage();
@@ -74,7 +75,7 @@ public abstract class LivingEntityMixin_Neo_Damage implements TrackedDamageBridg
             event = new LivingShieldBlockEvent(self, container, true);
             event.setBlocked(true);
         } else {
-            event = CommonHooks.onDamageBlock(self, container, true);
+            event = operation.call(self, container, true);
             container.setBlockedDamage(event);
             damage = container.getNewDamage();
         }
@@ -82,9 +83,10 @@ public abstract class LivingEntityMixin_Neo_Damage implements TrackedDamageBridg
         return event;
     }
 
-    @Redirect(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/neoforged/neoforge/common/damagesource/DamageContainer;setBlockedDamage(Lnet/neoforged/neoforge/event/entity/living/LivingShieldBlockEvent;)V"))
-    private void damage$cancelSetBlockedDamage(final DamageContainer container, final LivingShieldBlockEvent event) {
+    @WrapWithCondition(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/neoforged/neoforge/common/damagesource/DamageContainer;setBlockedDamage(Lnet/neoforged/neoforge/event/entity/living/LivingShieldBlockEvent;)V"))
+    private boolean damage$cancelSetBlockedDamage(final DamageContainer container, final LivingShieldBlockEvent event) {
         // We already did it above
+        return false;
     }
 
     @ModifyVariable(method = "actuallyHurt", ordinal = 1,
@@ -94,14 +96,11 @@ public abstract class LivingEntityMixin_Neo_Damage implements TrackedDamageBridg
         return tracker == null ? damage : tracker.startStep(DamageStepTypes.ABSORPTION, damage, this);
     }
 
-    @SuppressWarnings("UnstableApiUsage")
-    @Redirect(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/neoforged/neoforge/common/damagesource/DamageContainer;setReduction(Lnet/neoforged/neoforge/common/damagesource/DamageContainer$Reduction;F)V"), slice = @Slice(
+    @WrapWithCondition(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/neoforged/neoforge/common/damagesource/DamageContainer;setReduction(Lnet/neoforged/neoforge/common/damagesource/DamageContainer$Reduction;F)V"), slice = @Slice(
         from = @At(value = "INVOKE", target = "Lnet/neoforged/neoforge/common/CommonHooks;onLivingDamagePre(Lnet/minecraft/world/entity/LivingEntity;Lnet/neoforged/neoforge/common/damagesource/DamageContainer;)F")))
-    private void damage$skipAbsorption(final DamageContainer container, final DamageContainer.Reduction reduction, final float absorbed) {
+    private boolean damage$skipAbsorption(final DamageContainer container, final DamageContainer.Reduction reduction, final float absorbed) {
         final SpongeDamageTracker tracker = this.damage$tracker();
-        if (tracker == null || !tracker.isSkipped(DamageStepTypes.ABSORPTION)) {
-            container.setReduction(reduction, absorbed);
-        }
+        return tracker == null || !tracker.isSkipped(DamageStepTypes.ABSORPTION);
     }
 
     @ModifyVariable(method = "actuallyHurt", at = @At("LOAD"), ordinal = 3, slice = @Slice(

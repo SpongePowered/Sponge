@@ -24,10 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.world.entity;
 
+import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.damagesource.CombatRules;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -47,7 +49,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.world.entity.LivingEntityBridge;
@@ -64,12 +65,9 @@ import java.util.LinkedList;
 public abstract class LivingEntityMixin_Damage extends EntityMixin implements LivingEntityBridge, TrackedDamageBridge {
 
     //@formatter:off
-    @Shadow protected abstract void shadow$playHurtSound(final DamageSource source);
     @Shadow protected abstract float shadow$getKnockback(final Entity entity, final DamageSource source);
     @Shadow public abstract @NonNull ItemStack shadow$getWeaponItem();
     @Shadow public abstract ItemStack shadow$getItemBySlot(final EquipmentSlot slot);
-    @Shadow protected abstract void shadow$hurtHelmet(final DamageSource source, final float damage);
-    @Shadow protected abstract void shadow$hurtArmor(final DamageSource source, final float damage);
     @Shadow public abstract @Nullable MobEffectInstance shadow$getEffect(final Holder<MobEffect> effect);
     @Shadow public abstract double shadow$getAttributeValue(final Holder<Attribute> attribute);
     // @formatter:on
@@ -135,13 +133,14 @@ public abstract class LivingEntityMixin_Damage extends EntityMixin implements Li
         return tracker == null ? damage : tracker.startStep(DamageStepTypes.HARD_HAT, damage, this.shadow$getItemBySlot(EquipmentSlot.HEAD));
     }
 
-    @Redirect(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;hurtHelmet(Lnet/minecraft/world/damagesource/DamageSource;F)V"))
-    private void damage$skipHardHat(final LivingEntity self, final DamageSource source, final float damage) {
+    @WrapWithCondition(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;hurtHelmet(Lnet/minecraft/world/damagesource/DamageSource;F)V"))
+    private boolean damage$skipHardHat(final LivingEntity self, final DamageSource source, final float damage) {
         final SpongeDamageTracker tracker = this.damage$tracker();
         if (tracker == null || !tracker.isSkipped(DamageStepTypes.HARD_HAT)) {
-            this.shadow$hurtHelmet(source, damage);
             this.damage$inventoryChanged = true;
+            return true;
         }
+        return false;
     }
 
     @ModifyVariable(method = "hurtServer", at = @At("STORE"), argsOnly = true, slice = @Slice(
@@ -159,13 +158,14 @@ public abstract class LivingEntityMixin_Damage extends EntityMixin implements Li
         return tracker == null ? damage : tracker.startStep(DamageStepTypes.ARMOR, damage, this, Attributes.ARMOR_TOUGHNESS);
     }
 
-    @Redirect(method = "getDamageAfterArmorAbsorb", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;hurtArmor(Lnet/minecraft/world/damagesource/DamageSource;F)V"))
-    private void damage$skipArmor(final LivingEntity self, final DamageSource source, final float damage) {
+    @WrapWithCondition(method = "getDamageAfterArmorAbsorb", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;hurtArmor(Lnet/minecraft/world/damagesource/DamageSource;F)V"))
+    private boolean damage$skipArmor(final LivingEntity self, final DamageSource source, final float damage) {
         final SpongeDamageTracker tracker = this.damage$tracker();
         if (tracker == null || !tracker.isSkipped(DamageStepTypes.ARMOR)) {
-            this.shadow$hurtArmor(source, damage);
             this.damage$inventoryChanged = true;
+            return true;
         }
+        return false;
     }
 
     @ModifyVariable(method = "getDamageAfterArmorAbsorb", at = @At("STORE"), argsOnly = true)
@@ -188,33 +188,29 @@ public abstract class LivingEntityMixin_Damage extends EntityMixin implements Li
         return tracker == null ? damage : tracker.endStep(DamageStepTypes.DEFENSIVE_POTION_EFFECT, damage);
     }
 
-    @Redirect(method = "getDamageAfterMagicAbsorb", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/CombatRules;getDamageAfterMagicAbsorb(FF)F"))
-    private float damage$modifyBeforeAndAfterArmorEnchantment(float damage, final float protection) {
+    @WrapOperation(method = "getDamageAfterMagicAbsorb", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/CombatRules;getDamageAfterMagicAbsorb(FF)F"))
+    private float damage$modifyBeforeAndAfterArmorEnchantment(float damage, final float protection, final Operation<Float> operation) {
         final SpongeDamageTracker tracker = this.damage$tracker();
         if (tracker == null) {
-            return CombatRules.getDamageAfterMagicAbsorb(damage, protection);
+            return operation.call(damage, protection);
         }
 
         final SpongeDamageStep step = tracker.newStep(DamageStepTypes.ARMOR_ENCHANTMENT, this);
         damage = (float) step.applyChildrenBefore(damage);
         if (!step.isSkipped()) {
-            damage = CombatRules.getDamageAfterMagicAbsorb(damage, protection);
+            damage = operation.call(damage, protection);
         }
         return (float) step.applyChildrenAfter(damage);
     }
 
-    @Redirect(method = "hurtServer", at = @At(value = "INVOKE",  target = "Lnet/minecraft/world/entity/LivingEntity;playHurtSound(Lnet/minecraft/world/damagesource/DamageSource;)V"))
-    private void damage$onHurtSound(final LivingEntity self, final DamageSource source) {
-        if (this.bridge$vanishState().createsSounds()) {
-            this.shadow$playHurtSound(source);
-        }
+    @WrapWithCondition(method = "hurtServer", at = @At(value = "INVOKE",  target = "Lnet/minecraft/world/entity/LivingEntity;playHurtSound(Lnet/minecraft/world/damagesource/DamageSource;)V"))
+    private boolean damage$onHurtSound(final LivingEntity self, final DamageSource source) {
+        return this.bridge$vanishState().createsSounds();
     }
 
-    @Redirect(method = "hurtServer", at = @At(value = "INVOKE",  target = "Lnet/minecraft/world/entity/LivingEntity;makeSound(Lnet/minecraft/sounds/SoundEvent;)V"))
-    private void damage$onMakeSound(final LivingEntity self, final SoundEvent sound) {
-        if (this.bridge$vanishState().createsSounds()) {
-            self.makeSound(sound);
-        }
+    @WrapWithCondition(method = "hurtServer", at = @At(value = "INVOKE",  target = "Lnet/minecraft/world/entity/LivingEntity;makeSound(Lnet/minecraft/sounds/SoundEvent;)V"))
+    private boolean damage$onMakeSound(final LivingEntity self, final SoundEvent sound) {
+        return this.bridge$vanishState().createsSounds();
     }
 
     @Inject(method = "hurtServer", at = @At("RETURN"), slice = @Slice(
