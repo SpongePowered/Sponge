@@ -178,9 +178,9 @@ public final class ItemStackData {
                         })
                         .delete(h -> h.remove(DataComponents.LORE))
                     .create(Keys.MAX_DURABILITY)
-                        .get(h -> h.getMaxDamage() != 0 ? h.getMaxDamage() : null)
+                        .get(h -> h.get(DataComponents.MAX_DAMAGE))
                         .setAnd((h, v) -> {
-                            if (v <= 0) {
+                            if (v <= 0 || h.getMaxStackSize() > 1) {
                                 return false;
                             }
 
@@ -188,7 +188,6 @@ public final class ItemStackData {
                             return true;
                         })
                         .delete(h -> h.remove(DataComponents.MAX_DAMAGE))
-                        .supports(h -> h.getOrDefault(DataComponents.MAX_STACK_SIZE, 1) == 1)
                     .create(Keys.MAX_STACK_SIZE)
                         .get(h -> h.get(DataComponents.MAX_STACK_SIZE))
                         .setAnd((h, v) -> {
