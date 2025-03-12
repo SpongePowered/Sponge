@@ -189,7 +189,7 @@ public final class ItemStackData {
                         })
                         .delete(h -> h.remove(DataComponents.MAX_DAMAGE))
                     .create(Keys.MAX_STACK_SIZE)
-                        .get(h -> h.get(DataComponents.MAX_STACK_SIZE))
+                        .get(ItemStack::getMaxStackSize)
                         .setAnd((h, v) -> {
                             if (v <= 0 || v > 99 || h.has(DataComponents.MAX_DAMAGE)) {
                                 return false;

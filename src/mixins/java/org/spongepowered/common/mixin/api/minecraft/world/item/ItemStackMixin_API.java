@@ -89,10 +89,6 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
         return this.shadow$getCount();
     }
 
-    public int itemStack$maxStackQuantity() {
-        return this.shadow$getMaxStackSize();
-    }
-
     public ItemType itemStack$type() {
         return (ItemType) this.shadow$getItem();
     }

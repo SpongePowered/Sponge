@@ -120,11 +120,6 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     }
 
     @Override
-    public int maxStackQuantity() {
-        return this.privateStack.maxStackQuantity();
-    }
-
-    @Override
     public boolean isEmpty() {
         return this.privateStack.isEmpty();
     }
