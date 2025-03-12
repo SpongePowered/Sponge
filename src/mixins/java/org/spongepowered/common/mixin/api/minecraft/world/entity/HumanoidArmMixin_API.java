@@ -35,11 +35,11 @@ import org.spongepowered.asm.mixin.Shadow;
 public abstract class HumanoidArmMixin_API implements HandPreference {
 
     // @formatter:off
-    @Shadow @Final private String name;
+    @Shadow @Final private String translationKey;
     // @formatter:on
 
     @Override
     public Component asComponent() {
-        return Component.translatable(this.name);
+        return Component.translatable(this.translationKey);
     }
 }
