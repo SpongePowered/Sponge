@@ -33,7 +33,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public record SpongeDamageModifier(DamageStepType type, Optional<Consumer<CauseStackManager.StackFrame>> frame, Optional<Function> damage) implements DamageModifier {
+public record SpongeDamageModifier(DamageStepType type, Optional<Consumer<CauseStackManager.StackFrame>> frameModifier, Optional<Function> damageFunction) implements DamageModifier {
 
     public static class Builder implements DamageModifier.Builder {
         private @Nullable DamageStepType type;
@@ -59,13 +59,13 @@ public record SpongeDamageModifier(DamageStepType type, Optional<Consumer<CauseS
         }
 
         @Override
-        public DamageModifier.Builder frame(Consumer<CauseStackManager.StackFrame> frame) {
+        public DamageModifier.Builder frameModifier(Consumer<CauseStackManager.StackFrame> frame) {
             this.frame = Objects.requireNonNull(frame, "frame");
             return this;
         }
 
         @Override
-        public DamageModifier.Builder damage(Function function) {
+        public DamageModifier.Builder damageFunction(Function function) {
             this.function = Objects.requireNonNull(function, "function");
             return this;
         }

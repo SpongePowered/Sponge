@@ -160,13 +160,13 @@ public class DamageTest implements LoadableModule {
         @Listener
         private void onAttackPre(final AttackEntityEvent.Pre event) {
             event.addModifierBefore(DamageStepTypes.CRITICAL_HIT,
-                DamageModifier.builder().type(DOUBLE_CRITICAL).frame((frame) -> frame.pushCause(new CustomCause()))
-                    .damage((step, damage) -> {
+                DamageModifier.builder().type(DOUBLE_CRITICAL).frameModifier((frame) -> frame.pushCause(new CustomCause()))
+                    .damageFunction((step, damage) -> {
                         step.parent().get().skip();
                         return damage * 2;
                     }).build());
             event.addModifierAfter(DOUBLE_CRITICAL,
-                DamageModifier.builder().type(DOUBLE_DOUBLE_CRITICAL).damage((step, damage) -> damage * 2).build());
+                DamageModifier.builder().type(DOUBLE_DOUBLE_CRITICAL).damageFunction((step, damage) -> damage * 2).build());
         }
 
         @Listener

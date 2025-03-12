@@ -81,8 +81,8 @@ public final class SpongeDamageStep implements DamageStep {
         this.tracker = parent.tracker;
         this.parent = parent;
         this.type = modifier.type();
-        this.frameModifier = modifier.frame().orElse(null);
-        this.damageFunction = modifier.damage().orElse(null);
+        this.frameModifier = modifier.frameModifier().orElse(null);
+        this.damageFunction = modifier.damageFunction().orElse(null);
     }
 
     void populateChildren() {
