@@ -55,7 +55,7 @@ public abstract class ServerChunkCacheMixin_Tracker {
         final NaturalSpawner.SpawnState spawnState,
         final List<MobCategory> mobCategories
     ) {
-        try (final PhaseContext<@NonNull ?> context = GenerationPhase.State.WORLD_SPAWNER_SPAWNING.createPhaseContext(PhaseTracker.SERVER)
+        try (final PhaseContext<@NonNull ?> context = GenerationPhase.State.WORLD_SPAWNER_SPAWNING.createPhaseContext(PhaseTracker.getWorldInstance(serverWorld))
             .world(serverWorld)) {
             context.buildAndSwitch();
             NaturalSpawner.spawnForChunk(serverWorld, targetChunk, spawnState, mobCategories);
@@ -74,7 +74,7 @@ public abstract class ServerChunkCacheMixin_Tracker {
         final boolean spawnHostileMobs,
         final boolean spawnPeacefulMobs
     ) {
-        try (final PhaseContext<@NonNull ?> context = GenerationPhase.State.WORLD_SPAWNER_SPAWNING.createPhaseContext(PhaseTracker.SERVER)
+        try (final PhaseContext<@NonNull ?> context = GenerationPhase.State.WORLD_SPAWNER_SPAWNING.createPhaseContext(PhaseTracker.getWorldInstance(serverWorld))
             .world(serverWorld)) {
             context.buildAndSwitch();
             serverWorld.tickCustomSpawners(spawnHostileMobs, spawnPeacefulMobs);

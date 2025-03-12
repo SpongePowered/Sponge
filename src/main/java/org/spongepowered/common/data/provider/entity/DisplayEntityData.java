@@ -36,6 +36,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.display.BillboardType;
 import org.spongepowered.api.entity.display.DisplayEntity;
 import org.spongepowered.api.entity.display.ItemDisplayType;
+import org.spongepowered.api.entity.display.TextAlignment;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.util.Transform;
@@ -61,6 +62,9 @@ public class DisplayEntityData {
                 .asMutable(Display.class)
                     .create(Keys.TRANSFORM)
                         .get(DisplayEntityData::getTransform)
+                        .set((h, v) -> DisplayEntityData.setTransform(h, v.toMatrix()))
+                    .create(Keys.MATRIX)
+                        .get(DisplayEntityData::getMatrix)
                         .set(DisplayEntityData::setTransform)
                 .asMutable(DisplayAccessor.class)
                     .create(Keys.BILLBOARD_TYPE)
@@ -116,11 +120,11 @@ public class DisplayEntityData {
                         .set((h, v) -> h.invoker$setBlockState((net.minecraft.world.level.block.state.BlockState) v))
                 .asMutable(Display_ItemDisplayAccessor.class)
                     .create(Keys.ITEM_STACK_SNAPSHOT)
-                        .get(h -> ItemStackUtil.snapshotOf(((Display_ItemDisplayAccessor)h).invoker$getItemStack()))
+                        .get(h -> ItemStackUtil.snapshotOf(h.invoker$getItemStack()))
                         .set((h, v) -> h.invoker$setItemStack(ItemStackUtil.fromSnapshotToNative(v)))
                     .create(Keys.ITEM_DISPLAY_TYPE)
                         .get(h -> (ItemDisplayType) (Object) h.invoker$getItemTransform())
-                        .set((h, v) -> ((Display_ItemDisplayAccessor) h).invoker$setItemTransform(((ItemDisplayContext) (Object) v)))
+                        .set((h, v) -> h.invoker$setItemTransform(((ItemDisplayContext) (Object) v)))
                 .asMutable(Display_TextDisplayAccessor.class)
                     .create(Keys.DISPLAY_NAME)
                         .get(h -> SpongeAdventure.asAdventure(h.invoker$getText()))
@@ -140,12 +144,15 @@ public class DisplayEntityData {
                     .create(Keys.HAS_DEFAULT_BACKGROUND)
                         .get(h -> DisplayEntityData.getFlagValue(h, Display.TextDisplay.FLAG_USE_DEFAULT_BACKGROUND))
                         .set((h, v) -> DisplayEntityData.setFlagValue(h, v, Display.TextDisplay.FLAG_USE_DEFAULT_BACKGROUND))
-                    .create(Keys.HAS_DEFAULT_BACKGROUND)
-                        .get(h -> DisplayEntityData.getFlagValue(h, Display.TextDisplay.FLAG_USE_DEFAULT_BACKGROUND))
-                        .set((h, v) -> DisplayEntityData.setFlagValue(h, v, Display.TextDisplay.FLAG_USE_DEFAULT_BACKGROUND))
+                    .create(Keys.TEXT_ALIGNMENT)
+                        .get(DisplayEntityData::getAlignment)
+                        .set(DisplayEntityData::setAlignment)
                     .create(Keys.TEXT_BACKGROUND_COLOR)
-                        .get(h -> DisplayEntityData.colorFromInt(h.invoker$getBackgroundColor()))
-                        .set((h, v) -> h.invoker$setBackgroundColor(DisplayEntityData.colorToInt(v)))
+                        .get(h -> DisplayEntityData.argbToColor(h.invoker$getBackgroundColor()))
+                        .set((h, v) -> h.invoker$setBackgroundColor(DisplayEntityData.argbWithColor(h.invoker$getBackgroundColor(), v)))
+                    .create(Keys.TEXT_BACKGROUND_OPACITY)
+                        .get(h -> DisplayEntityData.argbToOpacity(h.invoker$getBackgroundColor()))
+                        .set((h, v) -> h.invoker$setBackgroundColor(DisplayEntityData.argbWithOpacity(h.invoker$getBackgroundColor(), v)))
         ;
         registrator.spongeDataStore(Keys.TELEPORT_DURATION.key(), DisplayEntity.class, Keys.TELEPORT_DURATION);
     }
@@ -197,12 +204,45 @@ public class DisplayEntityData {
         return Brightness.unpack(original).sky();
     }
 
-    private static Color colorFromInt(final int color) {
-        return Color.ofRgb(color);
+    private static Color argbToColor(final int argb) {
+        return Color.ofRgb(argb & 0x00ffffff);
     }
 
-    private static int colorToInt(final Color color) {
-        return color.rgb();
+    private static byte argbToOpacity(final int argb) {
+        return (byte) (argb >> 24);
+    }
+
+    private static int argbWithColor(final int argb, final Color color) {
+        final int alpha = argb & 0xff000000;
+        final int rgb = color.rgb();
+        return alpha | rgb;
+    }
+
+    private static int argbWithOpacity(final int argb, final Byte opacity) {
+        final int alpha = opacity << 24;
+        final int rgb = argb & 0x00ffffff;
+        return alpha | rgb;
+    }
+
+    private static TextAlignment getAlignment(final Display_TextDisplayAccessor h) {
+        return (TextAlignment) (Object) Display.TextDisplay.getAlign(h.invoker$getFlags());
+    }
+
+    private static void setAlignment(final Display_TextDisplayAccessor h, final TextAlignment alignment) {
+        switch ((Display.TextDisplay.Align) (Object) alignment) {
+            case LEFT -> {
+                DisplayEntityData.setFlagValue(h, true, Display.TextDisplay.FLAG_ALIGN_LEFT);
+                DisplayEntityData.setFlagValue(h, false, Display.TextDisplay.FLAG_ALIGN_RIGHT);
+            }
+            case RIGHT -> {
+                DisplayEntityData.setFlagValue(h, false, Display.TextDisplay.FLAG_ALIGN_LEFT);
+                DisplayEntityData.setFlagValue(h, true, Display.TextDisplay.FLAG_ALIGN_RIGHT);
+            }
+            case CENTER -> {
+                DisplayEntityData.setFlagValue(h, false, Display.TextDisplay.FLAG_ALIGN_LEFT);
+                DisplayEntityData.setFlagValue(h, false, Display.TextDisplay.FLAG_ALIGN_RIGHT);
+            }
+        }
     }
 
     private static Transform getTransform(final Display display) {
@@ -219,9 +259,17 @@ public class DisplayEntityData {
         return transform;
     }
 
-    private static void setTransform(final Display h, final Transform transform) {
+    private static Matrix4d getMatrix(final Display display) {
+        var vanillaTransform = DisplayAccessor.invoker$createTransformation(display.getEntityData());
+        var vMatrix = vanillaTransform.getMatrix();
+        return Matrix4d.from(
+            vMatrix.get(0, 0), vMatrix.get(1, 0), vMatrix.get(2, 0), vMatrix.get(3, 0),
+            vMatrix.get(0, 1), vMatrix.get(1, 1), vMatrix.get(2, 1), vMatrix.get(3, 1),
+            vMatrix.get(0, 2), vMatrix.get(1, 2), vMatrix.get(2, 2), vMatrix.get(3, 2),
+            vMatrix.get(0, 3), vMatrix.get(1, 3), vMatrix.get(2, 3), vMatrix.get(3, 3));
+    }
 
-        final Matrix4d matrix = transform.toMatrix();
+    private static void setTransform(final Display h, final Matrix4d matrix) {
         var vMatrix = new org.joml.Matrix4f(
                 (float) matrix.get(0, 0), (float) matrix.get(1, 0), (float) matrix.get(2, 0), (float) matrix.get(3, 0),
                 (float) matrix.get(0, 1), (float) matrix.get(1, 1), (float) matrix.get(2, 1), (float) matrix.get(3, 1),

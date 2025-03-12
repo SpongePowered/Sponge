@@ -442,7 +442,7 @@ public class SpongeCommand {
     private @NonNull CommandResult pluginsRefreshSubcommandExecutor(final CommandContext context) {
         final Optional<PluginContainer> pluginContainer = context.one(this.pluginContainerKey);
         final RefreshGameEvent event = SpongeEventFactory.createRefreshGameEvent(
-                PhaseTracker.getCauseStackManager().currentCause(),
+                PhaseTracker.getInstance().currentCause(),
                 SpongeCommon.game()
         );
         if (pluginContainer.isPresent()) {

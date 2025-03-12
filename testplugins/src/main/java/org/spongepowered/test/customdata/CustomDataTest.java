@@ -65,6 +65,7 @@ import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.chunk.WorldChunk;
 import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.math.vector.Vector3i;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
@@ -99,7 +100,8 @@ public final class CustomDataTest {
         PLAYER,
         USER,
         BLOCK,
-        CHUNK
+        CHUNK,
+        LEVEL
     }
 
     @Listener
@@ -165,6 +167,11 @@ public final class CustomDataTest {
                             player.sendActionBar(Component.text(oldNumber2));
                             player.world().chunk(player.location().chunkPosition()).offer(this.myDataKey, oldNumber2 + number);
                             break;
+                        case LEVEL:
+                            final Integer oldNumber3 = player.world().properties().get(this.myDataKey).orElse(0);
+                            player.sendActionBar(Component.text(oldNumber3));
+                            player.world().properties().offer(this.myDataKey, oldNumber3 + number);
+                            break;
                     }
                     return CommandResult.success();
                 })
@@ -183,7 +190,7 @@ public final class CustomDataTest {
                 .build();
 
 
-        final DataStore dataStore = DataStore.of(this.myDataKey, DataQuery.of("mykey"), ItemStack.class, User.class, ServerPlayer.class, BlockEntity.class, Entity.class, WorldChunk.class);
+        final DataStore dataStore = DataStore.of(this.myDataKey, DataQuery.of("mykey"), ItemStack.class, User.class, ServerPlayer.class, BlockEntity.class, Entity.class, WorldChunk.class, ServerWorldProperties.class);
         final DataRegistration myRegistration = DataRegistration.builder()
                 .dataKey(this.myDataKey)
                 .store(dataStore)

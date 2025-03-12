@@ -34,6 +34,7 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.util.MemoizedSupplier;
@@ -160,7 +161,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
         if (SpongeConfigs.getCommon().get().phaseTracker.generateStackTracePerPhase) {
             this.stackTrace = new Exception("Debug Trace").getStackTrace();
         }
-        PhaseTracker.getInstance().switchToPhase(this.state, this);
+        this.createdTracker.switchToPhase(this.state, this);
         return (P) this;
     }
 
@@ -321,16 +322,15 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
                     this.state, this, new IllegalStateException("Closing empty phase context"));
             return;
         }
-        final PhaseTracker instance = PhaseTracker.getInstance();
-        instance.completePhase(this);
+        this.createdTracker.completePhase(this);
         if (this.usedFrame != null) {
-            this.usedFrame.iterator().forEachRemaining(instance::popCauseFrame);
+            this.usedFrame.iterator().forEachRemaining(this.createdTracker::popCauseFrame);
             this.usedFrame = null;
         } else if (this.shouldProvideModifiers()) {
             // So, this part is interesting... Since the used frame is null, that means
             // the cause stack manager still has the reference of this context/phase, we have
             // to "pop off" the list.
-            instance.popFrameMutator(this);
+            this.createdTracker.popFrameMutator(this);
         }
         this.reset();
         this.isCompleted = false;
@@ -367,6 +367,14 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
             return ((ServerPlayer) this.source).uniqueId();
         }
         return null;
+    }
+
+    public boolean isClientSide() {
+        return false;
+    }
+
+    public Optional<ServerLocation> containerLocation() {
+        return Optional.empty();
     }
 
     protected boolean isRunaway(final PhaseContext<?> phaseContext) {

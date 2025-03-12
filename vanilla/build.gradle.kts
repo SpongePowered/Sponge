@@ -1,4 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.spongepowered.gradle.impl.IdeHelper
 
 plugins {
     id("org.spongepowered.gradle.vanilla")
@@ -9,14 +10,15 @@ plugins {
 }
 
 val commonProject = parent!!
-val transformersProject = parent!!.project(":modlauncher-transformers")
+val bootstrapDevProject = commonProject.project(":bootstrap-dev")
+val transformersProject = commonProject.project(":modlauncher-transformers")
+val libraryManagerProject = commonProject.project(":library-manager")
 val testPluginsProject: Project? = rootProject.subprojects.find { "testplugins" == it.name }
 
 val apiVersion: String by project
 val apiJavaTarget: String by project
 val minecraftVersion: String by project
 val recommendedVersion: String by project
-val organization: String by project
 val projectUrl: String by project
 
 description = "The SpongeAPI implementation for Vanilla Minecraft"
@@ -34,8 +36,6 @@ val gameManagedLibrariesConfig: NamedDomainObjectProvider<Configuration> = confi
 
 val bootShadedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("bootShadedLibraries")
 val gameShadedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("gameShadedLibraries")
-
-val runTaskOnlyConfig: NamedDomainObjectProvider<Configuration> = configurations.register("runTaskOnly")
 
 // ModLauncher layers
 val bootLayerConfig: NamedDomainObjectProvider<Configuration> = configurations.register("bootLayer") {
@@ -55,172 +55,80 @@ val mixins: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.name
 val main: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("main")
 
 // SpongeVanilla source sets
+// Prod launch
 val vanillaInstaller by sourceSets.register("installer") {
     configurations.named(implementationConfigurationName) {
         extendsFrom(installerLibrariesConfig.get())
     }
 }
 
-val vanillaMain by sourceSets.named("main") {
-    // implementation (compile) dependencies
-    spongeImpl.applyNamedDependencyOnOutput(commonProject, accessors.get(), this, project, this.implementationConfigurationName)
-    spongeImpl.applyNamedDependencyOnOutput(commonProject, launch.get(), this, project, this.implementationConfigurationName)
-    spongeImpl.applyNamedDependencyOnOutput(commonProject, applaunch.get(), this, project, this.implementationConfigurationName)
+// Boot layer
+val vanillaAppLaunch by sourceSets.register("applaunch") {
+    spongeImpl.addDependencyToImplementation(applaunch.get(), this)
 
     configurations.named(implementationConfigurationName) {
-        extendsFrom(gameLayerConfig.get())
+        extendsFrom(bootLayerConfig.get())
     }
 }
+
+// Game layer
 val vanillaLaunch by sourceSets.register("launch") {
-    // implementation (compile) dependencies
-    spongeImpl.applyNamedDependencyOnOutput(commonProject, launch.get(), this, project, this.implementationConfigurationName)
-    spongeImpl.applyNamedDependencyOnOutput(commonProject, applaunch.get(), this, project, this.implementationConfigurationName)
-    spongeImpl.applyNamedDependencyOnOutput(commonProject, main.get(), this, project, this.implementationConfigurationName)
-    spongeImpl.applyNamedDependencyOnOutput(project, this, vanillaMain, project, vanillaMain.implementationConfigurationName)
+    spongeImpl.addDependencyToImplementation(applaunch.get(), this)
+    spongeImpl.addDependencyToImplementation(launch.get(), this)
+    spongeImpl.addDependencyToImplementation(main.get(), this)
+    spongeImpl.addDependencyToImplementation(vanillaAppLaunch, this)
 
     configurations.named(implementationConfigurationName) {
         extendsFrom(gameLayerConfig.get())
     }
 }
 val vanillaAccessors by sourceSets.register("accessors") {
-    spongeImpl.applyNamedDependencyOnOutput(commonProject, mixins.get(), this, project, this.implementationConfigurationName)
-    spongeImpl.applyNamedDependencyOnOutput(commonProject, accessors.get(), this, project, this.implementationConfigurationName)
-    spongeImpl.applyNamedDependencyOnOutput(project, this, vanillaLaunch, project, vanillaLaunch.implementationConfigurationName)
+    spongeImpl.addDependencyToImplementation(accessors.get(), this)
 
     configurations.named(implementationConfigurationName) {
         extendsFrom(gameLayerConfig.get())
     }
 }
 val vanillaMixins by sourceSets.register("mixins") {
-    // implementation (compile) dependencies
-    spongeImpl.applyNamedDependencyOnOutput(commonProject, mixins.get(), this, project, this.implementationConfigurationName)
-    spongeImpl.applyNamedDependencyOnOutput(commonProject, accessors.get(), this, project, this.implementationConfigurationName)
-    spongeImpl.applyNamedDependencyOnOutput(commonProject, launch.get(), this, project, this.implementationConfigurationName)
-    spongeImpl.applyNamedDependencyOnOutput(commonProject, applaunch.get(), this, project, this.implementationConfigurationName)
-    spongeImpl.applyNamedDependencyOnOutput(commonProject, main.get(), this, project, this.implementationConfigurationName)
-    spongeImpl.applyNamedDependencyOnOutput(project, vanillaMain, this, project, this.implementationConfigurationName)
-    spongeImpl.applyNamedDependencyOnOutput(project, vanillaAccessors, this, project, this.implementationConfigurationName)
-    spongeImpl.applyNamedDependencyOnOutput(project, vanillaLaunch, this, project, this.implementationConfigurationName)
+    spongeImpl.addDependencyToImplementation(applaunch.get(), this)
+    spongeImpl.addDependencyToImplementation(launch.get(), this)
+    spongeImpl.addDependencyToImplementation(accessors.get(), this)
+    spongeImpl.addDependencyToImplementation(mixins.get(), this)
+    spongeImpl.addDependencyToImplementation(main.get(), this)
+    spongeImpl.addDependencyToImplementation(vanillaAppLaunch, this)
+    spongeImpl.addDependencyToImplementation(vanillaLaunch, this)
+    spongeImpl.addDependencyToImplementation(vanillaAccessors, this)
 
     configurations.named(implementationConfigurationName) {
         extendsFrom(gameLayerConfig.get())
     }
 }
-val vanillaLang by sourceSets.register("lang") {
-    configurations.named(implementationConfigurationName) {
-        extendsFrom(bootLayerConfig.get())
-    }
-}
-val vanillaAppLaunch by sourceSets.register("applaunch") {
-    // implementation (compile) dependencies
-    spongeImpl.applyNamedDependencyOnOutput(commonProject, applaunch.get(), this, project, this.implementationConfigurationName)
-    spongeImpl.applyNamedDependencyOnOutput(project, this, vanillaLaunch, project, vanillaLaunch.implementationConfigurationName)
+val vanillaMain by sourceSets.named("main") {
+    spongeImpl.addDependencyToImplementation(applaunch.get(), this)
+    spongeImpl.addDependencyToImplementation(launch.get(), this)
+    spongeImpl.addDependencyToImplementation(accessors.get(), this)
+    spongeImpl.addDependencyToImplementation(main.get(), this)
+    spongeImpl.addDependencyToImplementation(vanillaAppLaunch, this)
+    spongeImpl.addDependencyToImplementation(vanillaLaunch, this)
+    spongeImpl.addDependencyToImplementation(vanillaAccessors, this)
+
+    spongeImpl.addDependencyToImplementation(this, vanillaMixins)
 
     configurations.named(implementationConfigurationName) {
-        extendsFrom(bootLayerConfig.get())
+        extendsFrom(gameLayerConfig.get())
     }
+
+    // The rest of the project because we want everything in the initial classpath
+    spongeImpl.addDependencyToRuntimeOnly(mixins.get(), this)
+    spongeImpl.addDependencyToRuntimeOnly(vanillaMixins, this)
 }
 
 val superclassConfigs = spongeImpl.getNamedConfigurations("superClassChanges")
 val mixinConfigs = spongeImpl.mixinConfigurations
 
 minecraft {
-    runs {
-        // Full development environment
-        server("runServer") {
-            args("--nogui", "--launchTarget", "sponge_server_dev")
-        }
-        client("runClient") {
-            args("--launchTarget", "sponge_client_dev")
-        }
-
-        // Lightweight integration tests
-        server("integrationTestServer") {
-            args("--launchTarget", "sponge_server_it")
-        }
-        client("integrationTestClient") {
-            args("--launchTarget", "sponge_client_it")
-        }
-
-        configureEach {
-            targetVersion(apiJavaTarget.toInt())
-            workingDirectory(project.file("run/"))
-            if (org.spongepowered.gradle.vanilla.internal.util.IdeConfigurer.isIdeaImport()) { // todo(zml): promote to API... eventually
-                // IntelliJ does not properly report its compatibility
-                jvmArgs("-Dterminal.ansi=true", "-Djansi.mode=force")
-            }
-            jvmArgs(
-                "-Dlog4j.configurationFile=log4j2_dev.xml",
-                "-Dmixin.dumpTargetOnFailure=true",
-                "-Dmixin.debug.verbose=true",
-                "-Dmixin.debug.countInjections=true",
-                "-Dmixin.debug.strict=true",
-                "-Dmixin.debug.strict.unique=false"
-            )
-
-            // ModLauncher
-            // jvmArgs("-Dbsl.debug=true") // Uncomment to debug bootstrap classpath
-            mainClass("net.minecraftforge.bootstrap.ForgeBootstrap")
-
-            allArgumentProviders += CommandLineArgumentProvider {
-                mixinConfigs.asSequence()
-                        .flatMap { sequenceOf("--mixin.config", it) }
-                        .toList()
-            }
-            allArgumentProviders += CommandLineArgumentProvider {
-                superclassConfigs.asSequence()
-                    .flatMap { sequenceOf("--superclass_change.config", it) }
-                    .toList()
-            }
-        }
-
-        all {
-            tasks.named(this.name, JavaExec::class) {
-                // Put modules in boot layer
-                classpath = files(
-                    vanillaAppLaunch.output,
-                    vanillaAppLaunch.runtimeClasspath,
-                    runTaskOnlyConfig
-                )
-
-                // Merge applaunch sourcesets in a single module
-                val applaunchOutputs = files(applaunch.get().output, vanillaAppLaunch.output)
-                dependsOn(applaunchOutputs)
-                environment("MOD_CLASSES", applaunchOutputs.joinToString(";") { "applaunch%%$it" })
-
-                // Configure resources
-                val gameResources = mutableListOf<FileCollection>()
-                gameResources.addAll(gameManagedLibrariesConfig.get().files.map { files(it) })
-
-                gameResources.add(files(
-                    main.get().output, vanillaMain.output,
-                    mixins.get().output, vanillaMixins.output,
-                    accessors.get().output, vanillaAccessors.output,
-                    launch.get().output, vanillaLaunch.output,
-                    gameShadedLibrariesConfig.get()
-                ))
-
-                dependsOn(gameResources)
-                jvmArgs("-Dsponge.gameResources=" + gameResources.joinToString(";") { it.joinToString("&") })
-
-                testPluginsProject?.also {
-                    val plugins: FileCollection = it.sourceSets.getByName("main").output
-                    dependsOn(plugins)
-                    environment("SPONGE_PLUGINS", plugins.joinToString("&"))
-                }
-            }
-        }
-    }
-
-    main.get().resources
-            .filter { it.name.endsWith(".accesswidener") }
-            .files
-            .forEach { accessWideners(it) }
-
-    vanillaMain.resources
-            .filter { it.name.endsWith(".accesswidener") }
-            .files
-            .forEach { accessWideners(it) }
+    accessWideners(main.get().resources.filter { it.name.endsWith(".accesswidener") })
+    accessWideners(vanillaMain.resources.filter { it.name.endsWith(".accesswidener") })
 }
 
 configurations.configureEach {
@@ -231,12 +139,6 @@ configurations.configureEach {
 }
 
 dependencies {
-    api(project(":", configuration = "launch"))
-    implementation(project(":", configuration = "accessors"))
-    implementation(project(commonProject.path))
-
-    vanillaMixins.implementationConfigurationName(project(commonProject.path))
-
     val installer = installerLibrariesConfig.name
     installer(apiLibs.gson)
     installer(platform(apiLibs.configurate.bom))
@@ -252,6 +154,8 @@ dependencies {
         exclude(group = "net.sf.jopt-simple")
         exclude(group = "org.ow2.asm")
     }
+
+    installer(project(libraryManagerProject.path))
 
     val init = initLibrariesConfig.name
     init(libs.securemodules)
@@ -302,23 +206,15 @@ dependencies {
     }
 
     boot(libs.mixin)
+    boot(libs.mixinextras.common)
     boot(libs.asm.tree)
     boot(libs.guava) {
         exclude(group = "com.google.errorprone", module = "error_prone_annotations")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
 
-    // All minecraft deps except itself
-    configurations.minecraft.get().resolvedConfiguration.resolvedArtifacts
-        .map {
-            var id = it.id.componentIdentifier.toString()
-            if (it.classifier != null) {
-                id += ":" + it.classifier
-            }
-            id
-        }
-        .filter { !it.startsWith("net.minecraft:joined") }
-        .forEach { boot(it) { isTransitive = false } }
+    // All minecraft dependencies except itself
+    spongeImpl.copyModulesExcludingPrefix(configurations.minecraft.get(), "net.minecraft", "joined", bootLibrariesConfig.get())
 
     boot(project(transformersProject.path)) {
         exclude(group = "cpw.mods", module = "modlauncher")
@@ -344,13 +240,75 @@ dependencies {
     val gameShadedLibraries = gameShadedLibrariesConfig.name
     gameShadedLibraries("org.spongepowered:spongeapi:$apiVersion") { isTransitive = false }
 
-    afterEvaluate {
-        spongeImpl.copyModulesExcludingProvided(gameLibrariesConfig.get(), bootLayerConfig.get(), gameManagedLibrariesConfig.get())
-    }
+    spongeImpl.copyModulesExcludingProvided(gameLibrariesConfig.get(), bootLayerConfig.get(), gameManagedLibrariesConfig.get())
 
-    val runTaskOnly = runTaskOnlyConfig.name
-    // Allow boot layer manipulation such as merging applaunch sourcesets
-    runTaskOnly("net.minecraftforge:bootstrap-dev:2.1.1")
+    runtimeOnly(project(bootstrapDevProject.path))
+    testPluginsProject?.also {
+        runtimeOnly(project(it.path))
+    }
+}
+
+minecraft {
+    runs {
+        // Full development environment
+        server("runServer") {
+            args("--nogui", "--launchTarget", "sponge_server_dev")
+        }
+        client("runClient") {
+            args("--launchTarget", "sponge_client_dev")
+        }
+
+        // Lightweight integration tests
+        server("integrationTestServer") {
+            args("--launchTarget", "sponge_server_it")
+        }
+        client("integrationTestClient") {
+            args("--launchTarget", "sponge_client_it")
+        }
+
+        // Configure bootstrap-dev
+        val bootFileNames = spongeImpl.buildRuntimeFileNames(bootLayerConfig.get())
+        val gameShadedFileNames = spongeImpl.buildRuntimeFileNames(gameShadedLibrariesConfig.get())
+
+        configureEach {
+            targetVersion(apiJavaTarget.toInt())
+            workingDirectory(project.file("run/"))
+
+            if (IdeHelper.isIdeaActive()) {
+                // IntelliJ does not properly report its compatibility
+                jvmArgs("-Dterminal.ansi=true", "-Djansi.mode=force")
+            }
+
+            jvmArgs(
+                "-Dlog4j.configurationFile=log4j2_dev.xml",
+                "-Dmixin.dumpTargetOnFailure=true",
+                "-Dmixin.debug.verbose=true",
+                "-Dmixin.debug.countInjections=true",
+                "-Dmixin.debug.strict=true",
+                "-Dmixin.debug.strict.unique=false"
+            )
+
+            allArgumentProviders += CommandLineArgumentProvider {
+                mixinConfigs.asSequence()
+                    .flatMap { sequenceOf("--mixin.config", it) }
+                    .toList()
+            }
+            allArgumentProviders += CommandLineArgumentProvider {
+                superclassConfigs.asSequence()
+                    .flatMap { sequenceOf("--superclass_change.config", it) }
+                    .toList()
+            }
+
+            // ModLauncher
+            // jvmArgs("-Dbsl.debug=true") // Uncomment to debug bootstrap classpath
+            mainClass("net.minecraftforge.bootstrap.ForgeBootstrap")
+
+            // Configure resources
+            jvmArgs("-Dsponge.dev.root=" + project.rootDir)
+            jvmArgs("-Dsponge.dev.boot=$bootFileNames")
+            jvmArgs("-Dsponge.dev.gameShaded=$gameShadedFileNames")
+        }
+    }
 }
 
 val vanillaManifest = java.manifest {
@@ -359,7 +317,7 @@ val vanillaManifest = java.manifest {
         "Specification-Vendor" to "SpongePowered",
         "Specification-Version" to apiVersion,
         "Implementation-Title" to project.name,
-        "Implementation-Version" to spongeImpl.generatePlatformBuildVersionString(apiVersion, minecraftVersion, recommendedVersion),
+        "Implementation-Version" to version,
         "Implementation-Vendor" to "SpongePowered"
     )
     // These two are included by most CI's
@@ -376,7 +334,7 @@ vanillaLaunch.apply {
     blossom.resources {
         property("apiVersion", apiVersion)
         property("minecraftVersion", minecraftVersion)
-        property("version", provider { project.version.toString() })
+        property("version", version.toString())
     }
 }
 vanillaInstaller.apply {
@@ -430,18 +388,14 @@ tasks {
     val installerResources = project.layout.buildDirectory.dir("generated/resources/installer")
     vanillaInstaller.resources.srcDir(installerResources)
 
-    val downloadNotNeeded = configurations.register("downloadNotNeeded") {
-        extendsFrom(configurations.minecraft.get())
-        extendsFrom(gameShadedLibrariesConfig.get())
-    }
-
     val emitDependencies by registering(org.spongepowered.gradle.impl.OutputDependenciesToJson::class) {
         group = "sponge"
         this.dependencies("bootstrap", bootLibrariesConfig)
         this.dependencies("main", gameManagedLibrariesConfig)
-        this.excludedDependencies(downloadNotNeeded)
+        this.excludeDependencies(configurations.minecraft)
+        this.excludeDependencies(gameShadedLibrariesConfig)
 
-        outputFile.set(installerResources.map { it.file("libraries.json") })
+        outputFile.set(installerResources.map { it.file("sponge-libraries.json") })
     }
     named(vanillaInstaller.processResourcesTaskName).configure {
         dependsOn(emitDependencies)
@@ -533,14 +487,6 @@ tasks {
     assemble {
         dependsOn(universalJar)
     }
-}
-
-indraSpotlessLicenser {
-    licenseHeaderFile(rootProject.file("HEADER.txt"))
-
-    property("name", "Sponge")
-    property("organization", organization)
-    property("url", projectUrl)
 }
 
 val universalJar by tasks.existing

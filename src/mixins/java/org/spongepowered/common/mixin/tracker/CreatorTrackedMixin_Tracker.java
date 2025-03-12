@@ -28,6 +28,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.ticks.SavedTick;
+import net.minecraft.world.ticks.ScheduledTick;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,7 +40,7 @@ import org.spongepowered.common.entity.PlayerTracker;
 import java.util.Optional;
 import java.util.UUID;
 
-@Mixin({Entity.class, BlockEntity.class})
+@Mixin({Entity.class, BlockEntity.class, ScheduledTick.class, SavedTick.class})
 public abstract class CreatorTrackedMixin_Tracker implements CreatorTrackedBridge {
 
     @Nullable private UUID tracker$creator;

@@ -124,7 +124,7 @@ public final class SpongeEventBus extends EventBus {
             if (!this.rtrackPhases && Objects.equals(listener.getClass(), EventPriority.class)) continue;
 
             try (
-                final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame();
+                final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame();
                 final PhaseContext<@NonNull ?> context = SpongeEventManager.createListenerContext(null))
             {
                 if (context != null) {

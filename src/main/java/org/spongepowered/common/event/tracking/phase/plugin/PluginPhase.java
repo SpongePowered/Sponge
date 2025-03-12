@@ -34,6 +34,7 @@ public final class PluginPhase {
         public static final IPhaseState<VolumeStreamApplicationState.Context> VOLUME_STREAM_APPLICATION = new VolumeStreamApplicationState();
         public static final IPhaseState<BasicPluginContext> SCHEDULED_TASK = new ScheduledTaskPhaseState();
         public static final IPhaseState<DelayedTaskPhaseState.Context> DELAYED_TASK = new DelayedTaskPhaseState();
+        public static final IPhaseState<BasicPluginContext> PLUGIN = new BasicPluginState();
 
         private State() {
         }

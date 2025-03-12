@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.inventory.event.world.inventory;
 
 import net.minecraft.core.NonNullList;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -114,7 +115,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         )
     )
     private void impl$handleUnviewedSlotSwap(final Inventory inv, final int index, final ItemStack newStack) {
-        if (!PhaseTracker.SERVER.onSidedThread() || inv.player.inventoryMenu == inv.player.containerMenu ||  Inventory.isHotbarSlot(index)) {
+        if (!PhaseTracker.getWorldInstance().onSidedThread() || inv.player.inventoryMenu == inv.player.containerMenu ||  Inventory.isHotbarSlot(index)) {
             inv.setItem(index, newStack);
         } else {
             final ItemStackSnapshot oldItem = ItemStackUtil.snapshotOf(inv.getItem(index));
@@ -139,7 +140,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     )
     private ItemStack impl$handleUnviewedSlotSwap2(final ItemStack origin, final int splitOff, int $$0, int index, ClickType $$2, Player $$3) {
         Inventory inv = $$3.getInventory();
-        if (!PhaseTracker.SERVER.onSidedThread() || inv.player.inventoryMenu == inv.player.containerMenu || Inventory.isHotbarSlot(index)) {
+        if (!PhaseTracker.getWorldInstance().onSidedThread() || inv.player.inventoryMenu == inv.player.containerMenu || Inventory.isHotbarSlot(index)) {
             return origin.split(splitOff);
         } else {
             final ItemStackSnapshot oldItem = ItemStackUtil.snapshotOf(origin);
@@ -188,7 +189,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
             return result;
         }
         this.bridge$detectAndSendChanges(true, true);
-        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance((ServerLevel) player.level()).getPhaseContext();
         TrackingUtil.processBlockCaptures(context); // ClickContainerEvent -> CraftEvent -> PreviewEvent
         // result is modified by the ClickMenuTransaction
         return result;
@@ -207,11 +208,12 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
             this.shadow$doClick(slotId, dragType, clickType, player);
             return;
         }
-        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance((ServerLevel) player.level()).getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         try (final EffectTransactor ignored = transactor.logClickContainer(menu, slotId, dragType, clickType, player)) {
             this.impl$isClicking = true;
             this.shadow$doClick(slotId, dragType, clickType, player);
+            this.bridge$detectAndSendChanges(true, false);
         } finally {
             this.impl$isClicking = false;
         }
@@ -222,7 +224,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
 
     @Inject(method = "broadcastFullState", at = @At("HEAD"), cancellable = true)
     private void impl$broadcastFullStateWithTransactions(final CallbackInfo ci) {
-        if (!PhaseTracker.SERVER.onSidedThread()) {
+        if (!PhaseTracker.getWorldInstance().onSidedThread()) {
             return;
         }
         this.bridge$detectAndSendChanges(false, false);
@@ -243,7 +245,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
      */
     @Inject(method = "broadcastChanges", at = @At("HEAD"), cancellable = true)
     private void impl$broadcastChangesWithTransactions(final CallbackInfo ci) {
-        if (!PhaseTracker.SERVER.onSidedThread()) {
+        if (!PhaseTracker.getWorldInstance().onSidedThread()) {
             return;
         }
         this.bridge$detectAndSendChanges(false, true);
@@ -256,7 +258,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     public void bridge$detectAndSendChanges(final boolean capture, final boolean synchronize) {
         // Code-Flow changed from vanilla completely!
 
-        final PhaseContext<?> phaseContext = PhaseTracker.SERVER.getPhaseContext();
+        final PhaseContext<?> phaseContext = PhaseTracker.getWorldInstance().getPhaseContext();
         if (phaseContext.captureModifiedContainer((AbstractContainerMenu) (Object) this)) {
             return;
         }
@@ -282,7 +284,10 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
 
             // Only call Menu Callbacks when clicking
             if (this.impl$isClicking && menu != null && !menu.onChange(newStack, oldStack, (org.spongepowered.api.item.inventory.Container) this, i, slot)) {
-                this.lastSlots.set(i, oldStack.copy());  // revert changes
+                // revert changes
+                oldStack = oldStack.copy();
+                slot.set(oldStack);
+                this.lastSlots.set(i, oldStack);
                 this.impl$sendSlotContents(i, oldStack); // Send reverted slots to clients
             } else {
                 this.impl$capture(i, newStack, oldStack); // Capture changes for inventory events
@@ -342,8 +347,9 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     }
 
     private void impl$capture(final Integer index, final ItemStack newStack, final ItemStack oldStack) {
-        final PhaseContext<?> phaseContext = PhaseTracker.SERVER.getPhaseContext();
-        if (PhaseTracker.SERVER.onSidedThread() &&
+        final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance();
+        final PhaseContext<?> phaseContext = phaseTracker.getPhaseContext();
+        if (phaseTracker.onSidedThread() &&
                  !(phaseContext.isRestoring() // do not capture when block restoring & initial sync on inventory open
                 || phaseContext instanceof TileEntityTickContext)) { // do not capture for open inventories when ticking BlockEntities
             final ItemStackSnapshot oldItem = ItemStackUtil.snapshotOf(oldStack);
@@ -359,7 +365,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     }
 
     private void impl$captureSwap(int index, Inventory inv, ItemStackSnapshot oldItem, ItemStackSnapshot newItem) {
-        final PhaseContext<@NonNull ?> phaseContext = PhaseTracker.SERVER.getPhaseContext();
+        final PhaseContext<@NonNull ?> phaseContext = PhaseTracker.getWorldInstance().getPhaseContext();
         final TransactionalCaptureSupplier transactor = phaseContext.getTransactor();
         final org.spongepowered.api.item.inventory.Slot adapter = ((InventoryAdapter) inv.player.getInventory()).inventoryAdapter$getSlot(index).get();
         final SlotTransaction newTransaction = new SlotTransaction(adapter, oldItem, newItem);

@@ -26,9 +26,10 @@ package org.spongepowered.common.event.tracking.phase.generation;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.ticks.ScheduledTick;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.tick.LocationBasedTickContext;
 
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -54,12 +55,6 @@ final class DeferredScheduledUpdatePhaseState extends GeneralGenerationPhaseStat
         return this.CHUNK_LOAD_MODIFIER;
     }
 
-    @Override
-    public void associateScheduledTickUpdate(
-        final Context asContext, ServerLevel level, final ScheduledTick<?> entry
-    ) {
-    }
-
     public static final class Context extends GenerationContext<Context> {
 
         private BlockPos location;
@@ -81,6 +76,12 @@ final class DeferredScheduledUpdatePhaseState extends GeneralGenerationPhaseStat
 
         public Object type() {
             return Objects.requireNonNull(this.type, "NextTickListEntry was not initialized");
+        }
+
+        @Override
+        public void appendNotifierPreBlockTick(final ServerLevel world, final BlockPos pos, final LocationBasedTickContext<@NonNull ?> phaseContext) {
+            this.applyOwnerIfAvailable(phaseContext::creator);
+            this.applyNotifierIfAvailable(phaseContext::notifier);
         }
     }
 }

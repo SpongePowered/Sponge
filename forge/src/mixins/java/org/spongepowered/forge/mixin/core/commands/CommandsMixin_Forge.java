@@ -80,7 +80,7 @@ public abstract class CommandsMixin_Forge {
         final Function<SuggestionProvider<S>, SuggestionProvider<T>> execute,
         final ServerPlayer player
     ) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(player);
             frame.addContext(EventContextKeys.SUBJECT, (Subject) player);
             final CommandCause sourceToUse = ((CommandSourceStackBridge) sourceToResult).bridge$withCurrentCause();

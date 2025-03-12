@@ -62,7 +62,7 @@ public abstract class CraftingMenuMixin_Inventory {
             return;
         }
 
-        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance().getPhaseContext();
         if (!context.isRestoring()) {
             final TransactionalCaptureSupplier transactor = context.getTransactor();
             transactor.logCraftingPreview((ServerPlayer) player, (CraftingInventory) inv, craftingContainer);

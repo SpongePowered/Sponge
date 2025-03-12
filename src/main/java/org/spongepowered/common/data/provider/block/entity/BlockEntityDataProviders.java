@@ -47,5 +47,6 @@ public final class BlockEntityDataProviders extends DataProviderRegistratorBuild
         SkullData.register(this.registrator);
         StructureBlockData.register(this.registrator);
         CrafterData.register(this.registrator);
+        DecoratedPotData.register(this.registrator);
     }
 }

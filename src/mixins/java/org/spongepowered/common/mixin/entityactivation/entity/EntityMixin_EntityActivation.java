@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.entityactivation.entity;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -35,7 +34,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.activation.ActivationCapabilityBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
-import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
+import org.spongepowered.common.bridge.world.level.storage.ServerLevelDataBridge;
 import org.spongepowered.common.mixin.plugin.entityactivation.EntityActivationRange;
 
 @Mixin(value = Entity.class, priority = 1002)
@@ -55,8 +54,8 @@ public abstract class EntityMixin_EntityActivation implements ActivationCapabili
     private boolean entityActivation$refreshCache = false;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void entityActivation$initActivationRanges(EntityType<?> type, Level world, CallbackInfo ci) {
-        if (world != null && !((LevelBridge) world).bridge$isFake() && ((PrimaryLevelDataBridge) ((LevelAccessor) world).getLevelData()).bridge$valid()) {
+    private void entityActivation$initActivationRanges(EntityType<?> type, Level level, CallbackInfo ci) {
+        if (level != null && !((LevelBridge) level).bridge$isFake() && ((ServerLevelDataBridge) level.getLevelData()).bridge$valid()) {
             EntityActivationRange.initializeEntityActivationState((Entity) (Object) this);
         }
     }

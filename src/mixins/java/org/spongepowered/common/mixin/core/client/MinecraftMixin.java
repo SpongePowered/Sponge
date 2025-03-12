@@ -116,7 +116,7 @@ public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnabl
     private void impl$nullServerRefAndPhaseTracker(Screen screenIn, CallbackInfo ci) {
         ((MinecraftBridge) this).bridge$setTemporaryIntegratedServer(null);
         try {
-            PhaseTracker.SERVER.setThread(null);
+            PhaseTracker.getServerInstanceExplicitly().setThread(null);
         } catch (IllegalAccessException ignore) {
         }
     }

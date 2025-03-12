@@ -64,7 +64,7 @@ public abstract class MemoryServerHandshakePacketListenerImplMixin implements Se
         final SpongeEngineConnection connection = ((ConnectionBridge) this.connection).bridge$getEngineConnection();
         final Component message = Component.text("You are not allowed to log in to this server.");
         final ServerSideConnectionEvent.Intent event = SpongeEventFactory.createServerSideConnectionEventIntent(
-                PhaseTracker.getCauseStackManager().currentCause(), message, message, (ServerSideConnection) connection, false);
+                PhaseTracker.getInstance().currentCause(), message, message, (ServerSideConnection) connection, false);
         if (connection.postGuardedEvent(event)) {
             ci.cancel();
             final net.minecraft.network.chat.Component kickReason = SpongeAdventure.asVanilla(event.message());

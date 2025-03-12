@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.level.entity;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.entity.EntityAccess;
 import net.minecraft.world.level.entity.PersistentEntitySectionManager;
@@ -73,7 +74,7 @@ public class PersistentEntitySectionManagerMixin {
         final ServerLocation location = ServerLocation.of(sw, position.x(), position.y(), position.z());
         final Vec2 rotationVector = mcEntity.getRotationVector();
         final Vector3d rotation = new Vector3d(rotationVector.x, rotationVector.y, 0);
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.SERVER.pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getWorldInstance((ServerLevel) sw).pushCauseFrame()) {
             frame.pushCause(entity);
             final Event construct = SpongeEventFactory.createConstructEntityEventPost(frame.currentCause(), (org.spongepowered.api.entity.Entity) entity, location, rotation,
                 ((EntityType<?>) mcEntity.getType()));

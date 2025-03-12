@@ -147,7 +147,7 @@ public abstract class ArmorStandMixin extends LivingEntityMixin {
         target = "Lnet/minecraft/world/entity/decoration/ArmorStand;brokenByPlayer(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;)V"))
     public void impl$onBrokenByPlayer(final ArmorStand instance, final ServerLevel $$0, final DamageSource $$1)
     {
-        try (final EffectTransactor ignored = PhaseTracker.SERVER.getPhaseContext().getTransactor().ensureEntityDropTransactionEffect((LivingEntity) (Object) this)) {
+        try (final EffectTransactor ignored = PhaseTracker.getWorldInstance($$0).getPhaseContext().getTransactor().ensureEntityDropTransactionEffect((LivingEntity) (Object) this)) {
             this.shadow$brokenByPlayer($$0, $$1);
         }
     }

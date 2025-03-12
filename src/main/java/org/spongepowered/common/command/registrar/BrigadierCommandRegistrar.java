@@ -91,7 +91,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar<
     // For mods and others that use this. We get the plugin container from the CauseStack, if we can.
     public LiteralCommandNode<CommandSourceStack> register(final LiteralArgumentBuilder<CommandSourceStack> command) {
         // Get the plugin container - though we might not have it.
-        final @Nullable PluginContainer container = PhaseTracker.getCauseStackManager().currentCause().first(PluginContainer.class).orElse(null);
+        final @Nullable PluginContainer container = PhaseTracker.getInstance().currentCause().first(PluginContainer.class).orElse(null);
 
         return this.registerInternal(this,
                 container,

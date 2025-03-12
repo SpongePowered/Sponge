@@ -54,7 +54,7 @@ public abstract class ServerGamePacketListenerImplMixin_Neo implements ServerGam
     private RecipeBookMenu.PostPlaceAction neo$onPlaceRecipe(
         final RecipeBookMenu recipeBookMenu, final boolean shift, final boolean isCreative, final RecipeHolder<?> recipe,
         final ServerLevel serverLevel, final net.minecraft.world.entity.player.Inventory inventory) {
-        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.player.serverLevel()).getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         final var player = this.player;
 

@@ -24,8 +24,10 @@
  */
 package org.spongepowered.neoforge.mixin.core.server.level;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -37,10 +39,14 @@ import org.spongepowered.neoforge.mixin.core.world.entity.LivingEntityMixin_Neo;
 @Mixin(ServerPlayer.class)
 public abstract class ServerPlayerMixin_Neo extends LivingEntityMixin_Neo {
 
+    // @formatter:off
+    @Shadow public abstract ServerLevel shadow$serverLevel();
+    // @formatter:on
+
     // override from LivingEntityMixin_Neo
     @Override
     protected void neo$onElytraUse(final CallbackInfo ci) {
-        final PhaseContext<?> context = PhaseTracker.SERVER.getPhaseContext();
+        final PhaseContext<?> context = PhaseTracker.getWorldInstance(this.shadow$serverLevel()).getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         final net.minecraft.server.level.ServerPlayer player = (net.minecraft.server.level.ServerPlayer) (Object) this;
         try (final EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect(player, PlayerInventoryTransaction.EventCreator.STANDARD)) {

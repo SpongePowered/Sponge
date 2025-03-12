@@ -50,7 +50,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
-class MapEntriesValidator<V> implements Generator {
+public class MapEntriesValidator<V> implements Generator {
 
     private final String relativePackageName;
     private final String targetClassSimpleName;
@@ -67,12 +67,12 @@ class MapEntriesValidator<V> implements Generator {
         this(targetRelativePackage, targetClassSimpleName, clazz, registry, map -> (Map<ResourceLocation, ?>) map);
     }
 
-    MapEntriesValidator(
-            final String targetRelativePackage,
-            final String targetClassSimpleName,
-            final Class<?> clazz,
-            final String registry,
-            final Function<Map<?, ?>, Map<ResourceLocation, ?>> mapping
+    public MapEntriesValidator(
+        final String targetRelativePackage,
+        final String targetClassSimpleName,
+        final Class<?> clazz,
+        final String registry,
+        final Function<Map<?, ?>, Map<ResourceLocation, ?>> mapping
     ) {
         this.relativePackageName = targetRelativePackage;
         this.targetClassSimpleName = targetClassSimpleName;

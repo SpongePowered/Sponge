@@ -67,7 +67,7 @@ public abstract class DispenserBlockMixin_Tracker {
     private void tracker$createContextOnDispensing(final ServerLevel worldIn, final BlockState state, final BlockPos pos, final CallbackInfo ci) {
         final SpongeBlockSnapshot spongeBlockSnapshot = ((TrackedWorldBridge) worldIn).bridge$createSnapshot(state, pos, BlockChangeFlags.ALL);
         final LevelChunkBridge mixinChunk = (LevelChunkBridge) worldIn.getChunkAt(pos);
-        this.tracker$context = BlockPhase.State.DISPENSE.createPhaseContext(PhaseTracker.SERVER)
+        this.tracker$context = BlockPhase.State.DISPENSE.createPhaseContext(PhaseTracker.getWorldInstance(worldIn))
                 .source(spongeBlockSnapshot)
                 .creator(() -> mixinChunk.bridge$getBlockCreatorUUID(pos))
                 .notifier(() -> mixinChunk.bridge$getBlockNotifierUUID(pos))
@@ -108,7 +108,7 @@ public abstract class DispenserBlockMixin_Tracker {
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(dispensedItem);
         final List<ItemStackSnapshot> original = new ArrayList<>();
         original.add(snapshot);
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(dispenserTileEntity);
             final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(frame.currentCause(), ImmutableList.of(snapshot), original);
             SpongeCommon.post(dropEvent);

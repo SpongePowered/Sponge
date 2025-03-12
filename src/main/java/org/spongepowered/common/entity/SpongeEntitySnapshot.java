@@ -223,7 +223,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
                 return entity;
             }
         }
-        try (final StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLUGIN);
             final Entity newEntity = world.get().createEntity(this.type(), this.position);
             if (newEntity != null) {

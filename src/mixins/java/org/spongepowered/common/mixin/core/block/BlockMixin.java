@@ -82,7 +82,7 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge {
             return;
         }
         // Go ahead and throw the construction event
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(level.getBlockState(pos));
             final ConstructEntityEvent.Pre eventPre = SpongeEventFactory.createConstructEntityEventPre(
                 frame.currentCause(), ServerLocation.of((ServerWorld) level, xPos, yPos, zPos), Vector3d.ZERO,
@@ -113,7 +113,7 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge {
             return;
         }
         // Go ahead and throw the construction event
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(level.getBlockState(pos));
             final ConstructEntityEvent.Pre eventPre = SpongeEventFactory.createConstructEntityEventPre(
                 frame.currentCause(), ServerLocation.of((ServerWorld) level, xPos, yPos, zPos), new Vector3d(xMov, yMov, zMov),

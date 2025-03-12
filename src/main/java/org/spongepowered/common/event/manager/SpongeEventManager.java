@@ -58,7 +58,6 @@ import org.spongepowered.plugin.PluginContainer;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -70,7 +69,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -96,30 +94,6 @@ public abstract class SpongeEventManager implements EventManager {
         this.handlersByEvent = HashMultimap.create();
         this.registeredListeners = new ReferenceOpenHashSet<>();
         this.checker = new ListenerChecker(ShouldFire.class);
-
-        // Caffeine offers no control over the concurrency level of the
-        // ConcurrentHashMap which backs the cache. By default this concurrency
-        // level is 16. We replace the backing map before any use can occur
-        // a new ConcurrentHashMap with a concurrency level of 1
-        try {
-            // Cache impl class is UnboundedLocalLoadingCache which extends
-            // UnboundedLocalManualCache
-
-            // UnboundedLocalManualCache has a field 'cache' with an
-            // UnboundedLocalCache which contains the actual backing map
-            final Field innerCache = this.handlersCache.getClass().getSuperclass().getDeclaredField("cache");
-            innerCache.setAccessible(true);
-            final Object innerCacheValue = innerCache.get(this.handlersCache);
-            final Class<?> innerCacheClass = innerCacheValue.getClass(); // UnboundedLocalCache
-            final Field cacheData = innerCacheClass.getDeclaredField("data");
-            cacheData.setAccessible(true);
-            final ConcurrentHashMap<Class<? extends Event>, RegisteredListener.Cache> newBackingData =
-                    new ConcurrentHashMap<>(150, 0.75f, 1);
-            cacheData.set(innerCacheValue, newBackingData);
-        } catch (final NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-            SpongeCommon.logger().warn("Failed to set event cache backing array, type was " + this.handlersCache.getClass().getName());
-            SpongeCommon.logger().warn("  Caused by: " + e.getClass().getName() + ": " + e.getMessage());
-        }
     }
 
     private static @Nullable String getHandlerErrorOrNull(final ListenerClassVisitor.DiscoveredMethod method) throws
@@ -392,7 +366,7 @@ public abstract class SpongeEventManager implements EventManager {
     protected final boolean post(final Event event, final List<RegisteredListener<?>> handlers) {
         for (final RegisteredListener handler : handlers) {
             try (
-                    final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame();
+                    final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame();
                     final @Nullable PhaseContext<@NonNull ?> context = SpongeEventManager.createListenerContext(handler.getPlugin())
             ) {
                 frame.pushCause(handler.getPlugin());

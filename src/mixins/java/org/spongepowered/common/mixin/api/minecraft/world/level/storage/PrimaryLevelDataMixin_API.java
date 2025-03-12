@@ -26,38 +26,14 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.storage;
 
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.WorldData;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.ResourceKeyBridge;
-import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 
-import java.util.Optional;
-import java.util.UUID;
-
-@SuppressWarnings("ConstantConditions")
 @Mixin(PrimaryLevelData.class)
 public abstract class PrimaryLevelDataMixin_API implements WorldData, ServerWorldProperties {
-
-    @Override
-    public ResourceKey key() {
-        return ((ResourceKeyBridge) this).bridge$getKey();
-    }
-
-    @Override
-    public Optional<ServerWorld> world() {
-        return Optional.ofNullable((ServerWorld) ((PrimaryLevelDataBridge) this).bridge$world());
-    }
 
     @Override
     public String name() {
         return this.getLevelName();
     }
-
-    @Override
-    public UUID uniqueId() {
-        return ((PrimaryLevelDataBridge) this).bridge$uniqueId();
-    }
-
 }

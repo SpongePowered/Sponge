@@ -60,7 +60,8 @@ public abstract class ChunkStatusTasksMixin_Tracker {
         if (isFake) {
             return;
         }
-        if (!PhaseTracker.SERVER.onSidedThread()) {
+        final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance((ServerLevel) chunk.getLevel());
+        if (!phaseTracker.onSidedThread()) {
             new PrettyPrinter(60).add("Illegal Async Chunk Load").centre().hr()
                     .addWrapped("Sponge relies on knowing when chunks are being loaded as chunks add entities"
                             + " to the parented world for management. These operations are generally not"
@@ -73,10 +74,10 @@ public abstract class ChunkStatusTasksMixin_Tracker {
                     .log(SpongeCommon.logger(), Level.ERROR);
             return;
         }
-        if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
+        if (phaseTracker.getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
             return;
         }
-        GenerationPhase.State.CHUNK_LOADING.createPhaseContext(PhaseTracker.getInstance())
+        GenerationPhase.State.CHUNK_LOADING.createPhaseContext(phaseTracker)
                 .source(chunk)
                 .world((ServerLevel) chunk.getLevel())
                 .chunk(chunk)
@@ -92,12 +93,13 @@ public abstract class ChunkStatusTasksMixin_Tracker {
     )
     private static void tracker$endLoad(final ChunkAccess $$0x, final WorldGenContext $$1x, final GenerationChunkHolder $$2x,
             final CallbackInfoReturnable<ChunkAccess> cir) {
-        if (!((LevelBridge) $$1x.level()).bridge$isFake() && PhaseTracker.SERVER.onSidedThread()) {
-            if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
+        final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance($$1x.level());
+        if (!((LevelBridge) $$1x.level()).bridge$isFake() && phaseTracker.onSidedThread()) {
+            if (phaseTracker.getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
                 return;
             }
             // IF we're not on the main thread,
-            PhaseTracker.getInstance().getPhaseContext().close();
+            phaseTracker.getPhaseContext().close();
         }
     }
 

@@ -77,7 +77,7 @@ public final class UpdateLightSideEffect implements ProcessingSideEffect {
 //            this.skyLightSources.update(this, $$6, $$3, $$8);
             final var pos = oldState.pos();
             final var x = pos.getX() & 15;
-            final var y = pos.getY() & 15;
+            final var y = pos.getY();
             final var z = pos.getZ() & 15;
 
             final var levelChunk = serverWorld.getChunk(pos);

@@ -122,7 +122,7 @@ public final class UseItemPacketState extends BasicPacketState {
         final ItemStack itemStack = context.getItemUsed();
         final boolean success = TrackingUtil.processBlockCaptures(context);
         if (!success && snapshot.isEmpty()) {
-            PhaseTracker.getCauseStackManager().pushCause(player);
+            PhaseTracker.getInstance().pushCause(player);
             PacketPhaseUtil.handlePlayerSlotRestore(player, ItemStackUtil.toNative(itemStack), (InteractionHand) (Object) hand);
         }
     }

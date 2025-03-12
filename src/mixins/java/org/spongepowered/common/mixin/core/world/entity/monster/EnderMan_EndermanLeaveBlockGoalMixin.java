@@ -93,7 +93,7 @@ public abstract class EnderMan_EndermanLeaveBlockGoalMixin extends Goal {
                 final ServerLocation location = ServerLocation.of((ServerWorld) blockReaderIn, blockPosIn.getX(), blockPosIn.getY(), blockPosIn.getZ());
                 final List<ServerLocation> list = new ArrayList<>(1);
                 list.add(location);
-                final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
+                final Cause cause = PhaseTracker.getInstance().currentCause();
                 final ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(cause, list,
                     ((ServerWorld) this.enderman.level()));
                 return !SpongeCommon.post(event);

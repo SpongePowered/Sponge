@@ -31,4 +31,6 @@ import org.spongepowered.common.world.level.chunk.storage.SpongeIOWorkerType;
 public interface IOWorkerBridge {
 
     void bridge$setDimension(SpongeIOWorkerType type, ResourceKey<Level> dimension);
+
+    void bridge$forciblyClear();
 }

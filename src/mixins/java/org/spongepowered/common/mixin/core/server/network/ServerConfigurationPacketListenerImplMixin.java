@@ -150,7 +150,7 @@ public abstract class ServerConfigurationPacketListenerImplMixin extends ServerC
             public void start(final Consumer<Packet<?>> var1) {
                 final ServerSideConnection connection = (ServerSideConnection) ((ConnectionBridge) ServerConfigurationPacketListenerImplMixin.this.connection).bridge$getEngineConnection();
                 final ServerSideConnectionEvent.Configuration event = SpongeEventFactory.createServerSideConnectionEventConfiguration(
-                        PhaseTracker.getCauseStackManager().currentCause(),
+                        PhaseTracker.getInstance().currentCause(),
                         connection,
                         SpongeGameProfile.of(ServerConfigurationPacketListenerImplMixin.this.gameProfile));
                 SpongeCommon.post(event);

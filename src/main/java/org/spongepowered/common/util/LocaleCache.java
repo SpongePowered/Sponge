@@ -24,18 +24,18 @@
  */
 package org.spongepowered.common.util;
 
-import com.google.common.collect.Maps;
 import org.apache.commons.lang3.LocaleUtils;
 import org.spongepowered.common.SpongeCommon;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 public final class LocaleCache {
 
-    private static final Map<String, Locale> LOCALE_CACHE = Maps.newHashMap();
-    private static final Function<String, Locale> LOCALE_FUNCTION = new Function<String, Locale>() {
+    private static final Map<String, Locale> LOCALE_CACHE = new ConcurrentHashMap<>();
+    private static final Function<String, Locale> LOCALE_FUNCTION = new Function<>() {
         @Override
         public Locale apply(String key) {
             try {

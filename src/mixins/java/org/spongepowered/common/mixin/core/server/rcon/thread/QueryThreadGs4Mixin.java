@@ -38,6 +38,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -71,7 +72,7 @@ public abstract class QueryThreadGs4Mixin {
             return;
         }
 
-        final Cause currentCause = Sponge.server().causeStackManager().currentCause();
+        final Cause currentCause = PhaseTracker.getInstance().currentCause();
         final QueryServerEvent.Basic event = SpongeEventFactory.createQueryServerEventBasic(currentCause,
                 (InetSocketAddress) datagramPacket.getSocketAddress(),
                 "SMP",
@@ -99,7 +100,7 @@ public abstract class QueryThreadGs4Mixin {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/server/rcon/NetworkDataOutputStream;reset()V"))
     public void impl$basicSendTo(DatagramPacket datagramPacket, CallbackInfoReturnable<byte[]> cir) throws IOException {
 
-        final Cause currentCause = Sponge.server().causeStackManager().currentCause();
+        final Cause currentCause = PhaseTracker.getInstance().currentCause();
         final QueryServerEvent.Full event = SpongeEventFactory.createQueryServerEventFull(currentCause,
                 (InetSocketAddress) datagramPacket.getSocketAddress(),
                 new LinkedHashMap<>(),

@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.mixin.tracker.world.ticks;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.ticks.LevelChunkTicks;
 import net.minecraft.world.ticks.LevelTicks;
 import net.minecraft.world.ticks.ScheduledTick;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.world.ticks.ScheduledTickBridge;
+import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 
@@ -41,42 +41,31 @@ import java.util.List;
 import java.util.function.BiConsumer;
 
 @Mixin(LevelTicks.class)
-public abstract class LevelTicksMixin_Tracker {
+public abstract class LevelTicksMixin_Tracker<T> {
 
     // @formatter:off
     @Shadow @Final private List<ScheduledTick<?>> alreadyRunThisTick;
     // @formatter:on
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    @Redirect(method = "schedule(Lnet/minecraft/world/ticks/ScheduledTick;)V",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/ticks/LevelChunkTicks;schedule(Lnet/minecraft/world/ticks/ScheduledTick;)V")
-    )
-    private void tracker$associatePhaseContextWithTickEntry(LevelChunkTicks instance, ScheduledTick<?> scheduledTick) {
-        instance.schedule(scheduledTick);
-    }
-
-    @Redirect(method = "runCollectedTicks",
+    @WrapOperation(method = "runCollectedTicks",
         at = @At(value = "INVOKE",
             target = "Ljava/util/function/BiConsumer;accept(Ljava/lang/Object;Ljava/lang/Object;)V"
         )
     )
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    private void tracker$wrapTickConsumer(BiConsumer consumer, Object blockPos, Object ticking) {
+    @SuppressWarnings({"rawtypes"})
+    private void tracker$wrapTickConsumer(final BiConsumer consumer, final Object blockPos, final Object ticking, Operation<Void> original) {
         // Technically we can grab the latest ScheduledTick from the accepted list
-        final var thisScheduledTick = this.alreadyRunThisTick.get(this.alreadyRunThisTick.size() - 1);
-        if (((ScheduledTickBridge) (Object) thisScheduledTick).bridge$isPartOfWorldGeneration()) {
-            try (final var context = GenerationPhase.State.DEFERRED_SCHEDULED_UPDATE.createPhaseContext(
-                    PhaseTracker.SERVER)
-                .source(this)
-                .scheduledUpdate((BlockPos) blockPos, ticking)
-            ) {
-                context.buildAndSwitch();
-                consumer.accept(blockPos, ticking);
-            }
-        } else {
-            consumer.accept(blockPos, ticking);
+        final var thisScheduledTick = this.alreadyRunThisTick.getLast();
+        final CreatorTrackedBridge bridge = (CreatorTrackedBridge) (Object) thisScheduledTick;
+        try (final var context = GenerationPhase.State.DEFERRED_SCHEDULED_UPDATE.createPhaseContext(
+                PhaseTracker.getWorldInstance())
+            .source(this)
+            .creator(bridge::tracker$getCreatorUUID)
+            .notifier(bridge::tracker$getNotifierUUID)
+            .scheduledUpdate((BlockPos) blockPos, ticking)
+        ) {
+            context.buildAndSwitch();
+            original.call(consumer, blockPos, ticking);
         }
     }
 }

@@ -63,7 +63,8 @@ public abstract class ChunkMapMixin_Tracker {
     @Redirect(method = "lambda$prepareTickingChunk$25",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;startTickingChunk(Lnet/minecraft/world/level/chunk/LevelChunk;)V"))
     private void tracker$wrapUnpackTicks(final ServerLevel level, final LevelChunk chunk) {
-        if (!PhaseTracker.SERVER.onSidedThread()) {
+        final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance(level);
+        if (!phaseTracker.onSidedThread()) {
             new PrettyPrinter(60).add("Illegal Async Chunk Unpacking").centre().hr()
                 .addWrapped("Someone is attempting to unpack chunk scheduled updates while off the main thread, this is" +
                     "generally unsupported and Sponge would appreciate a report about this. Please attach " +
@@ -76,10 +77,10 @@ public abstract class ChunkMapMixin_Tracker {
                 .log(SpongeCommon.logger(), Level.ERROR);
             return;
         }
-        if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_LOADING) {
+        if (phaseTracker.getCurrentState() == GenerationPhase.State.CHUNK_LOADING) {
             return;
         }
-        try (final PhaseContext<@NonNull ?> ctx = GenerationPhase.State.CHUNK_LOADING.createPhaseContext(PhaseTracker.getInstance())
+        try (final PhaseContext<@NonNull ?> ctx = GenerationPhase.State.CHUNK_LOADING.createPhaseContext(phaseTracker)
             .source(chunk)
             .world(level)
             .chunk(chunk)) {

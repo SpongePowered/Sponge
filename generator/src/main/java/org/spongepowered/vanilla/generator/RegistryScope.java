@@ -38,7 +38,7 @@ import java.util.Objects;
 
 import javax.lang.model.element.Modifier;
 
-enum RegistryScope {
+public enum RegistryScope {
     GAME {
         @Override
         protected CodeBlock registryKeyToReference() {

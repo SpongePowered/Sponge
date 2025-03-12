@@ -83,6 +83,9 @@ public abstract class HopperBlockEntityMixin_Inventory_Vanilla {
             // Call event
             InventoryEventFactory.callTransferPost(capture, (Inventory) iInventory, InventoryUtil.toInventory(iInventory), originalStack, sourceSlotTransaction);
         }
+
+        InventoryUtil.updateInventoryNoEvents(var3);
+        InventoryUtil.updateInventoryNoEvents(iInventory);
     }
 
 }

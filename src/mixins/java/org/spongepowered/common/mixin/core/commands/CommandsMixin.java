@@ -102,7 +102,7 @@ public abstract class CommandsMixin implements CommandsBridge {
             target = "Lnet/minecraft/server/commands/AdvancementCommands;register(Lcom/mojang/brigadier/CommandDispatcher;)V"))
     private void impl$setupStackFrameOnInit(final CommandDispatcher<CommandSourceStack> dispatcher) {
         if (Launch.instance().pluginManager().isReady()) {
-            this.impl$initFrame = PhaseTracker.getCauseStackManager().pushCauseFrame();
+            this.impl$initFrame = PhaseTracker.getInstance().pushCauseFrame();
             this.impl$initFrame.pushCause(Launch.instance().minecraftPlugin());
         }
         AdvancementCommands.register(dispatcher);
@@ -112,7 +112,7 @@ public abstract class CommandsMixin implements CommandsBridge {
     private void impl$tellDispatcherCommandsAreRegistered(final CallbackInfo ci) {
         if (this.impl$initFrame != null) {
             this.impl$initFrame.popCause();
-            PhaseTracker.getCauseStackManager().popCauseFrame(this.impl$initFrame);
+            PhaseTracker.getInstance().popCauseFrame(this.impl$initFrame);
             this.impl$initFrame = null;
         }
     }

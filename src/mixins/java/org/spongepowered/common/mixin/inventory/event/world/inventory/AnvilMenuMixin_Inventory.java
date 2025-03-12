@@ -49,7 +49,7 @@ public abstract class AnvilMenuMixin_Inventory extends ItemCombinerMenuMixin_Inv
 
     @Inject(method = "createResult", at = @At(value = "RETURN"))
     private void impl$throwUpdateAnvilEvent(final CallbackInfo ci) {
-        if (!ShouldFire.UPDATE_ANVIL_EVENT || !PhaseTracker.SERVER.onSidedThread()) {
+        if (!ShouldFire.UPDATE_ANVIL_EVENT || !PhaseTracker.getWorldInstance().onSidedThread()) {
             return;
         }
 

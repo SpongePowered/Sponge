@@ -134,7 +134,7 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
             return;
         }
 
-        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance().getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
 
         transactor.logCrafting(thePlayer, this.impl$craftedStack, (CraftingInventory) craftInv, this.impl$onTakeRecipe);

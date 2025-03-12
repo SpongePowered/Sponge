@@ -125,7 +125,7 @@ public final class ReflectionUtil {
         public MethodCheckerClassVisitor(
             final String targetMethodForEnvironment, final Class<?>[] methodParameters, final Class<?> returnType
         ) {
-            super(Opcodes.ASM8);
+            super(Opcodes.ASM9);
             this.targetMethod = targetMethodForEnvironment;
             final StringJoiner joiner = new StringJoiner("", "(", ")");
             for (final Class<?> clazz : methodParameters) {

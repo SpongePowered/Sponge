@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.world.volume.buffer.archetype;
 
+import net.minecraft.server.level.ServerLevel;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
@@ -276,7 +277,7 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
         Objects.requireNonNull(target, "Target world cannot be null");
         Objects.requireNonNull(placement, "Target position cannot be null");
         try (final PhaseContext<@NonNull ?> context = PluginPhase.State.VOLUME_STREAM_APPLICATION
-            .createPhaseContext(PhaseTracker.SERVER)
+            .createPhaseContext(PhaseTracker.getWorldInstance((ServerLevel) target))
             .spawnType(spawnContext)
             .source(this)) {
             context.buildAndSwitch();

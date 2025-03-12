@@ -72,10 +72,10 @@ public abstract class WolfMixin extends AgableMobMixin implements AggressiveEnti
             handStack.grow(1);
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(handStack);
             handStack.shrink(1);
-            PhaseTracker.getCauseStackManager().pushCause(snapshot);
+            PhaseTracker.getInstance().pushCause(snapshot);
             this.shadow$tryToTame(player);
         } finally {
-            PhaseTracker.getCauseStackManager().popCause();
+            PhaseTracker.getInstance().popCause();
         }
     }
 
@@ -85,13 +85,13 @@ public abstract class WolfMixin extends AgableMobMixin implements AggressiveEnti
     private void impl$onTame(final Player player, final CallbackInfo ci) {
         try {
 
-            PhaseTracker.getCauseStackManager().pushCause(player);
-            if (SpongeCommon.post(SpongeEventFactory.createTameEntityEvent(PhaseTracker.getCauseStackManager().currentCause(), (Wolf) this))) {
+            PhaseTracker.getInstance().pushCause(player);
+            if (SpongeCommon.post(SpongeEventFactory.createTameEntityEvent(PhaseTracker.getInstance().currentCause(), (Wolf) this))) {
                 this.shadow$level().broadcastEntityEvent((net.minecraft.world.entity.animal.Wolf) (Object) this, (byte)6);
                 ci.cancel();
             }
         } finally {
-            PhaseTracker.getCauseStackManager().popCause();
+            PhaseTracker.getInstance().popCause();
         }
     }
 

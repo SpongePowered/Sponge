@@ -106,7 +106,7 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
             final TaskChainer $$13,
             final CallbackInfo ci
     ) {
-        this.impl$cause = PhaseTracker.getCauseStackManager().currentCause();
+        this.impl$cause = PhaseTracker.getInstance().currentCause();
         final EventContext context = this.impl$cause.context();
 
         context.get(EventContextKeys.LOCATION).ifPresent(x ->{

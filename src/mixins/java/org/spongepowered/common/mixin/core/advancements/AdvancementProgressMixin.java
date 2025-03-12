@@ -251,7 +251,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
             criterionProgress.grant();
             return true;
         }
-        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
+        final Cause cause = PhaseTracker.getInstance().currentCause();
         final ServerPlayer player = ((PlayerAdvancementsBridge) this.impl$playerAdvancements).bridge$getPlayer();
         final CriterionProgress progress = (CriterionProgress) criterionProgress;
         final AdvancementCriterion criterion = progress.criterion();
@@ -306,7 +306,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
             criterionProgress.revoke();
             return true;
         }
-        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
+        final Cause cause = PhaseTracker.getInstance().currentCause();
         final ServerPlayer player = ((PlayerAdvancementsBridge) this.impl$playerAdvancements).bridge$getPlayer();
         final CriterionProgress progress = (CriterionProgress) criterionProgress;
         final AdvancementCriterion criterion = progress.criterion();

@@ -53,7 +53,7 @@ public final class SpongeCommandCauseFactory implements CommandCause.Factory {
 
     @Override
     public @NonNull CommandCause create() {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             final Cause cause = frame.currentCause();
             final CommandSource iCommandSource =
                     cause.first(CommandSource.class).orElseGet(() -> SpongeCommon.game().systemSubject());

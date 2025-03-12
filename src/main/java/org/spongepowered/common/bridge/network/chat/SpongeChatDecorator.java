@@ -42,7 +42,7 @@ public class SpongeChatDecorator implements ChatDecorator {
     @Override
     public Component decorate(@Nullable final ServerPlayer player, final Component message) {
 
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.SERVER.pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getServerInstanceExplicitly().pushCauseFrame()) {
             if (player != null) {
                 frame.pushCause(player);
             }

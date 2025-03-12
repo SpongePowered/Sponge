@@ -54,7 +54,7 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla implements Serve
         final RecipeHolder<?> recipe, final ServerLevel serverLevel,
         final net.minecraft.world.entity.player.Inventory inventory) {
         final var player = inventory.player;
-        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(serverLevel).getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
 
         final Inventory craftInv = ((Inventory) player.containerMenu).query(QueryTypes.INVENTORY_TYPE.get().of(CraftingInventory.class));

@@ -47,7 +47,7 @@ public abstract class OcelotMixin extends AgableMobMixin {
         int random = rand.nextInt(bound);
         if (random == 0) {
             stack.setCount(stack.getCount() + 1);
-            try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            try (CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
                 frame.pushCause(player);
                 if (!SpongeCommon.post(SpongeEventFactory.createTameEntityEvent(frame.currentCause(), (Ocelot) this))) {
                     stack.setCount(stack.getCount() - 1);

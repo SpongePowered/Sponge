@@ -40,7 +40,7 @@ public abstract class AbstractVillagerMixin_API extends AgeableMobMixin_API impl
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.requireValue(Keys.CUSTOMER).asImmutable());
+        this.getValue(Keys.CUSTOMER).map(Value::asImmutable).ifPresent(values::add);
 
         return values;
     }

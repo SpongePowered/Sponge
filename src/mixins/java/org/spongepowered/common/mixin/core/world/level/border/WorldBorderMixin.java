@@ -158,7 +158,7 @@ public abstract class WorldBorderMixin implements WorldBorderBridge {
             final Optional<ServerWorld> world = Sponge.server().worldManager().world(this.impl$associatedWorld);
             if (world.isPresent()) {
                 final ChangeWorldBorderEvent.World event = SpongeEventFactory.createChangeWorldBorderEventWorld(
-                        PhaseTracker.getCauseStackManager().currentCause(),
+                        PhaseTracker.getInstance().currentCause(),
                         Optional.of(proposed.get()),
                         Optional.of(proposed.get()),
                         Optional.of(this.bridge$asImmutable()),

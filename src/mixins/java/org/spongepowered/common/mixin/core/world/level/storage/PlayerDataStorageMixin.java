@@ -61,7 +61,7 @@ public abstract class PlayerDataStorageMixin {
             final Instant creationTime = Files.exists(file) ? Files.readAttributes(file, BasicFileAttributes.class).creationTime().toInstant() : null;
             ((SpongeServer) SpongeCommon.server()).getPlayerDataManager().readLegacyPlayerData((ServerPlayer) playerEntity, compound, creationTime);
         }
-        ((ServerPlayer) playerEntity).offer(Keys.LAST_DATE_PLAYED, Instant.now());
+        ((ServerPlayer) playerEntity).offer(Keys.LAST_DATE_JOINED, Instant.now());
     }
 
     @Inject(method = "save",

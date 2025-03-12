@@ -24,18 +24,21 @@
  */
 package org.spongepowered.common.mixin.core.world.level.storage;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
+import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.util.Constants;
 
 @Mixin(LevelStorageSource.LevelStorageAccess.class)
@@ -51,16 +54,19 @@ public abstract class LevelStorageSource_LevelStorageAccessMixin {
         return "Lock for world " + this.levelDirectory.path() + " is no longer valid!";
     }
 
-    @Redirect(
+    @WrapOperation(
             method = "saveDataTag(Lnet/minecraft/core/RegistryAccess;Lnet/minecraft/world/level/storage/WorldData;Lnet/minecraft/nbt/CompoundTag;)V",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/nbt/CompoundTag;put(Ljava/lang/String;Lnet/minecraft/nbt/Tag;)Lnet/minecraft/nbt/Tag;"
+                    target = "Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;saveLevelData(Lnet/minecraft/nbt/CompoundTag;)V"
             )
     )
-    private Tag impl$saveSpongeLevelData(final CompoundTag root, final String path, final Tag data, final RegistryAccess p_237288_1_,
-            final WorldData levelData) {
+    private void impl$saveSpongeLevelData(final LevelStorageSource.LevelStorageAccess instance, final CompoundTag root, final Operation<Void> original,
+            final RegistryAccess registry, final WorldData levelData, final @Nullable CompoundTag tag) {
         root.put(Constants.Sponge.Data.V2.SPONGE_DATA, ((PrimaryLevelDataBridge) levelData).bridge$writeSpongeLevelData());
-        return root.put(path, data);
+        if (DataUtil.syncDataToTag(levelData)) {
+            root.merge(((DataCompoundHolder) levelData).data$getCompound());
+        }
+        original.call(instance, root);
     }
 }

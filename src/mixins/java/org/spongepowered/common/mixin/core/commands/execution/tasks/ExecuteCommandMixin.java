@@ -71,7 +71,7 @@ public abstract class ExecuteCommandMixin {
         final String originalCommand = origSplitArg[0];
         final String originalArgs = origSplitArg.length == 2 ? origSplitArg[1] : "";
 
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             final CommandSourceStackBridge sourceBridge = (CommandSourceStackBridge) source;
             frame.addContext(EventContextKeys.COMMAND, this.commandInput);
             sourceBridge.bridge$updateFrameFromCommandSource(frame);

@@ -61,7 +61,7 @@ public final class SwitchHotbarNumberPressState extends BasicInventoryPacketStat
             SpongeCommon.logger().warn("Entities are being captured but not being processed");
         }
         return SpongeEventFactory.createClickContainerEventNumberPress(
-            PhaseTracker.getCauseStackManager().currentCause(),
+            PhaseTracker.getInstance().currentCause(),
             openContainer, transaction, Optional.ofNullable(slot), slotTransactions, usedButton
         );
     }

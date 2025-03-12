@@ -59,6 +59,22 @@ public class SpongeRegistryType<T> implements RegistryType<T> {
     }
 
     @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof SpongeRegistryType<?> other)) {
+            return false;
+        }
+        return Objects.equals(this.root, other.root) && Objects.equals(this.location, other.location);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.root, this.location);
+    }
+
+    @Override
     public String toString() {
         return new StringJoiner(", ", this.getClass().getSimpleName() + "[", "]")
                 .add("root=" + this.root)

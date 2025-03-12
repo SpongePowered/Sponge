@@ -60,6 +60,7 @@ import org.spongepowered.common.bridge.advancements.CriterionBridge;
 import org.spongepowered.common.bridge.advancements.CriterionProgressBridge;
 import org.spongepowered.common.bridge.server.PlayerAdvancementsBridge;
 import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.time.Instant;
 import java.util.Map;
@@ -194,7 +195,7 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
         }
 
         final AdvancementEvent.Grant event = SpongeEventFactory.createAdvancementEventGrant(
-                Sponge.server().causeStackManager().currentCause(),
+                PhaseTracker.getInstance().currentCause(),
                 channel,
                 Optional.of(channel),
                 this.impl$message == null ? Component.empty() : this.impl$message,
@@ -218,7 +219,7 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
                      target = "Lnet/minecraft/server/PlayerAdvancements;markForVisibilityUpdate(Lnet/minecraft/advancements/AdvancementHolder;)V"))
     private void impl$callRevokeEventIfSuccessful(final AdvancementHolder advancement, final String string, final CallbackInfoReturnable<Boolean> ci, boolean var0) {
         if (var0) {
-            final Cause currentCause = Sponge.server().causeStackManager().currentCause();
+            final Cause currentCause = PhaseTracker.getInstance().currentCause();
             SpongeCommon.post(SpongeEventFactory.createAdvancementEventRevoke(currentCause, (org.spongepowered.api.advancement.Advancement) (Object) advancement.value(), (ResourceKey) (Object) advancement.id(), (ServerPlayer) this.player));
         }
     }

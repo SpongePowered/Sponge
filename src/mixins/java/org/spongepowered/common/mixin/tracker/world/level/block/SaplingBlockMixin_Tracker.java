@@ -57,11 +57,12 @@ public class SaplingBlockMixin_Tracker {
             return instance.growTree(level, generator, pos, state, random);
         }
 
-        if (PhaseTracker.getInstance().getPhaseContext() instanceof GrowablePhaseContext) {
+        final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance(level);
+        if (phaseTracker.getPhaseContext() instanceof GrowablePhaseContext) {
             instance.growTree(level, generator, pos, state, random);
-        } else if (PhaseTracker.getInstance().getPhaseContext().doesBlockEventTracking()) {
+        } else if (phaseTracker.getPhaseContext().doesBlockEventTracking()) {
             // We can enter the new phase state.
-            try (GrowablePhaseContext context = BlockPhase.State.GROWING.createPhaseContext(PhaseTracker.SERVER)
+            try (GrowablePhaseContext context = BlockPhase.State.GROWING.createPhaseContext(phaseTracker)
                 .world(level)
                 .block(state)
                 .pos(pos)) {

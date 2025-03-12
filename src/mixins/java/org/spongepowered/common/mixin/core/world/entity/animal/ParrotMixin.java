@@ -48,7 +48,7 @@ public abstract class ParrotMixin extends AgableMobMixin {
         final int random = rand.nextInt(bound);
         if (random == 0) {
             stack.setCount(stack.getCount() + 1);
-            try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            try (CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
                 frame.pushCause(player);
                 if (!SpongeCommon.post(SpongeEventFactory.createTameEntityEvent(frame.currentCause(), (Parrot) this))) {
                     stack.setCount(stack.getCount() - 1);

@@ -37,6 +37,7 @@ import org.gradle.api.tasks.SourceSet;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -44,6 +45,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.StringJoiner;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -60,51 +63,116 @@ public abstract class SpongeImplementationExtension {
         this.logger = logger;
     }
 
-    public void copyModulesExcludingProvided(final Configuration source, final Configuration provided, final Configuration target) {
-        final DependencyHandler deps = this.project.getDependencies();
+    private record Module(ModuleIdentifier id, String classifier) {}
 
-        final Map<ModuleIdentifier, String> providedModuleVersions = new HashMap<>();
-        for (ResolvedArtifact artifact : provided.getResolvedConfiguration().getResolvedArtifacts()) {
+    public String buildRuntimeFileNames(final Configuration config) {
+        final Configuration runtimeConfig = this.project.getConfigurations().getByName("runtimeClasspath");
+
+        final Map<Module, String> runtimeFileNames = new HashMap<>();
+        for (final ResolvedArtifact artifact : runtimeConfig.getResolvedConfiguration().getResolvedArtifacts()) {
             final ComponentIdentifier id = artifact.getId().getComponentIdentifier();
-            if (id instanceof ModuleComponentIdentifier) {
-                final ModuleComponentIdentifier moduleId = (ModuleComponentIdentifier) id;
+            if (id instanceof ModuleComponentIdentifier moduleId) {
+                runtimeFileNames.put(new Module(moduleId.getModuleIdentifier(), artifact.getClassifier()), artifact.getFile().getName());
+            }
+        }
+
+        final StringJoiner joiner = new StringJoiner(File.pathSeparator);
+
+        for (final ResolvedArtifact artifact : config.getResolvedConfiguration().getResolvedArtifacts()) {
+            final ComponentIdentifier id = artifact.getId().getComponentIdentifier();
+
+            String fileName = null;
+            if (id instanceof ModuleComponentIdentifier moduleId) {
+                fileName = runtimeFileNames.get(new Module(moduleId.getModuleIdentifier(), artifact.getClassifier()));
+            }
+
+            if (fileName == null) {
+                fileName = artifact.getFile().getName();
+            }
+
+            joiner.add(fileName);
+        }
+
+        return joiner.toString();
+    }
+
+    private String buildDependencyNotation(final ModuleComponentIdentifier moduleId, final String classifier) {
+        final ModuleIdentifier module = moduleId.getModuleIdentifier();
+        String notation = module.getGroup() + ":" + module.getName() + ":" + moduleId.getVersion();
+        if (classifier != null) {
+            notation += ":" + classifier;
+        }
+        return notation;
+    }
+
+    public void copyModulesExcludingProvided(final Configuration source, final Configuration provided, final Configuration target) {
+        final Map<ModuleIdentifier, String> providedModuleVersions = new HashMap<>();
+        for (final ResolvedArtifact artifact : provided.getResolvedConfiguration().getResolvedArtifacts()) {
+            final ComponentIdentifier id = artifact.getId().getComponentIdentifier();
+            if (id instanceof ModuleComponentIdentifier moduleId) {
                 providedModuleVersions.put(moduleId.getModuleIdentifier(), moduleId.getVersion());
             }
         }
 
+        this.copyModulesExcludingPredicate(source, (moduleId) -> {
+            final ModuleIdentifier module = moduleId.getModuleIdentifier();
+            final String version = moduleId.getVersion();
+
+            final String providedVersion = providedModuleVersions.get(module);
+            if (providedVersion == null) {
+                return false;
+            }
+
+            if (!providedVersion.equals(version)) {
+                this.logger.warn("Version mismatch for module {}. {} expects {} but {} has {}.", module, source.getName(), version, provided.getName(), providedVersion);
+            }
+            return true;
+        }, target);
+    }
+
+    public void copyModulesExcludingPrefix(final Configuration source, final String group, final String namePrefix, final Configuration target) {
+        this.copyModulesExcludingPredicate(source, (moduleId) -> {
+            final ModuleIdentifier module = moduleId.getModuleIdentifier();
+            return module.getGroup().equals(group) && module.getName().startsWith(namePrefix);
+        }, target);
+    }
+
+    public void copyModulesExcludingExact(final Configuration source, final String group, final String name, final Configuration target) {
+        this.copyModulesExcludingPredicate(source, (moduleId) -> {
+            final ModuleIdentifier module = moduleId.getModuleIdentifier();
+            return module.getGroup().equals(group) && module.getName().equals(name);
+        }, target);
+    }
+
+    private void copyModulesExcludingPredicate(final Configuration source, final Predicate<ModuleComponentIdentifier> predicate, final Configuration target) {
+        final DependencyHandler deps = this.project.getDependencies();
+
         for (ResolvedArtifact artifact : source.getResolvedConfiguration().getResolvedArtifacts()) {
             final ComponentIdentifier id = artifact.getId().getComponentIdentifier();
-            if (id instanceof ModuleComponentIdentifier) {
-                final ModuleComponentIdentifier moduleId = (ModuleComponentIdentifier) id;
-                final ModuleIdentifier module = moduleId.getModuleIdentifier();
-                final String version = moduleId.getVersion();
-
-                final String providedVersion = providedModuleVersions.get(module);
-                if (providedVersion == null) {
-                    ModuleDependency dep = (ModuleDependency) deps.create(module.getGroup() + ":" + module.getName() + ":" + version);
-                    dep.setTransitive(false);
-                    target.getDependencies().add(dep);
-                } else if (!providedVersion.equals(version)) {
-                    this.logger.warn("Version mismatch for module {}. {} expects {} but {} has {}.", module, source.getName(), version, provided.getName(), providedVersion);
+            if (id instanceof ModuleComponentIdentifier moduleId) {
+                if (predicate.test(moduleId)) {
+                    continue;
                 }
+
+                final ModuleDependency dep = (ModuleDependency) deps.create(this.buildDependencyNotation(moduleId, artifact.getClassifier()));
+                dep.setTransitive(false);
+                target.getDependencies().add(dep);
             }
 
             // projects are not copied because we cannot always recreate properly a project dependency from the resolved artefact
         }
     }
 
-    public void applyNamedDependencyOnOutput(final Project originProject, final SourceSet sourceAdding, final SourceSet targetSource, final Project implProject, final String dependencyConfigName) {
-        implProject.getLogger().lifecycle(
-            "[{}] Adding {}({}) to {}({}).{}",
-            implProject.getName(),
-            originProject.getPath(),
-            sourceAdding.getName(),
-            implProject.getPath(),
-            targetSource.getName(),
-            dependencyConfigName
-        );
+    public void addDependencyToRuntimeOnly(final SourceSet source, final SourceSet target) {
+        this.addDependencyTo(source, target.getRuntimeOnlyConfigurationName());
+    }
 
-        implProject.getDependencies().add(dependencyConfigName, sourceAdding.getOutput());
+    public void addDependencyToImplementation(final SourceSet source, final SourceSet target) {
+        this.addDependencyTo(source, target.getImplementationConfigurationName());
+    }
+
+    public void addDependencyTo(final SourceSet source, final String targetConfig) {
+        this.project.getDependencies().add(targetConfig, source.getOutput());
     }
 
     public String generateImplementationVersionString(final String apiVersion, final String minecraftVersion, final String implRecommendedVersion) {

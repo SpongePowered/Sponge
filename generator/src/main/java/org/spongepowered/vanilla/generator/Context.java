@@ -43,7 +43,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-final class Context {
+public final class Context {
 
     static final String INDENT = "    ";
     static final String BASE_PACKAGE = "org.spongepowered.api";

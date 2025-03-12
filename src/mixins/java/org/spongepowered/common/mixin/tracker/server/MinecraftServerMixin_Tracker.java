@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.mixin.tracker.server;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.minecraft.SystemReport;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -63,7 +64,7 @@ public abstract class MinecraftServerMixin_Tracker extends BlockableEventLoopMix
 
     @Inject(method = "tickServer", at = @At("RETURN"))
     private void tracker$ensurePhaseTrackerEmpty(final BooleanSupplier hasTimeLeft, final CallbackInfo ci) {
-        PhaseTracker.SERVER.ensureEmpty();
+        PhaseTracker.getServerInstanceExplicitly().ensureEmpty();
     }
 
     @Redirect(
@@ -76,7 +77,7 @@ public abstract class MinecraftServerMixin_Tracker extends BlockableEventLoopMix
     private void tracker$wrapUpdateTimeLightAndEntities(final MinecraftServer minecraftServer, final BooleanSupplier hasTimeLeft) {
         try (
             final PhaseContext<@NonNull ?> context = TickPhase.Tick.SERVER_TICK
-                .createPhaseContext(PhaseTracker.SERVER)
+                .createPhaseContext(PhaseTracker.getServerInstanceExplicitly())
                 .server(minecraftServer)
         ) {
             context.buildAndSwitch();
@@ -94,7 +95,7 @@ public abstract class MinecraftServerMixin_Tracker extends BlockableEventLoopMix
     private void tracker$wrapWorldTick(final ServerLevel serverWorld, final BooleanSupplier hasTimeLeft) {
         try (
             final PhaseContext<@NonNull ?> context = TickPhase.Tick.WORLD_TICK
-                .createPhaseContext(PhaseTracker.SERVER)
+                .createPhaseContext(PhaseTracker.getWorldInstance(serverWorld))
                 .world(serverWorld)
         ) {
             context.buildAndSwitch();
@@ -104,7 +105,7 @@ public abstract class MinecraftServerMixin_Tracker extends BlockableEventLoopMix
 
     @Inject(method = "wrapRunnable(Ljava/lang/Runnable;)Lnet/minecraft/server/TickTask;", at = @At("RETURN"))
     private void tracker$associatePhaseContextWithWrappedTask(final Runnable runnable, final CallbackInfoReturnable<TickTask> cir) {        final TickTask returnValue = cir.getReturnValue();
-        if (!PhaseTracker.SERVER.onSidedThread()) {
+        if (!PhaseTracker.getServerInstanceExplicitly().onSidedThread()) {
             final PhaseContext<@NonNull ?> phaseContext = PhaseTracker.getInstance().getPhaseContext();
             if (phaseContext.isEmpty()) {
                 return;
@@ -113,21 +114,14 @@ public abstract class MinecraftServerMixin_Tracker extends BlockableEventLoopMix
         }
     }
 
-    @Redirect(
-        method = "doRunTask(Lnet/minecraft/server/TickTask;)V",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/util/thread/ReentrantBlockableEventLoop;doRunTask(Ljava/lang/Runnable;)V"
-        )
-    )
-    @SuppressWarnings("unchecked")
-    private void tracker$wrapAndPerformContextSwitch(final ReentrantBlockableEventLoop<?> thisServer, final Runnable runnable) {
-        try (final PhaseContext<@NonNull ?> context = PluginPhase.State.DELAYED_TASK.createPhaseContext(PhaseTracker.SERVER)
-            .source(runnable)
-            .setDelayedContextPopulator(((TickTaskBridge) runnable).bridge$getFrameModifier().orElse(null))
+    @WrapMethod(method = "doRunTask(Lnet/minecraft/server/TickTask;)V")
+    private void tracker$wrapAndPerformContextSwitch(final TickTask task, final Operation<Void> original) {
+        try (final PhaseContext<@NonNull ?> context = PluginPhase.State.DELAYED_TASK.createPhaseContext(PhaseTracker.getServerInstanceExplicitly())
+            .source(task)
+            .setDelayedContextPopulator(((TickTaskBridge) task).bridge$getFrameModifier().orElse(null))
         ) {
             context.buildAndSwitch();
-            super.shadow$doRunTask(runnable);
+            original.call(task);
         }
     }
 

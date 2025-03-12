@@ -24,16 +24,11 @@
  */
 package org.spongepowered.common.bridge.world.ticks;
 
-import java.util.function.LongSupplier;
+import net.minecraft.server.level.ServerLevel;
 
 public interface LevelTicksBridge<T> {
 
-    LongSupplier bridge$getGameTime();
+    void bridge$level(ServerLevel level);
 
-    void bridge$setGameTimeSupplier(LongSupplier supplier);
-
-    LongSupplier bridge$getNextSubTickCountSupplier();
-
-    void bridge$setNextSubTickCountSupplier(LongSupplier supplier);
-
+    ServerLevel bridge$level();
 }

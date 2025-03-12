@@ -27,6 +27,7 @@ package org.spongepowered.common.launch;
 import com.google.inject.Injector;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.RegistryLayer;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.level.WorldDataConfiguration;
 import org.spongepowered.api.Client;
 import org.spongepowered.api.Engine;
@@ -51,7 +52,7 @@ public interface Lifecycle {
     void establishEarlyGlobalRegistries();
     void finalizeEarlyGlobalRegistries();
 
-    void establishGlobalRegistries(RegistryAccess.Frozen registryAccess, final RegistryLayer $$0);
+    void establishGlobalRegistries(RegistryAccess.Frozen registryAccess, final RegistryLayer layer);
 
     void establishDataProviders();
 
@@ -84,4 +85,6 @@ public interface Lifecycle {
     void callStoppedGameEvent();
 
     void setWorldDataConfiguration(WorldDataConfiguration first);
+
+    void establishTags(ResourceManager resourceManager);
 }

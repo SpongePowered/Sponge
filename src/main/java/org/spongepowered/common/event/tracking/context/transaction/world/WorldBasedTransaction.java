@@ -39,7 +39,7 @@ public abstract class WorldBasedTransaction<E extends Event & Cancellable> exten
     protected final ResourceKey worldKey;
 
     protected WorldBasedTransaction(
-        final TransactionType<? extends E> transactionType,
+        final TransactionType<? super E> transactionType,
         final ResourceKey worldKey
     ) {
         super(transactionType);

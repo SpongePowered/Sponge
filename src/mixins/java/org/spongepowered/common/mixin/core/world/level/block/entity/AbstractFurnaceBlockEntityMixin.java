@@ -77,7 +77,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
     private static void impl$throwFuelEventIfOrShrink(
         final ItemStack itemStack, final int quantity, final ServerLevel var0, final BlockPos var1,
         final BlockState var2, final AbstractFurnaceBlockEntity entity) {
-        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
+        final Cause cause = PhaseTracker.getInstance().currentCause();
 
         final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(itemStack);
         final ItemStackSnapshot shrinkedFuel = ItemStackUtil.snapshotOf(ItemStackUtil.cloneDefensive(itemStack, itemStack.getCount() - 1));
@@ -85,7 +85,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
         final SlotTransaction transaction = new SlotTransaction(((FurnaceBlockEntity) entity).inventory().slot(1).get(), fuel, shrinkedFuel);
         final var recipe = ((AbstractFurnaceBlockEntityMixin) (Object) entity).bridge$getCurrentRecipe();
         final CookingEvent.ConsumeFuel event = SpongeEventFactory.createCookingEventConsumeFuel(cause, (FurnaceBlockEntity) entity, Optional.of(fuel),
-                recipe.map(r -> (CookingRecipe) r.value()), recipe.map(r -> (ResourceKey) (Object) r.id()), Collections.singletonList(transaction));
+                recipe.map(r -> (CookingRecipe) r.value()), recipe.map(r -> (ResourceKey) (Object) r.id().location()), Collections.singletonList(transaction));
         SpongeCommon.post(event);
         if (event.isCancelled()) {
             ((AbstractFurnaceBlockEntityMixin) (Object) entity).cookingTotalTime = 0;
@@ -151,10 +151,10 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
     private void impl$callInteruptSmeltEvent() {
         if (this.cookingProgress > 0) {
             final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(this.items.get(1));
-            final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
+            final Cause cause = PhaseTracker.getInstance().currentCause();
             final var recipe = this.bridge$getCurrentRecipe();
             final CookingEvent.Interrupt event = SpongeEventFactory.createCookingEventInterrupt(cause, (FurnaceBlockEntity) this, Optional.of(fuel),
-                    recipe.map(r -> (CookingRecipe) r.value()), recipe.map(r -> (ResourceKey) (Object) r.id()));
+                    recipe.map(r -> (CookingRecipe) r.value()), recipe.map(r -> (ResourceKey) (Object) r.id().location()));
             SpongeCommon.post(event);
         }
     }

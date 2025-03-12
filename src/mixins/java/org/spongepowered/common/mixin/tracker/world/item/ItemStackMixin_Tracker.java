@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.tracker.world.item;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -55,7 +56,7 @@ public abstract class ItemStackMixin_Tracker {
         final LivingEntity player, final Level levelIn, final BlockState stateIn, final BlockPos posIn, final Player playerIn
     ) {
         final boolean isServerLevel = !((LevelBridge) level).bridge$isFake();
-        final PhaseContext<@NonNull ?> context = isServerLevel ? PhaseTracker.SERVER.getPhaseContext() : null;
+        final PhaseContext<@NonNull ?> context = isServerLevel ? PhaseTracker.getWorldInstance((ServerLevel) level).getPhaseContext() : null;
         try {
             if (isServerLevel) {
                 context.capturePlayerUsingStackToBreakBlock((ServerPlayer) playerIn);

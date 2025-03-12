@@ -78,7 +78,7 @@ public final class PacketCommandState extends PacketState<PlayerCommandPhaseCont
         // We have to check if there is a player, because command blocks can be triggered
         // without player interaction.
         // Fixes https://github.com/SpongePowered/SpongeForge/issues/2442
-        PhaseTracker.getCauseStackManager().currentCause().first(Player.class).ifPresent(user -> {
+        PhaseTracker.getInstance().currentCause().first(Player.class).ifPresent(user -> {
             TrackingUtil.associateTrackerToTarget(blockChange, transaction, user.uniqueId());
         });
    }

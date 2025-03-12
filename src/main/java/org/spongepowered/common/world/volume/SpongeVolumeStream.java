@@ -264,7 +264,7 @@ public class SpongeVolumeStream<V extends Volume, T> implements VolumeStream<V, 
             : PluginPhase.State.VOLUME_STREAM_APPLICATION
             .createPhaseContext(instance)
             .setVolumeStream(this)
-            .spawnType(() -> PhaseTracker.getCauseStackManager().context(EventContextKeys.SPAWN_TYPE).orElse(null))
+            .spawnType(() -> PhaseTracker.getInstance().context(EventContextKeys.SPAWN_TYPE).orElse(null))
         ) {
             if (context != null) {
                 context.buildAndSwitch();

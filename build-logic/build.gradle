@@ -6,12 +6,18 @@ plugins {
 indra {
     javaVersions {
         strictVersions(false) // it's just buildscript, no need for anything fancy
+        target(17)
     }
 }
 
 dependencies {
     api(apiLibs.gson)
     implementation("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:${apiLibs.versions.ideaExt.get()}")
+    implementation(libs.at)
+    implementation(libs.accessWidener)
+
+    // arch-loom is used by SpongeNeo but must be declared here to avoid a classloader conflict with its transitive dependencies
+    api("dev.architectury:architectury-loom:1.7.423")
 }
 
 indraSpotlessLicenser {

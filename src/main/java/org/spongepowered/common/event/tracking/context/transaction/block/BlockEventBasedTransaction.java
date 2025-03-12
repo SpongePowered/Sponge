@@ -27,13 +27,13 @@ package org.spongepowered.common.event.tracking.context.transaction.block;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.block.transaction.Operation;
-import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
@@ -45,7 +45,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
 import org.spongepowered.common.event.tracking.context.transaction.world.WorldBasedTransaction;
-import org.spongepowered.math.vector.Vector3i;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -55,6 +54,8 @@ abstract class BlockEventBasedTransaction extends WorldBasedTransaction<ChangeBl
 
     final BlockPos affectedPosition;
     final BlockState originalState;
+
+    private @MonotonicNonNull BlockTransaction eventTransaction;
 
     BlockEventBasedTransaction(final BlockPos affectedPosition, final BlockState originalState, final ResourceKey worldKey) {
         super(TransactionTypes.BLOCK.get(), worldKey);
@@ -84,7 +85,7 @@ abstract class BlockEventBasedTransaction extends WorldBasedTransaction<ChangeBl
             final SpongeBlockSnapshot result = blockTransaction.getResultingSnapshot();
             final Operation operation = context.getBlockOperation(original, result);
             final BlockTransaction eventTransaction = new BlockTransaction(original, result, operation);
-            eventTransactions.merge(blockTransaction.affectedPosition, eventTransaction, (oldValue, newValue) -> {
+            blockTransaction.eventTransaction = eventTransactions.merge(blockTransaction.affectedPosition, eventTransaction, (oldValue, newValue) -> {
                 final ImmutableList.Builder<BlockSnapshot> intermediary = ImmutableList.builderWithExpectedSize(oldValue.intermediary().size() + 1);
                 intermediary.addAll(oldValue.intermediary());
                 intermediary.add(oldValue.finalReplacement());
@@ -120,24 +121,26 @@ abstract class BlockEventBasedTransaction extends WorldBasedTransaction<ChangeBl
         if (event.isCancelled()) {
             event.transactions().forEach(BlockTransaction::invalidate);
         }
-        for (final Transaction<BlockSnapshot> transaction : event.transactions()) {
-            if (!transaction.isValid()) {
+        for (final GameTransaction<ChangeBlockEvent.All> gameTransaction : blockTransactions) {
+            final BlockEventBasedTransaction blockTransaction = (BlockEventBasedTransaction) gameTransaction;
+            if (blockTransaction.eventTransaction != null && !blockTransaction.eventTransaction.isValid()) {
                 cancelledAny = true;
-                for (final GameTransaction<ChangeBlockEvent.All> gameTransaction : blockTransactions) {
-                    final BlockEventBasedTransaction blockTransaction = (BlockEventBasedTransaction) gameTransaction;
-                    final Vector3i position = transaction.original().position();
-                    final BlockPos affectedPosition = blockTransaction.affectedPosition;
-                    if (position.x() == affectedPosition.getX()
-                        && position.y() == affectedPosition.getY()
-                        && position.z() == affectedPosition.getZ()
-                    ) {
-                        gameTransaction.markCancelled();
-                    }
-                }
+                gameTransaction.markCancelled();
             }
         }
 
         return cancelledAny;
+    }
+
+    @Override
+    public void postProcessEvent(final PhaseContext<@NonNull ?> context, final ChangeBlockEvent.All event) {
+        for (final BlockTransaction transaction : event.transactions()) {
+            if (transaction.isValid()) {
+                transaction.custom().ifPresent(b ->
+                    transaction.original().location().ifPresent(l ->
+                        b.withLocation(l).restore(true, transaction.customFlag())));
+            }
+        }
     }
 
     @Override

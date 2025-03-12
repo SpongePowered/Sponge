@@ -58,11 +58,11 @@ public interface NeighborUpdaterMixin_Tracker {
     ))
     private static void tracker$wrapNeighborUpdateInSideEffect(Level level, BlockState targetState, BlockPos targetPos, Block fromBlock, @Nullable Orientation orientation, boolean movement, CallbackInfo ci) {
         // Sponge start - prepare notification
-        final PhaseContext<@NonNull ?> peek = PhaseTracker.getInstance().getPhaseContext();
         if (!(level instanceof ServerLevel serverLevel)) {
             return;
         }
 
+        final PhaseContext<@NonNull ?> peek = PhaseTracker.getWorldInstance(serverLevel).getPhaseContext();
         final var targetChunk = serverLevel.getChunkAt(targetPos);
         final Supplier<ServerLevel> worldSupplier = VolumeStreamUtils.createWeaklyReferencedSupplier(serverLevel, "ServerWorld");
         final net.minecraft.world.level.block.entity.@Nullable BlockEntity existingTile = targetChunk.getBlockEntity(

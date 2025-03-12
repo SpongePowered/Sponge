@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.inventory.util;
 
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.CompoundContainer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -53,10 +54,14 @@ import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.inventory.AbstractCraftingMenuAccessor;
 import org.spongepowered.common.accessor.world.inventory.SmithingMenuAccessor;
+import org.spongepowered.common.bridge.world.inventory.ViewableInventoryBridge;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.entity.player.SpongeUserData;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
+import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
@@ -216,6 +221,17 @@ public final class InventoryUtil {
         for (final AbstractContainerMenu container : containers) {
             try (final EffectTransactor ignore = transactor.logInventoryTransaction(container)) {
                 container.broadcastChanges();
+            }
+        }
+    }
+
+    public static void updateInventoryNoEvents(final Object inventory) {
+        if (inventory instanceof final ViewableInventoryBridge bridge) {
+            try (final PhaseContext<?> context = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext(PhaseTracker.getInstance())) {
+                context.buildAndSwitch();
+                for (final ServerPlayer player : bridge.viewableBridge$getViewers()) {
+                    player.containerMenu.broadcastChanges();
+                }
             }
         }
     }

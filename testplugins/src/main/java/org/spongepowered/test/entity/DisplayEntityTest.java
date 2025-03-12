@@ -50,6 +50,7 @@ import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.imaginary.Quaterniond;
+import org.spongepowered.math.matrix.Matrix4d;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
@@ -83,15 +84,17 @@ public class DisplayEntityTest {
                         final int col5 = 3;
                         final int col6 = 5;
                         final int col7 = 6;
+                        final int col8 = 7;
                         var textDisplay = spawnEntity(player.world(), EntityTypes.TEXT_DISPLAY, centerPos, forwardDir, -4, -1);
                         textDisplay.offer(Keys.DISPLAY_NAME, Component.text("DisplayEntityTest").color(NamedTextColor.GOLD));
                         textDisplay.offer(Keys.SEE_THROUGH_BLOCKS, true);
-                        textDisplay.offer(Keys.TEXT_ALIGNMENT, TextAlignments.LEFT.get());
-                        textDisplay.offer(Keys.TEXT_BACKGROUND_COLOR, Color.GRAY);
+                        textDisplay.offer(Keys.TEXT_BACKGROUND_COLOR, Color.CYAN);
+                        textDisplay.offer(Keys.TEXT_BACKGROUND_OPACITY, (byte) 255);
 
                         textDisplay = spawnEntity(player.world(), EntityTypes.TEXT_DISPLAY, centerPos, forwardDir, col0, 0);
                         textDisplay.offer(Keys.DISPLAY_NAME, Component.text("Fixed"));
                         textDisplay.offer(Keys.BILLBOARD_TYPE, BillboardTypes.FIXED.get());
+                        textDisplay.offer(Keys.TEXT_BACKGROUND_OPACITY, (byte) 0);
 
                         var itemDisplay = spawnEntity(player.world(), EntityTypes.ITEM_DISPLAY, centerPos, forwardDir, col2, 0);
                         itemDisplay.offer(Keys.ITEM_STACK_SNAPSHOT, ItemStack.of(ItemTypes.NETHERITE_INGOT).asImmutable());
@@ -99,6 +102,7 @@ public class DisplayEntityTest {
 
                         textDisplay = spawnEntity(player.world(), EntityTypes.TEXT_DISPLAY, centerPos, forwardDir, col1, 0);
                         textDisplay.offer(Keys.DISPLAY_NAME, Component.text("default\nlight"));
+                        textDisplay.offer(Keys.TEXT_ALIGNMENT, TextAlignments.RIGHT.get());
 
                         textDisplay = spawnEntity(player.world(), EntityTypes.TEXT_DISPLAY, centerPos, forwardDir, col0, 1);
                         textDisplay.offer(Keys.DISPLAY_NAME, Component.text("Center"));
@@ -246,6 +250,14 @@ public class DisplayEntityTest {
                         // TODO force interpolator start value update?
                         textDisplay.offer(Keys.INTERPOLATION_DURATION, Ticks.of(20));
                         textDisplay.offer(Keys.INTERPOLATION_DELAY, Ticks.of(20));
+
+                        blockDisplay = createEntity(player.world(), EntityTypes.BLOCK_DISPLAY, centerPos, forwardDir, col8, 0);
+                        blockDisplay.offer(Keys.BLOCK_STATE, BlockTypes.CHERRY_SAPLING.get().defaultState());
+                        blockDisplay.offer(Keys.MATRIX, Matrix4d
+                            .createRotation(Quaterniond.fromAxesAnglesDeg(0, 45, 0))
+                            .scale(0.5)
+                            .rotate(Quaterniond.fromAxesAnglesDeg(45, 0, 0)));
+                        player.world().spawnEntity(blockDisplay);
 
                         // TODO interpolate text opacity?
 

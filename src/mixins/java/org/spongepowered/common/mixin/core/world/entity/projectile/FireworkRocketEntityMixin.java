@@ -98,7 +98,7 @@ public abstract class FireworkRocketEntityMixin extends ProjectileMixin implemen
             target = "Lnet/minecraft/server/level/ServerLevel;broadcastEntityEvent(Lnet/minecraft/world/entity/Entity;B)V")
     )
     private void impl$useSpongeExplosion(final ServerLevel world, final Entity self, final byte state) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             // Fireworks don't typically explode like other explosives, but we'll
             // post an event regardless and if the radius is zero the explosion
             // won't be triggered (the default behavior).
@@ -109,7 +109,7 @@ public abstract class FireworkRocketEntityMixin extends ProjectileMixin implemen
                 .location(((FireworkRocket) this).serverLocation())
                 .radius(this.impl$explosionRadius);
 
-            final var detonateEvent = SpongeEventFactory.createDetonateExplosiveEvent(PhaseTracker.getCauseStackManager().currentCause(),
+            final var detonateEvent = SpongeEventFactory.createDetonateExplosiveEvent(PhaseTracker.getInstance().currentCause(),
                 explosionBuilder, (FireworkRocket) this, explosionBuilder.build());
             if (Sponge.eventManager().post(detonateEvent)) {
                 return;
@@ -121,7 +121,7 @@ public abstract class FireworkRocketEntityMixin extends ProjectileMixin implemen
     @Inject(method = "tick()V", at = @At("RETURN"))
     private void impl$postPrimeEvent(final CallbackInfo ci) {
         if (this.life == 1 && !this.shadow$level().isClientSide) {
-            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
                 frame.pushCause(this);
                 frame.addContext(EventContextKeys.PROJECTILE_SOURCE, this.impl$getProjectileSource());
                 this.bridge$postPrime();

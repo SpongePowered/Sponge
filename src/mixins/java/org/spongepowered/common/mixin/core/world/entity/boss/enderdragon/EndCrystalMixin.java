@@ -80,7 +80,7 @@ public abstract class EndCrystalMixin extends EntityMixin implements ExplosiveBr
     @Override
     public void bridge$wrappedExplode(final double x, final double y, final double z,
         @Nullable final DamageSource source, final DamageSource causeSource) {
-        final CauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();
+        final CauseStackManager causeStackManager = PhaseTracker.getInstance();
         try (final CauseStackManager.StackFrame frame = causeStackManager.pushCauseFrame()) {
             frame.pushCause(this);
             if (source != null) {

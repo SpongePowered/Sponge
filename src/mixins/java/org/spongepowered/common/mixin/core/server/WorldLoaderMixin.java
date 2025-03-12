@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.RegistryAccess;
@@ -33,39 +36,32 @@ import net.minecraft.server.packs.resources.CloseableResourceManager;
 import net.minecraft.world.level.WorldDataConfiguration;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.launch.Launch;
 
 @Mixin(WorldLoader.class)
 public abstract class WorldLoaderMixin {
 
-    @Redirect(method = "load", at = @At(value = "INVOKE",
+    @ModifyExpressionValue(method = "load", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/server/WorldLoader$PackConfig;createResourceManager()Lcom/mojang/datafixers/util/Pair;"))
-    private static Pair<WorldDataConfiguration, CloseableResourceManager> impl$onGetSecond(final WorldLoader.PackConfig instance) {
-        final Pair<WorldDataConfiguration, CloseableResourceManager> pair = instance.createResourceManager();
+    private static Pair<WorldDataConfiguration, CloseableResourceManager> impl$onCreateResourceManager(final Pair<WorldDataConfiguration, CloseableResourceManager> pair) {
         Launch.instance().lifecycle().setWorldDataConfiguration(pair.getFirst());
         return pair;
     }
 
-    @Redirect(method = "load", at = @At(value = "INVOKE",
+    @WrapOperation(method = "load", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/core/LayeredRegistryAccess;getAccessForLoading(Ljava/lang/Object;)Lnet/minecraft/core/RegistryAccess$Frozen;"))
-    private static <T> RegistryAccess.Frozen impl$onGetAccess(final LayeredRegistryAccess instance, final T $$0) {
-        final RegistryAccess.Frozen registryAccess = instance.getAccessForLoading($$0);
+    private static RegistryAccess.Frozen impl$onGetRegistryAccess(final LayeredRegistryAccess<?> instance, final Object layer, final Operation<RegistryAccess.Frozen> original) {
+        final RegistryAccess.Frozen registryAccess = original.call(instance, layer);
         final var lifecycle = Launch.instance().lifecycle();
-        lifecycle.establishGlobalRegistries(registryAccess, (RegistryLayer) $$0);
+        lifecycle.establishGlobalRegistries(registryAccess, (RegistryLayer) layer);
         return registryAccess;
     }
 
-
-    @Redirect(method = "load", at = @At(value = "INVOKE",
+    @WrapOperation(method = "load", at = @At(value = "INVOKE",
         target = "Lnet/minecraft/core/LayeredRegistryAccess;replaceFrom(Ljava/lang/Object;[Lnet/minecraft/core/RegistryAccess$Frozen;)Lnet/minecraft/core/LayeredRegistryAccess;"))
-    private static <T> LayeredRegistryAccess<T> impl$afterLoadDimensionRegistries(final LayeredRegistryAccess instance,
-        final T $$0, final RegistryAccess.Frozen[] $$1) {
+    private static LayeredRegistryAccess<?> impl$afterLoadDimensionRegistries(final LayeredRegistryAccess<?> instance, final Object worldGenLayer, final RegistryAccess.Frozen[] registries, final Operation<LayeredRegistryAccess<?>> original) {
         final var lifecycle = Launch.instance().lifecycle();
-        lifecycle.establishGlobalRegistries($$1[0], RegistryLayer.DIMENSIONS);
-        return instance.replaceFrom($$0, $$1);
+        lifecycle.establishGlobalRegistries(registries[0], RegistryLayer.DIMENSIONS);
+        return original.call(instance, worldGenLayer, registries);
     }
-
-
-
 }

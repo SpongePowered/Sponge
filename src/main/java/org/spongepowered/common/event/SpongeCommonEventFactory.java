@@ -144,7 +144,7 @@ public final class SpongeCommonEventFactory {
 
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final PhaseContext<@NonNull ?> currentContext = phaseTracker.getPhaseContext();
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             if (sourceEntity != null) {
                 // We only want to push the source entity if it's not the current entity being ticked or "sourced". They will be already pushed.
                 if (currentContext.getSource() != sourceEntity) {
@@ -155,7 +155,7 @@ public final class SpongeCommonEventFactory {
 
             final List<Entity> spEntities = (List<Entity>) (List<?>) entities;
             final CollideEntityEvent event =
-                    SpongeEventFactory.createCollideEntityEvent(PhaseTracker.getCauseStackManager().currentCause(), spEntities);
+                    SpongeEventFactory.createCollideEntityEvent(PhaseTracker.getInstance().currentCause(), spEntities);
             SpongeCommon.post(event);
             return event;
         }
@@ -232,7 +232,7 @@ public final class SpongeCommonEventFactory {
      * @return The event
      */
     private static ChangeBlockEvent.Pre callChangeBlockEventPre(final ServerLevelBridge worldIn, final ImmutableList<ServerLocation> locations, @Nullable Object source) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             final PhaseContext<@NonNull ?> phaseContext = PhaseTracker.getInstance().getPhaseContext();
             if (source == null) {
                 source = phaseContext.getSource() == null ? worldIn : phaseContext.getSource();
@@ -265,7 +265,7 @@ public final class SpongeCommonEventFactory {
     }
 
     public static InteractEntityEvent.Primary callInteractEntityEventPrimary(final net.minecraft.server.level.ServerPlayer player, final ItemStack stack, final net.minecraft.world.entity.Entity entity, final InteractionHand hand) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             SpongeCommonEventFactory.applyCommonInteractContext(player, stack, hand, null, entity, frame);
             final InteractEntityEvent.Primary event = SpongeEventFactory.createInteractEntityEventPrimary(frame.currentCause(), (Entity) entity);
             if (entity instanceof Player && !((ServerWorld) player.level()).properties().pvp()) {
@@ -278,7 +278,7 @@ public final class SpongeCommonEventFactory {
 
     public static InteractEntityEvent.Secondary callInteractEntityEventSecondary(final net.minecraft.server.level.ServerPlayer player, final ItemStack stack, final net.minecraft.world.entity.Entity entity,
             final InteractionHand hand, final @Nullable Vector3d hitVec) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             SpongeCommonEventFactory.applyCommonInteractContext(player, stack, hand, null, entity, frame);
             final InteractEntityEvent.Secondary event = hitVec == null ?
                     SpongeEventFactory.createInteractEntityEventSecondaryOn(frame.currentCause(), (Entity) entity) :
@@ -289,7 +289,7 @@ public final class SpongeCommonEventFactory {
     }
 
     public static InteractItemEvent.Primary callInteractItemEventPrimary(final net.minecraft.world.entity.player.Player player, final ItemStack stack, final InteractionHand hand) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             SpongeCommonEventFactory.applyCommonInteractContext(player, stack, hand, null, null, frame);
             final InteractItemEvent.Primary event = SpongeEventFactory.createInteractItemEventPrimary(frame.currentCause(), ItemStackUtil.snapshotOf(stack));
             SpongeCommon.post(event);
@@ -298,7 +298,7 @@ public final class SpongeCommonEventFactory {
     }
 
     public static InteractItemEvent.Secondary callInteractItemEventSecondary(final net.minecraft.world.entity.player.Player player, final ItemStack stack, final InteractionHand hand) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             SpongeCommonEventFactory.applyCommonInteractContext(player, stack, hand, null, null, frame);
             final InteractItemEvent.Secondary event = SpongeEventFactory.createInteractItemEventSecondary(frame.currentCause(), ItemStackUtil.snapshotOf(stack));
             SpongeCommon.post(event);
@@ -310,7 +310,7 @@ public final class SpongeCommonEventFactory {
     public static InteractBlockEvent.Primary callInteractBlockEventPrimary(final ServerboundPlayerActionPacket.Action action,
             final net.minecraft.world.entity.player.Player player, final ItemStack heldItem, final BlockSnapshot blockSnapshot, final InteractionHand hand,
             final net.minecraft.core.@Nullable Direction side) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             SpongeCommonEventFactory.applyCommonInteractContext(player, heldItem, hand, blockSnapshot, null, frame);
             final Direction direction;
             if (side != null) {
@@ -340,7 +340,7 @@ public final class SpongeCommonEventFactory {
     }
 
     public static InteractBlockEvent.Secondary callInteractBlockEventSecondary(final net.minecraft.world.entity.player.Player player, final ItemStack heldItem, final Vector3d hitVec, final BlockSnapshot targetBlock, final Direction targetSide, final InteractionHand hand) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             SpongeCommonEventFactory.applyCommonInteractContext(player, heldItem, hand, targetBlock, null, frame);
             final InteractBlockEvent.Secondary event = SpongeEventFactory.createInteractBlockEventSecondary(frame.currentCause(),
                     Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED, targetBlock, hitVec,
@@ -384,7 +384,7 @@ public final class SpongeCommonEventFactory {
             return;
         }
 
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(entity);
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.NATURAL);
 
@@ -413,7 +413,7 @@ public final class SpongeCommonEventFactory {
             return;
         }
 
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(entity);
 
             // x and y are the opposite way around to the rotation in the API.
@@ -439,7 +439,7 @@ public final class SpongeCommonEventFactory {
             final Vector3d fromPosition,
             final Vector3d toPosition) {
 
-        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
+        final Cause cause = PhaseTracker.getInstance().currentCause();
         // Call move & rotate event as needed...
         if (ShouldFire.MOVE_ENTITY_EVENT && fromPosition != null && toPosition != null &&
                 !fromPosition.mul(SpongeCommonEventFactory.MOVEMENT_GRID_POINTS_PER_BLOCK).toInt()
@@ -462,7 +462,7 @@ public final class SpongeCommonEventFactory {
             final Vector3d toRotation
     ) {
 
-        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
+        final Cause cause = PhaseTracker.getInstance().currentCause();
         if (ShouldFire.ROTATE_ENTITY_EVENT && fromRotation != null && toRotation != null &&
                 !fromRotation.mul(SpongeCommonEventFactory.ROTATION_GRID_POINTS_PER_UNIT).toInt()
                         .equals(toRotation.mul(SpongeCommonEventFactory.ROTATION_GRID_POINTS_PER_UNIT).toInt())) {
@@ -494,7 +494,7 @@ public final class SpongeCommonEventFactory {
         }
 
         originalMessage = SpongeAdventure.asAdventure(entity.getCombatTracker().getDeathMessage());
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             if (source != null) {
                 frame.pushCause(source);
             }
@@ -526,7 +526,7 @@ public final class SpongeCommonEventFactory {
             return false;
         }
 
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(entity);
 
             if (entity instanceof CreatorTrackedBridge) {
@@ -572,7 +572,7 @@ public final class SpongeCommonEventFactory {
     public static boolean handleCollideImpactEvent(final net.minecraft.world.entity.Entity projectile, final @Nullable ProjectileSource projectileSource,
             final HitResult movingObjectPosition) {
         final HitResult.Type movingObjectType = movingObjectPosition.getType();
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(projectile);
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, projectileSource == null
                     ? UnknownProjectileSource.UNKNOWN
@@ -616,7 +616,7 @@ public final class SpongeCommonEventFactory {
     }
 
     public static SetAITargetEvent callSetAttackTargetEvent(final @Nullable Entity target, final Agent agent) {
-        final SetAITargetEvent event = SpongeEventFactory.createSetAITargetEvent(PhaseTracker.getCauseStackManager().currentCause(), agent, Optional.ofNullable(target));
+        final SetAITargetEvent event = SpongeEventFactory.createSetAITargetEvent(PhaseTracker.getInstance().currentCause(), agent, Optional.ofNullable(target));
         SpongeCommon.post(event);
         return event;
     }
@@ -641,7 +641,7 @@ public final class SpongeCommonEventFactory {
      * @param frame
      * @return The item if it is to be spawned, null if to be ignored
      */
-    public static @Nullable ItemStack throwDropItemAndConstructEvent(final net.minecraft.world.entity.Entity entity, final double posX, final double posY,
+    public static ItemStack throwDropItemAndConstructEvent(final net.minecraft.world.entity.Entity entity, final double posX, final double posY,
         final double posZ, final ItemStackSnapshot snapshot, final List<ItemStackSnapshot> original, final CauseStackManager.StackFrame frame) {
         final ItemStack item;
 
@@ -652,10 +652,10 @@ public final class SpongeCommonEventFactory {
             ImmutableList.of(snapshot), original);
         SpongeCommon.post(dropEvent);
         if (dropEvent.isCancelled()) {
-            return null;
+            return ItemStack.EMPTY;
         }
         if (dropEvent.droppedItems().isEmpty()) {
-            return null;
+            return ItemStack.EMPTY;
         }
 
         // SECOND throw the ConstructEntityEvent
@@ -664,12 +664,12 @@ public final class SpongeCommonEventFactory {
         frame.removeContext(EventContextKeys.SPAWN_TYPE);
         SpongeCommon.post(event);
         if (event.isCancelled()) {
-            return null;
+            return ItemStack.EMPTY;
         }
 
-        item = event.isCancelled() ? null : ItemStackUtil.fromSnapshotToNative(dropEvent.droppedItems().get(0));
+        item = event.isCancelled() ? ItemStack.EMPTY : ItemStackUtil.fromSnapshotToNative(dropEvent.droppedItems().get(0));
         if (item == null) {
-            return null;
+            return ItemStack.EMPTY;
         }
         return item;
     }

@@ -34,6 +34,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
+import org.spongepowered.api.item.recipe.smithing.ArmorTrim;
 import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -60,6 +61,23 @@ public final class ArmorItemStackData {
                                 .orElse(null);
                         })
                         .supports(h -> h.getItem() instanceof ArmorItem)
+                    .create(Keys.ARMOR_TRIM)
+                        .get(h -> {
+                            final net.minecraft.world.item.equipment.trim.@Nullable ArmorTrim trim = h.get(DataComponents.TRIM);
+                            if (trim != null) {
+                                return (ArmorTrim) (Object) trim;
+                            }
+                            return null;
+                        })
+                        .set((h, v) -> {
+                            if (v == null) {
+                                h.remove(DataComponents.TRIM);
+                                return;
+                            }
+                            h.set(DataComponents.TRIM, (net.minecraft.world.item.equipment.trim.ArmorTrim) (Object) v);
+                        })
+                        .delete(h -> h.remove(DataComponents.TRIM))
+                    .supports(h -> h.getItem() instanceof ArmorItem)
                     .create(Keys.DAMAGE_ABSORPTION)
                         .get(h -> {
                             final @Nullable ItemAttributeModifiers modifiersContainer = h.get(DataComponents.ATTRIBUTE_MODIFIERS);

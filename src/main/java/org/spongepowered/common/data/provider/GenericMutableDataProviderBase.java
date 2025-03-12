@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.provider;
 
 import io.leangen.geantyref.GenericTypeReflector;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.entity.EntityInLevelCallback;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -260,7 +261,7 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
                 .result(DataTransactionResult.Type.SUCCESS);
         originalValue.ifPresent(transaction::replace);
         final ChangeDataHolderEvent.ValueChange valueChange = SpongeEventFactory.createChangeDataHolderEventValueChange(
-                PhaseTracker.SERVER.currentCause(),
+                PhaseTracker.getWorldInstance((ServerLevel) entity.world()).currentCause(),
                 transaction.build(),
                 dataHolder);
         if (SpongeCommon.post(valueChange)) {

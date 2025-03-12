@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.tracker.world.level.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -73,19 +74,43 @@ public abstract class BlockMixin_Tracker implements TrackableBlockBridge, Regist
      * @param ci The callback info
      */
     @Inject(
-        method = {
-            "dropResources(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)V",
-            "dropResources(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/LevelAccessor;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/BlockEntity;)V",
-            "dropResources(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/item/ItemStack;)V"
-        },
+        method = "dropResources(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)V",
         at = @At("HEAD"),
         cancellable = true
     )
-    private static void tracker$cancelOnBlockRestoration(final CallbackInfo ci) {
-        if (Thread.currentThread() == PhaseTracker.SERVER.getSidedThread()) {
-            if (PhaseTracker.SERVER.getPhaseContext().isRestoring()) {
-                ci.cancel();
-            }
+    private static void tracker$cancelOnBlockRestoration(final BlockState state, final Level worldIn,
+        final BlockPos pos, final CallbackInfo ci) {
+        final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance((ServerLevel) worldIn);
+        if (phaseTracker.onSidedThread() && phaseTracker.getPhaseContext().isRestoring()) {
+            ci.cancel();
+        }
+    }
+
+    @Inject(
+        method = "dropResources(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/LevelAccessor;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/BlockEntity;)V",
+        at = @At("HEAD"),
+        cancellable = true
+    )
+    private static void tracker$cancelOnBlockRestoration(
+        final BlockState state, final LevelAccessor worldIn,
+        final BlockPos pos, final @Nullable BlockEntity tileEntity, final CallbackInfo ci) {
+        final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance((ServerLevel) worldIn);
+        if (phaseTracker.onSidedThread() && phaseTracker.getPhaseContext().isRestoring()) {
+            ci.cancel();
+        }
+    }
+
+    @Inject(
+        method = "dropResources(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/item/ItemStack;)V",
+        at = @At("HEAD"),
+        cancellable = true
+    )
+    private static void tracker$cancelOnBlockRestoration(final BlockState state, final Level worldIn,
+        final BlockPos pos, final @Nullable BlockEntity tileEntity, final Entity entity, final ItemStack itemStack,
+        final CallbackInfo ci) {
+        final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance((ServerLevel) worldIn);
+        if (phaseTracker.onSidedThread() && phaseTracker.getPhaseContext().isRestoring()) {
+            ci.cancel();
         }
     }
 
@@ -95,11 +120,11 @@ public abstract class BlockMixin_Tracker implements TrackableBlockBridge, Regist
     )
     private static void tracker$captureBlockProposedToBeSpawningDrops(final BlockState state, final Level worldIn,
         final BlockPos pos, final CallbackInfo ci) {
-        final PhaseTracker server = PhaseTracker.SERVER;
-        if (server.getSidedThread() != Thread.currentThread()) {
+        final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance((ServerLevel) worldIn);
+        if (!phaseTracker.onSidedThread()) {
             return;
         }
-        final PhaseContext<@NonNull ?> context = server.getPhaseContext();
+        final PhaseContext<@NonNull ?> context = phaseTracker.getPhaseContext();
         BlockMixin_Tracker.tracker$effectTransactorForDrops = context.getTransactor()
             .logBlockDrops(worldIn, pos, state, null);
     }
@@ -115,11 +140,11 @@ public abstract class BlockMixin_Tracker implements TrackableBlockBridge, Regist
         if (!(worldIn instanceof Level)) {
             return; // In the name of my father, and his father before him, I cast you out!
         }
-        final PhaseTracker server = PhaseTracker.SERVER;
-        if (server.getSidedThread() != Thread.currentThread()) {
+        final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance((ServerLevel) worldIn);
+        if (!phaseTracker.onSidedThread()) {
             return;
         }
-        final PhaseContext<@NonNull ?> context = server.getPhaseContext();
+        final PhaseContext<@NonNull ?> context = phaseTracker.getPhaseContext();
         BlockMixin_Tracker.tracker$effectTransactorForDrops = context.getTransactor()
             .logBlockDrops((Level) worldIn, pos, state, tileEntity);
     }
@@ -131,30 +156,60 @@ public abstract class BlockMixin_Tracker implements TrackableBlockBridge, Regist
     private static void tracker$captureBlockProposedToBeSpawningDrops(final BlockState state, final Level worldIn,
         final BlockPos pos, final @Nullable BlockEntity tileEntity, final Entity entity, final ItemStack itemStack,
         final CallbackInfo ci) {
-        final PhaseTracker server = PhaseTracker.SERVER;
-        if (server.getSidedThread() != Thread.currentThread()) {
+        final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance((ServerLevel) worldIn);
+        if (!phaseTracker.onSidedThread()) {
             return;
         }
-        final PhaseContext<@NonNull ?> context = server.getPhaseContext();
+        final PhaseContext<@NonNull ?> context = phaseTracker.getPhaseContext();
         BlockMixin_Tracker.tracker$effectTransactorForDrops = context.getTransactor()
             .logBlockDrops(worldIn, pos, state, tileEntity);
     }
 
 
     @Inject(
-        method = {
-            "dropResources(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)V",
-            "dropResources(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/LevelAccessor;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/BlockEntity;)V",
-            "dropResources(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/item/ItemStack;)V"
-        },
+        method = "dropResources(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)V",
         at = @At("TAIL")
     )
-    private static void tracker$closeEffectIfCapturing(final CallbackInfo ci) {
-        final PhaseTracker server = PhaseTracker.SERVER;
-        if (server.getSidedThread() != Thread.currentThread()) {
+    private static void tracker$closeEffectIfCapturing(final BlockState state, final Level worldIn,
+        final BlockPos pos, final CallbackInfo ci) {
+        final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance((ServerLevel) worldIn);
+        if (!phaseTracker.onSidedThread()) {
             return;
         }
-        final PhaseContext<@NonNull ?> context = server.getPhaseContext();
+        final PhaseContext<@NonNull ?> context = phaseTracker.getPhaseContext();
+        context.getTransactor().completeBlockDrops(BlockMixin_Tracker.tracker$effectTransactorForDrops);
+        BlockMixin_Tracker.tracker$effectTransactorForDrops = null;
+    }
+
+    @Inject(
+        method = "dropResources(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/LevelAccessor;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/BlockEntity;)V",
+        at = @At("TAIL")
+    )
+    private static void tracker$closeEffectIfCapturing(
+        final BlockState state, final LevelAccessor worldIn, final BlockPos pos,
+        final @Nullable BlockEntity tileEntity, final CallbackInfo ci
+    ) {
+        final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance((ServerLevel) worldIn);
+        if (!phaseTracker.onSidedThread()) {
+            return;
+        }
+        final PhaseContext<@NonNull ?> context = phaseTracker.getPhaseContext();
+        context.getTransactor().completeBlockDrops(BlockMixin_Tracker.tracker$effectTransactorForDrops);
+        BlockMixin_Tracker.tracker$effectTransactorForDrops = null;
+    }
+
+    @Inject(
+        method = "dropResources(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/item/ItemStack;)V",
+        at = @At("TAIL")
+    )
+    private static void tracker$closeEffectIfCapturing(final BlockState state, final Level worldIn,
+        final BlockPos pos, final @Nullable BlockEntity tileEntity, final Entity entity, final ItemStack itemStack,
+        final CallbackInfo ci) {
+        final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance((ServerLevel) worldIn);
+        if (!phaseTracker.onSidedThread()) {
+            return;
+        }
+        final PhaseContext<@NonNull ?> context = phaseTracker.getPhaseContext();
         context.getTransactor().completeBlockDrops(BlockMixin_Tracker.tracker$effectTransactorForDrops);
         BlockMixin_Tracker.tracker$effectTransactorForDrops = null;
     }

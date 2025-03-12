@@ -25,6 +25,7 @@
 package org.spongepowered.common.bridge.server.network;
 
 import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.common.entity.player.tab.SpongeTabList;
 
 public interface ServerGamePacketListenerImplBridge {
 
@@ -33,4 +34,6 @@ public interface ServerGamePacketListenerImplBridge {
     long bridge$getLastTryBlockPacketTimeStamp();
 
     void bridge$incrementIgnorePackets();
+
+    SpongeTabList bridge$tabList();
 }

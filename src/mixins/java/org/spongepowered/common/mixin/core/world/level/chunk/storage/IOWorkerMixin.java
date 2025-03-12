@@ -32,6 +32,7 @@ import net.minecraft.nbt.visitors.CollectFields;
 import net.minecraft.nbt.visitors.FieldSelector;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.thread.PriorityConsecutiveExecutor;
+import net.minecraft.util.thread.StrictQueue;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.storage.IOWorker;
@@ -50,6 +51,7 @@ import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.util.thread.AbstractConsecutiveExecutorAccessor;
 import org.spongepowered.common.accessor.world.level.chunk.storage.IOWorker$PendingStoreAccessor;
 import org.spongepowered.common.bridge.world.level.chunk.storage.IOWorkerBridge;
 import org.spongepowered.common.event.ShouldFire;
@@ -185,5 +187,19 @@ public abstract class IOWorkerMixin implements IOWorkerBridge {
         //Sponge end
 
         return future;
+    }
+
+    @Override
+    public void bridge$forciblyClear() {
+        final StrictQueue<?> queue = ((AbstractConsecutiveExecutorAccessor<?>) this.consecutiveExecutor).accessor$queue();
+        while (!queue.isEmpty()) {
+            queue.pop();
+        }
+        this.consecutiveExecutor.schedule(new StrictQueue.RunnableWithPriority(0, () -> {
+            this.pendingWrites.clear();
+            while (!queue.isEmpty()) {
+                queue.pop();
+            }
+        }));
     }
 }

@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.holder;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.data.CollectionDataProvider;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -88,6 +89,9 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
         final SpongeKey<? extends CollectionValue<E, Collection<E>>, Collection<E>> key0 =
                 (SpongeKey<? extends CollectionValue<E, Collection<E>>, Collection<E>>) key;
         return this.impl$applyTransaction(key0, (p, m) -> {
+                    if (p instanceof CollectionDataProvider<?, ?, ?>) {
+                        return ((CollectionDataProvider<E, ?, ?>) p).offerSingle(m, element);
+                    }
                     final Collection<E> collection = p.get(m)
                             .map(DataUtil::ensureMutable)
                             .orElseGet(key0.getDefaultValueSupplier());
@@ -143,6 +147,9 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
         final SpongeKey<? extends CollectionValue<E, Collection<E>>, Collection<E>> key0 =
                 (SpongeKey<? extends CollectionValue<E, Collection<E>>, Collection<E>>) key;
         return this.impl$applyTransaction(key0, (p, m) -> {
+            if (p instanceof CollectionDataProvider<?, ?, ?>) {
+                return ((CollectionDataProvider<E, ?, ?>) p).removeSingle(m, element);
+            }
             final Optional<Collection<E>> optCollection = p.get(m).map(DataUtil::ensureMutable);
             if (!optCollection.isPresent()) {
                 return DataTransactionResult.failNoData();

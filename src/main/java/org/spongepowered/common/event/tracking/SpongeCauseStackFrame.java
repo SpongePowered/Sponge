@@ -43,6 +43,7 @@ public final class SpongeCauseStackFrame implements CauseStackManager.StackFrame
     private final Map<EventContextKey<?>, Object> storedContext;
     int old_min_depth;
     int lastCauseSize;
+    @Nullable PhaseContext<?> implicitContext = null;
 
     @Nullable Exception stackDebug = null;
 
@@ -58,6 +59,7 @@ public final class SpongeCauseStackFrame implements CauseStackManager.StackFrame
         this.storedContext.clear();
         this.lastCauseSize = -1;
         this.old_min_depth = -1;
+        this.implicitContext = null;
         this.stackDebug = null;
     }
 

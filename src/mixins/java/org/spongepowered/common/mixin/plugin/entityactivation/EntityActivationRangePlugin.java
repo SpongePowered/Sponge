@@ -36,7 +36,7 @@ public class EntityActivationRangePlugin extends AbstractMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(final String targetClassName, final String mixinClassName) {
-        return SpongeConfigs.getCommon().get().modules.entityActivationRange;
+        return false && SpongeConfigs.getCommon().get().modules.entityActivationRange;
     }
 
     @Override

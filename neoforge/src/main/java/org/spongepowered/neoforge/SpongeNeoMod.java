@@ -25,11 +25,6 @@
 package org.spongepowered.neoforge;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobCategory;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
@@ -40,7 +35,6 @@ import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
-import net.neoforged.neoforge.registries.RegisterEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Client;
@@ -69,7 +63,6 @@ public final class SpongeNeoMod {
         // modBus: add all FML events with it
         modBus.addListener(this::onCommonSetup);
         modBus.addListener(this::onClientSetup);
-        modBus.addListener(this::onRegister);
         modBus.addListener(this::onEntityAttributeCreationEvent);
 
         // annotation events, for non-FML things
@@ -132,19 +125,6 @@ public final class SpongeNeoMod {
     public void onServerStoppingEvent(final ServerStoppingEvent event) {
         final Lifecycle lifecycle = Launch.instance().lifecycle();
         lifecycle.callStoppingEngineEvent((Server) event.getServer());
-    }
-
-    public void onRegister(RegisterEvent event) {
-        if (event.getRegistryKey() == Registries.ENTITY_TYPE) {
-            SpongeEntityTypes.HUMAN = EntityType.Builder.of(HumanEntity::new, MobCategory.MISC)
-                .noSave()
-                .sized(0.6F, 1.8F)
-                .clientTrackingRange(org.spongepowered.common.util.Constants.Entity.Player.TRACKING_RANGE)
-                .updateInterval(2)
-                .build(ResourceKey.create(Registries.ENTITY_TYPE, ResourceLocation.parse("sponge:human")));
-
-            event.register(Registries.ENTITY_TYPE, helper -> helper.register(HumanEntity.KEY, SpongeEntityTypes.HUMAN));
-        }
     }
 
     public void onEntityAttributeCreationEvent(final EntityAttributeCreationEvent event) {

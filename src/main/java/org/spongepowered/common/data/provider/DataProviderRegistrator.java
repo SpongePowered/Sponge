@@ -29,6 +29,7 @@ import io.leangen.geantyref.TypeToken;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.CollectionDataProvider;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataProvider;
@@ -41,6 +42,7 @@ import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.value.CollectionValue;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.api.util.OptBool;
@@ -54,6 +56,7 @@ import org.spongepowered.common.util.TypeTokenUtil;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -189,7 +192,7 @@ public class DataProviderRegistrator {
          * @param <K> The key type
          * @return The registration
          */
-        public <K> MutableRegistration<T, K> create(final Supplier<? extends Key<? extends Value<K>>> suppliedKey) {
+        public <K, V extends Value<K>> MutableRegistration<T, K, V> create(final Supplier<? extends Key<V>> suppliedKey) {
             return this.create(suppliedKey.get());
         }
 
@@ -199,14 +202,14 @@ public class DataProviderRegistrator {
          * @param <K> The key type
          * @return The registration
          */
-        public <K> MutableRegistration<T, K> create(final Key<? extends Value<K>> key) {
-            final MutableRegistration<T, K> registration = new MutableRegistration<>(this, key);
+        public <K, V extends Value<K>> MutableRegistration<T, K, V> create(final Key<V> key) {
+            final MutableRegistration<T, K, V> registration = new MutableRegistration<>(this, key);
             this.register(registration);
             return registration;
         }
 
         @SuppressWarnings({"unchecked", "UnstableApiUsage"})
-        protected <K, V extends Value<K>> MutableRegistrator<T> register(final MutableRegistration<T, K> registration) {
+        protected <K, V extends Value<K>> MutableRegistrator<T> register(final AbstractMutableRegistration<T, K, ?, ?> registration) {
             final DataProvider<?, ?> provider = registration.build(this.target);
             this.registrationBuilder.dataKey(provider.key()).provider(provider);
             return this;
@@ -253,10 +256,10 @@ public class DataProviderRegistrator {
     }
 
     @SuppressWarnings("unchecked")
-    private static class MutableRegistrationBase<H, E, R extends MutableRegistrationBase<H, E, R>> {
+    private static class MutableRegistrationBase<H, E, V extends Value<E>, R extends MutableRegistrationBase<H, E, V, R>> {
 
-        final Key<? extends Value<E>> key;
-        private @Nullable BiFunction<H, E, Value<E>> constructValue;
+        final Key<V> key;
+        private @Nullable BiFunction<H, E, V> constructValue;
         private @Nullable Function<H, @Nullable E> get;
         private @Nullable BiFunction<H, E, Boolean> setAnd;
         private @Nullable BiConsumer<H, E> set;
@@ -267,11 +270,11 @@ public class DataProviderRegistrator {
         private @Nullable BiFunction<H, E, DataTransactionResult> setAndGet;
         private @Nullable Function<H, Boolean> supports;
 
-        public MutableRegistrationBase(Key<? extends Value<E>> key) {
+        public MutableRegistrationBase(final Key<V> key) {
             this.key = key;
         }
 
-        public R constructValue(final BiFunction<H, E, Value<E>> constructValue) {
+        public R constructValue(final BiFunction<H, E, V> constructValue) {
             this.constructValue = constructValue;
             return (R) this;
         }
@@ -329,105 +332,115 @@ public class DataProviderRegistrator {
             return (R) this;
         }
 
-        public DataProvider<?, ?> build(Class<H> target) {
-            final MutableRegistrationBase<H, E, R> registration = this;
-            return new GenericMutableDataProvider<H, E>(registration.key, target) {
-                final boolean isBooleanKey = registration.key.elementType() == Boolean.class;
-
-                @Override
-                protected Value<E> constructValue(final H dataHolder, final E element) {
-                    if (registration.constructValue != null) {
-                        return registration.constructValue.apply(dataHolder, element);
-                    }
-                    return super.constructValue(dataHolder, element);
-                }
-
-                @Override
-                protected Optional<E> getFrom(final H dataHolder) {
-                    if (registration.get == null) {
-                        return Optional.empty();
-                    }
-                    if (this.isBooleanKey) {
-                        return (Optional<E>) OptBool.of((Boolean) registration.get.apply(dataHolder));
-                    }
-                    return Optional.ofNullable(registration.get.apply(dataHolder));
-                }
-
-                @Override
-                protected boolean set(final H dataHolder, final E value) {
-                    if (registration.setAnd != null) {
-                        return registration.setAnd.apply(dataHolder, value);
-                    }
-                    if (registration.set != null) {
-                        registration.set.accept(dataHolder, value);
-                        return true;
-                    }
-                    return super.set(dataHolder, value);
-                }
-
-                @Override
-                protected boolean delete(final H dataHolder) {
-                    if (registration.deleteAnd != null) {
-                        return registration.deleteAnd.apply(dataHolder);
-                    }
-                    if (registration.delete != null) {
-                        registration.delete.accept(dataHolder);
-                        return true;
-                    }
-                    if (registration.resetOnDelete != null) {
-                        return this.set(dataHolder, registration.resetOnDelete.apply(dataHolder));
-                    }
-                    return super.delete(dataHolder);
-                }
-
-                @Override
-                protected DataTransactionResult setAndGetResult(final H dataHolder, final E value) {
-                    if (registration.setAndGet != null) {
-                        return registration.setAndGet.apply(dataHolder, value);
-                    }
-                    return super.setAndGetResult(dataHolder, value);
-                }
-
-                @Override
-                protected DataTransactionResult deleteAndGetResult(final H dataHolder) {
-                    if (registration.deleteAndGet != null) {
-                        return registration.deleteAndGet.apply(dataHolder);
-                    }
-                    if (registration.resetOnDelete != null) {
-                        return this.setAndGetResult(dataHolder, registration.resetOnDelete.apply(dataHolder));
-                    }
-                    return super.deleteAndGetResult(dataHolder);
-                }
-
-                @Override
-                protected boolean supports(final H dataHolder) {
-                    if (registration.supports != null) {
-                        return registration.supports.apply(dataHolder);
-                    }
-                    return super.supports(dataHolder);
-                }
-            };
-
-
+        public DataProvider<?, ?> build(final Class<H> target) {
+            return new SpongeMutableDataProvider(this.key, target);
         }
 
+        protected class SpongeMutableDataProvider extends GenericMutableDataProvider<H, E, V> {
+
+            private final boolean isBooleanKey = MutableRegistrationBase.this.key.elementType() == Boolean.class;
+
+            SpongeMutableDataProvider(final Key<V> key, final Class<H> holderType) {
+                super(key, holderType);
+            }
+
+            @Override
+            protected V constructValue(final H dataHolder, final E element) {
+                if (MutableRegistrationBase.this.constructValue != null) {
+                    return MutableRegistrationBase.this.constructValue.apply(dataHolder, element);
+                }
+                return super.constructValue(dataHolder, element);
+            }
+
+            @Override
+            protected Optional<E> getFrom(final H dataHolder) {
+                if (MutableRegistrationBase.this.get == null) {
+                    return Optional.empty();
+                }
+                if (this.isBooleanKey) {
+                    return (Optional<E>) OptBool.of((Boolean) MutableRegistrationBase.this.get.apply(dataHolder));
+                }
+                return Optional.ofNullable(MutableRegistrationBase.this.get.apply(dataHolder));
+            }
+
+            @Override
+            protected boolean set(final H dataHolder, final E value) {
+                if (MutableRegistrationBase.this.setAnd != null) {
+                    return MutableRegistrationBase.this.setAnd.apply(dataHolder, value);
+                }
+                if (MutableRegistrationBase.this.set != null) {
+                    MutableRegistrationBase.this.set.accept(dataHolder, value);
+                    return true;
+                }
+                return super.set(dataHolder, value);
+            }
+
+            @Override
+            protected boolean delete(final H dataHolder) {
+                if (MutableRegistrationBase.this.deleteAnd != null) {
+                    return MutableRegistrationBase.this.deleteAnd.apply(dataHolder);
+                }
+                if (MutableRegistrationBase.this.delete != null) {
+                    MutableRegistrationBase.this.delete.accept(dataHolder);
+                    return true;
+                }
+                if (MutableRegistrationBase.this.resetOnDelete != null) {
+                    return this.set(dataHolder, MutableRegistrationBase.this.resetOnDelete.apply(dataHolder));
+                }
+                return super.delete(dataHolder);
+            }
+
+            @Override
+            protected DataTransactionResult setAndGetResult(final H dataHolder, final E value) {
+                if (MutableRegistrationBase.this.setAndGet != null) {
+                    return MutableRegistrationBase.this.setAndGet.apply(dataHolder, value);
+                }
+                return super.setAndGetResult(dataHolder, value);
+            }
+
+            @Override
+            protected DataTransactionResult deleteAndGetResult(final H dataHolder) {
+                if (MutableRegistrationBase.this.deleteAndGet != null) {
+                    return MutableRegistrationBase.this.deleteAndGet.apply(dataHolder);
+                }
+                if (MutableRegistrationBase.this.resetOnDelete != null) {
+                    return this.setAndGetResult(dataHolder, MutableRegistrationBase.this.resetOnDelete.apply(dataHolder));
+                }
+                return super.deleteAndGetResult(dataHolder);
+            }
+
+            @Override
+            protected boolean supports(final H dataHolder) {
+                if (MutableRegistrationBase.this.supports != null) {
+                    return MutableRegistrationBase.this.supports.apply(dataHolder);
+                }
+                return super.supports(dataHolder);
+            }
+        }
     }
 
-    public static final class MutableRegistration<H, E> extends MutableRegistrationBase<H, E, MutableRegistration<H, E>> {
+    public static class AbstractMutableRegistration<H, E, V extends Value<E>, R extends AbstractMutableRegistration<H, E, V, R>> extends MutableRegistrationBase<H, E, V, R> {
 
         private final MutableRegistrator<H> registrator;
 
-        private MutableRegistration(final MutableRegistrator<H> registrator, final Key<? extends Value<E>> key) {
+        AbstractMutableRegistration(final MutableRegistrator<H> registrator, final Key<V> key) {
             super(key);
             this.registrator = registrator;
         }
 
-        public <NE> MutableRegistration<H, NE> create(final DefaultedRegistryReference<? extends Key<? extends Value<NE>>> suppliedKey) {
+        public <NE, NV extends Value<NE>> MutableRegistration<H, NE, NV> create(final DefaultedRegistryReference<? extends Key<NV>> suppliedKey) {
             return this.create(suppliedKey.get());
         }
 
-        public <NE> MutableRegistration<H, NE> create(final Key<? extends Value<NE>> key) {
-            final MutableRegistration<H, NE> registration = new MutableRegistration<>(this.registrator, key);
+        public <NE, NV extends Value<NE>> MutableRegistration<H, NE, NV> create(final Key<NV> key) {
+            final MutableRegistration<H, NE, NV> registration = new MutableRegistration<>(this.registrator, key);
+            this.registrator.register(registration);
+            return registration;
+        }
+
+        @SuppressWarnings("unchecked")
+        public <NE extends Collection<NS>, NV extends CollectionValue<NS, NE>, NS> MutableCollectionRegistration<H, NE, NS> createCollection(final Key<NV> key) {
+            final MutableCollectionRegistration<H, NE, NS> registration = new MutableCollectionRegistration<>(this.registrator, (Key<CollectionValue<NS, NE>>) key);
             this.registrator.register(registration);
             return registration;
         }
@@ -446,6 +459,75 @@ public class DataProviderRegistrator {
          */
         public <NT> ImmutableRegistrator<NT> asImmutable(final Class<NT> target) {
             return new ImmutableRegistrator<>(this.registrator.registrationBuilder, target);
+        }
+    }
+
+    public static final class MutableRegistration<H, E, V extends Value<E>> extends AbstractMutableRegistration<H, E, V, MutableRegistration<H, E, V>> {
+
+        MutableRegistration(final MutableRegistrator<H> registrator, final Key<V> key) {
+            super(registrator, key);
+        }
+    }
+
+    public static class AbstractMutableCollectionRegistration<H, E extends Collection<S>, S, R extends AbstractMutableCollectionRegistration<H, E, S, R>> extends AbstractMutableRegistration<H, E, CollectionValue<S, E>, R> {
+
+        private @Nullable BiFunction<H, S, Boolean> offerSingleAnd;
+        private @Nullable BiFunction<H, S, Boolean> removeSingleAnd;
+
+        AbstractMutableCollectionRegistration(final MutableRegistrator<H> registrator, final Key<CollectionValue<S, E>> key) {
+            super(registrator, key);
+        }
+
+        public R offerSingleAnd(final BiFunction<H, S, Boolean> offerSingleAnd) {
+            this.offerSingleAnd = offerSingleAnd;
+            return (R) this;
+        }
+
+        public R removeSingleAnd(final BiFunction<H, S, Boolean> removeSingleAnd) {
+            this.removeSingleAnd = removeSingleAnd;
+            return (R) this;
+        }
+
+        @Override
+        public DataProvider<?, ?> build(final Class<H> target) {
+            return new SpongeMutableCollectionDataProvider(this.key, target);
+        }
+
+        private class SpongeMutableCollectionDataProvider extends SpongeMutableDataProvider implements CollectionDataProvider<S, E, CollectionValue<S, E>> {
+
+            SpongeMutableCollectionDataProvider(final Key<CollectionValue<S, E>> key, final Class<H> holderType) {
+                super(key, holderType);
+            }
+
+            @Override
+            public DataTransactionResult offerSingle(final DataHolder.Mutable dataHolder, final S element) {
+                return this.modifyCollection((H) dataHolder, element, AbstractMutableCollectionRegistration.this.offerSingleAnd);
+            }
+
+            @Override
+            public DataTransactionResult removeSingle(final DataHolder.Mutable dataHolder, final S element) {
+                return this.modifyCollection((H) dataHolder, element, AbstractMutableCollectionRegistration.this.removeSingleAnd);
+            }
+
+            private DataTransactionResult modifyCollection(final H dataHolder, S element, final BiFunction<H, S, Boolean> operation) {
+                final Optional<Value.Immutable<E>> originalValue = this.getFrom(dataHolder)
+                    .map(e -> this.constructValue(dataHolder, e).asImmutable());
+                if (operation.apply(dataHolder, element)) {
+                    final DataTransactionResult.Builder builder = DataTransactionResult.builder();
+                    originalValue.ifPresent(builder::replace);
+                    final Optional<Value.Immutable<E>> replacementValue = this.getFrom(dataHolder)
+                        .map(e -> this.constructValue(dataHolder, e).asImmutable());
+                    return builder.result(DataTransactionResult.Type.SUCCESS).success(replacementValue.orElseThrow()).build();
+                }
+                return DataTransactionResult.failNoData();
+            }
+        }
+    }
+
+    public static final class MutableCollectionRegistration<H, E extends Collection<S>, S> extends AbstractMutableCollectionRegistration<H, E, S, MutableCollectionRegistration<H, E, S>> {
+
+        MutableCollectionRegistration(final MutableRegistrator<H> registrator, final Key<CollectionValue<S, E>> key) {
+            super(registrator, key);
         }
     }
 
@@ -615,9 +697,9 @@ public class DataProviderRegistrator {
         }
     }
 
-    public static class SpongeMutableDataProviderBuilder<H extends DataHolder.Mutable, V extends Value<E>, E, R extends MutableRegistrationBase<H, E, R>> implements MutableDataProviderBuilder<H, V, E> {
+    public static class SpongeMutableDataProviderBuilder<H extends DataHolder.Mutable, V extends Value<E>, E, S, R extends MutableRegistrationBase<H, E, V, R>> implements MutableDataProviderBuilder<H, V, E> {
 
-        private MutableRegistrationBase<H, E, R> registration;
+        private MutableRegistrationBase<H, E, V, R> registration;
         private Type holder;
 
         @Override

@@ -131,12 +131,12 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
         final CommandSourceStack source = parse.getContext().getSource();
         final ServerPlayer player = source.getPlayer();
 
-        final String originalRawCommand = PhaseTracker.getCauseStackManager().currentContext().get(EventContextKeys.COMMAND).orElse(fullCommand);
+        final String originalRawCommand = PhaseTracker.getInstance().currentContext().get(EventContextKeys.COMMAND).orElse(fullCommand);
         final String[] origSplitArg = originalRawCommand.split(" ", 2);
         final String originalCommand = origSplitArg[0];
         final String originalArgs = origSplitArg.length == 2 ? origSplitArg[1] : "";
 
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             final CommandSourceStackBridge sourceBridge = (CommandSourceStackBridge) source;
             frame.addContext(EventContextKeys.COMMAND, fullCommand);
             sourceBridge.bridge$updateFrameFromCommandSource(frame);

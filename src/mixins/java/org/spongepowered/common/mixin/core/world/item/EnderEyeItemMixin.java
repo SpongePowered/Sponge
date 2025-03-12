@@ -57,7 +57,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.math.vector.Vector3d;
 
 @Mixin(EnderEyeItem.class)
-public abstract class EnderEyeItemMixin extends ItemMixin {
+public abstract class EnderEyeItemMixin {
 
     /**
      * @author gabizou - June 10th, 2019 - 1.12.2
@@ -92,7 +92,7 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
         final CallbackInfoReturnable<InteractionResult> cir, final ItemStack used, final BlockHitResult rayTraceResult, final ServerLevel world, final BlockPos targetPos) {
         if (targetPos != null && !((LevelBridge) worldIn).bridge$isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
             final ConstructEntityEvent.Pre event =
-                    SpongeEventFactory.createConstructEntityEventPre(PhaseTracker.getCauseStackManager().currentCause(),
+                    SpongeEventFactory.createConstructEntityEventPre(PhaseTracker.getInstance().currentCause(),
                             ServerLocation.of((ServerWorld) worldIn, playerIn.getX(), playerIn.getY() + (double) (playerIn.getDimensions(playerIn
                                     .getPose()).height() / 2.0F), playerIn.getZ()), new Vector3d(0, 0, 0), EntityTypes.EYE_OF_ENDER.get());
             if (SpongeCommon.post(event)) {
@@ -110,7 +110,7 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
         final CallbackInfoReturnable<InteractionResult> cir, final ItemStack used, @Nullable final BlockPos targetPos) {
         if (targetPos != null && !((LevelBridge) worldIn).bridge$isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
             final ConstructEntityEvent.Pre event =
-                    SpongeEventFactory.createConstructEntityEventPre(PhaseTracker.getCauseStackManager().currentCause(),
+                    SpongeEventFactory.createConstructEntityEventPre(PhaseTracker.getInstance().currentCause(),
                             ServerLocation.of((ServerWorld) worldIn, playerIn.getX(), playerIn.getY() + (double) (playerIn.getDimensions(playerIn
                                     .getPose()).height() / 2.0F), playerIn.getZ()), new Vector3d(0, 0, 0), EntityTypes.EYE_OF_ENDER.get());
             if (SpongeCommon.post(event)) {

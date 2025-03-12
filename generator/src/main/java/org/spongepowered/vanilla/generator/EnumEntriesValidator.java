@@ -48,7 +48,7 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Objects;
 
-class EnumEntriesValidator<V> implements Generator {
+public class EnumEntriesValidator<V> implements Generator {
 
     private final String relativePackageName;
     private final String targetClassSimpleName;
@@ -57,12 +57,12 @@ class EnumEntriesValidator<V> implements Generator {
 
     private final String namespace;
 
-    EnumEntriesValidator(
-            final String targetRelativePackage,
-            final String targetClassSimpleName,
-            final Class<? extends Enum<?>> clazz,
-            final String keyFunction,
-            final String namespace
+    public EnumEntriesValidator(
+        final String targetRelativePackage,
+        final String targetClassSimpleName,
+        final Class<? extends Enum<?>> clazz,
+        final String keyFunction,
+        final String namespace
     ) {
         this.relativePackageName = targetRelativePackage;
         this.targetClassSimpleName = targetClassSimpleName;

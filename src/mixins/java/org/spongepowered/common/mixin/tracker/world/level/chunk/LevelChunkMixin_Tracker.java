@@ -130,7 +130,7 @@ public abstract class LevelChunkMixin_Tracker extends ChunkAccessMixin_Tracker i
         }
 
         // Sponge Start - Build out the BlockTransaction
-        final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
+        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance((ServerLevel) this.level).getPhaseContext();
         final @Nullable BlockEntity existing = this.shadow$getBlockEntity(pos, LevelChunk.EntityCreationType.CHECK);
         // Build a transaction maybe?
         final WeakReference<ServerLevel> ref = new WeakReference<>((ServerLevel) this.level);
@@ -165,11 +165,12 @@ public abstract class LevelChunkMixin_Tracker extends ChunkAccessMixin_Tracker i
 
     @Inject(method = "postProcessGeneration", at = @At("HEAD"))
     private void tracker$startChunkPostProcess(final CallbackInfo ci) {
+        final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance((ServerLevel) this.level);
         if (this.tracker$postProcessContext != null) {
-            PhasePrinter.printMessageWithCaughtException(PhaseTracker.SERVER, "Expected to not have a chunk post process", "Chunk Post Process has not completed!", GenerationPhase.State.CHUNK_LOADING, this.tracker$postProcessContext, new NullPointerException("spongecommon.ChunkMixin_Tracker:tracker$postProcessContext is Null"));
+            PhasePrinter.printMessageWithCaughtException(phaseTracker, "Expected to not have a chunk post process", "Chunk Post Process has not completed!", GenerationPhase.State.CHUNK_LOADING, this.tracker$postProcessContext, new NullPointerException("spongecommon.ChunkMixin_Tracker:tracker$postProcessContext is Null"));
             this.tracker$postProcessContext.close();
         }
-        this.tracker$postProcessContext = GenerationPhase.State.CHUNK_LOADING.createPhaseContext(PhaseTracker.SERVER)
+        this.tracker$postProcessContext = GenerationPhase.State.CHUNK_LOADING.createPhaseContext(phaseTracker)
             .chunk((LevelChunk) (Object) this)
             .world((ServerLevel) this.level)
             .buildAndSwitch();
@@ -205,10 +206,11 @@ public abstract class LevelChunkMixin_Tracker extends ChunkAccessMixin_Tracker i
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Redirect(method = "unpackTicks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/ticks/LevelChunkTicks;unpack(J)V"))
     private void tracker$wrapRescheduledTicks(final LevelChunkTicks instance, final long $$0) {
-        if (!PhaseTracker.SERVER.onSidedThread()) {
+        final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance((ServerLevel) this.level);
+        if (!phaseTracker.onSidedThread()) {
             return;
         }
-        try (final ChunkLoadContext context = GenerationPhase.State.CHUNK_LOADING.createPhaseContext(PhaseTracker.SERVER)) {
+        try (final ChunkLoadContext context = GenerationPhase.State.CHUNK_LOADING.createPhaseContext(phaseTracker)) {
             context.chunk((LevelChunk) (Object) this);
             context.buildAndSwitch();
             instance.unpack($$0);

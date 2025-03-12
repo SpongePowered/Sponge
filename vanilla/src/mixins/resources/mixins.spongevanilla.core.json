@@ -27,6 +27,7 @@
     "server.level.ServerPlayerMixin_Vanilla",
     "server.network.ServerGamePacketListenerImplMixin_Vanilla",
     "server.packs.repository.PackRepositoryMixin_Vanilla",
+    "tags.TagLoaderMixin_Vanilla",
     "world.entity.EntityMixin_Vanilla",
     "world.entity.EntityTypeMixin_Vanilla",
     "world.entity.LivingEntityMixin_Attack_Impl",
@@ -36,6 +37,7 @@
     "world.entity.item.ItemEntityMixin_Vanilla",
     "world.entity.player.PlayerMixin_Vanilla_Attack_Impl",
     "world.entity.vehicle.AbstractBoatMixin_Vanilla",
+    "world.level.ServerExplosionMixin_Vanilla",
     "world.level.block.FireBlockMixin_Vanilla",
     "world.level.block.entity.AbstractFurnaceBlockEntityMixin_Vanilla",
     "world.level.storage.LevelStorageSourceMixin_Vanilla"

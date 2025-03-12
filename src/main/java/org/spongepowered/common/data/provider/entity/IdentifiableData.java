@@ -30,6 +30,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Identifiable;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.entity.player.SpongeUserData;
@@ -49,12 +50,20 @@ public final class IdentifiableData {
                         .get(h -> ((SpongeDataHolderBridge) h).bridge$get(Keys.FIRST_DATE_JOINED).orElse(null))
                         .set((h, v) -> ((SpongeDataHolderBridge) h).bridge$offer(Keys.FIRST_DATE_JOINED, v))
                         .supports(h -> h instanceof ServerPlayer || h instanceof SpongeUserData)
+                    .create(Keys.LAST_DATE_JOINED)
+                        .get(h -> ((SpongeDataHolderBridge) h).bridge$get(Keys.LAST_DATE_JOINED)
+                            .or(() -> ((SpongeDataHolderBridge) h).bridge$get(Keys.LAST_DATE_PLAYED)).orElse(null))
+                        .set((h, v) -> ((SpongeDataHolderBridge) h).bridge$offer(Keys.LAST_DATE_JOINED, v))
+                        .supports(h -> h instanceof ServerPlayer || h instanceof SpongeUserData)
                     .create(Keys.LAST_DATE_PLAYED)
-                        .get(h -> ((SpongeDataHolderBridge) h).bridge$get(Keys.LAST_DATE_PLAYED).orElse(null))
+                        .get(h -> SpongeCommon.server().getPlayerList().getPlayer(h.uniqueId()) != null
+                            ? Instant.now()
+                            : ((SpongeDataHolderBridge) h).bridge$get(Keys.LAST_DATE_PLAYED).orElse(null))
                         .set((h, v) -> ((SpongeDataHolderBridge) h).bridge$offer(Keys.LAST_DATE_PLAYED, v))
                         .supports(h -> h instanceof ServerPlayer || h instanceof SpongeUserData);
 
         IdentifiableData.registerSpongeDataStore(registrator, Keys.FIRST_DATE_JOINED);
+        IdentifiableData.registerSpongeDataStore(registrator, Keys.LAST_DATE_JOINED);
         IdentifiableData.registerSpongeDataStore(registrator, Keys.LAST_DATE_PLAYED);
     }
     // @formatter:on

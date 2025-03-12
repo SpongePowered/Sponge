@@ -44,6 +44,7 @@ import net.minecraft.world.entity.animal.MushroomCow;
 import net.minecraft.world.entity.animal.Panda;
 import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.entity.animal.Rabbit;
+import net.minecraft.world.entity.animal.Salmon;
 import net.minecraft.world.entity.animal.TropicalFish;
 import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.animal.horse.Markings;
@@ -57,7 +58,10 @@ import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.component.FireworkExplosion;
+import net.minecraft.world.item.equipment.ArmorMaterial;
+import net.minecraft.world.item.equipment.ArmorMaterials;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LightLayer;
@@ -93,6 +97,8 @@ import net.minecraft.world.scores.Team;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import net.minecraft.world.ticks.TickPriority;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.data.type.ItemTier;
+import org.spongepowered.api.data.type.ItemTiers;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.FireworkShapes;
 import org.spongepowered.api.registry.Registry;
@@ -141,18 +147,19 @@ public final class VanillaRegistryLoader {
             map.put(EnderDragonPhase.HOVERING, "hover");
         }, phase -> CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, ((EnderDragonPhaseAccessor) phase).accessor$name()));
         this.holder.createRegistry(RegistryTypes.FIREWORK_SHAPE, VanillaRegistryLoader.fireworkShape());
-//        final var materials = new HashMap<ArmorMaterial, String>();
-//        materials.put(ArmorMaterials.LEATHER, ArmorMaterials.LEATHER.modelId().toString());
-//        materials.put(ArmorMaterials.CHAIN, ArmorMaterials.CHAIN.modelId().toString());
-//        materials.put(ArmorMaterials.IRON, ArmorMaterials.IRON.modelId().toString());
-//        materials.put(ArmorMaterials.GOLD, ArmorMaterials.GOLD.modelId().toString());
-//        materials.put(ArmorMaterials.DIAMOND, ArmorMaterials.DIAMOND.modelId().toString());
-//        materials.put(ArmorMaterials.TURTLE_SCUTE, ResourceKey.minecraft("turtle").toString());
-//        materials.put(ArmorMaterials.NETHERITE, ArmorMaterials.NETHERITE.modelId().toString());
-//        materials.put(ArmorMaterials.ARMADILLO_SCUTE, ArmorMaterials.ARMADILLO_SCUTE.modelId().toString());
-//
-//        this.naming(RegistryTypes.ARMOR_MATERIAL, materials.keySet().toArray(new ArmorMaterial[]{}), materials);
+        final var materials = new HashMap<ArmorMaterial, String>();
+        materials.put(ArmorMaterials.LEATHER, ArmorMaterials.LEATHER.modelId().toString());
+        materials.put(ArmorMaterials.CHAINMAIL, ArmorMaterials.CHAINMAIL.modelId().toString());
+        materials.put(ArmorMaterials.IRON, ArmorMaterials.IRON.modelId().toString());
+        materials.put(ArmorMaterials.GOLD, ArmorMaterials.GOLD.modelId().toString());
+        materials.put(ArmorMaterials.DIAMOND, ArmorMaterials.DIAMOND.modelId().toString());
+        materials.put(ArmorMaterials.TURTLE_SCUTE, ResourceKey.minecraft("turtle").toString());
+        materials.put(ArmorMaterials.NETHERITE, ArmorMaterials.NETHERITE.modelId().toString());
+        materials.put(ArmorMaterials.ARMADILLO_SCUTE, ArmorMaterials.ARMADILLO_SCUTE.modelId().toString().replace("_scute", ""));
+
+        this.naming(RegistryTypes.ARMOR_MATERIAL, materials.keySet().toArray(new ArmorMaterial[]{}), materials);
         this.knownName(RegistryTypes.GAME_RULE, GameRulesAccessor.accessor$GAME_RULE_TYPES().keySet(), rule -> CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, rule.getId()));
+        this.holder.createRegistry(RegistryTypes.ITEM_TIER, VanillaRegistryLoader.itemTier());
     }
 
     private void loadEnumRegistries() {
@@ -180,8 +187,6 @@ public final class VanillaRegistryLoader {
         this.automaticName(RegistryTypes.HAND_TYPE, InteractionHand.values());
         this.automaticName(RegistryTypes.INSTRUMENT_TYPE, NoteBlockInstrument.values());
         this.automaticName(RegistryTypes.ITEM_RARITY, Rarity.values());
-        // TODO - Figure out if we should make a registry - Snapshot 24w34a
-//        this.automaticName(RegistryTypes.ITEM_TIER, ToolMaterial.values());
         this.automaticName(RegistryTypes.JIGSAW_BLOCK_ORIENTATION, FrontAndTop.values());
         this.automaticName(RegistryTypes.MOOSHROOM_TYPE, MushroomCow.Variant.values());
         this.automaticName(RegistryTypes.OBJECTIVE_DISPLAY_MODE, ObjectiveCriteria.RenderType.values());
@@ -206,6 +211,7 @@ public final class VanillaRegistryLoader {
         this.automaticName(RegistryTypes.WIRE_ATTACHMENT_TYPE, RedstoneSide.values());
         this.automaticName(RegistryTypes.ADVANCEMENT_TYPE, AdvancementType.values());
         this.automaticName(RegistryTypes.TROPICAL_FISH_SHAPE, TropicalFish.Pattern.values());
+        this.automaticName(RegistryTypes.SALMON_SIZE, Salmon.Variant.values());
         this.automaticName(RegistryTypes.HEIGHT_TYPE, Heightmap.Types.values());
         this.automaticName(RegistryTypes.ENTITY_CATEGORY, MobCategory.values());
         this.automaticName(RegistryTypes.WALL_CONNECTION_STATE, WallSide.values());
@@ -249,14 +255,24 @@ public final class VanillaRegistryLoader {
 
     private static RegistryLoader<FireworkShape> fireworkShape() {
         return RegistryLoader.of(l -> {
-            l.addWithId(FireworkExplosion.Shape.BURST.getId(), FireworkShapes.BURST, () -> (FireworkShape) (Object) FireworkExplosion.Shape.BURST);
-            l.addWithId(FireworkExplosion.Shape.CREEPER.getId(), FireworkShapes.CREEPER, () -> (FireworkShape) (Object) FireworkExplosion.Shape.CREEPER);
-            l.addWithId(FireworkExplosion.Shape.LARGE_BALL.getId(), FireworkShapes.LARGE_BALL, () -> (FireworkShape) (Object) FireworkExplosion.Shape.LARGE_BALL);
             l.addWithId(FireworkExplosion.Shape.SMALL_BALL.getId(), FireworkShapes.SMALL_BALL, () -> (FireworkShape) (Object) FireworkExplosion.Shape.SMALL_BALL);
+            l.addWithId(FireworkExplosion.Shape.LARGE_BALL.getId(), FireworkShapes.LARGE_BALL, () -> (FireworkShape) (Object) FireworkExplosion.Shape.LARGE_BALL);
             l.addWithId(FireworkExplosion.Shape.STAR.getId(), FireworkShapes.STAR, () -> (FireworkShape) (Object) FireworkExplosion.Shape.STAR);
+            l.addWithId(FireworkExplosion.Shape.CREEPER.getId(), FireworkShapes.CREEPER, () -> (FireworkShape) (Object) FireworkExplosion.Shape.CREEPER);
+            l.addWithId(FireworkExplosion.Shape.BURST.getId(), FireworkShapes.BURST, () -> (FireworkShape) (Object) FireworkExplosion.Shape.BURST);
         });
     }
 
+    private static RegistryLoader<ItemTier> itemTier() {
+        return RegistryLoader.of(l -> {
+            l.add(ItemTiers.DIAMOND, k -> (ItemTier) (Object) ToolMaterial.DIAMOND);
+            l.add(ItemTiers.GOLD, k -> (ItemTier) (Object) ToolMaterial.GOLD);
+            l.add(ItemTiers.IRON, k -> (ItemTier) (Object) ToolMaterial.IRON);
+            l.add(ItemTiers.NETHERITE, k -> (ItemTier) (Object) ToolMaterial.NETHERITE);
+            l.add(ItemTiers.STONE, k -> (ItemTier) (Object) ToolMaterial.STONE);
+            l.add(ItemTiers.WOOD, k -> (ItemTier) (Object) ToolMaterial.WOOD);
+        });
+    }
 
     // The following methods are named for clarity above.
 

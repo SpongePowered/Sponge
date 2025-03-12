@@ -80,7 +80,7 @@ public abstract class DedicatedServerMixin_Tracker {
 
     @Redirect(method = "handleConsoleInputs", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/Commands;performPrefixedCommand(Lnet/minecraft/commands/CommandSourceStack;Ljava/lang/String;)V"))
     private void tracker$onPerformConsoleCommand(final Commands instance, final CommandSourceStack source, final String command) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(Sponge.systemSubject());
             frame.addContext(EventContextKeys.COMMAND, command);
             instance.performPrefixedCommand(source, command);

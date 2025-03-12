@@ -43,7 +43,7 @@ public final class SpongeEventBus extends EventBus {
     @Override
     public <T extends Event> T post(T event) {
         try (
-            final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame();
+            final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame();
             final PhaseContext<@NonNull ?> context = SpongeEventManager.createListenerContext(null)
         ) {
             if (context != null) {
@@ -56,7 +56,7 @@ public final class SpongeEventBus extends EventBus {
     @Override
     public <T extends Event> T post(EventPriority phase, T event) {
         try (
-            final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame();
+            final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame();
             final PhaseContext<@NonNull ?> context = SpongeEventManager.createListenerContext(null)
         ) {
             if (context != null) {

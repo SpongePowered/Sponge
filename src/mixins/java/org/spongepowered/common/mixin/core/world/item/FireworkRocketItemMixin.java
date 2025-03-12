@@ -127,7 +127,7 @@ public abstract class FireworkRocketItemMixin {
      */
     private boolean impl$throwConstructPreEvent(final Level world, final net.minecraft.world.entity.player.Player player, final ItemStack usedItem) {
         if (ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE && !((LevelBridge) world).bridge$isFake()) {
-            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(usedItem));
                 frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (ProjectileSource) player);
                 frame.pushCause(player);
@@ -210,7 +210,7 @@ public abstract class FireworkRocketItemMixin {
         }
         ((FireworkRocket) rocket).offer(Keys.SHOOTER, (Player) player);
         if (ShouldFire.PRIME_EXPLOSIVE_EVENT_PRE) {
-            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(usedItem));
                 frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (ProjectileSource) player);
                 frame.pushCause(player);

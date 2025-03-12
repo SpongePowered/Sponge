@@ -100,7 +100,7 @@ public abstract class MobMixin extends LivingEntityMixin {
 
         final net.minecraft.world.entity.Entity entity = leashData.leashHolder;
 
-        final CauseStackManager csm = PhaseTracker.getCauseStackManager();
+        final CauseStackManager csm = PhaseTracker.getInstance();
         if (entity == null) {
             csm.pushCause(this);
         } else {

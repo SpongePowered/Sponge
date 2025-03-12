@@ -24,20 +24,20 @@
  */
 package org.spongepowered.common.tag;
 
-import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.registry.DefaultedRegistryType;
+import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.tag.Tag;
+import org.spongepowered.common.accessor.resources.ResourceKeyAccessor;
 
 public class SpongeTagFactory implements Tag.Factory {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> Tag<T> of(DefaultedRegistryType<T> registryType, ResourceKey key) {
-
-        final var regKey = ((Registry<T>) registryType.get()).key();
+    public <T> Tag<T> of(final RegistryType<T> registryType, final ResourceKey key) {
+        final net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<T>> regKey =
+            ResourceKeyAccessor.invoker$create((ResourceLocation) (Object) registryType.root(), (ResourceLocation) (Object) registryType.location());
         // TagKey.create returns interned tag-keys
         return (Tag<T>) (Object) TagKey.create(regKey, ((ResourceLocation) (Object) key));
     }

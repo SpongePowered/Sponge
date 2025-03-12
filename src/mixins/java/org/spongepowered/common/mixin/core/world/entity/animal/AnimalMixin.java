@@ -51,11 +51,11 @@ public abstract class AnimalMixin extends AgableMobMixin {
             cancellable = true)
     private void impl$cancelSpawnResultIfMarked(final ServerLevel level, final Animal partner, final AgeableMob offspring, final CallbackInfo ci) {
         if (ShouldFire.BREEDING_EVENT_BREED) {
-            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
                 frame.pushCause(this);
                 frame.pushCause(partner);
                 final org.spongepowered.api.event.entity.BreedingEvent.Breed event =
-                        SpongeEventFactory.createBreedingEventBreed(PhaseTracker.getCauseStackManager().currentCause(), (Ageable) offspring);
+                        SpongeEventFactory.createBreedingEventBreed(PhaseTracker.getInstance().currentCause(), (Ageable) offspring);
 
                 if (!(!SpongeCommon.post(event) && this.shadow$level().addFreshEntity(offspring))) {
                     ci.cancel();

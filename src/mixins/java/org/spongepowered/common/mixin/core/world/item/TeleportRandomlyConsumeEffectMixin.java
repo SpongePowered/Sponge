@@ -40,7 +40,7 @@ public abstract class TeleportRandomlyConsumeEffectMixin {
     @Redirect(method = "apply", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;randomTeleport(DDDZ)Z"))
     private boolean impl$createCauseFrameForTeleport(final LivingEntity entity, final double x, final double y, final double z,
                                                      final boolean p_213373_7_) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.CHORUS_FRUIT.get());
 
             return entity.randomTeleport(x, y, z, p_213373_7_);

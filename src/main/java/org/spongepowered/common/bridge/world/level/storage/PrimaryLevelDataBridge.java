@@ -29,77 +29,32 @@ import com.mojang.serialization.Dynamic;
 import net.kyori.adventure.text.Component;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
-import org.spongepowered.common.config.inheritable.WorldConfig;
 
 import java.util.Optional;
 import java.util.UUID;
 
-public interface PrimaryLevelDataBridge {
-
-    default boolean bridge$isVanilla() {
-        return false;
-    }
-
-    boolean bridge$valid();
-
-    @Nullable ServerLevel bridge$world();
-
-    @Nullable DimensionType bridge$dimensionType();
+public interface PrimaryLevelDataBridge extends ServerLevelDataBridge {
 
     void bridge$dimensionType(DimensionType dimensionType, boolean updatePlayers);
 
-    UUID bridge$uniqueId();
-
-    /**
-     * Gets whether the world data supports custom difficulties,
-     * @return
-     */
-    default boolean bridge$customDifficulty() {
-        return true;
-    }
-
-    boolean bridge$customGameType();
-
-    boolean bridge$customSpawnPosition();
-
     void bridge$forceSetDifficulty(Difficulty difficulty);
-
-    Optional<Boolean> bridge$pvp();
 
     void bridge$setPvp(@Nullable Boolean pvp);
 
-    boolean bridge$loadOnStartup();
-
     void bridge$setLoadOnStartup(boolean loadOnStartup);
-
-    boolean bridge$performsSpawnLogic();
 
     void bridge$setPerformsSpawnLogic(boolean keepLoaded);
 
-    Optional<SerializationBehavior> bridge$serializationBehavior();
-
     void bridge$setSerializationBehavior(@Nullable SerializationBehavior behavior);
-
-    Optional<Component> bridge$displayName();
 
     void bridge$setDisplayName(@Nullable Component displayName);
 
-    Optional<Integer> bridge$viewDistance();
-
     void bridge$setViewDistance(@Nullable Integer viewDistance);
-
-    void bridge$triggerViewDistanceLogic();
-
-    InheritableConfigHandle<WorldConfig> bridge$configAdapter();
-
-    void bridge$configAdapter(InheritableConfigHandle<WorldConfig> adapter);
 
     void bridge$populateFromLevelStem(LevelStem dimension);
 

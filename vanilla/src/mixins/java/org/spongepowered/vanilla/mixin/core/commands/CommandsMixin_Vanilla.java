@@ -70,7 +70,7 @@ public abstract class CommandsMixin_Vanilla {
         final CommandSourceStack p_197052_3_,
         final Map<CommandNode<CommandSourceStack>, CommandNode<SharedSuggestionProvider>> p_197052_4_,
         final ServerPlayer playerEntity) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(playerEntity);
             frame.addContext(EventContextKeys.SUBJECT, (Subject) playerEntity);
             final CommandCause sourceToUse = ((CommandSourceStackBridge) p_197052_3_).bridge$withCurrentCause();

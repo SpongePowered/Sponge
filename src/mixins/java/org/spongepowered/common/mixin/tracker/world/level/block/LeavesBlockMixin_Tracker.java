@@ -90,7 +90,7 @@ public abstract class LeavesBlockMixin_Tracker extends BlockMixin_Tracker {
         if (this.shadow$decaying(state)) {
             // Sponge Start - PhaseTracker checks and phase entry
             if (!((LevelBridge) worldIn).bridge$isFake()) {
-                try (final PhaseContext<@NonNull ?> context = BlockPhase.State.BLOCK_DECAY.createPhaseContext(PhaseTracker.SERVER)
+                try (final PhaseContext<@NonNull ?> context = BlockPhase.State.BLOCK_DECAY.createPhaseContext(PhaseTracker.getWorldInstance(worldIn))
                         .source(new SpongeLocatableBlockBuilder()
                                 .world((ServerWorld) worldIn)
                                 .position(pos.getX(), pos.getY(), pos.getZ())

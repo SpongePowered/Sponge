@@ -40,6 +40,7 @@ import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundMoveVehiclePacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ServerboundChatCommandSignedPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
@@ -89,8 +90,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.network.protocol.game.ServerboundMovePlayerPacketAccessor;
 import org.spongepowered.common.accessor.network.protocol.game.ServerboundMoveVehiclePacketAccessor;
 import org.spongepowered.common.accessor.server.level.ServerPlayerGameModeAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
@@ -101,9 +104,11 @@ import org.spongepowered.common.command.registrar.BrigadierBasedRegistrar;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
+import org.spongepowered.common.event.tracking.phase.player.PlayerPhase;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.network.channel.SpongeChannelPayload;
 import org.spongepowered.common.profile.SpongeGameProfile;
@@ -136,14 +141,18 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
     @Shadow protected abstract ParseResults<CommandSourceStack> shadow$parseCommand(final String $$0);
     // @formatter:on
 
+    private final SpongeTabList impl$tabList = new SpongeTabList((ServerGamePacketListenerImpl) (Object) this);
+
     private int impl$ignorePackets;
 
     @Override
-    public void impl$modifyClientBoundPacket(final Packet<?> packet) {
-        super.impl$modifyClientBoundPacket(packet);
-        if (packet instanceof ClientboundPlayerInfoUpdatePacket infoPacket) {
-            ((SpongeTabList) ((ServerPlayer) this.player).tabList()).updateEntriesOnSend(infoPacket);
+    public @Nullable Packet<?> impl$modifyClientBoundPacket(final Packet<?> packet) {
+        if (packet instanceof final ClientboundPlayerInfoUpdatePacket infoPacket) {
+            return this.impl$tabList.updateEntriesOnSend(infoPacket);
+        } else if (packet instanceof final ClientboundPlayerInfoRemovePacket removePacket) {
+            return this.impl$tabList.updateEntriesOnSend(removePacket);
         }
+        return super.impl$modifyClientBoundPacket(packet);
     }
 
     @Override
@@ -197,9 +206,11 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
     }
 
     @Inject(method = "handleMovePlayer",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;isPassenger()Z"),
-            cancellable = true
-    )
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/game/ServerboundMovePlayerPacket;getYRot(F)F"),
+        cancellable = true,
+        slice = @Slice(
+            from = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;updateAwaitingTeleport()Z"),
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;isPassenger()Z")))
     private void impl$callMoveEntityEvent(final ServerboundMovePlayerPacket packetIn, final CallbackInfo ci) {
         final boolean fireMoveEvent = packetIn.hasPosition();
         final boolean fireRotationEvent = packetIn.hasRotation();
@@ -222,7 +233,7 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
         // common checks and throws are done here.
         final @Nullable Vector3d toPosition;
         if (fireMoveEvent) {
-            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
                 frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.NATURAL);
                 toPosition = SpongeCommonEventFactory.callMoveEvent(
                         player,
@@ -261,16 +272,16 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
             this.shadow$teleport(new PositionMoveRotation(
                     VecHelper.toVanillaVector3d(fromPosition),
                     Vec3.ZERO,
-                    (float) toRotation.y(), (float) toRotation.x()
+                    (float) (toRotation.y() - originalToRotation.y()), (float) (toRotation.x() - originalToRotation.x())
                 ),
-                EnumSet.of(Relative.X_ROT, Relative.Y_ROT)
+                Relative.ROTATION
             );
             ci.cancel();
             return;
         }
 
         // Handle event results
-        if (!toPosition.equals(originalToPosition) || !toRotation.equals(originalToRotation)) {
+        if (!toPosition.equals(originalToPosition)) {
             // Notify the client about the new position and new rotation.
             // Both are relatives so the client will keep its momentum.
             // The client thinks its current position is originalToPosition so the new position is relative to that.
@@ -279,11 +290,29 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
             this.player.setXRot((float) originalToRotation.x());
             this.player.setYRot((float) originalToRotation.y());
             this.shadow$teleport(new PositionMoveRotation(
-                    VecHelper.toVanillaVector3d(toPosition),
+                    VecHelper.toVanillaVector3d(toPosition.sub(originalToPosition)),
                     Vec3.ZERO,
-                    (float) toRotation.y(), (float) toRotation.x()),
-                EnumSet.allOf(Relative.class));
+                    (float) (toRotation.y() - originalToRotation.y()), (float) (toRotation.x() - originalToRotation.x())
+                ),
+                Relative.ALL);
             ci.cancel();
+        } else if (!toRotation.equals(originalToRotation)) {
+            // Notify the client about the new rotation.
+            // Both are relatives so the client will keep its momentum.
+            // The rotation values can be out of "valid" range so set them directly to the same value the client has.
+            this.player.setXRot((float) originalToRotation.x());
+            this.player.setYRot((float) originalToRotation.y());
+            this.shadow$teleport(new PositionMoveRotation(
+                    Vec3.ZERO,
+                    Vec3.ZERO,
+                    (float) (toRotation.y() - originalToRotation.y()), (float) (toRotation.x() - originalToRotation.x())
+                ),
+                EnumSet.of(Relative.X, Relative.Y, Relative.Z, Relative.X_ROT, Relative.Y_ROT, Relative.DELTA_X, Relative.DELTA_Y, Relative.DELTA_Z));
+
+            // Let MC handle the movement but override the rotation.
+            ((ServerboundMovePlayerPacketAccessor) packetIn).accessor$yRot((float) toRotation.y());
+            ((ServerboundMovePlayerPacketAccessor) packetIn).accessor$xRot((float) toRotation.x());
+            ((ServerboundMovePlayerPacketAccessor) packetIn).accessor$hasRot(true);
         }
     }
 
@@ -380,7 +409,7 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
             final HandType handType = (HandType) (Object) hand;
             final ItemStack heldItem = this.player.getItemInHand(hand);
 
-            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
                 frame.addContext(EventContextKeys.USED_HAND, handType);
                 final AnimateHandEvent event =
@@ -415,9 +444,17 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
                     return; // prevents Mismatch in destroy block pos warning
                 }
             }
-            playerInteractionManager.handleBlockBreakAction(pos, act, dir, maxBuildHeight, sequence);
-            if (act == ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK) {
-                this.impl$ignorePackets++;
+            final PhaseTracker tracker = PhaseTracker.getWorldInstance(this.player.serverLevel());
+            try (final CauseStackManager.StackFrame frame = tracker.pushCauseFrame();
+                 final PhaseContext<?> context = PlayerPhase.State.PLAYER_INTERACT.createPhaseContext(tracker)
+                    .creator(this.player.getUUID())
+                    .notifier(this.player.getUUID())) {
+                context.buildAndSwitch();
+                frame.pushCause(event);
+                playerInteractionManager.handleBlockBreakAction(pos, act, dir, maxBuildHeight, sequence);
+                if (act == ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK) {
+                    this.impl$ignorePackets++;
+                }
             }
         }
     }
@@ -433,12 +470,12 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
         }
         final ServerPlayer spongePlayer = (ServerPlayer) this.player;
 
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(this.player);
             final Component message = SpongeAdventure.asAdventure($$0);
             final Audience audience = Sponge.server().broadcastAudience();
             final ServerSideConnectionEvent.Leave event = SpongeEventFactory.createServerSideConnectionEventLeave(
-                    PhaseTracker.getCauseStackManager().currentCause(), audience, Optional.of(audience), message, message,
+                    PhaseTracker.getInstance().currentCause(), audience, Optional.of(audience), message, message,
                     spongePlayer.connection(), spongePlayer, SpongeGameProfile.of(this.player.getGameProfile()), false);
             SpongeCommon.post(event);
             if (!event.isMessageCancelled()) {
@@ -473,10 +510,10 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
             newLines.add(Component.text(StringUtil.filterText(line.filtered())));
         }
 
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(this.player);
             final ListValue.Mutable<Component> newLinesValue = ListValue.mutableOf(Keys.SIGN_LINES, newLines);
-            final ChangeSignEvent event = SpongeEventFactory.createChangeSignEvent(PhaseTracker.getCauseStackManager().currentCause(),
+            final ChangeSignEvent event = SpongeEventFactory.createChangeSignEvent(PhaseTracker.getInstance().currentCause(),
                     originalLines, newLinesValue,
                     (Sign) sign,
                     isFrontText);
@@ -512,7 +549,7 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
 
     @Redirect(method = "lambda$handleChatCommand$7", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;performUnsignedChatCommand(Ljava/lang/String;)V"))
     public void impl$onPerformChatCommand(final ServerGamePacketListenerImpl instance, final String $$0) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(this.player);
             frame.addContext(EventContextKeys.COMMAND, $$0);
             this.shadow$performUnsignedChatCommand($$0);
@@ -521,7 +558,7 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
 
     @Redirect(method = "lambda$handleSignedChatCommand$8", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;performSignedChatCommand(Lnet/minecraft/network/protocol/game/ServerboundChatCommandSignedPacket;Lnet/minecraft/network/chat/LastSeenMessages;)V"))
     public void impl$onPerformSignedChatCommand(final ServerGamePacketListenerImpl instance, final ServerboundChatCommandSignedPacket $$0, final LastSeenMessages $$1) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(this.player);
             frame.addContext(EventContextKeys.COMMAND, $$0.command());
             this.shadow$performSignedChatCommand($$0, $$1);
@@ -535,5 +572,10 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
 
             ci.cancel();
         }
+    }
+
+    @Override
+    public SpongeTabList bridge$tabList() {
+        return this.impl$tabList;
     }
 }

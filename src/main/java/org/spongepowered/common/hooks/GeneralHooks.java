@@ -27,6 +27,7 @@ package org.spongepowered.common.hooks;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.status.ServerStatus;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.Optional;
 
@@ -36,7 +37,7 @@ public interface GeneralHooks {
         // Return true when the server isn't yet initialized, this means on a client
         // that the game is still being loaded. This is needed to support initialization
         // events with cause tracking.
-        return !Sponge.isServerAvailable() || Sponge.server().onMainThread();
+        return !Sponge.isServerAvailable() || PhaseTracker.getWorldInstance().onSidedThread();
     }
 
     default ServerStatus createServerStatus(ServerStatus originalStatus, Component description, Optional<ServerStatus.Players> players, Optional<ServerStatus.Version> version, Optional<ServerStatus.Favicon> favicon) {

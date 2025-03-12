@@ -86,7 +86,7 @@ public abstract class CriterionTrigger_ListenerMixin {
             final FilteredTrigger<FilteredTriggerConfiguration> filteredTrigger = (FilteredTrigger) this.trigger;
             final Trigger<?> triggerType = advancementCriterion.type().orElse(null);
             if (triggerType instanceof SpongeCriterionTrigger) {
-                final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
+                final Cause cause = PhaseTracker.getInstance().currentCause();
                 final TypeToken<FilteredTriggerConfiguration> typeToken = (TypeToken) TypeToken.get(triggerType.configurationType());
                 final CriterionEvent.Trigger event = SpongeEventFactory.createCriterionEventTrigger(cause,
                         advancement, (ResourceKey) (Object) this.advancement.id(), advancementCriterion, typeToken, player, filteredTrigger, (Trigger<FilteredTriggerConfiguration>) advancementCriterion.type().get(), true);
@@ -97,7 +97,7 @@ public abstract class CriterionTrigger_ListenerMixin {
                 }
             }
         }
-        PhaseTracker.getCauseStackManager().pushCause(this.trigger);
+        PhaseTracker.getInstance().pushCause(this.trigger);
         // Handle the score criteria ourselves, with each trigger will
         // the score be increased by one.
         if (advancementCriterion instanceof ScoreAdvancementCriterion sac) {
@@ -107,13 +107,13 @@ public abstract class CriterionTrigger_ListenerMixin {
                 score.add(1);
             }
             ci.cancel();
-            PhaseTracker.getCauseStackManager().popCause();
+            PhaseTracker.getInstance().popCause();
         }
     }
 
     @Inject(method = "run", at = @At("RETURN"))
     private void impl$popCauseAtEndOfEvent(PlayerAdvancements playerAdvancements, CallbackInfo ci) {
-        PhaseTracker.getCauseStackManager().popCause();
+        PhaseTracker.getInstance().popCause();
     }
 
 }

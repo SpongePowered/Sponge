@@ -8,6 +8,7 @@
         "api.event.block.ChangeBlockEvent_AllMixin_Neo",
         "api.event.entity.ChangeEntityWorldEvent_PreMixin_Neo",
         "api.event.entity.ChangeEventWorldEvent_PostMixin_Neo",
+        "neoforge.event.entity.item.ItemTossEventMixin_Neo",
         "commands.CommandsMixin_Neo",
         "neoforge.NeoForgeMixin_Neo",
         "neoforge.event.entity.EntityTravelToDimensionEventMixin_Neo",
@@ -15,6 +16,7 @@
         "neoforge.event.world.BlockEvent_BreakEventMixin_Neo",
         "neoforge.event.world.BlockEventMixin_Neo",
         "neoforge.internal.BrandingControlMixin_Neo",
+        "neoforge.registries.GameDataMixin_Neo",
         "neoforge.registries.RegistryManagerMixin_Neo",
         "network.ConnectionMixin_Neo",
         "server.BootstrapMixin_Neo",
@@ -23,6 +25,7 @@
         "server.level.ServerEntityMixin_Neo",
         "server.level.ServerPlayerMixin_Neo",
         "server.network.ServerGamePacketListenerImplMixin_Neo",
+        "tags.TagLoaderMixin_NeoForge",
         "world.entity.EntityMixin_Neo",
         "world.entity.LivingEntityMixin_Neo",
         "world.entity.LivingEntityMixin_Neo_Attack_Impl",
@@ -31,6 +34,7 @@
         "world.entity.player.PlayerMixin_Neo_Attack_Impl",
         "world.entity.projectile.FishingHookMixin_Neo",
         "world.entity.vehicle.AbstractBoatMixin_Neo",
+        "world.level.ServerExplosionMixin_NeoForge",
         "world.level.block.FireBlockMixin_Neo",
         "world.level.block.entity.AbstractFurnaceBlockEntityMixin_Neo"
     ],
@@ -40,5 +44,5 @@
     ],
     "server": [
         "server.MainMixin_Neo"
-  ]
+    ]
 }

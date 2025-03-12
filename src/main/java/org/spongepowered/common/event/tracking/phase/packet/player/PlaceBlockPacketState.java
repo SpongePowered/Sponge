@@ -97,7 +97,7 @@ public final class PlaceBlockPacketState extends BasicPacketState {
     public void appendNotifierToBlockEvent(final BasicPacketContext context,
         final TrackedWorldBridge mixinWorldServer, final BlockPos pos, final TrackableBlockEventDataBridge blockEvent
     ) {
-        final Player player = PhaseTracker.getCauseStackManager().currentCause().first(Player.class).get();
+        final Player player = PhaseTracker.getInstance().currentCause().first(Player.class).get();
         final BlockState state = ((ServerWorld) mixinWorldServer).block(pos.getX(), pos.getY(), pos.getZ());
         final LocatableBlock locatable =
                 new SpongeLocatableBlockBuilder().world((ServerWorld) mixinWorldServer).position(pos.getX(), pos.getY(), pos.getZ()).state(state).build();

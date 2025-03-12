@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.tracker.world.entity;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.CombatEntry;
 import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageSource;
@@ -96,12 +97,12 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker {
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/entity/LivingEntity;tickDeath()V"))
     private void tracker$enterDeathPhase(final LivingEntity livingEntity) {
-        final PhaseTracker instance = PhaseTracker.SERVER;
-        if (!instance.onSidedThread()) {
+        if (((LevelBridge) this.shadow$level()).bridge$isFake()) {
             this.shadow$tickDeath();
             return;
         }
-        if (((LevelBridge) this.shadow$level()).bridge$isFake()) {
+        final PhaseTracker instance = PhaseTracker.getWorldInstance((ServerLevel) livingEntity.level());
+        if (!instance.onSidedThread()) {
             this.shadow$tickDeath();
             return;
         }
@@ -127,11 +128,11 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker {
     )
     private void tracker$wrapOnDeathWithState(final LivingEntity thisEntity, final DamageSource cause) {
         // Sponge Start - notify the cause tracker
-        final PhaseTracker instance = PhaseTracker.SERVER;
-        if (!instance.onSidedThread()) {
+        if (((LevelBridge) this.shadow$level()).bridge$isFake()) {
             return;
         }
-        if (((LevelBridge) this.shadow$level()).bridge$isFake()) {
+        final PhaseTracker instance = PhaseTracker.getWorldInstance((ServerLevel) thisEntity.level());
+        if (!instance.onSidedThread()) {
             return;
         }
         final PhaseContext<@NonNull ?> context = instance.getPhaseContext();
@@ -156,7 +157,7 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker {
             return;
         }
         try (final PhaseContext<@NonNull ?> context = EntityPhase.State.COLLISION
-            .createPhaseContext(PhaseTracker.SERVER)
+            .createPhaseContext(PhaseTracker.getWorldInstance((ServerLevel) livingEntity.level()))
             .source(livingEntity)
         ) {
             context.buildAndSwitch();

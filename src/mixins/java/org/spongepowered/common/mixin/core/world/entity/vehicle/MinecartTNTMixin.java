@@ -127,11 +127,11 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
     private void impl$postIgnite(final CallbackInfo ci) {
         this.bridge$setFuseTicksRemaining(this.impl$fuseDuration);
         if (this.impl$primeCause != null) {
-            PhaseTracker.getCauseStackManager().pushCause(this.impl$primeCause);
+            PhaseTracker.getInstance().pushCause(this.impl$primeCause);
         }
         this.bridge$postPrime();
         if (this.impl$primeCause != null) {
-            PhaseTracker.getCauseStackManager().popCause();
+            PhaseTracker.getInstance().popCause();
         }
     }
 

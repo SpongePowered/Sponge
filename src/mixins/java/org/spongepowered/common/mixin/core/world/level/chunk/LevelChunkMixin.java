@@ -262,8 +262,10 @@ public abstract class LevelChunkMixin extends ChunkAccess implements LevelChunkB
         if (((LevelBridge) this.level).bridge$isFake()) {
             return;
         }
-        final PrimaryLevelDataBridge worldInfo = (PrimaryLevelDataBridge) this.level.getLevelData();
-        final int index = uuid == null ? -1 : worldInfo.bridge$getIndexForUniqueId(uuid);
+        if (!(this.level.getLevelData() instanceof PrimaryLevelDataBridge levelData)) {
+            return;
+        }
+        final int index = uuid == null ? -1 : levelData.bridge$getIndexForUniqueId(uuid);
         if (pos.getY() <= 255) {
             final short blockPos = Constants.Sponge.blockPosToShort(pos);
             this.impl$computePlayerTracker(this.impl$trackedShortBlockPositions, blockPos, index, type, consumer);

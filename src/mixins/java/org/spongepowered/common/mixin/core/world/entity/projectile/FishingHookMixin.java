@@ -78,7 +78,7 @@ public abstract class FishingHookMixin extends ProjectileMixin {
     @Inject(method = "setHookedEntity", at = @At("HEAD"), cancellable = true)
     private void onSetHookedEntity(final net.minecraft.world.entity.@Nullable Entity hookedIn, final CallbackInfo ci) {
         if (hookedIn != null && SpongeCommon
-            .post(SpongeEventFactory.createFishingEventHookEntity(PhaseTracker.getCauseStackManager().currentCause(), (Entity) hookedIn, (FishingBobber) this))) {
+            .post(SpongeEventFactory.createFishingEventHookEntity(PhaseTracker.getInstance().currentCause(), (Entity) hookedIn, (FishingBobber) this))) {
             this.hookedIn = null;
             ci.cancel();
         }
@@ -115,9 +115,9 @@ public abstract class FishingHookMixin extends ProjectileMixin {
             } else {
                 transactions = new ArrayList<>();
             }
-            PhaseTracker.getCauseStackManager().pushCause(playerEntity);
+            PhaseTracker.getInstance().pushCause(playerEntity);
 
-            if (SpongeCommon.post(SpongeEventFactory.createFishingEventStop(PhaseTracker.getCauseStackManager().currentCause(), ((FishingBobber) this), transactions))) {
+            if (SpongeCommon.post(SpongeEventFactory.createFishingEventStop(PhaseTracker.getInstance().currentCause(), ((FishingBobber) this), transactions))) {
                 // Event is cancelled
                 return 0;
             }
@@ -159,7 +159,7 @@ public abstract class FishingHookMixin extends ProjectileMixin {
                         playerEntity.awardStat(Stats.FISH_CAUGHT, 1);
                     }
                 }
-                PhaseTracker.getCauseStackManager().popCause();
+                PhaseTracker.getInstance().popCause();
 
                 i = Math.max(i, 1); // Sponge: Don't lower damage if we've also caught an entity
             }

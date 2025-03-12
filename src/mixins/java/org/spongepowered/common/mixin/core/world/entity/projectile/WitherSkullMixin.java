@@ -85,7 +85,7 @@ public abstract class WitherSkullMixin extends AbstractHurtingProjectileMixin im
 
     @Override
     public void bridge$wrappedExplode(final double x, final double y, final double z, final float explosionRadius, final boolean causesFire, final Level.ExplosionInteraction mode) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(this);
             ((Projectile) this).get(Keys.SHOOTER).ifPresent(shooter -> {
                 frame.addContext(EventContextKeys.PROJECTILE_SOURCE, shooter);

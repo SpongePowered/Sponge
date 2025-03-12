@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking.phase.generation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.ticks.ScheduledTick;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.common.bridge.world.ticks.ScheduledTickBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.function.BiConsumer;
@@ -57,6 +56,5 @@ public final class ChunkLoadPhaseState extends GeneralGenerationPhaseState<Chunk
     public void associateScheduledTickUpdate(
         final ChunkLoadContext asContext, ServerLevel level, final ScheduledTick<?> entry
     ) {
-        ((ScheduledTickBridge) (Object) entry).bridge$setIsPartOfWorldGeneration(true);
     }
 }

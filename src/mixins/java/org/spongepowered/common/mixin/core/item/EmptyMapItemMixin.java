@@ -74,7 +74,7 @@ public abstract class EmptyMapItemMixin {
 
         final Player player = (Player) playerIn;
 
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.addContext(EventContextKeys.PLAYER, player);
             final HandType handType = (HandType) (Object) usedHand;
             frame.addContext(EventContextKeys.USED_HAND, handType);

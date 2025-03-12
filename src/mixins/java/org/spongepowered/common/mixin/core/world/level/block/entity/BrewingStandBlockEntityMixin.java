@@ -48,6 +48,7 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.accessor.world.level.block.entity.BrewingStandBlockEntityAccessor;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.inventory.lens.Lens;
@@ -75,7 +76,7 @@ public class BrewingStandBlockEntityMixin {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;setChanged(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)V"))
     private static void impl$onConsumeFuel(final Level param0, final BlockPos param1, final BlockState param2, final BrewingStandBlockEntity param3,
                                            final CallbackInfo ci, final ItemStack fuelStack) {
-        final Cause currentCause = Sponge.server().causeStackManager().currentCause();
+        final Cause currentCause = PhaseTracker.getInstance().currentCause();
         fuelStack.grow(1);
         final ItemStackSnapshot originalStack = ItemStackUtil.snapshotOf(fuelStack);
         fuelStack.shrink(1);
@@ -115,7 +116,7 @@ public class BrewingStandBlockEntityMixin {
         final boolean isBrewing = ((BrewingStandBlockEntityAccessor) entity).accessor$brewTime() > 0;
         final ItemStack ingredientStack = items.get(3);
 
-        final Cause currentCause = Sponge.server().causeStackManager().currentCause();
+        final Cause currentCause = PhaseTracker.getInstance().currentCause();
         final BrewingStandBlockEntityMixin mixinSelf = (BrewingStandBlockEntityMixin) (Object) entity;
         if (isBrewing) {
             if (mixinSelf.brewTime == 0 && isBrewable) {
@@ -161,7 +162,7 @@ public class BrewingStandBlockEntityMixin {
             final ItemStack fuelStack, final boolean isBrewable, final boolean isBrewing, final ItemStack ingredientStack) {
         if (((BrewingStandBlockEntityMixin) (Object) param3).brewTime != 0 && isBrewable &&
                 ((BrewingStandBlockEntityMixin) (Object) param3).ingredient == ingredientStack.getItem()) {
-            final Cause currentCause = Sponge.server().causeStackManager().currentCause();
+            final Cause currentCause = PhaseTracker.getInstance().currentCause();
             final BrewingEvent.Tick event = SpongeEventFactory.createBrewingEventTick(currentCause, (BrewingStand) param3, ItemStackUtil.snapshotOf(ingredientStack));
             if (Sponge.eventManager().post(event)) {
                 ((BrewingStandBlockEntityMixin) (Object) param3).brewTime++;

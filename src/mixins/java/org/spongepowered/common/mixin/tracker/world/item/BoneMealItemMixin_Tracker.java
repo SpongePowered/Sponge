@@ -79,11 +79,12 @@ public abstract class BoneMealItemMixin_Tracker {
             return;
         }
 
-        final PhaseContext<@NonNull ?> current = PhaseTracker.getInstance().getPhaseContext();
+        final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance(worldIn);
+        final PhaseContext<@NonNull ?> current = phaseTracker.getPhaseContext();
         final boolean doesEvent = current.doesBlockEventTracking();
         if (doesEvent) {
             // We can enter the new phase state.
-            try (final GrowablePhaseContext context = BlockPhase.State.GROWING.createPhaseContext(PhaseTracker.SERVER)
+            try (final GrowablePhaseContext context = BlockPhase.State.GROWING.createPhaseContext(phaseTracker)
                 .provideItem(stack)
                 .world(worldIn)
                 .block(state)

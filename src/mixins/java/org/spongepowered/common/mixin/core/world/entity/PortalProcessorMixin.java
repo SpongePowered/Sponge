@@ -87,7 +87,7 @@ public abstract class PortalProcessorMixin implements PortalProcessorBridge {
         }
 
         try (final TeleportContext context = contextToSwitchTo.buildAndSwitch();
-                final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+                final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(entity);
             var be = serverLevel.getBlockEntity(this.entryPosition);
             if (be != null) {

@@ -404,7 +404,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     default void associateScheduledTickUpdate(final C asContext, final ServerLevel level,
         final ScheduledTick<?> entry
     ) {
-
+        asContext.getTransactor().logScheduledUpdate(level, entry);
     }
 
     default boolean isApplyingStreams() {

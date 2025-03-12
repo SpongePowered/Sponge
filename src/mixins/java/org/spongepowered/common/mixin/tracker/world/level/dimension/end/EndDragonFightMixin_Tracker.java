@@ -34,6 +34,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.end.DragonRespawnAnimation;
 import net.minecraft.world.level.dimension.end.EndDragonFight;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -50,6 +51,8 @@ import java.util.List;
 public abstract class EndDragonFightMixin_Tracker {
 
     // @formatter:off
+    @Shadow @Final private ServerLevel level;
+
     @Shadow protected abstract EnderDragon shadow$createNewDragon();
     // @formatter:on
 
@@ -59,7 +62,7 @@ public abstract class EndDragonFightMixin_Tracker {
         final RandomSource rand, final BlockPos pos
     ) {
 
-        try (final FeaturePhaseContext context = GenerationPhase.State.FEATURE_PLACEMENT.createPhaseContext(PhaseTracker.SERVER)) {
+        try (final FeaturePhaseContext context = GenerationPhase.State.FEATURE_PLACEMENT.createPhaseContext(PhaseTracker.getWorldInstance(worldIn.getLevel()))) {
             context
                     .world((ServerLevel) worldIn)
                     .generator(generator)
@@ -75,7 +78,7 @@ public abstract class EndDragonFightMixin_Tracker {
     @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/dimension/end/DragonRespawnAnimation;tick(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/dimension/end/EndDragonFight;Ljava/util/List;ILnet/minecraft/core/BlockPos;)V"))
     private void tracker$switchToSpawnDragonState(final DragonRespawnAnimation dragonSpawnState, final ServerLevel worldIn,
             final EndDragonFight manager, final List<EndCrystal> crystals, int respawnStateTicks, final BlockPos exitPortalLocation) {
-        try (final SpawnDragonContext context = DragonPhase.State.SPAWN_DRAGON.createPhaseContext(PhaseTracker.SERVER)) {
+        try (final SpawnDragonContext context = DragonPhase.State.SPAWN_DRAGON.createPhaseContext(PhaseTracker.getWorldInstance(worldIn))) {
             context
                     .manager(manager)
                     .setIsRespawn(true)
@@ -88,7 +91,7 @@ public abstract class EndDragonFightMixin_Tracker {
 
     @Redirect(method = "findOrCreateDragon", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/dimension/end/EndDragonFight;createNewDragon()Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;"))
     private EnderDragon tracker$switchToSpawnDragonState(final EndDragonFight manager) {
-        try (final SpawnDragonContext context = DragonPhase.State.SPAWN_DRAGON.createPhaseContext(PhaseTracker.SERVER)) {
+        try (final SpawnDragonContext context = DragonPhase.State.SPAWN_DRAGON.createPhaseContext(PhaseTracker.getWorldInstance(this.level))) {
             context
                     .manager(manager)
                     .setIsRespawn(false)

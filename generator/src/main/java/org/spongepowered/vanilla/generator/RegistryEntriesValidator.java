@@ -53,7 +53,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 // Generates a constants file based on registry entries
-class RegistryEntriesValidator<V> implements Generator {
+public class RegistryEntriesValidator<V> implements Generator {
 
     private final String relativePackageName;
     private final String targetClassSimpleName;
@@ -61,7 +61,7 @@ class RegistryEntriesValidator<V> implements Generator {
     private final Predicate<V> filter;
     private final Set<ResourceLocation> extraEntries;
 
-    RegistryEntriesValidator(
+    public RegistryEntriesValidator(
         final String targetRelativePackage,
         final String targetClassSimpleName,
         final ResourceKey<? extends Registry<V>> registry
@@ -69,7 +69,7 @@ class RegistryEntriesValidator<V> implements Generator {
         this(targetRelativePackage, targetClassSimpleName, registry, $ -> true, Set.of());
     }
 
-    RegistryEntriesValidator(
+    public RegistryEntriesValidator(
         final String targetRelativePackage,
         final String targetClassSimpleName,
         final ResourceKey<? extends Registry<V>> registry,

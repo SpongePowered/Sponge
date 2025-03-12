@@ -75,7 +75,7 @@ public abstract class ProjectileMixin extends EntityMixin {
 
     @Override
     protected void impl$callExpireEntityEvent() {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(this);
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, this.impl$getProjectileSource());
             Sponge.eventManager().post(SpongeEventFactory.createExpireEntityEvent(frame.currentCause(), (org.spongepowered.api.entity.Entity) this));

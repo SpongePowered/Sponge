@@ -30,8 +30,11 @@ import net.minecraft.network.PacketListener;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ServerboundClientInformationPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
+import net.minecraft.network.protocol.game.ClientboundSetCursorItemPacket;
+import net.minecraft.network.protocol.game.ClientboundSetPlayerInventoryPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -82,7 +85,10 @@ public final class PacketPhaseUtil {
 
     @SuppressWarnings("removal")
     public static void handleSlotRestore(@Nullable final Player player, final @Nullable AbstractContainerMenu containerMenu, final List<SlotTransaction> slotTransactions, final boolean eventCancelled) {
-        try (PhaseContext<@NonNull ?> ignored = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext(PhaseTracker.SERVER).buildAndSwitch()) {
+        final PhaseTracker phaseTracker = player != null
+            ? PhaseTracker.getWorldInstance((ServerLevel) player.level())
+            : PhaseTracker.getWorldInstance();
+        try (PhaseContext<@NonNull ?> ignored = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext(phaseTracker).buildAndSwitch()) {
             boolean restoredAny = false;
             for (final SlotTransaction slotTransaction : slotTransactions) {
 
@@ -99,7 +105,7 @@ public final class PacketPhaseUtil {
                     final org.spongepowered.api.item.inventory.ItemStack stack = snapshot.asMutable();
                     slot.set(stack);
                     ((net.minecraft.server.level.ServerPlayer) player).connection.send(
-                            new ClientboundContainerSetSlotPacket(-2, player.inventoryMenu.getStateId(), ((SlotAdapter) slot).getOrdinal(), ItemStackUtil.toNative(stack)));
+                            new ClientboundSetPlayerInventoryPacket(((SlotAdapter) slot).getOrdinal(), ItemStackUtil.toNative(stack)));
                 } else {
                     final int slotNumber = ((SlotAdapter) slot).getOrdinal();
                     final Slot nmsSlot = containerMenu.getSlot(slotNumber);
@@ -134,7 +140,7 @@ public final class PacketPhaseUtil {
         player.containerMenu.setCarried(cursor);
         player.containerMenu.setRemoteCarried(cursor);
         if (player instanceof net.minecraft.server.level.ServerPlayer) {
-            ((net.minecraft.server.level.ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(-1, player.containerMenu.getStateId(), -1, cursor));
+            ((net.minecraft.server.level.ServerPlayer) player).connection.send(new ClientboundSetCursorItemPacket(cursor));
         }
     }
 
@@ -142,7 +148,7 @@ public final class PacketPhaseUtil {
         final ItemStack cursor = ItemStackUtil.fromSnapshotToNative(customCursor);
         player.containerMenu.setCarried(cursor);
         if (player instanceof net.minecraft.server.level.ServerPlayer) {
-            ((net.minecraft.server.level.ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(-1, -1, -1, cursor));
+            ((net.minecraft.server.level.ServerPlayer) player).connection.send(new ClientboundSetCursorItemPacket(cursor));
         }
     }
 
@@ -207,7 +213,7 @@ public final class PacketPhaseUtil {
             if (!packetPlayer.isAlive() && !((PacketBridge) packetIn).bridge$canProcessWhenDead()) {
                 return;
             }
-            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
                 frame.pushCause(packetPlayer);
 
                 // Don't process movement capture logic if player hasn't moved
@@ -252,7 +258,7 @@ public final class PacketPhaseUtil {
                 } else {
                     final IPhaseState<? extends PacketContext<?>> packetState = PacketPhase.getInstance().getStateForPacket(packetIn);
                     // At the very least make an unknown packet state case.
-                    final PacketContext<?> context = packetState.createPhaseContext(PhaseTracker.SERVER);
+                    final PacketContext<?> context = packetState.createPhaseContext(PhaseTracker.getWorldInstance(packetPlayer.serverLevel()));
                     context.source(packetPlayer)
                            .packetPlayer(packetPlayer)
                            .packet(packetIn);

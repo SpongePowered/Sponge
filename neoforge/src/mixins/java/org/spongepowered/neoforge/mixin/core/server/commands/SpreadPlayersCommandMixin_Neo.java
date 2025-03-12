@@ -44,7 +44,7 @@ public abstract class SpreadPlayersCommandMixin_Neo {
         target = "Lnet/neoforged/neoforge/event/EventHooks;onEntityTeleportSpreadPlayersCommand(Lnet/minecraft/world/entity/Entity;DDD)Lnet/neoforged/neoforge/event/entity/EntityTeleportEvent$SpreadPlayersCommand;"
     ))
     private static EntityTeleportEvent.SpreadPlayersCommand vanilla$createCauseFrameForTeleport(Entity entity, double targetX, double targetY, double targetZ) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.COMMAND);
 
             return EventHooks.onEntityTeleportSpreadPlayersCommand(entity, targetX, targetY, targetZ);

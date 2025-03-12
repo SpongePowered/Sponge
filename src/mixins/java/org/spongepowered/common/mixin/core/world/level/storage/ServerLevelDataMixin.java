@@ -26,13 +26,8 @@ package org.spongepowered.common.mixin.core.world.level.storage;
 
 import net.minecraft.world.level.storage.ServerLevelData;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
+import org.spongepowered.common.bridge.world.level.storage.ServerLevelDataBridge;
 
 @Mixin(ServerLevelData.class)
-public interface ServerLevelDataMixin extends PrimaryLevelDataBridge {
-
-    @Override
-    default boolean bridge$valid() {
-        return false;
-    }
+public interface ServerLevelDataMixin extends ServerLevelDataBridge {
 }

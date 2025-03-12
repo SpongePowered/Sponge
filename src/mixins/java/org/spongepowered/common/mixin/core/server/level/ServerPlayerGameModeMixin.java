@@ -39,7 +39,6 @@ public abstract class ServerPlayerGameModeMixin implements ServerPlayerGameModeB
 
     private boolean impl$interactBlockLeftClickEventCancelled = false;
     private boolean impl$interactBlockRightClickEventCancelled = false;
-    private boolean impl$lastInteractItemOnBlockCancelled = false;
 
     @Override
     public boolean bridge$isInteractBlockRightClickCancelled() {
@@ -50,16 +49,6 @@ public abstract class ServerPlayerGameModeMixin implements ServerPlayerGameModeB
     public void bridge$setInteractBlockRightClickCancelled(final boolean cancelled) {
         this.impl$interactBlockRightClickEventCancelled = cancelled;
     }
-
-//    @Override
-//    public boolean bridge$isLastInteractItemOnBlockCancelled() {
-//        return this.impl$lastInteractItemOnBlockCancelled;
-//    }
-//
-//    @Override
-//    public void bridge$setLastInteractItemOnBlockCancelled(final boolean lastInteractItemOnBlockCancelled) {
-//        this.impl$lastInteractItemOnBlockCancelled = lastInteractItemOnBlockCancelled;
-//    }
 
     /**
      * We have to check for cancelled left click events because they occur from different packets

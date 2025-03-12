@@ -47,7 +47,7 @@ public class PlayerListMixin_Tracker {
         final Entity.RemovalReason reason
     ) {
         try (final GeneralizedContext context = PlayerPhase.State.PLAYER_LOGOUT
-                .createPhaseContext(PhaseTracker.SERVER)
+                .createPhaseContext(PhaseTracker.getWorldInstance(world))
                 .source(player)) {
             context.buildAndSwitch();
             world.removePlayerImmediately(player, reason);
@@ -57,7 +57,7 @@ public class PlayerListMixin_Tracker {
     @Redirect(method = "placeNewPlayer",
               at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;initInventoryMenu()V"))
     private void tracker$onPlaceNewPlayerInitMenu(final ServerPlayer player) {
-        try (final PhaseContext<?> context = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext(PhaseTracker.SERVER).source(player);) {
+        try (final PhaseContext<?> context = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext(PhaseTracker.getWorldInstance(player.serverLevel())).source(player);) {
             context.buildAndSwitch();
             player.initInventoryMenu();
         }
@@ -66,7 +66,7 @@ public class PlayerListMixin_Tracker {
     @Redirect(method = "respawn",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;initInventoryMenu()V"))
     private void tracker$onRespawnInitMenu(final ServerPlayer player) {
-        try (final PhaseContext<?> context = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext(PhaseTracker.SERVER).source(player);) {
+        try (final PhaseContext<?> context = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext(PhaseTracker.getWorldInstance(player.serverLevel())).source(player);) {
             context.buildAndSwitch();
             player.initInventoryMenu();
         }

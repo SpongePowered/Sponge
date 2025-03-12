@@ -99,6 +99,7 @@ public abstract class PlayerMixin_API extends LivingEntityMixin_API implements P
         values.add(this.requireValue(Keys.WALKING_SPEED).asImmutable());
 
         this.getValue(Keys.FIRST_DATE_JOINED).map(Value::asImmutable).ifPresent(values::add);
+        this.getValue(Keys.LAST_DATE_JOINED).map(Value::asImmutable).ifPresent(values::add);
         this.getValue(Keys.LAST_DATE_PLAYED).map(Value::asImmutable).ifPresent(values::add);
 
         return values;

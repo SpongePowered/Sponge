@@ -2,19 +2,10 @@ plugins {
     id("org.spongepowered.gradle.vanilla")
 }
 
-val apiVersion: String by project
-val organization: String by project
-val projectUrl: String by project
-
 description = "Code generator for automatically producing API catalog classes based off of Vanilla MC data"
 
 minecraft {
-    rootProject.sourceSets["main"].resources
-            .filter { it.name.endsWith(".accesswidener") }
-            .files
-            .forEach {
-                accessWideners(it)
-            }
+    accessWideners(rootProject.sourceSets["main"].resources.filter { it.name.endsWith(".accesswidener") })
 }
 
 configurations.configureEach {
@@ -28,14 +19,6 @@ dependencies {
     implementation(libs.tinylog.api)
     runtimeOnly(libs.tinylog.impl)
     runtimeOnly(libs.tinylog.slf4j)
-}
-
-indraSpotlessLicenser {
-    licenseHeaderFile(rootProject.file("HEADER.txt"))
-
-    property("name", "Sponge")
-    property("organization", organization)
-    property("url", projectUrl)
 }
 
 val apiBase = rootProject.file("SpongeAPI/src/main/java/")

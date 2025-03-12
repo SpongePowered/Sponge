@@ -154,13 +154,13 @@ public final class SpongeBanService implements BanService {
         if (ban.type().equals(BanTypes.PROFILE.get())) {
             return Sponge.server().userManager().loadOrCreate(((Ban.Profile) ban).profile().uuid())
                     .thenApplyAsync(user -> {
-                        Sponge.eventManager().post(SpongeEventFactory.createPardonUserEvent(PhaseTracker.getCauseStackManager().currentCause(), (Ban.Profile) ban, user));
+                        Sponge.eventManager().post(SpongeEventFactory.createPardonUserEvent(PhaseTracker.getInstance().currentCause(), (Ban.Profile) ban, user));
 
                         UserListUtil.removeEntry(this.getUserBanList(), SpongeGameProfile.toMcProfile(((Ban.Profile) ban).profile()));
                         return true;
                     }, ((MinecraftServerBridge) SpongeCommon.server()).bridge$spongeMainThreadExecutor());
         } else if (ban.type().equals(BanTypes.IP.get())) {
-            Sponge.eventManager().post(SpongeEventFactory.createPardonIpEvent(PhaseTracker.getCauseStackManager().currentCause(), (Ban.IP) ban));
+            Sponge.eventManager().post(SpongeEventFactory.createPardonIpEvent(PhaseTracker.getInstance().currentCause(), (Ban.IP) ban));
 
             final InetSocketAddress inetSocketAddress = new InetSocketAddress(((Ban.IP) ban).address(), 0);
             UserListUtil.removeEntry(this.getIPBanList(), ((IpBanListAccessor) this.getIPBanList()).invoker$getIpFromAddress(inetSocketAddress));
@@ -177,12 +177,12 @@ public final class SpongeBanService implements BanService {
 
             return Sponge.server().userManager().loadOrCreate(((Ban.Profile) ban).profile().uuid())
                     .thenApplyAsync(user -> {
-                        Sponge.eventManager().post(SpongeEventFactory.createBanUserEvent(PhaseTracker.getCauseStackManager().currentCause(), (Ban.Profile) ban, user));
+                        Sponge.eventManager().post(SpongeEventFactory.createBanUserEvent(PhaseTracker.getInstance().currentCause(), (Ban.Profile) ban, user));
                         return Optional.ofNullable((Ban) UserListUtil.addEntry(this.getUserBanList(), (StoredUserEntry<?>) ban));
                     }, ((MinecraftServerBridge) SpongeCommon.server()).bridge$spongeMainThreadExecutor());
         } else if (ban.type().equals(BanTypes.IP.get())) {
 
-            Sponge.eventManager().post(SpongeEventFactory.createBanIpEvent(PhaseTracker.getCauseStackManager().currentCause(), (Ban.IP) ban));
+            Sponge.eventManager().post(SpongeEventFactory.createBanIpEvent(PhaseTracker.getInstance().currentCause(), (Ban.IP) ban));
 
             prevBan = (Ban) UserListUtil.addEntry(this.getIPBanList(), (StoredUserEntry<?>) ban);
         } else {

@@ -63,7 +63,7 @@ public abstract class BreedGoalMixin {
         }
 
         if (ShouldFire.BREEDING_EVENT_FIND_MATE) {
-            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
                 frame.pushCause(this.animal);
                 final org.spongepowered.api.event.entity.BreedingEvent.FindMate event =
                     SpongeEventFactory.createBreedingEventFindMate(frame.currentCause(), TristateResult.Result.DEFAULT,

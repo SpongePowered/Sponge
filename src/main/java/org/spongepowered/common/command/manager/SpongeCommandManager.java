@@ -299,7 +299,7 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
 
     @Override
     public @NonNull CommandResult process(final @NonNull String arguments) throws CommandException {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             final int result = this.getDispatcher().execute(arguments, ((CommandSourceStack) CommandCause.create()));
             frame.addContext(EventContextKeys.COMMAND, arguments);
             return CommandResult.builder().result(result).build();
@@ -316,7 +316,7 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
     public <T extends Subject & Audience> @NonNull CommandResult process(
             final @NonNull T subjectReceiver,
             final @NonNull String arguments) throws CommandException {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SUBJECT, subjectReceiver);
             frame.addContext(EventContextKeys.AUDIENCE, subjectReceiver);
             return this.process(arguments);
@@ -328,7 +328,7 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
             final @NonNull Subject subject,
             final @NonNull Audience receiver,
             final @NonNull String arguments) throws CommandException {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SUBJECT, subject);
             frame.addContext(EventContextKeys.AUDIENCE, receiver);
             return this.process(arguments);
@@ -387,7 +387,7 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
 
     @Override
     public @NonNull List<CommandCompletion> complete(final @NonNull String arguments) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.addContext(EventContextKeys.COMMAND, arguments);
             final String[] splitArg = arguments.split(" ", 2);
             final String command = splitArg[0].toLowerCase();
@@ -418,7 +418,7 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
     public <T extends Subject & Audience> @NonNull List<CommandCompletion> complete(
             final @NonNull T subjectReceiver,
             final @NonNull String arguments) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SUBJECT, subjectReceiver);
             frame.addContext(EventContextKeys.AUDIENCE, subjectReceiver);
             return this.complete(arguments);
@@ -430,7 +430,7 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
             final @NonNull Subject subject,
             final @NonNull Audience receiver,
             final @NonNull String arguments) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SUBJECT, subject);
             frame.addContext(EventContextKeys.AUDIENCE, receiver);
             return this.complete(arguments);
@@ -438,7 +438,7 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
     }
 
     public void init() {
-        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
+        final Cause cause = PhaseTracker.getInstance().currentCause();
         final Set<TypeToken<?>> usedTokens = new HashSet<>();
         Sponge.game().registry(RegistryTypes.COMMAND_REGISTRAR_TYPE).streamEntries().forEach(entry -> {
             final CommandRegistrarType<?> type = entry.value();

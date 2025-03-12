@@ -128,7 +128,7 @@ public final class EntityUtil {
                 entitiesToSpawn.add(e);
             }
         }
-        final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(PhaseTracker.getCauseStackManager().currentCause(), entitiesToSpawn);
+        final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(PhaseTracker.getInstance().currentCause(), entitiesToSpawn);
         if (Sponge.eventManager().post(event)) {
             return Collections.emptyList();
         }

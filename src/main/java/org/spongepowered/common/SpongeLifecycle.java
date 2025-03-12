@@ -32,6 +32,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.RegistryLayer;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.level.WorldDataConfiguration;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -46,6 +47,7 @@ import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.common.applaunch.plugin.DummyPluginContainer;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
+import org.spongepowered.common.bridge.server.packs.resources.ResourceManagerBridge;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.event.lifecycle.AbstractRegisterRegistryEvent;
 import org.spongepowered.common.event.lifecycle.AbstractRegisterRegistryValueEvent;
@@ -53,6 +55,7 @@ import org.spongepowered.common.event.lifecycle.RegisterBuilderEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterChannelEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterDataEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterFactoryEventImpl;
+import org.spongepowered.common.event.lifecycle.RegisterTagEventImpl;
 import org.spongepowered.common.event.manager.SpongeEventManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Lifecycle;
@@ -235,24 +238,24 @@ public final class SpongeLifecycle implements Lifecycle {
 
     @Override
     public void callStartingEngineEvent(final Engine engine) {
-        this.game.eventManager().post(SpongeEventFactory.createStartingEngineEvent(PhaseTracker.getCauseStackManager().currentCause(),
+        this.game.eventManager().post(SpongeEventFactory.createStartingEngineEvent(PhaseTracker.getInstance().currentCause(),
                 engine, this.game, (TypeToken<Engine>) TypeToken.get(engine.getClass())));
     }
 
     @Override
     public void callStartedEngineEvent(final Engine engine) {
-        this.game.eventManager().post(SpongeEventFactory.createStartedEngineEvent(PhaseTracker.getCauseStackManager().currentCause(),
+        this.game.eventManager().post(SpongeEventFactory.createStartedEngineEvent(PhaseTracker.getInstance().currentCause(),
                 engine, this.game, (TypeToken<Engine>) TypeToken.get(engine.getClass())));
     }
 
     @Override
     public void callLoadedGameEvent() {
-        this.game.eventManager().post(SpongeEventFactory.createLoadedGameEvent(PhaseTracker.getCauseStackManager().currentCause(), this.game));
+        this.game.eventManager().post(SpongeEventFactory.createLoadedGameEvent(PhaseTracker.getInstance().currentCause(), this.game));
     }
 
     @Override
     public void callStoppingEngineEvent(final Engine engine) {
-        this.game.eventManager().post(SpongeEventFactory.createStoppingEngineEvent(PhaseTracker.getCauseStackManager().currentCause(),
+        this.game.eventManager().post(SpongeEventFactory.createStoppingEngineEvent(PhaseTracker.getInstance().currentCause(),
                 engine, this.game, (TypeToken<Engine>) TypeToken.get(engine.getClass())));
         if (engine instanceof SpongeServer) {
             final @Nullable SpongeGameProfileManager profileManager = ((SpongeServer) engine).gameProfileManagerIfPresent();
@@ -265,7 +268,7 @@ public final class SpongeLifecycle implements Lifecycle {
     @Override
     public void callStoppedGameEvent() {
         // Call an event for plugins to shut down any thread pools
-        this.game.eventManager().post(SpongeEventFactory.createStoppedGameEvent(PhaseTracker.getCauseStackManager().currentCause(), this.game));
+        this.game.eventManager().post(SpongeEventFactory.createStoppedGameEvent(PhaseTracker.getInstance().currentCause(), this.game));
 
         // Then shut down our own thread pool
         ((AsyncScheduler) this.game.asyncScheduler()).close();
@@ -283,4 +286,10 @@ public final class SpongeLifecycle implements Lifecycle {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public void establishTags(final ResourceManager resourceManager) {
+        final RegisterTagEventImpl event = new RegisterTagEventImpl(Cause.of(EventContext.empty(), this.game), this.game);
+        this.game.eventManager().post(event);
+        ((ResourceManagerBridge) resourceManager).bridge$pluginProvidedTags(event.tags());
+    }
 }

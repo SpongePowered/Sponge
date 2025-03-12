@@ -16,13 +16,13 @@ jobs:
       matrix:
         project:
           - vanilla
-#          - forge
+          - forge
           - neoforge
         include:
           - project: vanilla
             gradleProject: SpongeVanilla
-#          - project: forge
-#            gradleProject: SpongeForge
+          - project: forge
+            gradleProject: SpongeForge
           - project: neoforge
             gradleProject: SpongeNeo
     steps:
@@ -34,7 +34,7 @@ jobs:
           runtime_version: 21
           publishing_branch_regex: 'api-\d+'
       - name: setup / cache minecraft dependencies
-        uses: "actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9" # v4.0.2
+        uses: "actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf" # v4.2.2
         if: "!startsWith(github.ref, 'refs/heads/update/') || matrix.project == 'vanilla'"
         with:
           path: |
@@ -74,4 +74,4 @@ jobs:
         uses: "actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3" # v4.3.1
         with:
           name: SpongeVanilla installer libraries
-          path: "${{ github.workspace }}/vanilla/build/resources/installer/libraries.json"
+          path: "${{ github.workspace }}/vanilla/build/resources/installer/sponge-libraries.json"

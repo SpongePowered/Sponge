@@ -109,7 +109,7 @@ public abstract class FoodDataMixin implements FoodDataBridge {
 
         final ChangeDataHolderEvent.ValueChange
                 event =
-                SpongeEventFactory.createChangeDataHolderEventValueChange(PhaseTracker.getCauseStackManager().currentCause(), transaction, (DataHolder.Mutable) this.impl$player);
+                SpongeEventFactory.createChangeDataHolderEventValueChange(PhaseTracker.getInstance().currentCause(), transaction, (DataHolder.Mutable) this.impl$player);
 
         Sponge.eventManager().post(event);
 

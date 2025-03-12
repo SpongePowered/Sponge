@@ -49,7 +49,7 @@ public abstract class FireBlockMixin extends BaseFireBlockMixin {
             ordinal = 1))
     private boolean impl$onFireSpread(final net.minecraft.server.level.ServerLevel world, final BlockPos pos, final BlockState newState, final int flags) {
         if (!((LevelBridge) world).bridge$isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
-            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
                 frame.addContext(EventContextKeys.FIRE_SPREAD, (ServerWorld) world);
                 if (SpongeCommonEventFactory.callChangeBlockEventPre((ServerLevelBridge) world, pos).isCancelled()) {
                     return false;

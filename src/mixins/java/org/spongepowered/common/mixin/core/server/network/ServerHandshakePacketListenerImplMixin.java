@@ -83,7 +83,7 @@ public abstract class ServerHandshakePacketListenerImplMixin implements ServerHa
         final SpongeEngineConnection connection = ((ConnectionBridge) this.connection).bridge$getEngineConnection();
         final Component message = Component.text("You are not allowed to log in to this server.");
         final ServerSideConnectionEvent.Intent event = SpongeEventFactory.createServerSideConnectionEventIntent(
-                PhaseTracker.getCauseStackManager().currentCause(), message, message, (ServerSideConnection) connection, false);
+                PhaseTracker.getInstance().currentCause(), message, message, (ServerSideConnection) connection, false);
         if (connection.postGuardedEvent(event)) {
             final net.minecraft.network.chat.Component kickReason = SpongeAdventure.asVanilla(event.message());
             this.connection.send(new ClientboundLoginDisconnectPacket(kickReason));
@@ -99,7 +99,7 @@ public abstract class ServerHandshakePacketListenerImplMixin implements ServerHa
         final SpongeEngineConnection connection = ((ConnectionBridge) this.connection).bridge$getEngineConnection();
         final Component message = Component.translatable("multiplayer.disconnect.transfers_disabled");
         final ServerSideConnectionEvent.Intent event = SpongeEventFactory.createServerSideConnectionEventIntent(
-                PhaseTracker.getCauseStackManager().currentCause(), message, message, (ServerSideConnection) connection, true);
+                PhaseTracker.getInstance().currentCause(), message, message, (ServerSideConnection) connection, true);
         event.setCancelled(!instance.acceptsTransfers());
         if (connection.postGuardedEvent(event)) {
             ((ConnectionBridge) this.connection).bridge$setKickReason(SpongeAdventure.asVanilla(event.message()));

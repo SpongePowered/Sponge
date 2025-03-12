@@ -94,11 +94,11 @@ public abstract class EntityMixin_Tracker implements DelegatingConfigTrackableBr
     )
     private void tracker$logEntityDropTransactionIfNecessary(final ServerLevel level, final ItemStack stack, final float offsetY,
                                                              final CallbackInfoReturnable<ItemEntity> cir) {
-        final PhaseTracker instance = PhaseTracker.SERVER;
-        if (!instance.onSidedThread()) {
+        if (((LevelBridge) level).bridge$isFake()) {
             return;
         }
-        if (((LevelBridge) level).bridge$isFake()) {
+        final PhaseTracker instance = PhaseTracker.getWorldInstance(level);
+        if (!instance.onSidedThread()) {
             return;
         }
         final PhaseContext<@NonNull ?> context = instance.getPhaseContext();
@@ -112,11 +112,11 @@ public abstract class EntityMixin_Tracker implements DelegatingConfigTrackableBr
 
     @Inject(method = "setRemoved(Lnet/minecraft/world/entity/Entity$RemovalReason;)V", at = @At("RETURN"))
     private void tracker$ensureDropEffectCompleted(final Entity.RemovalReason reason, final CallbackInfo ci) {
-        final PhaseTracker instance = PhaseTracker.SERVER;
-        if (!instance.onSidedThread()) {
+        if (((LevelBridge) this.shadow$level()).bridge$isFake()) {
             return;
         }
-        if (((LevelBridge) this.shadow$level()).bridge$isFake()) {
+        final PhaseTracker instance = PhaseTracker.getWorldInstance((ServerLevel) this.shadow$level());
+        if (!instance.onSidedThread()) {
             return;
         }
         final PhaseContext<@NonNull ?> context = instance.getPhaseContext();
@@ -143,7 +143,7 @@ public abstract class EntityMixin_Tracker implements DelegatingConfigTrackableBr
                 && this.levelCallback != EntityInLevelCallback.NULL) {
 
             if (!((Entity) (Object) this instanceof LivingEntity)) {
-                final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
+                final Cause cause = PhaseTracker.getInstance().currentCause();
                 final Audience originalChannel = Audience.empty();
                 SpongeCommon.post(SpongeEventFactory.createDestructEntityEvent(
                     cause,

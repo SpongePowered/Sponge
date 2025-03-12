@@ -81,6 +81,7 @@ public final class SpongePlayerDataManager {
             }
         }
         playerEntity.offer(Keys.FIRST_DATE_JOINED, creation);
+        playerEntity.offer(Keys.LAST_DATE_JOINED, lastPlayed);
         playerEntity.offer(Keys.LAST_DATE_PLAYED, lastPlayed);
     }
 

@@ -24,24 +24,25 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.ReloadableServerRegistries;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.launch.Launch;
 
 @Mixin(ReloadableServerRegistries.class)
 public abstract class ReloadableServerRegistriesMixin {
 
-    @Redirect(method = "reload", at = @At(value = "INVOKE",
+    @WrapOperation(method = "reload", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/core/LayeredRegistryAccess;getAccessForLoading(Ljava/lang/Object;)Lnet/minecraft/core/RegistryAccess$Frozen;"))
-    private static <T> RegistryAccess.Frozen impl$onGetAccess(final LayeredRegistryAccess instance, final T $$0) {
-        final RegistryAccess.Frozen registryAccess = instance.getAccessForLoading($$0);
+    private static RegistryAccess.Frozen impl$onGetRegistryAccess(final LayeredRegistryAccess<?> instance, final Object layer, final Operation<RegistryAccess.Frozen> original) {
+        final RegistryAccess.Frozen registryAccess = original.call(instance, layer);
         final var lifecycle = Launch.instance().lifecycle();
-        lifecycle.establishGlobalRegistries(registryAccess, (RegistryLayer) $$0);
+        lifecycle.establishGlobalRegistries(registryAccess, (RegistryLayer) layer);
         return registryAccess;
     }
 }

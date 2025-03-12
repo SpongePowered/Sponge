@@ -45,7 +45,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.world.entity.item.ItemEntityBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
-import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.data.provider.entity.ItemData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -75,7 +74,7 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
             return originalRadius;
         }
         if (this.impl$cachedRadius == -1) {
-            final double configRadius = ((PrimaryLevelDataBridge) this.shadow$level().getLevelData()).bridge$configAdapter().get().world.itemMergeRadius;
+            final double configRadius = SpongeGameConfigs.getForWorld(this.shadow$level()).get().world.itemMergeRadius;
             this.impl$cachedRadius = configRadius < 0 ? 0 : configRadius;
         }
         return this.impl$cachedRadius;
@@ -123,7 +122,7 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
         )
     )
     private void impl$fireExpireEntityEventTargetItem(final CallbackInfo ci) {
-        if (!PhaseTracker.SERVER.onSidedThread() || this.shadow$getItem().isEmpty()) {
+        if (!PhaseTracker.getWorldInstance((ServerLevel) this.shadow$level()).onSidedThread() || this.shadow$getItem().isEmpty()) {
             // In the rare case the first if block is actually at the end of the method instruction list, we don't want to
             // erroneously be calling this twice.
             return;
@@ -139,7 +138,7 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
     @Inject(method = "tryToMerge", cancellable = true,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;merge(Lnet/minecraft/world/entity/item/ItemEntity;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/item/ItemEntity;Lnet/minecraft/world/item/ItemStack;)V"))
     private void impl$merge(final ItemEntity param0, final CallbackInfo ci) {
-        final Cause currentCause = Sponge.server().causeStackManager().currentCause();
+        final Cause currentCause = PhaseTracker.getInstance().currentCause();
         if (Sponge.eventManager().post(SpongeEventFactory.createItemMergeWithItemEvent(currentCause, (Item) this, (Item) param0))) {
             ci.cancel();
         }

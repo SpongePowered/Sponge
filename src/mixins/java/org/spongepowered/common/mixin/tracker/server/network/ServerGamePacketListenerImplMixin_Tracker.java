@@ -61,7 +61,7 @@ public abstract class ServerGamePacketListenerImplMixin_Tracker {
             player.doTick();
             return;
         }
-        try (final PlayerTickContext context = TickPhase.Tick.PLAYER.createPhaseContext(PhaseTracker.SERVER).source(player)) {
+        try (final PlayerTickContext context = TickPhase.Tick.PLAYER.createPhaseContext(PhaseTracker.getWorldInstance(this.player.serverLevel())).source(player)) {
             context.buildAndSwitch();
             PhaseTracker.LOGGER.trace(TrackingUtil.PLAYER_TICK, () -> "Wrapping Player Tick: " + player.toString());
             player.doTick();

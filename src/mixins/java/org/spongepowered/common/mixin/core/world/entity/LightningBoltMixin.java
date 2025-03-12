@@ -69,7 +69,7 @@ public abstract class LightningBoltMixin extends EntityMixin {
             return Collections.emptyList();
         }
         final List<Entity> originalEntities = level.getEntities(thisEntity, boundingBox, predicate);
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             final LightningEvent.Strike strike = SpongeEventFactory.createLightningEventStrike(frame.currentCause(), (List<org.spongepowered.api.entity.Entity>) (List<?>) originalEntities);
             Sponge.eventManager().post(strike);
             if (strike.isCancelled()) {
@@ -90,7 +90,7 @@ public abstract class LightningBoltMixin extends EntityMixin {
         if (this.shadow$isRemoved() || this.shadow$level().isClientSide || this.life >= 0) {
             return;
         }
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(this);
             final LightningEvent.Post strike = SpongeEventFactory.createLightningEventPost(frame.currentCause());
             Sponge.eventManager().post(strike);

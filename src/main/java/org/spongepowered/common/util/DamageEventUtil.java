@@ -45,7 +45,6 @@ import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.AABB;
 import org.apache.commons.lang3.mutable.MutableFloat;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContext;
@@ -222,7 +221,7 @@ public final class DamageEventUtil {
     }
 
     public static DamageFunction provideCooldownAttackStrengthFunction(final Player player, final float attackStrength) {
-        final var modifier = DamageEventUtil.buildAttackDamageModifier(DamageModifierTypes.ATTACK_STRENGTH, player);
+        final var modifier = DamageEventUtil.buildAttackDamageModifier(DamageModifierTypes.ATTACK_COOLDOWN, player);
         final DoubleUnaryOperator function = (damage) -> damage * (0.2F + attackStrength * attackStrength * 0.8F);
         return new DamageFunction(modifier, function);
     }
@@ -251,7 +250,7 @@ public final class DamageEventUtil {
     }
 
     private static DamageModifier buildDamageReductionModifierWithFrame(final DefaultedRegistryReference<DamageModifierType> modifierType, Object... causes) {
-        try (final CauseStackManager.StackFrame frame = Sponge.server().causeStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             for (final Object cause : causes) {
                 frame.pushCause(cause);
             }
@@ -294,7 +293,7 @@ public final class DamageEventUtil {
      * {@link Mob#doHurtTarget}
      */
     public static AttackEntityEvent callMobAttackEvent(final Attack<Mob> attack, final float knockbackModifier) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(attack.dmgSource());
             return attack.postEvent(knockbackModifier, frame.currentCause());
         }
@@ -315,7 +314,7 @@ public final class DamageEventUtil {
             final Entity targetEntity,
             final DamageSource damageSource,
             final double damage) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(damageSource);
             final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.currentCause(), (org.spongepowered.api.entity.Entity) targetEntity, new ArrayList<>(), 0, damage);
             SpongeCommon.post(event);
@@ -325,7 +324,7 @@ public final class DamageEventUtil {
 
     public static DamageEventResult callLivingDamageEntityEvent(final Hurt hurt, final ActuallyHurt actuallyHurt) {
 
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             DamageEventUtil.generateCauseFor(actuallyHurt.dmgSource(), frame);
 
             final List<DamageFunction> originalFunctions = new ArrayList<>();
@@ -371,7 +370,7 @@ public final class DamageEventUtil {
 
 
     public static DamageEntityEvent callSimpleDamageEntityEvent(final DamageSource source, final Entity targetEntity, final double amount) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             DamageEventUtil.generateCauseFor(source, frame);
             final var event = SpongeEventFactory.createDamageEntityEvent(frame.currentCause(), (org.spongepowered.api.entity.Entity) targetEntity, new ArrayList<>(), amount);
             SpongeCommon.post(event);

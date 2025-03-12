@@ -85,7 +85,7 @@ public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, Imp
             return this.get();
         }
         final CriterionEvent.Score.Change event;
-        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
+        final Cause cause = PhaseTracker.getInstance().currentCause();
         final Advancement advancement = this.progress.advancement();
         final ResourceKey advancementKey = (ResourceKey) (Object) ((AdvancementProgressBridge) this.progress).bridge$getAdvancementKey();
         final ServerPlayer player = ((PlayerAdvancementsBridge) ((AdvancementProgressBridge) this.progress).bridge$getPlayerAdvancements()).bridge$getPlayer();

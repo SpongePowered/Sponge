@@ -41,6 +41,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 @Mixin(BedBlock.class)
 public class BedBlockMixin {
@@ -49,7 +50,7 @@ public class BedBlockMixin {
     private void impl$onUseBed(final BlockState param0, final Level param1, final BlockPos param2, final Player param3, final BlockHitResult param5,
             final CallbackInfoReturnable<InteractionResult> cir) {
         if (!param1.isClientSide) {
-            final Cause currentCause = Sponge.server().causeStackManager().currentCause();
+            final Cause currentCause = PhaseTracker.getInstance().currentCause();
             final BlockPos bedLocation = param5.getBlockPos();
             final BlockSnapshot snapshot = ((ServerWorld) param1).createSnapshot(bedLocation.getX(), bedLocation.getY(), bedLocation.getZ());
             if (Sponge.eventManager().post(SpongeEventFactory.createSleepingEventPre(currentCause, snapshot, (Living) param3))) {
@@ -61,7 +62,7 @@ public class BedBlockMixin {
     @Inject(method = "useWithoutItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;removeBlock(Lnet/minecraft/core/BlockPos;Z)Z"), cancellable = true)
     private void impl$onExplodeBed(final BlockState param0, final Level param1, final BlockPos param2, final Player param3, final BlockHitResult param5,
             final CallbackInfoReturnable<InteractionResult> cir) {
-        final Cause currentCause = Sponge.server().causeStackManager().currentCause();
+        final Cause currentCause = PhaseTracker.getInstance().currentCause();
         final BlockPos bedLocation = param5.getBlockPos();
         final BlockSnapshot snapshot = ((ServerWorld) param1).createSnapshot(bedLocation.getX(), bedLocation.getY(), bedLocation.getZ());
         if (Sponge.eventManager().post(SpongeEventFactory.createSleepingEventFailed(currentCause, snapshot, (Living) param3))) {
