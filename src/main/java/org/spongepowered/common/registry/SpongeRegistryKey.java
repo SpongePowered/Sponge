@@ -30,6 +30,7 @@ import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.registry.RegistryType;
+import org.spongepowered.common.SpongeCommon;
 
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -63,6 +64,11 @@ public class SpongeRegistryKey<T> implements RegistryKey<T> {
     @Override
     public final <V extends T> DefaultedRegistryReference<V> asDefaultedReference(final Supplier<RegistryHolder> defaultHolder) {
         return new SpongeDefaultedRegistryReference<>((RegistryKey<V>) this, defaultHolder);
+    }
+
+    @Override
+    public final <V extends T> DefaultedRegistryReference<V> asScopedReference() {
+        return new SpongeDefaultedRegistryReference<>((RegistryKey<V>) this, SpongeCommon::scopedHolder);
     }
 
     @Override

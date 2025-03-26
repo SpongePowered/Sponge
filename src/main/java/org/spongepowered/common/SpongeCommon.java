@@ -37,7 +37,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.scheduler.AsyncScheduler;
 import org.spongepowered.common.scheduler.ServerScheduler;
 
@@ -100,8 +102,21 @@ public final class SpongeCommon {
         return SpongeCommon.server().registryAccess();
     }
 
+    public static SpongeRegistryHolder scopedHolder() {
+        var holder = PhaseTracker.getInstance().currentCause().first(SpongeRegistryHolder.class);
+        // If we have a holder in scope use it directly unless it is game
+        if (holder.isEmpty() || holder.get() == SpongeCommon.game()) {
+
+            if (SpongeCommon.game().isServerAvailable()) {
+                return (SpongeRegistryHolder) SpongeCommon.server();
+            }
+            return SpongeCommon.game();
+        }
+        return holder.get();
+    }
+
     public static <E> Registry<E> vanillaRegistry(ResourceKey<? extends Registry<? extends E>> key) {
-        return SpongeCommon.vanillaRegistryAccess().lookupOrThrow(key);
+        return (Registry<E>) SpongeCommon.scopedHolder().lookupOrThrow(key);
     }
 
     public static ServerScheduler serverScheduler() {

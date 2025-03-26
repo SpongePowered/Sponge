@@ -28,6 +28,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.DefaultedRegistryType;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryType;
+import org.spongepowered.common.SpongeCommon;
 
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -56,6 +57,11 @@ public class SpongeRegistryType<T> implements RegistryType<T> {
     @Override
     public final <V extends T> DefaultedRegistryType<V> asDefaultedType(final Supplier<RegistryHolder> defaultHolder) {
         return new SpongeDefaultedRegistryType<>(this.root, this.location, Objects.requireNonNull(defaultHolder, "defaultHolder"));
+    }
+
+    @Override
+    public <V> DefaultedRegistryType<V> asScopedType() {
+        return new SpongeDefaultedRegistryType<>(this.root, this.location, SpongeCommon::scopedHolder);
     }
 
     @Override
