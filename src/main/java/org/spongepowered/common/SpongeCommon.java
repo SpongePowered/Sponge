@@ -103,16 +103,15 @@ public final class SpongeCommon {
     }
 
     public static SpongeRegistryHolder scopedHolder() {
-        var holder = PhaseTracker.getInstance().currentCause().first(SpongeRegistryHolder.class);
+        var holder = PhaseTracker.getInstance().startupRegistryHolder();
         // If we have a holder in scope use it directly unless it is game
-        if (holder.isEmpty() || holder.get() == SpongeCommon.game()) {
-
+        if (holder == null) {
             if (SpongeCommon.game().isServerAvailable()) {
                 return (SpongeRegistryHolder) SpongeCommon.server();
             }
             return SpongeCommon.game();
         }
-        return holder.get();
+        return holder;
     }
 
     public static <E> Registry<E> vanillaRegistry(ResourceKey<? extends Registry<? extends E>> key) {
