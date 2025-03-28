@@ -102,7 +102,6 @@ public final class ItemStackData {
         // TODO DataComponents.OMINOUS_BOTTLE_AMPLIFIER 1.21
 
         // TODO rework applicable potion effects to consume effects
-        final var applicablePotionEffects = Keys.APPLICABLE_POTION_EFFECTS;
         ConsumeEffect newPotionEffects = new ApplyStatusEffectsConsumeEffect(List.of());
         ConsumeEffect teleportRand = new TeleportRandomlyConsumeEffect(5);
         ConsumeEffect removeStatusEffects = new RemoveStatusEffectsConsumeEffect(HolderSet.empty());
