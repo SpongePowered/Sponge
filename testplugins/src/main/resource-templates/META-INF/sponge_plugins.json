@@ -377,6 +377,12 @@
             "name": "Decorated Pot Data",
             "entrypoint": "org.spongepowered.test.data.PotDataTest",
             "description": "Decorated Pot Data"
+        },
+        {
+            "id": "consumabledata",
+            "name": "Consumable ItemStack Data",
+            "entrypoint": "org.spongepowered.test.data.ConsumableDataTest",
+            "description": "Consumable ItemStack Data"
         }
     ]
 }
