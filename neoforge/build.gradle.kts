@@ -21,6 +21,7 @@ val commonProject = parent!!
 val transformersProject = commonProject.project(":modlauncher-transformers")
 val libraryManagerProject = commonProject.project(":library-manager")
 val testPluginsProject: Project? = rootProject.subprojects.find { "testplugins" == it.name }
+val userPluginsProject: Project? = rootProject.subprojects.find { "userplugins" == it.name }
 
 val apiVersion: String by project
 val minecraftVersion: String by project
@@ -303,6 +304,9 @@ tasks {
                 dirs.addAll(testPluginsOutput.classesDirs)
                 environment["SPONGE_PLUGINS"] = dirs.joinToString("&")
 
+                dependsOn(it.tasks.classes)
+            }
+            userPluginsProject?.also {
                 dependsOn(it.tasks.classes)
             }
 

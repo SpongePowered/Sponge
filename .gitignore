@@ -85,3 +85,6 @@ buildSrc/src/api
 testplugins.settings.gradle.kts
 spongeforge.settings.gradle.kts
 projects.properties
+# External plugin projects
+/userplugins/userPluginBuilds
+/userplugins/userPlugins

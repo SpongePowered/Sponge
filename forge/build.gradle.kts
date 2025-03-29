@@ -25,6 +25,7 @@ val bootstrapDevProject = commonProject.project(":bootstrap-dev")
 val transformersProject = commonProject.project(":modlauncher-transformers")
 val libraryManagerProject = commonProject.project(":library-manager")
 val testPluginsProject: Project? = rootProject.subprojects.find { "testplugins" == it.name }
+val userPluginsProject: Project? = rootProject.subprojects.find { "userplugins" == it.name }
 
 val apiVersion: String by project
 val minecraftVersion: String by project
@@ -213,6 +214,9 @@ dependencies {
 
     runtimeOnly(project(bootstrapDevProject.path))
     testPluginsProject?.also {
+        runtimeOnly(project(it.path))
+    }
+    userPluginsProject?.also {
         runtimeOnly(project(it.path))
     }
 }

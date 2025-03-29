@@ -110,6 +110,22 @@ if (projects.contains("neoforge")) {
     project(":SpongeNeo").projectDir = file("neoforge")
 }
 
+if (projects.contains("userplugins")) {
+    include(":userplugins")
+    val userPluginBuilds = file("userplugins/userPluginBuilds")
+    if (userPluginBuilds.exists()) {
+        userPluginBuilds.readLines().filter { !it.startsWith("#") && it.isNotBlank()}.forEach {
+            includeBuild(it)
+        }
+    } else {
+        userPluginBuilds.writeText("# Add paths to your plugin projects here")
+    }
+    val userPlugins = file("userplugins/userPlugins")
+    if (userPlugins.exists().not()) {
+        userPlugins.writeText("# Add dependencies to your plugins here")
+    }
+}
+
 if (projects.contains("testplugins")) {
     include(":testplugins")
 }
