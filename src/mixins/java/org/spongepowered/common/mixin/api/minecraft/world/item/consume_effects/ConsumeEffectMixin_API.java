@@ -53,7 +53,7 @@ public interface ConsumeEffectMixin_API extends org.spongepowered.api.data.type.
     default boolean apply(final World<?, ?> world, final Living entity, final ItemStackLike stack) {
         return this.shadow$apply(
             (Level) Objects.requireNonNull(world, "world"),
-            ItemStackUtil.fromLikeToNative(stack).copy(),
+            ItemStackUtil.fromLikeToNativeCopy(stack),
             (LivingEntity) Objects.requireNonNull(entity, "entity"));
     }
 }

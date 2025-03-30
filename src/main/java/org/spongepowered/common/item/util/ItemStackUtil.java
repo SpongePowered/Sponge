@@ -167,6 +167,10 @@ public abstract class ItemStackUtil {
         return itemStack == null ? ItemStackUtil.emptyNative() : itemStack.isEmpty() ? ItemStackUtil.emptyNative() : ItemStackUtil.toNative(itemStack.asMutable());
     }
 
+    public static net.minecraft.world.item.ItemStack fromLikeToNativeCopy(@Nullable ItemStackLike itemStack) {
+        return itemStack == null ? ItemStackUtil.emptyNative() : itemStack.isEmpty() ? ItemStackUtil.emptyNative() : ItemStackUtil.toNative(itemStack.asMutableCopy());
+    }
+
     public static ItemStack empty() {
         return ItemStackUtil.fromNative(net.minecraft.world.item.ItemStack.EMPTY);
     }
