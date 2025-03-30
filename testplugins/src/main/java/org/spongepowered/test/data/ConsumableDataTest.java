@@ -91,7 +91,15 @@ public class ConsumableDataTest implements LoadableModule {
             PotionEffect.of(PotionEffectTypes.HASTE, 0, Ticks.of(20 * 10))
             ));
 
-        player.inventory().offer(stack1, stack2);
+        final ItemStack stack3 = ItemStack.of(ItemTypes.TOTEM_OF_UNDYING);
+        stack3.offer(Keys.CUSTOM_NAME, Component.text("No death protection"));
+        stack3.remove(Keys.DEATH_PROTECTION_EFFECTS);
+
+        final ItemStack stack4 = ItemStack.of(ItemTypes.ANVIL);
+        stack4.offer(Keys.CUSTOM_NAME, Component.text("Teleport on death"));
+        stack4.offerSingle(Keys.DEATH_PROTECTION_EFFECTS, ConsumeEffect.teleportRandomly(20));
+
+        player.inventory().offer(stack1, stack2, stack3, stack4);
         return CommandResult.success();
     }
 

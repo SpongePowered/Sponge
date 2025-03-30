@@ -43,6 +43,7 @@ import net.minecraft.world.item.component.ChargedProjectiles;
 import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.item.component.DamageResistant;
+import net.minecraft.world.item.component.DeathProtection;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.component.Unbreakable;
@@ -242,6 +243,13 @@ public final class ItemStackData {
                         })
                         .set((h, v) -> h.update(DataComponents.CONSUMABLE, DEFAULT_CONSUMABLE_PROPERTIES,
                                 c -> new Consumable(c.consumeSeconds(), c.animation(), c.sound(), c.hasConsumeParticles(), (List<ConsumeEffect>) (Object) v)))
+                    .create(Keys.DEATH_PROTECTION_EFFECTS)
+                        .get(h -> {
+                            final var deathProtection = h.get(DataComponents.DEATH_PROTECTION);
+                            return deathProtection == null ? null : (List<org.spongepowered.api.data.type.ConsumeEffect>) (Object) deathProtection.deathEffects();
+                        })
+                        .set((h, v) -> h.set(DataComponents.DEATH_PROTECTION, new DeathProtection((List<ConsumeEffect>) (Object) v)))
+                        .delete(h -> h.remove(DataComponents.DEATH_PROTECTION))
                     .create(Keys.FOOD_CONVERTS_TO)
                         .get(h -> {
                             final var remainder = h.get(DataComponents.USE_REMAINDER);
