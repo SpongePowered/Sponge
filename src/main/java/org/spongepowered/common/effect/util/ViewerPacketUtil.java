@@ -31,6 +31,7 @@ import net.kyori.adventure.title.Title;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -38,8 +39,10 @@ import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
+import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
+import net.minecraft.network.protocol.game.ClientboundSetPlayerInventoryPacket;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
@@ -50,7 +53,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.JukeboxSong;
+import net.minecraft.world.item.component.DeathProtection;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -60,12 +66,15 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeEngine;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
+import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.network.packet.ChangeViewerEnvironmentPacket;
 
 import java.time.Duration;
@@ -78,6 +87,33 @@ public final class ViewerPacketUtil {
 
     public static ChangeViewerEnvironmentPacket changeEnvironment(final WorldType worldType) {
         return new ChangeViewerEnvironmentPacket((DimensionType) (Object) Objects.requireNonNull(worldType, "worldType"));
+    }
+
+    public static ClientboundBundlePacket deathProtection(final Player player, final ItemStackLike stack) {
+        final ItemStack item = ItemStackUtil.fromLikeToNativeCopy(stack);
+        // Client will play item animation only if it has DEATH_PROTECTION component,
+        // otherwise it will use totem of undying
+        if (!item.has(DataComponents.DEATH_PROTECTION)) {
+            item.set(DataComponents.DEATH_PROTECTION, new DeathProtection(List.of()));
+        }
+
+        final net.minecraft.world.entity.player.Player mcPlayer = (net.minecraft.world.entity.player.Player) player;
+        final Inventory inventory = mcPlayer.getInventory();
+        final int totemSlot = inventory.selected;
+        final net.minecraft.world.item.ItemStack oldItem = inventory.getSelected();
+
+        final List<Packet<? super ClientGamePacketListener>> packets = new ArrayList<>();
+
+        // First we need to send a fake totem ItemStack to the player's hand
+        packets.add(new ClientboundSetPlayerInventoryPacket(totemSlot, item));
+
+        // Next we tell the client to play death protection animation
+        packets.add(new ClientboundEntityEventPacket(mcPlayer, (byte) 35));
+
+        // Now we can remove the fake totem
+        packets.add(new ClientboundSetPlayerInventoryPacket(totemSlot, oldItem));
+
+        return new ClientboundBundlePacket(packets);
     }
 
     public static ClientboundBundlePacket spawnParticles(final ParticleEffect particleEffect, final double x, final double y, final double z) {
