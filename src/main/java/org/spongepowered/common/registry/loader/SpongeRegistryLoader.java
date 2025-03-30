@@ -384,6 +384,7 @@ public final class SpongeRegistryLoader {
             l.add(ParticleOptions.TO_COLOR, k -> new SpongeParticleOption<>(Color.class));
             l.add(ParticleOptions.TRAVEL_TIME, k -> new SpongeParticleOption<>(Ticks.class));
             l.add(ParticleOptions.VELOCITY, k -> new SpongeParticleOption<>(Vector3d.class));
+            l.add(ParticleOptions.TARGET, k -> new SpongeParticleOption<>(Vector3d.class));
         });
     }
 

@@ -373,7 +373,7 @@ interface TransactionSink {
     }
 
     default EffectTransactor logCloseInventory(final PhaseContext<@NonNull ?> current, final Player player) {
-        final CloseMenuTransaction transaction = new CloseMenuTransaction(player, current.isClientSide());
+        final CloseMenuTransaction transaction = new CloseMenuTransaction(player);
         this.logTransaction(transaction);
         return this.pushEffect(new ResultingTransactionBySideEffect<>(InventoryEffect.getInstance()));
     }

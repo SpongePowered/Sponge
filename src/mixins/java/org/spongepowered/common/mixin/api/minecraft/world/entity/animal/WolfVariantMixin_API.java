@@ -28,5 +28,5 @@ import net.minecraft.world.entity.animal.WolfVariant;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(WolfVariant.class)
-public class WollfVariantMixin_API implements org.spongepowered.api.data.type.WolfVariant {
+public class WolfVariantMixin_API implements org.spongepowered.api.data.type.WolfVariant {
 }

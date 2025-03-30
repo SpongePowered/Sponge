@@ -212,13 +212,18 @@ public final class SpongeLifecycle implements Lifecycle {
 
     @Override
     public void processServerRegistries(final RegistryHolder server, final Stream<? extends org.spongepowered.api.registry.Registry<?>> registries) {
-        final Map<RegistryType<?>, org.spongepowered.api.registry.Registry<?>> map =
-            registries.collect(Collectors.toMap(org.spongepowered.api.registry.Registry::type, Function.identity()));
-        if (!map.isEmpty()) {
-            map.values().forEach(r -> ((WritableRegistryBridge<?>) r).bridge$setRegistryHolder(server));
-            this.game.eventManager().post(AbstractRegisterRegistryValueEvent.EngineScopedImpl.server(Cause.of(EventContext.empty(), this.game), this.game, server, map));
-            map.values().forEach(r -> ((WritableRegistryBridge<?>) r).bridge$markEventCalled());
-            ((SpongeRegistryHolder) server).registryHolder().freezeSpongeDynamicRegistries(false);
+        try {
+            PhaseTracker.getInstance().startupRegistryHolder(server);
+            final Map<RegistryType<?>, org.spongepowered.api.registry.Registry<?>> map =
+                    registries.collect(Collectors.toMap(org.spongepowered.api.registry.Registry::type, Function.identity()));
+            if (!map.isEmpty()) {
+                map.values().forEach(r -> ((WritableRegistryBridge<?>) r).bridge$setRegistryHolder(server));
+                this.game.eventManager().post(AbstractRegisterRegistryValueEvent.EngineScopedImpl.server(Cause.of(EventContext.empty(), this.game), this.game, server, map));
+                map.values().forEach(r -> ((WritableRegistryBridge<?>) r).bridge$markEventCalled());
+                ((SpongeRegistryHolder) server).registryHolder().freezeSpongeDynamicRegistries(false);
+            }
+        } finally {
+            PhaseTracker.getInstance().startupRegistryHolder(null);
         }
     }
 

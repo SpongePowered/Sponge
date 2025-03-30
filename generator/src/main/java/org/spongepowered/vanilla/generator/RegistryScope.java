@@ -63,7 +63,7 @@ public enum RegistryScope {
     SERVER {
         @Override
         protected CodeBlock registryKeyToReference() {
-            return CodeBlock.of("asDefaultedReference($T::server)", Types.SPONGE);
+            return CodeBlock.of("asScopedReference()", Types.SPONGE);
         }
 
         @Override

@@ -49,6 +49,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.EventContextKey;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.common.SpongeCommon;
@@ -59,6 +60,7 @@ import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.Preconditions;
 import org.spongepowered.common.util.PrettyPrinter;
@@ -259,6 +261,7 @@ public final class PhaseTracker implements CauseStackManager {
     private final Deque<PhaseContext<?>> phaseContextProviders = new ArrayDeque<>();
     final PhaseStack stack = new PhaseStack();
     private final SpongeCauseStackManager api = new SpongeCauseStackManager();
+    private @Nullable SpongeRegistryHolder startupRegistryHolder;
 
     PhaseTracker() {
         for (int i = 0; i < PhaseTracker.INITIAL_POOL_SIZE; i++) {
@@ -866,6 +869,18 @@ public final class PhaseTracker implements CauseStackManager {
 
     public CauseStackManager apiAccess() {
         return this.api;
+    }
+
+    public void startupRegistryHolder(final RegistryHolder holder) {
+        if (holder instanceof SpongeRegistryHolder srh) {
+            this.startupRegistryHolder = srh;
+        } else {
+            this.startupRegistryHolder = null;
+        }
+    }
+
+    public @Nullable SpongeRegistryHolder startupRegistryHolder() {
+        return this.startupRegistryHolder;
     }
 
     /**

@@ -33,12 +33,14 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SculkChargeParticleOptions;
 import net.minecraft.core.particles.ShriekParticleOption;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.core.particles.TrailParticleOption;
 import net.minecraft.core.particles.VibrationParticleOption;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket;
 import net.minecraft.util.ARGB;
+import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.effect.particle.ParticleEffect;
@@ -49,8 +51,10 @@ import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.PositionSource;
 import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3f;
+import org.spongepowered.math.vector.Vector3i;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -95,8 +99,11 @@ public final class SpongeParticleHelper {
         // The only way we can see what options are supported for a particular named particle
         // is to compare the internal type's deserializer to some static deserializer fields.
         // If only mojang had some type akin to our ParticleEffect...
-        if (internalType == ParticleTypes.BLOCK || internalType == ParticleTypes.BLOCK_MARKER
-                || internalType == ParticleTypes.FALLING_DUST || internalType == ParticleTypes.DUST_PILLAR) {
+        if (internalType == ParticleTypes.BLOCK ||
+            internalType == ParticleTypes.BLOCK_MARKER ||
+            internalType == ParticleTypes.FALLING_DUST ||
+            internalType == ParticleTypes.DUST_PILLAR ||
+            internalType == ParticleTypes.BLOCK_CRUMBLE) {
             //This particle type supports a block state option.
             final BlockState state = effect.optionOrDefault(ParticleOptions.BLOCK_STATE).get();
             final BlockParticleOption particleData = new BlockParticleOption(
@@ -148,6 +155,13 @@ public final class SpongeParticleHelper {
                     (net.minecraft.core.particles.ParticleType<ColorParticleOption>) internalType,
                     ARGB.color(ARGB.as8BitChannel((float) opacity), color.red(), color.green(), color.blue()));
             return new NamedCachedPacket(particleData, offset, quantity, velocity);
+        } else if (internalType == ParticleTypes.TRAIL) {
+            // This particle type color, destination and duration
+            final var dest = effect.optionOrDefault(ParticleOptions.TARGET).orElse(Vector3d.ZERO);
+            final var duration = effect.optionOrDefault(ParticleOptions.TRAVEL_TIME).orElse(Ticks.of(20));
+            final var color = effect.optionOrDefault(ParticleOptions.COLOR).map(c -> ARGB.color(c.red(), c.green(), c.blue())).orElse(16545810);
+            final var particleData = new TrailParticleOption(VecHelper.toVanillaVector3d(dest), color, (int) duration.ticks());
+            return new NamedCachedPacket(particleData, offset, quantity, velocity);
         }
 
         // Otherwise, we don't really know how to get a valid ParticleOptions. Sorry mods!
@@ -195,6 +209,12 @@ public final class SpongeParticleHelper {
                 ParticleOptions.COLOR.get(), Color.of(
                     Vector3f.from(colorOptions.getRed(), colorOptions.getGreen(), colorOptions.getBlue()).mul(255)),
                 ParticleOptions.OPACITY.get(), colorOptions.getAlpha()
+            ));
+        } else if (effect instanceof TrailParticleOption(Vec3 target, int color, int duration)) {
+            return new SpongeParticleEffect((ParticleType) type, Map.of(
+                    ParticleOptions.COLOR.get(), Color.of(Vector3i.from(ARGB.red(color), ARGB.green(color), ARGB.blue(color))),
+                    ParticleOptions.TRAVEL_TIME.get(), Ticks.of(duration),
+                    ParticleOptions.TARGET.get(), VecHelper.toVector3d(target)
             ));
         }
 

@@ -233,7 +233,7 @@ public class EntityRegistries {
             new RegistryEntriesGenerator<>(
                 "data.type",
                 "WolfVariants",
-                "WOLF_VAIRANT",
+                "WOLF_VARIANT",
                 context.relativeClass("data.type", "WolfVariant"),
                 Registries.WOLF_VARIANT
             )

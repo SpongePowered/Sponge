@@ -125,7 +125,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
         this.title = title;
         this.tracked.forEach((c, p) -> {
             var container = (AbstractContainerMenu) c;
-            var connection = (ServerGamePacketListenerImpl) p.connection();
+            var connection = (ServerGamePacketListenerImpl) p.connectionState();
             var packet = new ClientboundOpenScreenPacket(container.containerId, container.getType(), SpongeAdventure.asVanilla(this.title));
             connection.send(packet);
             container.broadcastFullState();

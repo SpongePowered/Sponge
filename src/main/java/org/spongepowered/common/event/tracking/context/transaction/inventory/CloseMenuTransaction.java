@@ -25,14 +25,8 @@
 package org.spongepowered.common.event.tracking.context.transaction.inventory;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.network.protocol.game.ClientboundContainerClosePacket;
-import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.inventory.Slot;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -40,7 +34,6 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -58,18 +51,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
-public class CloseMenuTransaction extends MenuBasedTransaction<InteractContainerEvent> {
+public class CloseMenuTransaction extends MenuBasedTransaction<InteractContainerEvent.Close.Post> {
 
     private final ServerPlayer player;
     private final ItemStackSnapshot cursor;
-    private boolean clientSource;
     private @MonotonicNonNull List<SlotTransaction> slotTransactions;
 
-    public CloseMenuTransaction(final Player player, final boolean clientSource) {
+    public CloseMenuTransaction(final Player player) {
         super(TransactionTypes.INTERACT_CONTAINER_EVENT.get(), player.containerMenu);
         this.player = (ServerPlayer) player;
         this.cursor = ItemStackUtil.snapshotOf(player.containerMenu.getCarried());
-        this.clientSource = clientSource;
     }
 
     @Override
@@ -80,9 +71,9 @@ public class CloseMenuTransaction extends MenuBasedTransaction<InteractContainer
     }
 
     @Override
-    public Optional<InteractContainerEvent> generateEvent(
+    public Optional<InteractContainerEvent.Close.Post> generateEvent(
         final PhaseContext<@NonNull ?> context, @Nullable final GameTransaction<@NonNull ?> parent,
-        final ImmutableList<GameTransaction<InteractContainerEvent>> gameTransactions, final Cause currentCause
+        final ImmutableList<GameTransaction<InteractContainerEvent.Close.Post>> gameTransactions, final Cause currentCause
     ) {
         final ItemStackSnapshot resultingCursor = ItemStackUtil.snapshotOf(this.player.containerMenu.getCarried());
         final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(this.cursor, resultingCursor);
@@ -92,15 +83,9 @@ public class CloseMenuTransaction extends MenuBasedTransaction<InteractContainer
     }
 
     @Override
-    public void restore(final PhaseContext<@NonNull ?> context, final InteractContainerEvent event) {
-        if (this.clientSource) {
-            // If client closed container we need to reopen it
-            this.reopen(this.player, this.menu);
-        }
+    public void restore(final PhaseContext<@NonNull ?> context, final InteractContainerEvent.Close.Post event) {
         PacketPhaseUtil.handleCursorRestore(this.player, event.cursorTransaction(), event.isCancelled());
-        if (event instanceof ChangeInventoryEvent) {
-            PacketPhaseUtil.handleSlotRestore(this.player, this.menu, ((ChangeInventoryEvent) event).transactions(), event.isCancelled());
-        }
+        PacketPhaseUtil.handleSlotRestore(this.player, this.menu, event.transactions(), event.isCancelled());
 
         this.player.inventoryMenu.broadcastChanges(); // prevent double capture
     }
@@ -120,26 +105,17 @@ public class CloseMenuTransaction extends MenuBasedTransaction<InteractContainer
     }
 
     @Override
-    public void postProcessEvent(final PhaseContext<@NonNull ?> context, final InteractContainerEvent event) {
-        if (!this.clientSource) {
-            // Server closed send packet to client
-            this.player.connection.send(new ClientboundContainerClosePacket(this.player.containerMenu.containerId));
-        }
-        // Finish closing container
-        this.player.containerMenu = this.player.inventoryMenu;
-
+    public void postProcessEvent(final PhaseContext<@NonNull ?> context, final InteractContainerEvent.Close.Post event) {
         // And restore cursor if needed
         PacketPhaseUtil.handleCursorRestore(this.player, event.cursorTransaction(), event.isCancelled());
-        if (event instanceof ChangeInventoryEvent) {
-            PacketPhaseUtil.handleSlotRestore(this.player, this.menu, ((ChangeInventoryEvent) event).transactions(), event.isCancelled());
-        }
+        PacketPhaseUtil.handleSlotRestore(this.player, this.menu, event.transactions(), event.isCancelled());
 
         this.player.inventoryMenu.broadcastChanges(); // prevent double capture
     }
 
     @Override
-    public boolean markCancelledTransactions(final InteractContainerEvent event,
-            final ImmutableList<? extends GameTransaction<InteractContainerEvent>> gameTransactions) {
+    public boolean markCancelledTransactions(final InteractContainerEvent.Close.Post event,
+            final ImmutableList<? extends GameTransaction<InteractContainerEvent.Close.Post>> gameTransactions) {
         if (event.isCancelled()) {
             event.cursorTransaction().invalidate();
             return true;
@@ -151,37 +127,4 @@ public class CloseMenuTransaction extends MenuBasedTransaction<InteractContainer
     public void addToPrinter(final PrettyPrinter printer) {
 
     }
-
-    private void reopen(final ServerPlayer player, final AbstractContainerMenu container) {
-        if (container.getSlot(0) == null) {
-            return;
-        }
-        if (!(container instanceof InventoryMenu)) {
-            // Inventory closed by client, reopen window and send container
-            player.containerMenu = container;
-            final Slot slot = container.getSlot(0);
-            final net.minecraft.world.Container slotInventory = slot.container;
-            final net.minecraft.network.chat.@Nullable Component title;
-            // TODO get name from last open
-            if (slotInventory instanceof MenuProvider) {
-                title = ((MenuProvider) slotInventory).getDisplayName();
-            } else {
-                // expected fallback for unknown types
-                title = null;
-            }
-            slotInventory.startOpen(player);
-            player.connection.send(new ClientboundOpenScreenPacket(container.containerId, container.getType(), title));
-            // resync data to client
-            container.broadcastFullState();
-        } else {
-            // TODO: Maybe print a warning or throw an exception here?
-            // The player gui cannot be opened from the
-            // server so allowing this event to be cancellable when the
-            // GUI has been closed already would result
-            // in opening the wrong GUI window.
-        }
-
-    }
-
-
 }
