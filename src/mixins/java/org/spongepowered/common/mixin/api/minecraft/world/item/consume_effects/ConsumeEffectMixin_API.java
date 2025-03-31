@@ -51,10 +51,11 @@ public interface ConsumeEffectMixin_API extends ItemActionEffect {
     }
 
     @Override
-    default boolean apply(final World<?, ?> world, final Living entity, final ItemStackLike stack) {
+    default boolean apply(final Living entity, final ItemStackLike stack) {
+        Objects.requireNonNull(entity, "entity");
         return this.shadow$apply(
-            (Level) Objects.requireNonNull(world, "world"),
+            (Level) entity.world(),
             ItemStackUtil.fromLikeToNativeCopy(stack),
-            (LivingEntity) Objects.requireNonNull(entity, "entity"));
+            (LivingEntity) entity);
     }
 }
