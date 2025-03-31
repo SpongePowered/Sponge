@@ -52,8 +52,8 @@ public interface SpongeForwardingViewer extends SpongeViewer, ForwardingViewer, 
     // Viewer
 
     @Override
-    default void sendDeathProtection(final ItemStackLike stack) {
-        this.audiences().forEach(viewer -> viewer.sendDeathProtection(stack));
+    default void playTotemOfUndyingEffect(final ItemStackLike stack) {
+        this.audiences().forEach(viewer -> viewer.playTotemOfUndyingEffect(stack));
     }
 
     @Override
