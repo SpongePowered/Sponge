@@ -31,7 +31,6 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.codecs.PrimitiveCodec;
 import io.netty.util.AttributeKey;
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.serializer.configurate4.ConfigurateComponentSerializer;
@@ -99,10 +98,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.adventure.ResolveOperation;
 import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.CommandCause;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.api.util.Tristate;
@@ -168,16 +167,31 @@ public final class SpongeAdventure {
         }
     };
 
-    public static final ComponentRenderer<SpongeRendererContext> SPONGE_COMPONENT_RENDERER = new TranslatableComponentRenderer<>() {
+    public static final ComponentRenderer<SpongeRendererContext> SPONGE_VIRTUAL_COMPONENT_RENDERER = new ComponentRenderer<SpongeRendererContext>() {
 
         @Override
-        protected @NonNull Component renderVirtual(final @NonNull VirtualComponent component, final @NonNull SpongeRendererContext context) {
+        public @NotNull Component render(final @NotNull Component component, final @NotNull SpongeRendererContext context) {
+            if (component instanceof final VirtualComponent virtualComponent) {
+                return this.renderVirtual(virtualComponent, context);
+            }
+            return component;
+        }
+
+        public @NonNull Component renderVirtual(final @NonNull VirtualComponent component, final @NonNull SpongeRendererContext context) {
             context.markContainsVirtualComponents();
             if (component.renderer() instanceof final AudienceVirtualComponentRenderer audienceVirtualComponentRenderer
                 && context.audience() != null) {
                 return audienceVirtualComponentRenderer.apply(context.audience()).asComponent();
             }
-            return super.renderVirtual(component, context);
+            return component;
+        }
+    };
+
+    public static final ComponentRenderer<SpongeRendererContext> SPONGE_COMPONENT_RENDERER = new TranslatableComponentRenderer<>() {
+
+        @Override
+        protected @NonNull Component renderVirtual(final @NonNull VirtualComponent component, final @NonNull SpongeRendererContext context) {
+            return SpongeAdventure.SPONGE_VIRTUAL_COMPONENT_RENDERER.render(component, context);
         }
 
         @Override
@@ -831,29 +845,18 @@ public final class SpongeAdventure {
         public final @NonNull Component render(
             final @NonNull Component component,
             final @NonNull CommandCause senderContext,
-            @Nullable Audience viewer,
+            final @NonNull Audience viewer,
             final @NonNull DefaultedRegistryReference<ResolveOperation> firstOperation,
             final @NonNull DefaultedRegistryReference<ResolveOperation> @NonNull ... otherOperations
         ) {
             Component output = Objects.requireNonNull(component, "component");
             Objects.requireNonNull(senderContext, "senderContext");
 
-            // Unwrap the Audience to an entity
-            while (viewer instanceof ForwardingAudience.Single single && !(viewer instanceof Entity)) {
-                viewer = single.audience();
-            }
-            final @Nullable Entity backing;
-            if (viewer instanceof Entity entity) {
-                backing = entity;
-            } else {
-                backing = null;
-            }
-
             output = ((SpongeResolveOperation) Objects.requireNonNull(firstOperation, "firstOperation").get())
-                .resolve(output, senderContext, backing);
+                .resolve(output, senderContext, viewer);
 
             for (final DefaultedRegistryReference<ResolveOperation> ref : otherOperations) {
-                output = ((SpongeResolveOperation) ref.get()).resolve(output, senderContext, backing);
+                output = ((SpongeResolveOperation) ref.get()).resolve(output, senderContext, viewer);
             }
             return output;
         }
@@ -875,8 +878,8 @@ public final class SpongeAdventure {
         }
 
         @Override
-        public VirtualComponent receiverVirtualComponent(final @NonNull Function<Audience, ComponentLike> apply) {
-            return Component.virtual(Audience.class, new AudienceVirtualComponentRenderer(apply));
+        public VirtualComponent receiverVirtualComponent(final @NonNull Function<Audience, ComponentLike> apply, final @NonNull String fallbackValue) {
+            return Component.virtual(Audience.class, new AudienceVirtualComponentRenderer(apply, fallbackValue));
         }
     }
 
