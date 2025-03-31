@@ -25,10 +25,13 @@
 package org.spongepowered.common.adventure;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.ComponentUtils;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -44,7 +47,23 @@ public abstract class SpongeResolveOperation implements ResolveOperation {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public abstract Component resolve(final Component input, final CommandCause senderContext, final @Nullable Entity viewer);
+    public Component resolve(final Component input, final CommandCause senderContext, Audience viewer) {
+        // Unwrap the Audience to an entity
+        while (viewer instanceof ForwardingAudience.Single single && !(viewer instanceof Entity)) {
+            viewer = single.audience();
+        }
+        final @Nullable Entity backing;
+        if (viewer instanceof Entity entity) {
+            backing = entity;
+        } else {
+            backing = null;
+        }
+        return this.resolve(input, senderContext, backing);
+    }
+
+    public Component resolve(final Component input, final CommandCause senderContext, final @Nullable Entity viewer) {
+        throw new NotImplementedException();
+    }
 
     public static SpongeResolveOperation newCustomTranslations() {
         return new SpongeResolveOperation() {
@@ -76,4 +95,12 @@ public abstract class SpongeResolveOperation implements ResolveOperation {
         };
     }
 
+    public static SpongeResolveOperation newVirtualComponents() {
+        return new SpongeResolveOperation() {
+            @Override
+            public Component resolve(final Component input, final CommandCause senderContext, final Audience viewer) {
+                return SpongeAdventure.SPONGE_VIRTUAL_COMPONENT_RENDERER.render(input, new SpongeRendererContext(null, viewer));
+            }
+        };
+    }
 }

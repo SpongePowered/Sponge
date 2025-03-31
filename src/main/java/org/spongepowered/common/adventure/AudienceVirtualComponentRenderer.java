@@ -34,13 +34,20 @@ import java.util.function.Function;
 public final class AudienceVirtualComponentRenderer implements VirtualComponentRenderer<Audience> {
 
     private final Function<Audience, ComponentLike> apply;
+    private final String fallbackString;
 
-    AudienceVirtualComponentRenderer(final Function<Audience, ComponentLike> apply) {
+    AudienceVirtualComponentRenderer(final Function<Audience, ComponentLike> apply, final String fallbackString) {
         this.apply = apply;
+        this.fallbackString = fallbackString;
     }
 
     @Override
     public @NonNull ComponentLike apply(final @NonNull Audience context) {
         return this.apply.apply(context);
+    }
+
+    @Override
+    public @NonNull String fallbackString() {
+        return this.fallbackString;
     }
 }

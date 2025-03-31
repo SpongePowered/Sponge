@@ -410,6 +410,7 @@ public final class SpongeRegistryLoader {
         return RegistryLoader.of(l -> {
             l.add(ResolveOperations.CONTEXTUAL_COMPONENTS, SpongeResolveOperation::newContextualComponents);
             l.add(ResolveOperations.CUSTOM_TRANSLATIONS, SpongeResolveOperation::newCustomTranslations);
+            l.add(ResolveOperations.VIRTUAL_COMPONENTS, SpongeResolveOperation::newVirtualComponents);
         });
     }
 
