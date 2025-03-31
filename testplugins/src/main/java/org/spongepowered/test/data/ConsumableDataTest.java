@@ -30,7 +30,7 @@ import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.type.ConsumeEffect;
+import org.spongepowered.api.data.type.ItemActionEffect;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectTypes;
 import org.spongepowered.api.effect.sound.SoundTypes;
@@ -75,18 +75,18 @@ public class ConsumableDataTest implements LoadableModule {
 
         final ItemStack stack1 = ItemStack.of(ItemTypes.BRICKS);
         stack1.offer(Keys.CUSTOM_NAME, Component.text("Remove slowness, get speed & regeneration"));
-        stack1.offerSingle(Keys.CONSUME_EFFECTS, ConsumeEffect.playSound(SoundTypes.BLOCK_ANVIL_BREAK));
-        stack1.offerSingle(Keys.CONSUME_EFFECTS, ConsumeEffect.teleportRandomly(5));
-        stack1.offerSingle(Keys.CONSUME_EFFECTS, ConsumeEffect.removeEffects(PotionEffectTypes.SLOWNESS));
-        stack1.offerSingle(Keys.CONSUME_EFFECTS, ConsumeEffect.applyEffects(
+        stack1.offerSingle(Keys.CONSUME_EFFECTS, ItemActionEffect.playSound(SoundTypes.BLOCK_ANVIL_BREAK));
+        stack1.offerSingle(Keys.CONSUME_EFFECTS, ItemActionEffect.teleportRandomly(5));
+        stack1.offerSingle(Keys.CONSUME_EFFECTS, ItemActionEffect.removeEffects(PotionEffectTypes.SLOWNESS));
+        stack1.offerSingle(Keys.CONSUME_EFFECTS, ItemActionEffect.applyEffects(
             PotionEffect.of(PotionEffectTypes.SPEED, 1, Ticks.of(20 * 30)),
             PotionEffect.of(PotionEffectTypes.REGENERATION, 0, Ticks.of(20 * 30))
         ));
 
         final ItemStack stack2 = ItemStack.of(ItemTypes.CHORUS_FRUIT);
         stack2.offer(Keys.CUSTOM_NAME, Component.text("Remove all effects, get slowness & haste with 50% chance"));
-        stack2.offerSingle(Keys.CONSUME_EFFECTS, ConsumeEffect.clearEffects());
-        stack2.offerSingle(Keys.CONSUME_EFFECTS, ConsumeEffect.applyEffects(0.5,
+        stack2.offerSingle(Keys.CONSUME_EFFECTS, ItemActionEffect.clearEffects());
+        stack2.offerSingle(Keys.CONSUME_EFFECTS, ItemActionEffect.applyEffects(0.5,
             PotionEffect.of(PotionEffectTypes.SLOWNESS, 1, Ticks.of(20 * 10)),
             PotionEffect.of(PotionEffectTypes.HASTE, 0, Ticks.of(20 * 10))
             ));
@@ -97,7 +97,7 @@ public class ConsumableDataTest implements LoadableModule {
 
         final ItemStack stack4 = ItemStack.of(ItemTypes.ANVIL);
         stack4.offer(Keys.CUSTOM_NAME, Component.text("Teleport on death"));
-        stack4.offerSingle(Keys.DEATH_PROTECTION_EFFECTS, ConsumeEffect.teleportRandomly(20));
+        stack4.offerSingle(Keys.DEATH_PROTECTION_EFFECTS, ItemActionEffect.teleportRandomly(20));
 
         player.inventory().offer(stack1, stack2, stack3, stack4);
         return CommandResult.success();
@@ -109,7 +109,7 @@ public class ConsumableDataTest implements LoadableModule {
             return CommandResult.error(Component.text("Must be run ingame by a player"));
         }
 
-        ConsumeEffect.teleportRandomly(20).apply(player);
+        ItemActionEffect.teleportRandomly(20).apply(player);
         return CommandResult.success();
     }
 
@@ -119,7 +119,7 @@ public class ConsumableDataTest implements LoadableModule {
             return CommandResult.error(Component.text("Must be run ingame by a player"));
         }
 
-        ConsumeEffect.playSound(SoundTypes.BLOCK_BELL_USE).apply(player);
+        ItemActionEffect.playSound(SoundTypes.BLOCK_BELL_USE).apply(player);
         return CommandResult.success();
     }
 }

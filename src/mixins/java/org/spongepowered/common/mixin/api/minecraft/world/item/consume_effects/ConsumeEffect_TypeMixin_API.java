@@ -25,9 +25,9 @@
 package org.spongepowered.common.mixin.api.minecraft.world.item.consume_effects;
 
 import net.minecraft.world.item.consume_effects.ConsumeEffect;
-import org.spongepowered.api.data.type.ConsumeEffectType;
+import org.spongepowered.api.data.type.ItemActionEffectType;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(ConsumeEffect.Type.class)
-public abstract class ConsumeEffect_TypeMixin_API implements ConsumeEffectType {
+public abstract class ConsumeEffect_TypeMixin_API implements ItemActionEffectType {
 }

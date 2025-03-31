@@ -25,9 +25,9 @@
 package org.spongepowered.common.mixin.api.minecraft.world.item.consume_effects;
 
 import net.minecraft.world.item.consume_effects.ClearAllStatusEffectsConsumeEffect;
-import org.spongepowered.api.data.type.ConsumeEffect;
+import org.spongepowered.api.data.type.ItemActionEffect;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(ClearAllStatusEffectsConsumeEffect.class)
-public abstract class ClearAllStatusEffectsConsumeEffectMixin_API implements ConsumeEffect.ClearEffects {
+public abstract class ClearAllStatusEffectsConsumeEffectMixin_API implements ItemActionEffect.ClearEffects {
 }
