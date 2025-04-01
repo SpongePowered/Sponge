@@ -28,6 +28,6 @@ import org.spongepowered.api.data.type.PushReaction;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(net.minecraft.world.level.material.PushReaction.class)
-public class PushReactionMixin_API implements PushReaction {
+public abstract class PushReactionMixin_API implements PushReaction {
 
 }
