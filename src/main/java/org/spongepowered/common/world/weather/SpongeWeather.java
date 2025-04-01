@@ -27,7 +27,6 @@ package org.spongepowered.common.world.weather;
 import net.minecraft.world.level.storage.ServerLevelData;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.Queries;
-import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.WeatherType;
@@ -121,7 +120,7 @@ public final class SpongeWeather implements Weather {
     public DataContainer toContainer() {
         return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, this.contentVersion())
-                .set(Constants.Universe.Weather.TYPE, this.type.key(RegistryTypes.WEATHER_TYPE))
+                .set(Constants.Universe.Weather.TYPE, this.type.registryKey())
                 .set(Constants.Universe.Weather.REMAINING_DURATION, this.remainingDuration.ticks())
                 .set(Constants.Universe.Weather.RUNNING_DURATION, this.runningDuration.ticks());
     }

@@ -28,7 +28,6 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackComparators;
-import org.spongepowered.api.registry.RegistryTypes;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -48,7 +47,7 @@ public class SpongeItemStackComparatorFactory implements ItemStackComparators.Fa
 
     @Override
     public ItemStackComparators.Factory byType() {
-        final Comparator<ItemStack> comparator = Comparator.comparing(i -> i.type().key(RegistryTypes.ITEM_TYPE));
+        final Comparator<ItemStack> comparator = Comparator.comparing(i -> i.type().registryKey());
         return new SpongeItemStackComparatorFactory(this.comparator == null ? comparator : this.comparator.thenComparing(comparator));
     }
 

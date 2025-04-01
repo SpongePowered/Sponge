@@ -71,7 +71,6 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.item.merchant.TradeOffer;
-import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.math.vector.Vector2i;
 import org.spongepowered.plugin.PluginContainer;
@@ -211,16 +210,16 @@ public final class InventoryTest implements LoadableModule {
                 ((ClickContainerEvent) event).slot().ifPresent(clicked -> {
                     this.plugin.logger().info("  Clicked: {}", InventoryTest.slotName(clicked));
                 });
-                this.plugin.logger().info("  Cursor: {}x{}->{}x{}", cursor.original().type().key(RegistryTypes.ITEM_TYPE), cursor.original().quantity(),
-                        cursor.finalReplacement().type().key(RegistryTypes.ITEM_TYPE), cursor.finalReplacement().quantity());
+                this.plugin.logger().info("  Cursor: {}x{}->{}x{}", cursor.original().type().registryKey(), cursor.original().quantity(),
+                        cursor.finalReplacement().type().registryKey(), cursor.finalReplacement().quantity());
                 if (event instanceof CraftItemEvent.Preview) {
                     final SlotTransaction preview = ((CraftItemEvent.Preview) event).preview();
-                    this.plugin.logger().info("  Preview: {}x{}->{}x{}", preview.original().type().key(RegistryTypes.ITEM_TYPE), preview.original().quantity(),
-                            preview.finalReplacement().type().key(RegistryTypes.ITEM_TYPE), preview.finalReplacement().quantity());
+                    this.plugin.logger().info("  Preview: {}x{}->{}x{}", preview.original().type().registryKey(), preview.original().quantity(),
+                            preview.finalReplacement().type().registryKey(), preview.finalReplacement().quantity());
                 }
                 if (event instanceof CraftItemEvent.Craft) {
                     final ItemStackSnapshot craft = ((CraftItemEvent.Craft) event).crafted();
-                    this.plugin.logger().info("  Craft: {}x{}", craft.type().key(RegistryTypes.ITEM_TYPE), craft.quantity());
+                    this.plugin.logger().info("  Craft: {}x{}", craft.type().registryKey(), craft.quantity());
                 }
             }
             if (event instanceof ChangeInventoryEvent.Drop) {
@@ -229,15 +228,15 @@ public final class InventoryTest implements LoadableModule {
             }
             if (event instanceof ClickContainerEvent.Creative.Drop) {
                 final ItemStackSnapshot stack = ((ClickContainerEvent.Creative.Drop) event).droppedStack();
-                this.plugin.logger().info("  Creative Drop: {}x{}", stack.type().key(RegistryTypes.ITEM_TYPE), stack.quantity());
+                this.plugin.logger().info("  Creative Drop: {}x{}", stack.type().registryKey(), stack.quantity());
             }
             if (event instanceof DropItemEvent.Dispense) {
                 this.plugin.logger().info("  Dropping: {} entities", ((DropItemEvent.Dispense) event).entities().size());
             }
 
             for (final SlotTransaction slotTrans : event.transactions()) {
-                this.plugin.logger().info("  SlotTr: {}x{}->{}x{}[{}]", slotTrans.original().type().key(RegistryTypes.ITEM_TYPE), slotTrans.original().quantity(),
-                        slotTrans.finalReplacement().type().key(RegistryTypes.ITEM_TYPE), slotTrans.finalReplacement().quantity(), InventoryTest.slotName(slotTrans.slot()));
+                this.plugin.logger().info("  SlotTr: {}x{}->{}x{}[{}]", slotTrans.original().type().registryKey(), slotTrans.original().quantity(),
+                        slotTrans.finalReplacement().type().registryKey(), slotTrans.finalReplacement().quantity(), InventoryTest.slotName(slotTrans.slot()));
             }
         }
 
@@ -245,10 +244,10 @@ public final class InventoryTest implements LoadableModule {
         public void onChangeEquipment(final ChangeEntityEquipmentEvent event, @Getter("transaction") final Transaction<@NonNull ItemStackSnapshot> transaction) {
             final Slot slot = event.slot();
             this.plugin.logger().info("Equipment: {}: {} {}->{}",
-                    event.entity().type().key(RegistryTypes.ENTITY_TYPE),
-                    slot.get(Keys.EQUIPMENT_TYPE).get().key(RegistryTypes.EQUIPMENT_TYPE),
-                    transaction.original().type().key(RegistryTypes.ITEM_TYPE),
-                    transaction.finalReplacement().type().key(RegistryTypes.ITEM_TYPE));
+                    event.entity().type().registryKey(),
+                    slot.get(Keys.EQUIPMENT_TYPE).get().registryKey(),
+                    transaction.original().type().registryKey(),
+                    transaction.finalReplacement().type().registryKey());
         }
 
         @Listener
@@ -278,7 +277,7 @@ public final class InventoryTest implements LoadableModule {
     private static String slotName(Slot clicked) {
         final Optional<Integer> idx = clicked.get(Keys.SLOT_INDEX);
         final Optional<EquipmentType> equipmentType = clicked.get(Keys.EQUIPMENT_TYPE);
-        return idx.map(String::valueOf).orElse(equipmentType.map(t -> t.key(RegistryTypes.EQUIPMENT_TYPE).asString()).orElse("?"));
+        return idx.map(String::valueOf).orElse(equipmentType.map(t -> t.registryKey().asString()).orElse("?"));
     }
 
     @Override

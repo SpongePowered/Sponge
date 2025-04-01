@@ -296,7 +296,7 @@ public final class TagTest {
     }
 
     private static <T extends Taggable<@NonNull T>> void sendTags(final Audience audience, final T taggable) {
-        final Collection<Tag<T>> tags = taggable.tags();
+        final Collection<Tag<T>> tags = taggable.tags().toList();
         final String taggableKey = taggable.registryType().get().valueKey(taggable).toString();
         if (tags.isEmpty()) {
             audience.sendMessage(Component.text(taggableKey + " has no tags", NamedTextColor.RED));

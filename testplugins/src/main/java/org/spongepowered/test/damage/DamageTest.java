@@ -125,13 +125,13 @@ public class DamageTest implements LoadableModule {
             final Audience audience = Sponge.server();
             audience.sendMessage(Component.text("------------AttackEntityEvent------------"));
             audience.sendMessage(Component.text().content("entity: ").append(event.entity().displayName().get()).build());
-            audience.sendMessage(Component.text("damage type: " + damageSource.type().key(RegistryTypes.DAMAGE_TYPE)));
+            audience.sendMessage(Component.text("damage type: " + damageSource.type().registryKey()));
             audience.sendMessage(Component.text("damage: " + event.originalDamage()));
             audience.sendMessage(Component.text("modifiers:"));
             for (final DamageFunction f : event.originalFunctions()) {
                 final DamageModifier modifier = f.modifier();
                 final Tuple<Double, Double> tuple = event.originalModifierDamage(modifier);
-                audience.sendMessage(Component.text(" " + ResourceKey.resolve(modifier.group()).value() + "/" + modifier.type().key(RegistryTypes.DAMAGE_MODIFIER_TYPE).value() + ": " + tuple.first() + " -> " + tuple.second()));
+                audience.sendMessage(Component.text(" " + ResourceKey.resolve(modifier.group()).value() + "/" + modifier.type().registryKey().value() + ": " + tuple.first() + " -> " + tuple.second()));
             }
             audience.sendMessage(Component.text("final damage: " + event.originalFinalDamage()));
             audience.sendMessage(Component.text("-----------------------------------------"));
@@ -142,13 +142,13 @@ public class DamageTest implements LoadableModule {
             final Audience audience = Sponge.server();
             audience.sendMessage(Component.text("------------DamageEntityEvent------------"));
             audience.sendMessage(Component.text().content("entity: ").append(event.entity().displayName().get()).build());
-            audience.sendMessage(Component.text("damage type: " + damageSource.type().key(RegistryTypes.DAMAGE_TYPE)));
+            audience.sendMessage(Component.text("damage type: " + damageSource.type().registryKey()));
             audience.sendMessage(Component.text("damage: " + event.originalDamage()));
             audience.sendMessage(Component.text("modifiers:"));
             for (final DamageFunction f : event.originalFunctions()) {
                 final DamageModifier modifier = f.modifier();
                 final Tuple<Double, Double> tuple = event.originalModifierDamage(modifier);
-                audience.sendMessage(Component.text(" " + ResourceKey.resolve(modifier.group()).value() + "/" + modifier.type().key(RegistryTypes.DAMAGE_MODIFIER_TYPE).value() + ": " + tuple.first() + " -> " + tuple.second()));
+                audience.sendMessage(Component.text(" " + ResourceKey.resolve(modifier.group()).value() + "/" + modifier.type().registryKey().value() + ": " + tuple.first() + " -> " + tuple.second()));
             }
             audience.sendMessage(Component.text("final damage: " + event.originalFinalDamage()));
             audience.sendMessage(Component.text("-----------------------------------------"));

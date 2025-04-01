@@ -42,6 +42,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class StubBlock implements SpongeImmutableDataHolder<BlockType>, BlockType {
 
@@ -137,8 +138,8 @@ public class StubBlock implements SpongeImmutableDataHolder<BlockType>, BlockTyp
     }
 
     @Override
-    public Collection<Tag<BlockType>> tags() {
-        return Collections.emptyList();
+    public Stream<Tag<BlockType>> tags() {
+        return Stream.empty();
     }
 
     @Override

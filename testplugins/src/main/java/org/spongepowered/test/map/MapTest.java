@@ -354,7 +354,7 @@ public class MapTest implements LoadableModule {
         final List<MapDecorationType> types = RegistryTypes.MAP_DECORATION_TYPE.get().stream().collect(Collectors.toList());
         final Collection<MapDecorationOrientation> orientations = Sponge.game().registry(RegistryTypes.MAP_DECORATION_ORIENTATION).stream().collect(Collectors.toList());
         player.sendMessage(Component.text("Number of orientations: " + orientations.size()));
-        player.sendMessage(Component.text("EAST: " + MapDecorationOrientations.EAST.get().key(RegistryTypes.MAP_DECORATION_ORIENTATION).toString()));
+        player.sendMessage(Component.text("EAST: " + MapDecorationOrientations.EAST.get().registryKey().toString()));
         for (final MapDecorationOrientation dir : orientations) {
             decorations.add(
                     MapDecoration.builder()
@@ -362,7 +362,7 @@ public class MapTest implements LoadableModule {
                             .rotation(dir)
                             .position(Vector2i.from(x, y))
                             .build());
-            player.sendMessage(Component.text(dir.key(RegistryTypes.MAP_DECORATION_ORIENTATION).value()).append(Component.text("x: " + x)).append(Component.text("y: " + y)));
+            player.sendMessage(Component.text(dir.registryKey().value()).append(Component.text("x: " + x)).append(Component.text("y: " + y)));
             x += 16;
             if (x > Byte.MAX_VALUE) {
                 y += 16;

@@ -168,7 +168,7 @@ public final class InfiniteTicksDataTest implements LoadableModule {
                     final Entity entity = context.requireOne(entityParameter);
                     final Key<@NonNull Value<Ticks>> key = context.requireOne(keyParameter);
                     if (!entity.supports(key)) {
-                        return CommandResult.error(Component.text("Unsupported key for entity: " + entity.type().findKey(RegistryTypes.ENTITY_TYPE).get()));
+                        return CommandResult.error(Component.text("Unsupported key for entity: " + entity.type().registryKey()));
                     }
                     final DataTransactionResult result = entity.offer(key, Ticks.infinite());
                     if (result.isSuccessful()) {
@@ -185,7 +185,7 @@ public final class InfiniteTicksDataTest implements LoadableModule {
                     final ServerLocation location = context.requireOne(locationParameter);
                     final Key<@NonNull Value<Ticks>> key = context.requireOne(keyParameter);
                     if (!location.supports(key)) {
-                        return CommandResult.error(Component.text("Unsupported key for location: " + location.blockType().findKey(RegistryTypes.BLOCK_TYPE).get()));
+                        return CommandResult.error(Component.text("Unsupported key for location: " + location.blockType().registryKey()));
                     }
                     final DataTransactionResult result = location.offer(key, Ticks.infinite());
                     if (result.isSuccessful()) {
@@ -202,7 +202,7 @@ public final class InfiniteTicksDataTest implements LoadableModule {
                     final Entity entity = context.requireOne(entityParameter);
                     final PotionEffectType potionEffectType = context.requireOne(potionEffectParameter);
                     if (!entity.supports(Keys.POTION_EFFECTS)) {
-                        return CommandResult.error(Component.text("Unsupported key for entity: " + entity.type().findKey(RegistryTypes.ENTITY_TYPE).get()));
+                        return CommandResult.error(Component.text("Unsupported key for entity: " + entity.type().registryKey()));
                     }
                     final DataTransactionResult result = entity.offerSingle(Keys.POTION_EFFECTS, PotionEffect.builder()
                             .potionType(potionEffectType)
@@ -215,7 +215,7 @@ public final class InfiniteTicksDataTest implements LoadableModule {
                                         .stream()
                                         .flatMap(List::stream)
                                         .filter(e -> e.duration().isInfinite())
-                                        .map(e -> e.type().key(RegistryTypes.POTION_EFFECT_TYPE).asString())
+                                        .map(e -> e.type().registryKey().asString())
                                         .collect(Collectors.joining(", ")))));
                         return CommandResult.success();
                     }
@@ -227,13 +227,13 @@ public final class InfiniteTicksDataTest implements LoadableModule {
                 .executor(context -> {
                     final Entity entity = context.requireOne(entityParameter);
                     if (!(entity instanceof Agent agent)) {
-                        return CommandResult.error(Component.text("Entity is not agent: " + entity.type().findKey(RegistryTypes.ENTITY_TYPE).get()));
+                        return CommandResult.error(Component.text("Entity is not agent: " + entity.type().registryKey()));
                     }
                     final List<? super Goal<?>> goals = agent.goal(GoalExecutorTypes.NORMAL.get())
                             .map(e -> e.tasksByType(GoalTypes.RANGED_ATTACK_AGAINST_AGENT.get()))
                             .orElse(Collections.emptyList());
                     if (goals.isEmpty()) {
-                        return CommandResult.error(Component.text("Entity has no RangedAttackAgainstAgentGoal: " + entity.type().findKey(RegistryTypes.ENTITY_TYPE).get()));
+                        return CommandResult.error(Component.text("Entity has no RangedAttackAgainstAgentGoal: " + entity.type().registryKey()));
                     }
                     goals.forEach(g -> ((RangedAttackAgainstAgentGoal) g).setDelayBetweenAttacks(Ticks.infinite()));
                     context.sendMessage(Component.text("Applied!", NamedTextColor.GREEN));

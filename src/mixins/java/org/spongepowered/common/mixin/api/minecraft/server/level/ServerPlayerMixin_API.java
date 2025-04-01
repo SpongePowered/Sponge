@@ -64,7 +64,6 @@ import org.spongepowered.api.event.world.ChangeWorldBorderEvent;
 import org.spongepowered.api.network.ServerConnectionState;
 import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.world.border.WorldBorder;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -244,7 +243,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     @Override
     public AdvancementProgress progress(final org.spongepowered.api.advancement.Advancement advancement) {
         Objects.requireNonNull(advancement, "advancement");
-        final AdvancementHolder holder = new AdvancementHolder((ResourceLocation) (Object) advancement.key(RegistryTypes.ADVANCEMENT), (Advancement) (Object) advancement);
+        final AdvancementHolder holder = new AdvancementHolder((ResourceLocation) (Object) advancement.registryKey(), (Advancement) (Object) advancement);
         return (AdvancementProgress) this.advancements.getOrStartProgress(holder);
     }
 

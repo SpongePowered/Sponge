@@ -469,7 +469,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                 final int[] apos = new int[]{pos.x() - xMin, pos.y() - yMin, pos.z() - zMin};
                 container.set(Constants.Sponge.Schematic.BLOCKENTITY_POS, apos);
                 container.set(Constants.Sponge.Schematic.BLOCKENTITY_DATA, entityData);
-                final ResourceKey key = archetype.blockEntityType().key(RegistryTypes.BLOCK_ENTITY_TYPE);
+                final ResourceKey key = archetype.blockEntityType().registryKey();
                 container.set(Constants.Sponge.Schematic.ENTITIES_ID, key.asString());
                 final String namespace = key.namespace();
                 if (!ResourceKey.MINECRAFT_NAMESPACE.equals(namespace)) {
@@ -522,7 +522,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
             entityPosition.add(entry.position().y());
             entityPosition.add(entry.position().z());
             container.set(Constants.Sponge.Schematic.ENTITIES_POS, entityPosition);
-            final ResourceKey key = entry.archetype().type().key(RegistryTypes.ENTITY_TYPE);
+            final ResourceKey key = entry.archetype().type().registryKey();
             if (!ResourceKey.MINECRAFT_NAMESPACE.equals(key.namespace())) {
                 requiredMods.add(key.namespace());
             }

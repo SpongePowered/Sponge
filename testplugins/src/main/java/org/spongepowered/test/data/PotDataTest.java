@@ -35,7 +35,6 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.filter.cause.Root;
-import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 import org.spongepowered.test.LoadableModule;
@@ -65,16 +64,16 @@ public class PotDataTest implements LoadableModule {
                 .ifPresentOrElse(be -> {
                     final var pos = be.blockPosition();
                     final var front = be.get(Keys.POT_FRONT_DECORATION).get();
-                    final var frontResourceKey = front.key(RegistryTypes.ITEM_TYPE);
+                    final var frontResourceKey = front.registryKey();
                     final var frontItem = HoverEvent.showItem(frontResourceKey, 1);
                     final var back = be.get(Keys.POT_BACK_DECORATION).get();
-                    final var backResourceKey = back.key(RegistryTypes.ITEM_TYPE);
+                    final var backResourceKey = back.registryKey();
                     final var backItem = HoverEvent.showItem(backResourceKey, 1);
                     final var left = be.get(Keys.POT_LEFT_DECORATION).get();
-                    final var leftResourceKey = left.key(RegistryTypes.ITEM_TYPE);
+                    final var leftResourceKey = left.registryKey();
                     final var leftItem = HoverEvent.showItem(leftResourceKey, 1);
                     final var right = be.get(Keys.POT_RIGHT_DECORATION).get();
-                    final var rightResourceKey = right.key(RegistryTypes.ITEM_TYPE);
+                    final var rightResourceKey = right.registryKey();
                     final var rightItem = HoverEvent.showItem(rightResourceKey, 1);
                     final var message = Component.text("Here's the block decorations"
                     ).append(Component.newline()).append(

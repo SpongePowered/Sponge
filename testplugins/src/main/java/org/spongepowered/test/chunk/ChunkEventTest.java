@@ -118,10 +118,10 @@ public final class ChunkEventTest implements LoadableModule {
                     final EntityType<?> entityType = context.requireOne(entityTypeParam);
                     if (!this.filterEntitySave.contains(entityType)) {
                         this.filterEntitySave.add(entityType);
-                        context.sendMessage(Identity.nil(), Component.text("Filtering entity: " + entityType.key(RegistryTypes.ENTITY_TYPE), NamedTextColor.GREEN));
+                        context.sendMessage(Identity.nil(), Component.text("Filtering entity: " + entityType.registryKey(), NamedTextColor.GREEN));
                     } else {
                         this.filterEntitySave.remove(entityType);
-                        context.sendMessage(Identity.nil(), Component.text("Removed entity from filter: " + entityType.key(RegistryTypes.ENTITY_TYPE), NamedTextColor.RED));
+                        context.sendMessage(Identity.nil(), Component.text("Removed entity from filter: " + entityType.registryKey(), NamedTextColor.RED));
                     }
                     return CommandResult.success();
                 })
@@ -133,10 +133,10 @@ public final class ChunkEventTest implements LoadableModule {
                     final EntityType<?> entityType = context.requireOne(entityTypeParam);
                     if (!this.addEntityLoad.contains(entityType)) {
                         this.addEntityLoad.add(entityType);
-                        context.sendMessage(Identity.nil(), Component.text("Adding entity: " + entityType.key(RegistryTypes.ENTITY_TYPE), NamedTextColor.GREEN));
+                        context.sendMessage(Identity.nil(), Component.text("Adding entity: " + entityType.registryKey(), NamedTextColor.GREEN));
                     } else {
                         this.addEntityLoad.remove(entityType);
-                        context.sendMessage(Identity.nil(), Component.text("No longer adding entity: " + entityType.key(RegistryTypes.ENTITY_TYPE), NamedTextColor.RED));
+                        context.sendMessage(Identity.nil(), Component.text("No longer adding entity: " + entityType.registryKey(), NamedTextColor.RED));
                     }
                     return CommandResult.success();
                 })
@@ -148,10 +148,10 @@ public final class ChunkEventTest implements LoadableModule {
                     final BlockType blockType = context.requireOne(blockTypeParam);
                     if (!this.filterBlockSave.contains(blockType)) {
                         this.filterBlockSave.add(blockType);
-                        context.sendMessage(Identity.nil(), Component.text("Filtering block: " + blockType.key(RegistryTypes.BLOCK_TYPE), NamedTextColor.GREEN));
+                        context.sendMessage(Identity.nil(), Component.text("Filtering block: " + blockType.registryKey(), NamedTextColor.GREEN));
                     } else {
                         this.filterBlockSave.remove(blockType);
-                        context.sendMessage(Identity.nil(), Component.text("Removed block from filter: " + blockType.key(RegistryTypes.BLOCK_TYPE), NamedTextColor.RED));
+                        context.sendMessage(Identity.nil(), Component.text("Removed block from filter: " + blockType.registryKey(), NamedTextColor.RED));
                     }
                     return CommandResult.success();
                 })
@@ -163,10 +163,10 @@ public final class ChunkEventTest implements LoadableModule {
                     final BlockType blockType = context.requireOne(blockTypeParam);
                     if (!this.addBlockLoad.contains(blockType)) {
                         this.addBlockLoad.add(blockType);
-                        context.sendMessage(Identity.nil(), Component.text("Adding block: " + blockType.key(RegistryTypes.BLOCK_TYPE), NamedTextColor.GREEN));
+                        context.sendMessage(Identity.nil(), Component.text("Adding block: " + blockType.registryKey(), NamedTextColor.GREEN));
                     } else {
                         this.addBlockLoad.remove(blockType);
-                        context.sendMessage(Identity.nil(), Component.text("No longer adding block: " + blockType.key(RegistryTypes.BLOCK_TYPE), NamedTextColor.RED));
+                        context.sendMessage(Identity.nil(), Component.text("No longer adding block: " + blockType.registryKey(), NamedTextColor.RED));
                     }
                     return CommandResult.success();
                 })

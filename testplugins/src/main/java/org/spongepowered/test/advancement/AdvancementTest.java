@@ -278,7 +278,7 @@ public final class AdvancementTest implements LoadableModule {
 
     @Listener
     private void onTrigger(final CriterionEvent.Trigger<?> event) {
-        this.logger.info("{} for {} was triggered", event.type().key(RegistryTypes.TRIGGER), event.advancementKey());
+        this.logger.info("{} for {} was triggered", event.type().registryKey(), event.advancementKey());
     }
 
     @Listener
