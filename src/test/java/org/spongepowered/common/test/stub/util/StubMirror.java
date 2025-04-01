@@ -39,4 +39,8 @@ public enum StubMirror implements Mirror {
         registry.register(new StubKey("sponge", "front_back"), StubMirror.FRONT_BACK);
     }
 
+    @Override
+    public String serializationString() {
+        return this.name().toLowerCase();
+    }
 }

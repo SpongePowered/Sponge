@@ -89,4 +89,9 @@ public enum StubRotations implements Rotation {
     public Angle angle() {
         return Angle.fromDegrees(this.angle);
     }
+
+    @Override
+    public String serializationString() {
+        return this.name().toLowerCase();
+    }
 }
