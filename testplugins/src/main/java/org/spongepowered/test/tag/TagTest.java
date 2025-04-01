@@ -55,7 +55,7 @@ import org.spongepowered.api.registry.DefaultedRegistryType;
 import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.tag.BlockTypeTags;
-import org.spongepowered.api.tag.DefaultedTaggable;
+import org.spongepowered.api.tag.Taggable;
 import org.spongepowered.api.tag.Tag;
 import org.spongepowered.api.util.blockray.RayTrace;
 import org.spongepowered.api.world.LocatableBlock;
@@ -295,7 +295,7 @@ public final class TagTest {
         return heldItem.type();
     }
 
-    private static <T extends DefaultedTaggable<@NonNull T>> void sendTags(final Audience audience, final T taggable) {
+    private static <T extends Taggable<@NonNull T>> void sendTags(final Audience audience, final T taggable) {
         final Collection<Tag<T>> tags = taggable.tags();
         final String taggableKey = taggable.registryType().get().valueKey(taggable).toString();
         if (tags.isEmpty()) {
