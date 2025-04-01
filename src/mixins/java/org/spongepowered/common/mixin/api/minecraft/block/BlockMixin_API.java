@@ -35,8 +35,6 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.registry.DefaultedRegistryType;
-import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.state.StateProperty;
 import org.spongepowered.api.tag.Tag;
 import org.spongepowered.asm.mixin.Final;
@@ -48,7 +46,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 @Mixin(value = Block.class, priority = 999)
 public abstract class BlockMixin_API extends BlockBehaviourMixin_API implements SpongeImmutableDataHolder<BlockType> {
@@ -103,16 +100,6 @@ public abstract class BlockMixin_API extends BlockBehaviourMixin_API implements 
     @Override
     public boolean isAnyOf(final BlockType... types) {
         return Arrays.stream(types).anyMatch(type -> type == this);
-    }
-
-    @Override
-    public DefaultedRegistryType<BlockType> registryType() {
-        return RegistryTypes.BLOCK_TYPE;
-    }
-
-    @Override
-    public Collection<Tag<BlockType>> tags() {
-        return this.registryType().get().tags().filter(this::is).collect(Collectors.toSet());
     }
 
     @Override

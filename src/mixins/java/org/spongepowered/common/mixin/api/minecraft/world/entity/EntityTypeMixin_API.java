@@ -31,16 +31,11 @@ import net.minecraft.world.entity.MobCategory;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityCategory;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.registry.DefaultedRegistryType;
-import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.tag.Tag;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.adventure.SpongeAdventure;
-
-import java.util.Collection;
-import java.util.stream.Collectors;
 
 @Mixin(net.minecraft.world.entity.EntityType.class)
 public abstract class EntityTypeMixin_API<T extends Entity> implements EntityType<T> {
@@ -79,16 +74,6 @@ public abstract class EntityTypeMixin_API<T extends Entity> implements EntityTyp
     @Override
     public boolean isSummonable() {
         return this.shadow$canSummon();
-    }
-
-    @Override
-    public DefaultedRegistryType<EntityType<?>> registryType() {
-        return RegistryTypes.ENTITY_TYPE;
-    }
-
-    @Override
-    public Collection<Tag<EntityType<?>>> tags() {
-        return this.registryType().get().tags().filter(this::is).collect(Collectors.toSet());
     }
 
     @Override
