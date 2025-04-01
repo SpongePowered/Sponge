@@ -86,6 +86,7 @@
     "minecraft.world.InteractionHandMixin_API",
     "minecraft.world.IWorldGenerationBaseReaderMixin_API",
     "minecraft.world.IWorldGenerationReaderMixin_API",
+    "minecraft.world.damagesource.DamageEffectsMixin_API",
     "minecraft.world.damagesource.DamageScalingMixin_API",
     "minecraft.world.damagesource.DamageSourceMixin_API",
     "minecraft.world.damagesource.DamageTypeMixin_API",
