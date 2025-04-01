@@ -22,13 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.level;
+package org.spongepowered.common.mixin.api.minecraft.world.level;
 
 import net.minecraft.world.level.Explosion;
 import org.spongepowered.api.world.explosion.ExplosionBlockInteraction;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(Explosion.BlockInteraction.class)
-public interface Explosion_BlockInteractionMixin extends ExplosionBlockInteraction {
+public abstract class Explosion_BlockInteractionMixin_API implements ExplosionBlockInteraction {
 
 }
