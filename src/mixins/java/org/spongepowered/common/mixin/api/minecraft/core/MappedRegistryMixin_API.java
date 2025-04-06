@@ -43,11 +43,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.core.RegistryBridge;
 import org.spongepowered.common.bridge.core.WritableRegistryBridge;
+import org.spongepowered.common.bridge.tags.TagBridge;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Mixin(MappedRegistry.class)
@@ -120,11 +119,10 @@ public abstract class MappedRegistryMixin_API<T> implements Registry<T> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <V extends T> Set<V> taggedValues(final Tag<T> tag) {
-        return this.impl$getTag((TagKey<T>) (Object) tag).stream()
+    public <V extends T> Stream<V> taggedValues(final Tag<T> tag) {
+        return this.impl$getTag(((TagBridge<T>) tag).bridge$asVanillaTag()).stream()
                 .flatMap(HolderSet.ListBacked::stream)
-                .map(h -> (V) h.value())
-                .collect(Collectors.toSet());
+                .map(h -> (V) h.value());
     }
 
     @Override

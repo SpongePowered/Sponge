@@ -22,22 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.level.biome;
+package org.spongepowered.common.bridge.tags;
 
-import org.spongepowered.api.data.persistence.DataContainer;
-import org.spongepowered.api.registry.RegistryHolder;
-import org.spongepowered.api.world.biome.Biome;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.holder.SpongeDataHolder;
-import org.spongepowered.common.util.DataPackUtil;
+import net.minecraft.tags.TagKey;
 
-import java.util.Optional;
+public interface TagBridge<T> {
 
-@Mixin(net.minecraft.world.level.biome.Biome.class)
-public abstract class BiomeMixin_API implements Biome, SpongeDataHolder {
-
-    @Override
-    public Optional<DataContainer> toDataPack(final RegistryHolder registryHolder) {
-        return DataPackUtil.toDataContainer(registryHolder, net.minecraft.world.level.biome.Biome.DIRECT_CODEC, (net.minecraft.world.level.biome.Biome) (Object) this);
-    }
+    TagKey<T> bridge$asVanillaTag();
 }

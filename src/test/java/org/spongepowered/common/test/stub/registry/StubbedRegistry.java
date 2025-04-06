@@ -35,7 +35,6 @@ import org.spongepowered.common.registry.SpongeRegistryEntry;
 import org.spongepowered.common.test.stub.StubKey;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -110,8 +109,8 @@ public class StubbedRegistry<T> implements Registry<T> {
     }
 
     @Override
-    public <V extends T> Set<V> taggedValues(final Tag<T> tag) {
-        return Set.of();
+    public <V extends T> Stream<V> taggedValues(final Tag<T> tag) {
+        return Stream.empty();
     }
 
     @Override

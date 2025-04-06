@@ -36,8 +36,8 @@ import org.spongepowered.common.tag.SpongePluginTagModifier;
 import org.spongepowered.common.tag.SpongePluginTagPredicate;
 import org.spongepowered.common.tag.SpongePluginTags;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 
 public final class RegisterTagEventImpl extends AbstractLifecycleEvent implements RegisterTagEvent {
 
-    private final Map<Tag<?>, SpongePluginTagModifier<?>> tags = new HashMap<>();
+    private final Map<Tag<?>, SpongePluginTagModifier<?>> tags = new TreeMap<>();
 
     public RegisterTagEventImpl(final Cause cause, final Game game) {
         super(cause, game);
