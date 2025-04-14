@@ -33,6 +33,7 @@ body:
       options:
         - "No"
         - "Yes, only SpongeForge"
+        - "Yes, only SpongeNeo"
         - "Yes, only SpongeVanilla"
     validations:
       required: true
