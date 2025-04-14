@@ -26,6 +26,7 @@ body:
       options:
         - "SpongeForge"
         - "SpongeVanilla"
+        - "SpongeNeo"
       multiple: true
     validations:
       required: true
