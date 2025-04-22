@@ -34,7 +34,7 @@ import java.util.Objects;
 public final class DirectionUtil {
 
     public static net.minecraft.core.@Nullable Direction getFor(final Direction direction) {
-        Objects.requireNonNull(direction);
+        Objects.requireNonNull(direction, "direction");
         return switch (direction) {
             case UP -> net.minecraft.core.Direction.UP;
             case DOWN -> net.minecraft.core.Direction.DOWN;
