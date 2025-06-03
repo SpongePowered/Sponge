@@ -27,11 +27,17 @@ package org.spongepowered.common.accessor.world.entity.decoration;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
+import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(ItemFrame.class)
 public interface ItemFrameAccessor {
 
     @Invoker("dropItem") void invoker$dropItem(final Entity entity, final boolean drop);
+
+    @Accessor("fixed") boolean accessor$fixed();
+
+    @Accessor("fixed") @Mutable void accessor$fixed(final boolean fixed);
 
 }

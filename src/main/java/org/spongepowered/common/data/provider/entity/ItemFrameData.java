@@ -28,6 +28,7 @@ import net.minecraft.world.entity.decoration.ItemFrame;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.util.Angle;
 import org.spongepowered.api.util.orientation.Orientation;
+import org.spongepowered.common.accessor.world.entity.decoration.ItemFrameAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
@@ -45,7 +46,10 @@ public final class ItemFrameData {
                         .set((h, v) -> h.setItem(ItemStackUtil.fromSnapshotToNative(v)))
                     .create(Keys.ORIENTATION)
                         .get(h -> Orientation.fromAngle(Angle.fromDegrees(h.getRotation() * 45)).orElse(null))
-                        .set((h, v) -> h.setRotation((int) v.angle().degrees() / 45));
+                        .set((h, v) -> h.setRotation((int) v.angle().degrees() / 45))
+                    .create(Keys.FIXED)
+                        .get(h -> ((ItemFrameAccessor)h).accessor$fixed())
+                        .set((h, v) -> ((ItemFrameAccessor)h).accessor$fixed(v));
     }
     // @formatter:on
 }
