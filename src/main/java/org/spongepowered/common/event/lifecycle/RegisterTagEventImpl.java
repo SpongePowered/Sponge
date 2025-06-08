@@ -30,7 +30,6 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.lifecycle.RegisterTagEvent;
 import org.spongepowered.api.registry.DefaultedRegistryReference;
-import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.tag.Tag;
 import org.spongepowered.common.tag.SpongePluginTag;
@@ -40,7 +39,6 @@ import org.spongepowered.common.tag.SpongePluginTags;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
