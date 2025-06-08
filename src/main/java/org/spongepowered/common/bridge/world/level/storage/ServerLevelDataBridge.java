@@ -26,9 +26,12 @@ package org.spongepowered.common.bridge.world.level.storage;
 
 import com.google.common.collect.MapMaker;
 import net.kyori.adventure.text.Component;
+import net.minecraft.core.Holder;
 import net.minecraft.network.protocol.game.ClientboundSetChunkCacheRadiusPacket;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.storage.LevelData;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -78,6 +81,14 @@ public interface ServerLevelDataBridge {
 
     default @Nullable DimensionType bridge$dimensionType() {
         return null;
+    }
+
+    default @Nullable ChunkGenerator bridge$chunkGenerator() {
+        return null;
+    }
+
+    default LevelStem bridge$levelStem() {
+        return new LevelStem(Holder.direct(this.bridge$dimensionType()), this.bridge$chunkGenerator());
     }
 
     default boolean bridge$customDifficulty() {

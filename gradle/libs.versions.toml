@@ -4,7 +4,7 @@ format = { version = "1.1" }
 # Implementation-only dependencies, or dependencies that use a different version than in API
 # See SpongeAPI's gradle/libs.versions.toml for many dependency declarations that Sponge also uses
 [versions]
-asm = "9.7"
+asm = "9.8"
 log4j = "2.24.1"
 forgeAutoRenamingTool = "1.0.6"
 mixin = "0.8.7"
@@ -51,7 +51,6 @@ accessWidener = { module = "net.fabricmc:access-widener", version = "2.1.0" }
 # Sponge
 adventure-serializerAnsi = { module = "net.kyori:adventure-text-serializer-ansi" } # version inherited from bom in API catalog
 adventure-serializerConfigurate4 = { module = "net.kyori:adventure-serializer-configurate4" } # version inherited from bom in API catalog
-configurate-jackson = { module = "org.spongepowered:configurate-jackson" } # version inherited from bom in API catalog
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
 javaxInject = { module = "javax.inject:javax.inject", version = "1" }
 mixin = { module = "org.spongepowered:mixin", version.ref = "mixin" }
@@ -79,3 +78,4 @@ indra-licenserSpotless = { id = "net.kyori.indra.licenser.spotless", version = "
 shadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
 versions = { id = "com.github.ben-manes.versions", version = "0.51.0" }
 forgeGradle = { id = "net.minecraftforge.gradle", version = "6.0.35" }
+modDevGradle = { id = "net.neoforged.moddev", version = "2.0.78" }

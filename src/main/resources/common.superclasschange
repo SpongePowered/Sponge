@@ -1,5 +1,4 @@
-{
-    "org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSource": "org.spongepowered.common.event.cause.entity.damage.SpongeCommonDamageSource",
-    "org.spongepowered.api.event.cause.entity.damage.source.common.AbstractEntityDamageSource": "org.spongepowered.common.event.cause.entity.damage.SpongeCommonEntityDamageSource",
-    "org.spongepowered.api.event.cause.entity.damage.source.common.AbstractIndirectEntityDamageSource": "org.spongepowered.common.event.cause.entity.damage.SpongeCommonIndirectEntityDamageSource"
-}
+org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSource:org.spongepowered.common.event.cause.entity.damage.SpongeCommonDamageSource
+org.spongepowered.api.event.cause.entity.damage.source.common.AbstractEntityDamageSource:org.spongepowered.common.event.cause.entity.damage.SpongeCommonEntityDamageSource
+org.spongepowered.api.event.cause.entity.damage.source.common.AbstractIndirectEntityDamageSource:org.spongepowered.common.event.cause.entity.damage.SpongeCommonIndirectEntityDamageSource
+org.spongepowered.api.entity.ai.goal.AbstractGoal:net.minecraft.world.entity.ai.goal.Goal

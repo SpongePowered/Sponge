@@ -1,3 +1,0 @@
-{
-    "org.spongepowered.api.entity.ai.goal.AbstractGoal": "net.minecraft.world.entity.ai.goal.Goal"
-}

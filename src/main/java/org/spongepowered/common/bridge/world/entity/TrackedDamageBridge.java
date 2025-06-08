@@ -22,19 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.cause.entity.damage;
+package org.spongepowered.common.bridge.world.entity;
 
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
-import org.spongepowered.api.registry.RegistryTypes;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.event.cause.entity.damage.DamageStepTypes;
+import org.spongepowered.common.event.cause.entity.damage.SpongeDamageTracker;
 
-public final class SpongeDamageModifierType implements DamageModifierType {
+public interface TrackedDamageBridge {
 
-    @Override
-    public String toString() {
-        return RegistryTypes.DAMAGE_MODIFIER_TYPE.get().findValueKey(this)
-                .map(ResourceKey::toString)
-                .map("DamageModifierType[%s]"::formatted)
-                .orElse(super.toString());
+    @Nullable
+    SpongeDamageTracker damage$tracker();
+
+    default float damage$firePostEvent(float damage) {
+        final SpongeDamageTracker tracker = this.damage$tracker();
+        if (tracker == null) {
+            return damage;
+        }
+        damage = tracker.endStep(DamageStepTypes.ABSORPTION, damage);
+        damage = tracker.callDamagePostEvent((org.spongepowered.api.entity.Entity) this, damage);
+        this.damage$setContainerDamage(damage);
+        return damage;
+    }
+
+    // Neo hook
+    default void damage$setContainerDamage(final float damage) {}
+
+    // Neo hook
+    default float damage$getContainerDamage(final float damage) {
+        return damage;
     }
 }

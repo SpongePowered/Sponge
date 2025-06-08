@@ -22,29 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.entity.player;
+package org.spongepowered.common.event.cause.entity.damage;
 
-import net.minecraft.world.entity.player.Player;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.common.mixin.core.world.entity.LivingEntityMixin_Attack_Impl;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.event.cause.entity.damage.DamageStepType;
+import org.spongepowered.api.registry.RegistryTypes;
 
-// Forge and Vanilla
-@Mixin(value = Player.class, priority = 900)
-public abstract class PlayerMixin_Shared_Attack_Impl extends LivingEntityMixin_Attack_Impl {
+public final class SpongeDamageStepType implements DamageStepType {
 
-    /**
-     * Set absorbed damage after calling {@link Player#setAbsorptionAmount} in which we called the event
-     */
-    @ModifyVariable(method = "actuallyHurt", ordinal = 2,
-            slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;setAbsorptionAmount(F)V")),
-            at = @At(value = "STORE", ordinal = 0))
-    public float attackImpl$setAbsorbed(final float value) {
-        if (this.attackImpl$actuallyHurtResult.event().isCancelled()) {
-            return 0;
-        }
-        return this.attackImpl$actuallyHurtResult.damageAbsorbed().orElse(0f);
+    @Override
+    public String toString() {
+        return RegistryTypes.DAMAGE_STEP_TYPE.get().findValueKey(this)
+                .map(ResourceKey::toString)
+                .orElseGet(super::toString);
     }
 }

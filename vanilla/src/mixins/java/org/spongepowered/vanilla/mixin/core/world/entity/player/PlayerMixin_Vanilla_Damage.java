@@ -22,12 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.item.enchantment;
+package org.spongepowered.vanilla.mixin.core.world.entity.player;
 
-import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.vanilla.mixin.core.world.entity.LivingEntityMixin_Vanilla_Damage;
 
-@Mixin(Enchantment.class)
-public abstract class EnchantmentMixin {
+@Mixin(Player.class)
+public abstract class PlayerMixin_Vanilla_Damage extends LivingEntityMixin_Vanilla_Damage {
 
+    @ModifyVariable(method = "actuallyHurt", at = @At("LOAD"), argsOnly = true, slice = @Slice(
+        from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;awardStat(Lnet/minecraft/resources/ResourceLocation;I)V"),
+        to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;causeFoodExhaustion(F)V")))
+    private float damage$firePostEvent_Player(final float damage) {
+        return this.damage$firePostEvent(damage);
+    }
 }

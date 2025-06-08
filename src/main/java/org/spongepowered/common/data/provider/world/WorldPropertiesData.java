@@ -37,6 +37,8 @@ import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.border.WorldBorder;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
+import org.spongepowered.api.world.server.WorldArchetype;
+import org.spongepowered.api.world.server.WorldArchetypeType;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.bridge.world.level.storage.ServerLevelDataBridge;
@@ -91,6 +93,8 @@ public final class WorldPropertiesData {
                         .get(ServerLevelDataBridge::bridge$performsSpawnLogic)
                     .create(Keys.IS_LOAD_ON_STARTUP)
                         .get(ServerLevelDataBridge::bridge$loadOnStartup)
+                    .create(Keys.WORLD_ARCHETYPE_TYPE)
+                        .get(h -> (WorldArchetypeType) (Object) h.bridge$levelStem())
                 .asMutable(PrimaryLevelData.class)
                     .create(Keys.WORLD_DIFFICULTY)
                         .set((h, v) -> h.setDifficulty((net.minecraft.world.Difficulty) (Object) v))
@@ -115,6 +119,8 @@ public final class WorldPropertiesData {
                         .set(PrimaryLevelDataBridge::bridge$setPerformsSpawnLogic)
                     .create(Keys.IS_LOAD_ON_STARTUP)
                         .set(PrimaryLevelDataBridge::bridge$setLoadOnStartup)
+                    .create(Keys.WORLD_ARCHETYPE)
+                        .get(h -> WorldArchetype.of((WorldArchetypeType) (Object) h.bridge$levelStem(), (WorldGenerationConfig) ((PrimaryLevelData) h).worldGenOptions()))
         ;
     }
     // @formatter:on

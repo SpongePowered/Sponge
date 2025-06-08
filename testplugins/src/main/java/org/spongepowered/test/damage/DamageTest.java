@@ -24,9 +24,16 @@
  */
 package org.spongepowered.test.damage;
 
+import static net.kyori.adventure.text.Component.text;
+
 import com.google.inject.Inject;
 import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
@@ -34,14 +41,16 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.cause.entity.damage.DamageScalings;
+import org.spongepowered.api.event.cause.entity.damage.DamageStep;
+import org.spongepowered.api.event.cause.entity.damage.DamageStepType;
+import org.spongepowered.api.event.cause.entity.damage.DamageStepTypes;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
-import org.spongepowered.api.event.entity.DamageEntityEvent;
+import org.spongepowered.api.event.entity.DamageCalculationEvent;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.lifecycle.RegisterRegistryValueEvent;
@@ -51,15 +60,23 @@ import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryRegistrationSet;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.tag.DamageTypeTags;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 import org.spongepowered.test.LoadableModule;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.OptionalDouble;
 
 @Plugin("damagetest")
 public class DamageTest implements LoadableModule {
     private static final ResourceKey EXHAUSTING_DAMAGE = ResourceKey.of("damagetest", "test");
+
+    private static final DamageStepType DOUBLE_CRITICAL = DamageStepType.create();
+    private static final DamageStepType DOUBLE_DOUBLE_CRITICAL = DamageStepType.create();
 
     class Test {
 
@@ -119,39 +136,99 @@ public class DamageTest implements LoadableModule {
         event.tag(DamageTypeTags.BYPASSES_INVULNERABILITY).append(RegistryKey.of(RegistryTypes.DAMAGE_TYPE, EXHAUSTING_DAMAGE));
     }
 
+    @Listener
+    public void onRegisterDamageStepType(final RegisterRegistryValueEvent.GameScoped event) {
+        event.registry(RegistryTypes.DAMAGE_STEP_TYPE, (r) -> {
+            r.register(ResourceKey.of(this.plugin, "double_critical"), DOUBLE_CRITICAL);
+            r.register(ResourceKey.of(this.plugin, "double_double_critical"), DOUBLE_DOUBLE_CRITICAL);
+        });
+    }
+
+    private static class CustomCause {}
+
     private static class DamageListener {
-        @Listener
-        private void onAttack(final AttackEntityEvent event, @Root DamageSource damageSource) {
-            final Audience audience = Sponge.server();
-            audience.sendMessage(Component.text("------------AttackEntityEvent------------"));
-            audience.sendMessage(Component.text().content("entity: ").append(event.entity().displayName().get()).build());
-            audience.sendMessage(Component.text("damage type: " + damageSource.type().key(RegistryTypes.DAMAGE_TYPE)));
-            audience.sendMessage(Component.text("damage: " + event.originalDamage()));
-            audience.sendMessage(Component.text("modifiers:"));
-            for (final DamageFunction f : event.originalFunctions()) {
-                final DamageModifier modifier = f.modifier();
-                final Tuple<Double, Double> tuple = event.originalModifierDamage(modifier);
-                audience.sendMessage(Component.text(" " + ResourceKey.resolve(modifier.group()).value() + "/" + modifier.type().key(RegistryTypes.DAMAGE_MODIFIER_TYPE).value() + ": " + tuple.first() + " -> " + tuple.second()));
-            }
-            audience.sendMessage(Component.text("final damage: " + event.originalFinalDamage()));
-            audience.sendMessage(Component.text("-----------------------------------------"));
+        private static final DecimalFormat decimalFormat = new DecimalFormat("0.00", DecimalFormatSymbols.getInstance(Locale.ROOT));
+
+        private static String format(final OptionalDouble value) {
+            return DamageListener.format(value.orElse(Double.NaN));
+        }
+
+        private static String format(final double value) {
+            return DamageListener.decimalFormat.format(value);
         }
 
         @Listener
-        private void onDamage(final DamageEntityEvent event, @Root DamageSource damageSource) {
+        private void onAttackPre(final AttackEntityEvent.Pre event) {
+            event.addModifierBefore(DamageStepTypes.CRITICAL_HIT,
+                DamageModifier.builder().type(DOUBLE_CRITICAL).frameModifier((frame) -> frame.pushCause(new CustomCause()))
+                    .damageFunction((step, damage) -> {
+                        step.parent().get().skip();
+                        return damage * 2;
+                    }).build());
+            event.addModifierAfter(DOUBLE_CRITICAL,
+                DamageModifier.builder().type(DOUBLE_DOUBLE_CRITICAL).damageFunction((step, damage) -> damage * 2).build());
+        }
+
+        @Listener
+        private void onDamagePre(final DamageCalculationEvent.Pre event, @Root final DamageSource damageSource) {
+            final Component eventName = event instanceof AttackEntityEvent ?
+                text("AttackEntityEvent", NamedTextColor.RED) : text("DamageEntityEvent", NamedTextColor.BLUE);
+
             final Audience audience = Sponge.server();
-            audience.sendMessage(Component.text("------------DamageEntityEvent------------"));
-            audience.sendMessage(Component.text().content("entity: ").append(event.entity().displayName().get()).build());
-            audience.sendMessage(Component.text("damage type: " + damageSource.type().key(RegistryTypes.DAMAGE_TYPE)));
-            audience.sendMessage(Component.text("damage: " + event.originalDamage()));
-            audience.sendMessage(Component.text("modifiers:"));
-            for (final DamageFunction f : event.originalFunctions()) {
-                final DamageModifier modifier = f.modifier();
-                final Tuple<Double, Double> tuple = event.originalModifierDamage(modifier);
-                audience.sendMessage(Component.text(" " + ResourceKey.resolve(modifier.group()).value() + "/" + modifier.type().key(RegistryTypes.DAMAGE_MODIFIER_TYPE).value() + ": " + tuple.first() + " -> " + tuple.second()));
+            audience.sendMessage(text().content("-------------").append(eventName, text(".Pre", NamedTextColor.YELLOW), text("---------------")));
+            audience.sendMessage(text().content(damageSource.type().key(RegistryTypes.DAMAGE_TYPE).value())
+                .color(NamedTextColor.GOLD).append(text(" → ", NamedTextColor.WHITE), event.entity().displayName().get()));
+            audience.sendMessage(text("base damage: " + format(event.baseDamage())));
+            audience.sendMessage(text("-----------------------------------------------"));
+        }
+
+        @Listener
+        private void onDamagePost(final DamageCalculationEvent.Post event, @Root final DamageSource damageSource) {
+            final Component eventName = event instanceof AttackEntityEvent ?
+                text("AttackEntityEvent", NamedTextColor.RED) : text("DamageEntityEvent", NamedTextColor.BLUE);
+
+            final Audience audience = Sponge.server();
+            audience.sendMessage(text().content("-------------").append(eventName, text(".Post", NamedTextColor.GREEN), text("--------------")));
+            audience.sendMessage(text().content(damageSource.type().key(RegistryTypes.DAMAGE_TYPE).value())
+                .color(NamedTextColor.GOLD).append(text(" → ", NamedTextColor.WHITE), event.entity().displayName().get()));
+            audience.sendMessage(text("base damage: " + format(event.baseDamage())));
+            audience.sendMessage(text("steps:"));
+            for (final DamageStep step : event.history().rootSteps()) {
+                audience.sendMessage(formatStep(step));
             }
-            audience.sendMessage(Component.text("final damage: " + event.originalFinalDamage()));
-            audience.sendMessage(Component.text("-----------------------------------------"));
+            audience.sendMessage(text("final damage: " + format(event.finalDamage())));
+            audience.sendMessage(text("-----------------------------------------------"));
+        }
+
+        private static Component formatStep(final DamageStep step) {
+            final List<Component> components = new ArrayList<>();
+            components.add(Component.text(format(step.damageBeforeChildren())));
+            formatStep(step, components);
+            return Component.join(JoinConfiguration.separator(Component.text(" → ", NamedTextColor.GRAY)), components);
+        }
+
+        private static void formatStep(final DamageStep step, final List<Component> components) {
+            for (final DamageStep child : step.childrenBefore()) {
+                formatStep(child, components);
+            }
+
+            final List<String> causeClasses = new ArrayList<>();
+            for (final Object obj : step.cause().all()) {
+                causeClasses.add(obj.getClass().getSimpleName());
+            }
+
+            components.add(Component.text()
+                .content(step.type().findKey(RegistryTypes.DAMAGE_STEP_TYPE).map(Key::value).orElse("?"))
+                .color(step.parent().isEmpty() ? NamedTextColor.AQUA : NamedTextColor.YELLOW)
+                .decoration(TextDecoration.STRIKETHROUGH, step.isSkipped())
+                .hoverEvent(HoverEvent.showText(Component.text(String.join(" ", causeClasses))))
+                .build());
+
+            components.add(Component.text(format(step.damageAfterSelf())));
+
+            for (final DamageStep child : step.childrenAfter()) {
+                formatStep(child, components);
+            }
         }
     }
 }

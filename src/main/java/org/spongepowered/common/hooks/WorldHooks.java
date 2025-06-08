@@ -40,4 +40,6 @@ public interface WorldHooks {
     }
 
     default void postLoadWorld(ServerLevel world) { }
+
+    default void preUnloadWorld(ServerLevel world) { }
 }

@@ -32,7 +32,6 @@ import cpw.mods.modlauncher.api.ITransformerVotingContext;
 import cpw.mods.modlauncher.api.TargetType;
 import cpw.mods.modlauncher.api.TransformerVoteResult;
 import cpw.mods.modlauncher.api.TypesafeMap;
-import io.leangen.geantyref.TypeToken;
 import joptsimple.OptionSpec;
 import joptsimple.OptionSpecBuilder;
 import org.apache.logging.log4j.LogManager;
@@ -46,12 +45,15 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
-import org.spongepowered.configurate.jackson.JacksonConfigurationLoader;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -72,8 +74,6 @@ public class SuperclassChanger implements ITransformationService {
     public static final Supplier<TypesafeMap.Key<SuperclassChanger>>
         INSTANCE = IEnvironment.buildKey("sponge:scc", SuperclassChanger.class);
     static final Logger LOGGER = LogManager.getLogger();
-    private static final TypeToken<Map<String, String>> CONFIG_TOKEN = new TypeToken<Map<String, String>>() {
-    };
 
     private @MonotonicNonNull OptionSpec<String> configSpec;
     private final Map<String, String> superclassTargets = new ConcurrentHashMap<>();
@@ -124,15 +124,8 @@ public class SuperclassChanger implements ITransformationService {
         if (resource.getFile().endsWith(SuperclassChanger.SUPER_CLASS_EXTENSION)) {
             try {
                 SuperclassChanger.LOGGER.debug("Reading superclass change {} from {}", name, resource);
-                @Nullable final Map<String, String> superClassTargets = JacksonConfigurationLoader.builder()
-                    .url(resource)
-                    .build()
-                    .load()
-                    .get(SuperclassChanger.CONFIG_TOKEN);
-                if (superClassTargets != null) {
-                    this.superclassTargets.putAll(superClassTargets);
-                }
-            } catch (final IOException ex) {
+                this.superclassTargets.putAll(SuperclassChanger.readMap(resource));
+            } catch (final Exception ex) {
                 SuperclassChanger.LOGGER.error("Failed to load superclass change {} from {}", name, resource, ex);
             }
         } else {
@@ -141,6 +134,24 @@ public class SuperclassChanger implements ITransformationService {
                 name, resource, SuperclassChanger.SUPER_CLASS_EXTENSION
             );
         }
+    }
+
+    private static Map<String, String> readMap(final URL resource) throws IOException {
+        final Map<String, String> targets = new HashMap<>();
+        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(resource.openStream(), StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (!line.isEmpty()) {
+                    String[] parts = line.split(":", 2);
+                    if (parts.length != 2) {
+                        throw new IllegalArgumentException("Invalid map entry: " + line);
+                    }
+                    targets.put(parts[0], parts[1]);
+                }
+            }
+        }
+        return targets;
     }
 
     static class SuperclassTransformer implements ITransformer<ClassNode> {

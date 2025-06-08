@@ -46,6 +46,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.accessor.core.MappedRegistryAccessor;
 import org.spongepowered.common.accessor.resources.ResourceKeyAccessor;
 import org.spongepowered.common.bridge.core.MappedRegistryBridge;
 import org.spongepowered.common.bridge.core.RegistryBridge;
@@ -166,7 +167,7 @@ public abstract class MappedRegistryMixin<T> implements RegistryBridge<T>, Writa
     private void impl$onFreeze(final CallbackInfoReturnable<Registry<T>> cir) {
         this.impl$dependencies.forEach(t -> {
             if (!this.impl$registryHolder.findRegistry(t)
-                .map(r -> ((MappedRegistryMixin<?>) r).frozen)
+                .map(r -> ((MappedRegistryAccessor<?>) r).accessor$frozen())
                 .orElse(false)) {
                 throw new ValueNotFoundException(String.format("Dependency %s was not found!", t));
             }
@@ -183,7 +184,7 @@ public abstract class MappedRegistryMixin<T> implements RegistryBridge<T>, Writa
     @Override
     public void bridge$addDependencies(final Supplier<InitialRegistryData<T>> supplier, final RegistryType<?>... dependencies) {
         if (Arrays.stream(dependencies).allMatch(d -> this.impl$registryHolder.findRegistry(d)
-            .map(r -> ((MappedRegistryMixin<?>) r).frozen)
+            .map(r -> ((MappedRegistryAccessor<?>) r).accessor$frozen())
             .orElse(false))) {
             this.impl$appendRegister(supplier);
             return;
