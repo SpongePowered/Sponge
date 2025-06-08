@@ -32,7 +32,9 @@ import org.spongepowered.api.block.BlockSoundGroup;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.registry.DefaultedRegistryType;
 import org.spongepowered.api.state.StateProperty;
+import org.spongepowered.api.tag.Tag;
 import org.spongepowered.common.data.holder.SpongeImmutableDataHolder;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -40,6 +42,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class StubBlock implements SpongeImmutableDataHolder<BlockType>, BlockType {
 
@@ -127,5 +130,10 @@ public class StubBlock implements SpongeImmutableDataHolder<BlockType>, BlockTyp
     @Override
     public Optional<StateProperty<?>> findStateProperty(final String name) {
         return Optional.empty();
+    }
+
+    @Override
+    public Stream<Tag<BlockType>> tags(DefaultedRegistryType<BlockType> registryType) {
+        return Stream.empty();
     }
 }
