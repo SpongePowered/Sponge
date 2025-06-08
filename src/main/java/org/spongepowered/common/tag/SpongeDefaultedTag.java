@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.tag;
 
+import net.minecraft.core.MappedRegistry;
 import net.minecraft.tags.TagKey;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.RegistryHolder;
@@ -75,5 +76,11 @@ public final class SpongeDefaultedTag<T> implements DefaultedTag<T>, TagBridge<T
     @Override
     public TagKey<T> bridge$asVanillaTag() {
         return this.vanillaTag;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public boolean contains(final T value) {
+        return ((MappedRegistry<T>) this.defaultHolder.get().registry(this.registry())).wrapAsHolder(value).is(this.vanillaTag);
     }
 }
