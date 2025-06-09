@@ -68,6 +68,7 @@ import org.spongepowered.api.entity.ai.goal.builtin.creature.target.FindNearestA
 import org.spongepowered.api.entity.attribute.AttributeModifier;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
 import org.spongepowered.api.event.EventContextKey;
+import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.fluid.FluidStack;
@@ -179,6 +180,7 @@ import org.spongepowered.common.entity.ai.goal.builtin.creature.target.SpongeFin
 import org.spongepowered.common.entity.attribute.SpongeAttributeModifierBuilder;
 import org.spongepowered.common.entity.player.tab.TabListEntryBuilder;
 import org.spongepowered.common.event.SpongeEventContextKeyBuilder;
+import org.spongepowered.common.event.cause.entity.damage.SpongeDamageModifier;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageSourceBuilder;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageTypeBuilder;
 import org.spongepowered.common.fluid.SpongeFluidStackBuilder;
@@ -292,6 +294,7 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(Team.Builder.class, SpongeTeamBuilder::new)
                 .register(Scoreboard.Builder.class, SpongeScoreboardBuilder::new)
                 .register(DamageSource.Builder.class, SpongeDamageSourceBuilder::new)
+                .register(DamageModifier.Builder.class, SpongeDamageModifier.Builder::new)
                 .register(Explosion.Builder.class, SpongeExplosionBuilder::new)
                 .register(BlockState.Builder.class, SpongeBlockStateBuilder::new)
                 .register(BlockSnapshot.Builder.class, SpongeBlockSnapshot.BuilderImpl::unpooled)

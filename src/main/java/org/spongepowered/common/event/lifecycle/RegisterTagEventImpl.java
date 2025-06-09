@@ -26,10 +26,11 @@ package org.spongepowered.common.event.lifecycle;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.lifecycle.RegisterTagEvent;
 import org.spongepowered.api.registry.DefaultedRegistryReference;
-import org.spongepowered.api.registry.RegistryKey;
+import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.tag.Tag;
 import org.spongepowered.common.tag.SpongePluginTag;
 import org.spongepowered.common.tag.SpongePluginTagModifier;
@@ -45,7 +46,7 @@ import java.util.stream.Collectors;
 
 public final class RegisterTagEventImpl extends AbstractLifecycleEvent implements RegisterTagEvent {
 
-    private final Map<Tag<?>, SpongePluginTagModifier<?>> tags = new HashMap<>();
+    private final Map<TagKey, SpongePluginTagModifier<?>> tags = new HashMap<>();
 
     public RegisterTagEventImpl(final Cause cause, final Game game) {
         super(cause, game);
@@ -54,13 +55,13 @@ public final class RegisterTagEventImpl extends AbstractLifecycleEvent implement
     @SuppressWarnings("unchecked")
     @Override
     public <T> TagStep<T> tag(final Tag<T> tag) {
-        final SpongePluginTagModifier<?> modifier = this.tags.computeIfAbsent(tag, $ -> new SpongePluginTagModifier<>());
+        final SpongePluginTagModifier<?> modifier = this.tags.computeIfAbsent(new TagKey(tag), $ -> new SpongePluginTagModifier<>());
         return new TagStepImpl<>((SpongePluginTagModifier<T>) modifier, null);
     }
 
     public SpongePluginTags tags() {
         return new SpongePluginTags(this.tags.entrySet().stream().collect(
-            Collectors.groupingBy(e -> e.getKey().registry(), Collectors.toMap(e -> e.getKey().key(), Map.Entry::getValue))));
+            Collectors.groupingBy(e -> e.getKey().registry().registryType(), Collectors.toMap(e -> e.getKey().tag(), Map.Entry::getValue))));
     }
 
     private record TagStepImpl<T>(SpongePluginTagModifier<T> pluginTagModifier, @Nullable SpongePluginTagPredicate<T> predicate) implements TagStep<T> {
@@ -84,7 +85,7 @@ public final class RegisterTagEventImpl extends AbstractLifecycleEvent implement
         }
 
         @Override
-        public TagStep<T> append(final RegistryKey<T> key) {
+        public TagStep<T> append(final org.spongepowered.api.registry.RegistryKey<T> key) {
             this.pluginTagModifier.append(new SpongePluginTag(key.location(), false), this.predicate);
             return this;
         }
@@ -111,6 +112,27 @@ public final class RegisterTagEventImpl extends AbstractLifecycleEvent implement
         public TagStep<T> testTags(final BiPredicate<Tag<T>, DefaultedRegistryReference<T>> predicate, final Consumer<TagStep<T>> consumer) {
             consumer.accept(new TagStepImpl<>(this.pluginTagModifier, SpongePluginTagPredicate.tagKey(predicate).and(this.predicate)));
             return this;
+        }
+    }
+
+    private record TagKey(RegistryTypeKey registry, ResourceKey tag)
+    {
+        public TagKey(final Tag<?> tag)
+        {
+            this(new RegistryTypeKey(tag.registry()), tag.key());
+        }
+    }
+
+    private record RegistryTypeKey(ResourceKey registryRoot, ResourceKey registryKey)
+    {
+        public RegistryTypeKey(RegistryType<?> registryType)
+        {
+            this(registryType.root(), registryType.location());
+        }
+
+        public RegistryType<?> registryType()
+        {
+            return RegistryType.of(this.registryRoot, this.registryKey);
         }
     }
 }

@@ -22,19 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.cause.entity.damage;
+package org.spongepowered.common.accessor.server;
 
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
-import org.spongepowered.api.registry.RegistryTypes;
+import net.minecraft.server.ServerFunctionLibrary;
+import net.minecraft.server.ServerFunctionManager;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public final class SpongeDamageModifierType implements DamageModifierType {
+@Mixin(ServerFunctionManager.class)
+public interface ServerFunctionManagerAccessor {
 
-    @Override
-    public String toString() {
-        return RegistryTypes.DAMAGE_MODIFIER_TYPE.get().findValueKey(this)
-                .map(ResourceKey::toString)
-                .map("DamageModifierType[%s]"::formatted)
-                .orElse(super.toString());
-    }
+    @Accessor("library") ServerFunctionLibrary accessor$library();
 }

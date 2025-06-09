@@ -37,7 +37,6 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.data.type.HandTypes;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
@@ -101,7 +100,7 @@ public class EntityTest {
             })
             .build(), "testload");
         final Parameter.Value<EntityType<@NonNull ?>> entityTypeParam =
-                Parameter.registryElement(new TypeToken<EntityType<@NonNull ? extends Entity>>() {}, RegistryTypes.ENTITY_TYPE, "minecraft").key("entityType").build();
+                Parameter.registryElement(new TypeToken<EntityType<?>>() {}, RegistryTypes.ENTITY_TYPE, "minecraft").key("entityType").build();
         event.register(this.plugin, Command.builder()
                 .addChild(Command.builder()
                         .addParameter(entityTypeParam)

@@ -5,7 +5,9 @@ pluginManagement {
         maven("https://repo.spongepowered.org/repository/maven-public/") {
             name = "sponge"
         }
-        maven("https://maven.architectury.dev/")
+        maven("https://maven.architectury.dev/") {
+            name = "architectury"
+        }
     }
     val vanillaGradleVersion = "0.2.1-20241107.194040-91"
     plugins {
@@ -27,7 +29,7 @@ plugins {
 }
 
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT) // needed for arch-loom, unfortunately
+    repositoriesMode = RepositoriesMode.PREFER_PROJECT // needed for ForgeGradle, unfortunately
     repositories {
         maven("https://repo.spongepowered.org/repository/maven-public/") {
             name = "sponge"

@@ -28,11 +28,17 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryType;
+import org.spongepowered.api.tag.DefaultedTag;
 import org.spongepowered.api.tag.Tag;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.tag.SpongeDefaultedTag;
+
+import java.util.function.Supplier;
 
 @Mixin(TagKey.class)
 public abstract class TagKeyMixin_API<T> implements Tag<T> {
@@ -50,5 +56,15 @@ public abstract class TagKeyMixin_API<T> implements Tag<T> {
     @Override
     public ResourceKey key() {
         return (ResourceKey) (Object) this.location;
+    }
+
+    @Override
+    public DefaultedTag<T> asDefaultedTag(final Supplier<RegistryHolder> holder) {
+        return new SpongeDefaultedTag<>(this, holder);
+    }
+
+    @Override
+    public DefaultedTag<T> asScopedTag() {
+        return new SpongeDefaultedTag<>(this, SpongeCommon::scopedHolder);
     }
 }

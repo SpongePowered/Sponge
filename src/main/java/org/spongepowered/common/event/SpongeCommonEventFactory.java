@@ -745,7 +745,8 @@ public final class SpongeCommonEventFactory {
         final MapIdTrackerBridge mapIdTrackerBridge = (MapIdTrackerBridge) defaultWorld.getDataStorage()
                 .computeIfAbsent(MapIndex.factory(), Constants.Map.MAP_INDEX_DATA_NAME);
 
-        final MapItemSavedData mapData = MapItemSavedData.createFresh(0, 0, (byte) 0, false, false, Level.END);
+        final MapItemSavedData mapData = MapItemSavedData.createFresh(0, 0,
+            (byte) Constants.Map.DEFAULT_MAP_SCALE, Constants.Map.DEFAULT_TRACKS_PLAYERS, Constants.Map.DEFAULT_UNLIMITED_TRACKING, Level.END);
 
         final MapInfo mapInfo = (MapInfo) mapData;
         for (final Value<?> value : values) {
