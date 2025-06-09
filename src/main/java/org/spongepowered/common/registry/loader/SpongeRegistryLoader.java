@@ -420,8 +420,8 @@ public final class SpongeRegistryLoader {
 
     public static RegistryLoader<SignalType> signalType() {
         return RegistryLoader.of(l -> {
-            l.add(SignalTypes.WEAK, k -> SpongeSignalType.WEAK);
-            l.add(SignalTypes.STRONG, k -> SpongeSignalType.STRONG);
+            l.add(SignalTypes.DIRECT, k -> SpongeSignalType.DIRECT);
+            l.add(SignalTypes.INDIRECT, k -> SpongeSignalType.INDIRECT);
             l.add(SignalTypes.COMPOSITE, k -> SpongeSignalType.COMPOSITE);
             l.add(SignalTypes.ANALOG, k -> SpongeSignalType.ANALOG);
         });

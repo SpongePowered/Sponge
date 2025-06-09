@@ -61,7 +61,7 @@ public interface SignalGetterMixin_API extends BlockGetter, SignalAwareVolume {
         final BlockPos pos = new BlockPos(x, y, z);
         if (type == SpongeSignalType.ANALOG) {
             return this.getBlockState(pos).hasAnalogOutputSignal();
-        } else if (type == SpongeSignalType.WEAK || type == SpongeSignalType.STRONG || type == SpongeSignalType.COMPOSITE) {
+        } else if (type == SpongeSignalType.DIRECT || type == SpongeSignalType.INDIRECT || type == SpongeSignalType.COMPOSITE) {
             return this.getBlockState(pos).isSignalSource();
         }
 
@@ -74,9 +74,9 @@ public interface SignalGetterMixin_API extends BlockGetter, SignalAwareVolume {
         final BlockPos pos = new BlockPos(x, y, z);
         if (type == SpongeSignalType.ANALOG) {
             return this.impl$analogSignalFrom(pos);
-        } else if (type == SpongeSignalType.WEAK) {
+        } else if (type == SpongeSignalType.DIRECT) {
             return this.impl$regularSignalFrom(pos, DirectionUtil.getForOrThrow(direction).getOpposite());
-        } else if (type == SpongeSignalType.STRONG) {
+        } else if (type == SpongeSignalType.INDIRECT) {
             return this.shadow$getDirectSignal(pos, DirectionUtil.getForOrThrow(direction).getOpposite());
         } else if (type == SpongeSignalType.COMPOSITE) {
             return this.shadow$getSignal(pos, DirectionUtil.getForOrThrow(direction).getOpposite());
@@ -91,9 +91,9 @@ public interface SignalGetterMixin_API extends BlockGetter, SignalAwareVolume {
         final BlockPos pos = new BlockPos(x, y, z);
         if (type == SpongeSignalType.ANALOG) {
             return this.impl$highestSignalAt(pos, (relativePos, $) -> this.impl$analogSignalFrom(relativePos));
-        } else if (type == SpongeSignalType.WEAK) {
+        } else if (type == SpongeSignalType.DIRECT) {
             return this.impl$highestSignalAt(pos, this::impl$regularSignalFrom);
-        } else if (type == SpongeSignalType.STRONG) {
+        } else if (type == SpongeSignalType.INDIRECT) {
             return this.shadow$getDirectSignalTo(pos);
         } else if (type == SpongeSignalType.COMPOSITE) {
             return this.shadow$getBestNeighborSignal(pos);
@@ -108,9 +108,9 @@ public interface SignalGetterMixin_API extends BlockGetter, SignalAwareVolume {
         final BlockPos pos = new BlockPos(x, y, z);
         if (type == SpongeSignalType.ANALOG) {
             return this.impl$hasSignalAt(pos, (relativePos, $) -> this.impl$analogSignalFrom(relativePos));
-        } else if (type == SpongeSignalType.WEAK) {
+        } else if (type == SpongeSignalType.DIRECT) {
             return this.impl$hasSignalAt(pos, this::impl$regularSignalFrom);
-        } else if (type == SpongeSignalType.STRONG) {
+        } else if (type == SpongeSignalType.INDIRECT) {
             return this.impl$hasSignalAt(pos, this::shadow$getDirectSignal);
         } else if (type == SpongeSignalType.COMPOSITE) {
             return this.shadow$hasNeighborSignal(pos);

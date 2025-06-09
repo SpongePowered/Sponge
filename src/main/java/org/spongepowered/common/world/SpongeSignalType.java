@@ -28,9 +28,9 @@ import org.spongepowered.api.world.SignalType;
 
 public class SpongeSignalType implements SignalType {
 
-    public static final SignalType WEAK = new SpongeSignalType();
+    public static final SignalType DIRECT = new SpongeSignalType();
 
-    public static final SignalType STRONG = new SpongeSignalType();
+    public static final SignalType INDIRECT = new SpongeSignalType();
 
     public static final SignalType COMPOSITE = new SpongeSignalType();
 
