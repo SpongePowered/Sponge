@@ -77,7 +77,7 @@ public class TagRegistries {
                 Registries.ENCHANTMENT,
                 context.relativeClass("item.enchantment", "EnchantmentType"),
                 "tag",
-                "EnchantmenTypeTags"
+                "EnchantmentTypeTags"
             ),
 
             new TagGenerator(

@@ -123,6 +123,11 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
     }
 
     @Override
+    public @Nullable ChunkGenerator bridge$chunkGenerator() {
+        return this.impl$chunkGenerator;
+    }
+
+    @Override
     public void bridge$dimensionType(final DimensionType type, final boolean updatePlayers) {
         this.impl$dimensionType = type;
     }

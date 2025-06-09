@@ -46,6 +46,7 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.effect.ForwardingViewer;
 import org.spongepowered.api.effect.VanishState;
 import org.spongepowered.api.event.EventListenerRegistration;
+import org.spongepowered.api.event.cause.entity.damage.DamageStepType;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackComparators;
@@ -123,6 +124,7 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.effect.SpongeCustomForwardingViewer;
 import org.spongepowered.common.entity.effect.SpongeVanishState;
 import org.spongepowered.common.event.SpongeEventListenerRegistration;
+import org.spongepowered.common.event.cause.entity.damage.SpongeDamageStepType;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
 import org.spongepowered.common.item.SpongeItemStack;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
@@ -244,6 +246,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(RegistryReference.Factory.class, new SpongeRegistryReference.FactoryImpl())
                 .registerFactory(BlockVolumeFactory.class, new SpongeBlockVolumeFactory())
                 .registerFactory(DamageSource.Factory.class, new SpongeDamageSourceFactory())
+                .registerFactory(DamageStepType.Factory.class, SpongeDamageStepType::new)
                 .registerFactory(PaletteReference.Factory.class, new SpongePaletteReferenceFactory())
                 .registerFactory(EntityArchetypeEntry.Factory.class, new SpongeEntityArchetypeEntryFactory())
                 .registerFactory(ServerLocationCreator.Factory.class, new SpongeServerLocationCreatorFactory())

@@ -22,31 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.entity;
+package org.spongepowered.common.mixin.api.tag;
 
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.core.MappedRegistry;
+import org.spongepowered.api.registry.DefaultedRegistryType;
+import org.spongepowered.api.tag.Tag;
+import org.spongepowered.api.tag.Taggable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.common.util.DamageEventUtil;
 
-// Forge and Vanilla
-@Mixin(value = LivingEntity.class, priority = 900)
-public class LivingEntityMixin_Shared_Attack_Impl {
+import java.util.stream.Stream;
 
-    protected DamageEventUtil.DamageEventResult attackImpl$actuallyHurtResult;
+@Mixin(value = Taggable.class, remap = false)
+public interface TaggableMixin<T extends Taggable<T>> {
 
-    /**
-     * Set absorbed damage after calling {@link LivingEntity#setAbsorptionAmount} in which we called the event
-     */
-    @ModifyVariable(method = "actuallyHurt", ordinal = 2,
-        slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;setAbsorptionAmount(F)V", ordinal = 0)),
-        at = @At(value = "STORE", ordinal = 0))
-    public float attackImpl$setAbsorbed(final float value) {
-        if (this.attackImpl$actuallyHurtResult.event().isCancelled()) {
-            return 0;
-        }
-        return this.attackImpl$actuallyHurtResult.damageAbsorbed().orElse(0f);
+    @SuppressWarnings("unchecked")
+    default Stream<Tag<T>> tags(final DefaultedRegistryType<T> registryType) {
+        return (Stream<Tag<T>>) (Object) ((MappedRegistry<T>) registryType.get()).wrapAsHolder((T) this).tags();
     }
 }

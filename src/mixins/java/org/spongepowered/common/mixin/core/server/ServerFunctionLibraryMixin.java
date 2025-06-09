@@ -22,27 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.mixin.core.world.entity.player;
+package org.spongepowered.common.mixin.core.server;
 
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.event.entity.player.CriticalHitEvent;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import net.minecraft.server.ServerFunctionLibrary;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.server.packs.resources.ResourceManager;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.util.DamageEventUtil;
 
-@Mixin(Player.class)
-public class PlayerMixin_Forge_Attack_Impl {
-    private DamageEventUtil.Attack<Player> attackImpl$attack;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
-    @Redirect(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/common/ForgeHooks;getCriticalHit(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/entity/Entity;ZF)Lnet/minecraftforge/event/entity/player/CriticalHitEvent;"))
-    private CriticalHitEvent attackImpl$critHook(final Player player, final Entity target, final boolean vanillaCritical, final float damageModifier) {
-        final CriticalHitEvent event = ForgeHooks.getCriticalHit(player, target, vanillaCritical, damageModifier);
-        if (event != null) {
-            this.attackImpl$attack.functions().add(DamageEventUtil.provideCriticalAttackFunction(this.attackImpl$attack.sourceEntity(), event.getDamageModifier()));
+@Mixin(ServerFunctionLibrary.class)
+public abstract class ServerFunctionLibraryMixin {
+
+    @WrapMethod(method = "reload")
+    private CompletableFuture<Void> impl$onReload(final PreparableReloadListener.PreparationBarrier barrier, final ResourceManager manager,
+                                                  final Executor executor1, final Executor executor2, final Operation<CompletableFuture<Void>> original) {
+        if (Sponge.isServerAvailable()) {
+            return original.call(barrier, manager, executor1, executor2);
         }
-        return event;
+        return barrier.wait(null);
     }
 }

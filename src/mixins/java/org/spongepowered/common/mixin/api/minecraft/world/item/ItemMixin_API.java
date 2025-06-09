@@ -28,25 +28,19 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.item.ItemRarity;
 import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.registry.DefaultedRegistryType;
-import org.spongepowered.api.registry.RegistryTypes;
-import org.spongepowered.api.tag.Tag;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.holder.SpongeImmutableDataHolder;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 @Mixin(Item.class)
 public abstract class ItemMixin_API implements ItemType, SpongeImmutableDataHolder<ItemType> {
@@ -92,21 +86,6 @@ public abstract class ItemMixin_API implements ItemType, SpongeImmutableDataHold
     @Override
     public boolean isAnyOf(ItemType... types) {
         return Arrays.stream(types).anyMatch(type -> type == this);
-    }
-
-    @Override
-    public DefaultedRegistryType<ItemType> registryType() {
-        return RegistryTypes.ITEM_TYPE;
-    }
-
-    @Override
-    public Collection<Tag<ItemType>> tags() {
-        return this.registryType().get().tags().filter(this::is).collect(Collectors.toSet());
-    }
-
-    @Override
-    public boolean is(Tag<ItemType> tag) {
-        return this.builtInRegistryHolder.is((TagKey<Item>) (Object) tag);
     }
 
     @Override

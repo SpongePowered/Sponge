@@ -22,29 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.entity.player;
+package org.spongepowered.common.bridge.tags;
 
-import net.minecraft.world.entity.player.Player;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.common.mixin.core.world.entity.LivingEntityMixin_Attack_Impl;
+import net.minecraft.tags.TagKey;
 
-// Forge and Vanilla
-@Mixin(value = Player.class, priority = 900)
-public abstract class PlayerMixin_Shared_Attack_Impl extends LivingEntityMixin_Attack_Impl {
+public interface TagBridge<T> {
 
-    /**
-     * Set absorbed damage after calling {@link Player#setAbsorptionAmount} in which we called the event
-     */
-    @ModifyVariable(method = "actuallyHurt", ordinal = 2,
-            slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;setAbsorptionAmount(F)V")),
-            at = @At(value = "STORE", ordinal = 0))
-    public float attackImpl$setAbsorbed(final float value) {
-        if (this.attackImpl$actuallyHurtResult.event().isCancelled()) {
-            return 0;
-        }
-        return this.attackImpl$actuallyHurtResult.damageAbsorbed().orElse(0f);
-    }
+    TagKey<T> bridge$asVanillaTag();
 }

@@ -678,6 +678,8 @@ public class SpongeWorldManager implements WorldManager {
             final UnloadWorldEvent unloadWorldEvent = SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getInstance().currentCause(), (ServerWorld) level);
             SpongeCommon.post(unloadWorldEvent);
 
+            PlatformHooks.INSTANCE.getWorldHooks().preUnloadWorld(level);
+
             final int lastSpawnChunkRadius = ((ServerLevelAccessor) level).accessor$lastSpawnChunkRadius();
             if (lastSpawnChunkRadius > 1) {
                 level.getChunkSource().removeRegionTicket(TicketType.START, new ChunkPos(level.getSharedSpawnPos()), lastSpawnChunkRadius, Unit.INSTANCE);

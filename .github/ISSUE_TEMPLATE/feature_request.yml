@@ -1,4 +1,4 @@
-name: Implementation/Feature Request for SpongeForge and SpongeVanilla on Minecraft 1.16.5 or later
+name: Implementation/Feature Request for SpongeVanilla, SpongeForge or SpongeNeo
 description: Request implementation or a feature.
 labels: [ "status: needs triage", "type: feature request" ]
 body:
@@ -33,6 +33,7 @@ body:
       options:
         - "No"
         - "Yes, only SpongeForge"
+        - "Yes, only SpongeNeo"
         - "Yes, only SpongeVanilla"
     validations:
       required: true
@@ -41,7 +42,7 @@ body:
     attributes:
       label: Sponge Version
       description: What version number are you running that does not fulfil your requirements?
-      placeholder: ex. 1.16.5-36.2.5-8.0.0-RC921
+      placeholder: ex. 1.21.1-52.0.3-12.0.2-RC2190
     validations:
       required: true
   - type: textarea

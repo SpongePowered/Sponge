@@ -22,25 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.mixin.core.world.entity;
+package org.spongepowered.common.mixin.core.tags;
 
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.stats.Stat;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.tags.TagKey;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.tags.TagBridge;
 
-@Mixin(LivingEntity.class)
-public class LivingEntityMixin_Forge_Attack_Impl {
+@Mixin(TagKey.class)
+public abstract class TagKeyMixin<T> implements TagBridge<T> {
 
-    /**
-     * Prevents {@link ServerPlayer#awardStat} from running before event
-     */
-    @Redirect(method = "getDamageAfterMagicAbsorb",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;awardStat(Lnet/minecraft/stats/Stat;I)V"))
-    public void attackImpl$onAwardStatDamageResist(final ServerPlayer instance, final Stat<?> resourceLocation, final int i) {
-        // do nothing
+    @Override
+    public TagKey<T> bridge$asVanillaTag() {
+        return (TagKey<T>) (Object) this;
     }
-
 }

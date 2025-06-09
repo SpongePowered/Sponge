@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.world.server;
 
+import org.spongepowered.api.util.Builder;
 import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.api.world.server.WorldArchetype;
 import org.spongepowered.api.world.server.WorldArchetypeType;
@@ -38,6 +39,10 @@ public record SpongeWorldArchetype(WorldArchetypeType type, Optional<WorldGenera
         private WorldArchetypeType type;
         private WorldGenerationConfig generationConfig;
 
+        public BuilderImpl() {
+            this.reset();
+        }
+
         @Override
         public Builder type(final WorldArchetypeType type) {
             this.type = type;
@@ -47,6 +52,20 @@ public record SpongeWorldArchetype(WorldArchetypeType type, Optional<WorldGenera
         @Override
         public Builder generationConfig(final WorldGenerationConfig generationConfig) {
             this.generationConfig = generationConfig;
+            return this;
+        }
+
+        @Override
+        public Builder from(final WorldArchetype value) {
+            this.type = value.type();
+            value.generationConfig().ifPresent(c -> this.generationConfig = c);
+            return this;
+        }
+
+        @Override
+        public Builder reset() {
+            this.type = null;
+            this.generationConfig = null;
             return this;
         }
 

@@ -22,12 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.item.enchantment;
+package org.spongepowered.forge.mixin.core.minecraftforge.registries;
 
-import net.minecraft.world.item.enchantment.Enchantment;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.accessor.core.MappedRegistryAccessor;
 
-@Mixin(Enchantment.class)
-public abstract class EnchantmentMixin {
+/**
+ * Due to the Accessor being intrinsically implemented on top of MappedRegistry, the
+ * extended NamespacedWrapper class redefines frozen as a private field, leaving the
+ * original accessor to be useless. To fix registry issues, we therefore re-implement
+ * our accessor interface explicitly for registry purposes.
+ *
+ * @author gabizou
+ * @param <T>
+ */
+@Mixin(targets = "net/minecraftforge/registries/NamespacedWrapper")
+public abstract class NamespacedWrapperMixin_Forge<T> implements MappedRegistryAccessor<T> {
 
+    @Shadow private boolean frozen;
+
+    @Override
+    public boolean accessor$frozen() {
+        return this.frozen;
+    }
 }

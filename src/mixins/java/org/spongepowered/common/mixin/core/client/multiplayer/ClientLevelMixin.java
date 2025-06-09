@@ -25,12 +25,27 @@
 package org.spongepowered.common.mixin.core.client.multiplayer;
 
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.mixin.core.world.level.LevelMixin;
+
+import java.util.function.Supplier;
 
 @Mixin(ClientLevel.class)
 public abstract class ClientLevelMixin extends LevelMixin {
+
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void impl$onInit(final ClientPacketListener $$0, final ClientLevel.ClientLevelData $$1, final ResourceKey<?> $$2, final Holder<DimensionType> $$3,
+            final int $$4, final int $$5, final Supplier<?> $$6, final LevelRenderer $$7, final boolean $$8, final long $$9, final CallbackInfo ci) {
+        this.bridge$adjustDimensionLogic($$3.value());
+    }
 
     @Override
     public void bridge$adjustDimensionLogic(final DimensionType dimensionType) {
