@@ -203,6 +203,8 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
                 this.dragonFight = null;
             }
         }
+
+        this.bridge$adjustDimensionLogic(levelStem.type().value());
     }
 
     @Override

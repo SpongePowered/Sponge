@@ -14,7 +14,6 @@ plugins {
     alias(libs.plugins.versions)
 }
 
-val commonProject = project
 val apiVersion: String by project
 val apiJavaTarget: String by project
 val minecraftVersion: String by project
@@ -384,22 +383,27 @@ tasks {
     jar {
         manifest.from(commonManifest)
     }
+
     val mixinsJar by registering(Jar::class) {
+        group = "build"
         archiveClassifier.set("mixins")
         manifest.from(commonManifest)
         from(mixins.map { it.output })
     }
     val accessorsJar by registering(Jar::class) {
+        group = "build"
         archiveClassifier.set("accessors")
         manifest.from(commonManifest)
         from(accessors.map { it.output })
     }
     val launchJar by registering(Jar::class) {
+        group = "build"
         archiveClassifier.set("launch")
         manifest.from(commonManifest)
         from(launch.map { it.output })
     }
     val applaunchJar by registering(Jar::class) {
+        group = "build"
         archiveClassifier.set("applaunch")
         manifest.from(commonManifest)
         from(applaunch.map { it.output })

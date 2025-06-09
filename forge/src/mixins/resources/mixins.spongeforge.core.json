@@ -18,6 +18,7 @@
     "minecraftforge.internal.BrandingControlMixin_Forge",
     "minecraftforge.registries.ForgeRegistryMixin_Forge",
     "minecraftforge.registries.GameDataMixin_Forge",
+    "minecraftforge.registries.NamespacedWrapperMixin_Forge",
     "minecraftforge.registries.RegistryManagerMixin_Forge",
     "network.ConnectionMixin_Forge",
     "network.protocol.common.ClientboundCustomPayloadPacketMixin_Forge",

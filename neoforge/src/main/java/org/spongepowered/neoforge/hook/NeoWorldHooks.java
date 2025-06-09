@@ -59,6 +59,13 @@ public class NeoWorldHooks implements WorldHooks {
 
     @Override
     public void postLoadWorld(final ServerLevel world) {
-         NeoForge.EVENT_BUS.post(new LevelEvent.Load(world));
+        NeoForge.EVENT_BUS.post(new LevelEvent.Load(world));
+        world.getServer().markWorldsDirty();
+    }
+
+    @Override
+    public void preUnloadWorld(final ServerLevel world) {
+        NeoForge.EVENT_BUS.post(new LevelEvent.Unload(world));
+        world.getServer().markWorldsDirty();
     }
 }

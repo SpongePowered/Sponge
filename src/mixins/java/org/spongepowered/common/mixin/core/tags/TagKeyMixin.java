@@ -22,24 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.hooks;
+package org.spongepowered.common.mixin.core.tags;
 
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
-import org.spongepowered.common.event.tracking.PhaseTracker;
+import net.minecraft.tags.TagKey;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.tags.TagBridge;
 
-public interface WorldHooks {
+@Mixin(TagKey.class)
+public abstract class TagKeyMixin<T> implements TagBridge<T> {
 
-    default Entity getCustomEntityIfItem(final Entity entity) {
-        return null;
+    @Override
+    public TagKey<T> bridge$asVanillaTag() {
+        return (TagKey<T>) (Object) this;
     }
-
-    default boolean isRestoringBlocks(final Level world) {
-        return PhaseTracker.getInstance().getPhaseContext().isRestoring();
-    }
-
-    default void postLoadWorld(ServerLevel world) { }
-
-    default void preUnloadWorld(ServerLevel world) { }
 }

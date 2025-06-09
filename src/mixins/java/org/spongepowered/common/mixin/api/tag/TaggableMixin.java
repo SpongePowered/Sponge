@@ -22,24 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.hooks;
+package org.spongepowered.common.mixin.api.tag;
 
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
-import org.spongepowered.common.event.tracking.PhaseTracker;
+import net.minecraft.core.MappedRegistry;
+import org.spongepowered.api.registry.DefaultedRegistryType;
+import org.spongepowered.api.tag.Tag;
+import org.spongepowered.api.tag.Taggable;
+import org.spongepowered.asm.mixin.Mixin;
 
-public interface WorldHooks {
+import java.util.stream.Stream;
 
-    default Entity getCustomEntityIfItem(final Entity entity) {
-        return null;
+@Mixin(value = Taggable.class, remap = false)
+public interface TaggableMixin<T extends Taggable<T>> {
+
+    @SuppressWarnings("unchecked")
+    default Stream<Tag<T>> tags(final DefaultedRegistryType<T> registryType) {
+        return (Stream<Tag<T>>) (Object) ((MappedRegistry<T>) registryType.get()).wrapAsHolder((T) this).tags();
     }
-
-    default boolean isRestoringBlocks(final Level world) {
-        return PhaseTracker.getInstance().getPhaseContext().isRestoring();
-    }
-
-    default void postLoadWorld(ServerLevel world) { }
-
-    default void preUnloadWorld(ServerLevel world) { }
 }

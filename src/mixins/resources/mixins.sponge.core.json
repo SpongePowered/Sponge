@@ -109,6 +109,7 @@
     "server.rcon.thread.QueryThreadGs4Mixin",
     "server.rcon.thread.RconClientMixin",
     "service.permission.SubjectMixin",
+    "tags.TagKeyMixin",
     "tags.TagLoader_EntryWithSourceMixin",
     "tags.TagLoaderMixin",
     "util.ClassInstanceMultiMapMixin",

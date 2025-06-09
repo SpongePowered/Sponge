@@ -22,24 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.hooks;
+package org.spongepowered.common.bridge.tags;
 
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
-import org.spongepowered.common.event.tracking.PhaseTracker;
+import net.minecraft.tags.TagKey;
 
-public interface WorldHooks {
+public interface TagBridge<T> {
 
-    default Entity getCustomEntityIfItem(final Entity entity) {
-        return null;
-    }
-
-    default boolean isRestoringBlocks(final Level world) {
-        return PhaseTracker.getInstance().getPhaseContext().isRestoring();
-    }
-
-    default void postLoadWorld(ServerLevel world) { }
-
-    default void preUnloadWorld(ServerLevel world) { }
+    TagKey<T> bridge$asVanillaTag();
 }

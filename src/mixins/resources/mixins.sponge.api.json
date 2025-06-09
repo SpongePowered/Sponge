@@ -509,6 +509,7 @@
     "minecraft.world.ticks.ScheduledTickMixin_API",
     "minecraft.world.ticks.TickPriorityMixin_API",
     "service.permission.SubjectMixin_API",
+    "tag.TaggableMixin",
     "world.LocatableBlockMixin_API"
   ],
   "client": [

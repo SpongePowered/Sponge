@@ -22,24 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.hooks;
+package org.spongepowered.forge.mixin.core.minecraftforge.registries;
 
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
-import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.accessor.core.MappedRegistryAccessor;
 
-public interface WorldHooks {
+/**
+ * Due to the Accessor being intrinsically implemented on top of MappedRegistry, the
+ * extended NamespacedWrapper class redefines frozen as a private field, leaving the
+ * original accessor to be useless. To fix registry issues, we therefore re-implement
+ * our accessor interface explicitly for registry purposes.
+ *
+ * @author gabizou
+ * @param <T>
+ */
+@Mixin(targets = "net/minecraftforge/registries/NamespacedWrapper")
+public abstract class NamespacedWrapperMixin_Forge<T> implements MappedRegistryAccessor<T> {
 
-    default Entity getCustomEntityIfItem(final Entity entity) {
-        return null;
+    @Shadow private boolean frozen;
+
+    @Override
+    public boolean accessor$frozen() {
+        return this.frozen;
     }
-
-    default boolean isRestoringBlocks(final Level world) {
-        return PhaseTracker.getInstance().getPhaseContext().isRestoring();
-    }
-
-    default void postLoadWorld(ServerLevel world) { }
-
-    default void preUnloadWorld(ServerLevel world) { }
 }
