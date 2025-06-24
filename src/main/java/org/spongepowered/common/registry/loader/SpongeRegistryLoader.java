@@ -97,6 +97,8 @@ import org.spongepowered.api.util.orientation.Orientations;
 import org.spongepowered.api.world.ChunkRegenerateFlag;
 import org.spongepowered.api.world.ChunkRegenerateFlags;
 import org.spongepowered.api.world.PositionSource;
+import org.spongepowered.api.world.SignalType;
+import org.spongepowered.api.world.SignalTypes;
 import org.spongepowered.api.world.generation.config.flat.FlatGeneratorConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfigs;
@@ -150,6 +152,7 @@ import org.spongepowered.common.map.decoration.orientation.SpongeMapDecorationOr
 import org.spongepowered.common.registry.RegistryLoader;
 import org.spongepowered.common.util.SpongeOrientation;
 import org.spongepowered.common.world.SpongeChunkRegenerateFlag;
+import org.spongepowered.common.world.SpongeSignalType;
 import org.spongepowered.common.world.schematic.SpongePaletteType;
 import org.spongepowered.common.world.weather.SpongeWeatherType;
 import org.spongepowered.math.vector.Vector3d;
@@ -412,6 +415,15 @@ public final class SpongeRegistryLoader {
             l.add(ResolveOperations.CONTEXTUAL_COMPONENTS, SpongeResolveOperation::newContextualComponents);
             l.add(ResolveOperations.CUSTOM_TRANSLATIONS, SpongeResolveOperation::newCustomTranslations);
             l.add(ResolveOperations.VIRTUAL_COMPONENTS, SpongeResolveOperation::newVirtualComponents);
+        });
+    }
+
+    public static RegistryLoader<SignalType> signalType() {
+        return RegistryLoader.of(l -> {
+            l.add(SignalTypes.DIRECT, k -> SpongeSignalType.DIRECT);
+            l.add(SignalTypes.INDIRECT, k -> SpongeSignalType.INDIRECT);
+            l.add(SignalTypes.COMPOSITE, k -> SpongeSignalType.COMPOSITE);
+            l.add(SignalTypes.ANALOG, k -> SpongeSignalType.ANALOG);
         });
     }
 

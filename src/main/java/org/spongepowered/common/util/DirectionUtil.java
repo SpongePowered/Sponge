@@ -26,14 +26,15 @@ package org.spongepowered.common.util;
 
 
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.util.Direction;
 
 import java.util.Objects;
 
 public final class DirectionUtil {
 
-    public static net.minecraft.core.Direction getFor(final Direction direction) {
-        Objects.requireNonNull(direction);
+    public static net.minecraft.core.@Nullable Direction getFor(final Direction direction) {
+        Objects.requireNonNull(direction, "direction");
         return switch (direction) {
             case UP -> net.minecraft.core.Direction.UP;
             case DOWN -> net.minecraft.core.Direction.DOWN;
@@ -56,6 +57,14 @@ public final class DirectionUtil {
             case NORTH -> Direction.NORTH;
             default -> throw new IllegalStateException();
         };
+    }
+
+    public static net.minecraft.core.Direction getForOrThrow(final Direction direction) {
+        final net.minecraft.core.@Nullable Direction result = DirectionUtil.getFor(direction);
+        if (result == null) {
+            throw new IllegalArgumentException("Direction must be cardinal: " + direction);
+        }
+        return result;
     }
 
     public static net.minecraft.world.level.block.state.BlockState set(final net.minecraft.world.level.block.state.BlockState holder, final Direction value, final EnumProperty<net.minecraft.core.Direction> property) {

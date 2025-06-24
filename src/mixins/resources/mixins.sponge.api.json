@@ -359,6 +359,7 @@
     "minecraft.world.level.LevelWriterMixin_API",
     "minecraft.world.level.LightLayerMixin_API",
     "minecraft.world.level.ServerExplosionMixin_API",
+    "minecraft.world.level.SignalGetterMixin_API",
     "minecraft.world.level.biome.AmbientAdditionsSettingsMixin_API",
     "minecraft.world.level.biome.AmbientMoodSettingsMixin_API",
     "minecraft.world.level.biome.AmbientParticleSettingsMixin_API",
