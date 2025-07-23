@@ -91,7 +91,9 @@ public final class SpawnEntityTransaction extends WorldBasedTransaction<SpawnEnt
     @Override
     protected void captureState() {
         super.captureState();
-        this.entityTag = this.entityToSpawn.saveWithoutId(new CompoundTag());
+        if(this.entityToSpawn.getType().canSerialize()) {
+            this.entityTag = this.entityToSpawn.saveWithoutId(new CompoundTag());
+        }
     }
 
     @Override
