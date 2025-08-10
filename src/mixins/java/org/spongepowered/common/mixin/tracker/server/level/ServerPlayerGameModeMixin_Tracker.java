@@ -108,7 +108,7 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
         final FoodData foodData = player.getFoodData();
         final float prevHealth = player.getHealth();
         final int prevFoodLevel = foodData.getFoodLevel();
-        final float prevSaturationLevel = foodData.getExhaustionLevel();
+        final float prevSaturationLevel = foodData.getSaturationLevel();
 
         ((ServerPlayerGameModeBridge) this).bridge$setInteractBlockRightClickCancelled(event.isCancelled());
         if (event.isCancelled()) {
