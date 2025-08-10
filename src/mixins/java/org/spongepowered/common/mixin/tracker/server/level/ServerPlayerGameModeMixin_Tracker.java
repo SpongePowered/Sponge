@@ -31,12 +31,14 @@ import com.llamalad7.mixinextras.sugar.Cancellable;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
+import net.minecraft.network.protocol.game.ClientboundSetHealthPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.food.FoodData;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -103,10 +105,18 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
         final Vector3d hitVec = VecHelper.toVector3d(blockHit.getLocation());
         final org.spongepowered.api.util.Direction direction = DirectionFacingProvider.INSTANCE.getKey(blockHit.getDirection()).get();
         final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.callInteractBlockEventSecondary(player, stack, hitVec, snapshot, direction, hand);
+        final FoodData foodData = player.getFoodData();
+        final float prevHealth = player.getHealth();
+        final int prevFoodLevel = foodData.getFoodLevel();
+        final float prevSaturationLevel = foodData.getExhaustionLevel();
 
         ((ServerPlayerGameModeBridge) this).bridge$setInteractBlockRightClickCancelled(event.isCancelled());
         if (event.isCancelled()) {
             this.player.inventoryMenu.sendAllDataToRemote();
+            // Cancel health or food level changes to the client, for example after eating a cake
+            if (player.getHealth() != prevHealth || foodData.getFoodLevel() != prevFoodLevel || foodData.getSaturationLevel() != prevSaturationLevel) {
+                this.player.connection.send(new ClientboundSetHealthPacket(player.getHealth(), foodData.getFoodLevel(), foodData.getSaturationLevel()));
+            }
             return InteractionResult.FAIL;
         }
 
