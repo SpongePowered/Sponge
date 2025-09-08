@@ -26,25 +26,17 @@ package org.spongepowered.neoforge.boot;
 
 import org.junit.platform.launcher.LauncherSession;
 import org.junit.platform.launcher.LauncherSessionListener;
-import org.spongepowered.common.applaunch.test.TestGameAccess;
 
-public class SpongeSessionListener implements LauncherSessionListener {
-    private ClassLoader previousLoader;
+public final class SpongeSessionListener implements LauncherSessionListener {
 
-    @Override
-    public void launcherSessionOpened(final LauncherSession session) {
-        this.previousLoader = Thread.currentThread().getContextClassLoader();
+    private final ClassLoader classLoader;
 
-        try {
-            Thread.currentThread().setContextClassLoader(SpongeTestBoot.getGameClassLoader());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public SpongeSessionListener() {
+        this.classLoader = Thread.currentThread().getContextClassLoader();
     }
 
     @Override
-    public void launcherSessionClosed(final LauncherSession session) {
-        TestGameAccess.shutdownGame();
-        Thread.currentThread().setContextClassLoader(this.previousLoader);
+    public void launcherSessionOpened(final LauncherSession session) {
+        Thread.currentThread().setContextClassLoader(this.classLoader);
     }
 }

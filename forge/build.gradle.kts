@@ -435,6 +435,7 @@ tasks {
         jvmArgs(runServer.jvmArgs)
         jvmArgs("-Dsponge.test.args=" + runServer.args.joinToString(" "))
         jvmArgs("-Dsponge.jacoco.packages=org.spongepowered")
+        jvmArgs("-Djunit.platform.launcher.interceptors.enabled=true")
         workingDir = layout.buildDirectory.dir("test-run").get().asFile
 
         doFirst {

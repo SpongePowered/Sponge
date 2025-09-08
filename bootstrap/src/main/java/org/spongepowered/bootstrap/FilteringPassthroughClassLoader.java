@@ -22,21 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.boot;
+package org.spongepowered.bootstrap;
 
-import org.junit.platform.launcher.LauncherSession;
-import org.junit.platform.launcher.LauncherSessionListener;
+import java.lang.module.Configuration;
+import java.lang.module.ResolvedModule;
+import java.util.HashSet;
+import java.util.Set;
 
-public final class SpongeSessionListener implements LauncherSessionListener {
+public final class FilteringPassthroughClassLoader extends ClassLoader {
 
-    private final ClassLoader classLoader;
+    private final Set<String> filteredPackages = new HashSet<>();
 
-    public SpongeSessionListener() {
-        this.classLoader = Thread.currentThread().getContextClassLoader();
+    static {
+        ClassLoader.registerAsParallelCapable();
+    }
+
+    FilteringPassthroughClassLoader(final ClassLoader parent, final Configuration config) {
+        super(parent);
+        for (final ResolvedModule module : config.modules()) {
+            this.filteredPackages.addAll(module.reference().descriptor().packages());
+        }
     }
 
     @Override
-    public void launcherSessionOpened(final LauncherSession session) {
-        Thread.currentThread().setContextClassLoader(this.classLoader);
+    protected Class<?> loadClass(final String name, final boolean resolve) throws ClassNotFoundException {
+        if (!this.filteredPackages.contains(FilteringPassthroughClassLoader.nameToPackage(name))) {
+            return super.loadClass(name, resolve);
+        }
+        throw new ClassNotFoundException(name);
+    }
+
+    private static String nameToPackage(final String name) {
+        final int index = name.lastIndexOf('.');
+        if (index == -1 || index == name.length() - 1) {
+            return "";
+        }
+        return name.substring(0, index);
     }
 }

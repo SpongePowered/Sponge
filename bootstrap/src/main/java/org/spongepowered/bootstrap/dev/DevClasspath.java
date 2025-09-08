@@ -125,14 +125,14 @@ public class DevClasspath {
 
             final String fileName = path.getFileName().toString();
 
-            if (fileName.startsWith("junit-") || fileName.startsWith("mockito-")) {
+            if (fileName.startsWith("junit-") || fileName.startsWith("byte-buddy-")) {
                 if (Bootstrap.DEBUG) {
                     System.out.println("Ignored: " + path);
                 }
                 continue;
             }
 
-            if (bootNames.contains(fileName) || fileName.startsWith("org.jacoco.core-")) {
+            if (bootNames.contains(fileName) || fileName.startsWith("org.jacoco.core-") || fileName.startsWith("mockito-") || fileName.startsWith("objenesis-")) {
                 if (Bootstrap.DEBUG) {
                     System.out.println("Boot: " + path);
                 }

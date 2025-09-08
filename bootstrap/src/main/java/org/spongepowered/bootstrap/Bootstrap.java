@@ -26,6 +26,7 @@ package org.spongepowered.bootstrap;
 
 import org.spongepowered.bootstrap.dev.DevClasspath;
 
+import java.io.File;
 import java.lang.module.Configuration;
 import java.lang.module.ModuleFinder;
 import java.net.URL;
@@ -38,6 +39,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class Bootstrap<Jar> {
     public static final boolean DEBUG = Boolean.getBoolean("sponge.bootstrap.debug");
@@ -117,7 +119,23 @@ public abstract class Bootstrap<Jar> {
 
         // Isolation
         final ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
-        ClassLoader parentLoader = isolated ? ClassLoader.getPlatformClassLoader() : contextLoader;
+        ClassLoader parentLoader = ClassLoader.getPlatformClassLoader();
+        if (!isolated) {
+            // Make sure we don't leak classes that are supposed to be
+            // in the game layer from the boostrap layer.
+            final String resources = System.getProperty("sponge.resources");
+            if (resources != null) {
+                final List<Jar> spongeJars = new ArrayList<>();
+                for (final String entry : resources.split(File.pathSeparator)) {
+                    final Path[] paths = Stream.of(entry.split("&")).map(Path::of).toArray(Path[]::new);
+                    spongeJars.add(this.createJar(paths));
+                }
+                final List<String> spongeModules = spongeJars.stream().map(this::getModuleName).toList();
+                final ModuleFinder spongeFinder = this.createModuleFinder(spongeJars);
+                final Configuration spongeConfig = Configuration.resolveAndBind(spongeFinder, List.of(config), ModuleFinder.of(), spongeModules);
+                parentLoader = new FilteringPassthroughClassLoader(contextLoader, spongeConfig);
+            }
+        }
 
         // Intermediate classloader to include resources but not modules
         if (!resourceJars.isEmpty()) {

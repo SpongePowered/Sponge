@@ -24,19 +24,34 @@
  */
 package org.spongepowered.vanilla.boot;
 
-import org.junit.platform.launcher.LauncherSession;
-import org.junit.platform.launcher.LauncherSessionListener;
+import org.junit.platform.launcher.LauncherInterceptor;
+import org.spongepowered.common.applaunch.test.TestGameAccess;
 
-public final class SpongeSessionListener implements LauncherSessionListener {
+public final class SpongeLauncherInterceptor implements LauncherInterceptor {
 
     private final ClassLoader classLoader;
 
-    public SpongeSessionListener() {
-        this.classLoader = Thread.currentThread().getContextClassLoader();
+    public SpongeLauncherInterceptor() {
+        try {
+            this.classLoader = SpongeTestBoot.getGameClassLoader();
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
-    public void launcherSessionOpened(final LauncherSession session) {
+    public <T> T intercept(final Invocation<T> invocation) {
+        final ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(this.classLoader);
+        try {
+            return invocation.proceed();
+        } finally {
+            Thread.currentThread().setContextClassLoader(originalClassLoader);
+        }
+    }
+
+    @Override
+    public void close() {
+        TestGameAccess.shutdownGame();
     }
 }
