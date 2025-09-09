@@ -24,37 +24,21 @@
  */
 package org.spongepowered.bootstrap;
 
-import java.lang.module.ModuleReference;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Stream;
+import java.net.URL;
+import java.net.URLClassLoader;
 
-public final class FilteringPassthroughClassLoader extends ClassLoader {
-
-    private final Set<String> filteredPackages = new HashSet<>();
+public final class ResourceClassLoader extends URLClassLoader {
 
     static {
         ClassLoader.registerAsParallelCapable();
     }
 
-    FilteringPassthroughClassLoader(final ClassLoader parent, final Stream<ModuleReference> modules) {
-        super(parent);
-        modules.forEach(m -> this.filteredPackages.addAll(m.descriptor().packages()));
+    public ResourceClassLoader(final String name, final URL[] urls, final ClassLoader parent) {
+        super(name, urls, parent);
     }
 
     @Override
-    protected Class<?> loadClass(final String name, final boolean resolve) throws ClassNotFoundException {
-        if (!this.filteredPackages.contains(FilteringPassthroughClassLoader.nameToPackage(name))) {
-            return super.loadClass(name, resolve);
-        }
+    protected Class<?> findClass(final String name) throws ClassNotFoundException {
         throw new ClassNotFoundException(name);
-    }
-
-    private static String nameToPackage(final String name) {
-        final int index = name.lastIndexOf('.');
-        if (index == -1 || index == name.length() - 1) {
-            return "";
-        }
-        return name.substring(0, index);
     }
 }

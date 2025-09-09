@@ -30,7 +30,6 @@ import java.io.File;
 import java.lang.module.Configuration;
 import java.lang.module.ModuleFinder;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -75,7 +74,8 @@ public abstract class Bootstrap<Jar> {
 
         // Collect the jars
         final Set<String> moduleNames = new HashSet<>();
-        final List<Path> resourceJars = new ArrayList<>();
+        final List<Path> resourcePaths = new ArrayList<>();
+        final List<Jar> resourceJars = new ArrayList<>();
         final List<Jar> appJars = new ArrayList<>();
 
         for (final Path[] paths : classpath) {
@@ -94,7 +94,8 @@ public abstract class Bootstrap<Jar> {
                 if (Bootstrap.DEBUG) {
                     System.out.println("Filtered: " + name + " " + Bootstrap.formatUnion(paths));
                 }
-                resourceJars.addAll(Arrays.asList(paths));
+                resourceJars.add(jar);
+                resourcePaths.addAll(Arrays.asList(paths));
                 continue;
             }
 
@@ -102,7 +103,8 @@ public abstract class Bootstrap<Jar> {
                 if (Bootstrap.DEBUG) {
                     System.out.println("Duplicate: " + name + " " + Bootstrap.formatUnion(paths));
                 }
-                resourceJars.addAll(Arrays.asList(paths));
+                resourceJars.add(jar);
+                resourcePaths.addAll(Arrays.asList(paths));
                 continue;
             }
 
@@ -130,20 +132,20 @@ public abstract class Bootstrap<Jar> {
                     final Path[] paths = Stream.of(entry.split("&")).map(Path::of).toArray(Path[]::new);
                     spongeJars.add(this.createJar(paths));
                 }
-                final List<String> spongeModules = spongeJars.stream().map(this::getModuleName).toList();
                 final ModuleFinder spongeFinder = this.createModuleFinder(spongeJars);
-                final Configuration spongeConfig = Configuration.resolveAndBind(spongeFinder, List.of(config), ModuleFinder.of(), spongeModules);
-                parentLoader = new FilteringPassthroughClassLoader(contextLoader, spongeConfig);
+                final ModuleFinder resourceFinder = this.createModuleFinder(resourceJars);
+                parentLoader = new FilteringPassthroughClassLoader(contextLoader,
+                    Stream.concat(spongeFinder.findAll().stream(), resourceFinder.findAll().stream()));
             }
         }
 
         // Intermediate classloader to include resources but not modules
-        if (!resourceJars.isEmpty()) {
-            final URL[] urls = new URL[resourceJars.size()];
+        if (!resourcePaths.isEmpty()) {
+            final URL[] urls = new URL[resourcePaths.size()];
             for (int i = 0; i < urls.length; i++) {
-                urls[i] = resourceJars.get(i).toUri().toURL();
+                urls[i] = resourcePaths.get(i).toUri().toURL();
             }
-            parentLoader = new URLClassLoader("BOOTSTRAP-RESOURCES", urls, parentLoader);
+            parentLoader = new ResourceClassLoader("BOOTSTRAP-RESOURCES", urls, parentLoader);
         }
 
         // Create the application classloader
