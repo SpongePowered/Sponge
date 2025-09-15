@@ -108,6 +108,11 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
     }
 
     @Override
+    public void skipChar() {
+        this.skip();
+    }
+
+    @Override
     public char parseChar() {
         return this.read();
     }

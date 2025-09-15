@@ -45,17 +45,19 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
 import org.spongepowered.common.event.tracking.context.transaction.world.WorldBasedTransaction;
+import org.spongepowered.math.vector.Vector3i;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 abstract class BlockEventBasedTransaction extends WorldBasedTransaction<ChangeBlockEvent.All> {
 
     final BlockPos affectedPosition;
     final BlockState originalState;
 
-    private @MonotonicNonNull BlockTransaction eventTransaction;
+    private @MonotonicNonNull Supplier<BlockTransaction> eventTransaction;
 
     BlockEventBasedTransaction(final BlockPos affectedPosition, final BlockState originalState, final ResourceKey worldKey) {
         super(TransactionTypes.BLOCK.get(), worldKey);
@@ -75,7 +77,7 @@ abstract class BlockEventBasedTransaction extends WorldBasedTransaction<ChangeBl
             return Optional.empty();
         }
 
-        final Map<BlockPos, BlockTransaction> eventTransactions = new HashMap<>();
+        final Map<Vector3i, BlockTransaction> eventTransactions = new HashMap<>();
         for (final GameTransaction<@NonNull ?> transaction : transactions) {
             final BlockEventBasedTransaction blockTransaction = (BlockEventBasedTransaction) transaction;
             if (!blockTransaction.actualBlockTransaction()) {
@@ -85,13 +87,17 @@ abstract class BlockEventBasedTransaction extends WorldBasedTransaction<ChangeBl
             final SpongeBlockSnapshot result = blockTransaction.getResultingSnapshot();
             final Operation operation = context.getBlockOperation(original, result);
             final BlockTransaction eventTransaction = new BlockTransaction(original, result, operation);
-            blockTransaction.eventTransaction = eventTransactions.merge(blockTransaction.affectedPosition, eventTransaction, (oldValue, newValue) -> {
+            final BlockTransaction mergedEventTransaction = eventTransactions.merge(eventTransaction.original().position(), eventTransaction, (oldValue, newValue) -> {
                 final ImmutableList.Builder<BlockSnapshot> intermediary = ImmutableList.builderWithExpectedSize(oldValue.intermediary().size() + 1);
                 intermediary.addAll(oldValue.intermediary());
                 intermediary.add(oldValue.finalReplacement());
                 final Operation mergedOperation = context.getBlockOperation((SpongeBlockSnapshot) oldValue.original(), (SpongeBlockSnapshot) newValue.finalReplacement());
                 return new BlockTransaction(oldValue.original(), newValue.finalReplacement(), intermediary.build(), mergedOperation);
             });
+            // Only the original transaction should perform the cancellation.
+            if (eventTransaction == mergedEventTransaction) {
+                blockTransaction.eventTransaction = () -> eventTransactions.get(eventTransaction.original().position());
+            }
         }
 
         if (eventTransactions.isEmpty()) {
@@ -123,7 +129,7 @@ abstract class BlockEventBasedTransaction extends WorldBasedTransaction<ChangeBl
         }
         for (final GameTransaction<ChangeBlockEvent.All> gameTransaction : blockTransactions) {
             final BlockEventBasedTransaction blockTransaction = (BlockEventBasedTransaction) gameTransaction;
-            if (blockTransaction.eventTransaction != null && !blockTransaction.eventTransaction.isValid()) {
+            if (blockTransaction.eventTransaction != null && !blockTransaction.eventTransaction.get().isValid()) {
                 cancelledAny = true;
                 gameTransaction.markCancelled();
             }

@@ -36,9 +36,9 @@ import org.spongepowered.api.profile.GameProfileCache;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.profile.GameProfileProvider;
 import org.spongepowered.common.SpongeServer;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.server.players.GameProfileCacheBridge;
 import org.spongepowered.common.bridge.server.players.GameProfileCache_GameProfileInfoBridge;
+import org.spongepowered.common.launch.config.core.SpongeConfigs;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.util.UsernameCache;
 

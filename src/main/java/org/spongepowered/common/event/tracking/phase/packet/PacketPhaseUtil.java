@@ -270,6 +270,7 @@ public final class PacketPhaseUtil {
                     }
                     try (final PhaseContext<?> packetContext = context) {
                         packetContext.buildAndSwitch();
+
                         packetIn.handle(netHandler);
                     }
                 }

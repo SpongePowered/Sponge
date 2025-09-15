@@ -379,6 +379,10 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
                 try {
                      child.parse(reader, context);
                 } catch (final RuntimeException ex) {
+                    if (!SpongeCommon.game().isServerAvailable()) {
+                        // Log exception during startup
+                        SpongeCommon.logger().error("Failed to parse command", ex);
+                    }
                     throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().createWithContext(reader, ex.getMessage());
                 }
                 // Sponge Start: if we didn't consume anything we don't want Brig to complain at us.

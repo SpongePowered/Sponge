@@ -38,7 +38,6 @@ import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.accessor.server.level.ServerPlayer_ContainerListenerAccessor;
 import org.spongepowered.common.bridge.world.inventory.container.ContainerBridge;
 import org.spongepowered.common.bridge.world.inventory.container.MenuBridge;
 import org.spongepowered.common.inventory.adapter.impl.DefaultImplementedAdapterInventory;
@@ -49,7 +48,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Mixin(value = AbstractContainerMenu.class, priority = 998)
 public abstract class ContainerMixin_Inventory_API implements org.spongepowered.api.item.inventory.Container,
@@ -94,25 +92,18 @@ public abstract class ContainerMixin_Inventory_API implements org.spongepowered.
             return false;
         }
         ItemStack nativeStack = ItemStackUtil.fromLikeToNative(item);
-        this.listeners().stream().findFirst()
-                .ifPresent(p -> p.containerMenu.setCarried(nativeStack));
+        this.getViewer().ifPresent(p -> p.containerMenu.setCarried(nativeStack));
         return true;
     }
 
     @Override
     public Optional<org.spongepowered.api.item.inventory.ItemStack> cursor() {
-        return this.listeners().stream().findFirst()
-                .map(p -> p.containerMenu.getCarried())
-                .map(ItemStackUtil::fromNative);
+        return this.getViewer().map(p -> p.containerMenu.getCarried()).map(ItemStackUtil::fromNative);
     }
 
     @Override
     public ServerPlayer viewer() {
-        return this.listeners().stream()
-            .filter(ServerPlayer.class::isInstance)
-            .map(ServerPlayer.class::cast)
-            .findFirst()
-            .orElseThrow(() -> new IllegalStateException("Container without viewer"));
+        return (ServerPlayer) this.getViewer().orElseThrow(() -> new IllegalStateException("Container without viewer"));
     }
 
     @Override
@@ -126,11 +117,8 @@ public abstract class ContainerMixin_Inventory_API implements org.spongepowered.
         return Optional.ofNullable((ContainerType) this.menuType);
     }
 
-    private List<net.minecraft.server.level.ServerPlayer> listeners() {
-        return this.containerListeners.stream()
-                .filter(listener -> this.containerListeners.get(0).getClass().getEnclosingClass() == net.minecraft.server.level.ServerPlayer.class)
-                .map(listener -> ((ServerPlayer_ContainerListenerAccessor) listener).accessor$this$0())
-                .collect(Collectors.toList());
+    private Optional<net.minecraft.server.level.ServerPlayer> getViewer() {
+        return Optional.ofNullable(((ContainerBridge) this).bridge$getViewer());
     }
 
     @Override

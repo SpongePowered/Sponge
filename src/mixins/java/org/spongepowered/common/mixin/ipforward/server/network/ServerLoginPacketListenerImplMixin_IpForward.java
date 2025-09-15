@@ -39,10 +39,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.applaunch.config.common.IpForwardingCategory;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.network.ConnectionBridge_IpForward;
 import org.spongepowered.common.ipforward.velocity.VelocityForwardingInfo;
+import org.spongepowered.common.launch.config.common.IpForwardingCategory;
+import org.spongepowered.common.launch.config.core.SpongeConfigs;
 import org.spongepowered.common.util.Preconditions;
 
 import java.nio.charset.StandardCharsets;

@@ -28,7 +28,6 @@ import com.google.inject.Stage;
 import net.minecraft.server.Bootstrap;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.common.launch.Lifecycle;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 import org.spongepowered.vanilla.applaunch.util.MixinLoggerInjector;
 
@@ -69,11 +68,6 @@ public class IntegrationTestLaunch extends VanillaLaunch {
             // Prepare Vanilla
             Bootstrap.bootStrap();
             Bootstrap.validate();
-
-            // Prepare Sponge
-            final Lifecycle lifecycle = Launch.instance().lifecycle();
-            lifecycle.establishDataProviders();
-            lifecycle.callRegisterDataEvent();
 
             this.logger().info("Performing Mixin audit");
             Launch.instance().auditMixins();

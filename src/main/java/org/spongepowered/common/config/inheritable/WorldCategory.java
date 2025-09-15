@@ -26,6 +26,7 @@ package org.spongepowered.common.config.inheritable;
 
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.world.SerializationBehavior;
+import org.spongepowered.common.launch.config.common.AutoSaveOptions;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
@@ -43,15 +44,13 @@ public final class WorldCategory {
         + "areas for more items. Setting to a negative value is not supported!")
     public final double itemMergeRadius = 2.5D;
 
-    @Setting("auto-save-interval")
-    @Comment("The auto-save tick interval used to save all loaded chunks in a world. \n"
-        + "Set to 0 to disable. (Default: 6000) \n"
-        + "Note: 20 ticks is equivalent to 1 second.")
-    public int autoSaveInterval = 6000;
+    @Setting("auto-save")
+    @Comment("The auto-save options used to save all loaded chunks in a world.")
+    public AutoSaveOptions autoSave = new AutoSaveOptions();
 
-    @Setting("log-auto-save")
-    @Comment("Log when a world auto-saves its chunk data. Note: This may be spammy depending on the auto-save-interval configured for world.")
-    public final boolean logAutoSave = false;
+    @Setting("config-auto-save")
+    @Comment("The auto-save options used to save the world configuration files.")
+    public AutoSaveOptions configAutoSave = new AutoSaveOptions();
 
     @Setting(value = "load-on-startup")
     @Comment("If 'true', this world will load on startup.")

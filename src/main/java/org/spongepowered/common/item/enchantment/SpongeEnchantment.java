@@ -24,17 +24,22 @@
  */
 package org.spongepowered.common.item.enchantment;
 
+import net.kyori.adventure.text.Component;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.world.item.enchantment.Enchantment;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.Queries;
-import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.adventure.SpongeAdventure;
 
 import java.util.Objects;
 
-public final class SpongeEnchantment implements Enchantment {
+public final class SpongeEnchantment implements org.spongepowered.api.item.enchantment.Enchantment {
 
     private final EnchantmentType enchantmentType;
     private final int level;
@@ -52,6 +57,13 @@ public final class SpongeEnchantment implements Enchantment {
     @Override
     public int level() {
         return this.level;
+    }
+
+    @Override
+    public Component asComponent() {
+        final Registry<Enchantment> registry = (Registry<Enchantment>) SpongeCommon.scopedHolder().registry(RegistryTypes.ENCHANTMENT_TYPE);
+        final Holder<Enchantment> holder = registry.wrapAsHolder((Enchantment) (Object) this.enchantmentType);
+        return SpongeAdventure.asAdventure(Enchantment.getFullname(holder, this.level));
     }
 
     @Override

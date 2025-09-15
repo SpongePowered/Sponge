@@ -25,11 +25,15 @@
 package org.spongepowered.neoforge.applaunch.loading.moddiscovery;
 
 import com.google.common.collect.ImmutableMap;
+import cpw.mods.jarhandling.JarContents;
+import cpw.mods.jarhandling.SecureJar;
 import cpw.mods.modlauncher.Environment;
 import cpw.mods.modlauncher.Launcher;
 import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.fml.loading.moddiscovery.readers.JarModsDotTomlModFileReader;
 import net.neoforged.neoforgespi.ILaunchContext;
 import net.neoforged.neoforgespi.locating.IDiscoveryPipeline;
+import net.neoforged.neoforgespi.locating.IModFile;
 import net.neoforged.neoforgespi.locating.IModFileCandidateLocator;
 import net.neoforged.neoforgespi.locating.IncompatibleFileReporting;
 import net.neoforged.neoforgespi.locating.ModFileDiscoveryAttributes;
@@ -37,6 +41,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.neoforge.applaunch.plugin.NeoForgePluginPlatform;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.FileSystem;
@@ -57,11 +62,32 @@ public final class SpongeNeoModLocator implements IModFileCandidateLocator {
 
     @Override
     public void findCandidates(ILaunchContext context, IDiscoveryPipeline pipeline) {
+        final ModFileDiscoveryAttributes attributes = ModFileDiscoveryAttributes.DEFAULT.withLocator(this);
+
         if (!FMLEnvironment.production) {
+            final String resourcesProp = System.getProperty("sponge.resources");
+            if (resourcesProp != null) {
+                for (final String entry : resourcesProp.split(File.pathSeparator)) {
+                    if (entry.isBlank()) {
+                        continue;
+                    }
+
+                    final JarContents jarContents = JarContents.of(Stream.of(entry.split("&")).map(Path::of).toList());
+                    IModFile modFile = null;
+                    try {
+                        // attempt to load as mod or plugin
+                        modFile = pipeline.readModFile(jarContents, attributes);
+                    } catch (Exception ignored) {}
+                    if (modFile == null) {
+                        // fallback to game library
+                        modFile = IModFile.create(SecureJar.from(jarContents), JarModsDotTomlModFileReader::manifestParser, IModFile.Type.GAMELIBRARY, attributes);
+                    }
+                    pipeline.addModFile(modFile);
+                }
+            }
             return;
         }
 
-        final ModFileDiscoveryAttributes attributes = ModFileDiscoveryAttributes.DEFAULT.withLocator(this);
         try {
             URL rootJar = SpongeNeoModLocator.class.getProtectionDomain().getCodeSource().getLocation();
             FileSystem fs =  FileSystems.getFileSystem(rootJar.toURI()); // FML has already opened a file system for this jar

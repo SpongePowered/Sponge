@@ -24,7 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.server.players;
 
+import com.google.common.collect.Iterators;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import io.netty.channel.local.LocalAddress;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;
@@ -56,7 +62,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.portal.TeleportTransition;
-import net.minecraft.world.level.storage.PlayerDataStorage;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.slf4j.Logger;
@@ -117,6 +122,7 @@ import org.spongepowered.common.server.PerWorldBorderListener;
 import org.spongepowered.common.service.server.ban.SpongeIPBanList;
 import org.spongepowered.common.service.server.ban.SpongeUserBanList;
 import org.spongepowered.common.service.server.whitelist.SpongeUserWhiteList;
+import org.spongepowered.common.util.AutoSaveQueue;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.NetworkUtil;
 import org.spongepowered.math.vector.Vector3d;
@@ -128,9 +134,11 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -149,18 +157,17 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Shadow @Final private List<net.minecraft.server.level.ServerPlayer> players;
     @Shadow @Final protected int maxPlayers;
     @Shadow @Final private Map<UUID, net.minecraft.server.level.ServerPlayer> playersByUUID;
-    @Shadow @Final private PlayerDataStorage playerIo;
 
     @Shadow public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract Optional<CompoundTag> shadow$load(final net.minecraft.server.level.ServerPlayer $$0);
     @Shadow public abstract boolean shadow$canBypassPlayerLimit(com.mojang.authlib.GameProfile param0);
     @Shadow protected abstract boolean shadow$verifyChatTrusted(final PlayerChatMessage $$0);
-    @Shadow protected abstract void shadow$broadcastChatMessage(final PlayerChatMessage $$0, final Predicate<net.minecraft.server.level.ServerPlayer> $$1,
-        final net.minecraft.server.level.@Nullable ServerPlayer $$2, final ChatType.Bound $$4);
+    @Shadow protected abstract void shadow$save(net.minecraft.server.level.ServerPlayer $$0);
     // @formatter:on
 
     private boolean impl$isRespawnWithPosition = false;
     private boolean impl$isDuringSystemMessageEvent = false;
+    private @Nullable AutoSaveQueue<UUID> impl$autoSaveQueue;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$setSpongeLists(final CallbackInfo callbackInfo) {
@@ -606,71 +613,63 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         this.impl$isDuringSystemMessageEvent = false;
     }
 
-    @Redirect(method = "broadcastChatMessage(Lnet/minecraft/network/chat/PlayerChatMessage;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/network/chat/ChatType$Bound;)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastChatMessage(Lnet/minecraft/network/chat/PlayerChatMessage;Ljava/util/function/Predicate;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/network/chat/ChatType$Bound;)V"))
-    private void impl$onBroadcastChatMessage1(final PlayerList instance, final PlayerChatMessage $$0,
-            final Predicate<net.minecraft.server.level.ServerPlayer> $$1, final net.minecraft.server.level.ServerPlayer $$2,
-            final ChatType.Bound $$4) {
-        this.impl$onBroadcastChatMessage($$0, $$1, $$2, $$4);
-    }
-
-    @Redirect(method = "broadcastChatMessage(Lnet/minecraft/network/chat/PlayerChatMessage;Lnet/minecraft/commands/CommandSourceStack;Lnet/minecraft/network/chat/ChatType$Bound;)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastChatMessage(Lnet/minecraft/network/chat/PlayerChatMessage;Ljava/util/function/Predicate;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/network/chat/ChatType$Bound;)V"))
-    private void impl$onBroadcastChatMessage2(final PlayerList instance, final PlayerChatMessage $$0,
-            final Predicate<net.minecraft.server.level.ServerPlayer> $$1, final net.minecraft.server.level.ServerPlayer $$2,
-            final ChatType.Bound $$4) {
-        this.impl$onBroadcastChatMessage($$0, $$1, $$2, $$4);
-    }
-
-    private void impl$onBroadcastChatMessage(final PlayerChatMessage $$0, final Predicate<net.minecraft.server.level.ServerPlayer> $$1,
-            final net.minecraft.server.level.ServerPlayer $$2, final ChatType.Bound $$4) {
-
-        final boolean isTrusted = this.shadow$verifyChatTrusted($$0);
-
-        final Component content = SpongeAdventure.asAdventure($$0.decoratedContent());
-        final Component sender = SpongeAdventure.asAdventure($$4.name());
-        final Component target = $$4.targetName() == null ? null : SpongeAdventure.asAdventure($$4.targetName());
+    @WrapMethod(method = "broadcastChatMessage(Lnet/minecraft/network/chat/PlayerChatMessage;Ljava/util/function/Predicate;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/network/chat/ChatType$Bound;)V")
+    private void impl$onBroadcastChatMessage(
+        PlayerChatMessage message, final Predicate<net.minecraft.server.level.ServerPlayer> mcFilter,
+        final net.minecraft.server.level.ServerPlayer player, ChatType.Bound boundChatType, final Operation<Void> original,
+        @Share("filter") final LocalRef<Predicate<ServerPlayer>> spongeFilterRef
+    ) {
+        final boolean isTrusted = this.shadow$verifyChatTrusted(message);
+        final Component content = SpongeAdventure.asAdventure(message.decoratedContent());
+        final Component sender = SpongeAdventure.asAdventure(boundChatType.name());
+        final Optional<Component> target = boundChatType.targetName().map(SpongeAdventure::asAdventure);
         final Registry<ChatType> chatTypeRegistry = SpongeCommon.vanillaRegistry(Registries.CHAT_TYPE);
-        final var chatType = RegistryTypes.CHAT_TYPE.defaultReferenced((org.spongepowered.api.ResourceKey) (Object) chatTypeRegistry.getKey($$4.chatType().value()));
-
-        final Predicate<net.minecraft.server.level.ServerPlayer> filter;
-        ChatType.Bound boundChatType;
+        final var chatType = RegistryTypes.CHAT_TYPE.defaultReferenced((org.spongepowered.api.ResourceKey) (Object) chatTypeRegistry.getKey(boundChatType.chatType().value()));
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getServerInstanceExplicitly().pushCauseFrame()) {
-            if ($$2 != null) {
-                frame.pushCause($$2);
+            if (player != null) {
+                frame.pushCause(player);
             }
 
             final PlayerChatEvent.Submit event = SpongeEventFactory.createPlayerChatEventSubmit(frame.currentCause(), content, content, chatType,
-                    Optional.empty(), Optional.ofNullable((ServerPlayer) $$2), sender, Optional.ofNullable(target), isTrusted);
+                    Optional.empty(), Optional.ofNullable((ServerPlayer) player), sender, target, isTrusted);
             if (SpongeCommon.post(event)) {
-                return; // Do nothing when canceled or audience removed
-            }
-            boundChatType = ChatType.bind(ResourceKey.create(Registries.CHAT_TYPE, (ResourceLocation) (Object) event.chatType().location()),
-                    this.server.registryAccess(), SpongeAdventure.asVanilla(event.sender()));
-            boundChatType = event.target().map(SpongeAdventure::asVanilla).map(boundChatType::withTargetName).orElse(boundChatType);
-
-            filter = event.filter().map(f -> $$1.and((Predicate) f)).orElse($$1);
-            if (event.message() != event.originalMessage()) {
-                final net.minecraft.network.chat.Component customMessage = SpongeAdventure.asVanilla(event.message());
-                // It works!
-                // If the message is changed, the player will be shown the standard message change notification for such situations.
-                // The value of `isTrusted` will always be `true` when `online-mode=true`.
-                // If `online-mode=false`, then `isTrusted` will also have a value of `false`.
-                // When `online-mode=false`, the player is not shown a notification when the server changes the message.
-                var modifiedMessage =  new PlayerChatMessage($$0.link(), $$0.signature(), $$0.signedBody(), customMessage, $$0.filterMask());
-                this.shadow$broadcastChatMessage(modifiedMessage, filter, $$2, boundChatType);
                 return;
             }
-        }
 
-        this.shadow$broadcastChatMessage($$0, filter, $$2, boundChatType);
+            boundChatType = ChatType.bind(ResourceKey.create(Registries.CHAT_TYPE, (ResourceLocation) (Object) event.chatType().location()),
+                    this.server.registryAccess(), SpongeAdventure.asVanilla(event.sender()));
+
+            if (event.target().isPresent()) {
+                boundChatType = boundChatType.withTargetName(SpongeAdventure.asVanilla(event.target().get()));
+            }
+
+            spongeFilterRef.set(event.filter().orElse(null));
+
+            if (event.message() != event.originalMessage()) {
+                message = message.withUnsignedContent(SpongeAdventure.asVanilla(event.message()));
+            }
+
+            original.call(message, mcFilter, player, boundChatType);
+        }
+    }
+
+    @ModifyExpressionValue(method = "broadcastChatMessage(Lnet/minecraft/network/chat/PlayerChatMessage;Ljava/util/function/Predicate;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/network/chat/ChatType$Bound;)V",
+        at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;"))
+    private Iterator<net.minecraft.server.level.ServerPlayer> impl$filterPlayersToBroadcastChatMessage(
+        Iterator<net.minecraft.server.level.ServerPlayer> original, @Share("filter") final LocalRef<Predicate<ServerPlayer>> spongeFilterRef
+    ) {
+        final Predicate<ServerPlayer> spongeFilter = spongeFilterRef.get();
+        return spongeFilter == null ? original : Iterators.filter(original, (p) -> spongeFilter.test((ServerPlayer) p));
     }
 
     @Inject(method = "save", at = @At("HEAD"), cancellable = true)
     private void impl$onSave(final net.minecraft.server.level.ServerPlayer player, final CallbackInfo ci) {
         if (((TransientBridge) player).bridge$isTransient()) {
             ci.cancel();
+        }
+        if (this.impl$autoSaveQueue != null) {
+            this.impl$autoSaveQueue.remove(player.getUUID());
         }
     }
 
@@ -680,5 +679,40 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         //not for the TRANSIENT key. This ensures that arbitrary
         //entities are removed with the player but players are ignored.
         return instance.hasExactlyOnePlayerPassenger() && instance.getType().canSerialize();
+    }
+
+    @ModifyExpressionValue(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;levelKeys()Ljava/util/Set;"))
+    private Set<ResourceKey<Level>> impl$onLoginPacketLevelKeys(final Set<ResourceKey<Level>> original) {
+        //Levels can be dynamically added or removed while
+        //the packet is in-flight in the I/O thread.
+        return Set.copyOf(original);
+    }
+
+    @Override
+    public void bridge$saveAll(final int batchInterval, final int batchAmount, final boolean log) {
+        if (this.impl$autoSaveQueue != null || this.players.isEmpty()) {
+            return;
+        }
+        if (log) {
+            PlayerListMixin.LOGGER.info("Starting to save {} player(s) data every {} tick(s)", batchAmount, batchInterval);
+        }
+        this.impl$autoSaveQueue = new AutoSaveQueue<>(k -> {
+            final net.minecraft.server.level.@Nullable ServerPlayer player = this.playersByUUID.get(k);
+            if (player != null) {
+                this.shadow$save(player);
+                return true;
+            }
+            return false;
+        }, this.playersByUUID.keySet(), batchInterval, batchAmount, log);
+    }
+
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void impl$onTick(final CallbackInfo ci) {
+        if (this.impl$autoSaveQueue != null && this.impl$autoSaveQueue.drain()) {
+            if (this.impl$autoSaveQueue.log()) {
+                PlayerListMixin.LOGGER.info("All player data has been saved");
+            }
+            this.impl$autoSaveQueue = null;
+        }
     }
 }

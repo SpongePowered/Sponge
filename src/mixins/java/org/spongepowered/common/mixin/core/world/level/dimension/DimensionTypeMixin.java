@@ -25,19 +25,14 @@
 package org.spongepowered.common.mixin.core.world.level.dimension;
 
 import com.mojang.serialization.Codec;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.ExtraCodecs;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge;
 import org.spongepowered.common.world.server.SpongeDimensionTypes;
-
-import java.nio.file.Path;
 
 @Mixin(DimensionType.class)
 public abstract class DimensionTypeMixin implements DimensionTypeBridge {
@@ -46,16 +41,6 @@ public abstract class DimensionTypeMixin implements DimensionTypeBridge {
     // @formatter:on
 
     @Nullable private Boolean impl$createDragonFight;
-
-    /**
-     * @author zidane
-     * @reason Compensate for our per-world level save adapters
-     */
-    @Overwrite
-    public static Path getStorageFolder(ResourceKey<Level> worldKey, Path defaultLevelDirectory) {
-        // Sponge Start - The directory is already set to be at this location
-        return defaultLevelDirectory;
-    }
 
     @Override
     public DimensionType bridge$decorateData(final SpongeDimensionTypes.SpongeDataSection data) {

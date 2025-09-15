@@ -210,6 +210,7 @@ public final class CommandRegistryLoader {
             l.add(ClientCompletionTypes.DECIMAL_NUMBER, k -> new SpongeClientCompletionType(DoubleArgumentType.doubleArg()));
             l.add(ClientCompletionTypes.SNBT, k -> new SpongeClientCompletionType(CompoundTagArgument.compoundTag()));
             l.add(ClientCompletionTypes.NONE, k -> SpongeClientCompletionType.NONE);
+            l.add(ClientCompletionTypes.REMAINING_JOINED_STRINGS, k -> new SpongeClientCompletionType(StringArgumentType.greedyString()));
             l.add(ClientCompletionTypes.RESOURCE_KEY, k -> new SpongeClientCompletionType(ResourceLocationArgument.id()));
             l.add(ClientCompletionTypes.STRING, k -> new SpongeClientCompletionType(StringArgumentType.string()));
             l.add(ClientCompletionTypes.WHOLE_NUMBER, k -> new SpongeClientCompletionType(LongArgumentType.longArg()));

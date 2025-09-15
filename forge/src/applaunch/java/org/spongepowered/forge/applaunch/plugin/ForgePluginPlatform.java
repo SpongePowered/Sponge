@@ -30,15 +30,13 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.applaunch.config.LaunchConfig;
+import org.spongepowered.common.applaunch.config.TokenReplacement;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public final class ForgePluginPlatform implements PluginPlatform {
@@ -47,25 +45,37 @@ public final class ForgePluginPlatform implements PluginPlatform {
 
     private final Environment environment;
     private final Logger logger;
+    private final LaunchConfig config;
+    private final TokenReplacement tokens;
     private final List<Path> pluginDirectories;
 
-    public static synchronized boolean bootstrap(final Environment environment) {
+    public static synchronized void bootstrap(final Environment environment) {
         if (ForgePluginPlatform.bootstrapped) {
-            return false;
+            return;
         }
         ForgePluginPlatform.bootstrapped = true;
-        final ForgePluginPlatform platform = new ForgePluginPlatform(environment);
+        final ForgePluginPlatform platform;
+        try {
+            platform = new ForgePluginPlatform(environment);
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
         AppLaunch.setPluginPlatform(platform);
-        platform.init();
-        return true;
     }
 
-    private ForgePluginPlatform(final Environment environment) {
+    private ForgePluginPlatform(final Environment environment) throws IOException {
         this.environment = environment;
         this.logger = LogManager.getLogger("plugin");
-        this.pluginDirectories = new ArrayList<>();
+        this.config = LaunchConfig.load(this.baseDirectory(), true);
 
-        this.pluginDirectories.add(FMLPaths.MODSDIR.get());
+        this.tokens = new TokenReplacement();
+        this.tokens.register("BASE_DIR", this.baseDirectory());
+        this.tokens.register("CONFIG_DIR", this.configDirectory());
+        this.tokens.register("MODS_DIR", FMLPaths.MODSDIR.get());
+
+        final Path additionalPluginsDirectory = Path.of(this.tokens.replace(this.config.additionalPluginsDirectory()));
+        Files.createDirectories(additionalPluginsDirectory);
+        this.pluginDirectories = List.of(FMLPaths.MODSDIR.get(), additionalPluginsDirectory);
     }
 
     @Override
@@ -74,53 +84,37 @@ public final class ForgePluginPlatform implements PluginPlatform {
     }
 
     @Override
-    public void setVersion(final String version) {
-        // NOOP
-    }
-
-    @Override
     public Logger logger() {
         return this.logger;
     }
 
     @Override
-    public Path baseDirectory() {
-        return this.environment.getProperty(IEnvironment.Keys.GAMEDIR.get()).orElse(Paths.get("."));
+    public boolean vanilla() {
+        return false;
     }
 
     @Override
-    public void setBaseDirectory(final Path baseDirectory) {
-        // NOOP
+    public Path baseDirectory() {
+        return FMLPaths.GAMEDIR.get();
+    }
+
+    @Override
+    public Path configDirectory() {
+        return FMLPaths.CONFIGDIR.get();
+    }
+
+    @Override
+    public LaunchConfig config() {
+        return this.config;
+    }
+
+    @Override
+    public TokenReplacement tokens() {
+        return this.tokens;
     }
 
     @Override
     public List<Path> pluginDirectories() {
-        return Collections.unmodifiableList(this.pluginDirectories);
-    }
-
-    @Override
-    public void setPluginDirectories(final List<Path> pluginDirectories) {
-        // NOOP
-    }
-
-    @Override
-    public String metadataFilePath() {
-        return null;
-    }
-
-    @Override
-    public void setMetadataFilePath(final String metadataFilePath) {
-        // NOOP
-    }
-
-    public void init() {
-        final Path alternativePluginsDirectory = Paths.get(SpongeConfigs.getCommon().get().general.pluginsDir.getParsed());
-        try {
-            Files.createDirectories(alternativePluginsDirectory);
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        this.pluginDirectories.add(alternativePluginsDirectory);
+        return this.pluginDirectories;
     }
 }

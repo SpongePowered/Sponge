@@ -24,19 +24,7 @@
  */
 package org.spongepowered.common.test;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.event.manager.SpongeEventManager;
-import org.spongepowered.common.util.DefinableClassLoader;
 
 public class TestEventManager extends SpongeEventManager {
-
-    private final @Nullable DefinableClassLoader loader;
-
-    public TestEventManager(final DefinableClassLoader loader) {
-        this.loader = loader;
-    }
-
-    public TestEventManager() {
-        this.loader = null;
-    }
 }

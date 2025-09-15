@@ -53,4 +53,8 @@ public interface MinecraftServerBridge {
     void bridge$reloadedServerRegistries(RegistryHolderLogic holder);
 
     RegistryHolderLogic bridge$registryHolder();
+
+    default void bridge$tickServer(int ticks) {
+        throw new UnsupportedOperationException("Cannot trigger manual server tick outside test environment");
+    }
 }

@@ -28,9 +28,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.common.applaunch.config.common.ModuleCategory;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.launch.config.common.ModuleCategory;
 
 import java.util.Optional;
 import java.util.UUID;

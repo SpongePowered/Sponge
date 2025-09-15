@@ -33,6 +33,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.TranslationRegistry;
 import org.apache.logging.log4j.LogManager;
@@ -41,7 +42,6 @@ import org.spongepowered.api.Game;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.ChatType;
-import org.spongepowered.api.adventure.ChatTypes;
 import org.spongepowered.api.adventure.ResolveOperations;
 import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.Command;
@@ -52,9 +52,7 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.filter.cause.Root;
-import org.spongepowered.api.event.filter.data.GetValue;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.lifecycle.RegisterRegistryValueEvent;
@@ -201,26 +199,31 @@ public class ChatTest implements LoadableModule {
             event.player().sendMessage(Component.translatable("chattest.response"));
         }
 
-        @Listener(order = Order.LAST)
-        private void onChat(final PlayerChatEvent event, final @Root ServerPlayer player, @GetValue("HEALTH") final double health) {
+        @Listener
+        private void onChatDecorate(final PlayerChatEvent.Decorate event, final @Root ServerPlayer player) {
             ChatTest.LOGGER.info(Component.translatable("chattest.response.chat",
-                                                                              event.message(),
-                                                                              player.require(Keys.DISPLAY_NAME)
-                                                                                      .decorate(TextDecoration.BOLD)
-                                                                                      .colorIfAbsent(NamedTextColor.AQUA))
-                                                               .color(NamedTextColor.DARK_AQUA));
-            ChatTest.LOGGER.info("Player has health of {}", health);
+                    event.message(), player.require(Keys.DISPLAY_NAME).decorate(TextDecoration.BOLD).colorIfAbsent(NamedTextColor.AQUA)).color(NamedTextColor.DARK_AQUA));
 
-            if (event instanceof PlayerChatEvent.Decorate) {
-                event.setMessage(event.message().color(NamedTextColor.GREEN));
-            } else if (event instanceof final PlayerChatEvent.Submit submitEvent) {
+            event.setMessage(event.message().color(NamedTextColor.GREEN));
+        }
 
-                submitEvent.setChatType(ChatTypes.INVERTED_CHAT_ORDER);
-                final Optional<Component> optPlayerName = event.player().flatMap(p -> p.get(Keys.DISPLAY_NAME));
-                final TextComponent name = Component.text("Prefix", NamedTextColor.RED)
-                        .append(Component.text(" | ", NamedTextColor.GOLD))
-                        .append(optPlayerName.orElse(Component.text("N/A")).color(NamedTextColor.DARK_GREEN));
-                submitEvent.setSender(name);
+        @Listener
+        private void onChatSubmit(final PlayerChatEvent.Submit event, final @Root ServerPlayer player) {
+            event.setChatType(ChatTypes.INVERTED_CHAT_ORDER);
+            final Optional<Component> optPlayerName = event.player().flatMap(p -> p.get(Keys.DISPLAY_NAME));
+            final TextComponent name = Component.text("Prefix", NamedTextColor.RED)
+                .append(Component.text(" | ", NamedTextColor.GOLD))
+                .append(optPlayerName.orElse(Component.text("N/A")).color(NamedTextColor.DARK_GREEN));
+            event.setSender(name);
+
+            final String plainMessage = PlainTextComponentSerializer.plainText().serialize(event.message());
+            if (plainMessage.contains("filter")) {
+                event.setFilter(p -> false); // hide for all
+                player.sendMessage(Component.text("Message filtered."));
+            } else if (plainMessage.contains("modify")) {
+                event.setMessage(event.message().append(Component.text(" [modified]")));
+            } else if (plainMessage.contains("replace")) {
+                event.setMessage(Component.text("[replaced]"));
             }
         }
     }

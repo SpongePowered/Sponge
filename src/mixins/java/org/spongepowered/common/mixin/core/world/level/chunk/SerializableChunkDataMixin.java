@@ -31,6 +31,7 @@ import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.storage.SerializableChunkData;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -38,13 +39,15 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
+import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.world.level.chunk.storage.SerializableChunkDataBridge;
-import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
+import org.spongepowered.common.bridge.world.level.storage.ServerLevelDataBridge;
 import org.spongepowered.common.data.DataUtil;
 
 @Mixin(SerializableChunkData.class)
 public abstract class SerializableChunkDataMixin implements SerializableChunkDataBridge {
 
+    private DataContainer impl$dataContainer;
     private CompoundTag impl$tag;
     private SerializationBehavior impl$serializationBehavior;
 
@@ -52,12 +55,12 @@ public abstract class SerializableChunkDataMixin implements SerializableChunkDat
     @Inject(method = "copyOf", at = @At(value = "RETURN"))
     private static void impl$copyOfSpongeData(final ServerLevel level, final ChunkAccess chunkAccess, final CallbackInfoReturnable<SerializableChunkData> cir) {
         final var bridge = (SerializableChunkDataBridge) (Object) cir.getReturnValue();
-        if (level.getLevelData() instanceof PrimaryLevelDataBridge levelBridge) {
+        if (level.getLevelData() instanceof final ServerLevelDataBridge levelBridge) {
             final var behavior = levelBridge.bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
             bridge.bridge$setSerializationBehavior(behavior);
         }
-        if (chunkAccess instanceof LevelChunk levelChunk) {
 
+        if (chunkAccess instanceof final LevelChunk levelChunk) {
             bridge.bridge$setTrackerData(levelChunk);
             bridge.bridge$setDataHolderData(levelChunk);
         }
@@ -99,7 +102,7 @@ public abstract class SerializableChunkDataMixin implements SerializableChunkDat
         }
     }
 
-    @Inject(method = "parse", at = @At(value = "RETURN"))
+    @Inject(method = "parse", at = @At(value = "TAIL"))
     private static void tracker$parseSpongeData(final LevelHeightAccessor $$0, final RegistryAccess $$1, final CompoundTag tag, final CallbackInfoReturnable<SerializableChunkData> cir) {
         final var bridge = (SerializableChunkDataBridge) (Object) cir.getReturnValue();
         bridge.bridge$parseTrackerData(tag);
@@ -108,7 +111,7 @@ public abstract class SerializableChunkDataMixin implements SerializableChunkDat
 
     @Override
     public void bridge$parseDataHolderData(final CompoundTag tag) {
-        this.impl$tag = tag;
+        this.impl$dataContainer = DataUtil.convertTagToContainer(tag);
     }
 
     @Redirect(method = "read",
@@ -126,9 +129,7 @@ public abstract class SerializableChunkDataMixin implements SerializableChunkDat
 
     @Override
     public void bridge$readDataHolderDataFrom(final LevelChunk levelChunk) {
-        ((DataCompoundHolder) levelChunk).data$setCompound(this.impl$tag);
-        DataUtil.syncTagToData(levelChunk);
-        ((DataCompoundHolder) levelChunk).data$setCompound(null);
+        DataUtil.deserializeSpongeData((SpongeDataHolderBridge) levelChunk, this.impl$dataContainer);
     }
 
 

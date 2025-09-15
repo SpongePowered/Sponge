@@ -30,13 +30,18 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.launch.Lifecycle;
 
 @Mixin(BuiltInRegistries.class)
 public abstract class BuiltInRegistriesMixin_Vanilla {
 
     @Inject(method = "bootStrap", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/registries/BuiltInRegistries;freeze()V"))
     private static void impl$beforeFreeze(final CallbackInfo ci) {
-        Launch.instance().lifecycle().establishGlobalRegistries();
+        final Lifecycle lifecycle = Launch.instance().lifecycle();
+        lifecycle.establishDataProviders();
+        lifecycle.callRegisterDataEvent();
+        lifecycle.establishEarlyGlobalRegistries();
+        lifecycle.establishGlobalRegistries();
     }
 
     @Inject(method = "freeze", at = @At("TAIL"))

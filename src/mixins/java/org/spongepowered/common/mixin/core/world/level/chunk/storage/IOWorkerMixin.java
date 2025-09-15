@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.world.level.chunk.storage;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.datafixers.util.Either;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntTag;
@@ -51,7 +54,6 @@ import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.util.thread.AbstractConsecutiveExecutorAccessor;
 import org.spongepowered.common.accessor.world.level.chunk.storage.IOWorker$PendingStoreAccessor;
 import org.spongepowered.common.bridge.world.level.chunk.storage.IOWorkerBridge;
 import org.spongepowered.common.event.ShouldFire;
@@ -84,6 +86,8 @@ public abstract class IOWorkerMixin implements IOWorkerBridge {
     // We only set these for chunk and entity related IO workers
     @MonotonicNonNull private SpongeIOWorkerType impl$type;
     @MonotonicNonNull private ResourceKey<Level> impl$dimension;
+
+    private volatile boolean impl$haltStore = false;
 
     @Override
     public void bridge$setDimension(final SpongeIOWorkerType type, final ResourceKey<Level> dimension) {
@@ -190,16 +194,48 @@ public abstract class IOWorkerMixin implements IOWorkerBridge {
     }
 
     @Override
-    public void bridge$forciblyClear() {
-        final StrictQueue<?> queue = ((AbstractConsecutiveExecutorAccessor<?>) this.consecutiveExecutor).accessor$queue();
-        while (!queue.isEmpty()) {
-            queue.pop();
+    public void bridge$haltStore(final boolean halt) {
+        this.impl$haltStore = halt;
+
+        if (!halt) {
+            // Restart storing the chunks, even the ones
+            // that were scheduled after the halt.
+            this.shadow$tellStorePending();
         }
-        this.consecutiveExecutor.schedule(new StrictQueue.RunnableWithPriority(0, () -> {
-            this.pendingWrites.clear();
-            while (!queue.isEmpty()) {
-                queue.pop();
-            }
-        }));
+    }
+
+    @Override
+    public CompletableFuture<Void> bridge$onIdle() {
+        // Schedules a task in the SHUTDOWN priority which will be executed after everything else.
+        return this.consecutiveExecutor.scheduleWithResult(2, (future) -> future.complete(null));
+    }
+
+    @WrapMethod(method = "tellStorePending")
+    private void impl$onTellStorePending(final Operation<Void> original) {
+        if (this.impl$haltStore) {
+            return;
+        }
+        original.call();
+    }
+
+    @WrapOperation(method = "synchronize", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/storage/IOWorker;submitTask(Ljava/util/function/Supplier;)Ljava/util/concurrent/CompletableFuture;"))
+    private CompletableFuture<CompletableFuture<Void>> impl$onSynchronizeGetPendingWrites(
+            final IOWorker instance, final Supplier<Either<CompletableFuture<Void>, Exception>> supplier, final Operation<CompletableFuture<CompletableFuture<Void>>> original) {
+        if (this.impl$haltStore) {
+            // Make sure we don't deadlock callers that try to ask to flush the storage out.
+            return CompletableFuture.completedFuture(CompletableFuture.completedFuture(null));
+        }
+        return original.call(instance, supplier);
+    }
+
+    @Inject(method = "close", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/storage/IOWorker;waitForShutdown()V"))
+    private void impl$onMailboxClose(final CallbackInfo ci) {
+        if (this.impl$haltStore) {
+            // Complete the never processed stores to make sure we don't left promises hanging.
+            this.consecutiveExecutor.schedule(new StrictQueue.RunnableWithPriority(2, () -> {
+                this.pendingWrites.values().forEach(p -> p.accessor$result().complete(null));
+                this.pendingWrites.clear();
+            }));
+        }
     }
 }

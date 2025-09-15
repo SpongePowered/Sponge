@@ -34,11 +34,14 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.ResultingTransactionBySideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.BlockAddedEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.CheckBlockPostPlacementIsSameEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.ChunkChangeCompleteEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.OldBlockOnReplaceEffect;
+import org.spongepowered.common.event.tracking.context.transaction.effect.PrepareBlockDrops;
 import org.spongepowered.common.event.tracking.context.transaction.effect.SetBlockToChunkSectionEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.UpdateChunkLightManagerEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.UpdateHeightMapEffect;
@@ -193,5 +196,10 @@ public final class ChangeBlock extends BlockEventBasedTransaction {
         return this.original.blockChange == BlockChange.BREAK
             && this.affectedPosition.equals(transaction.affectedPosition)
             && this.original.state() == transaction.getOriginalSnapshot().state();
+    }
+
+    @Override
+    public EffectTransactor absorbBlockDropsPreparationChildren(final PhaseContext<@NonNull ?> context) {
+        return context.getTransactor().pushEffect(new ResultingTransactionBySideEffect(PrepareBlockDrops.getInstance()), this);
     }
 }

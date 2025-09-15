@@ -28,9 +28,13 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import org.spongepowered.common.world.level.chunk.storage.SpongeIOWorkerType;
 
+import java.util.concurrent.CompletableFuture;
+
 public interface IOWorkerBridge {
 
     void bridge$setDimension(SpongeIOWorkerType type, ResourceKey<Level> dimension);
 
-    void bridge$forciblyClear();
+    void bridge$haltStore(boolean halt);
+
+    CompletableFuture<Void> bridge$onIdle();
 }

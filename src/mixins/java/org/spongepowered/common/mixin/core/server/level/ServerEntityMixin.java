@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server.level;
 
+import com.llamalad7.mixinextras.injector.ModifyReceiver;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerEntity;
@@ -39,6 +40,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
 import org.spongepowered.common.bridge.data.VanishableBridge;
@@ -53,8 +55,12 @@ import java.util.stream.Stream;
 @Mixin(ServerEntity.class)
 public abstract class ServerEntityMixin {
 
+    // @formatter:off
     @Shadow @Final private Entity entity;
     @Shadow @Final @Mutable private Consumer<Packet<?>> broadcast;
+
+    @Shadow protected abstract void shadow$broadcastAndSend(Packet<?> arg);
+    // @formatter:on
 
     /**
      * @author gabizou
@@ -131,4 +137,16 @@ public abstract class ServerEntityMixin {
         return packed;
     }
 
+    @ModifyReceiver(method = "sendChanges", at = @At(value = "INVOKE", target = "Ljava/util/function/Consumer;accept(Ljava/lang/Object;)V"),
+        slice = @Slice(
+            from = @At(value = "NEW", target = "(Lnet/minecraft/world/entity/Entity;)Lnet/minecraft/network/protocol/game/ClientboundSetPassengersPacket;"),
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerEntity;removedPassengers(Ljava/util/List;Ljava/util/List;)Ljava/util/stream/Stream;")))
+    private <T> Consumer<Packet<?>> impl$sendSetPassengersToSelf(final Consumer<Packet<?>> instance, final T packet) {
+        // When passengers are removed from a player entity, the target
+        // is the player itself, and we need to synchronize it to them.
+        // In vanilla, it is not possible to ride player entities
+        // so we never end up hitting this code path.
+        // noinspection Convert2MethodRef https://github.com/SpongePowered/Mixin/issues/406
+        return p -> this.shadow$broadcastAndSend(p);
+    }
 }

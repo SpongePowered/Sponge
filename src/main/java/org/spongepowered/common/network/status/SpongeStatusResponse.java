@@ -121,7 +121,7 @@ public final class SpongeStatusResponse implements ClientPingServerEvent.Respons
                     // Make sure profiles are sent with non-null UUIDs and names because everything else
                     // will make the response invalid on the client. Some plugins use empty UUIDs to create
                     // custom lines in the player list that do not refer to a specific player.
-                    .map(SpongeGameProfile::toMcProfileNonNull)
+                    .map(SpongeGameProfile::toMcProfile)
                     .toList());
         }
     }

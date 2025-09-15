@@ -63,7 +63,6 @@ public final class SpongeRegistries {
         holder.createFrozenRegistry(RegistryTypes.BODY_PART, SpongeRegistryLoader.bodyPart());
         holder.createFrozenRegistry(RegistryTypes.CLICK_TYPE, SpongeRegistryLoader.clickType());
         holder.createFrozenRegistry(RegistryTypes.CHUNK_REGENERATE_FLAG, SpongeRegistryLoader.chunkRegenerateFlag());
-        holder.createFrozenRegistry(RegistryTypes.DAMAGE_MODIFIER_TYPE, SpongeRegistryLoader.damageModifierType());
         holder.createFrozenRegistry(RegistryTypes.DISMOUNT_TYPE, SpongeRegistryLoader.dismountType());
         holder.createFrozenRegistry(RegistryTypes.GOAL_EXECUTOR_TYPE, SpongeRegistryLoader.goalExecutorType());
         holder.createFrozenRegistry(RegistryTypes.GOAL_TYPE, SpongeRegistryLoader.goalType());
@@ -95,6 +94,7 @@ public final class SpongeRegistries {
         holder.createRegistry(RegistryTypes.COMMAND_REGISTRAR_TYPE, CommandRegistryLoader.commandRegistrarType(), true);
         holder.createRegistry(RegistryTypes.PLACEHOLDER_PARSER, DynamicSpongeRegistryLoader.placeholderParser(), true);
         holder.createRegistry(RegistryTypes.TELEPORT_HELPER_FILTER, DynamicSpongeRegistryLoader.teleportHelperFilter(), true);
+        holder.createRegistry(RegistryTypes.DAMAGE_STEP_TYPE, SpongeRegistryLoader.damageStepType(), true);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

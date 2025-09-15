@@ -51,7 +51,7 @@ public class NodeTreeTest {
     }
 
     @Test
-    public void testWithValue() throws Exception {
+    public void testWithValue() {
         final Map<String, Boolean> testPermissions = new HashMap<>();
         testPermissions.put("generate.rainbow", true);
         testPermissions.put("generate.sunset", false);
@@ -66,7 +66,7 @@ public class NodeTreeTest {
     }
 
     @Test
-    public void testWithAll() throws Exception {
+    public void testWithAll() {
         final Map<String, Boolean> testPermissions = new HashMap<>();
         testPermissions.put("generate.rainbow", true);
         testPermissions.put("generate.sunset", false);
@@ -93,7 +93,7 @@ public class NodeTreeTest {
     }
 
     @Test
-    public void testCreateFromValues() throws Exception {
+    public void testCreateFromValues() {
         final Map<String, Boolean> testPermissions = new HashMap<>();
         testPermissions.put("generate.rainbow", true);
         testPermissions.put("generate.sunset", false);

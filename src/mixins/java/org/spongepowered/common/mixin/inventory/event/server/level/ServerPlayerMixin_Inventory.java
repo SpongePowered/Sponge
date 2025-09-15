@@ -28,7 +28,7 @@ import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Cancellable;
-import net.minecraft.network.protocol.game.ClientboundContainerClosePacket;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundHorseScreenOpenPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.server.level.ServerLevel;
@@ -45,7 +45,6 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.HorseInventoryMenu;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -103,6 +102,8 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
     ServerPlayerMixin_Inventory(final EntityType<?> param0, final Level param1) {
         super(param0, param1);
     }
+
+    @Nullable private Packet<?> inventory$closePacket;
 
     // -- Overrides from PlayerMixin_Inventory
 
@@ -253,8 +254,13 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
         throw new IllegalStateException("Unknown Lens for Player Inventory: " + lens.getClass().getName());
     }
 
+    @WrapOperation(method = "closeContainer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;send(Lnet/minecraft/network/protocol/Packet;)V"))
+    private void impl$onCloseContainerPacket(final ServerGamePacketListenerImpl connection, final Packet<?> packet, final Operation<Void> original) {
+        this.inventory$closePacket = packet;
+    }
+
     @WrapMethod(method = "doCloseContainer")
-    private void impl$onPreDoCloseContainer(final Operation<Void> original) {
+    private void impl$onDoCloseContainer(final Operation<Void> original) {
         final PhaseTracker tracker = PhaseTracker.getWorldInstance(this.shadow$serverLevel());
         final ItemStackSnapshot resultingCursor = ItemStackUtil.snapshotOf(this.containerMenu.getCarried());
         final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(resultingCursor, resultingCursor);
@@ -263,7 +269,10 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
             cursorTransaction);
         SpongeCommon.post(event);
         PacketPhaseUtil.handleCursorRestore((ServerPlayer) (Object) this, event.cursorTransaction(), event.isCancelled());
-        if (event.isCancelled() && !(this.containerMenu instanceof InventoryMenu)) {
+
+        if (event.isCancelled()) {
+            this.inventory$closePacket = null;
+
             final PhaseContext<@NonNull ?> context = tracker.getPhaseContext();
             if (context.isClientSide()) {
                 final net.minecraft.world.inventory.Slot slot = this.containerMenu.getSlot(0);
@@ -280,7 +289,12 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
             }
             return;
         }
-        this.connection.send(new ClientboundContainerClosePacket(this.containerMenu.containerId));
+
+        if (this.inventory$closePacket != null) {
+            this.connection.send(this.inventory$closePacket);
+            this.inventory$closePacket = null;
+        }
+
         try (final CauseStackManager.StackFrame frame = tracker.pushCauseFrame()) {
             frame.pushCause(event);
             original.call();

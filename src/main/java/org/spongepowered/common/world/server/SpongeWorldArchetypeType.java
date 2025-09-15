@@ -53,6 +53,13 @@ public final class SpongeWorldArchetypeType implements WorldArchetypeType.Builde
     }
 
     @Override
+    public WorldArchetypeType.Builder from(final WorldArchetypeType value) {
+        this.worldType = value.worldType();
+        this.chunkGenerator = value.chunkGenerator();
+        return this;
+    }
+
+    @Override
     public WorldArchetypeType.Builder reset() {
         this.worldType = null;
         this.chunkGenerator = null;

@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.item;
 
-import net.minecraft.core.HolderGetter;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import org.spongepowered.api.data.type.ItemTier;
@@ -33,6 +33,7 @@ import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
 
 @Mixin(net.minecraft.world.item.ToolMaterial.class)
@@ -44,7 +45,7 @@ public abstract class ToolMaterialMixin_API implements ItemTier {
 
     @Override
     public Ingredient repairIngredient() {
-        HolderGetter<Item> holder = BuiltInRegistries.acquireBootstrapRegistrationLookup(BuiltInRegistries.ITEM);
+        Registry<Item> holder = SpongeCommon.vanillaRegistry(Registries.ITEM);
         final var items = holder.getOrThrow(this.repairItems);
         return (Ingredient) (Object) SpongeIngredient.of(items);
     }

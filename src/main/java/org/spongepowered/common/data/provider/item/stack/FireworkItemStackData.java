@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.provider.item.stack;
 
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.FireworkUtil;
@@ -46,7 +45,6 @@ public final class FireworkItemStackData {
                         .get(h -> FireworkUtil.getFireworkEffects(h).orElse(null))
                         .setAnd(FireworkUtil::setFireworkEffects)
                         .deleteAnd(FireworkUtil::removeFireworkEffects)
-                        .supports(h -> h.getItem() == Items.FIREWORK_ROCKET || h.getItem() == Items.FIREWORK_STAR)
                     .create(Keys.FIREWORK_FLIGHT_MODIFIER)
                         .get(h -> {
                             final OptionalInt modifier = FireworkUtil.getFlightModifier(h);
@@ -61,8 +59,7 @@ public final class FireworkItemStackData {
                                 return false;
                             }
                             return FireworkUtil.setFlightModifier(h, ticks);
-                        })
-                        .supports(h -> h.getItem() == Items.FIREWORK_ROCKET);
+                        });
     }
     // @formatter:on
 }

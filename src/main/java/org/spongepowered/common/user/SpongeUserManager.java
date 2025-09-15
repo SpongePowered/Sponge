@@ -65,6 +65,7 @@ import java.util.stream.Stream;
 @DefaultQualifier(NonNull.class)
 public final class SpongeUserManager implements UserManager {
 
+    // Forge FakePlayer
     public static final UUID FAKEPLAYER_UUID = UUID.fromString("41C82C87-7AFB-4024-BA57-13D2C99CAE77");
 
     private final SpongeUserFileCache userFileCache;
@@ -90,13 +91,7 @@ public final class SpongeUserManager implements UserManager {
 
     @Override
     public CompletableFuture<Optional<User>> load(final UUID uniqueId) {
-        return this.fetchUser(uniqueId, false)
-                .thenApply(x -> {
-                    if (x != null) {
-                        return Optional.of(SpongeUserView.create(uniqueId));
-                    }
-                    return Optional.empty();
-                });
+        return this.fetchUser(uniqueId, false).thenApply(Optional::ofNullable);
     }
 
     @Override
@@ -105,10 +100,10 @@ public final class SpongeUserManager implements UserManager {
     }
 
     private CompletableFuture<@Nullable User> fetchUser(final UUID uniqueId, final boolean always) {
-        final UUID uuidToUse = this.ensureNonEmptyUUID(uniqueId);
         if (this.server.getPlayerList().getPlayer(uniqueId) != null) {
             return CompletableFuture.completedFuture(SpongeUserView.create(uniqueId));
         }
+        final UUID uuidToUse = this.ensureNonEmptyUUID(uniqueId);
         final @Nullable SpongeUserData currentUser = this.userCache.getIfPresent(uuidToUse);
         if (currentUser != null) {
             return CompletableFuture.completedFuture(SpongeUserView.create(uuidToUse));
@@ -117,8 +112,8 @@ public final class SpongeUserManager implements UserManager {
             return CompletableFuture.completedFuture(null);
         }
         return CompletableFuture.supplyAsync(() -> {
-            final com.mojang.authlib.@Nullable GameProfile profile = this.server.getProfileCache().get(uuidToUse)
-                .orElseGet(() -> new com.mojang.authlib.GameProfile(uuidToUse, null));
+            final com.mojang.authlib.GameProfile profile = this.server.getProfileCache().get(uuidToUse)
+                .orElseGet(() -> new com.mojang.authlib.GameProfile(uuidToUse, ""));
             try {
                 this.createUser(profile);
             } catch (final IOException e) {
@@ -146,13 +141,7 @@ public final class SpongeUserManager implements UserManager {
 
     @Override
     public CompletableFuture<Optional<User>> load(final GameProfile profile) {
-        return this.fetchUser(this.ensureNonEmptyUUID(profile.uniqueId()), false)
-                .thenApply(x -> {
-                    if (x != null) {
-                        return Optional.of(SpongeUserView.create(profile.uniqueId()));
-                    }
-                    return Optional.empty();
-                });
+        return this.load(profile.uniqueId());
     }
 
     @Override

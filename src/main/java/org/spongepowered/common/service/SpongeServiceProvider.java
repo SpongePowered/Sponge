@@ -34,11 +34,11 @@ import org.spongepowered.api.event.lifecycle.ProvideServiceEvent;
 import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.service.ServiceRegistration;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.applaunch.config.common.ServicesCategory;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.event.lifecycle.AbstractProvideServiceEventImpl;
 import org.spongepowered.common.event.manager.SpongeEventManager;
 import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.launch.config.common.ServicesCategory;
+import org.spongepowered.common.launch.config.core.SpongeConfigs;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.plugin.PluginContainer;
 

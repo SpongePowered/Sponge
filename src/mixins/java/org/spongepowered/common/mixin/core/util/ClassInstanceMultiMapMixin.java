@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.util;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.util.ClassInstanceMultiMap;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(ClassInstanceMultiMap.class)
 public abstract class ClassInstanceMultiMapMixin {
@@ -38,10 +39,10 @@ public abstract class ClassInstanceMultiMapMixin {
      *
      * @reason Adds support for finding values by searching for one of their interfaces.
      */
-    @Redirect(method = "find",
+    @WrapOperation(method = "find",
             at = @At(value = "INVOKE", target = "Ljava/lang/Class;isAssignableFrom(Ljava/lang/Class;)Z", remap = false))
-    private boolean impl$isAssignableFromOrInterface(final Class<?> baseClass, final Class<?> clazz) {
-        return clazz.isInterface() || baseClass.isAssignableFrom(clazz);
+    private boolean impl$isAssignableFromOrInterface(final Class<?> baseClass, final Class<?> clazz, final Operation<Boolean> original) {
+        return clazz.isInterface() || original.call(baseClass, clazz);
     }
 
 }

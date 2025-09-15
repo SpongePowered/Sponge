@@ -1,0 +1,10 @@
+{
+  "parent": "mixins.sponge.parent.json",
+  "package": "org.spongepowered.common.mixin.test",
+  "plugin": "org.spongepowered.common.mixin.plugin.TestPlugin",
+  "mixins": [
+    "server.MinecraftServerMixin_Test",
+    "server.dedicated.DedicatedServerMixin_Test",
+    "server.dedicated.DedicatedServerSettingsMixin_Test"
+  ]
+}

@@ -128,9 +128,11 @@ import java.util.function.Supplier;
 interface TransactionSink {
 
     @Deprecated
-    void logTransaction(StatefulTransaction transaction);
+    @Nullable EffectTransactor logTransaction(StatefulTransaction transaction);
 
     <T, C, A extends ProcessingSideEffect.Args, @Nullable R> EffectTransactor pushEffect(final ResultingTransactionBySideEffect<T, C, A, R> effect);
+
+    <T, C, A extends ProcessingSideEffect.Args, @Nullable R> EffectTransactor pushEffect(final ResultingTransactionBySideEffect<T, C, A, R> effect, final GameTransaction<?> parentTransaction);
 
     default ChangeBlock logBlockChange(final SpongeBlockSnapshot originalBlockSnapshot, final BlockState newState,
         final BlockChangeFlag flags
@@ -165,7 +167,7 @@ interface TransactionSink {
     }
 
     @SuppressWarnings("ConstantConditions")
-    default EffectTransactor logBlockDrops(
+    default @Nullable EffectTransactor logBlockDrops(
         final Level serverWorld, final BlockPos pos, final BlockState state,
         final @Nullable BlockEntity tileEntity
     ) {
@@ -182,8 +184,11 @@ interface TransactionSink {
         );
         original.blockChange = BlockChange.MODIFY;
         final PrepareBlockDropsTransaction transaction = new PrepareBlockDropsTransaction(pos, state, original);
-        this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect<>(PrepareBlockDrops.getInstance()));
+        final @Nullable EffectTransactor effect = this.logTransaction(transaction);
+        if (effect == null) {
+            return this.pushEffect(new ResultingTransactionBySideEffect<>(PrepareBlockDrops.getInstance()));
+        }
+        return effect;
     }
 
     @SuppressWarnings({"ConstantConditions", "unchecked"})

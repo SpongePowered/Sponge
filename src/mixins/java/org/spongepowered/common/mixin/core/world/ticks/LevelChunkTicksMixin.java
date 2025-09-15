@@ -62,13 +62,13 @@ public abstract class LevelChunkTicksMixin<T> implements LevelChunkTicksBridge<T
 
     @SuppressWarnings("unchecked")
     @Inject(method = "scheduleUnchecked", at = @At("HEAD"))
-    private void impl$onScheduleUnchecked(final ScheduledTick<T> $$0, final CallbackInfo ci) {
+    private void impl$onScheduleUnchecked(final ScheduledTick<T> tick, final CallbackInfo ci) {
         final ServerLevel level = ((LevelTicksBridge<?>) this.impl$tickList).bridge$level();
         final PhaseContext<?> context = PhaseTracker.getWorldInstance(level).getPhaseContext();
-        context.associateScheduledTickUpdate(level, $$0);
-        context.applyOwnerIfAvailable(owner -> ((CreatorTrackedBridge) (Object) $$0).tracker$setTrackedUUID(PlayerTracker.Type.CREATOR, owner));
-        context.applyNotifierIfAvailable(notified -> ((CreatorTrackedBridge) (Object) $$0).tracker$setTrackedUUID(PlayerTracker.Type.NOTIFIER, notified));
-        ((TickNextTickDataBridge<T>) (Object) $$0).bridge$createdByList(level, (LevelChunkTicks) (Object) this);
+        context.associateScheduledTickUpdate(level, tick);
+        context.applyOwnerIfAvailable(owner -> ((CreatorTrackedBridge) (Object) tick).tracker$setTrackedUUID(PlayerTracker.Type.CREATOR, owner));
+        context.applyNotifierIfAvailable(notified -> ((CreatorTrackedBridge) (Object) tick).tracker$setTrackedUUID(PlayerTracker.Type.NOTIFIER, notified));
+        ((TickNextTickDataBridge<T>) (Object) tick).bridge$createdByList(level, (LevelChunkTicks) (Object) this);
     }
 
     @ModifyExpressionValue(method = "pack(J)Ljava/util/List;",

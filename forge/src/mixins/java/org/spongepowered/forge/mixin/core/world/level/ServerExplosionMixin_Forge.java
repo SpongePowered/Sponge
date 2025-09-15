@@ -46,6 +46,7 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.VecHelper;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -84,7 +85,7 @@ public abstract class ServerExplosionMixin_Forge {
 
         if (ShouldFire.EXPLOSION_EVENT_DETONATE) {
             final var apiWorld = (ServerWorld) this.level;
-            final var apiEntities = entities.stream().map(org.spongepowered.api.entity.Entity.class::cast).toList();
+            final var apiEntities = entities.stream().map(org.spongepowered.api.entity.Entity.class::cast).collect(Collectors.toCollection(ArrayList::new));
             final var apiBlockPositions = this.impl$affectedBlocks.stream().map(bp -> ServerLocation.of(apiWorld, VecHelper.toVector3i(bp))).toList();
             final Cause cause = PhaseTracker.getInstance().currentCause();
             final ExplosionEvent.Detonate event = SpongeEventFactory.createExplosionEventDetonate(cause, apiBlockPositions, apiEntities, (Explosion) this, apiWorld);

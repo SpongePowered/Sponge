@@ -25,7 +25,6 @@
 package org.spongepowered.common.world.server;
 
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -41,6 +40,7 @@ import org.spongepowered.api.util.MinecraftDayTime;
 import org.spongepowered.api.util.Range;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.WorldTypeEffect;
+import org.spongepowered.common.bridge.tags.TagBridge;
 import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderLookup;
@@ -110,7 +110,7 @@ public final class SpongeWorldTypeBuilder implements WorldType.Builder {
                     hasSkylight, hasCeiling, scorching, natural, coordinateMultiplier,
                     bedsUsable, respawnAnchorsUsable,
                     floor, height, logicalHeight,
-                    (TagKey<Block>) (Object) infiniburn,
+                    ((TagBridge<Block>) infiniburn).bridge$asVanillaTag(),
                     (ResourceLocation) (Object) effect.key(),
                     ambientLighting,
                     new DimensionType.MonsterSettings(piglinSafe, hasRaids, monsterSpawnLightTest, monsterSpawnBlockLightLimit));

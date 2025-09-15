@@ -25,8 +25,6 @@
 package org.spongepowered.neoforge.applaunch.loading.moddiscovery;
 
 import cpw.mods.jarhandling.SecureJar;
-import cpw.mods.modlauncher.Environment;
-import cpw.mods.modlauncher.Launcher;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.moddiscovery.readers.JarModsDotTomlModFileReader;
 import net.neoforged.neoforgespi.locating.IDependencyLocator;
@@ -35,9 +33,10 @@ import net.neoforged.neoforgespi.locating.IModFile;
 import net.neoforged.neoforgespi.locating.ModFileDiscoveryAttributes;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.common.applaunch.AppLaunch;
+import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.libs.LibraryManager;
 import org.spongepowered.neoforge.applaunch.loading.moddiscovery.library.Log4JLogger;
-import org.spongepowered.neoforge.applaunch.transformation.SpongeNeoTransformationService;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -51,12 +50,11 @@ public class SpongeNeoDependencyLocator implements IDependencyLocator {
             return;
         }
 
-        final Environment env = Launcher.INSTANCE.environment();
-        LibraryManager libraryManager = new LibraryManager(
+        final PluginPlatform platform = AppLaunch.pluginPlatform();
+        final LibraryManager libraryManager = new LibraryManager(
             new Log4JLogger(LogManager.getLogger(LibraryManager.class)),
-            env.getProperty(SpongeNeoTransformationService.Keys.CHECK_LIBRARY_HASHES.get()).orElse(true),
-            env.getProperty(SpongeNeoTransformationService.Keys.LIBRARIES_DIRECTORY.get())
-                .orElseThrow(() -> new IllegalStateException("No libraries directory available")),
+            platform.config().checkLibraryHashes(),
+            Path.of(platform.tokens().replace(platform.config().librariesDirectory())),
             SpongeNeoModLocator.class.getResource("/sponge-libraries.json")
         );
 

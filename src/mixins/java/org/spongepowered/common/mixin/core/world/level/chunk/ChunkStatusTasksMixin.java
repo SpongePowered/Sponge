@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.level.chunk;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.server.level.GenerationChunkHolder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
@@ -44,7 +45,8 @@ import org.spongepowered.api.world.chunk.BlockChunk;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.event.ShouldFire;
@@ -80,11 +82,11 @@ public abstract class ChunkStatusTasksMixin {
      * See IOWorkerMixin#createOldDataForRegion and GenerationChunkHolderMixin#impl$guardForUnloadedChunkOnGenerate
      */
     @Overwrite
-    static CompletableFuture<ChunkAccess> generateBiomes(final WorldGenContext $$0, final ChunkStep $$1, final StaticCache2D<GenerationChunkHolder> $$2, final ChunkAccess $$3) {
-        ServerLevel $$4 = $$0.level();
-        WorldGenRegion $$5 = new WorldGenRegion($$4, $$2, $$1, $$3);
+    static CompletableFuture<ChunkAccess> generateBiomes(final WorldGenContext context, final ChunkStep step, final StaticCache2D<GenerationChunkHolder> cache, final ChunkAccess chunkAccess) {
+        ServerLevel level = context.level();
+        WorldGenRegion region = new WorldGenRegion(level, cache, step, chunkAccess);
         try { //Sponge: Add try
-            return $$0.generator().createBiomes($$4.getChunkSource().randomState(), Blender.of($$5), $$4.structureManager().forWorldGenRegion($$5), $$3);
+            return context.generator().createBiomes(level.getChunkSource().randomState(), Blender.of(region), level.structureManager().forWorldGenRegion(region), chunkAccess);
         } catch (final Exception e) { //Sponge start: Add catch
             if (e.getCause() != SpongeUnloadedChunkException.INSTANCE) {
                 throw e;
@@ -94,13 +96,8 @@ public abstract class ChunkStatusTasksMixin {
         } //Sponge end
     }
 
-
-
-    @Redirect(method = "lambda$full$2",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;setLoaded(Z)V")
-    )
-    private static void impl$onLoad(final LevelChunk levelChunk, final boolean loaded) {
-        levelChunk.setLoaded(true);
+    @Inject(method = "lambda$full$2", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;setLoaded(Z)V"))
+    private static void impl$onLoad(final CallbackInfoReturnable<ChunkAccess> cir, @Local() final LevelChunk levelChunk) {
         final Vector3i chunkPos = VecHelper.toVector3i(levelChunk.getPos());
         if (ShouldFire.CHUNK_EVENT_BLOCKS_LOAD) {
             final ChunkEvent.Blocks.Load loadEvent = SpongeEventFactory.createChunkEventBlocksLoad(PhaseTracker.getInstance().currentCause(),
@@ -122,7 +119,4 @@ public abstract class ChunkStatusTasksMixin {
             }
         }
     }
-
-
-
 }

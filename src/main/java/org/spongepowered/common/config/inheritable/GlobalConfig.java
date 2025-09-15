@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.config.inheritable;
 
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.launch.config.core.SpongeConfigs;
 
 public final class GlobalConfig extends BaseConfig {
 

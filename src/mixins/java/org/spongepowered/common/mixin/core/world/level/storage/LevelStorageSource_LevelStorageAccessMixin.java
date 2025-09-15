@@ -35,18 +35,32 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
+import org.spongepowered.common.bridge.world.level.storage.LevelStorageAccessBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.util.Constants;
 
+import java.nio.file.Path;
+
 @Mixin(LevelStorageSource.LevelStorageAccess.class)
-public abstract class LevelStorageSource_LevelStorageAccessMixin {
+public abstract class LevelStorageSource_LevelStorageAccessMixin implements LevelStorageAccessBridge {
 
     // @formatter:off
-    @Shadow @Final private LevelStorageSource.LevelDirectory levelDirectory;
+    @Shadow @Final LevelStorageSource.LevelDirectory levelDirectory;
     // @formatter:on
+
+    private boolean impl$dedicated = false;
+
+    @Inject(method = "getDimensionPath", at = @At("HEAD"), cancellable = true)
+    public void impl$dedicatedDimensionPath(final CallbackInfoReturnable<Path> cir) {
+        if (this.impl$dedicated) {
+            cir.setReturnValue(this.levelDirectory.path());
+        }
+    }
 
     @ModifyArg(method = "checkLock",
         at = @At(value = "INVOKE", target = "Ljava/lang/IllegalStateException;<init>(Ljava/lang/String;)V", ordinal = 0, remap = false))
@@ -68,5 +82,10 @@ public abstract class LevelStorageSource_LevelStorageAccessMixin {
             root.merge(((DataCompoundHolder) levelData).data$getCompound());
         }
         original.call(instance, root);
+    }
+
+    @Override
+    public void bridge$setDedicated(final boolean dedicated) {
+        this.impl$dedicated = dedicated;
     }
 }

@@ -73,7 +73,7 @@ public abstract class WorldBorderMixin implements WorldBorderBridge {
         if (this.impl$fireEvent) {
             final Supplier<org.spongepowered.api.world.border.WorldBorder> proposed =
                     () -> new SpongeWorldBorderBuilder().from(this)
-                            .targetDiameter(size)
+                            .initialDiameter(size)
                             .build();
             if (this.impl$suppressOriginalAction(proposed)) {
                 ci.cancel();
@@ -153,14 +153,15 @@ public abstract class WorldBorderMixin implements WorldBorderBridge {
         return result != null && (result.isCancelled() || result.originalNewBorder().orElse(null) != result.newBorder().orElse(null));
     }
 
-    private ChangeWorldBorderEvent.@Nullable World impl$fireWorldBorderEvent(final Supplier<org.spongepowered.api.world.border.WorldBorder> proposed) {
+    private ChangeWorldBorderEvent.@Nullable World impl$fireWorldBorderEvent(final Supplier<org.spongepowered.api.world.border.WorldBorder> supplier) {
         if (this.impl$associatedWorld != null && SpongeCommon.game().isServerAvailable()) {
             final Optional<ServerWorld> world = Sponge.server().worldManager().world(this.impl$associatedWorld);
             if (world.isPresent()) {
+                final org.spongepowered.api.world.border.WorldBorder originalNewBorder = supplier.get();
                 final ChangeWorldBorderEvent.World event = SpongeEventFactory.createChangeWorldBorderEventWorld(
                         PhaseTracker.getInstance().currentCause(),
-                        Optional.of(proposed.get()),
-                        Optional.of(proposed.get()),
+                        Optional.of(originalNewBorder),
+                        Optional.of(originalNewBorder),
                         Optional.of(this.bridge$asImmutable()),
                         world.get()
                 );
@@ -168,7 +169,7 @@ public abstract class WorldBorderMixin implements WorldBorderBridge {
                 if (!isCancelled) {
                     final org.spongepowered.api.world.border.WorldBorder toSet =
                             event.newBorder().orElse((org.spongepowered.api.world.border.WorldBorder) WorldBorder.DEFAULT_SETTINGS);
-                    if (proposed.get() != toSet) {
+                    if (originalNewBorder != toSet) {
                         // set the values, suppress this call.
                         this.impl$fireEvent = false;
                         this.bridge$applyFrom(toSet);
@@ -188,6 +189,11 @@ public abstract class WorldBorderMixin implements WorldBorderBridge {
 
     @Override
     public org.spongepowered.api.world.border.@Nullable WorldBorder bridge$applyFrom(final org.spongepowered.api.world.border.WorldBorder worldBorder) {
+        if (!this.impl$fireEvent) {
+            ((WorldBorder) (Object) this).applySettings((WorldBorder.Settings) worldBorder);
+            return worldBorder;
+        }
+
         final ChangeWorldBorderEvent.World event = this.impl$fireWorldBorderEvent(() -> worldBorder);
         final org.spongepowered.api.world.border.WorldBorder toSet;
         if (event != null) {

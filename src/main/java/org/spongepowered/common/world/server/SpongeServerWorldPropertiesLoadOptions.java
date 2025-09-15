@@ -59,7 +59,19 @@ public record SpongeServerWorldPropertiesLoadOptions(
         }
     }
 
-    public record LoadOperationImpl(@Nullable Consumer<ServerWorldProperties> callback) implements LoadOperation {
+    public record LoadOperationImpl(@Nullable WorldArchetype overrideWorldArchetypeValue,
+                                    @Nullable WorldArchetype fallbackWorldArchetypeValue,
+                                    @Nullable Consumer<ServerWorldProperties> callback) implements LoadOperation {
+
+        @Override
+        public Optional<WorldArchetype> overrideWorldArchetype() {
+            return Optional.ofNullable(this.overrideWorldArchetypeValue);
+        }
+
+        @Override
+        public Optional<WorldArchetype> fallbackWorldArchetype() {
+            return Optional.ofNullable(this.fallbackWorldArchetypeValue);
+        }
 
         @Override
         public Optional<Consumer<ServerWorldProperties>> loadCallback() {
@@ -95,7 +107,7 @@ public record SpongeServerWorldPropertiesLoadOptions(
 
         @Override
         public LoadStep load() {
-            this.loadOperation = new LoadOperationImpl(null);
+            this.loadOperation = new LoadOperationImpl(null, null, null);
             return this;
         }
 
@@ -112,8 +124,21 @@ public record SpongeServerWorldPropertiesLoadOptions(
         }
 
         @Override
+        public LoadStep overrideWorldArchetype(WorldArchetype worldArchetype) {
+            this.loadOperation = new LoadOperationImpl(worldArchetype, null, this.loadOperation.loadCallback().orElse(null));
+            return this;
+        }
+
+        @Override
+        public LoadStep fallbackWorldArchetype(WorldArchetype worldArchetype) {
+            this.loadOperation = new LoadOperationImpl(null, worldArchetype, this.loadOperation.loadCallback().orElse(null));
+            return this;
+        }
+
+        @Override
         public LoadStep loadCallback(final Consumer<ServerWorldProperties> loadCallback) {
-            this.loadOperation = new LoadOperationImpl(loadCallback);
+            this.loadOperation = new LoadOperationImpl(this.loadOperation.overrideWorldArchetype().orElse(null),
+                this.loadOperation.fallbackWorldArchetype().orElse(null), loadCallback);
             return this;
         }
 

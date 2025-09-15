@@ -26,13 +26,13 @@ package org.spongepowered.common.event.tracking.context.transaction;
 
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventContext;
+import org.spongepowered.api.event.impl.AbstractEvent;
 
 import java.util.Collections;
 
-class StubEvent implements Event, Cancellable {
-    boolean cancelled = false;
+public class StubEvent extends AbstractEvent implements Cancellable {
+    private boolean cancelled = false;
 
     @Override
     public boolean isCancelled() {

@@ -65,6 +65,7 @@ import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -429,32 +430,40 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
     @Redirect(method = "handlePlayerAction", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayerGameMode;handleBlockBreakAction(Lnet/minecraft/core/BlockPos;Lnet/minecraft/network/protocol/game/ServerboundPlayerActionPacket$Action;Lnet/minecraft/core/Direction;II)V"))
     public void impl$callInteractBlockPrimaryEvent(final ServerPlayerGameMode playerInteractionManager, final BlockPos pos,
             final ServerboundPlayerActionPacket.Action act, final Direction dir, final int maxBuildHeight, final int sequence) {
-        final ServerLevel level = ((ServerPlayerGameModeAccessor) playerInteractionManager).accessor$level();
-        final BlockSnapshot snapshot = ((org.spongepowered.api.world.server.ServerWorld) level)
-            .createSnapshot(VecHelper.toVector3i(pos));
-        final InteractBlockEvent.Primary event = SpongeCommonEventFactory.callInteractBlockEventPrimary(act, this.player, this.player.getItemInHand(
+        final InteractBlockEvent.@MonotonicNonNull Primary event;
+        // Block destroying can be delayed for lag compensation.
+        if (act != ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK) {
+            final ServerLevel level = ((ServerPlayerGameModeAccessor) playerInteractionManager).accessor$level();
+            final BlockSnapshot snapshot = ((org.spongepowered.api.world.server.ServerWorld) level)
+                .createSnapshot(VecHelper.toVector3i(pos));
+            event = SpongeCommonEventFactory.callInteractBlockEventPrimary(act, this.player, this.player.getItemInHand(
                 InteractionHand.MAIN_HAND), snapshot, InteractionHand.MAIN_HAND, dir);
-        if (event instanceof Cancellable && ((Cancellable) event).isCancelled()) {
-            this.player.connection.send(new ClientboundBlockUpdatePacket(pos, level.getBlockState(pos)));
-            this.player.connection.ackBlockChangesUpTo(sequence);
-            this.impl$ignorePackets++;
-        } else {
-            if (act == ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK) {
-                if (!Objects.equals(((ServerPlayerGameModeAccessor) playerInteractionManager).accessor$destroyPos(), pos)) {
-                    return; // prevents Mismatch in destroy block pos warning
-                }
+            if (event instanceof Cancellable && ((Cancellable) event).isCancelled()) {
+                this.player.connection.send(new ClientboundBlockUpdatePacket(pos, level.getBlockState(pos)));
+                this.player.connection.ackBlockChangesUpTo(sequence);
+                this.impl$ignorePackets++;
+                return;
             }
-            final PhaseTracker tracker = PhaseTracker.getWorldInstance(this.player.serverLevel());
-            try (final CauseStackManager.StackFrame frame = tracker.pushCauseFrame();
-                 final PhaseContext<?> context = PlayerPhase.State.PLAYER_INTERACT.createPhaseContext(tracker)
-                    .creator(this.player.getUUID())
-                    .notifier(this.player.getUUID())) {
-                context.buildAndSwitch();
+        } else {
+            event = null;
+        }
+        if (act == ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK) {
+            if (!Objects.equals(((ServerPlayerGameModeAccessor) playerInteractionManager).accessor$destroyPos(), pos)) {
+                return; // prevents Mismatch in destroy block pos warning
+            }
+        }
+        final PhaseTracker tracker = PhaseTracker.getWorldInstance(this.player.serverLevel());
+        try (final CauseStackManager.StackFrame frame = tracker.pushCauseFrame();
+             final PhaseContext<?> context = PlayerPhase.State.PLAYER_INTERACT.createPhaseContext(tracker)
+                 .creator(this.player.getUUID())
+                 .notifier(this.player.getUUID())) {
+            context.buildAndSwitch();
+            if (event != null) {
                 frame.pushCause(event);
-                playerInteractionManager.handleBlockBreakAction(pos, act, dir, maxBuildHeight, sequence);
-                if (act == ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK) {
-                    this.impl$ignorePackets++;
-                }
+            }
+            playerInteractionManager.handleBlockBreakAction(pos, act, dir, maxBuildHeight, sequence);
+            if (act == ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK) {
+                this.impl$ignorePackets++;
             }
         }
     }

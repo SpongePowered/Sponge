@@ -35,7 +35,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Consumer;
 
-public record SpongeChannelPayload(@Nullable Type<? extends CustomPacketPayload> type, @Nullable ResourceLocation id, @Nullable Consumer<FriendlyByteBuf> consumer) implements CustomPacketPayload, CustomQueryPayload, CustomQueryAnswerPayload {
+public record SpongeChannelPayload(@Nullable Type<? extends CustomPacketPayload> type, @Nullable ResourceLocation id, Consumer<FriendlyByteBuf> consumer) implements CustomPacketPayload, CustomQueryPayload, CustomQueryAnswerPayload {
 
     public static StreamCodec<FriendlyByteBuf, SpongeChannelPayload> streamCodec(final Type<? extends CustomPacketPayload> type, final int maxPayloadSize) {
         return CustomPacketPayload.codec(
@@ -63,15 +63,15 @@ public record SpongeChannelPayload(@Nullable Type<? extends CustomPacketPayload>
         return this.id;
     }
 
-    public static SpongeChannelPayload fromType(final Type<? extends CustomPacketPayload> type, Consumer<FriendlyByteBuf> consumer) {
+    public static SpongeChannelPayload fromType(final Type<? extends CustomPacketPayload> type, final Consumer<FriendlyByteBuf> consumer) {
         return new SpongeChannelPayload(type, type.id(), consumer);
     }
 
-    public static SpongeChannelPayload fromId(final ResourceLocation id, Consumer<FriendlyByteBuf> consumer) {
+    public static SpongeChannelPayload fromId(final ResourceLocation id, final Consumer<FriendlyByteBuf> consumer) {
         return new SpongeChannelPayload(null, id, consumer);
     }
 
-    public static SpongeChannelPayload bufferOnly(@Nullable Consumer<FriendlyByteBuf> consumer) {
+    public static SpongeChannelPayload bufferOnly(final Consumer<FriendlyByteBuf> consumer) {
         return new SpongeChannelPayload(null, null, consumer);
     }
 }

@@ -29,6 +29,8 @@ import com.google.common.collect.ImmutableMultimap;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.units.qual.A;
+import org.checkerframework.checker.units.qual.C;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
@@ -99,6 +101,11 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
         final GameTransaction<@NonNull ?> parentTransaction = Optional.ofNullable(this.effect)
             .map(child -> child.tail)
             .orElse(Objects.requireNonNull(this.tail, "Somehow pushing a new effect without an owning Transaction"));
+        return this.pushEffect(effect, parentTransaction);
+    }
+
+    @Override
+    public <T, C, A extends ProcessingSideEffect.Args, @Nullable R> EffectTransactor pushEffect(final ResultingTransactionBySideEffect<T, C, A, R> effect, final GameTransaction<?> parentTransaction) {
         final EffectTransactor effectTransactor = new EffectTransactor(effect, parentTransaction, this.effect, this);
         this.effect = effect;
         parentTransaction.addLast(effect);
@@ -112,13 +119,13 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     @Override
-    public void logTransaction(final StatefulTransaction transaction) {
+    public @Nullable EffectTransactor logTransaction(final StatefulTransaction transaction) {
         // todo - abstract the rest of this out into StatefulTransaction
         if (this.head == null) {
             final GameTransaction<@NonNull ?> gameTransaction = transaction.recordState();
             this.head = gameTransaction;
             this.tail = gameTransaction;
-            return;
+            return null;
         }
         final Optional<TransactionFlow.AbsorbingFlowStep> absorbingFlowStep = transaction.parentAbsorber();
         if (absorbingFlowStep.isPresent()) {
@@ -127,7 +134,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
             while (iterator.hasNext()) {
                 final GameTransaction<@NonNull ?> next = iterator.next();
                 if (absorber.absorb(this.context, next)) {
-                    return;
+                    return absorber.absorbChildren(this.context, next);
                 }
             }
         }
@@ -146,6 +153,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
             }
             this.tail = gameTransaction;
         }
+        return null;
     }
 
     public void completeBlockDrops(final @Nullable EffectTransactor context) {

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.plugin;
 
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.launch.config.core.SpongeConfigs;
 
 public class MovementCheckPlugin extends AbstractMixinConfigPlugin {
 

@@ -28,7 +28,9 @@ import com.google.inject.Injector;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.datafixers.DataFixer;
 import net.kyori.adventure.resource.ResourcePackRequest;
+import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -37,12 +39,18 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.obfuscate.DontObfuscate;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.ServerFunctionManager;
+import net.minecraft.server.Services;
 import net.minecraft.server.WorldStem;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.ChunkProgressListener;
+import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.SimpleReloadInstance;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.util.Unit;
 import net.minecraft.util.thread.BlockableEventLoop;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.Level;
@@ -80,17 +88,17 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
+import org.spongepowered.common.accessor.server.ServerFunctionManagerAccessor;
 import org.spongepowered.common.adventure.NativeComponentRenderer;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.commands.CommandSourceBridge;
 import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.network.chat.SpongeChatDecorator;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.server.players.GameProfileCacheBridge;
+import org.spongepowered.common.bridge.server.players.PlayerListBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.bridge.world.level.storage.ServerLevelDataBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
@@ -100,18 +108,22 @@ import org.spongepowered.common.event.lifecycle.FreezeRegistryEventImpl;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.launch.config.common.AutoSaveOptions;
+import org.spongepowered.common.launch.config.core.SpongeConfigs;
 import org.spongepowered.common.registry.RegistryHolderLogic;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
+import org.spongepowered.common.util.AutoSaveMapQueue;
+import org.spongepowered.common.world.server.SpongeWorldManager;
 
 import java.io.IOException;
+import java.net.Proxy;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin implements SpongeServer, MinecraftServerBridge, CommandSourceProviderBridge, SubjectProxy,
@@ -121,8 +133,8 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Shadow @Final private Map<ResourceKey<Level>, ServerLevel> levels;
     @Shadow @Final private static Logger LOGGER;
     @Shadow private int tickCount;
-    @Shadow @Final protected LevelStorageSource.LevelStorageAccess storageSource;
     @Shadow @Final private Thread serverThread;
+    @Shadow @Final private ServerFunctionManager functionManager;
 
     @Shadow public abstract CommandSourceStack shadow$createCommandSourceStack();
     @Shadow public abstract Iterable<ServerLevel> shadow$getAllLevels();
@@ -136,6 +148,8 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Shadow public abstract WorldData shadow$getWorldData();
     @Shadow public abstract boolean shadow$haveTime();
     @Shadow private volatile boolean isSaving;
+    @Shadow public abstract ResourceManager shadow$getResourceManager();
+    @Shadow @Nullable public abstract ServerLevel shadow$getLevel(ResourceKey<Level> $$0);
     // @formatter:on
 
     private final ChatDecorator impl$spongeDecorator = new SpongeChatDecorator();
@@ -164,16 +178,38 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     };
     private RegistryHolderLogic impl$registryHolder;
 
+    private final AutoSaveMapQueue<org.spongepowered.api.ResourceKey> impl$worldConfigSaveQueue = new AutoSaveMapQueue<>((k, log) -> {
+        final @Nullable ServerLevel level = this.shadow$getLevel(SpongeWorldManager.createRegistryKey(k));
+        if (level != null) {
+            this.impl$saveWorldConfig(level, SpongeGameConfigs.getForWorld(level), log);
+            return true;
+        }
+        return false;
+    });
+
+    private final AutoSaveMapQueue<org.spongepowered.api.ResourceKey> impl$worldSaveQueue = new AutoSaveMapQueue<>((k, log) -> {
+        final @Nullable ServerLevel level = this.shadow$getLevel(SpongeWorldManager.createRegistryKey(k));
+        if (level != null) {
+            if (log) {
+                MinecraftServerMixin.LOGGER.info("Saving chunks for level '{}'/{}", level, level.dimension().location());
+            }
+            level.save(null, false, level.noSave);
+            return true;
+        }
+        return false;
+    });
+
     @Override
     public Subject subject() {
         return SpongeCommon.game().systemSubject();
     }
 
-    @Inject(method = "spin", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-    private static void impl$setThreadOnServerPhaseTracker(final Function<Thread, MinecraftServer> p_240784_0_,
-                                                           final CallbackInfoReturnable<MinecraftServerMixin> cir,
-                                                           final AtomicReference<MinecraftServer> atomicReference,
-                                                           final Thread thread) {
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void impl$setThreadOnServerPhaseTracker(
+        Thread thread, LevelStorageSource.LevelStorageAccess storageAccess, PackRepository packRepo,
+        WorldStem stem, Proxy proxy, DataFixer fixer,
+        Services services, ChunkProgressListenerFactory progress, CallbackInfo ci
+    ) {
         try {
             PhaseTracker.getServerInstanceExplicitly().setThread(thread);
         } catch (final IllegalAccessException e) {
@@ -301,10 +337,20 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
             return Integer.MIN_VALUE;
         }
 
-        final int autoPlayerSaveInterval = SpongeConfigs.getCommon().get().world.playerAutoSaveInterval;
-        if (autoPlayerSaveInterval > 0 && (this.tickCount % autoPlayerSaveInterval == 0)) {
+        final AutoSaveOptions autoPlayerSave = SpongeConfigs.getCommon().get().world.playerAutoSave;
+        if (autoPlayerSave.interval > 0 && (this.tickCount % autoPlayerSave.interval == 0)) {
             this.isSaving = true;
-            this.shadow$getPlayerList().saveAll();
+            if (autoPlayerSave.batchInterval <= 0) {
+                if (autoPlayerSave.log) {
+                    MinecraftServerMixin.LOGGER.info("Starting to save player data");
+                }
+                this.shadow$getPlayerList().saveAll();
+                if (autoPlayerSave.log) {
+                    MinecraftServerMixin.LOGGER.info("All player data has been saved");
+                }
+            } else {
+                ((PlayerListBridge) this.shadow$getPlayerList()).bridge$saveAll(autoPlayerSave.batchInterval, Math.max(1, autoPlayerSave.batchAmount), autoPlayerSave.log);
+            }
             this.isSaving = false;
         }
 
@@ -328,12 +374,17 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
             // Sponge start - use our own config
             final SerializationBehavior serializationBehavior = ((ServerLevelDataBridge) level.getLevelData()).bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
             final InheritableConfigHandle<WorldConfig> configAdapter = SpongeGameConfigs.getForWorld(level);
-            final boolean log = configAdapter.get().world.logAutoSave;
+            final AutoSaveOptions configAutoSave = configAdapter.get().world.configAutoSave;
 
-            // If the server isn't running or we hit Vanilla's save interval or this was triggered
+            // If the server isn't running or we hit save interval or this was triggered
             // by a command, save our configs
-            if (!this.shadow$isRunning() || this.tickCount % 6000 == 0 || isForced) {
-                configAdapter.save();
+            if (!this.shadow$isRunning() || isForced || (configAutoSave.interval > 0 && this.tickCount % configAutoSave.interval == 0)) {
+                if (flush || configAutoSave.batchInterval == 0) {
+                    this.impl$worldConfigSaveQueue.remove(((ServerWorld) level).key());
+                    this.impl$saveWorldConfig(level, configAdapter, configAutoSave.log);
+                } else {
+                    this.impl$worldConfigSaveQueue.add(configAutoSave, ((ServerWorld) level).key());
+                }
             }
 
             final boolean canSaveAtAll = serializationBehavior != SerializationBehavior.NONE;
@@ -343,23 +394,32 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
                 continue;
             }
 
+            final AutoSaveOptions autoSave = configAdapter.get().world.autoSave;
+
             // Only run auto-save skipping if the server is still running and the save is not forced
             if (this.bridge$performAutosaveChecks() && !isForced) {
-                final int autoSaveInterval = configAdapter.get().world.autoSaveInterval;
 
                 // Do not process properties or chunks if the world is not set to do so unless the server is shutting down
-                if (autoSaveInterval <= 0 || serializationBehavior != SerializationBehavior.AUTOMATIC) {
+                if (autoSave.interval <= 0 || serializationBehavior != SerializationBehavior.AUTOMATIC) {
                     continue;
                 }
 
                 // Now check the interval vs the tick counter and skip it
-                if (this.tickCount % autoSaveInterval != 0) {
+                if (this.tickCount % autoSave.interval != 0) {
+                    continue;
+                }
+
+                if (!flush && autoSave.batchInterval > 0) {
+                    this.impl$worldSaveQueue.add(autoSave, ((ServerWorld) level).key());
+                    result = true;
                     continue;
                 }
             }
+
+            this.impl$worldSaveQueue.remove(((ServerWorld) level).key());
             // Sponge end
 
-            if (log) {
+            if (autoSave.log) {
                 LOGGER.info("Saving chunks for level '{}'/{}", level, level.dimension().location());
             }
 
@@ -390,7 +450,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
             for (final ServerLevel level : this.shadow$getAllLevels()) {
                 // Sponge start - use our own config
                 final InheritableConfigHandle<WorldConfig> configAdapter = SpongeGameConfigs.getForWorld(level);
-                final boolean log = configAdapter.get().world.logAutoSave;
+                final boolean log = configAdapter.get().world.autoSave.log;
                 // Sponge end
 
                 if (log) {
@@ -401,7 +461,20 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
             LOGGER.info("ThreadedAnvilChunkStorage: All dimensions are saved");
         }
 
+        this.impl$worldConfigSaveQueue.drain();
+        this.impl$worldSaveQueue.drain();
+
         return result;
+    }
+
+    private void impl$saveWorldConfig(final ServerLevel level, final InheritableConfigHandle<WorldConfig> configAdapter, final boolean log) {
+        if (log) {
+            MinecraftServerMixin.LOGGER.info("Saving world configuration file for level {}", level);
+        }
+        configAdapter.save();
+        if (log) {
+            MinecraftServerMixin.LOGGER.info("Saved world configuration file for level {}", level);
+        }
     }
 
     /**
@@ -425,6 +498,10 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         if (this.impl$serviceProvider == null) {
             this.impl$serviceProvider = new SpongeServerScopedServiceProvider(this, game, injector);
             this.impl$serviceProvider.init();
+
+            Util.blockUntilDone(e ->
+                SimpleReloadInstance.create(this.shadow$getResourceManager(), List.of(((ServerFunctionManagerAccessor) this.functionManager).accessor$library()),
+                    Util.backgroundExecutor(), e, CompletableFuture.completedFuture(Unit.INSTANCE), MinecraftServerMixin.LOGGER.isDebugEnabled()).done());
         }
     }
 

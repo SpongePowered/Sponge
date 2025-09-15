@@ -133,24 +133,31 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
 
     @Override
     public void bridge$removeAPIObjective(final Objective objective) {
+        for (final org.spongepowered.api.scoreboard.Score score : objective.scores().values()) {
+            objective.removeScore(score);
+        }
+
         if (objective instanceof SpongeObjective so) {
+            so.unregister(this);
+
             this.impl$apiCall = true;
             final net.minecraft.world.scores.Objective mcObjective = this.getObjective(objective.name());
             this.removeObjective(mcObjective);
             this.impl$apiCall = false;
-            so.unregister(this);
-        }
-
-        for (final org.spongepowered.api.scoreboard.Score score : objective.scores().values()) {
-            objective.removeScore(score);
         }
     }
 
     @Override
     public void bridge$removeMCObjective(final net.minecraft.world.scores.Objective mcObjective) {
-        if (!this.impl$apiCall) {
-            this.bridge$removeAPIObjective(((ObjectiveBridge) mcObjective).bridge$getSpongeObjective());
+        if (this.impl$apiCall) {
+            return;
         }
+
+        final SpongeObjective objective = ((ObjectiveBridge) mcObjective).bridge$getSpongeObjective();
+        for (final org.spongepowered.api.scoreboard.Score score : objective.scores().values()) {
+            objective.removeScore(score);
+        }
+        objective.unregister(this);
     }
 
     @Override

@@ -106,6 +106,10 @@ public abstract class ExecuteCommandMixin {
                 ));
                 return result;
             }
+            catch (CommandSyntaxException e)
+            {
+                throw e;
+            }
             catch (Exception e) {
                 var owner = Optional.ofNullable(mapping)
                         .flatMap(CommandMapping::plugin)

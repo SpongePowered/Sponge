@@ -29,12 +29,16 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
 import net.neoforged.neoforge.registries.GameData;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.entity.SpongeEntityTypes;
 import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.launch.Lifecycle;
+import org.spongepowered.common.network.channel.SpongeChannelManager;
+import org.spongepowered.common.network.packet.SpongePacketHandler;
 
 @Mixin(GameData.class)
 public class GameDataMixin_Neo {
@@ -48,6 +52,20 @@ public class GameDataMixin_Neo {
 
     @Inject(method = "postRegisterEvents", at = @At("HEAD"))
     private static void neo$onRegisterEvents(final CallbackInfo ci) {
+        final Lifecycle lifecycle = Launch.instance().lifecycle();
+        lifecycle.callConstructEvent();
+        lifecycle.callRegisterFactoryEvent();
+        lifecycle.callRegisterBuilderEvent();
+        lifecycle.callRegisterChannelEvent();
+        lifecycle.establishGameServices();
+        lifecycle.establishDataKeyListeners();
+
+        SpongePacketHandler.init((SpongeChannelManager) Sponge.channelManager());
+
+        lifecycle.establishDataProviders();
+        lifecycle.callRegisterDataEvent();
+        lifecycle.establishEarlyGlobalRegistries();
+
         Launch.instance().lifecycle().establishGlobalRegistries();
     }
 

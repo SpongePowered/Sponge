@@ -27,7 +27,11 @@ package org.spongepowered.vanilla.applaunch.plugin;
 import cpw.mods.modlauncher.Launcher;
 import cpw.mods.modlauncher.api.IModuleLayerManager;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.common.applaunch.config.LaunchConfig;
+import org.spongepowered.common.applaunch.config.TokenReplacement;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
+import org.spongepowered.common.applaunch.plugin.PluginPlatformConstants;
+import org.spongepowered.plugin.Environment;
 import org.spongepowered.plugin.PluginCandidate;
 import org.spongepowered.plugin.PluginLanguageService;
 import org.spongepowered.plugin.PluginResource;
@@ -38,6 +42,8 @@ import org.spongepowered.plugin.builtin.StandardEnvironment;
 import org.spongepowered.plugin.builtin.jvm.JVMKeys;
 import org.spongepowered.vanilla.applaunch.plugin.resource.SecureJarPluginResource;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
@@ -51,68 +57,105 @@ import java.util.Set;
 
 public final class VanillaPluginPlatform implements PluginPlatform {
 
-    private final StandardEnvironment standardEnvironment;
+    private final Environment environment;
+    private final LaunchConfig config;
+    private final TokenReplacement tokens;
+
     private final Map<String, PluginResourceLocatorService<?>> locatorServices;
     private final Map<String, PluginLanguageService> languageServices;
 
     private final Map<String, Set<? extends PluginResource>> locatorResources;
     private final Map<PluginLanguageService, List<PluginCandidate>> pluginCandidates;
 
-    public VanillaPluginPlatform(final StandardEnvironment standardEnvironment) {
-        this.standardEnvironment = standardEnvironment;
+    public VanillaPluginPlatform(final Path baseDirectory) throws IOException {
+        this.environment = new StandardEnvironment();
+
+        final String implVersion = StandardEnvironment.class.getPackage().getImplementationVersion();
+        this.setVersion(implVersion == null ? "dev" : implVersion);
+
+        this.setBaseDirectory(baseDirectory);
+        this.setMetadataFilePath(PluginPlatformConstants.METADATA_FILE_LOCATION);
+
+        this.config = LaunchConfig.load(baseDirectory, false);
+
+        final Path modsDirectory = baseDirectory.resolve("mods");
+        this.tokens = new TokenReplacement();
+        this.tokens.register("BASE_DIR", baseDirectory);
+        this.tokens.register("CONFIG_DIR", this.configDirectory());
+        this.tokens.register("MODS_DIR", modsDirectory);
+
         this.locatorServices = new HashMap<>();
         this.languageServices = new HashMap<>();
         this.locatorResources = new HashMap<>();
         this.pluginCandidates = new IdentityHashMap<>();
+
+        final Path additionalPluginsDirectory = Path.of(this.tokens.replace(this.config.additionalPluginsDirectory()));
+        Files.createDirectories(additionalPluginsDirectory);
+        this.setPluginDirectories(List.of(modsDirectory, additionalPluginsDirectory));
     }
 
     @Override
     public String version() {
-        return this.standardEnvironment.blackboard().get(Keys.VERSION);
+        return this.environment.blackboard().get(Keys.VERSION);
     }
 
-    @Override
-    public void setVersion(final String version) {
-        this.standardEnvironment.blackboard().set(Keys.VERSION, version);
+    private void setVersion(final String version) {
+        this.environment.blackboard().set(Keys.VERSION, version);
     }
 
     @Override
     public Logger logger() {
-        return this.standardEnvironment.logger();
+        return this.environment.logger();
+    }
+
+    @Override
+    public boolean vanilla() {
+        return true;
     }
 
     @Override
     public Path baseDirectory() {
-        return this.standardEnvironment.blackboard().get(Keys.BASE_DIRECTORY);
+        return this.environment.blackboard().get(Keys.BASE_DIRECTORY);
     }
 
     @Override
-    public void setBaseDirectory(final Path baseDirectory) {
-        this.standardEnvironment.blackboard().set(Keys.BASE_DIRECTORY, baseDirectory);
+    public Path configDirectory() {
+        return this.baseDirectory().resolve("config");
+    }
+
+    @Override
+    public LaunchConfig config() {
+        return this.config;
+    }
+
+    @Override
+    public TokenReplacement tokens() {
+        return this.tokens;
+    }
+
+    private void setBaseDirectory(final Path baseDirectory) {
+        this.environment.blackboard().set(Keys.BASE_DIRECTORY, baseDirectory);
     }
 
     @Override
     public List<Path> pluginDirectories() {
-        return this.standardEnvironment.blackboard().get(Keys.PLUGIN_DIRECTORIES);
+        return this.environment.blackboard().get(Keys.PLUGIN_DIRECTORIES);
     }
 
-    @Override
-    public void setPluginDirectories(final List<Path> pluginDirectories) {
-        this.standardEnvironment.blackboard().set(Keys.PLUGIN_DIRECTORIES, pluginDirectories);
+    private void setPluginDirectories(final List<Path> pluginDirectories) {
+        this.environment.blackboard().set(Keys.PLUGIN_DIRECTORIES, pluginDirectories);
     }
 
-    @Override
     public String metadataFilePath() {
-        return this.standardEnvironment.blackboard().get(Keys.METADATA_FILE_PATH);
+        return this.environment.blackboard().get(Keys.METADATA_FILE_PATH);
     }
 
-    @Override
-    public void setMetadataFilePath(final String metadataFilePath) {
-        this.standardEnvironment.blackboard().set(Keys.METADATA_FILE_PATH, metadataFilePath);
+    private void setMetadataFilePath(final String metadataFilePath) {
+        this.environment.blackboard().set(Keys.METADATA_FILE_PATH, metadataFilePath);
     }
 
-    public StandardEnvironment getStandardEnvironment() {
-        return this.standardEnvironment;
+    public Environment getEnvironment() {
+        return this.environment;
     }
 
     public Map<String, PluginResourceLocatorService<?>> getLocatorServices() {
@@ -133,12 +176,12 @@ public final class VanillaPluginPlatform implements PluginPlatform {
 
     public void initializeLanguageServices() {
         for (final Map.Entry<String, PluginLanguageService> entry : this.languageServices.entrySet()) {
-            entry.getValue().initialize(this.standardEnvironment);
+            entry.getValue().initialize(this.environment);
         }
     }
 
     public void discoverLocatorServices() {
-        final Blackboard blackboard = this.standardEnvironment.blackboard();
+        final Blackboard blackboard = this.environment.blackboard();
         blackboard.set(JVMKeys.ENVIRONMENT_LOCATOR_VARIABLE_NAME, "SPONGE_PLUGINS");
         blackboard.set(JVMKeys.JVM_PLUGIN_RESOURCE_FACTORY, SecureJarPluginResource::new);
 
@@ -151,7 +194,7 @@ public final class VanillaPluginPlatform implements PluginPlatform {
             try {
                 next = iter.next();
             } catch (final ServiceConfigurationError e) {
-                this.standardEnvironment.logger().error("Error encountered initializing plugin resource locator!", e);
+                this.environment.logger().error("Error encountered initializing plugin resource locator!", e);
                 continue;
             }
 
@@ -169,7 +212,7 @@ public final class VanillaPluginPlatform implements PluginPlatform {
             try {
                 next = iter.next();
             } catch (final ServiceConfigurationError e) {
-                this.standardEnvironment.logger().error("Error encountered initializing plugin language service!", e);
+                this.environment.logger().error("Error encountered initializing plugin language service!", e);
                 continue;
             }
 
@@ -180,7 +223,7 @@ public final class VanillaPluginPlatform implements PluginPlatform {
     public void locatePluginResources() {
         for (final Map.Entry<String, PluginResourceLocatorService<?>> locatorEntry : this.locatorServices.entrySet()) {
             final PluginResourceLocatorService<?> locatorService = locatorEntry.getValue();
-            final Set<? extends PluginResource> resources = locatorService.locatePluginResources(this.standardEnvironment);
+            final Set<? extends PluginResource> resources = locatorService.locatePluginResources(this.environment);
             if (!resources.isEmpty()) {
                 this.locatorResources.put(locatorEntry.getKey(), resources);
             }
@@ -196,7 +239,7 @@ public final class VanillaPluginPlatform implements PluginPlatform {
                     }
 
                     try {
-                        final List<PluginCandidate> candidates = languageService.createPluginCandidates(this.standardEnvironment, pluginResource);
+                        final List<PluginCandidate> candidates = languageService.createPluginCandidates(this.environment, pluginResource);
                         if (candidates.isEmpty()) {
                             continue;
                         }
@@ -206,7 +249,7 @@ public final class VanillaPluginPlatform implements PluginPlatform {
                             jarResource.addCandidates(candidates);
                         }
                     } catch (final Exception ex) {
-                        this.standardEnvironment.logger().error("Failed to create plugin candidates", ex);
+                        this.environment.logger().error("Failed to create plugin candidates", ex);
                     }
                 }
             }

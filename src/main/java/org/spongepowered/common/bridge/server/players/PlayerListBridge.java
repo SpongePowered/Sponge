@@ -33,4 +33,6 @@ import java.util.concurrent.CompletableFuture;
 public interface PlayerListBridge {
 
     CompletableFuture<Component> bridge$canPlayerLogin(SocketAddress param0, GameProfile param1);
+
+    void bridge$saveAll(int batchInterval, int batchAmount, boolean log);
 }

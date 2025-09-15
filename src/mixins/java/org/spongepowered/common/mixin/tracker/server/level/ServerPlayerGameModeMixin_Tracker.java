@@ -102,26 +102,25 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
         final org.spongepowered.api.util.Direction direction = DirectionFacingProvider.INSTANCE.getKey(blockHit.getDirection()).get();
         final InteractBlockEvent.Secondary.Pre event = SpongeCommonEventFactory.callInteractBlockEventSecondary(player, stack, hitVec, snapshot, direction, hand);
 
-        final PhaseTracker tracker = PhaseTracker.getWorldInstance((ServerLevel) level);
-        final PhaseContext<?> owningContext = tracker.getPhaseContext();
-        owningContext.getTransactor().logSecondaryInteractionTransaction(player, hitVec, snapshot, direction, event);
-        contextRef.set(owningContext);
-
         ((ServerPlayerGameModeBridge) this).bridge$setInteractBlockRightClickCancelled(event.isCancelled());
         if (event.isCancelled()) {
             this.player.inventoryMenu.sendAllDataToRemote();
             return InteractionResult.FAIL;
         }
 
-        useItemRef.set(event.useItemResult());
-        useBlockRef.set(event.useBlockResult());
-
+        final PhaseTracker tracker = PhaseTracker.getWorldInstance((ServerLevel) level);
         try (final CauseStackManager.StackFrame frame = tracker.pushCauseFrame();
              final PhaseContext<?> context = PlayerPhase.State.PLAYER_INTERACT.createPhaseContext(tracker)
                  .creator(player.getUUID())
                  .notifier(player.getUUID())
                  .containerLocation(ServerLocation.of((ServerWorld) level, blockPos))) {
             context.buildAndSwitch();
+            context.getTransactor().logSecondaryInteractionTransaction(player, hitVec, snapshot, direction, event);
+            contextRef.set(context);
+
+            useItemRef.set(event.useItemResult());
+            useBlockRef.set(event.useBlockResult());
+
             frame.pushCause(event);
             frame.addContext(EventContextKeys.BLOCK_HIT, snapshot);
 

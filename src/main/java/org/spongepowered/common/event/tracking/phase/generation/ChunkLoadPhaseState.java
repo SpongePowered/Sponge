@@ -53,6 +53,11 @@ public final class ChunkLoadPhaseState extends GeneralGenerationPhaseState<Chunk
     }
 
     @Override
+    public boolean shouldProvideModifiers(final ChunkLoadContext phaseContext) {
+        return true;
+    }
+
+    @Override
     public void associateScheduledTickUpdate(
         final ChunkLoadContext asContext, ServerLevel level, final ScheduledTick<?> entry
     ) {

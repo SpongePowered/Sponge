@@ -43,7 +43,6 @@ import org.spongepowered.common.data.value.SpongeValue;
 public final class TypeTokenUtilTest {
 
     @SuppressWarnings("rawtypes")
-    @Test
     @Disabled
     public void testA() {
         assertTrue(TypeTokenUtil.isAssignable(
