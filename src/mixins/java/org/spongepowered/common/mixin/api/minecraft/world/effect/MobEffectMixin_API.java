@@ -25,24 +25,14 @@
 package org.spongepowered.common.mixin.api.minecraft.world.effect;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.effect.MobEffect;
 import org.spongepowered.api.effect.potion.PotionEffectType;
-import org.spongepowered.api.registry.DefaultedRegistryType;
-import org.spongepowered.api.registry.RegistryTypes;
-import org.spongepowered.api.tag.Tag;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
-
-import java.util.Collection;
 
 @Mixin(MobEffect.class)
 @Implements(@Interface(iface = PotionEffectType.class, prefix = "potionEffectType$", remap = Remap.NONE))
@@ -60,22 +50,5 @@ public abstract class MobEffectMixin_API implements PotionEffectType {
     @Override
     public Component asComponent() {
         return SpongeAdventure.asAdventure(this.shadow$getDisplayName());
-    }
-
-    @Override
-    public DefaultedRegistryType<PotionEffectType> registryType() {
-        return RegistryTypes.POTION_EFFECT_TYPE;
-    }
-
-    @Override
-    public Collection<Tag<PotionEffectType>> tags() {
-        return this.registryType().get().tags().filter(this::is).toList();
-    }
-
-    @Override
-    public boolean is(final Tag<PotionEffectType> tag) {
-        final Registry<MobEffect> registry = SpongeCommon.vanillaRegistry(Registries.MOB_EFFECT);
-        final Holder.Reference<MobEffect> holder = registry.createIntrusiveHolder((MobEffect) (Object) this);
-        return holder.is(((TagKey<MobEffect>) (Object) tag));
     }
 }
