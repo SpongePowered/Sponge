@@ -36,6 +36,7 @@ import net.minecraft.world.damagesource.DamageEffects;
 import net.minecraft.world.damagesource.DamageScaling;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -183,6 +184,7 @@ public final class VanillaRegistryLoader {
         this.automaticName(RegistryTypes.DYE_COLOR, DyeColor.values());
         this.automaticName(RegistryTypes.DOOR_HINGE, DoorHingeSide.values());
         this.automaticName(RegistryTypes.DRIPSTONE_SEGMENT, DripstoneThickness.values());
+        this.automaticName(RegistryTypes.EQUIPMENT_CONDITION, EquipmentSlotGroup.values());
         this.automaticName(RegistryTypes.EQUIPMENT_GROUP, EquipmentSlot.Type.values());
         this.automaticName(RegistryTypes.EQUIPMENT_TYPE, EquipmentSlot.values());
         this.automaticName(RegistryTypes.FOX_TYPE, Fox.Variant.values());

@@ -51,6 +51,7 @@ import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackComparators;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.equipment.EquipmentCondition;
 import org.spongepowered.api.item.recipe.crafting.RecipeInput;
 import org.spongepowered.api.item.recipe.smithing.ArmorTrim;
 import org.spongepowered.api.network.channel.ChannelExceptionHandler;
@@ -126,6 +127,7 @@ import org.spongepowered.common.entity.effect.SpongeVanishState;
 import org.spongepowered.common.event.SpongeEventListenerRegistration;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageStepType;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
+import org.spongepowered.common.item.SpongeEquipmentConditionFactory;
 import org.spongepowered.common.item.SpongeItemStack;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.item.SpongeToolRuleFactory;
@@ -285,6 +287,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(NaturalSpawner.Factory.class, new SpongeNaturalSpawnerFactory())
                 .registerFactory(ScoreFormat.Factory.class, new SpongeScoreFormatFactory())
                 .registerFactory(ToolRule.Factory.class, new SpongeToolRuleFactory())
+                .registerFactory(EquipmentCondition.Factory.class, new SpongeEquipmentConditionFactory())
                 .registerFactory(PortalLogic.Factory.class, new SpongePortalLogicFactory())
                 .registerFactory(RecipeInput.Factory.class, new SpongeRecipeInputFactory())
                 .registerFactory(ArmorTrim.Factory.class, new SpongeArmorTrimFactory())
