@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.inventory.event.server.network;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.network.protocol.game.ServerboundSelectTradePacket;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
@@ -50,6 +52,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
+import org.spongepowered.common.bridge.world.inventory.AbstractContainerMenu_InventoryBridge;
 import org.spongepowered.common.bridge.world.inventory.container.MenuBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -113,6 +116,17 @@ public class ServerGamePacketListenerImplMixin_Inventory {
                 }
             }
             menu.sendAllDataToRemote();
+        }
+    }
+
+    @WrapMethod(method = "handleContainerClick")
+    private void impl$setIsClicking(final ServerboundContainerClickPacket packet, final Operation<Void> original) {
+        var containerBridge = (AbstractContainerMenu_InventoryBridge) this.player.containerMenu;
+        try {
+            containerBridge.bridge$setIsClicking(true);
+            original.call(packet);
+        } finally {
+            containerBridge.bridge$setIsClicking(false);
         }
     }
 

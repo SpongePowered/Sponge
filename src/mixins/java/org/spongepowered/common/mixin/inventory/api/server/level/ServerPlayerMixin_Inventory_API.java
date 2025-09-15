@@ -39,7 +39,7 @@ import java.util.Optional;
 @Mixin(net.minecraft.server.level.ServerPlayer.class)
 public abstract class ServerPlayerMixin_Inventory_API extends PlayerMixin_Inventory_API implements ServerPlayer {
 
-    @Shadow public abstract void shadow$doCloseContainer();
+    @Shadow public abstract void shadow$closeContainer();
 
     @Override
     public Optional<Container> openInventory() {
@@ -70,7 +70,7 @@ public abstract class ServerPlayerMixin_Inventory_API extends PlayerMixin_Invent
         // Create Close_Window to capture item drops
         final net.minecraft.server.level.ServerPlayer player = (net.minecraft.server.level.ServerPlayer) (Object) this;
         final net.minecraft.world.inventory.AbstractContainerMenu openMenu = player.containerMenu;
-        this.shadow$doCloseContainer();
+        this.shadow$closeContainer();
         return openMenu != player.containerMenu;
     }
 

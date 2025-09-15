@@ -78,7 +78,7 @@ public abstract class ScoreboardMixin implements ScoreboardBridge {
         }
     }
 
-    @Inject(method = "removeObjective", at = @At("RETURN"))
+    @Inject(method = "removeObjective", at = @At("HEAD"))
     public void impl$onRemoveObjective(final Objective objective, final CallbackInfo ci) {
         if (this instanceof ServerScoreboardBridge ssb) {
             ssb.bridge$removeMCObjective(objective);

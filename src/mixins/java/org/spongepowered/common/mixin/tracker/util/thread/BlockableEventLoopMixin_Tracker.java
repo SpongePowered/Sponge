@@ -31,7 +31,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
-import org.spongepowered.common.hooks.PlatformHooks;
 
 @Mixin(BlockableEventLoop.class)
 public abstract class BlockableEventLoopMixin_Tracker<R extends Runnable> {
@@ -43,7 +42,8 @@ public abstract class BlockableEventLoopMixin_Tracker<R extends Runnable> {
                     remap = false))
     private void tracker$callOnMainThreadWithPhaseState(final Runnable runnable) {
         // This method can be called async while server is stopping
-        if (this.tracker$isServerAndIsServerStopped() && !PlatformHooks.INSTANCE.getGeneralHooks().onServerThread()) {
+        // TODO find why this cause a runaway phase during shutdown of the test server
+        if (this.tracker$isServerAndIsServerStopped()/* && !PlatformHooks.INSTANCE.getGeneralHooks().onServerThread() */) {
             runnable.run();
             return;
         }

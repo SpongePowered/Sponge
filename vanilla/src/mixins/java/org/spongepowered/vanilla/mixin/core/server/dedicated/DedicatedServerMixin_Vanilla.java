@@ -29,9 +29,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.Lifecycle;
+import org.spongepowered.common.launch.config.core.ConfigHandle;
 import org.spongepowered.vanilla.mixin.core.server.MinecraftServerMixin_Vanilla;
 
 @Mixin(DedicatedServer.class)

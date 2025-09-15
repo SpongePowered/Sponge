@@ -152,7 +152,7 @@ public final class VanillaPluginManager implements SpongePluginManager {
                 final PluginLanguageService languageService = pluginLanguageLookup.get(candidate);
                 final PluginLoader<?> pluginLoader = pluginLoaders.get(languageService);
                 try {
-                    final PluginContainer container = pluginLoader.loadPlugin(platform.getStandardEnvironment(), candidate, launchClassloader);
+                    final PluginContainer container = pluginLoader.loadPlugin(platform.getEnvironment(), candidate, launchClassloader);
                     this.addPlugin(container);
                     this.containerToResource.put(container, candidate.resource());
                 } catch (final InvalidPluginException e) {

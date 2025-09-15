@@ -83,7 +83,8 @@ public class UserSubject extends SpongeSubject {
 
     @Override
     public Optional<String> friendlyIdentifier() {
-        return Optional.of(this.player.getName());
+        final String name = this.player.getName();
+        return name.isEmpty() ? Optional.empty() : Optional.of(name);
     }
 
     @Override

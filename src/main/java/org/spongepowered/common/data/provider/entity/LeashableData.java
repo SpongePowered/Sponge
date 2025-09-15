@@ -42,11 +42,10 @@ public final class LeashableData {
                 final var ld = h.getLeashData();
                 return ld == null ? null : (Entity) ld.leashHolder;
             })
-            .delete(Leashable::dropLeash)
+            .delete(Leashable::removeLeash)
             .set((h, v) -> {
                 if (v == null) {
-                    // TODO remove
-                    h.dropLeash();
+                    h.removeLeash();
                 } else {
                     h.setLeashedTo((net.minecraft.world.entity.Entity) v, true);
                 }

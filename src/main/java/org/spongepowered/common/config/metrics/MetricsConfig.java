@@ -25,8 +25,8 @@
 package org.spongepowered.common.config.metrics;
 
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.common.applaunch.config.core.Config;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.launch.config.core.Config;
+import org.spongepowered.common.launch.config.core.SpongeConfigs;
 import org.spongepowered.configurate.NodePath;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;

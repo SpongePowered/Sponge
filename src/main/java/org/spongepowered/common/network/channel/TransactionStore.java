@@ -127,6 +127,16 @@ public final class TransactionStore {
     }
 
     /**
+     * Checks whether this store contains the transaction id.
+     *
+     * @param transactionId The transaction id
+     * @return {@code true} if this store contains the transaction id.
+     */
+    public boolean contains(final int transactionId) {
+        return this.lookup.containsKey(transactionId);
+    }
+
+    /**
      * Whether the transaction store is empty.
      *
      * @return Is empty

@@ -29,8 +29,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
+import java.util.concurrent.CompletableFuture;
+
 @Mixin(targets = "net/minecraft/world/level/chunk/storage/IOWorker$PendingStore")
 public interface IOWorker$PendingStoreAccessor {
 
     @Accessor("data") @Nullable CompoundTag accessor$data();
+
+    @Accessor("result") CompletableFuture<Void> accessor$result();
 }

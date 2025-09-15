@@ -28,7 +28,7 @@ import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
-import org.spongepowered.common.applaunch.config.common.OptimizationCategory;
+import org.spongepowered.common.launch.config.common.OptimizationCategory;
 
 /**
  * Only used for the {@link OptimizationCategory#useMapOptimization()} mixins targeting {@link MapItemSavedData}.

@@ -44,9 +44,9 @@ import org.spongepowered.api.network.channel.raw.RawDataChannel;
 import org.spongepowered.api.network.channel.raw.handshake.RawHandshakeDataChannel;
 import org.spongepowered.common.accessor.network.ConnectionAccessor;
 import org.spongepowered.common.accessor.server.network.ServerLoginPacketListenerImplAccessor;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.bridge.network.ServerLoginPacketListenerImplBridge;
+import org.spongepowered.common.launch.config.core.SpongeConfigs;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;

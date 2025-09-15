@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.config.inheritable;
 
-import org.spongepowered.common.applaunch.config.core.Config;
+import org.spongepowered.common.launch.config.core.Config;
 import org.spongepowered.configurate.NodePath;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
@@ -51,11 +51,21 @@ public abstract class BaseConfig implements Config {
 
     public static ConfigurationTransformation transformation() {
         return ConfigurationTransformation.versionedBuilder()
+                .addVersion(4, BaseConfig.buildThreeToFour())
                 .addVersion(3, BaseConfig.buildTwoToThree())
                 .addVersion(2, BaseConfig.buildOneToTwo())
                 // move everything out of sponge subcategory
                 .addVersion(1, BaseConfig.buildInitialToOne())
                 .build();
+    }
+
+    static ConfigurationTransformation buildThreeToFour() {
+        return ConfigurationTransformation.builder()
+            .addAction(NodePath.path("world", "auto-save-interval"), (path, node) ->
+                new Object[] { "world", "auto-save", "interval" })
+            .addAction(NodePath.path("world", "log-auto-save"), (path, node) ->
+                new Object[] { "world", "auto-save", "log" })
+            .build();
     }
 
     static ConfigurationTransformation buildTwoToThree() {

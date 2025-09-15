@@ -27,4 +27,6 @@ package org.spongepowered.common.bridge.world.inventory;
 public interface AbstractContainerMenu_InventoryBridge {
 
     void bridge$markDirty();
+
+    void bridge$setIsClicking(final boolean isClicking);
 }

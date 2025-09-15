@@ -327,13 +327,25 @@ public final class SpongeCommonEventFactory {
                 case ABORT_DESTROY_BLOCK:
                     event = SpongeEventFactory.createInteractBlockEventPrimaryStop(frame.currentCause(), blockSnapshot, direction);
                     break;
-                case STOP_DESTROY_BLOCK:
-                    event = SpongeEventFactory.createInteractBlockEventPrimaryFinish(frame.currentCause(), blockSnapshot, direction);
-                    break;
                 default:
                     throw new IllegalStateException("unreachable code");
             }
 
+            SpongeCommon.post(event);
+            return event;
+        }
+    }
+
+    public static InteractBlockEvent.Primary.Finish callInteractBlockEventPrimaryFinish(final BlockSnapshot blockSnapshot,
+            final net.minecraft.core.@Nullable Direction side) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
+            final Direction direction;
+            if (side != null) {
+                direction = DirectionFacingProvider.INSTANCE.getKey(side).get();
+            } else {
+                direction = Direction.NONE;
+            }
+            final InteractBlockEvent.Primary.Finish event = SpongeEventFactory.createInteractBlockEventPrimaryFinish(frame.currentCause(), blockSnapshot, direction);
             SpongeCommon.post(event);
             return event;
         }
@@ -745,7 +757,8 @@ public final class SpongeCommonEventFactory {
         final MapIdTrackerBridge mapIdTrackerBridge = (MapIdTrackerBridge) defaultWorld.getDataStorage()
                 .computeIfAbsent(MapIndex.factory(), Constants.Map.MAP_INDEX_DATA_NAME);
 
-        final MapItemSavedData mapData = MapItemSavedData.createFresh(0, 0, (byte) 0, false, false, Level.END);
+        final MapItemSavedData mapData = MapItemSavedData.createFresh(0, 0,
+            (byte) Constants.Map.DEFAULT_MAP_SCALE, Constants.Map.DEFAULT_TRACKS_PLAYERS, Constants.Map.DEFAULT_UNLIMITED_TRACKING, Level.END);
 
         final MapInfo mapInfo = (MapInfo) mapData;
         for (final Value<?> value : values) {

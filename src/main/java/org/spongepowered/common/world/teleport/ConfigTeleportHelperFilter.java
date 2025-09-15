@@ -36,8 +36,8 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.state.StateContainer;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.applaunch.config.common.TeleportHelperCategory;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.launch.config.common.TeleportHelperCategory;
+import org.spongepowered.common.launch.config.core.SpongeConfigs;
 
 import java.util.List;
 import java.util.Locale;

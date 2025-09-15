@@ -30,7 +30,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.launch.config.core.SpongeConfigs;
 import org.spongepowered.common.mixin.core.block.BlockMixin;
 
 @Mixin(LeavesBlock.class)

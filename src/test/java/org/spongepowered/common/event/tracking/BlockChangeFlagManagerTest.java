@@ -34,7 +34,7 @@ import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
-class BlockChangeFlagManagerTest {
+public class BlockChangeFlagManagerTest {
 
     @BeforeAll
     public static void setupBlockChangeFlagManager() {
@@ -280,7 +280,7 @@ class BlockChangeFlagManagerTest {
         final SpongeBlockChangeFlag flag = BlockChangeFlagManagerTest.createDefaultFlag();
         assertTrue(flag.updateNeighboringShapes()); // 16
         assertTrue(flag.getRawFlag() != 0);
-        assertEquals((flag.getRawFlag() & 32), 0);
+        assertEquals(0, (flag.getRawFlag() & 32));
         assertTrue(flag.neighborDropsAllowed());
         final SpongeBlockChangeFlag nestedNeighbor = flag.asNestedNeighborUpdates();
         assertFalse(nestedNeighbor.updateNeighbors());

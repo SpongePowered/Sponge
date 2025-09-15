@@ -40,15 +40,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Client;
 import org.spongepowered.api.Server;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.common.entity.SpongeEntityTypes;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.Lifecycle;
-import org.spongepowered.common.network.channel.SpongeChannelManager;
-import org.spongepowered.common.network.packet.SpongePacketHandler;
+import org.spongepowered.common.launch.config.core.ConfigHandle;
 import org.spongepowered.forge.hook.ForgeChannelHooks;
 import org.spongepowered.forge.hook.ForgeEventHooks;
 import org.spongepowered.forge.hook.ForgeGeneralHooks;
@@ -82,24 +79,12 @@ public final class SpongeForgeMod {
     }
 
     private void onCommonSetup(final FMLCommonSetupEvent event) {
-        final Lifecycle lifecycle = Launch.instance().lifecycle();
-        lifecycle.callConstructEvent();
-        lifecycle.callRegisterFactoryEvent();
-        lifecycle.callRegisterBuilderEvent();
-        lifecycle.callRegisterChannelEvent();
-        lifecycle.establishGameServices();
-        lifecycle.establishDataKeyListeners();
-
-        SpongePacketHandler.init((SpongeChannelManager) Sponge.channelManager());
-
         this.logger.info("SpongeForge v{} initialized", Launch.instance().platformPlugin().metadata().version());
     }
 
     private void onClientSetup(final FMLClientSetupEvent event) {
         final Client minecraft = (Client) Minecraft.getInstance();
         final Lifecycle lifecycle = Launch.instance().lifecycle();
-        lifecycle.establishDataProviders();
-        lifecycle.callRegisterDataEvent();
         lifecycle.establishClientRegistries(minecraft);
         lifecycle.callStartingEngineEvent(minecraft);
     }

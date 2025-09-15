@@ -25,6 +25,8 @@
 package org.spongepowered.common.applaunch.plugin;
 
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.common.applaunch.config.LaunchConfig;
+import org.spongepowered.common.applaunch.config.TokenReplacement;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -33,25 +35,18 @@ public interface PluginPlatform {
 
     String version();
 
-    void setVersion(String version);
-
     Logger logger();
 
-    default boolean vanilla() {
-        return true;
-    }
+    boolean vanilla();
 
     Path baseDirectory();
 
-    void setBaseDirectory(Path baseDirectory);
+    Path configDirectory();
+
+    LaunchConfig config();
+
+    TokenReplacement tokens();
 
     List<Path> pluginDirectories();
-
-    void setPluginDirectories(List<Path> pluginDirectories);
-
-    String metadataFilePath();
-
-    void setMetadataFilePath(String metadataFilePath);
-
 
 }

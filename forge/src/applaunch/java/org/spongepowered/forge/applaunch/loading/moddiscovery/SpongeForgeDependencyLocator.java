@@ -24,26 +24,22 @@
  */
 package org.spongepowered.forge.applaunch.loading.moddiscovery;
 
-import cpw.mods.modlauncher.Environment;
-import cpw.mods.modlauncher.Launcher;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.forgespi.locating.IDependencyLocator;
 import net.minecraftforge.forgespi.locating.IModFile;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.common.applaunch.AppLaunch;
+import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.forge.applaunch.loading.moddiscovery.library.Log4JLogger;
-import org.spongepowered.forge.applaunch.transformation.SpongeForgeTransformationService;
 import org.spongepowered.libs.LibraryManager;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class SpongeForgeDependencyLocator extends AbstractModProvider implements IDependencyLocator {
     private static final Logger LOGGER = LogManager.getLogger();
-
-    private LibraryManager libraryManager;
 
     @Override
     public List<IModFile> scanMods(final Iterable<IModFile> loadedMods) {
@@ -51,14 +47,22 @@ public class SpongeForgeDependencyLocator extends AbstractModProvider implements
 
         // Add Sponge-specific libraries
         if (FMLEnvironment.production) {
+            final PluginPlatform platform = AppLaunch.pluginPlatform();
+            final LibraryManager libraryManager = new LibraryManager(
+                new Log4JLogger(LogManager.getLogger(LibraryManager.class)),
+                platform.config().checkLibraryHashes(),
+                Path.of(platform.tokens().replace(platform.config().librariesDirectory())),
+                SpongeForgeModLocator.class.getResource("/sponge-libraries.json")
+            );
+
             try {
-                this.libraryManager.validate();
+                libraryManager.validate();
             } catch (final Exception ex) {
                 throw new RuntimeException("Failed to download and validate Sponge libraries", ex);
             }
-            this.libraryManager.finishedProcessing();
+            libraryManager.finishedProcessing();
 
-            for (final LibraryManager.Library library : this.libraryManager.getAll("main")) {
+            for (final LibraryManager.Library library : libraryManager.getAll("main")) {
                 final Path path = library.file();
                 SpongeForgeDependencyLocator.LOGGER.debug("Proposing jar {} as a game library", path);
                 modFiles.add(PluginFileParser.newLibraryFile(this, path));
@@ -71,17 +75,5 @@ public class SpongeForgeDependencyLocator extends AbstractModProvider implements
     @Override
     public String name() {
         return "spongeforge";
-    }
-
-    @Override
-    public void initArguments(final Map<String, ?> arguments) {
-        final Environment env = Launcher.INSTANCE.environment();
-        this.libraryManager = new LibraryManager(
-                new Log4JLogger(LogManager.getLogger(LibraryManager.class)),
-                env.getProperty(SpongeForgeTransformationService.Keys.CHECK_LIBRARY_HASHES.get()).orElse(true),
-                env.getProperty(SpongeForgeTransformationService.Keys.LIBRARIES_DIRECTORY.get())
-                        .orElseThrow(() -> new IllegalStateException("No libraries directory available")),
-                SpongeForgeModLocator.class.getResource("/sponge-libraries.json")
-        );
     }
 }

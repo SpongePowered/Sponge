@@ -34,7 +34,7 @@ import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.context.ContextCalculator;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.launch.config.core.SpongeConfigs;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;

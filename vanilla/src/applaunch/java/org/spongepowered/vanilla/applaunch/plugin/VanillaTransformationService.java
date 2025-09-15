@@ -37,16 +37,13 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.fusesource.jansi.AnsiConsole;
 import org.spongepowered.asm.launch.MixinLaunchPlugin;
 import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.common.applaunch.plugin.PluginPlatformConstants;
 import org.spongepowered.plugin.PluginResource;
-import org.spongepowered.plugin.builtin.StandardEnvironment;
 import org.spongepowered.transformers.modlauncher.AccessWidenerTransformationService;
 import org.spongepowered.transformers.modlauncher.SuperclassChanger;
 import org.spongepowered.vanilla.applaunch.Constants;
 import org.spongepowered.vanilla.applaunch.plugin.resource.SecureJarPluginResource;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -66,33 +63,15 @@ public final class VanillaTransformationService implements ITransformationServic
     public void onLoad(final IEnvironment env, final Set<String> otherServices) {
         AnsiConsole.systemInstall();
 
-        this.pluginPlatform = new VanillaPluginPlatform(new StandardEnvironment());
+        final Path baseDirectory = env.getProperty(IEnvironment.Keys.GAMEDIR.get()).orElse(Paths.get("."));
+        try {
+            this.pluginPlatform = new VanillaPluginPlatform(baseDirectory);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         AppLaunch.setPluginPlatform(this.pluginPlatform);
 
-        final String implementationVersion = StandardEnvironment.class.getPackage().getImplementationVersion();
-        final Path baseDirectory = env.getProperty(IEnvironment.Keys.GAMEDIR.get()).orElse(Paths.get("."));
-
-        this.pluginPlatform.setVersion(implementationVersion == null ? "dev" : implementationVersion);
-        this.pluginPlatform.setBaseDirectory(baseDirectory);
-
         this.pluginPlatform.logger().info("SpongePowered PLUGIN Subsystem Version={} Source={}", this.pluginPlatform.version(), this.getCodeSource());
-
-        final Path modsDirectory = baseDirectory.resolve("mods");
-        if (Files.notExists(modsDirectory)) {
-            try {
-                Files.createDirectories(modsDirectory);
-            } catch (IOException ignored) {}
-        }
-
-        final Path pluginsDirectory = baseDirectory.resolve("plugins");
-        final List<Path> pluginDirectories = new ArrayList<>();
-        pluginDirectories.add(modsDirectory);
-        if (Files.exists(pluginsDirectory)) {
-            pluginDirectories.add(pluginsDirectory);
-        }
-
-        this.pluginPlatform.setPluginDirectories(pluginDirectories);
-        this.pluginPlatform.setMetadataFilePath(PluginPlatformConstants.METADATA_FILE_LOCATION);
     }
 
     @Override

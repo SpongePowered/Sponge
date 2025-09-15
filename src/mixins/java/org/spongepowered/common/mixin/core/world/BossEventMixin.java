@@ -90,7 +90,7 @@ public abstract class BossEventMixin implements BossEventBridge {
 
     @Redirect(method = "setProgress", at = @At(value = "FIELD", target = "Lnet/minecraft/world/BossEvent;progress:F"))
     private void adventurePercent(final BossEvent $this, final float percent) {
-        this.bridge$asAdventure().progress(percent);
+        this.bridge$asAdventure().progress(Math.clamp(percent, 0, 1));
     }
 
     @Redirect(method = "setColor", at = @At(value = "FIELD", target = "Lnet/minecraft/world/BossEvent;color:Lnet/minecraft/world/BossEvent$BossBarColor;"))

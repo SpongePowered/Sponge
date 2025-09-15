@@ -60,7 +60,9 @@ public final class SpongeSelectorType implements SelectorType {
     @SuppressWarnings("ConstantConditions")
     @Override
     public final Selector.@NonNull Builder toBuilder() {
-        final EntitySelectorParser parser = new EntitySelectorParser(new StringReader(this.selectorToken), true);
+        final StringReader reader = new StringReader(this.selectorToken);
+        reader.skip();
+        final EntitySelectorParser parser = new EntitySelectorParser(reader, true);
         ((EntitySelectorParserAccessor) parser).invoker$parseSelector();
         return (Selector.Builder) parser;
     }

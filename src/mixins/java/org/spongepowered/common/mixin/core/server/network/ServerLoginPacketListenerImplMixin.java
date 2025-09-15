@@ -34,6 +34,7 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.login.ServerboundCustomQueryAnswerPacket;
 import net.minecraft.network.protocol.login.ServerboundKeyPacket;
+import net.minecraft.network.protocol.login.custom.CustomQueryAnswerPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import net.minecraft.server.players.PlayerList;
@@ -66,7 +67,6 @@ import org.spongepowered.common.bridge.server.players.PlayerListBridge;
 import org.spongepowered.common.network.SpongeEngineConnection;
 import org.spongepowered.common.network.channel.ConnectionUtil;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
-import org.spongepowered.common.network.channel.SpongeChannelPayload;
 import org.spongepowered.common.network.channel.TransactionStore;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
@@ -286,9 +286,11 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
                 : null;
     }
 
-    @Inject(method = "handleCustomQueryPacket", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "handleCustomQueryPacket", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerLoginPacketListenerImpl;disconnect(Lnet/minecraft/network/chat/Component;)V"), cancellable = true)
     private void impl$onHandleCustomQueryPacket(final ServerboundCustomQueryAnswerPacket packet, final CallbackInfo ci) {
-        if (!(packet.payload() instanceof final SpongeChannelPayload payload)) {
+        final CustomQueryAnswerPayload payload = packet.payload();
+        final int transactionId = packet.transactionId();
+        if (!((ConnectionBridge) this.connection).bridge$getTransactionStore().contains(transactionId)) {
             return;
         }
 
@@ -297,7 +299,7 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
         this.server.execute(() -> {
             final SpongeChannelManager channelRegistry = (SpongeChannelManager) Sponge.channelManager();
             final EngineConnection connection = ((ConnectionBridge) this.connection).bridge$getEngineConnection();
-            channelRegistry.handleLoginResponsePayload(connection, (EngineConnectionState) this, payload.id(), packet.transactionId(), payload.consumer());
+            channelRegistry.handleLoginResponsePayload(connection, (EngineConnectionState) this, transactionId, payload == null ? null : payload::write);
         });
     }
 

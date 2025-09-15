@@ -25,10 +25,10 @@
 package org.spongepowered.common.mixin.inventory.impl.world.inventory;
 
 import net.minecraft.core.NonNullList;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.inventory.Slot;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.Carrier;
@@ -43,7 +43,6 @@ import org.spongepowered.common.inventory.util.ContainerUtil;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -52,7 +51,6 @@ import java.util.function.Predicate;
 public abstract class AbstractContainerMenuMixin_Bridge_Inventory implements CarriedBridge, ContainerBridge, InventoryAdapter {
 
     @Shadow @Final public NonNullList<Slot> slots;
-    @Shadow @Final private List<ContainerListener> containerListeners;
 
     @Nullable private Carrier impl$carrier;
 
@@ -111,4 +109,15 @@ public abstract class AbstractContainerMenuMixin_Bridge_Inventory implements Car
         return this.impl$inUse;
     }
 
+    private @Nullable ServerPlayer viewer;
+
+    @Override
+    public void bridge$setViewer(final @Nullable ServerPlayer viewer) {
+        this.viewer = viewer;
+    }
+
+    @Override
+    public @Nullable ServerPlayer bridge$getViewer() {
+        return this.viewer;
+    }
 }

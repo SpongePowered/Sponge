@@ -170,6 +170,8 @@ public final class InventoryTest implements LoadableModule {
 
             final String title = component.map(c -> PlainTextComponentSerializer.plainText().serialize(c)).orElse("No Title");
             this.plugin.logger().info("{} [{}]", event.getClass().getSimpleName(), title);
+
+            this.plugin.logger().info("viewer: {}", container.viewer());
         }
 
         @Listener

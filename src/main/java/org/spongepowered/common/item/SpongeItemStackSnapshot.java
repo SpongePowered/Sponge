@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableSet;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.minecraft.core.component.DataComponentPatch;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -73,8 +74,8 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     private final int damageValue;
     private final ImmutableList<DataManipulator.Immutable> manipulators;
     private final transient ItemStack privateStack; // only for internal use since the processors have a huge say
-    private final Set<Key<?>> keys;
-    private final Set<org.spongepowered.api.data.value.Value.Immutable<?>> values;
+    private @MonotonicNonNull Set<Key<?>> keys;
+    private @MonotonicNonNull Set<org.spongepowered.api.data.value.Value.Immutable<?>> values;
     private final DataComponentPatch components;
     private @Nullable UUID creatorUniqueId;
 
@@ -100,8 +101,6 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         this.damageValue = ItemStackUtil.toNative(itemStack).getDamageValue();
         this.manipulators = builder.build();
         this.privateStack = itemStack.copy();
-        this.keys = itemStack.getKeys();
-        this.values = itemStack.getValues();
         this.components = ItemStackUtil.toNative(this.privateStack).getComponentsPatch();
     }
 
@@ -209,11 +208,17 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public Set<Key<?>> getKeys() {
+        if (this.keys == null) {
+            this.keys = this.privateStack.getKeys();
+        }
         return this.keys;
     }
 
     @Override
     public Set<org.spongepowered.api.data.value.Value.Immutable<?>> getValues() {
+        if (this.values == null) {
+            this.values = this.privateStack.getValues();
+        }
         return this.values;
     }
 

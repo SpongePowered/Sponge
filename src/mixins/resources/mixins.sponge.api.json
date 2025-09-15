@@ -86,6 +86,7 @@
     "minecraft.world.InteractionHandMixin_API",
     "minecraft.world.IWorldGenerationBaseReaderMixin_API",
     "minecraft.world.IWorldGenerationReaderMixin_API",
+    "minecraft.world.damagesource.DamageEffectsMixin_API",
     "minecraft.world.damagesource.DamageScalingMixin_API",
     "minecraft.world.damagesource.DamageSourceMixin_API",
     "minecraft.world.damagesource.DamageTypeMixin_API",
@@ -180,7 +181,7 @@
     "minecraft.world.entity.animal.TurtleMixin_API",
     "minecraft.world.entity.animal.WaterAnimalMixin_API",
     "minecraft.world.entity.animal.WolfMixin_API",
-      "minecraft.world.entity.animal.WolfVariantMixin_API",
+    "minecraft.world.entity.animal.WolfVariantMixin_API",
     "minecraft.world.entity.animal.allay.AllayMixin_API",
     "minecraft.world.entity.animal.armadillo.ArmadilloMixin_API",
     "minecraft.world.entity.animal.axolotl.AxolotlMixin_API",
@@ -508,6 +509,7 @@
     "minecraft.world.ticks.ScheduledTickMixin_API",
     "minecraft.world.ticks.TickPriorityMixin_API",
     "service.permission.SubjectMixin_API",
+    "tag.TaggableMixin",
     "world.LocatableBlockMixin_API"
   ],
   "client": [

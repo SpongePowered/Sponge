@@ -31,9 +31,6 @@ import cpw.mods.modlauncher.api.IEnvironment;
 import cpw.mods.modlauncher.api.IModuleLayerManager;
 import cpw.mods.modlauncher.api.ITransformationService;
 import cpw.mods.modlauncher.api.ITransformer;
-import cpw.mods.modlauncher.api.TypesafeMap;
-import joptsimple.OptionSpec;
-import joptsimple.OptionSpecBuilder;
 import net.minecraftforge.fml.loading.LoadingModList;
 import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
 import org.apache.logging.log4j.LogManager;
@@ -43,44 +40,17 @@ import org.spongepowered.transformers.modlauncher.AccessWidenerTransformationSer
 import org.spongepowered.transformers.modlauncher.SuperclassChanger;
 
 import java.net.MalformedURLException;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
-import java.util.function.BiFunction;
-import java.util.function.Supplier;
 import java.util.jar.Attributes;
 
 public class SpongeForgeTransformationService implements ITransformationService {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private OptionSpec<Boolean> checkHashes;
-    private OptionSpec<String> librariesDirectoryName;
-
     @NonNull
     @Override
     public String name() {
         return "spongeforge";
-    }
-
-    @Override
-    public void arguments(final BiFunction<String, String, OptionSpecBuilder> argumentBuilder) {
-        this.checkHashes = argumentBuilder.apply("checkHashes", "Whether to check hashes when downloading libraries")
-            .withOptionalArg()
-            .ofType(Boolean.class)
-            .defaultsTo(true);
-        this.librariesDirectoryName = argumentBuilder.apply("librariesDir", "The directory to download SpongeForge libraries to")
-            .withOptionalArg()
-            .ofType(String.class)
-            .defaultsTo("sponge-libraries");
-    }
-
-    @Override
-    public void argumentValues(final OptionResult option) {
-        Launcher.INSTANCE.environment().computePropertyIfAbsent(Keys.CHECK_LIBRARY_HASHES.get(), $ -> option.value(this.checkHashes));
-        Launcher.INSTANCE.environment().computePropertyIfAbsent(Keys.LIBRARIES_DIRECTORY.get(),
-            $ -> Launcher.INSTANCE.environment().getProperty(IEnvironment.Keys.GAMEDIR.get())
-            .orElseThrow(() -> new IllegalStateException("No game directory was available"))
-            .resolve(option.value(this.librariesDirectoryName)));
     }
 
     @Override
@@ -145,15 +115,5 @@ public class SpongeForgeTransformationService implements ITransformationService 
     @SuppressWarnings("rawtypes") // :)
     public List<ITransformer> transformers() {
         return List.of(new ListenerTransformer());
-    }
-
-    public static final class Keys {
-
-        public static final Supplier<TypesafeMap.Key<Boolean>> CHECK_LIBRARY_HASHES = IEnvironment.buildKey("sponge:check_library_hashes", Boolean.class);
-        public static final Supplier<TypesafeMap.Key<Path>> LIBRARIES_DIRECTORY = IEnvironment.buildKey("sponge:libraries_directory", Path.class);
-
-        private Keys() {
-        }
-
     }
 }

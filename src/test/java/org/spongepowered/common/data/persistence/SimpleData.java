@@ -24,44 +24,14 @@
  */
 package org.spongepowered.common.data.persistence;
 
-import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataSerializable;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
-final class SimpleData implements DataSerializable {
-
-    private final int testInt;
-    private final double testDouble;
-    private final String testString;
-    private final String[] testList;
-
-    SimpleData(final int testInt, final double testDouble, final String testString, final List<String> testList) {
-        this.testInt = testInt;
-        this.testDouble = testDouble;
-        this.testString = testString;
-        this.testList = testList.toArray(new String[testList.size()]);
-    }
-
-    public int getTestInt() {
-        return this.testInt;
-    }
-
-    public double getTestDouble() {
-        return this.testDouble;
-    }
-
-    public String getTestString() {
-        return this.testString;
-    }
-
-    public List<String> getTestList() {
-        return ImmutableList.copyOf(this.testList);
-    }
+public record SimpleData(int testInt, double testDouble, String testString, String[] testList) implements DataSerializable {
 
     @Override
     public int contentVersion() {
@@ -80,7 +50,7 @@ final class SimpleData implements DataSerializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.testInt, this.testDouble, this.testString, this.testList);
+        return Objects.hash(this.testInt, this.testDouble, this.testString, Arrays.hashCode(this.testList));
     }
 
     @Override

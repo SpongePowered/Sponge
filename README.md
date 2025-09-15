@@ -1,4 +1,4 @@
-Sponge ![Java CI with Gradle](https://github.com/SpongePowered/Sponge/workflows/Java%20CI%20with%20Gradle/badge.svg?branch=api-11&event=push)
+Sponge [![Build and Deploy](https://github.com/SpongePowered/Sponge/actions/workflows/deploy.yaml/badge.svg)](https://github.com/SpongePowered/Sponge/actions/workflows/deploy.yaml)
 =============
 
 The SpongeAPI implementation targeting vanilla Minecraft and 3rd party platforms. It is licensed under the [MIT License].
@@ -11,17 +11,23 @@ The SpongeAPI implementation targeting vanilla Minecraft and 3rd party platforms
 
 ## Latest Builds
 
-### Sponge
-
-[![Sponge Latest](https://img.shields.io/nexus/maven-snapshots/org.spongepowered/sponge?label=Latest&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dsponge%20AND%20attributes.maven2.groupId%3Dorg.spongepowered)
-
-[![Sponge 1.16.5](https://img.shields.io/nexus/maven-snapshots/org.spongepowered/sponge?label=1.16.5&queryOpt=%3Aversion%3D1.16.5*&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dsponge%20AND%20attributes.maven2.groupId%3Dorg.spongepowered%20AND%20version%3D1.16.5*)
-
 ### SpongeVanilla
 
 [![SpongeVanilla Latest](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongevanilla?label=Latest&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dspongevanilla%20AND%20attributes.maven2.groupId%3Dorg.spongepowered)
 
-[![SpongeVanilla 1.16.5](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongevanilla?label=1.16.5&queryOpt=%3Aversion%3D1.16.5*&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dspongevanilla%20AND%20attributes.maven2.groupId%3Dorg.spongepowered%20AND%20version%3D1.16.5*)
+[![SpongeVanilla 1.21.4](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongevanilla?label=1.21.4&queryOpt=%3Aversion%3D1.21.4*&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dspongevanilla%20AND%20attributes.maven2.groupId%3Dorg.spongepowered%20AND%20version%3D1.21.4*)
+
+### SpongeForge
+
+[![SpongeForge Latest](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongeforge?label=Latest&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dspongeforge%20AND%20attributes.maven2.groupId%3Dorg.spongepowered)
+
+[![SpongeForge 1.21.4](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongeforge?label=1.21.4&queryOpt=%3Aversion%3D1.21.4*&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dspongeforge%20AND%20attributes.maven2.groupId%3Dorg.spongepowered%20AND%20version%3D1.21.4*)
+
+### SpongeNeo
+
+[![SpongeNeo Latest](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongeneo?label=Latest&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dspongeneo%20AND%20attributes.maven2.groupId%3Dorg.spongepowered)
+
+[![SpongeNeo 1.21.4](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongeneo?label=1.21.4&queryOpt=%3Aversion%3D1.21.4*&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dspongeneo%20AND%20attributes.maven2.groupId%3Dorg.spongepowered%20AND%20version%3D1.21.4*)
 
 
 ## Prerequisites
@@ -36,7 +42,7 @@ The following steps will ensure your project is cloned properly.
 
 ## Setup
 **Note**: Sponge uses [Gradle] as its build system. The repo includes the Gradle wrapper that will automatically download the correct Gradle 
-version. Local installations of Gradle may work (as long as they are using Gradle 6.8+) but are untested. To execute the Gradle wrapper, run the 
+version. Local installations of Gradle may work (as long as they are using Gradle 8.8+) but are untested. To execute the Gradle wrapper, run the 
 `./gradlew` script on Unix systems or only `gradlew` on Windows systems.
 
 To have browsable sources for use in-IDE, run `./gradlew :decompile`. This command will need to be re-ran after any change to
@@ -70,7 +76,7 @@ of `./gradlew build` to invoke the Gradle wrapper. You can find the compiled JAR
 The following steps will update your clone with the official repo.
 
 1. `git pull`
-2. `git submodule update --recursive`
+2. `git submodule update`
 3. `./gradlew build --refresh-dependencies`
 
 ## Contributing

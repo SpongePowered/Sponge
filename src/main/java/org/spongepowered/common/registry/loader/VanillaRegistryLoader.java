@@ -46,6 +46,7 @@ import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.entity.animal.Rabbit;
 import net.minecraft.world.entity.animal.Salmon;
 import net.minecraft.world.entity.animal.TropicalFish;
+import net.minecraft.world.entity.animal.axolotl.Axolotl;
 import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.animal.horse.Markings;
 import net.minecraft.world.entity.animal.horse.Variant;
@@ -238,6 +239,7 @@ public final class VanillaRegistryLoader {
         this.automaticName(RegistryTypes.TRIAL_SPAWNER_STATE, TrialSpawnerState.values());
         this.automaticName(RegistryTypes.VAULT_STATE, VaultState.values());
         this.automaticName(RegistryTypes.EXPLOSION_BLOCK_INTERACTION, Explosion.BlockInteraction.values());
+        this.automaticName(RegistryTypes.AXOLOTL_VARIANT, Axolotl.Variant.values());
     }
 
     private static RegistryLoader<Criterion> criterion() {

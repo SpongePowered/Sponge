@@ -30,7 +30,6 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.util.PathConverter;
 import joptsimple.util.PathProperties;
-import org.spongepowered.configurate.util.UnmodifiableCollections;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -43,10 +42,6 @@ public final class LauncherCommandLine {
         .accepts("installerDir", "Alternative installer directory").withRequiredArg()
         .withValuesConvertedBy(new PathConverter(PathProperties.DIRECTORY_EXISTING))
         .defaultsTo(Paths.get("."));
-    private static final ArgumentAcceptingOptionSpec<Path> LIBRARIES_DIRECTORY_ARG = LauncherCommandLine.PARSER
-        .accepts("librariesDir", "Alternative libraries directory").withRequiredArg()
-        .withValuesConvertedBy(new PathConverter(PathProperties.DIRECTORY_EXISTING))
-        .defaultsTo(Paths.get("libraries"));
     private static final ArgumentAcceptingOptionSpec<String> LAUNCH_TARGET_ARG = LauncherCommandLine.PARSER
         .accepts("launchTarget", "Launch target").withRequiredArg();
     private static final NonOptionArgumentSpec<String> REMAINDER = LauncherCommandLine.PARSER.nonOptions().ofType(String.class);
@@ -55,7 +50,7 @@ public final class LauncherCommandLine {
         LauncherCommandLine.PARSER.allowsUnrecognizedOptions();
     }
 
-    public static Path installerDirectory, librariesDirectory;
+    public static Path installerDirectory;
     public static String launchTarget;
     public static List<String> remainingArgs;
 
@@ -65,8 +60,7 @@ public final class LauncherCommandLine {
     public static void configure(final String[] args) {
         final OptionSet options = LauncherCommandLine.PARSER.parse(args);
         LauncherCommandLine.installerDirectory = options.valueOf(LauncherCommandLine.INSTALLER_DIRECTORY_ARG);
-        LauncherCommandLine.librariesDirectory = options.valueOf(LauncherCommandLine.LIBRARIES_DIRECTORY_ARG);
         LauncherCommandLine.launchTarget = options.valueOf(LauncherCommandLine.LAUNCH_TARGET_ARG);
-        LauncherCommandLine.remainingArgs = UnmodifiableCollections.copyOf(options.valuesOf(LauncherCommandLine.REMAINDER));
+        LauncherCommandLine.remainingArgs = List.copyOf(options.valuesOf(LauncherCommandLine.REMAINDER));
     }
 }

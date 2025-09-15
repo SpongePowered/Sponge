@@ -35,7 +35,7 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.teleport.TeleportHelper;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
 import org.spongepowered.api.world.teleport.TeleportHelperFilters;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.launch.config.core.SpongeConfigs;
 import org.spongepowered.math.GenericMath;
 import org.spongepowered.math.vector.Vector3i;
 

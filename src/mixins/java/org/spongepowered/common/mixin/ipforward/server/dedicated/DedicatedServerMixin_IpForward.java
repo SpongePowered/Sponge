@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.ipforward.server.dedicated;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.server.dedicated.DedicatedServer;
 import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Final;
@@ -32,8 +34,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.applaunch.config.common.IpForwardingCategory;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.launch.config.common.IpForwardingCategory;
+import org.spongepowered.common.launch.config.core.SpongeConfigs;
 
 @Mixin(DedicatedServer.class)
 public class DedicatedServerMixin_IpForward {
@@ -50,4 +52,11 @@ public class DedicatedServerMixin_IpForward {
         }
     }
 
+    @WrapOperation(method = "initServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/GameProfileCache;setUsesAuthentication(Z)V"))
+    private void ipForwarding$proxyOnlineMode(final boolean value, final Operation<Void> original) {
+        final IpForwardingCategory ipForwarding = SpongeConfigs.getCommon().get().ipForwarding;
+        original.call(ipForwarding.mode != IpForwardingCategory.Mode.NONE
+            ? ipForwarding.onlineMode
+            : value);
+    }
 }

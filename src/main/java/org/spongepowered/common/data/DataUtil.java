@@ -59,15 +59,24 @@ public final class DataUtil {
         return false;
     }
 
+    public static DataContainer convertTagToContainer(final CompoundTag compound) {
+        final DataContainer allData = NBTTranslator.INSTANCE.translate(compound);
+
+        DataUtil.upgradeDataVersion(compound, allData); // Upgrade v2->v3
+
+        return allData;
+    }
+
     public static <T extends SpongeDataHolderBridge & DataCompoundHolder> void deserializeSpongeData(final T dataHolder) {
         final CompoundTag compound = dataHolder.data$getCompound();
         if (compound == null) {
             return;
         }
-        final DataContainer allData = NBTTranslator.INSTANCE.translate(compound);
 
-        DataUtil.upgradeDataVersion(compound, allData); // Upgrade v2->v3
+        DataUtil.deserializeSpongeData(dataHolder, DataUtil.convertTagToContainer(compound));
+    }
 
+    public static <T extends SpongeDataHolderBridge> void deserializeSpongeData(final T dataHolder, final DataContainer allData) {
         // Run content-updaters and collect failed data
         final Class<? extends DataHolder> typeToken = dataHolder.getClass().asSubclass(DataHolder.class);
         allData.getView(Constants.Sponge.Data.V3.SPONGE_DATA_ROOT).ifPresent(customData -> {

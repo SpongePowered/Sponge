@@ -56,5 +56,10 @@ public class StubPhaseState implements IPhaseState<StubPhaseState.StubContext> {
         ) {
             super(state, tracker);
         }
+
+        @Override
+        protected boolean isRunaway(final PhaseContext<?> phaseContext) {
+            return false;
+        }
     }
 }

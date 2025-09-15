@@ -79,7 +79,7 @@ public final class TagGenerator implements Generator {
         clazz.addAnnotation(Types.suppressWarnings("unused"));
         clazz.addAnnotation(TagGenerator.SCOPE.registryScopeAnnotation());
 
-        final var fieldType = ParameterizedTypeName.get(Types.TAG, this.typeName);
+        final var fieldType = ParameterizedTypeName.get(Types.DEFAULTED_TAG, this.typeName);
         final ParameterSpec locationParam = ParameterSpec.builder(Types.RESOURCE_KEY, "key", Modifier.FINAL).build();
         final var factoryMethod = MethodSpec.methodBuilder("key")
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
@@ -87,7 +87,7 @@ public final class TagGenerator implements Generator {
                 .addParameter(locationParam)
                 .addCode(
                         "return $T.of($T.$L, $N);",
-                        Types.TAG,
+                        Types.DEFAULTED_TAG,
                         Types.REGISTRY_TYPES,
                         this.registryTypeName.toUpperCase(Locale.ROOT),
                         locationParam

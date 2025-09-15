@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.bridge.world.inventory.container;
 
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -49,4 +50,7 @@ public interface ContainerBridge {
 
     boolean bridge$isInUse();
 
+    void bridge$setViewer(@Nullable ServerPlayer player);
+
+    @Nullable ServerPlayer bridge$getViewer();
 }

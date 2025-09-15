@@ -144,7 +144,7 @@ public final class TagTest {
                 .executor(ctx -> {
                     final BlockType blockType = TagTest.raytraceBlock(ctx).blockState().type();
                     final Audience audience = ctx.cause().audience();
-                    TagTest.sendTags(audience, blockType);
+                    TagTest.sendTags(audience, blockType, RegistryTypes.BLOCK_TYPE);
                     return CommandResult.success();
                 })
                 .build();
@@ -153,7 +153,7 @@ public final class TagTest {
                 .executor(ctx -> {
                     final ItemType itemType = TagTest.requireItemInHand(ctx);
                     final Audience audience = ctx.cause().audience();
-                    TagTest.sendTags(audience, itemType);
+                    TagTest.sendTags(audience, itemType, RegistryTypes.ITEM_TYPE);
                     return CommandResult.success();
                 })
                 .build();
@@ -162,7 +162,7 @@ public final class TagTest {
                 .executor(ctx -> {
                     final EntityType<?> entityType = TagTest.raytraceEntity(ctx);
                     final Audience audience = ctx.cause().audience();
-                    TagTest.sendTags(audience, entityType);
+                    TagTest.sendTags(audience, entityType, RegistryTypes.ENTITY_TYPE);
                     return CommandResult.success();
                 })
                 .build();
@@ -171,7 +171,7 @@ public final class TagTest {
                 .executor(ctx -> {
                     final FluidType fluidType = TagTest.raytraceBlock(ctx).blockState().fluidState().type();
                     final Audience audience = ctx.cause().audience();
-                    TagTest.sendTags(audience, fluidType);
+                    TagTest.sendTags(audience, fluidType, RegistryTypes.FLUID_TYPE);
                     return CommandResult.success();
                 })
                 .build();
@@ -295,9 +295,9 @@ public final class TagTest {
         return heldItem.type();
     }
 
-    private static <T extends Taggable<@NonNull T>> void sendTags(final Audience audience, final T taggable) {
-        final Collection<Tag<T>> tags = taggable.tags();
-        final String taggableKey = taggable.registryType().get().valueKey(taggable).toString();
+    private static <T extends Taggable<@NonNull T>> void sendTags(final Audience audience, final T taggable, final DefaultedRegistryType<T> registry) {
+        final Collection<Tag<T>> tags = taggable.tags(registry).toList();
+        final String taggableKey = taggable.key(registry).toString();
         if (tags.isEmpty()) {
             audience.sendMessage(Component.text(taggableKey + " has no tags", NamedTextColor.RED));
             return;

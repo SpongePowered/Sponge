@@ -53,7 +53,7 @@ public final class PluginDependencyConfigurable implements IConfigurable {
 
         return switch (key[0]) {
             case "modId" -> (Optional<T>) Optional.of(this.dependency.id());
-            case "mandatory" -> (Optional<T>) Optional.of(!this.dependency.optional());
+            case "type" -> (Optional<T>) Optional.of(this.optionalToDependencyType(this.dependency.optional()).toString());
             case "versionRange" -> (Optional<T>) Optional.of(this.dependency.version().toString());
             case "ordering" -> (Optional<T>) Optional.of(this.loadToOrdering(this.dependency.loadOrder()).toString());
             case "side" -> (Optional<T>) Optional.of(IModInfo.DependencySide.BOTH.toString());
@@ -72,5 +72,9 @@ public final class PluginDependencyConfigurable implements IConfigurable {
         }
 
         return IModInfo.Ordering.NONE;
+    }
+
+    private IModInfo.DependencyType optionalToDependencyType(final boolean optional) {
+        return optional ? IModInfo.DependencyType.OPTIONAL : IModInfo.DependencyType.REQUIRED;
     }
 }

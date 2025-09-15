@@ -377,7 +377,7 @@ public final class SpongeChannelManager implements ChannelManager {
         return false;
     }
 
-    public void handleLoginResponsePayload(final EngineConnection connection, final EngineConnectionState state, final ResourceLocation channelKey, final int transactionId, final @Nullable Consumer<FriendlyByteBuf> payload) {
+    public void handleLoginResponsePayload(final EngineConnection connection, final EngineConnectionState state, final int transactionId, final @Nullable Consumer<FriendlyByteBuf> payload) {
         // Client -> Server response
         final ChannelBuf buf;
         if (payload != null) {
@@ -397,7 +397,7 @@ public final class SpongeChannelManager implements ChannelManager {
     }
 
     private void handleLoginResponsePayload(final EngineConnection connection, final EngineConnectionState state, final int transactionId, final @Nullable ChannelBuf payload) {
-        // Sponge magic... Allows normal packets to be send during the login phase from the client to server
+        // Sponge magic... Allows normal packets to be sent during the login phase from the client to server
         if (transactionId == Constants.Channels.LOGIN_PAYLOAD_IGNORED_TRANSACTION_ID) {
             return;
         }

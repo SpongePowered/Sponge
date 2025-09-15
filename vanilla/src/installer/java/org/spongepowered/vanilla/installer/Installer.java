@@ -24,54 +24,32 @@
  */
 package org.spongepowered.vanilla.installer;
 
-import org.spongepowered.configurate.CommentedConfigurationNode;
-import org.spongepowered.configurate.ConfigurateException;
-import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
-import org.spongepowered.configurate.loader.ConfigurationLoader;
-import org.spongepowered.configurate.objectmapping.ObjectMapper;
-import org.spongepowered.configurate.objectmapping.meta.NodeResolver;
+import org.spongepowered.common.applaunch.config.LaunchConfig;
+import org.spongepowered.common.applaunch.config.TokenReplacement;
 import org.spongepowered.libs.LibraryManager;
 import org.spongepowered.vanilla.installer.library.TinyLogger;
 
+import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public final class Installer {
-
     private final Path directory;
     private final LibraryManager libraryManager;
-    private final ConfigurationLoader<CommentedConfigurationNode> loader;
-    private final LauncherConfig config;
+    private final LaunchConfig config;
 
-    public Installer(final Path directory) throws ConfigurateException {
+    public Installer(final Path directory) throws IOException {
         this.directory = directory;
-        final Path launcherConfigFile = this.directory.resolve("launcher.conf");
-        this.loader = HoconConfigurationLoader.builder()
-                .path(launcherConfigFile)
-                .defaultOptions(options ->
-                    options.shouldCopyDefaults(true)
-                            .implicitInitialization(true)
-                            .serializers(builder -> builder.registerAnnotatedObjects(ObjectMapper.factoryBuilder()
-                                                         .addNodeResolver(NodeResolver.onlyWithSetting())
-                                                                                             .build()))
-                )
-                .build();
-        this.config = this.loadConfig();
+        this.config = LaunchConfig.load(directory, true);
+
+        final TokenReplacement tokens = new TokenReplacement();
+        tokens.register("BASE_DIR", directory);
+
         this.libraryManager = new LibraryManager(
             TinyLogger.INSTANCE,
-            this.config.checkLibraryHashes,
-            Paths.get(this.config.librariesDirectory.replace("${BASE_DIRECTORY}", directory.toAbsolutePath().toString())),
+            this.config.checkLibraryHashes(),
+            Path.of(tokens.replace(this.config.librariesDirectory())),
             this.getClass().getResource("/sponge-libraries.json")
         );
-    }
-
-    private LauncherConfig loadConfig() throws ConfigurateException {
-        final CommentedConfigurationNode node = this.loader.load();
-        final LauncherConfig ret = node.get(LauncherConfig.class);
-
-        // Write back to apply any additions to the file
-        this.loader.save(node);
-        return ret;
     }
 
     public Path getDirectory() {
@@ -82,7 +60,7 @@ public final class Installer {
         return this.libraryManager;
     }
 
-    public LauncherConfig getLauncherConfig() {
+    public LaunchConfig getConfig() {
         return this.config;
     }
 }

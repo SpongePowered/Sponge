@@ -55,8 +55,8 @@ public final class SpongeGameProfile implements GameProfile {
     public static final UUID EMPTY_UUID = new UUID(0, 0);
 
     public static SpongeGameProfile of(final com.mojang.authlib.GameProfile mcProfile) {
-        final UUID uniqueId = mcProfile.getId() == null ? SpongeGameProfile.EMPTY_UUID : mcProfile.getId();
-        final String name = mcProfile.getName();
+        final UUID uniqueId = mcProfile.getId();
+        final String name = mcProfile.getName().isEmpty() ? null : mcProfile.getName();
         final List<SpongeProfileProperty> properties = mcProfile.getProperties().values().stream()
                 .map(SpongeProfileProperty::new)
                 .collect(Collectors.toList());
@@ -64,17 +64,13 @@ public final class SpongeGameProfile implements GameProfile {
     }
 
     public static SpongeGameProfile basicOf(final com.mojang.authlib.GameProfile mcProfile) {
-        final UUID uniqueId = mcProfile.getId() == null ? SpongeGameProfile.EMPTY_UUID : mcProfile.getId();
-        final String name = mcProfile.getName();
+        final UUID uniqueId = mcProfile.getId();
+        final String name = mcProfile.getName().isEmpty() ? null : mcProfile.getName();
         return new SpongeGameProfile(uniqueId, name);
     }
 
     public static com.mojang.authlib.GameProfile toMcProfile(final GameProfile profile) {
         return ((SpongeGameProfile) profile).toMcProfile();
-    }
-
-    public static com.mojang.authlib.GameProfile toMcProfileNonNull(final GameProfile profile) {
-        return ((SpongeGameProfile) profile).toMcProfileNonNull();
     }
 
     public static GameProfile unsignedOf(final GameProfile profile) {
@@ -134,17 +130,6 @@ public final class SpongeGameProfile implements GameProfile {
     }
 
     public com.mojang.authlib.GameProfile toMcProfile() {
-        final UUID uniqueId = this.uniqueId.equals(SpongeGameProfile.EMPTY_UUID) ? null : this.uniqueId;
-        final String name = this.name;
-        final com.mojang.authlib.GameProfile mcProfile = new com.mojang.authlib.GameProfile(uniqueId, name);
-        for (final SpongeProfileProperty property : this.properties) {
-            mcProfile.getProperties().put(property.name(), property.asProperty());
-        }
-        return mcProfile;
-    }
-
-    public com.mojang.authlib.GameProfile toMcProfileNonNull() {
-        // Make sure UUID and name are non-null
         final UUID uniqueId = this.uniqueId;
         final String name = (this.name == null) ? "" : this.name;
         final com.mojang.authlib.GameProfile mcProfile = new com.mojang.authlib.GameProfile(uniqueId, name);

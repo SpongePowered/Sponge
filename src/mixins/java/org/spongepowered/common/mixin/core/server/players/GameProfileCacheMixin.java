@@ -156,15 +156,12 @@ public abstract class GameProfileCacheMixin implements GameProfileCacheBridge {
     private static void impl$lookUpViaSponge(final GameProfileRepository repository, final String[] names,
             final ProfileLookupCallback callback) {
         final GameProfileManager profileManager = Sponge.server().gameProfileManager();
-        profileManager.basicProfile(names[0])
-                .whenComplete((profile, ex) -> {
-                    if (ex != null) {
-                        callback.onProfileLookupFailed(names[0],
-                                ex instanceof Exception ? (Exception) ex : new RuntimeException(ex));
-                    } else {
-                        callback.onProfileLookupSucceeded(SpongeGameProfile.toMcProfile(profile));
-                    }
-                });
+        try {
+            callback.onProfileLookupSucceeded(SpongeGameProfile.toMcProfile(profileManager.basicProfile(names[0]).join()));
+        } catch (final Throwable e) {
+            callback.onProfileLookupFailed(names[0],
+                e instanceof final Exception ex ? ex : new RuntimeException(e));
+        }
     }
 
     @Inject(method = "save", at = @At("HEAD"), cancellable = true)

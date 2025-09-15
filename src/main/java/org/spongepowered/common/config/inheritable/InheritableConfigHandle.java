@@ -25,8 +25,8 @@
 package org.spongepowered.common.config.inheritable;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.applaunch.config.core.ConfigHandle;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.launch.config.core.ConfigHandle;
+import org.spongepowered.common.launch.config.core.SpongeConfigs;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.loader.ConfigurationLoader;

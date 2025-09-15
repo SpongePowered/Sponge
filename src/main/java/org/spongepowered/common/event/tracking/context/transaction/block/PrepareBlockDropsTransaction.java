@@ -33,7 +33,9 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.TransactionFlow;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
 
@@ -97,7 +99,18 @@ public final class PrepareBlockDropsTransaction extends BlockEventBasedTransacti
 
     @Override
     public Optional<AbsorbingFlowStep> parentAbsorber() {
-        return Optional.of((ctx, tx) -> tx.absorbBlockDropsPreparation(ctx, this));
+        return Optional.of(new AbsorbingFlowStep() {
+
+            @Override
+            public boolean absorb(final PhaseContext<@NonNull ?> context, final TransactionFlow transaction) {
+                return transaction.absorbBlockDropsPreparation(context, PrepareBlockDropsTransaction.this);
+            }
+
+            @Override
+            public @Nullable EffectTransactor absorbChildren(final PhaseContext<@NonNull ?> context, final TransactionFlow transaction) {
+                return transaction.absorbBlockDropsPreparationChildren(context);
+            }
+        });
     }
 
 }

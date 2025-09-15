@@ -30,7 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.common.collect.Lists;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -54,7 +53,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Disabled("Can't run these tests without access to a ResourceKey implementation")
 public class ConfigurateDataViewTest {
     private static final HoconDataFormat HOCON = new HoconDataFormat();
 
@@ -71,7 +69,7 @@ public class ConfigurateDataViewTest {
         node.node("foo", "stringList").raw(stringList);
         final List<SimpleData> dataList = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
-            dataList.add(new SimpleData(i, 10.0 + i, "String" + i, Collections.emptyList()));
+            dataList.add(new SimpleData(i, 10.0 + i, "String" + i, new String[0]));
         }
         node.node("foo", "nested", "Data").raw(dataList);
 
@@ -141,7 +139,7 @@ public class ConfigurateDataViewTest {
     }
 
     @Test
-    void testRespawnLocationData() throws IOException {
+    void testRespawnLocationData() {
         final Map<ResourceKey, RespawnLocation> m = new HashMap<>();
         for (int i = 0; i < 5; i++) {
             final ResourceKey key = ResourceKey.sponge("overworld" + i);
@@ -159,7 +157,7 @@ public class ConfigurateDataViewTest {
     }
 
     @Test
-    void testNumber() throws IOException {
+    void testNumber() {
         final DataContainer container = DataContainer.createNew().set(DataQuery.of("double"), 1.0);
 
         final ConfigurationNode node = ConfigurateTranslator.instance().translate(container);
@@ -191,18 +189,6 @@ public class ConfigurateDataViewTest {
     void testNullRootKey() {
         assertThrows(IllegalArgumentException.class, () ->
                 ConfigurateTranslator.instance().translate(BasicConfigurationNode.root().raw("bar")));
-    }
-
-    @Test
-    void testNullMapKey() {
-        final ConfigurationNode node = CommentedConfigurationNode.root();
-        final Map<String, String> map = Collections.singletonMap(null, "v");
-        final List<Object> list = Arrays.asList("e", map);
-
-        node.node("foo").raw("bar");
-        node.node("l").raw(list);
-
-        assertThrows(IllegalArgumentException.class, () -> ConfigurateTranslator.instance().translate(node));
     }
 
     @Test

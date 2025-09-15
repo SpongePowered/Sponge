@@ -25,6 +25,7 @@
 package org.spongepowered.common.service.server.permission;
 
 import com.mojang.authlib.GameProfile;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
@@ -45,7 +46,7 @@ public class UserCollection extends SpongeSubjectCollection {
 
     @Override
     public SpongeSubject get(final String identifier) {
-        final UUID uuid = this.identityToUuid(identifier);
+        final @Nullable UUID uuid = this.identityToUuid(identifier);
         if (uuid == null) {
             throw new IllegalArgumentException("Provided identifier must be a uuid, was " + identifier);
         }
@@ -61,24 +62,22 @@ public class UserCollection extends SpongeSubjectCollection {
             return SpongeGameProfile.toMcProfile(Sponge.server().gameProfileManager().basicProfile(uuid).get());
         } catch (final Exception e) {
             SpongeCommon.logger().warn("Failed to lookup game profile for {}", uuid, e);
-            // TODO: I'm sure this is null for a reason, but it breaks subjects.
-            // Temporary.
-            return new GameProfile(uuid, null);
+            return new GameProfile(uuid, "");
         }
     }
 
     @Override
     public boolean isRegistered(final String identifier) {
-        final UUID uuid = this.identityToUuid(identifier);
+        final @Nullable UUID uuid = this.identityToUuid(identifier);
         if (uuid == null) {
             return false;
         }
         // Name doesn't matter when getting entries
-        final GameProfile profile = new GameProfile(uuid, null);
+        final GameProfile profile = new GameProfile(uuid, "");
         return SpongePermissionService.getOps().get(profile) != null;
     }
 
-    private UUID identityToUuid(final String identifier) {
+    private @Nullable UUID identityToUuid(final String identifier) {
         try {
             return UUID.fromString(identifier);
         } catch (final IllegalArgumentException e) {
@@ -90,17 +89,6 @@ public class UserCollection extends SpongeSubjectCollection {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Collection<Subject> loadedSubjects() {
         return (Collection) SpongeCommon.game().server().onlinePlayers();
-        /*return ImmutableSet.copyOf(Iterables.concat(
-                Iterables.<Object, Subject>transform(SpongePermissionService.getOps().getValues().values(),
-                        new Function<Object, Subject>() {
-                        @Nullable
-                        @Override
-                        public Subject apply(Object input) {
-                            GameProfile profile = (((UserListOpsEntry) input).value);
-                            return get(profile);
-                        }
-                        // WARNING: This gives dupes
-                    }), Sponge.game().getServer().getOnlinePlayers()));*/
     }
 
     public SpongePermissionService getService() {

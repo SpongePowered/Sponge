@@ -36,11 +36,11 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhasePrinter;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
+import org.spongepowered.common.launch.config.core.SpongeConfigs;
 import org.spongepowered.common.util.PrettyPrinter;
 
 

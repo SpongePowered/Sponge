@@ -69,6 +69,10 @@ public interface TransactionFlow {
     @FunctionalInterface
     interface AbsorbingFlowStep {
         boolean absorb(final PhaseContext<@NonNull ?> context, final TransactionFlow transaction);
+
+        default @Nullable EffectTransactor absorbChildren(final PhaseContext<@NonNull ?> context, final TransactionFlow transaction) {
+            return null;
+        }
     }
 
     default boolean absorbSpawnEntity(
@@ -91,6 +95,10 @@ public interface TransactionFlow {
         final PhaseContext<@NonNull ?> context, final PrepareBlockDropsTransaction prepareBlockDropsTransaction
     ) {
         return false;
+    }
+
+    default @Nullable EffectTransactor absorbBlockDropsPreparationChildren(final PhaseContext<@NonNull ?> context) {
+        return null;
     }
 
     default boolean acceptTileRemoval(final @Nullable BlockEntity tileentity) {
