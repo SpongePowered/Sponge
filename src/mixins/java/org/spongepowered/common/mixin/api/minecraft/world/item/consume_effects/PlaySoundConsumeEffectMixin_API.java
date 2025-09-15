@@ -27,14 +27,14 @@ package org.spongepowered.common.mixin.api.minecraft.world.item.consume_effects;
 import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.consume_effects.PlaySoundConsumeEffect;
-import org.spongepowered.api.data.type.ItemActionEffect;
+import org.spongepowered.api.data.type.ItemAction;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(PlaySoundConsumeEffect.class)
-public abstract class PlaySoundConsumeEffectMixin_API implements ItemActionEffect.PlaySound {
+public abstract class PlaySoundConsumeEffectMixin_API implements ItemAction.PlaySound {
 
     @Shadow @Final private Holder<SoundEvent> sound;
 

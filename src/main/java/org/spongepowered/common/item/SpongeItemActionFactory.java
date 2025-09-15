@@ -34,7 +34,7 @@ import net.minecraft.world.item.consume_effects.ClearAllStatusEffectsConsumeEffe
 import net.minecraft.world.item.consume_effects.PlaySoundConsumeEffect;
 import net.minecraft.world.item.consume_effects.RemoveStatusEffectsConsumeEffect;
 import net.minecraft.world.item.consume_effects.TeleportRandomlyConsumeEffect;
-import org.spongepowered.api.data.type.ItemActionEffect;
+import org.spongepowered.api.data.type.ItemAction;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.effect.sound.SoundType;
@@ -44,50 +44,50 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-public class SpongeItemActionEffectFactory implements ItemActionEffect.Factory {
+public class SpongeItemActionFactory implements ItemAction.Factory {
 
     @Override
-    public ItemActionEffect.ApplyEffects applyEffects(final double chance, final List<PotionEffect> effects) {
+    public ItemAction.ApplyEffects applyEffects(final double chance, final List<PotionEffect> effects) {
         Objects.requireNonNull(effects, "effects");
         if (chance < 0 || chance > 1) {
             throw new IllegalArgumentException("chance must be in range [0; 1]: " + chance);
         }
-        return (ItemActionEffect.ApplyEffects) (Object) new ApplyStatusEffectsConsumeEffect((List) List.copyOf(effects), (float) chance);
+        return (ItemAction.ApplyEffects) (Object) new ApplyStatusEffectsConsumeEffect((List) List.copyOf(effects), (float) chance);
     }
 
     @Override
-    public ItemActionEffect.RemoveEffects removeEffects(final Set<PotionEffectType> effectTypes) {
+    public ItemAction.RemoveEffects removeEffects(final Set<PotionEffectType> effectTypes) {
         Objects.requireNonNull(effectTypes, "effectTypes");
         final var holderSet = HolderSet.direct(
             effectType -> BuiltInRegistries.MOB_EFFECT.wrapAsHolder((MobEffect) effectType),
             effectTypes);
-        return (ItemActionEffect.RemoveEffects) (Object) new RemoveStatusEffectsConsumeEffect(holderSet);
+        return (ItemAction.RemoveEffects) (Object) new RemoveStatusEffectsConsumeEffect(holderSet);
     }
 
     @Override
-    public ItemActionEffect.RemoveEffects removeEffects(final Tag<PotionEffectType> effectTypeTag) {
+    public ItemAction.RemoveEffects removeEffects(final Tag<PotionEffectType> effectTypeTag) {
         Objects.requireNonNull(effectTypeTag, "effectTypeTag");
         final var tag = (TagKey<MobEffect>) (Object) effectTypeTag;
         final var holderSet = BuiltInRegistries.MOB_EFFECT.get(tag).map(hs -> (HolderSet<MobEffect>) hs).orElse(HolderSet.empty());
-        return (ItemActionEffect.RemoveEffects) (Object) new RemoveStatusEffectsConsumeEffect(holderSet);
+        return (ItemAction.RemoveEffects) (Object) new RemoveStatusEffectsConsumeEffect(holderSet);
     }
 
     @Override
-    public ItemActionEffect.ClearEffects clearEffects() {
-        return (ItemActionEffect.ClearEffects) (Object) ClearAllStatusEffectsConsumeEffect.INSTANCE;
+    public ItemAction.ClearEffects clearEffects() {
+        return (ItemAction.ClearEffects) (Object) ClearAllStatusEffectsConsumeEffect.INSTANCE;
     }
 
     @Override
-    public ItemActionEffect.PlaySound playSound(final SoundType soundType) {
+    public ItemAction.PlaySound playSound(final SoundType soundType) {
         Objects.requireNonNull(soundType, "soundType");
-        return (ItemActionEffect.PlaySound) (Object) new PlaySoundConsumeEffect(BuiltInRegistries.SOUND_EVENT.wrapAsHolder((SoundEvent) (Object) soundType));
+        return (ItemAction.PlaySound) (Object) new PlaySoundConsumeEffect(BuiltInRegistries.SOUND_EVENT.wrapAsHolder((SoundEvent) (Object) soundType));
     }
 
     @Override
-    public ItemActionEffect.TeleportRandomly teleportRandomly(final double distance) {
+    public ItemAction.TeleportRandomly teleportRandomly(final double distance) {
         if (distance <= 0) {
             throw new IllegalArgumentException("distance must be positive: " + distance);
         }
-        return (ItemActionEffect.TeleportRandomly) (Object) new TeleportRandomlyConsumeEffect((float) distance * 2);
+        return (ItemAction.TeleportRandomly) (Object) new TeleportRandomlyConsumeEffect((float) distance * 2);
     }
 }

@@ -41,7 +41,7 @@ import org.spongepowered.api.command.parameter.managed.standard.VariableValuePar
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 import org.spongepowered.api.command.selector.Selector;
 import org.spongepowered.api.data.DataManipulator;
-import org.spongepowered.api.data.type.ItemActionEffect;
+import org.spongepowered.api.data.type.ItemAction;
 import org.spongepowered.api.data.type.ToolRule;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.effect.ForwardingViewer;
@@ -125,7 +125,7 @@ import org.spongepowered.common.effect.SpongeCustomForwardingViewer;
 import org.spongepowered.common.entity.effect.SpongeVanishState;
 import org.spongepowered.common.event.SpongeEventListenerRegistration;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
-import org.spongepowered.common.item.SpongeItemActionEffectFactory;
+import org.spongepowered.common.item.SpongeItemActionFactory;
 import org.spongepowered.common.item.SpongeItemStack;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.item.SpongeToolRuleFactory;
@@ -284,7 +284,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(NaturalSpawner.Factory.class, new SpongeNaturalSpawnerFactory())
                 .registerFactory(ScoreFormat.Factory.class, new SpongeScoreFormatFactory())
                 .registerFactory(ToolRule.Factory.class, new SpongeToolRuleFactory())
-                .registerFactory(ItemActionEffect.Factory.class, new SpongeItemActionEffectFactory())
+                .registerFactory(ItemAction.Factory.class, new SpongeItemActionFactory())
                 .registerFactory(PortalLogic.Factory.class, new SpongePortalLogicFactory())
                 .registerFactory(RecipeInput.Factory.class, new SpongeRecipeInputFactory())
                 .registerFactory(ArmorTrim.Factory.class, new SpongeArmorTrimFactory())

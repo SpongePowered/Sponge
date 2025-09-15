@@ -28,8 +28,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.consume_effects.ConsumeEffect;
 import net.minecraft.world.level.Level;
-import org.spongepowered.api.data.type.ItemActionEffect;
-import org.spongepowered.api.data.type.ItemActionEffectType;
+import org.spongepowered.api.data.type.ItemAction;
+import org.spongepowered.api.data.type.ItemActionType;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,14 +39,14 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import java.util.Objects;
 
 @Mixin(ConsumeEffect.class)
-public interface ConsumeEffectMixin_API extends ItemActionEffect {
+public interface ConsumeEffectMixin_API extends ItemAction {
 
     @Shadow ConsumeEffect.Type<? extends ConsumeEffect> shadow$getType();
     @Shadow boolean shadow$apply(Level level, ItemStack itemStack, LivingEntity livingEntity);
 
     @Override
-    default ItemActionEffectType type() {
-        return (ItemActionEffectType) (Object) this.shadow$getType();
+    default ItemActionType type() {
+        return (ItemActionType) (Object) this.shadow$getType();
     }
 
     @Override

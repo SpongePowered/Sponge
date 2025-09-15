@@ -25,13 +25,13 @@
 package org.spongepowered.common.mixin.api.minecraft.world.item.consume_effects;
 
 import net.minecraft.world.item.consume_effects.TeleportRandomlyConsumeEffect;
-import org.spongepowered.api.data.type.ItemActionEffect;
+import org.spongepowered.api.data.type.ItemAction;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(TeleportRandomlyConsumeEffect.class)
-public abstract class TeleportRandomlyConsumeEffectMixin_API implements ItemActionEffect.TeleportRandomly {
+public abstract class TeleportRandomlyConsumeEffectMixin_API implements ItemAction.TeleportRandomly {
 
     @Shadow @Final private float diameter;
 

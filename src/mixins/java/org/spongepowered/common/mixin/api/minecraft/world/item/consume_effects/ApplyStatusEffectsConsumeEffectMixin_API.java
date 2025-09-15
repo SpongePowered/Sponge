@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.minecraft.world.item.consume_effects;
 
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
-import org.spongepowered.api.data.type.ItemActionEffect;
+import org.spongepowered.api.data.type.ItemAction;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
@@ -38,8 +38,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.List;
 
 @Mixin(ApplyStatusEffectsConsumeEffect.class)
-@Implements(@Interface(iface = ItemActionEffect.ApplyEffects.class, prefix = "consumeEffect$"))
-public abstract class ApplyStatusEffectsConsumeEffectMixin_API implements ItemActionEffect.ApplyEffects {
+@Implements(@Interface(iface = ItemAction.ApplyEffects.class, prefix = "consumeEffect$"))
+public abstract class ApplyStatusEffectsConsumeEffectMixin_API implements ItemAction.ApplyEffects {
 
     @Shadow @Final private float probability;
     @Shadow @Final private List<MobEffectInstance> effects;

@@ -55,7 +55,7 @@ import org.spongepowered.api.Platform;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.type.ItemActionEffect;
+import org.spongepowered.api.data.type.ItemAction;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.item.ItemRarity;
 import org.spongepowered.api.item.ItemType;
@@ -243,17 +243,17 @@ public final class ItemStackData {
                         })
                         .set((h, v) -> h.update(DataComponents.CONSUMABLE, DEFAULT_CONSUMABLE_PROPERTIES,
                                 c -> new Consumable(v.ticks() / 20f, c.animation(), c.sound(), c.hasConsumeParticles(), c.onConsumeEffects())))
-                    .create(Keys.CONSUME_EFFECTS)
+                    .create(Keys.CONSUME_ACTIONS)
                         .get(h -> {
                             final var consumable = h.get(DataComponents.CONSUMABLE);
-                            return consumable == null ? null : (List<ItemActionEffect>) (Object) consumable.onConsumeEffects();
+                            return consumable == null ? null : (List<ItemAction>) (Object) consumable.onConsumeEffects();
                         })
                         .set((h, v) -> h.update(DataComponents.CONSUMABLE, DEFAULT_CONSUMABLE_PROPERTIES,
                                 c -> new Consumable(c.consumeSeconds(), c.animation(), c.sound(), c.hasConsumeParticles(), (List<ConsumeEffect>) (Object) v)))
-                    .create(Keys.DEATH_PROTECTION_EFFECTS)
+                    .create(Keys.DEATH_PROTECTION_ACTIONS)
                         .get(h -> {
                             final var deathProtection = h.get(DataComponents.DEATH_PROTECTION);
-                            return deathProtection == null ? null : (List<ItemActionEffect>) (Object) deathProtection.deathEffects();
+                            return deathProtection == null ? null : (List<ItemAction>) (Object) deathProtection.deathEffects();
                         })
                         .set((h, v) -> h.set(DataComponents.DEATH_PROTECTION, new DeathProtection((List<ConsumeEffect>) (Object) v)))
                         .delete(h -> h.remove(DataComponents.DEATH_PROTECTION))

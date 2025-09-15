@@ -113,9 +113,9 @@ public class ItemRegistries {
             ),
             new RegistryEntriesGenerator<>(
                 "data.type",
-                "ConsumeEffectTypes",
-                "CONSUME_EFFECT_TYPE",
-                context.relativeClass("data.type", "ConsumeEffectType"),
+                "ItemActionTypes",
+                "ITEM_ACTION_TYPE",
+                context.relativeClass("data.type", "ItemActionType"),
                 Registries.CONSUME_EFFECT_TYPE
             ),
             new EnumEntriesValidator<>(

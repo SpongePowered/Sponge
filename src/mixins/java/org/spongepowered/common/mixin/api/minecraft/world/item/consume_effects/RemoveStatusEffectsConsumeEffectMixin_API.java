@@ -28,7 +28,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.item.consume_effects.RemoveStatusEffectsConsumeEffect;
-import org.spongepowered.api.data.type.ItemActionEffect;
+import org.spongepowered.api.data.type.ItemAction;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,7 +38,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Mixin(RemoveStatusEffectsConsumeEffect.class)
-public abstract class RemoveStatusEffectsConsumeEffectMixin_API implements ItemActionEffect.RemoveEffects {
+public abstract class RemoveStatusEffectsConsumeEffectMixin_API implements ItemAction.RemoveEffects {
 
     @Shadow @Final private HolderSet<MobEffect> effects;
 
