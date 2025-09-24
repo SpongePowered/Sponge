@@ -32,6 +32,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import org.spongepowered.api.effect.ForwardingViewer;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.common.bridge.effect.ViewerBridge;
 
 public interface SpongeForwardingViewer extends SpongeViewer, ForwardingViewer, ViewerBridge {
@@ -49,6 +50,11 @@ public interface SpongeForwardingViewer extends SpongeViewer, ForwardingViewer, 
     }
 
     // Viewer
+
+    @Override
+    default void playTotemOfUndyingEffect(final ItemStackLike stack) {
+        this.audiences().forEach(viewer -> viewer.playTotemOfUndyingEffect(stack));
+    }
 
     @Override
     default void playMusicDisc(final int x, final int y, final int z, final MusicDisc musicDisc) {

@@ -38,6 +38,7 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Interface.Remap;
@@ -110,6 +111,11 @@ public abstract class PlayerMixin_API extends LivingEntityMixin_API implements P
     }
 
     // Viewer
+
+    @Override
+    public void playTotemOfUndyingEffect(final ItemStackLike stack) {
+        ((ViewerBridge) this).bridge$sendToViewer(ViewerPacketUtil.totemOfUndying(this, stack));
+    }
 
     @Override
     public void playMusicDisc(final int x, final int y, final int z, final MusicDisc musicDisc) {

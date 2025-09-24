@@ -39,6 +39,8 @@ import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.network.protocol.game.ServerboundPickItemFromBlockPacket;
+import net.minecraft.network.protocol.game.ServerboundPickItemFromEntityPacket;
 import net.minecraft.network.protocol.game.ServerboundPlaceRecipePacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerAbilitiesPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
@@ -316,6 +318,8 @@ public final class PacketPhase {
         this.packetTranslationMap.put(ServerboundPlayerInputPacket.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
         this.packetTranslationMap.put(ServerboundContainerClosePacket.class, packet -> PacketPhase.General.CLOSE_WINDOW);
         this.packetTranslationMap.put(ServerboundContainerClickPacket.class, packet -> PacketPhase.fromWindowPacket((ServerboundContainerClickPacket) packet));
+        this.packetTranslationMap.put(ServerboundPickItemFromBlockPacket.class, packet -> Inventory.MIDDLE_INVENTORY_CLICK);
+        this.packetTranslationMap.put(ServerboundPickItemFromEntityPacket.class, packet -> Inventory.MIDDLE_INVENTORY_CLICK);
         this.packetTranslationMap.put(ServerboundSetCreativeModeSlotPacket.class, packet -> PacketPhase.General.CREATIVE_INVENTORY);
         this.packetTranslationMap.put(ServerboundContainerButtonClickPacket.class, packet -> PacketPhase.Inventory.ENCHANT_ITEM);
         this.packetTranslationMap.put(ServerboundSignUpdatePacket.class, packet -> PacketPhase.General.UPDATE_SIGN);
