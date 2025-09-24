@@ -111,6 +111,13 @@ public class ItemRegistries {
                 $ -> true,
                 RegistryScope.SERVER
             ),
+            new RegistryEntriesGenerator<>(
+                "data.type",
+                "ItemActionTypes",
+                "ITEM_ACTION_TYPE",
+                context.relativeClass("data.type", "ItemActionType"),
+                Registries.CONSUME_EFFECT_TYPE
+            ),
             new EnumEntriesValidator<>(
                 "entity.display",
                 "ItemDisplayTypes",

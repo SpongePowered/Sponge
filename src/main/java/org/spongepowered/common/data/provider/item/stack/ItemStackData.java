@@ -25,12 +25,11 @@
 package org.spongepowered.common.data.provider.item.stack;
 
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderSet;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.StringUtil;
 import net.minecraft.util.Unit;
@@ -43,23 +42,20 @@ import net.minecraft.world.item.component.ChargedProjectiles;
 import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.item.component.DamageResistant;
+import net.minecraft.world.item.component.DeathProtection;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.component.Unbreakable;
 import net.minecraft.world.item.component.UseCooldown;
 import net.minecraft.world.item.component.UseRemainder;
-import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
-import net.minecraft.world.item.consume_effects.ClearAllStatusEffectsConsumeEffect;
 import net.minecraft.world.item.consume_effects.ConsumeEffect;
-import net.minecraft.world.item.consume_effects.PlaySoundConsumeEffect;
-import net.minecraft.world.item.consume_effects.RemoveStatusEffectsConsumeEffect;
-import net.minecraft.world.item.consume_effects.TeleportRandomlyConsumeEffect;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.ItemAction;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.attribute.ItemAttribute;
 import org.spongepowered.api.item.ItemRarity;
@@ -80,7 +76,7 @@ import java.util.Optional;
 public final class ItemStackData {
 
     public static final FoodProperties DEFAULT_FOOD_PROPERTIES = new FoodProperties(0, 0, false);
-    public static final Consumable DEFAULT_CONSUMABLE_PROPERTIES = new Consumable(1.6F, ItemUseAnimation.EAT, null, true, List.of());
+    public static final Consumable DEFAULT_CONSUMABLE_PROPERTIES = new Consumable(1.6F, ItemUseAnimation.EAT, SoundEvents.GENERIC_EAT, true, List.of());
 
     private ItemStackData() {
     }
@@ -100,14 +96,6 @@ public final class ItemStackData {
         // TODO DataComponents.INSTRUMENT goat horn + API type + duration + range
         // TODO DataComponents.RECIPES - for Items.KNOWLEDGE_BOOK
         // TODO DataComponents.OMINOUS_BOTTLE_AMPLIFIER 1.21
-
-        // TODO rework applicable potion effects to consume effects
-        final var applicablePotionEffects = Keys.APPLICABLE_POTION_EFFECTS;
-        ConsumeEffect newPotionEffects = new ApplyStatusEffectsConsumeEffect(List.of());
-        ConsumeEffect teleportRand = new TeleportRandomlyConsumeEffect(5);
-        ConsumeEffect removeStatusEffects = new RemoveStatusEffectsConsumeEffect(HolderSet.empty());
-        ConsumeEffect clearStatusEffects = new ClearAllStatusEffectsConsumeEffect();
-        ConsumeEffect playSoundEffect = new PlaySoundConsumeEffect(Holder.direct(null));
 
         registrator
                 .asMutable(ItemStack.class)
@@ -253,6 +241,20 @@ public final class ItemStackData {
                         })
                         .set((h, v) -> h.update(DataComponents.CONSUMABLE, DEFAULT_CONSUMABLE_PROPERTIES,
                                 c -> new Consumable(v.ticks() / 20f, c.animation(), c.sound(), c.hasConsumeParticles(), c.onConsumeEffects())))
+                    .create(Keys.CONSUME_ACTIONS)
+                        .get(h -> {
+                            final var consumable = h.get(DataComponents.CONSUMABLE);
+                            return consumable == null ? null : (List<ItemAction>) (Object) consumable.onConsumeEffects();
+                        })
+                        .set((h, v) -> h.update(DataComponents.CONSUMABLE, DEFAULT_CONSUMABLE_PROPERTIES,
+                                c -> new Consumable(c.consumeSeconds(), c.animation(), c.sound(), c.hasConsumeParticles(), (List<ConsumeEffect>) (Object) v)))
+                    .create(Keys.DEATH_PROTECTION_ACTIONS)
+                        .get(h -> {
+                            final var deathProtection = h.get(DataComponents.DEATH_PROTECTION);
+                            return deathProtection == null ? null : (List<ItemAction>) (Object) deathProtection.deathEffects();
+                        })
+                        .set((h, v) -> h.set(DataComponents.DEATH_PROTECTION, new DeathProtection((List<ConsumeEffect>) (Object) v)))
+                        .delete(h -> h.remove(DataComponents.DEATH_PROTECTION))
                     .create(Keys.FOOD_CONVERTS_TO)
                         .get(h -> {
                             final var remainder = h.get(DataComponents.USE_REMAINDER);

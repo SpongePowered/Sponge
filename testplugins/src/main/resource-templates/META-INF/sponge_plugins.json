@@ -389,6 +389,12 @@
             "name": "Viewer Test",
             "entrypoint": "org.spongepowered.test.viewer.ViewerTest",
             "description": "Viewer tests"
+        },
+        {
+            "id": "consumabledata",
+            "name": "Consumable ItemStack Data",
+            "entrypoint": "org.spongepowered.test.data.ConsumableDataTest",
+            "description": "Consumable ItemStack Data"
         }
     ]
 }
