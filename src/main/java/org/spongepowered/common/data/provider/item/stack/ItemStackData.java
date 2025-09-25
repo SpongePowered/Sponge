@@ -47,6 +47,9 @@ import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.component.UseCooldown;
 import net.minecraft.world.item.component.UseRemainder;
+import net.minecraft.world.item.component.Weapon;
+import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
+import net.minecraft.world.item.consume_effects.ClearAllStatusEffectsConsumeEffect;
 import net.minecraft.world.item.consume_effects.ConsumeEffect;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Platform;
@@ -65,6 +68,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
@@ -370,6 +374,57 @@ public final class ItemStackData {
                         .get(h -> (ResourceKey) (Object) h.get(DataComponents.TOOLTIP_STYLE))
                         .set((h, v) -> h.set(DataComponents.TOOLTIP_STYLE, (ResourceLocation) (Object) v))
                         .delete(h -> h.remove(DataComponents.TOOLTIP_STYLE))
+                    .create(Keys.WEAPON_DAMAGE_PER_ATTACK)
+                        .get(h -> {
+                            final @Nullable Weapon weapon = h.get(DataComponents.WEAPON);
+                            if (weapon == null) {
+                                return null;
+                            }
+                            return weapon.itemDamagePerAttack();
+                        })
+                        .set((h, v) -> {
+                            final @Nullable Weapon weapon = h.get(DataComponents.WEAPON);
+                            h.set(DataComponents.WEAPON, new Weapon(v, weapon == null ? 0 : weapon.disableBlockingForSeconds()));
+                        })
+                        .delete(h -> {
+                            final @Nullable Weapon weapon = h.get(DataComponents.WEAPON);
+                            if (weapon == null) {
+                                return;
+                            }
+                            if (weapon.disableBlockingForSeconds() == 0) {
+                                h.remove(DataComponents.WEAPON);
+                            } else {
+                                h.set(DataComponents.WEAPON, new Weapon(0, weapon.disableBlockingForSeconds()));
+                            }
+                        })
+                    .create(Keys.DISABLE_BLOCKING_TICKS)
+                        .get(h -> {
+                            final @Nullable Weapon weapon = h.get(DataComponents.WEAPON);
+                            if (weapon == null) {
+                                return null;
+                            }
+                            return Ticks.of(Math.round(
+                                Constants.TickConversions.TICKS_PER_SECOND * weapon.disableBlockingForSeconds()
+                            ));
+                        })
+                        .set((h, v) -> {
+                            final @Nullable Weapon weapon = h.get(DataComponents.WEAPON);
+                            h.set(DataComponents.WEAPON, new Weapon(
+                                weapon == null ? 0 : weapon.itemDamagePerAttack(),
+                                v.ticks() / (float) Constants.TickConversions.TICKS_PER_SECOND
+                            ));
+                        })
+                        .delete(h -> {
+                            final @Nullable Weapon weapon = h.get(DataComponents.WEAPON);
+                            if (weapon == null) {
+                                return;
+                            }
+                            if (weapon.itemDamagePerAttack() == 0) {
+                                h.remove(DataComponents.WEAPON);
+                            } else {
+                                h.set(DataComponents.WEAPON, new Weapon(weapon.itemDamagePerAttack()));
+                            }
+                        })
         ;
     }
     // @formatter:on

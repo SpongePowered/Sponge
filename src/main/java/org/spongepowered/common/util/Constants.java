@@ -1539,6 +1539,7 @@ public final class Constants {
     public static final class TickConversions {
 
         public static final int TICK_DURATION_MS = 50;
+        public static final int TICKS_PER_SECOND = 1000 / TICK_DURATION_MS;
         public static final Duration EFFECTIVE_MINIMUM_DURATION = Duration.ofMillis(TickConversions.TICK_DURATION_MS);
 
         public static final int MINECRAFT_DAY_TICKS = 24000;
