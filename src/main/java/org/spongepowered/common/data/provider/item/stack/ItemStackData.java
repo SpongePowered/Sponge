@@ -364,6 +364,10 @@ public final class ItemStackData {
                             return builder.build();
                         })
                         .deleteAndGet(ItemStackData::deleteAndTransactUseCooldown)
+                    .create(Keys.TOOLTIP_STYLE)
+                        .get(h -> (ResourceKey) (Object) h.get(DataComponents.TOOLTIP_STYLE))
+                        .set((h, v) -> h.set(DataComponents.TOOLTIP_STYLE, (ResourceLocation) (Object) v))
+                        .delete(h -> h.remove(DataComponents.TOOLTIP_STYLE))
         ;
     }
     // @formatter:on
