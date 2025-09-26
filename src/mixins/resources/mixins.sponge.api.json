@@ -333,6 +333,8 @@
     "minecraft.world.item.RarityMixin_API",
     "minecraft.world.item.ToolMaterialMixin_API",
     "minecraft.world.item.alchemy.PotionMixin_API",
+    "minecraft.world.item.component.BlocksAttacks_DamageReductionMixin_API",
+    "minecraft.world.item.component.BlocksAttacks_ItemDamageFunction_API",
     "minecraft.world.item.component.FireworkExplosionMixin_API",
     "minecraft.world.item.component.Tool_RuleMixin_API",
     "minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffectMixin_API",

@@ -51,6 +51,8 @@ import org.spongepowered.api.data.MutableDataProviderBuilder;
 import org.spongepowered.api.data.meta.BannerPatternLayer;
 import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.data.type.ArtType;
+import org.spongepowered.api.data.type.ShieldDamageReduction;
+import org.spongepowered.api.data.type.ShieldItemDamageFunction;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.sound.SoundType;
@@ -192,6 +194,8 @@ import org.spongepowered.common.inventory.custom.SpongeViewableInventoryBuilder;
 import org.spongepowered.common.inventory.query.SpongeQueryBuilder;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
 import org.spongepowered.common.item.SpongeItemStack;
+import org.spongepowered.common.item.SpongeShieldDamageReductionBuilder;
+import org.spongepowered.common.item.SpongeShieldItemDamageFunctionBuilder;
 import org.spongepowered.common.item.enchantment.SpongeEnchantmentBuilder;
 import org.spongepowered.common.item.enchantment.SpongeRandomEnchantmentListBuilder;
 import org.spongepowered.common.item.generation.SpongeItemStackGenerator;
@@ -395,6 +399,8 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(PortalLogic.Builder.class, SpongePortalLogicBuilder::new)
                 .register(ServerWorldProperties.LoadOptions.Builder.class, SpongeServerWorldPropertiesLoadOptions.BuilderImpl::new)
                 .register(WorldArchetype.Builder.class, SpongeWorldArchetype.BuilderImpl::new)
+                .register(ShieldDamageReduction.Builder.class, SpongeShieldDamageReductionBuilder::new)
+                .register(ShieldItemDamageFunction.Builder.class, SpongeShieldItemDamageFunctionBuilder::new)
         ;
     }
 }
