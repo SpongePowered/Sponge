@@ -35,7 +35,7 @@ public final class SpongeShieldItemDamageFunctionMultiplyAddBuilder implements S
 
     @Override
     public ShieldItemDamageFunction.MultiplyAdd.Builder minAttackDamage(double minDamage) {
-        Preconditions.checkArgument(minDamage >= 0, "minAttackDamage must be >= 0");
+        Preconditions.checkArgument(minDamage >= 0, "minAttackDamage must not be negative");
         this.minAttackDamage = minDamage;
 
         return this;

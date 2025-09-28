@@ -29,7 +29,7 @@ import org.spongepowered.api.data.type.ShieldItemDamageFunction;
 public final class SpongeShieldItemDamageFunctionFactory implements ShieldItemDamageFunction.Factory {
 
     @Override
-    public ShieldItemDamageFunction<ShieldItemDamageFunction.MultiplyAdd> create(ShieldItemDamageFunction.MultiplyAdd config) {
+    public ShieldItemDamageFunction<ShieldItemDamageFunction.MultiplyAdd> create(final ShieldItemDamageFunction.MultiplyAdd config) {
         return (ShieldItemDamageFunction<ShieldItemDamageFunction.MultiplyAdd>) config;
     }
 

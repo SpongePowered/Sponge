@@ -48,7 +48,7 @@ public abstract class BlocksAttacks_DamageReductionMixin_API implements ShieldDa
     @Shadow @Final private float factor;
     @Shadow @Final private float horizontalBlockingAngle;
 
-    @Shadow public abstract float resolve(net.minecraft.world.damagesource.DamageSource $$0, float $$1, double $$2);
+    @Shadow public abstract float shadow$resolve(net.minecraft.world.damagesource.DamageSource $$0, float $$1, double $$2);
 
     @Override
     public MultiplyAdd configuration() {

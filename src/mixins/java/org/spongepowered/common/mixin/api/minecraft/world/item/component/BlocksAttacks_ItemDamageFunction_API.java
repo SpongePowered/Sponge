@@ -45,7 +45,7 @@ public abstract class BlocksAttacks_ItemDamageFunction_API implements ShieldItem
     }
 
     @Override
-    public double resolve(double damage) {
+    public double resolve(final double damage) {
         return this.apply((float) damage);
     }
 
