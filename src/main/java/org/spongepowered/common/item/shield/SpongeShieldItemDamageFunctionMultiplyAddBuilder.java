@@ -34,7 +34,7 @@ public final class SpongeShieldItemDamageFunctionMultiplyAddBuilder implements S
     private double fractionalDamage = 0;
 
     @Override
-    public ShieldItemDamageFunction.MultiplyAdd.Builder minAttackDamage(double minDamage) {
+    public ShieldItemDamageFunction.MultiplyAdd.Builder minAttackDamage(final double minDamage) {
         Preconditions.checkArgument(minDamage >= 0, "minAttackDamage must not be negative");
         this.minAttackDamage = minDamage;
 
@@ -42,14 +42,14 @@ public final class SpongeShieldItemDamageFunctionMultiplyAddBuilder implements S
     }
 
     @Override
-    public ShieldItemDamageFunction.MultiplyAdd.Builder constantDamage(double constantDamage) {
+    public ShieldItemDamageFunction.MultiplyAdd.Builder constantDamage(final double constantDamage) {
         this.constantDamage = constantDamage;
 
         return this;
     }
 
     @Override
-    public ShieldItemDamageFunction.MultiplyAdd.Builder fractionalDamage(double fractionalDamage) {
+    public ShieldItemDamageFunction.MultiplyAdd.Builder fractionalDamage(final double fractionalDamage) {
         this.fractionalDamage = fractionalDamage;
 
         return this;

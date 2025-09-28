@@ -45,7 +45,7 @@ public final class SpongeShieldDamageReductionMultiplyAddBuilder implements Shie
     private double factor = 0;
 
     @Override
-    public ShieldDamageReduction.MultiplyAdd.Builder damageTypes(Set<DamageType> damageTypes) {
+    public ShieldDamageReduction.MultiplyAdd.Builder damageTypes(final Set<DamageType> damageTypes) {
         final Registry<net.minecraft.world.damagesource.DamageType> registry = (Registry<net.minecraft.world.damagesource.DamageType>) Sponge.server().registry(RegistryTypes.DAMAGE_TYPE);
 
         this.damageTypes = HolderSet.direct(damageTypes.stream()
@@ -56,7 +56,7 @@ public final class SpongeShieldDamageReductionMultiplyAddBuilder implements Shie
     }
 
     @Override
-    public ShieldDamageReduction.MultiplyAdd.Builder damageTypes(Tag<DamageType> tag) {
+    public ShieldDamageReduction.MultiplyAdd.Builder damageTypes(final Tag<DamageType> tag) {
         final Registry<net.minecraft.world.damagesource.DamageType> registry = (Registry<net.minecraft.world.damagesource.DamageType>) Sponge.server().registry(RegistryTypes.DAMAGE_TYPE);
         final var vanillaTag = ((TagBridge<net.minecraft.world.damagesource.DamageType>) tag).bridge$asVanillaTag();
         this.damageTypes = registry.getOrThrow(vanillaTag);
@@ -65,7 +65,7 @@ public final class SpongeShieldDamageReductionMultiplyAddBuilder implements Shie
     }
 
     @Override
-    public ShieldDamageReduction.MultiplyAdd.Builder horizontalBlockingAngle(double angle) {
+    public ShieldDamageReduction.MultiplyAdd.Builder horizontalBlockingAngle(final double angle) {
         Preconditions.checkArgument(angle > 0, "angle must be positive");
         this.horizontalBlockingAngle = angle;
 
@@ -73,14 +73,14 @@ public final class SpongeShieldDamageReductionMultiplyAddBuilder implements Shie
     }
 
     @Override
-    public ShieldDamageReduction.MultiplyAdd.Builder constantReduction(double constant) {
+    public ShieldDamageReduction.MultiplyAdd.Builder constantReduction(final double constant) {
         this.base = constant;
 
         return this;
     }
 
     @Override
-    public ShieldDamageReduction.MultiplyAdd.Builder fractionalReduction(double fraction) {
+    public ShieldDamageReduction.MultiplyAdd.Builder fractionalReduction(final double fraction) {
         this.factor = fraction;
 
         return this;
