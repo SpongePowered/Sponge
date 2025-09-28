@@ -58,9 +58,9 @@ public final class SpongeShieldItemDamageFunctionMultiplyAddBuilder implements S
     @Override
     public ShieldItemDamageFunction.MultiplyAdd build() {
         return (ShieldItemDamageFunction.MultiplyAdd) (Object) new BlocksAttacks.ItemDamageFunction(
-            (float) minAttackDamage,
-            (float) constantDamage,
-            (float) fractionalDamage
+            (float) this.minAttackDamage,
+            (float) this.constantDamage,
+            (float) this.fractionalDamage
         );
     }
 

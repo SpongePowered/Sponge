@@ -37,7 +37,7 @@ public abstract class BlocksAttacks_ItemDamageFunction_API implements ShieldItem
     @Shadow @Final private float base;
     @Shadow @Final private float factor;
 
-    @Shadow public abstract int apply(float $$0);
+    @Shadow public abstract int shadow$apply(float $$0);
 
     @Override
     public MultiplyAdd configuration() {
@@ -46,7 +46,7 @@ public abstract class BlocksAttacks_ItemDamageFunction_API implements ShieldItem
 
     @Override
     public double resolve(final double damage) {
-        return this.apply((float) damage);
+        return this.shadow$apply((float) damage);
     }
 
     @Override

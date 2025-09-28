@@ -55,7 +55,7 @@ public abstract class BlocksAttacks_DamageReductionMixin_API implements ShieldDa
         return this;
     }
 
-    public double shielddamagereduction$resolve(DamageSource source, double damage, double angle) {
+    public double shielddamagereduction$resolve(final DamageSource source, final double damage, final double angle) {
         return this.shadow$resolve((net.minecraft.world.damagesource.DamageSource) source, (float) damage, angle);
     }
 
