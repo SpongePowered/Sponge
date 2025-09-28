@@ -38,7 +38,7 @@ import org.spongepowered.common.util.Preconditions;
 import java.util.Optional;
 import java.util.Set;
 
-public class SpongeShieldDamageReductionBuilder implements ShieldDamageReduction.Builder {
+public final class SpongeShieldDamageReductionBuilder implements ShieldDamageReduction.Builder {
     private HolderSet<net.minecraft.world.damagesource.DamageType> damageTypes;
     private Double horizontalBlockingAngle;
     private double base = 0;

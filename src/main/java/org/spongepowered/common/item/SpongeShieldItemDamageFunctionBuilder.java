@@ -28,7 +28,7 @@ import net.minecraft.world.item.component.BlocksAttacks;
 import org.spongepowered.api.data.type.ShieldItemDamageFunction;
 import org.spongepowered.common.util.Preconditions;
 
-public class SpongeShieldItemDamageFunctionBuilder implements ShieldItemDamageFunction.Builder {
+public final class SpongeShieldItemDamageFunctionBuilder implements ShieldItemDamageFunction.Builder {
     private double minAttackDamage = 0;
     private double constantDamage = 0;
     private double fractionalDamage = 0;
