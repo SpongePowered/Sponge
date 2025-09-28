@@ -194,8 +194,6 @@ import org.spongepowered.common.inventory.custom.SpongeViewableInventoryBuilder;
 import org.spongepowered.common.inventory.query.SpongeQueryBuilder;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
 import org.spongepowered.common.item.SpongeItemStack;
-import org.spongepowered.common.item.shield.SpongeShieldDamageReductionMultiplyAddBuilder;
-import org.spongepowered.common.item.shield.SpongeShieldItemDamageFunctionMultiplyAddBuilder;
 import org.spongepowered.common.item.enchantment.SpongeEnchantmentBuilder;
 import org.spongepowered.common.item.enchantment.SpongeRandomEnchantmentListBuilder;
 import org.spongepowered.common.item.generation.SpongeItemStackGenerator;
@@ -208,6 +206,8 @@ import org.spongepowered.common.item.recipe.crafting.shapeless.SpongeShapelessCr
 import org.spongepowered.common.item.recipe.ingredient.SpongeIngredientBuilder;
 import org.spongepowered.common.item.recipe.smithing.SpongeSmithingRecipeBuilder;
 import org.spongepowered.common.item.recipe.stonecutting.SpongeStoneCutterRecipeBuilder;
+import org.spongepowered.common.item.shield.SpongeShieldDamageReductionMultiplyAddBuilder;
+import org.spongepowered.common.item.shield.SpongeShieldItemDamageFunctionMultiplyAddBuilder;
 import org.spongepowered.common.map.canvas.SpongeMapCanvasBuilder;
 import org.spongepowered.common.map.color.SpongeMapColorBuilder;
 import org.spongepowered.common.map.decoration.SpongeMapDecorationBuilder;
