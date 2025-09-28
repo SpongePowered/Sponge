@@ -22,19 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item;
+package org.spongepowered.common.item.shield;
 
 import net.minecraft.world.item.component.BlocksAttacks;
 import org.spongepowered.api.data.type.ShieldItemDamageFunction;
 import org.spongepowered.common.util.Preconditions;
 
-public final class SpongeShieldItemDamageFunctionBuilder implements ShieldItemDamageFunction.Builder {
+public final class SpongeShieldItemDamageFunctionMultiplyAddBuilder implements ShieldItemDamageFunction.MultiplyAdd.Builder {
     private double minAttackDamage = 0;
     private double constantDamage = 0;
     private double fractionalDamage = 0;
 
     @Override
-    public ShieldItemDamageFunction.Builder minAttackDamage(double minDamage) {
+    public ShieldItemDamageFunction.MultiplyAdd.Builder minAttackDamage(double minDamage) {
         Preconditions.checkArgument(minDamage >= 0, "minAttackDamage must be >= 0");
         this.minAttackDamage = minDamage;
 
@@ -42,22 +42,22 @@ public final class SpongeShieldItemDamageFunctionBuilder implements ShieldItemDa
     }
 
     @Override
-    public ShieldItemDamageFunction.Builder constantDamage(double constantDamage) {
+    public ShieldItemDamageFunction.MultiplyAdd.Builder constantDamage(double constantDamage) {
         this.constantDamage = constantDamage;
 
         return this;
     }
 
     @Override
-    public ShieldItemDamageFunction.Builder fractionalDamage(double fractionalDamage) {
+    public ShieldItemDamageFunction.MultiplyAdd.Builder fractionalDamage(double fractionalDamage) {
         this.fractionalDamage = fractionalDamage;
 
         return this;
     }
 
     @Override
-    public ShieldItemDamageFunction build() {
-        return (ShieldItemDamageFunction) (Object) new BlocksAttacks.ItemDamageFunction(
+    public ShieldItemDamageFunction.MultiplyAdd build() {
+        return (ShieldItemDamageFunction.MultiplyAdd) (Object) new BlocksAttacks.ItemDamageFunction(
             (float) minAttackDamage,
             (float) constantDamage,
             (float) fractionalDamage
@@ -65,7 +65,7 @@ public final class SpongeShieldItemDamageFunctionBuilder implements ShieldItemDa
     }
 
     @Override
-    public ShieldItemDamageFunction.Builder reset() {
+    public ShieldItemDamageFunction.MultiplyAdd.Builder reset() {
         this.minAttackDamage = 0;
         this.constantDamage = 0;
         this.fractionalDamage = 0;

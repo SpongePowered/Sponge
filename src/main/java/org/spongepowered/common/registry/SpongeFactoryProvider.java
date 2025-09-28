@@ -42,6 +42,8 @@ import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 import org.spongepowered.api.command.selector.Selector;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.type.ItemAction;
+import org.spongepowered.api.data.type.ShieldDamageReduction;
+import org.spongepowered.api.data.type.ShieldItemDamageFunction;
 import org.spongepowered.api.data.type.ToolRule;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.effect.ForwardingViewer;
@@ -133,6 +135,8 @@ import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.item.SpongeToolRuleFactory;
 import org.spongepowered.common.item.recipe.SpongeRecipeInputFactory;
 import org.spongepowered.common.item.recipe.smithing.SpongeArmorTrimFactory;
+import org.spongepowered.common.item.shield.SpongeShieldDamageReductionFactory;
+import org.spongepowered.common.item.shield.SpongeShieldItemDamageFunctionFactory;
 import org.spongepowered.common.item.util.SpongeItemStackComparatorFactory;
 import org.spongepowered.common.network.channel.SpongeChannelExceptionHandlerFactory;
 import org.spongepowered.common.network.status.SpongeFavicon;
@@ -292,6 +296,8 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(RecipeInput.Factory.class, new SpongeRecipeInputFactory())
                 .registerFactory(ArmorTrim.Factory.class, new SpongeArmorTrimFactory())
                 .registerFactory(RegistryRegistrationSet.Factory.class, new SpongeRegistryRegistrationSet.FactoryImpl())
+                .registerFactory(ShieldDamageReduction.Factory.class, new SpongeShieldDamageReductionFactory())
+                .registerFactory(ShieldItemDamageFunction.Factory.class, new SpongeShieldItemDamageFunctionFactory())
         ;
     }
 }

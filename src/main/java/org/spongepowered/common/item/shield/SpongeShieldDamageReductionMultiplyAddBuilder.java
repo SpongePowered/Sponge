@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item;
+package org.spongepowered.common.item.shield;
 
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
@@ -38,14 +38,14 @@ import org.spongepowered.common.util.Preconditions;
 import java.util.Optional;
 import java.util.Set;
 
-public final class SpongeShieldDamageReductionBuilder implements ShieldDamageReduction.Builder {
+public final class SpongeShieldDamageReductionMultiplyAddBuilder implements ShieldDamageReduction.MultiplyAdd.Builder {
     private HolderSet<net.minecraft.world.damagesource.DamageType> damageTypes;
     private Double horizontalBlockingAngle;
     private double base = 0;
     private double factor = 0;
 
     @Override
-    public ShieldDamageReduction.Builder damageTypes(Set<DamageType> damageTypes) {
+    public ShieldDamageReduction.MultiplyAdd.Builder damageTypes(Set<DamageType> damageTypes) {
         final Registry<net.minecraft.world.damagesource.DamageType> registry = (Registry<net.minecraft.world.damagesource.DamageType>) Sponge.server().registry(RegistryTypes.DAMAGE_TYPE);
 
         this.damageTypes = HolderSet.direct(damageTypes.stream()
@@ -56,7 +56,7 @@ public final class SpongeShieldDamageReductionBuilder implements ShieldDamageRed
     }
 
     @Override
-    public ShieldDamageReduction.Builder damageTypes(Tag<DamageType> tag) {
+    public ShieldDamageReduction.MultiplyAdd.Builder damageTypes(Tag<DamageType> tag) {
         final Registry<net.minecraft.world.damagesource.DamageType> registry = (Registry<net.minecraft.world.damagesource.DamageType>) Sponge.server().registry(RegistryTypes.DAMAGE_TYPE);
         final var vanillaTag = ((TagBridge<net.minecraft.world.damagesource.DamageType>) tag).bridge$asVanillaTag();
         this.damageTypes = registry.getOrThrow(vanillaTag);
@@ -65,7 +65,7 @@ public final class SpongeShieldDamageReductionBuilder implements ShieldDamageRed
     }
 
     @Override
-    public ShieldDamageReduction.Builder horizontalBlockingAngle(double angle) {
+    public ShieldDamageReduction.MultiplyAdd.Builder horizontalBlockingAngle(double angle) {
         Preconditions.checkArgument(angle > 0, "angle must be positive");
         this.horizontalBlockingAngle = angle;
 
@@ -73,22 +73,22 @@ public final class SpongeShieldDamageReductionBuilder implements ShieldDamageRed
     }
 
     @Override
-    public ShieldDamageReduction.Builder constantReduction(double constant) {
+    public ShieldDamageReduction.MultiplyAdd.Builder constantReduction(double constant) {
         this.base = constant;
 
         return this;
     }
 
     @Override
-    public ShieldDamageReduction.Builder fractionalReduction(double fraction) {
+    public ShieldDamageReduction.MultiplyAdd.Builder fractionalReduction(double fraction) {
         this.factor = fraction;
 
         return this;
     }
 
     @Override
-    public ShieldDamageReduction build() {
-        return (ShieldDamageReduction) (Object) new BlocksAttacks.DamageReduction(
+    public ShieldDamageReduction.MultiplyAdd build() {
+        return (ShieldDamageReduction.MultiplyAdd) (Object) new BlocksAttacks.DamageReduction(
             horizontalBlockingAngle != null ? horizontalBlockingAngle.floatValue() : 90,
             Optional.ofNullable(damageTypes),
             (float) base,
@@ -97,7 +97,7 @@ public final class SpongeShieldDamageReductionBuilder implements ShieldDamageRed
     }
 
     @Override
-    public ShieldDamageReduction.Builder reset() {
+    public ShieldDamageReduction.MultiplyAdd.Builder reset() {
         this.damageTypes = null;
         this.horizontalBlockingAngle = null;
         this.base = 0;

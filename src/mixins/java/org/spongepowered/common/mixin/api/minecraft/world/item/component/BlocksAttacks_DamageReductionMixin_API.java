@@ -33,14 +33,20 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(BlocksAttacks.DamageReduction.class)
-@Implements(@Interface(iface = ShieldDamageReduction.class, prefix = "shielddamagereduction$"))
-public abstract class BlocksAttacks_DamageReductionMixin_API implements ShieldDamageReduction {
+@Implements({
+    @Interface(iface = ShieldDamageReduction.class, prefix = "shielddamagereduction$"),
+    @Interface(iface = ShieldDamageReduction.MultiplyAdd.class, prefix = "shielddamagereductionmultiplyadd$")
+})
+public abstract class BlocksAttacks_DamageReductionMixin_API {
 
-    @Shadow
-    public abstract float resolve(net.minecraft.world.damagesource.DamageSource $$0, float $$1, double $$2);
+    @Shadow public abstract float resolve(net.minecraft.world.damagesource.DamageSource $$0, float $$1, double $$2);
 
     public double shielddamagereduction$resolve(DamageSource source, double damage, double angle) {
         return this.resolve((net.minecraft.world.damagesource.DamageSource) source, (float) damage, angle);
+    }
+
+    public double shielddamagereductionmultiplyadd$resolve(DamageSource source, double damage, double angle) {
+        return this.shielddamagereduction$resolve(source, (float) damage, angle);
     }
 
 }

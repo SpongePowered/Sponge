@@ -30,7 +30,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(BlocksAttacks.ItemDamageFunction.class)
-public abstract class BlocksAttacks_ItemDamageFunction_API implements ShieldItemDamageFunction {
+public abstract class BlocksAttacks_ItemDamageFunction_API implements ShieldItemDamageFunction.MultiplyAdd, ShieldItemDamageFunction<ShieldItemDamageFunction.MultiplyAdd> {
 
     @Shadow
     public abstract int apply(float $$0);

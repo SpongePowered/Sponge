@@ -56,17 +56,17 @@ public class KeysTest {
             Arguments.of(Keys.DISABLE_SHIELD_TICKS, Ticks.of(10)),
             Arguments.of(Keys.SHIELD_DEPLOY_TICKS, Ticks.of(15)),
             Arguments.of(Keys.DISABLE_SHIELD_TICKS_SCALE, 2.5),
-            Arguments.of(Keys.SHIELD_DAMAGE_REDUCTIONS, List.of(ShieldDamageReduction.builder()
+            Arguments.of(Keys.SHIELD_DAMAGE_REDUCTIONS, List.of(ShieldDamageReduction.of(ShieldDamageReduction.MultiplyAdd.builder()
                 .horizontalBlockingAngle(45)
                 .constantReduction(2)
                 .fractionalReduction(0.5)
                 .damageTypes(Set.of(DamageTypes.ARROW.get(), DamageTypes.PLAYER_ATTACK.get()))
-                .build())),
-            Arguments.of(Keys.SHIELD_ITEM_DAMAGE_FUNCTION, ShieldItemDamageFunction.builder()
+                .build()))),
+            Arguments.of(Keys.SHIELD_ITEM_DAMAGE_FUNCTION, ShieldItemDamageFunction.of(ShieldItemDamageFunction.MultiplyAdd.builder()
                 .constantDamage(5)
                 .fractionalDamage(2)
                 .minAttackDamage(2.5)
-                .build()),
+                .build())),
             Arguments.of(Keys.SHIELD_BLOCK_SOUND, SoundTypes.ENTITY_SHULKER_HURT.get()),
             Arguments.of(Keys.SHIELD_DISABLE_SOUND, SoundTypes.ENTITY_ENDER_DRAGON_DEATH.get())
         );
