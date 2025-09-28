@@ -24,10 +24,12 @@
  */
 package org.spongepowered.common.data.key;
 
-import com.google.common.collect.ImmutableMap;
 import io.leangen.geantyref.GenericTypeReflector;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.spongepowered.api.ResourceKeyed;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.Keys;
@@ -42,34 +44,38 @@ import org.spongepowered.api.tag.DamageTypeTags;
 import org.spongepowered.api.util.Ticks;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 public class KeysTest {
-    private final Map<Key<?>, Object> toTest = ImmutableMap.<Key<?>, Object>builder()
-        .put(Keys.WEAPON_DAMAGE_PER_ATTACK, 5)
-        .put(Keys.DISABLE_SHIELD_TICKS, Ticks.of(10))
-        .put(Keys.SHIELD_DEPLOY_TICKS, Ticks.of(15))
-        .put(Keys.DISABLE_SHIELD_TICKS_SCALE, 2.5)
-        .put(Keys.SHIELD_DAMAGE_REDUCTIONS, List.of(ShieldDamageReduction.builder()
-            .horizontalBlockingAngle(45)
-            .constantReduction(2)
-            .fractionalReduction(0.5)
-            .damageTypes(Set.of(DamageTypes.ARROW.get(), DamageTypes.PLAYER_ATTACK.get()))
-            .build()))
-        .put(Keys.SHIELD_ITEM_DAMAGE_FUNCTION, ShieldItemDamageFunction.builder()
-            .constantDamage(5)
-            .fractionalDamage(2)
-            .minAttackDamage(2.5)
-            .build())
-        .put(Keys.SHIELD_BLOCK_SOUND, SoundTypes.ENTITY_SHULKER_HURT.get())
-        .put(Keys.SHIELD_DISABLE_SOUND, SoundTypes.ENTITY_ENDER_DRAGON_DEATH.get())
-        .build();
 
-    @Test
-    void testSingleKeys() {
-        toTest.forEach(KeysTest::testSingleKeyUnchecked);
+    private static Stream<Arguments> testSingleKeys() {
+        return Stream.of(
+            Arguments.of(Keys.WEAPON_DAMAGE_PER_ATTACK, 5),
+            Arguments.of(Keys.DISABLE_SHIELD_TICKS, Ticks.of(10)),
+            Arguments.of(Keys.SHIELD_DEPLOY_TICKS, Ticks.of(15)),
+            Arguments.of(Keys.DISABLE_SHIELD_TICKS_SCALE, 2.5),
+            Arguments.of(Keys.SHIELD_DAMAGE_REDUCTIONS, List.of(ShieldDamageReduction.builder()
+                .horizontalBlockingAngle(45)
+                .constantReduction(2)
+                .fractionalReduction(0.5)
+                .damageTypes(Set.of(DamageTypes.ARROW.get(), DamageTypes.PLAYER_ATTACK.get()))
+                .build())),
+            Arguments.of(Keys.SHIELD_ITEM_DAMAGE_FUNCTION, ShieldItemDamageFunction.builder()
+                .constantDamage(5)
+                .fractionalDamage(2)
+                .minAttackDamage(2.5)
+                .build()),
+            Arguments.of(Keys.SHIELD_BLOCK_SOUND, SoundTypes.ENTITY_SHULKER_HURT.get()),
+            Arguments.of(Keys.SHIELD_DISABLE_SOUND, SoundTypes.ENTITY_ENDER_DRAGON_DEATH.get())
+        );
+    }
+
+    @MethodSource
+    @ParameterizedTest
+    void testSingleKeys(Key<?> k, Object value) {
+        testSingleKeyUnchecked(k, value);
     }
 
     @Test
