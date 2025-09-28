@@ -91,8 +91,8 @@ public final class SpongeShieldDamageReductionMultiplyAddBuilder implements Shie
         return (ShieldDamageReduction.MultiplyAdd) (Object) new BlocksAttacks.DamageReduction(
             this.horizontalBlockingAngle != null ? this.horizontalBlockingAngle.floatValue() : 90,
             Optional.ofNullable(this.damageTypes),
-            (float) base,
-            (float) factor
+            (float) this.base,
+            (float) this.factor
         );
     }
 
