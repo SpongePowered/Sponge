@@ -48,8 +48,6 @@ import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.component.UseCooldown;
 import net.minecraft.world.item.component.UseRemainder;
 import net.minecraft.world.item.component.Weapon;
-import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
-import net.minecraft.world.item.consume_effects.ClearAllStatusEffectsConsumeEffect;
 import net.minecraft.world.item.consume_effects.ConsumeEffect;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Platform;
@@ -397,7 +395,7 @@ public final class ItemStackData {
                                 h.set(DataComponents.WEAPON, new Weapon(0, weapon.disableBlockingForSeconds()));
                             }
                         })
-                    .create(Keys.DISABLE_BLOCKING_TICKS)
+                    .create(Keys.DISABLE_SHIELD_TICKS)
                         .get(h -> {
                             final @Nullable Weapon weapon = h.get(DataComponents.WEAPON);
                             if (weapon == null) {

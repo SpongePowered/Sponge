@@ -49,9 +49,9 @@ import java.util.function.Function;
 public class KeysTest {
     private final Map<Key<?>, Object> toTest = ImmutableMap.<Key<?>, Object>builder()
         .put(Keys.WEAPON_DAMAGE_PER_ATTACK, 5)
-        .put(Keys.DISABLE_BLOCKING_TICKS, Ticks.of(10))
-        .put(Keys.BLOCK_DELAY_TICKS, Ticks.of(15))
-        .put(Keys.DISABLED_BLOCKING_COOLDOWN_SCALE, 2.5f)
+        .put(Keys.DISABLE_SHIELD_TICKS, Ticks.of(10))
+        .put(Keys.SHIELD_DEPLOY_TICKS, Ticks.of(15))
+        .put(Keys.DISABLE_SHIELD_TICKS_SCALE, 2.5f)
         .put(Keys.SHIELD_DAMAGE_REDUCTIONS, List.of(ShieldDamageReduction.builder()
             .horizontalBlockingAngle(45)
             .constantReduction(2)
@@ -82,19 +82,19 @@ public class KeysTest {
         final var stack = ItemStack.builder()
             .itemType(ItemTypes.DIAMOND_SWORD)
             .add(Keys.WEAPON_DAMAGE_PER_ATTACK, 5)
-            .add(Keys.DISABLE_BLOCKING_TICKS, Ticks.of(5))
+            .add(Keys.DISABLE_SHIELD_TICKS, Ticks.of(5))
             .build();
 
         Assertions.assertEquals(5, stack.require(Keys.WEAPON_DAMAGE_PER_ATTACK));
-        Assertions.assertEquals(Ticks.of(5), stack.require(Keys.DISABLE_BLOCKING_TICKS));
+        Assertions.assertEquals(Ticks.of(5), stack.require(Keys.DISABLE_SHIELD_TICKS));
 
-        stack.remove(Keys.DISABLE_BLOCKING_TICKS);
+        stack.remove(Keys.DISABLE_SHIELD_TICKS);
         Assertions.assertEquals(5, stack.require(Keys.WEAPON_DAMAGE_PER_ATTACK));
 
         stack.remove(Keys.WEAPON_DAMAGE_PER_ATTACK);
 
         Assertions.assertNull(stack.getOrNull(Keys.WEAPON_DAMAGE_PER_ATTACK));
-        Assertions.assertNull(stack.getOrNull(Keys.DISABLE_BLOCKING_TICKS));
+        Assertions.assertNull(stack.getOrNull(Keys.DISABLE_SHIELD_TICKS));
     }
 
     @SuppressWarnings("unchecked")

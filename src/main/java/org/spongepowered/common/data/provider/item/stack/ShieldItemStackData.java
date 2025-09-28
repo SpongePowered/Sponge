@@ -66,7 +66,7 @@ public final class ShieldItemStackData {
                             h.set(DataComponents.BANNER_PATTERNS, new BannerPatternLayers(v.stream().map(BannerPatternLayers.Layer.class::cast).toList()));
                             // TODO check setting banner base? Constants.TileEntity.Banner.BANNER_BASE / BannerPatternShapes.BASE
                         })
-                    .create(Keys.BLOCK_DELAY_TICKS)
+                    .create(Keys.SHIELD_DEPLOY_TICKS)
                         .get(h -> {
                             final @Nullable BlocksAttacks blocksAttacks = h.get(DataComponents.BLOCKS_ATTACKS);
                             if (blocksAttacks == null) {
@@ -86,19 +86,19 @@ public final class ShieldItemStackData {
                                 blocksAttacks.disableSound()
                             ));
                         })
-                    .create(Keys.DISABLED_BLOCKING_COOLDOWN_SCALE)
+                    .create(Keys.DISABLE_SHIELD_TICKS_SCALE)
                         .get(h -> {
                             final @Nullable BlocksAttacks blocksAttacks = h.get(DataComponents.BLOCKS_ATTACKS);
                             if (blocksAttacks == null) {
                                 return null;
                             }
-                            return blocksAttacks.disableCooldownScale();
+                            return (double) blocksAttacks.disableCooldownScale();
                         })
                         .set((h, v) -> {
                             final @Nullable BlocksAttacks blocksAttacks = h.getOrDefault(DataComponents.BLOCKS_ATTACKS, BLOCKS_ATTACKS_DEFAULTS);
                             h.set(DataComponents.BLOCKS_ATTACKS, new BlocksAttacks(
                                 blocksAttacks.blockDelaySeconds(),
-                                v,
+                                v.floatValue(),
                                 blocksAttacks.damageReductions(),
                                 blocksAttacks.itemDamage(),
                                 blocksAttacks.bypassedBy(),
