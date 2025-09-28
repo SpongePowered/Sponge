@@ -112,7 +112,7 @@ public final class ShieldItemStackData {
                             if (blocksAttacks == null) {
                                 return null;
                             }
-                            return (List<ShieldDamageReduction>) (Object) List.copyOf(blocksAttacks.damageReductions());
+                            return (List<ShieldDamageReduction<?>>) (Object) List.copyOf(blocksAttacks.damageReductions());
                         })
                         .set((h, v) -> {
                             final @Nullable BlocksAttacks blocksAttacks = h.getOrDefault(DataComponents.BLOCKS_ATTACKS, BLOCKS_ATTACKS_DEFAULTS);
@@ -132,7 +132,7 @@ public final class ShieldItemStackData {
                             if (blocksAttacks == null) {
                                 return null;
                             }
-                            return (ShieldItemDamageFunction) (Object) blocksAttacks.itemDamage();
+                            return (ShieldItemDamageFunction<?>) (Object) blocksAttacks.itemDamage();
                         })
                         .set((h, v) -> {
                             final @Nullable BlocksAttacks blocksAttacks = h.getOrDefault(DataComponents.BLOCKS_ATTACKS, BLOCKS_ATTACKS_DEFAULTS);

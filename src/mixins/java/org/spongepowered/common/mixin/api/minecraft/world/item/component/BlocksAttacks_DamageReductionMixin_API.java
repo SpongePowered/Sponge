@@ -24,29 +24,61 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.item.component;
 
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.world.item.component.BlocksAttacks;
 import org.spongepowered.api.data.type.ShieldDamageReduction;
+import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.*;
+
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Mixin(BlocksAttacks.DamageReduction.class)
 @Implements({
     @Interface(iface = ShieldDamageReduction.class, prefix = "shielddamagereduction$"),
     @Interface(iface = ShieldDamageReduction.MultiplyAdd.class, prefix = "shielddamagereductionmultiplyadd$")
 })
-public abstract class BlocksAttacks_DamageReductionMixin_API {
+public abstract class BlocksAttacks_DamageReductionMixin_API implements ShieldDamageReduction<ShieldDamageReduction.MultiplyAdd>, ShieldDamageReduction.MultiplyAdd {
+
+    @Shadow @Final private Optional<HolderSet<net.minecraft.world.damagesource.DamageType>> type;
+    @Shadow @Final private float base;
+    @Shadow @Final private float factor;
+    @Shadow @Final private float horizontalBlockingAngle;
 
     @Shadow public abstract float resolve(net.minecraft.world.damagesource.DamageSource $$0, float $$1, double $$2);
+
+    @Override
+    public MultiplyAdd configuration() {
+        return this;
+    }
 
     public double shielddamagereduction$resolve(DamageSource source, double damage, double angle) {
         return this.resolve((net.minecraft.world.damagesource.DamageSource) source, (float) damage, angle);
     }
 
-    public double shielddamagereductionmultiplyadd$resolve(DamageSource source, double damage, double angle) {
-        return this.shielddamagereduction$resolve(source, (float) damage, angle);
+    @Override
+    public Optional<Set<DamageType>> damageTypes() {
+        return this.type.map(set -> set.stream()
+            .map(Holder::value)
+            .map(DamageType.class::cast)
+            .collect(Collectors.toSet()));
+    }
+
+    public double shielddamagereductionmultiplyadd$horizontalBlockingAngle() {
+        return this.horizontalBlockingAngle;
+    }
+
+    @Override
+    public double constantReduction() {
+        return this.base;
+    }
+
+    @Override
+    public double fractionalReduction() {
+        return this.factor;
     }
 
 }
