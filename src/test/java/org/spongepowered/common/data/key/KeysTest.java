@@ -51,7 +51,7 @@ public class KeysTest {
         .put(Keys.WEAPON_DAMAGE_PER_ATTACK, 5)
         .put(Keys.DISABLE_SHIELD_TICKS, Ticks.of(10))
         .put(Keys.SHIELD_DEPLOY_TICKS, Ticks.of(15))
-        .put(Keys.DISABLE_SHIELD_TICKS_SCALE, 2.5f)
+        .put(Keys.DISABLE_SHIELD_TICKS_SCALE, 2.5)
         .put(Keys.SHIELD_DAMAGE_REDUCTIONS, List.of(ShieldDamageReduction.builder()
             .horizontalBlockingAngle(45)
             .constantReduction(2)
