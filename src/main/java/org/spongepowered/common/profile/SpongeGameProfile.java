@@ -25,8 +25,11 @@
 package org.spongepowered.common.profile;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.properties.PropertyMap;
 import net.minecraft.server.players.NameAndId;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -148,11 +151,12 @@ public final class SpongeGameProfile implements GameProfile {
     public com.mojang.authlib.GameProfile toMcProfile() {
         final UUID uniqueId = this.uniqueId;
         final String name = (this.name == null) ? "" : this.name;
-        final com.mojang.authlib.GameProfile mcProfile = new com.mojang.authlib.GameProfile(uniqueId, name);
+        final ImmutableMultimap.Builder<String, Property> propertyBuilder = ImmutableMultimap.builder();
         for (final SpongeProfileProperty property : this.properties) {
-            mcProfile.properties().put(property.name(), property.asProperty());
+            propertyBuilder.put(property.name(), property.asProperty());
         }
-        return mcProfile;
+        final PropertyMap propertyMap = new PropertyMap(propertyBuilder.build());
+        return new com.mojang.authlib.GameProfile(uniqueId, name, propertyMap);
     }
 
     @Override
