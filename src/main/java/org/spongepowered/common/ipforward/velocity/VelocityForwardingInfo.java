@@ -24,9 +24,11 @@
  */
 package org.spongepowered.common.ipforward.velocity;
 
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.net.InetAddresses;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.properties.PropertyMap;
 import io.netty.buffer.ByteBuf;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.Connection;
@@ -135,18 +137,20 @@ public class VelocityForwardingInfo {
     }
 
     public static GameProfile createProfile(final ChannelBuf buf) {
-        final GameProfile profile = new GameProfile(buf.readUniqueId(), ((FriendlyByteBuf) buf).readUtf(16)); // TODO: ChannelBuf length-limited strings
-        VelocityForwardingInfo.readProperties(buf, profile);
-        return profile;
+        // TODO: ChannelBuf length-limited strings
+        return new GameProfile(buf.readUniqueId(), ((FriendlyByteBuf) buf).readUtf(16), VelocityForwardingInfo.readProperties(buf));
     }
 
-    private static void readProperties(final ChannelBuf buf, final GameProfile profile) {
+    private static PropertyMap readProperties(final ChannelBuf buf) {
+        final ImmutableMultimap.Builder<String, Property> propertiesBuilder = ImmutableMultimap.builder();
         final int properties = buf.readVarInt();
         for (int i1 = 0; i1 < properties; i1++) {
             final String name = buf.readString();
             final String value = buf.readString();
             final String signature = buf.readBoolean() ? buf.readString() : null;
-            profile.properties().put(name, new Property(name, value, signature));
+            propertiesBuilder.put(name, new Property(name, value, signature));
         }
+        final ImmutableMultimap<String, Property> propertiesMap = propertiesBuilder.build();
+        return new PropertyMap(propertiesMap);
     }
 }
