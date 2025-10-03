@@ -36,6 +36,7 @@ import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryRoots;
 import org.spongepowered.api.registry.RegistryType;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.registry.RegistryLoader;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 
@@ -68,7 +69,7 @@ public abstract class AbstractRegisterRegistryEvent extends AbstractLifecycleEve
 
         final SpongeRegistryHolder holder = this.getHolder();
         final RegistryType<T> type = RegistryType.of(RegistryRoots.SPONGE, key);
-        holder.createRegistry(type, defaultValues, isDynamic);
+        holder.createRegistry(type, () -> this.wrapWithScopedHolder(holder, defaultValues), isDynamic);
         return type;
     }
 
@@ -81,8 +82,18 @@ public abstract class AbstractRegisterRegistryEvent extends AbstractLifecycleEve
 
         final SpongeRegistryHolder holder = this.getHolder();
         final RegistryType<T> type = RegistryType.of(RegistryRoots.SPONGE, key);
-        holder.createRegistry(type, defaultValues, isDynamic, dependencies);
+        holder.createRegistry(type, actualHolder -> this.wrapWithScopedHolder(holder, () -> defaultValues.apply(actualHolder)), isDynamic, dependencies);
         return type;
+    }
+
+    private <T> Map<ResourceKey, T> wrapWithScopedHolder(final SpongeRegistryHolder holder, final Supplier<Map<ResourceKey, T>> defaultValues) {
+        return PhaseTracker.getInstance().switchStartupRegistryHolder(
+            holder, defaultValues,
+            (exception) -> {
+                // If we don't catch it, vanilla will shut the server with "Failed to load datapacks"
+                exception.printStackTrace();
+                return Map.of();
+            });
     }
 
     protected abstract SpongeRegistryHolder getHolder();
