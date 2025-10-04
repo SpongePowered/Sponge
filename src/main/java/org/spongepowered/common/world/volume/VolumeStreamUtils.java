@@ -31,6 +31,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
@@ -60,6 +61,7 @@ import org.spongepowered.api.world.volume.game.Region;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.client.multiplayer.ClientLevelAccessor;
 import org.spongepowered.common.accessor.server.level.ServerLevelAccessor;
 import org.spongepowered.common.accessor.world.level.block.entity.BlockEntityAccessor;
@@ -177,7 +179,11 @@ public final class VolumeStreamUtils {
         final int maskedX = x & 3;
         final int maskedY = y & 3;
         final int maskedZ = z & 3;
-        final var old = ((PalettedContainer<Holder<Biome>>) section.getBiomes()).getAndSet(maskedX, maskedY, maskedZ, Holder.direct((Biome) (Object) biome));
+        final Registry<Biome> biomeRegistry = SpongeCommon.vanillaRegistry(Registries.BIOME);
+        final ResourceKey<Biome> biomeResourceKey = biomeRegistry.getResourceKey((Biome) (Object) biome)
+            .orElseThrow(() -> new IllegalStateException("Missing resource in " + biomeRegistry.key() + ": " + biome));
+        final Holder.Reference<Biome> biomeHolder = biomeRegistry.getHolderOrThrow(biomeResourceKey);
+        final var old = ((PalettedContainer<Holder<Biome>>) section.getBiomes()).getAndSet(maskedX, maskedY, maskedZ, biomeHolder);
         if (old.value() == (Object) biome) {
             return false;
         }
