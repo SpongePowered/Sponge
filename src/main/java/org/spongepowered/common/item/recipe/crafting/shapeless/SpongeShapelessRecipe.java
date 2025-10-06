@@ -72,7 +72,7 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
         if (this.onlyVanillaIngredients) {
             return super.matches($$0, $$1);
         }
-        return SpongeShapelessRecipe.matches($$0.items(), ((ShapelessRecipeAccessor) this).accessor$ingredients());
+        return SpongeShapelessRecipe.matches($$0, ((ShapelessRecipeAccessor) this).accessor$ingredients());
     }
 
     @Override
@@ -92,31 +92,36 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
         return super.assemble($$0, $$1);
     }
 
-    private static boolean
-    matches(List<ItemStack> stacks, List<Ingredient> ingredients) {
+    private static boolean matches(final CraftingInput input, final List<Ingredient> ingredients) {
         final int elements = ingredients.size();
-        if (stacks.size() < elements) {
+        if (input.ingredientCount() != elements) {
+            // The amount of non-empty stacks doesn't match the amount of ingredients
             return false;
         }
 
+        // This can contain empty stacks
+        // Probably would be better to store non-empty stack list on CraftingInput
+        final List<ItemStack> stacks = input.items();
         // find matched stack -> ingredient list
         final Map<Integer, List<Integer>> matchesMap = new HashMap<>();
-        for (int i = 0; i < ingredients.size(); i++) {
-            Ingredient ingredient = ingredients.get(i);
+        for (int i = 0; i < elements; i++) {
+            final Ingredient ingredient = ingredients.get(i);
             boolean noMatch = true;
             for (int j = 0; j < stacks.size(); j++) {
-                if (ingredient.test(stacks.get(j))) {
-                    matchesMap.computeIfAbsent(j, k -> new ArrayList<>()).add(i);;
+                final ItemStack stack = stacks.get(j);
+                if (!stack.isEmpty() && ingredient.test(stack)) {
+                    matchesMap.computeIfAbsent(j, k -> new ArrayList<>()).add(i);
                     noMatch = false;
                 }
             }
             if (noMatch) {
-                // one ingredient had no match recipe does not match at all
+                // One ingredient had no matching stack
                 return false;
             }
         }
 
-        if (matchesMap.isEmpty()) {
+        if (matchesMap.size() != elements) {
+            // At least one stack had no matching ingredient
             return false;
         }
 
