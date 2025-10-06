@@ -52,8 +52,4 @@ public abstract class ResourceLocationMixin_API {
     public String adventure$value() {
         return this.shadow$getPath();
     }
-
-    public int adventure$compareTo(Key o) {
-        return -o.compareTo((Key) this);
-    }
 }
