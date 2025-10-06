@@ -39,7 +39,6 @@ import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -152,7 +151,7 @@ public class SpongeIngredient extends Ingredient {
         if (registeredPredicate instanceof WrappedPredicate wrapped) {
             wrapped.setPredicate(mcPredicate);
         } else if (registeredPredicate != null) {
-            SpongeCommon.logger().warn(MessageFormat.format("Predicate ingredient registered twice! {} was replaced.", key.toString()));
+            SpongeCommon.logger().warn("Predicate ingredient registered twice! {} was replaced.", key.toString());
         } else {
             SpongeIngredient.cachedPredicates.put(key.toString(), mcPredicate);
         }

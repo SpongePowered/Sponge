@@ -75,7 +75,7 @@ public interface PackResourcesMixin_API extends PackContents {
     default Resource requireResource(final PackType root, final ResourcePath path) throws IOException {
         final Resource resource = this.api$createResource(root, path);
         if (resource == null) {
-            throw new NoSuchElementException(MessageFormat.format("Pack type {} does not contain a resource at {}", root, path));
+            throw new NoSuchElementException(MessageFormat.format("Pack type {0} does not contain a resource at {1}", root, path));
         }
         return resource;
     }
