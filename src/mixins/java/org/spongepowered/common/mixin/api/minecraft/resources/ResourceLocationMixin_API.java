@@ -31,6 +31,7 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(ResourceLocation.class)
@@ -44,6 +45,15 @@ public abstract class ResourceLocationMixin_API {
     @Shadow public abstract String shadow$getNamespace();
     @Shadow public abstract String shadow$getPath();
     // @formatter:on
+
+    /**
+     * @author MrHell228 - October 6th, 2025
+     * @reason Both Key#compareTo and ResourceLocation#compareTo should use the same way to compare values.
+     */
+    @Overwrite
+    public int compareTo(final ResourceLocation location) {
+        return ((Key) this).compareTo((Key) (Object) location);
+    }
 
     public String adventure$namespace() {
         return this.shadow$getNamespace();
