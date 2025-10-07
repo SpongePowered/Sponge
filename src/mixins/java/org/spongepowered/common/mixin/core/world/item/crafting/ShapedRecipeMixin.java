@@ -30,7 +30,11 @@ import net.minecraft.world.item.crafting.ShapedRecipePattern;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.item.crafting.ShapedRecipeBridge;
+import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 
 @Mixin(ShapedRecipe.class)
 public abstract class ShapedRecipeMixin implements ShapedRecipeBridge {
@@ -41,6 +45,14 @@ public abstract class ShapedRecipeMixin implements ShapedRecipeBridge {
 
     // @formatter=on
 
+    private boolean impl$hasCustomIngredients;
+
+    @Inject(method = "<init>(Ljava/lang/String;Lnet/minecraft/world/item/crafting/CraftingBookCategory;Lnet/minecraft/world/item/crafting/ShapedRecipePattern;Lnet/minecraft/world/item/ItemStack;Z)V", at = @At("RETURN"))
+    private void impl$checkCustomIngredients(final CallbackInfo ci) {
+        this.impl$hasCustomIngredients = this.pattern.ingredients().stream()
+            .map(i -> i.orElse(null))
+            .anyMatch(IngredientUtil::isCustom);
+    }
 
     @Override
     public ShapedRecipePattern bridge$pattern() {
@@ -52,5 +64,8 @@ public abstract class ShapedRecipeMixin implements ShapedRecipeBridge {
         return this.result;
     }
 
-
+    @Override
+    public boolean bridge$hasCustomIngredients() {
+        return this.impl$hasCustomIngredients;
+    }
 }

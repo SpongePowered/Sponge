@@ -30,22 +30,37 @@ import net.minecraft.world.item.crafting.SingleItemRecipe;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.item.crafting.RecipeResultBridge;
+import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 
 /**
  * {@link net.minecraft.world.item.crafting.StonecutterRecipe}
  */
 @Mixin(SingleItemRecipe.class)
-public abstract class SingleItemRecipeMixin implements RecipeResultBridge {
+public abstract class SingleItemRecipeMixin implements RecipeMixin, RecipeResultBridge {
 
     // @formatter=off
     @Shadow @Final private ItemStack result;
     @Shadow public abstract Ingredient shadow$input();
     // @formatter=on
 
+    private boolean impl$hasCustomIngredients;
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void impl$checkCustomIngredient(final CallbackInfo ci) {
+        this.impl$hasCustomIngredients = IngredientUtil.isCustom(this.shadow$input());
+    }
 
     @Override
     public ItemStack bridge$result() {
         return this.result;
+    }
+
+    @Override
+    public boolean bridge$hasCustomIngredients() {
+        return this.impl$hasCustomIngredients;
     }
 }

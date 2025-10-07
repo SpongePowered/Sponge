@@ -24,43 +24,35 @@
  */
 package org.spongepowered.common.mixin.core.world.item.crafting;
 
+import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.ShapelessRecipe;
+import net.minecraft.world.item.crafting.PlacementInfo;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.world.item.crafting.RecipeBridge;
-import org.spongepowered.common.bridge.world.item.crafting.RecipeResultBridge;
-import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
+import org.spongepowered.common.bridge.world.item.crafting.PlacementInfoBridge;
 
 import java.util.List;
 
-@Mixin(ShapelessRecipe.class)
-public abstract class ShapelessRecipeMixin implements RecipeBridge, RecipeResultBridge {
+@Mixin(PlacementInfo.class)
+public abstract class PlacementInfoMixin implements PlacementInfoBridge {
 
-    // @formatter=off
-    @Shadow @Final ItemStack result;
     @Shadow @Final private List<Ingredient> ingredients;
-    // @formatter=on
 
-    private boolean impl$hasCustomIngredients;
+    private List<StackedContents.IngredientInfo<ItemStack>> impl$stackIngredientInfos;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void impl$checkCustomIngredients(final CallbackInfo ci) {
-        this.impl$hasCustomIngredients = this.ingredients.stream().anyMatch(IngredientUtil::isCustom);
+    private void impl$setIngredientInfos(final CallbackInfo ci) {
+        this.impl$stackIngredientInfos = this.ingredients.stream()
+            .<StackedContents.IngredientInfo<ItemStack>>map(ingredient -> ingredient::test)
+            .toList();
     }
 
-    @Override
-    public ItemStack bridge$result() {
-        return this.result;
-    }
-
-    @Override
-    public boolean bridge$hasCustomIngredients() {
-        return this.impl$hasCustomIngredients;
+    public List<StackedContents.IngredientInfo<ItemStack>> bridge$stackIngredientInfos() {
+        return this.impl$stackIngredientInfos;
     }
 }

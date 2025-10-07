@@ -24,8 +24,12 @@
  */
 package org.spongepowered.common.bridge.world.item.crafting;
 
-import net.minecraft.world.item.crafting.ShapedRecipePattern;
+import net.minecraft.world.entity.player.StackedContents;
+import net.minecraft.world.item.ItemStack;
 
-public interface ShapedRecipeBridge extends RecipeBridge, RecipeResultBridge {
-    ShapedRecipePattern bridge$pattern();
+import java.util.List;
+
+public interface PlacementInfoBridge {
+
+    List<StackedContents.IngredientInfo<ItemStack>> bridge$stackIngredientInfos();
 }

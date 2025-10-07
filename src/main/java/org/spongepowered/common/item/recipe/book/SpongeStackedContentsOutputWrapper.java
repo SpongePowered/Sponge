@@ -22,10 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.item.crafting;
+package org.spongepowered.common.item.recipe.book;
 
-import net.minecraft.world.item.crafting.ShapedRecipePattern;
+import net.minecraft.core.Holder;
+import net.minecraft.world.entity.player.StackedContents;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
-public interface ShapedRecipeBridge extends RecipeBridge, RecipeResultBridge {
-    ShapedRecipePattern bridge$pattern();
+public class SpongeStackedContentsOutputWrapper implements StackedContents.Output<Holder<Item>> {
+
+    private final StackedContents.Output<Holder<Item>> originalOutput;
+    private final StackedContents.Output<ItemStack> wrappedStackOutput;
+
+    public SpongeStackedContentsOutputWrapper(
+        final StackedContents.Output<Holder<Item>> original,
+        final StackedContents.Output<ItemStack> toWrap
+    ) {
+        this.originalOutput = original;
+        this.wrappedStackOutput = stack -> {
+            originalOutput.accept(stack.getItemHolder());
+            toWrap.accept(stack);
+        };
+    }
+
+    /**
+     * @deprecated Should not be used directly.
+     */
+    @Deprecated
+    @Override
+    public void accept(final Holder<Item> holder) {
+        this.originalOutput.accept(holder);
+    }
+
+    public StackedContents.Output<ItemStack> stackOutput() {
+        return this.wrappedStackOutput;
+    }
 }
