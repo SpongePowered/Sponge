@@ -25,8 +25,10 @@
 package org.spongepowered.common.mixin.ipforward.server.network;
 
 
+import com.google.common.collect.HashMultimap;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.properties.PropertyMap;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.login.ServerboundHelloPacket;
 import net.minecraft.server.MinecraftServer;
@@ -92,9 +94,13 @@ public abstract class ServerLoginPacketListenerImplMixin_IpForward {
             $$0 = new GameProfile(uuid, $$0.name());
 
             if (((ConnectionBridge_IpForward) this.connection).bungeeBridge$getSpoofedProfile() != null) {
+                final var mutableProperties = HashMultimap.create($$0.properties());
+
                 for (final Property property : ((ConnectionBridge_IpForward) this.connection).bungeeBridge$getSpoofedProfile()) {
-                    $$0.properties().put(property.name(), property);
+                    mutableProperties.put(property.name(), property);
                 }
+
+                $$0 = new GameProfile($$0.id(), $$0.name(), new PropertyMap(mutableProperties));
             }
         }
 

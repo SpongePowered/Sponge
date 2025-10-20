@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.bridge.world.entity.player;
 
+import com.mojang.authlib.GameProfile;
 import net.kyori.adventure.bossbar.BossBar;
 
 public interface PlayerBridge {
@@ -43,4 +44,6 @@ public interface PlayerBridge {
     void bridge$addActiveBossBar(BossBar bar);
 
     void bridge$removeActiveBossBar(BossBar bar);
+
+    void bridge$setGameProfile(GameProfile profile);
 }

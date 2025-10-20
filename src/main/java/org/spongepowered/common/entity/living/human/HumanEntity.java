@@ -24,8 +24,11 @@
  */
 package org.spongepowered.common.entity.living.human;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.authlib.yggdrasil.ProfileResult;
 import com.mojang.serialization.DataResult;
 import net.kyori.adventure.text.Component;
@@ -103,6 +106,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public final class HumanEntity extends PathfinderMob implements TeamMember, RangedAttackMob {
@@ -331,7 +335,9 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
             return false;
         }
 
-        this.fakeProfile.partialProfile().properties().replaceValues(ProfileProperty.TEXTURES, profile.properties().get(ProfileProperty.TEXTURES));
+        this.modifyProperties(props -> {
+            props.replaceValues(ProfileProperty.TEXTURES, profile.properties().get(ProfileProperty.TEXTURES));
+        });
         if (this.isAliveAndInWorld()) {
             this.respawnOnClient();
         }
@@ -349,8 +355,11 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
             return false;
         }
 
-        this.fakeProfile.partialProfile().properties().clear();
-        this.fakeProfile.partialProfile().properties().putAll(profile.properties());
+        this.modifyProperties(props -> {
+            props.clear();
+            props.putAll(profile.properties());
+        });
+
         if (this.isAliveAndInWorld()) {
             this.respawnOnClient();
         }
@@ -381,10 +390,10 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     }
 
     public void setSkinProperty(final ProfileProperty property) {
-        this.fakeProfile.partialProfile().properties()
-                .replaceValues(
-                        ProfileProperty.TEXTURES,
-                        Collections.singletonList(((SpongeProfileProperty) property).asProperty()));
+        this.modifyProperties(props -> props.replaceValues(
+            ProfileProperty.TEXTURES,
+            Collections.singletonList(((SpongeProfileProperty) property).asProperty())
+        ));
 
         if (this.isAliveAndInWorld()) {
             this.respawnOnClient();
@@ -401,6 +410,17 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
             (ServerLevel) this.level(),
             this, 1, true, NoOpSynchronizer.INSTANCE
         )));
+    }
+
+    private void modifyProperties(final Consumer<Multimap<String, Property>> fn) {
+        final var mutable = HashMultimap.create(this.fakeProfile.partialProfile().properties());
+        fn.accept(mutable);
+
+        this.fakeProfile = ResolvableProfile.createResolved(new GameProfile(
+            this.fakeProfile.partialProfile().id(),
+            this.fakeProfile.partialProfile().name(),
+            new PropertyMap(mutable)
+        ));
     }
 
     /**

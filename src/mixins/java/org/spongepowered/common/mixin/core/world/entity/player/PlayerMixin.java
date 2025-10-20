@@ -56,6 +56,7 @@ import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -92,7 +93,7 @@ public abstract class PlayerMixin extends AvatarMixin implements PlayerBridge, G
     @Shadow public float experienceProgress;
     @Shadow public AbstractContainerMenu containerMenu;
     @Shadow @Final public InventoryMenu inventoryMenu;
-    @Shadow @Final private GameProfile gameProfile;
+    @Shadow @Final @Mutable private GameProfile gameProfile;
     @Shadow public abstract boolean shadow$isSpectator();
     @Shadow protected abstract int shadow$getPermissionLevel();
     @Shadow public abstract int shadow$getXpNeededForNextLevel();
@@ -125,6 +126,11 @@ public abstract class PlayerMixin extends AvatarMixin implements PlayerBridge, G
     @Override
     public GameProfile bridge$getGameProfile() {
         return this.gameProfile;
+    }
+
+    @Override
+    public void bridge$setGameProfile(GameProfile profile) {
+        this.gameProfile = profile;
     }
 
     @Override

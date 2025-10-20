@@ -24,7 +24,10 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import com.google.common.collect.HashMultimap;
+import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.properties.PropertyMap;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
@@ -48,6 +51,7 @@ import org.spongepowered.common.accessor.server.level.ServerPlayerAccessor;
 import org.spongepowered.common.accessor.stats.StatsCounterAccessor;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerEntityHealthScaleBridge;
+import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.profile.SpongeProfileProperty;
@@ -81,7 +85,11 @@ public final class ServerPlayerData {
                             return new SpongeProfileProperty(properties.iterator().next());
                         })
                         .set((h ,v) -> {
-                            h.getGameProfile().properties().replaceValues(ProfileProperty.TEXTURES, Collections.singletonList(((SpongeProfileProperty)v).asProperty()));
+                            final var profile = h.getGameProfile();
+                            final var mutableProperties = HashMultimap.create(profile.properties());
+                            mutableProperties.replaceValues(ProfileProperty.TEXTURES, Collections.singletonList(((SpongeProfileProperty)v).asProperty()));
+
+                            ((PlayerBridge) h).bridge$setGameProfile(new GameProfile(profile.id(), profile.name(), new PropertyMap(mutableProperties)));
                             ServerPlayerData.resendProfile(h);
                         })
                     .create(Keys.SPECTATOR_TARGET)
