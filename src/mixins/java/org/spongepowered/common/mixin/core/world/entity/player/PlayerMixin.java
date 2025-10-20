@@ -129,7 +129,7 @@ public abstract class PlayerMixin extends AvatarMixin implements PlayerBridge, G
     }
 
     @Override
-    public void bridge$setGameProfile(GameProfile profile) {
+    public void bridge$setGameProfile(final GameProfile profile) {
         this.gameProfile = profile;
     }
 
