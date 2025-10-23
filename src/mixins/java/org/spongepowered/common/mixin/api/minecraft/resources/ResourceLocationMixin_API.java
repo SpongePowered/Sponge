@@ -48,11 +48,11 @@ public abstract class ResourceLocationMixin_API {
 
     /**
      * @author MrHell228 - October 6th, 2025
-     * @reason Both Key#compareTo and ResourceLocation#compareTo should use the same way to compare values.
+     * @reason Delegate synthetic method to #compareTo(Key) to avoid CCE in case Key is not a ResourceLocation
      */
     @Overwrite
-    public int compareTo(final ResourceLocation location) {
-        return ((Key) this).compareTo((Key) (Object) location);
+    public int compareTo(final Object obj) {
+        return ((Key) this).compareTo((Key) obj);
     }
 
     public String adventure$namespace() {
