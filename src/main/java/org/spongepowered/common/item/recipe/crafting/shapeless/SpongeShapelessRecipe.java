@@ -32,17 +32,11 @@ import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.level.Level;
-import org.spongepowered.common.accessor.world.item.crafting.ShapelessRecipeAccessor;
+import org.spongepowered.common.bridge.world.item.crafting.CraftingInputBridge;
+import org.spongepowered.common.bridge.world.item.crafting.PlacementInfoBridge;
 import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -68,11 +62,19 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
     }
 
     @Override
-    public boolean matches(final CraftingInput $$0, final Level $$1) {
+    public boolean matches(final CraftingInput input, final Level $$1) {
         if (this.onlyVanillaIngredients) {
-            return super.matches($$0, $$1);
+            return super.matches(input, $$1);
         }
-        return SpongeShapelessRecipe.matches($$0, ((ShapelessRecipeAccessor) this).accessor$ingredients());
+
+        // Quick check to avoid complex calculations if possible
+        if (input.ingredientCount() != this.placementInfo().ingredients().size()) {
+            // The amount of non-empty stacks doesn't match the amount of ingredients
+            return false;
+        }
+
+        return ((CraftingInputBridge) input).bridge$getItemStackStackedContents().tryPick(
+            ((PlacementInfoBridge) this.placementInfo()).bridge$getStackIngredientInfos(), 1, null);
     }
 
     @Override
@@ -91,65 +93,4 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
         }
         return super.assemble($$0, $$1);
     }
-
-    private static boolean matches(final CraftingInput input, final List<Ingredient> ingredients) {
-        final int elements = ingredients.size();
-        if (input.ingredientCount() != elements) {
-            // The amount of non-empty stacks doesn't match the amount of ingredients
-            return false;
-        }
-
-        // This can contain empty stacks
-        // Probably would be better to store non-empty stack list on CraftingInput
-        final List<ItemStack> stacks = input.items();
-        // find matched stack -> ingredient list
-        final Map<Integer, List<Integer>> matchesMap = new HashMap<>();
-        for (int i = 0; i < elements; i++) {
-            final Ingredient ingredient = ingredients.get(i);
-            boolean noMatch = true;
-            for (int j = 0; j < stacks.size(); j++) {
-                final ItemStack stack = stacks.get(j);
-                if (!stack.isEmpty() && ingredient.test(stack)) {
-                    matchesMap.computeIfAbsent(j, k -> new ArrayList<>()).add(i);
-                    noMatch = false;
-                }
-            }
-            if (noMatch) {
-                // One ingredient had no matching stack
-                return false;
-            }
-        }
-
-        if (matchesMap.size() != elements) {
-            // At least one stack had no matching ingredient
-            return false;
-        }
-
-        // Every ingredient had at least one matching stack
-        // Now check if each stack matches one ingredient
-        final List<Collection<Integer>> stackList = new ArrayList<>(matchesMap.values());
-        stackList.sort(Comparator.comparingInt(Collection::size));
-        return SpongeShapelessRecipe.matchesRecursive(stackList, 0, new HashSet<>());
-    }
-
-    private static boolean matchesRecursive(List<Collection<Integer>> stackList, int d, Set<Integer> used) {
-        if (d == stackList.size()) {
-            return true;
-        }
-
-        final Collection<Integer> stacks = stackList.get(d);
-        for (Integer stack : stacks) {
-            if (used.contains(stack)) {
-                // each stack is only used once
-                continue;
-            }
-            final HashSet<Integer> copy = new HashSet<>(used);
-            copy.add(stack);
-            if (SpongeShapelessRecipe.matchesRecursive(stackList, d + 1, copy)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
 }

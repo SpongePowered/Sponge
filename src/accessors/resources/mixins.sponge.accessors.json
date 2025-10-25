@@ -145,7 +145,6 @@
     "world.item.component.CustomDataAccessor",
     "world.item.context.UseOnContextAccessor",
     "world.item.crafting.RecipeMapAccessor",
-    "world.item.crafting.ShapelessRecipeAccessor",
     "world.item.enchantment.ItemEnchantmentsAccessor",
     "world.item.trading.MerchantOfferAccessor",
     "world.level.BaseCommandBlockAccessor",
