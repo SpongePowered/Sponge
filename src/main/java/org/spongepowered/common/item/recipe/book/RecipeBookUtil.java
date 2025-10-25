@@ -25,43 +25,10 @@
 package org.spongepowered.common.item.recipe.book;
 
 import net.minecraft.core.Holder;
-import net.minecraft.recipebook.ServerPlaceRecipe;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 public final class RecipeBookUtil {
-
-    /**
-     * Copied from {@link ServerPlaceRecipe#moveItemToGrid(Slot, Holder, int)}
-     * and adjusted to use exemplary {@link ItemStack} instead of just item type.
-     */
-    public static int moveItemToGrid(
-        final Inventory inventory, final Slot craftInputSlot, final ItemStack exemplaryStackToMove, final int amount
-    ) {
-        final ItemStack craftInputStack = craftInputSlot.getItem();
-        final int itemToMoveIndex = RecipeBookUtil.findSlotMatchingCraftingIngredient(inventory, exemplaryStackToMove, craftInputStack);
-        if (itemToMoveIndex == -1) {
-            return -1;
-        } else {
-            final ItemStack inventoryStack = inventory.getItem(itemToMoveIndex);
-            final ItemStack movedStack;
-            if (amount < inventoryStack.getCount()) {
-                movedStack = inventory.removeItem(itemToMoveIndex, amount);
-            } else {
-                movedStack = inventory.removeItemNoUpdate(itemToMoveIndex);
-            }
-
-            int movedAmount = movedStack.getCount();
-            if (craftInputStack.isEmpty()) {
-                craftInputSlot.set(movedStack);
-            } else {
-                craftInputStack.grow(movedAmount);
-            }
-
-            return amount - movedAmount;
-        }
-    }
 
     /**
      * Copied from {@link Inventory#findSlotMatchingCraftingIngredient(Holder, ItemStack)}

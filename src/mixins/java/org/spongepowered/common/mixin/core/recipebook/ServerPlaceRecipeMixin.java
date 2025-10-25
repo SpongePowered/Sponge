@@ -68,6 +68,7 @@ public abstract class ServerPlaceRecipeMixin {
      * inventory so it should never be called async.
      */
     private @Nullable List<ItemStack> impl$stackList;
+    private @Nullable ItemStack impl$currentExemplaryStackToMove;
 
     @WrapOperation(
         method = "placeRecipe(Lnet/minecraft/recipebook/ServerPlaceRecipe$CraftingMenuAccess;IILjava/util/List;Ljava/util/List;Lnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/item/crafting/RecipeHolder;ZZ)Lnet/minecraft/world/inventory/RecipeBookMenu$PostPlaceAction;",
@@ -153,15 +154,33 @@ public abstract class ServerPlaceRecipeMixin {
             target = "Lnet/minecraft/recipebook/ServerPlaceRecipe;moveItemToGrid(Lnet/minecraft/world/inventory/Slot;Lnet/minecraft/core/Holder;I)I"
         )
     )
-    private int impl$useAdjustedItemMoveLogic(
+    private int impl$adjustItemMoveLogic(
         final ServerPlaceRecipe<?> instance, final Slot craftInputSlot,
         final Holder<Item> exemplaryItem, final int amountToMove,
         final Operation<Integer> original,
         final List<Holder<Item>> exemplaryItems, final int totalAmountToCraft,
         final Integer exemplaryItemIndex, final int slotIndex, final int x, final int y
     ) {
-        return this.impl$stackList == null
-            ? original.call(instance, craftInputSlot, exemplaryItem, amountToMove)
-            : RecipeBookUtil.moveItemToGrid(this.inventory, craftInputSlot, this.impl$stackList.get(exemplaryItemIndex), amountToMove);
+        if (this.impl$stackList != null) {
+            this.impl$currentExemplaryStackToMove = this.impl$stackList.get(exemplaryItemIndex);
+        }
+        final int result = original.call(instance, craftInputSlot, exemplaryItem, amountToMove);
+        this.impl$currentExemplaryStackToMove = null;
+        return result;
+    }
+
+    @WrapOperation(
+        method = "moveItemToGrid",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/player/Inventory;findSlotMatchingCraftingIngredient(Lnet/minecraft/core/Holder;Lnet/minecraft/world/item/ItemStack;)I"
+        )
+    )
+    private int impl$adjustMatchingSlotFinder(
+        final Inventory instance, final Holder<Item> exemplaryItem, final ItemStack craftInputStack, final Operation<Integer> original
+    ) {
+        return this.impl$currentExemplaryStackToMove == null
+            ? original.call(instance, exemplaryItem, craftInputStack)
+            : RecipeBookUtil.findSlotMatchingCraftingIngredient(inventory, this.impl$currentExemplaryStackToMove, craftInputStack);
     }
 }
