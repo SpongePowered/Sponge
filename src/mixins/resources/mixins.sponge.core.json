@@ -214,7 +214,6 @@
     "world.item.crafting.IngredientMixin",
     "world.item.crafting.PlacementInfoMixin",
     "world.item.crafting.RecipeManagerMixin",
-    "world.item.crafting.RecipeMixin",
     "world.item.crafting.ShapedRecipeMixin",
     "world.item.crafting.ShapelessRecipeMixin",
     "world.item.crafting.SingleItemRecipeMixin",

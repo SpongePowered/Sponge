@@ -44,7 +44,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.world.item.crafting.RecipeBridge;
+import org.spongepowered.common.bridge.world.item.crafting.PlacementInfoBridge;
 import org.spongepowered.common.item.recipe.book.RecipeBookUtil;
 import org.spongepowered.common.item.recipe.book.SpongeStackedContentsOutputWrapper;
 import org.spongepowered.common.item.recipe.book.SpongeStackedItemContents;
@@ -89,7 +89,7 @@ public abstract class ServerPlaceRecipeMixin {
         final boolean useMaxItems,
         final boolean isCreative
     ) {
-        if (((RecipeBridge) recipe.value()).bridge$hasCustomIngredients()) {
+        if (((PlacementInfoBridge) recipe.value().placementInfo()).bridge$hasCustomIngredients()) {
             return new SpongeStackedItemContents();
         } else {
             return original.call();

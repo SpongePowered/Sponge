@@ -75,7 +75,7 @@ public class SpongeStackedItemContents extends StackedItemContents {
         final PlacementInfo placement = recipe.placementInfo();
         return !placement.isImpossibleToPlace()
             && this.stackedContents.tryPick(
-                ((PlacementInfoBridge) placement).bridge$stackIngredientInfos(),
+                ((PlacementInfoBridge) placement).bridge$getStackIngredientInfos(),
                 amount, this.unwrapStackOutput(output));
     }
 
@@ -96,7 +96,7 @@ public class SpongeStackedItemContents extends StackedItemContents {
         final StackedContents.@Nullable Output<Holder<Item>> output
     ) {
         return this.stackedContents.tryPickAll(
-            ((PlacementInfoBridge) recipe.placementInfo()).bridge$stackIngredientInfos(),
+            ((PlacementInfoBridge) recipe.placementInfo()).bridge$getStackIngredientInfos(),
             maxCount, this.unwrapStackOutput(output));
     }
 

@@ -35,6 +35,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.item.crafting.PlacementInfoBridge;
+import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 
 import java.util.List;
 
@@ -43,16 +44,25 @@ public abstract class PlacementInfoMixin implements PlacementInfoBridge {
 
     @Shadow @Final private List<Ingredient> ingredients;
 
+    private boolean impl$hasCustomIngredients;
     private List<StackedContents.IngredientInfo<ItemStack>> impl$stackIngredientInfos;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void impl$setIngredientInfos(final CallbackInfo ci) {
+    private void impl$setSpongeData(final CallbackInfo ci) {
+        this.impl$hasCustomIngredients = this.ingredients.stream()
+            .anyMatch(IngredientUtil::isCustom);
+
         this.impl$stackIngredientInfos = this.ingredients.stream()
             .<StackedContents.IngredientInfo<ItemStack>>map(ingredient -> ingredient::test)
             .toList();
     }
 
-    public List<StackedContents.IngredientInfo<ItemStack>> bridge$stackIngredientInfos() {
+    @Override
+    public boolean bridge$hasCustomIngredients() {
+        return this.impl$hasCustomIngredients;
+    }
+
+    public List<StackedContents.IngredientInfo<ItemStack>> bridge$getStackIngredientInfos() {
         return this.impl$stackIngredientInfos;
     }
 }

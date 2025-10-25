@@ -31,5 +31,7 @@ import java.util.List;
 
 public interface PlacementInfoBridge {
 
-    List<StackedContents.IngredientInfo<ItemStack>> bridge$stackIngredientInfos();
+    boolean bridge$hasCustomIngredients();
+
+    List<StackedContents.IngredientInfo<ItemStack>> bridge$getStackIngredientInfos();
 }

@@ -33,7 +33,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.level.Level;
 import org.spongepowered.common.accessor.world.item.crafting.ShapelessRecipeAccessor;
-import org.spongepowered.common.bridge.world.item.crafting.RecipeBridge;
+import org.spongepowered.common.bridge.world.item.crafting.PlacementInfoBridge;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -66,7 +66,7 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
 
     @Override
     public boolean matches(final CraftingInput $$0, final Level $$1) {
-        if (!((RecipeBridge) this).bridge$hasCustomIngredients()) {
+        if (!((PlacementInfoBridge) this.placementInfo()).bridge$hasCustomIngredients()) {
             return super.matches($$0, $$1);
         }
         return SpongeShapelessRecipe.matches($$0.items(), ((ShapelessRecipeAccessor) this).accessor$ingredients());

@@ -26,6 +26,6 @@ package org.spongepowered.common.bridge.world.item.crafting;
 
 import net.minecraft.world.item.crafting.ShapedRecipePattern;
 
-public interface ShapedRecipeBridge extends RecipeBridge, RecipeResultBridge {
+public interface ShapedRecipeBridge extends RecipeResultBridge {
     ShapedRecipePattern bridge$pattern();
 }
