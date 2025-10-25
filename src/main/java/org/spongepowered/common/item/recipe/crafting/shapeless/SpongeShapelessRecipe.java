@@ -129,7 +129,7 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
         if (this.onlyVanillaIngredients) {
             return super.matches($$0, $$1);
         }
-        return SpongeShapelessRecipe.matches($$0.items(), this.getIngredients());
+        return SpongeShapelessRecipe.matches($$0, this.getIngredients());
     }
 
     @Override
@@ -158,19 +158,22 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
     }
 
     private static boolean
-    matches(List<ItemStack> stacks, List<Ingredient> ingredients) {
+    matches(CraftingInput input, List<Ingredient> ingredients) {
         final int elements = ingredients.size();
-        if (stacks.size() < elements) {
+        if (input.ingredientCount() != elements) {
+            // The amount of non-empty stacks doesn't match the amount of ingredients
             return false;
         }
 
+        final List<ItemStack> stacks = input.items();
         // find matched stack -> ingredient list
         final Map<Integer, List<Integer>> matchesMap = new HashMap<>();
         for (int i = 0; i < ingredients.size(); i++) {
             Ingredient ingredient = ingredients.get(i);
             boolean noMatch = true;
             for (int j = 0; j < stacks.size(); j++) {
-                if (ingredient.test(stacks.get(j))) {
+                final ItemStack stack = stacks.get(j);
+                if (!stack.isEmpty() && ingredient.test(stack)) {
                     matchesMap.computeIfAbsent(j, k -> new ArrayList<>()).add(i);;
                     noMatch = false;
                 }
@@ -181,7 +184,8 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
             }
         }
 
-        if (matchesMap.isEmpty()) {
+        if (matchesMap.size() != elements) {
+            // At least one stack had no matching ingredient
             return false;
         }
 
