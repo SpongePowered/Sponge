@@ -22,16 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.item.crafting;
+package org.spongepowered.common.mixin.core.world.item.crafting;
 
+import net.minecraft.world.entity.player.StackedContents;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.ShapelessRecipe;
+import net.minecraft.world.item.crafting.PlacementInfo;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.world.item.crafting.PlacementInfoBridge;
 
 import java.util.List;
 
-@Mixin(ShapelessRecipe.class)
-public interface ShapelessRecipeAccessor {
-    @Accessor("ingredients") List<Ingredient> accessor$ingredients();
+@Mixin(PlacementInfo.class)
+public abstract class PlacementInfoMixin implements PlacementInfoBridge {
+
+    @Shadow @Final private List<Ingredient> ingredients;
+
+    private List<StackedContents.IngredientInfo<ItemStack>> impl$stackIngredientInfos;
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void impl$setIngredientInfos(final CallbackInfo ci) {
+        this.impl$stackIngredientInfos = this.ingredients.stream()
+            .<StackedContents.IngredientInfo<ItemStack>>map(ingredient -> ingredient::test)
+            .toList();
+    }
+
+    public List<StackedContents.IngredientInfo<ItemStack>> bridge$getStackIngredientInfos() {
+        return this.impl$stackIngredientInfos;
+    }
 }
