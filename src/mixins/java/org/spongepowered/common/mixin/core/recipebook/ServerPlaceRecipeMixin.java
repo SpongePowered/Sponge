@@ -24,29 +24,23 @@
  */
 package org.spongepowered.common.mixin.core.recipebook;
 
-import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import net.minecraft.core.Holder;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.recipebook.ServerPlaceRecipe;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.StackedItemContents;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.common.bridge.world.item.crafting.PlacementInfoBridge;
-import org.spongepowered.common.item.recipe.crafting.RecipeUtil;
 import org.spongepowered.common.item.recipe.crafting.SpongeStackedItemContents;
 
-import java.util.ArrayList;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.List;
 
 /**
@@ -56,9 +50,7 @@ import java.util.List;
 @Mixin(ServerPlaceRecipe.class)
 public abstract class ServerPlaceRecipeMixin {
 
-    @Shadow @Final private Inventory inventory;
-
-    private @Nullable List<ItemStack> impl$stackList;
+    private Deque<ItemStack> impl$stackList = new ArrayDeque<>();
 
     @WrapOperation(
         method = "placeRecipe(Lnet/minecraft/recipebook/ServerPlaceRecipe$CraftingMenuAccess;IILjava/util/List;Ljava/util/List;Lnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/item/crafting/RecipeHolder;ZZ)Lnet/minecraft/world/inventory/RecipeBookMenu$PostPlaceAction;",
@@ -73,54 +65,23 @@ public abstract class ServerPlaceRecipeMixin {
         final int gridWidth, final int gridHeight,
         final List<Slot> inputGridSlots, final List<Slot> slotsToClear,
         final Inventory inventory, final RecipeHolder<?> recipe,
-        final boolean useMaxItems, final boolean isCreative
+        final boolean useMaxItems, final boolean isCreative,
+        final @Local ServerPlaceRecipe<?> placeRecipe
     ) {
+        final ServerPlaceRecipeMixin mixed = (ServerPlaceRecipeMixin) (Object) placeRecipe;
         return ((PlacementInfoBridge) recipe.value().placementInfo()).bridge$hasCustomIngredients()
-            ? new SpongeStackedItemContents()
+            ? new SpongeStackedItemContents(mixed.impl$stackList::add, mixed.impl$stackList::clear)
             : original.call();
     }
 
-    @WrapMethod(method = "placeRecipe(Lnet/minecraft/world/item/crafting/RecipeHolder;Lnet/minecraft/world/entity/player/StackedItemContents;)V")
-    private void impl$handleApplicableStacks(
-        final RecipeHolder<?> recipe, final StackedItemContents contents, final Operation<Void> original
-    ) {
-        if (contents instanceof final SpongeStackedItemContents spongeContents) {
-            this.impl$stackList = new ArrayList<>();
-            // In wrapped method the used output (if not null) is always List<Holder<Item>>::add
-            spongeContents.setStackOutput(this.impl$stackList::add);
-            original.call(recipe, contents);
-            spongeContents.setStackOutput(null);
-            this.impl$stackList = null;
-        } else {
-            original.call(recipe, contents);
-        }
-    }
-
-    @Inject(
-        method = "placeRecipe(Lnet/minecraft/world/item/crafting/RecipeHolder;Lnet/minecraft/world/entity/player/StackedItemContents;)V",
-        at = @At(
-            value = "INVOKE",
-            target = "Ljava/util/List;clear()V"
-        )
-    )
-    private void impl$clearStackList(final CallbackInfo ci) {
-        if (this.impl$stackList != null) {
-            this.impl$stackList.clear();
-        }
-    }
-
-    @WrapOperation(
+    @ModifyArg(
         method = "moveItemToGrid",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/entity/player/Inventory;findSlotMatchingCraftingIngredient(Lnet/minecraft/core/Holder;Lnet/minecraft/world/item/ItemStack;)I"
         )
     )
-    private int impl$adjustMatchingSlotFinder(
-        final Inventory instance, final Holder<Item> exemplaryItem, final ItemStack craftInputStack, final Operation<Integer> original
-    ) {
-        return this.impl$stackList == null
-            ? original.call(instance, exemplaryItem, craftInputStack)
-            : RecipeUtil.findSlotMatchingCraftingIngredient(inventory, this.impl$stackList.removeFirst(), craftInputStack);
+    private ItemStack impl$adjustMatchingSlotFinder(final ItemStack craftInputStack) {
+        return this.impl$stackList.isEmpty() ? craftInputStack : this.impl$stackList.poll();
     }
 }

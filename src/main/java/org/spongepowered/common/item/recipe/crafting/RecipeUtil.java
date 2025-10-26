@@ -24,10 +24,7 @@
  */
 package org.spongepowered.common.item.recipe.crafting;
 
-import net.minecraft.core.Holder;
 import net.minecraft.util.context.ContextMap;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.display.DisplayContentsFactory;
 import net.minecraft.world.item.crafting.display.SlotDisplayContext;
 import org.spongepowered.api.Sponge;
@@ -53,25 +50,5 @@ public final class RecipeUtil {
         public T addRemainder(T var1, List<T> var2) {
             return null;
         }
-    }
-
-    /**
-     * Copied from {@link Inventory#findSlotMatchingCraftingIngredient(Holder, ItemStack)}
-     * and adjusted to use exemplary {@link ItemStack} instead of just item type.
-     */
-    public static int findSlotMatchingCraftingIngredient(
-        final Inventory inventory, final ItemStack exemplaryStackToMove, final ItemStack craftInputStack
-    ) {
-        for (int i = 0; i < inventory.items.size(); i++) {
-            final ItemStack stack = inventory.items.get(i);
-            if (!stack.isEmpty()
-                && Inventory.isUsableForCrafting(stack)
-                && ItemStack.isSameItemSameComponents(exemplaryStackToMove, stack)
-                && (craftInputStack.isEmpty() || ItemStack.isSameItemSameComponents(craftInputStack, stack))) {
-                return i;
-            }
-        }
-
-        return -1;
     }
 }

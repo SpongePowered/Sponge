@@ -37,10 +37,9 @@ import net.minecraft.world.item.crafting.Recipe;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.bridge.world.item.crafting.PlacementInfoBridge;
 
-import java.util.List;
 import java.util.function.Function;
 
-public class SpongeStackedItemContents extends StackedItemContents {
+public final class SpongeStackedItemContents extends StackedItemContents {
 
     private static final Hash.Strategy<ItemStack> STACK_HASH_STRATEGY = new Hash.Strategy<>() {
         @Override
@@ -54,13 +53,27 @@ public class SpongeStackedItemContents extends StackedItemContents {
         }
     };
 
-    private final Object2ReferenceMap<ItemStack, ItemStack> stackInterner = new Object2ReferenceOpenCustomHashMap<>(STACK_HASH_STRATEGY);
+    private final Object2ReferenceMap<ItemStack, ItemStack> stackInterner =
+        new Object2ReferenceOpenCustomHashMap<>(SpongeStackedItemContents.STACK_HASH_STRATEGY);
     private final StackedContents<ItemStack> stackedContents = new StackedContents<>();
 
-    private StackedContents.@Nullable Output<ItemStack> stackOutput;
+    private final StackedContents.Output<ItemStack> addCallback;
+    private final Runnable clearCallback;
+
+    public SpongeStackedItemContents(
+        final StackedContents.Output<ItemStack> addCallback, final Runnable clearCallback
+    ) {
+        this.addCallback = addCallback;
+        this.clearCallback = clearCallback;
+    }
 
     @Override
     public void accountStack(final ItemStack stack, final int maxStackSize) {
+        // Account to parent contents because it's used in
+        // #canCraft(List<StackedContents.IngredientInfo<Holder<Item>>>, StackedContents.Output<Holder<Item>>)
+        // and we can't safely override it to use StackedContents<ItemStack>
+        super.accountStack(stack, maxStackSize);
+
         if (!stack.isEmpty()) {
             // StackedContents works on Reference2IntMap, so if we meet stack which "same" copy
             // has already been accounted we would need to provide the stack that was met first.
@@ -82,17 +95,6 @@ public class SpongeStackedItemContents extends StackedItemContents {
     }
 
     @Override
-    public boolean canCraft(
-        final List<? extends StackedContents.IngredientInfo<Holder<Item>>> ingredients,
-        final StackedContents.@Nullable Output<Holder<Item>> output
-    ) {
-        // By default, this method is not called in the context the instance of this class is created.
-        // If this happens, it's either error in Sponge impl or
-        // mixin from some mod (which should be inspected instead of silently doing something that impl does not expect).
-        throw new UnsupportedOperationException("This method should not have been called, please report about it");
-    }
-
-    @Override
     public int getBiggestCraftableStack(
         final Recipe<?> recipe, final int maxCount,
         final StackedContents.@Nullable Output<Holder<Item>> output
@@ -104,12 +106,9 @@ public class SpongeStackedItemContents extends StackedItemContents {
 
     @Override
     public void clear() {
+        super.clear();
         this.stackInterner.clear();
         this.stackedContents.clear();
-    }
-
-    public void setStackOutput(final StackedContents.@Nullable Output<ItemStack> stackOutput) {
-        this.stackOutput = stackOutput;
     }
 
     private StackedContents.@Nullable Output<ItemStack> createStackOutput(
@@ -117,13 +116,12 @@ public class SpongeStackedItemContents extends StackedItemContents {
     ) {
         if (output == null) {
             return null;
-        } else if (this.stackOutput == null) {
-            return stack -> output.accept(stack.getItemHolder());
-        } else {
-            return stack -> {
-                output.accept(stack.getItemHolder());
-                this.stackOutput.accept(stack);
-            };
         }
+
+        this.clearCallback.run();
+        return stack -> {
+            output.accept(stack.getItemHolder());
+            this.addCallback.accept(stack);
+        };
     }
 }
