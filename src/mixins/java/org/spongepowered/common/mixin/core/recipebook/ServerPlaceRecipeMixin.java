@@ -43,8 +43,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.item.crafting.PlacementInfoBridge;
-import org.spongepowered.common.item.recipe.book.RecipeBookUtil;
-import org.spongepowered.common.item.recipe.book.SpongeStackedItemContents;
+import org.spongepowered.common.item.recipe.crafting.RecipeUtil;
+import org.spongepowered.common.item.recipe.crafting.SpongeStackedItemContents;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -121,6 +121,6 @@ public abstract class ServerPlaceRecipeMixin {
     ) {
         return this.impl$stackList == null
             ? original.call(instance, exemplaryItem, craftInputStack)
-            : RecipeBookUtil.findSlotMatchingCraftingIngredient(inventory, this.impl$stackList.removeFirst(), craftInputStack);
+            : RecipeUtil.findSlotMatchingCraftingIngredient(inventory, this.impl$stackList.removeFirst(), craftInputStack);
     }
 }
