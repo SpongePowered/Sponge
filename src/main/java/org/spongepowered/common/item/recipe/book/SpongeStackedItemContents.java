@@ -57,6 +57,8 @@ public class SpongeStackedItemContents extends StackedItemContents {
     private final Object2ReferenceMap<ItemStack, ItemStack> stackInterner = new Object2ReferenceOpenCustomHashMap<>(STACK_HASH_STRATEGY);
     private final StackedContents<ItemStack> stackedContents = new StackedContents<>();
 
+    private StackedContents.@Nullable Output<ItemStack> stackOutput;
+
     @Override
     public void accountStack(final ItemStack stack, final int maxStackSize) {
         if (!stack.isEmpty()) {
@@ -76,7 +78,7 @@ public class SpongeStackedItemContents extends StackedItemContents {
         return !placement.isImpossibleToPlace()
             && this.stackedContents.tryPick(
                 ((PlacementInfoBridge) placement).bridge$getStackIngredientInfos(),
-                amount, this.unwrapStackOutput(output));
+                amount, this.createStackOutput(output));
     }
 
     @Override
@@ -97,7 +99,7 @@ public class SpongeStackedItemContents extends StackedItemContents {
     ) {
         return this.stackedContents.tryPickAll(
             ((PlacementInfoBridge) recipe.placementInfo()).bridge$getStackIngredientInfos(),
-            maxCount, this.unwrapStackOutput(output));
+            maxCount, this.createStackOutput(output));
     }
 
     @Override
@@ -106,18 +108,22 @@ public class SpongeStackedItemContents extends StackedItemContents {
         this.stackedContents.clear();
     }
 
-    private StackedContents.@Nullable Output<ItemStack> unwrapStackOutput(
+    public void setStackOutput(final StackedContents.@Nullable Output<ItemStack> stackOutput) {
+        this.stackOutput = stackOutput;
+    }
+
+    private StackedContents.@Nullable Output<ItemStack> createStackOutput(
         final StackedContents.@Nullable Output<Holder<Item>> output
     ) {
         if (output == null) {
             return null;
-        } else if (output instanceof final SpongeStackedContentsOutputWrapper spongeOutput) {
-            return spongeOutput.stackOutput();
+        } else if (this.stackOutput == null) {
+            return stack -> output.accept(stack.getItemHolder());
         } else {
-            // By default, this method is only called with wrapped outputs.
-            // If this happens, there is either error in Sponge impl or
-            // mixin from some mod and Sponge mixin is not applied last.
-            throw new UnsupportedOperationException("This should not have happened, please report about it");
+            return stack -> {
+                output.accept(stack.getItemHolder());
+                this.stackOutput.accept(stack);
+            };
         }
     }
 }

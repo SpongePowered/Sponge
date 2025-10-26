@@ -62,6 +62,7 @@ public abstract class PlacementInfoMixin implements PlacementInfoBridge {
         return this.impl$hasCustomIngredients;
     }
 
+    @Override
     public List<StackedContents.IngredientInfo<ItemStack>> bridge$getStackIngredientInfos() {
         return this.impl$stackIngredientInfos;
     }
