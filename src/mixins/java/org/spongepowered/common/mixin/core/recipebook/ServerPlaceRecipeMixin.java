@@ -35,6 +35,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.common.bridge.world.item.crafting.PlacementInfoBridge;
@@ -42,7 +43,6 @@ import org.spongepowered.common.item.recipe.crafting.SpongeStackedItemContents;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.List;
 
 /**
  * Makes recipe placing to work with sponge custom ingredients.
@@ -52,6 +52,8 @@ import java.util.List;
 public abstract class ServerPlaceRecipeMixin {
 
     private Deque<ItemStack> impl$stackList = new ArrayDeque<>();
+    private @Nullable Slot impl$lastSlot;
+    private @Nullable ItemStack impl$lastStack;
 
     @WrapOperation(
         method = "placeRecipe(Lnet/minecraft/recipebook/ServerPlaceRecipe$CraftingMenuAccess;IILjava/util/List;Ljava/util/List;Lnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/item/crafting/RecipeHolder;ZZ)Lnet/minecraft/world/inventory/RecipeBookMenu$PostPlaceAction;",
@@ -62,11 +64,7 @@ public abstract class ServerPlaceRecipeMixin {
     )
     private static StackedItemContents impl$useCustomStackedItemContents(
         final Operation<StackedItemContents> original,
-        final ServerPlaceRecipe.CraftingMenuAccess<?> menu,
-        final int gridWidth, final int gridHeight,
-        final List<Slot> inputGridSlots, final List<Slot> slotsToClear,
-        final Inventory inventory, final RecipeHolder<?> recipe,
-        final boolean useMaxItems, final boolean isCreative,
+        final @Local(argsOnly = true) RecipeHolder<?> recipe,
         final @Local ServerPlaceRecipe<?> placeRecipe
     ) {
         final ServerPlaceRecipeMixin mixed = (ServerPlaceRecipeMixin) (Object) placeRecipe;
@@ -84,16 +82,23 @@ public abstract class ServerPlaceRecipeMixin {
     )
     private int impl$adjustMatchingSlotFinder(
         final Inventory instance, final Holder<Item> exemplaryItem, final ItemStack craftInputStack,
-        final Operation<Integer> original
+        final Operation<Integer> original,
+        final @Local(argsOnly = true) Slot craftInputSlot
     ) {
+        if (this.impl$lastSlot == craftInputSlot) {
+            return original.call(instance, exemplaryItem, this.impl$lastStack);
+        }
+
         if (this.impl$stackList.isEmpty()) {
             return original.call(instance, exemplaryItem, craftInputStack);
-        } else {
-            final ItemStack input = this.impl$stackList.poll();
-            if (!craftInputStack.isEmpty() && !ItemStack.isSameItemSameComponents(craftInputStack, input)) {
-                return -1;
-            }
-            return original.call(instance, exemplaryItem, input);
         }
+
+        if (!craftInputStack.isEmpty() && !ItemStack.isSameItemSameComponents(craftInputStack, this.impl$stackList.peek())) {
+            return -1;
+        }
+
+        this.impl$lastSlot = craftInputSlot;
+        this.impl$lastStack = this.impl$stackList.poll();
+        return original.call(instance, exemplaryItem, this.impl$lastStack);
     }
 }
