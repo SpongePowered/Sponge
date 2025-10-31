@@ -263,7 +263,7 @@ public final class RecipePlaceTest {
 
     private static final class TestPopulator {
 
-        private TestContext base;
+        private final TestContext base;
 
         private int expectedRegularCrafts;
         // This exists due to vanilla having a bug with shift-placing that
@@ -288,11 +288,6 @@ public final class RecipePlaceTest {
 
         public TestPopulator(final RecipeHolder<?> recipe) {
             this.base = new TestContext(recipe);
-        }
-
-        public TestPopulator test(final TestEntry test) {
-            this.base = this.base.test(test);
-            return this;
         }
 
         public TestPopulator expectCrafts(final int regularCrafts, final int shiftCrafts) {
@@ -341,13 +336,13 @@ public final class RecipePlaceTest {
                 ))
                 .flatMap(context -> Stream.of(context, context.shift()))
                 // 2 clicks is enough to ensure we always fail
-                .map(context -> context.clicks(2).expectInputs(List.of(List.of(), List.of())));
+                .map(context -> context.expectInputs(List.of(List.of(), List.of())));
 
             final Stream<TestContext> toMatchSingleClick = baseInputs.stream()
                 .map(context -> context.name("Total inventory").inventory(totalInitialInventory))
                 .flatMap(context -> Stream.of(
-                    context.expectInputAt(0, RecipePlaceTest.createExpectedInput(this.expectedInput, 1)),
-                    context.shift().expectInputAt(0, expectedShiftInput)
+                    context.expectInput(RecipePlaceTest.createExpectedInput(this.expectedInput, 1)),
+                    context.shift().expectInput(expectedShiftInput)
                 ));
 
             // After first click we end up with the same layout no matter the initial input.
@@ -358,13 +353,11 @@ public final class RecipePlaceTest {
                     .name("Partial inventory").inventory(this.partialInventory))
                 .flatMap(context -> Stream.of(
                     context
-                        .clicks(this.expectedRegularCrafts+1)
-                        .expectInputs(Stream.concat(
-                            IntStream.rangeClosed(1, this.expectedRegularCrafts)
-                                .mapToObj(clicks -> RecipePlaceTest.createExpectedInput(this.expectedInput, clicks)),
-                            Stream.of(RecipePlaceTest.createExpectedInput(this.expectedInput, this.expectedRegularCrafts))
-                            ).toList()),
-                    context.shift().clicks(2).expectInputs(List.of(expectedShiftInput, expectedShiftInput))
+                        .expectInputs(IntStream.rangeClosed(1, this.expectedRegularCrafts)
+                            .mapToObj(clicks -> RecipePlaceTest.createExpectedInput(this.expectedInput, clicks))
+                            .toList())
+                        .expectInput(RecipePlaceTest.createExpectedInput(this.expectedInput, this.expectedRegularCrafts)),
+                    context.shift().expectInputs(List.of(expectedShiftInput, expectedShiftInput))
                 ));
 
             return Stream.concat(toFail, Stream.concat(toMatchSingleClick, toMatchMultipleClicks));
@@ -372,68 +365,44 @@ public final class RecipePlaceTest {
     }
 
     private record TestContext(
-        RecipeHolder<?> recipe, String testName,
-        boolean shiftClick, int clicks,
+        RecipeHolder<?> recipe, String testName, boolean shiftClick,
         List<ItemStack> inventory, List<ItemStack> input,
-        List<TestEntry> tests
+        List<List<ItemStack>> expectedInputs
     ) {
         public TestContext(final RecipeHolder<?> recipe) {
-            this(recipe, "", false, 1, List.of(), List.of(), List.of());
+            this(recipe, "", false, List.of(), List.of(), List.of());
         }
 
         public TestContext name(final String testName) {
             final String newTestName = this.testName.isEmpty() ? testName : (this.testName + ", " + testName);
-            return new TestContext(this.recipe, newTestName, this.shiftClick, this.clicks, this.inventory, this.input, this.tests);
+            return new TestContext(this.recipe, newTestName, this.shiftClick, this.inventory, this.input, this.expectedInputs);
         }
 
         public TestContext shift() {
-            return new TestContext(this.recipe, this.testName, true, this.clicks, this.inventory, this.input, this.tests);
-        }
-
-        public TestContext clicks(final int clicks) {
-            return new TestContext(this.recipe, this.testName, this.shiftClick, clicks, this.inventory, this.input, this.tests);
+            return new TestContext(this.recipe, this.testName, true, this.inventory, this.input, this.expectedInputs);
         }
 
         public TestContext inventory(final List<ItemStack> items) {
-            return new TestContext(this.recipe, this.testName, this.shiftClick, this.clicks, items, this.input, this.tests);
+            return new TestContext(this.recipe, this.testName, this.shiftClick, items, this.input, this.expectedInputs);
         }
 
         public TestContext input(final List<ItemStack> items) {
-            return new TestContext(this.recipe, this.testName, this.shiftClick, this.clicks, this.inventory, items, this.tests);
-        }
-
-        public TestContext test(final TestEntry test) {
-            final List<TestEntry> newTests = Stream.concat(this.tests.stream(), Stream.of(test)).toList();
-            return new TestContext(this.recipe, this.testName, this.shiftClick, this.clicks, this.inventory, this.input, newTests);
-        }
-
-        public TestContext testAt(final int clickToTest, final TestEntry test) {
-            return this.test((context, input, click) -> {
-                if (click != clickToTest) {
-                    return true;
-                }
-
-                return test.test(context, input, click);
-            });
-        }
-
-        public TestContext expectInputAt(final int clickToTest, final List<ItemStack> expectedInput) {
-            return this.testAt(clickToTest, TestEntry.matchInput(expectedInput));
+            return new TestContext(this.recipe, this.testName, this.shiftClick, this.inventory, items, this.expectedInputs);
         }
 
         public TestContext expectInputs(final List<List<ItemStack>> expectedInputs) {
-            TestContext test = this;
-            for (int i = 0; i < expectedInputs.size(); ++i) {
-                test = test.expectInputAt(i, expectedInputs.get(i));
-            }
-            return test;
+            return new TestContext(this.recipe, this.testName, this.shiftClick, this.inventory, this.input, expectedInputs);
+        }
+
+        public TestContext expectInput(final List<ItemStack> expectedInput) {
+            return this.expectInputs(Stream.concat(this.expectedInputs.stream(), Stream.of(expectedInput)).toList());
         }
 
         public String asTestName() {
             return String.format("Place recipe %s (Shift click: %s, Total clicks: %s, %s)",
                 this.recipe.id().location().getPath(),
                 this.shiftClick,
-                this.clicks,
+                this.expectedInputs.size(),
                 this.testName);
         }
 
@@ -473,54 +442,34 @@ public final class RecipePlaceTest {
                 input.set(i, initialInput.get(i));
             }
 
-            for (int i = 0; i < this.clicks(); ++i) {
+            for (int i = 0; i < this.expectedInputs().size(); ++i) {
                 menu.handlePlacement(this.shiftClick(), true, this.recipe(), player.serverLevel(), player.getInventory());
-                for (final TestEntry test : this.tests()) {
-                    if (!test.test(this, input, i)) {
-                        break;
-                    }
-                }
-            }
-        }
-    }
 
-    @FunctionalInterface
-    private interface TestEntry {
-
-        static TestEntry matchInput(final List<ItemStack> expectedInput) {
-            return (context, input, click) -> {
                 final List<ItemStack> actualInput = input.slots().stream().map(Slot::peek).toList();
+                final List<ItemStack> expectedInput = this.expectedInputs().get(i);
+                final int click = i+1;
                 for (int j = 0; j < actualInput.size(); ++j) {
                     final ItemStack actualStack = actualInput.get(j);
                     final ItemStack expectedStack = expectedInput.size() <= j ? ItemStack.empty() : expectedInput.get(j);
                     assertTrue(net.minecraft.world.item.ItemStack.matches(
                             ItemStackUtil.toNative(actualStack), ItemStackUtil.toNative(expectedStack)),
                         () -> String.format("""
-                            Actual input doesn't match expected input after click №%s
+                            Actual input doesn't match expected input after click %s
                             Test: %s,
                             Expected input:    %s
                             Actual input:      %s
                             Initial input:     %s
                             Initial inventory: %s""",
-                            click+1,
-                            context.asTestName(),
+                            click,
+                            this.asTestName(),
                             RecipePlaceTest.stacksToString(false, expectedInput),
                             RecipePlaceTest.stacksToString(false, actualInput),
-                            RecipePlaceTest.stacksToString(false, context.input()),
-                            RecipePlaceTest.stacksToString(true, context.inventory())
+                            RecipePlaceTest.stacksToString(false, initialInput),
+                            RecipePlaceTest.stacksToString(true, initialInventory)
                         ));
                 }
-
-                return true;
-            };
+            }
         }
-
-        /**
-         * Performs the test on recipe input after each placement. Clicks start at 0.
-         *
-         * @return True if the following tests should be performed within the given click
-         */
-        boolean test(TestContext context, Inventory input, int click);
     }
 
     private static final class FakePlayer extends ServerPlayer {
