@@ -60,6 +60,7 @@ import org.spongepowered.common.accessor.world.inventory.AbstractCraftingMenuAcc
 import org.spongepowered.common.accessor.world.inventory.AbstractFurnaceMenuAccessor;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -129,12 +130,12 @@ public final class RecipePlaceTest {
                 && stack.maxStackQuantity() == bigPearl.maxStackQuantity(),
             pearl);
 
-        return Stream.of(
-            new TestPopulator("regular_shaped_crafting", CraftingRecipe.shapedBuilder()
+        return Stream.<TestPopulator>of(
+            new DefaultedTestPopulator(new TestContext("regular_shaped_crafting", CraftingRecipe.shapedBuilder()
                 .aisle("S S", " P ")
                 .where('S', stoneIngredient)
                 .where('P', anyPearlIngredient)
-                .result(result))
+                .result(result)))
 
                 .expectCrafts(8, 16)
                 .expectInput(List.of(
@@ -151,11 +152,11 @@ public final class RecipePlaceTest {
                 .badInventory(Collections.nCopies(9, bedrock))
                 .badInput(Collections.nCopies(9, bedrock)),
 
-            new TestPopulator("custom_shaped_crafting", CraftingRecipe.shapedBuilder()
+            new DefaultedTestPopulator(new TestContext("custom_shaped_crafting", CraftingRecipe.shapedBuilder()
                 .aisle("SSS", "BBB", "SSS")
                 .where('S', smallPearlIngredient)
                 .where('B', bigPearlIngredient)
-                .result(result))
+                .result(result)))
 
                 .expectCrafts(4, 4)
                 .expectInput(List.of(
@@ -172,8 +173,8 @@ public final class RecipePlaceTest {
                 .badInventory(List.of(pearl16))
                 .badInput(Collections.nCopies(9, pearl)),
 
-            new TestPopulator("regular_shapeless_crafting", CraftingRecipe.shapelessBuilder()
-                .addIngredients(anyPearlIngredient, stoneIngredient, anyPearlIngredient))
+            new DefaultedTestPopulator(new TestContext("regular_shapeless_crafting", CraftingRecipe.shapelessBuilder()
+                .addIngredients(anyPearlIngredient, stoneIngredient, anyPearlIngredient)))
 
                 .expectCrafts(16, 16)
                 .expectInput(List.of(
@@ -191,10 +192,10 @@ public final class RecipePlaceTest {
                 .badInput(Collections.nCopies(3, bedrock))/*,
 
             //TODO uncomment after shapeless recipe fix
-            new TestPopulator("custom_shapeless_crafting", CraftingRecipe.shapelessBuilder()
+            new DefaultedTestPopulator(new TestContext("custom_shapeless_crafting", CraftingRecipe.shapelessBuilder()
                 .addIngredients(
                     smallPearlIngredient, smallPearlIngredient, smallPearlIngredient,
-                    bigPearlIngredient,   bigPearlIngredient,   bigPearlIngredient))
+                    bigPearlIngredient,   bigPearlIngredient,   bigPearlIngredient)))
 
                 .expectCrafts(8, 16)
                 .expectInput(List.of(
@@ -221,11 +222,11 @@ public final class RecipePlaceTest {
         bigSnowball.offer(Keys.MAX_STACK_SIZE, 4);
         final ItemStack result = ItemStack.of(ItemTypes.BARRIER);
 
-        return Stream.of(
-            new TestPopulator("regular_smelting", CookingRecipe.builder()
+        return Stream.<TestPopulator>of(
+            new DefaultedTestPopulator(new TestContext("regular_smelting", CookingRecipe.builder()
                 .type(RecipeTypes.SMELTING)
                 .ingredient(Ingredient.of(snowball.type()))
-                .result(result))
+                .result(result)))
 
                 .expectCrafts(4, 8)
                 .expectInput(List.of(bigSnowball))
@@ -234,13 +235,13 @@ public final class RecipePlaceTest {
                 .badInventory(List.of(bedrock))
                 .badInput(List.of(bedrock)),
 
-            new TestPopulator("custom_smelting", CookingRecipe.builder()
+            new DefaultedTestPopulator(new TestContext("custom_smelting", CookingRecipe.builder()
                 .type(RecipeTypes.SMELTING)
                 .ingredient(Ingredient.of(ResourceKey.sponge("big_snowball"),
                     stack -> stack.type() == bigSnowball.type()
                         && stack.maxStackQuantity() == bigSnowball.maxStackQuantity(),
                     snowball))
-                .result(result))
+                .result(result)))
 
                 .expectCrafts(4, 8)
                 .expectInput(List.of(bigSnowball))
@@ -252,7 +253,7 @@ public final class RecipePlaceTest {
     }
 
     @TestFactory
-    public Stream<DynamicTest> testRecipes() {
+    public Stream<DynamicTest> generateTests() {
         return Stream.of(
             RecipePlaceTest.streamCraftingRecipes().map(context ->
                 dynamicTest(context.asTestName(), context::testCrafting)),
@@ -261,7 +262,38 @@ public final class RecipePlaceTest {
         ).flatMap(Function.identity());
     }
 
-    private static final class TestPopulator {
+    @FunctionalInterface
+    private interface TestPopulator {
+
+        Stream<TestContext> populate();
+    }
+
+    private static final class SimpleTestPopulator implements TestPopulator {
+
+        private final TestContext base;
+        private final List<TestContext> tests = new ArrayList<>();
+
+        public SimpleTestPopulator(final TestContext base) {
+            this.base = base;
+        }
+
+        public SimpleTestPopulator add(final Function<TestContext, TestContext> testProvider) {
+            this.tests.add(testProvider.apply(this.base));
+            return this;
+        }
+
+        public SimpleTestPopulator addAll(final Function<TestContext, Stream<TestContext>> testProvider) {
+            testProvider.apply(this.base).forEach(this.tests::add);
+            return this;
+        }
+
+        @Override
+        public Stream<TestContext> populate() {
+            return this.tests.stream();
+        }
+    }
+
+    private static final class DefaultedTestPopulator implements TestPopulator {
 
         private final TestContext base;
 
@@ -280,47 +312,42 @@ public final class RecipePlaceTest {
         private List<ItemStack> badInventory = List.of();
         private List<ItemStack> badInput = List.of();
 
-        public TestPopulator(final String key, final Builder<? extends org.spongepowered.api.item.recipe.Recipe<?>, ?> recipe) {
-            this(new RecipeHolder<>(
-                net.minecraft.resources.ResourceKey.create(Registries.RECIPE, ResourceLocation.fromNamespaceAndPath("sponge", key)),
-                (Recipe<?>) recipe.build()));
+        public DefaultedTestPopulator(final TestContext base) {
+            this.base = base;
         }
 
-        public TestPopulator(final RecipeHolder<?> recipe) {
-            this.base = new TestContext(recipe);
-        }
-
-        public TestPopulator expectCrafts(final int regularCrafts, final int shiftCrafts) {
+        public DefaultedTestPopulator expectCrafts(final int regularCrafts, final int shiftCrafts) {
             this.expectedRegularCrafts = regularCrafts;
             this.expectedShiftCrafts = shiftCrafts;
             return this;
         }
 
-        public TestPopulator expectInput(final List<ItemStack> items) {
+        public DefaultedTestPopulator expectInput(final List<ItemStack> items) {
             this.expectedInput = items;
             return this;
         }
 
-        public TestPopulator partialInventory(final List<ItemStack> items) {
+        public DefaultedTestPopulator partialInventory(final List<ItemStack> items) {
             this.partialInventory = items;
             return this;
         }
 
-        public TestPopulator partialInput(final List<ItemStack> items) {
+        public DefaultedTestPopulator partialInput(final List<ItemStack> items) {
             this.partialInput = items;
             return this;
         }
 
-        public TestPopulator badInventory(final List<ItemStack> items) {
+        public DefaultedTestPopulator badInventory(final List<ItemStack> items) {
             this.badInventory = items;
             return this;
         }
 
-        public TestPopulator badInput(final List<ItemStack> items) {
+        public DefaultedTestPopulator badInput(final List<ItemStack> items) {
             this.badInput = items;
             return this;
         }
 
+        @Override
         public Stream<TestContext> populate() {
             final List<ItemStack> totalInitialInventory = Stream.concat(this.partialInventory.stream(), this.partialInput.stream()).toList();
             final List<ItemStack> expectedShiftInput = RecipePlaceTest.createExpectedInput(this.expectedInput, this.expectedShiftCrafts);
@@ -329,17 +356,19 @@ public final class RecipePlaceTest {
                 this.base.name("Bad input").input(this.badInput)
             );
 
-            final Stream<TestContext> toFail = baseInputs.stream()
+            final Stream<TestContext> testBadLayouts = baseInputs.stream()
                 .flatMap(context -> Stream.of(
                     context.name("Empty inventory").inventory(List.of()),
                     context.name("Bad inventory").inventory(this.badInventory)
                 ))
                 .flatMap(context -> Stream.of(context, context.shift()))
-                // 2 clicks is enough to ensure we always fail
+                .flatMap(context -> Stream.of(context, context.creative()))
+                // 2 clicks is enough to ensure we always get empty input
                 .map(context -> context.expectInputs(List.of(List.of(), List.of())));
 
-            final Stream<TestContext> toMatchSingleClick = baseInputs.stream()
+            final Stream<TestContext> testSingleClick = baseInputs.stream()
                 .map(context -> context.name("Total inventory").inventory(totalInitialInventory))
+                .flatMap(context -> Stream.of(context, context.creative()))
                 .flatMap(context -> Stream.of(
                     context.expectInput(RecipePlaceTest.createExpectedInput(this.expectedInput, 1)),
                     context.shift().expectInput(expectedShiftInput)
@@ -347,10 +376,11 @@ public final class RecipePlaceTest {
 
             // After first click we end up with the same layout no matter the initial input.
             // So we can perform multiple-click tests on a single input.
-            final Stream<TestContext> toMatchMultipleClicks = Stream.of(this.base)
+            final Stream<TestContext> testMultipleClicks = Stream.of(this.base)
                 .map(context -> context
                     .name("Partial input").input(this.partialInput)
                     .name("Partial inventory").inventory(this.partialInventory))
+                .flatMap(context -> Stream.of(context, context.creative()))
                 .flatMap(context -> Stream.of(
                     context
                         .expectInputs(IntStream.rangeClosed(1, this.expectedRegularCrafts)
@@ -360,38 +390,60 @@ public final class RecipePlaceTest {
                     context.shift().expectInputs(List.of(expectedShiftInput, expectedShiftInput))
                 ));
 
-            return Stream.concat(toFail, Stream.concat(toMatchSingleClick, toMatchMultipleClicks));
+            final Stream<TestContext> testFullInventory = Stream.of(this.base)
+                .map(context -> context
+                    .name("Partial input").input(this.partialInput)
+                    .name("Full inventory").inventory(Collections.nCopies(36, ItemStack.of(ItemTypes.BARRIER, 64))))
+                .flatMap(context -> Stream.of(context, context.shift()))
+                .flatMap(context -> Stream.of(
+                    context.expectInput(this.partialInput),
+                    context.creative().expectInput(List.of())
+                ));
+
+            return Stream.of(testBadLayouts, testSingleClick, testMultipleClicks, testFullInventory)
+                .flatMap(Function.identity());
         }
     }
 
     private record TestContext(
-        RecipeHolder<?> recipe, String testName, boolean shiftClick,
+        RecipeHolder<?> recipe, String testName,
+        boolean shiftClick, boolean creativeMode,
         List<ItemStack> inventory, List<ItemStack> input,
         List<List<ItemStack>> expectedInputs
     ) {
+        public TestContext(final String key, final Builder<? extends org.spongepowered.api.item.recipe.Recipe<?>, ?> recipe) {
+            this(new RecipeHolder<>(
+                net.minecraft.resources.ResourceKey.create(Registries.RECIPE, ResourceLocation.fromNamespaceAndPath("sponge", key)),
+                (Recipe<?>) recipe.build()));
+        }
+
         public TestContext(final RecipeHolder<?> recipe) {
-            this(recipe, "", false, List.of(), List.of(), List.of());
+            this(recipe, "", false, false, List.of(), List.of(), List.of());
         }
 
         public TestContext name(final String testName) {
             final String newTestName = this.testName.isEmpty() ? testName : (this.testName + ", " + testName);
-            return new TestContext(this.recipe, newTestName, this.shiftClick, this.inventory, this.input, this.expectedInputs);
+            return new TestContext(this.recipe, newTestName, this.shiftClick, this.creativeMode, this.inventory, this.input, this.expectedInputs);
         }
 
         public TestContext shift() {
-            return new TestContext(this.recipe, this.testName, true, this.inventory, this.input, this.expectedInputs);
+            return new TestContext(this.recipe, this.testName, true, this.creativeMode, this.inventory, this.input, this.expectedInputs);
+        }
+
+        public TestContext creative() {
+            return new TestContext(this.recipe, this.testName, this.shiftClick, true, this.inventory, this.input, this.expectedInputs);
         }
 
         public TestContext inventory(final List<ItemStack> items) {
-            return new TestContext(this.recipe, this.testName, this.shiftClick, items, this.input, this.expectedInputs);
+            return new TestContext(this.recipe, this.testName, this.shiftClick, this.creativeMode, items, this.input, this.expectedInputs);
         }
 
         public TestContext input(final List<ItemStack> items) {
-            return new TestContext(this.recipe, this.testName, this.shiftClick, this.inventory, items, this.expectedInputs);
+            return new TestContext(this.recipe, this.testName, this.shiftClick, this.creativeMode, this.inventory, items, this.expectedInputs);
         }
 
         public TestContext expectInputs(final List<List<ItemStack>> expectedInputs) {
-            return new TestContext(this.recipe, this.testName, this.shiftClick, this.inventory, this.input, expectedInputs);
+            return new TestContext(this.recipe, this.testName, this.shiftClick, this.creativeMode, this.inventory, this.input, expectedInputs);
         }
 
         public TestContext expectInput(final List<ItemStack> expectedInput) {
@@ -399,11 +451,12 @@ public final class RecipePlaceTest {
         }
 
         public String asTestName() {
-            return String.format("Place recipe %s (Shift click: %s, Total clicks: %s, %s)",
+            return String.format("Place recipe %s, %s (Shift click: %s, Creative mode: %s, Total clicks: %s)",
                 this.recipe.id().location().getPath(),
+                this.testName,
                 this.shiftClick,
-                this.expectedInputs.size(),
-                this.testName);
+                this.creativeMode,
+                this.expectedInputs.size());
         }
 
         // Tests
@@ -443,7 +496,7 @@ public final class RecipePlaceTest {
             }
 
             for (int i = 0; i < this.expectedInputs().size(); ++i) {
-                menu.handlePlacement(this.shiftClick(), true, this.recipe(), player.serverLevel(), player.getInventory());
+                menu.handlePlacement(this.shiftClick(), this.creativeMode(), this.recipe(), player.serverLevel(), player.getInventory());
 
                 final List<ItemStack> actualInput = input.slots().stream().map(Slot::peek).toList();
                 final List<ItemStack> expectedInput = this.expectedInputs().get(i);
