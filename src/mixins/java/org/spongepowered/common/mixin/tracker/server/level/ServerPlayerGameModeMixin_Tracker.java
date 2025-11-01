@@ -105,18 +105,13 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
         final Vector3d hitVec = VecHelper.toVector3d(blockHit.getLocation());
         final org.spongepowered.api.util.Direction direction = DirectionFacingProvider.INSTANCE.getKey(blockHit.getDirection()).get();
         final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.callInteractBlockEventSecondary(player, stack, hitVec, snapshot, direction, hand);
-        final FoodData foodData = player.getFoodData();
-        final float prevHealth = player.getHealth();
-        final int prevFoodLevel = foodData.getFoodLevel();
-        final float prevSaturationLevel = foodData.getSaturationLevel();
 
         ((ServerPlayerGameModeBridge) this).bridge$setInteractBlockRightClickCancelled(event.isCancelled());
         if (event.isCancelled()) {
             this.player.inventoryMenu.sendAllDataToRemote();
-            // Cancel health or food level changes to the client, for example after eating a cake
-            if (player.getHealth() != prevHealth || foodData.getFoodLevel() != prevFoodLevel || foodData.getSaturationLevel() != prevSaturationLevel) {
-                this.player.connection.send(new ClientboundSetHealthPacket(player.getHealth(), foodData.getFoodLevel(), foodData.getSaturationLevel()));
-            }
+            // Eating a cake increases the food level on client-side
+            final FoodData foodData = player.getFoodData();
+            this.player.connection.send(new ClientboundSetHealthPacket(player.getHealth(), foodData.getFoodLevel(), foodData.getSaturationLevel()));
             return InteractionResult.FAIL;
         }
 
