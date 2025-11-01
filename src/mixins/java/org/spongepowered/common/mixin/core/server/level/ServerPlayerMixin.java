@@ -619,7 +619,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
         }
 
-        thisPlayer.setCamera(thisPlayer);
+        thisPlayer.setCamera(thisPlayer.getCamera());
         thisPlayer.stopRiding();
         if (thisPlayer.isSleeping()) {
             thisPlayer.stopSleepInBed(true, true);
