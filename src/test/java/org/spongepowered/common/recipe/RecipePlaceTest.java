@@ -130,88 +130,104 @@ public final class RecipePlaceTest {
                 && stack.maxStackQuantity() == bigPearl.maxStackQuantity(),
             pearl);
 
-        return Stream.<TestPopulator>of(
-            new DefaultedTestPopulator(new TestContext("regular_shaped_crafting", CraftingRecipe.shapedBuilder()
+        return Stream.of(
+            Stream.of(new TestContext("regular_shaped_crafting", CraftingRecipe.shapedBuilder()
                 .aisle("S S", " P ")
                 .where('S', stoneIngredient)
                 .where('P', anyPearlIngredient)
                 .result(result)))
+                .flatMap(test -> Stream.of(
+                    new DefaultedTestPopulator(test)
+                        .expectCrafts(8, 16)
+                        .expectInput(List.of(
+                            stone, empty,    stone,
+                            empty, bigPearl, empty,
+                            empty, empty,    empty))
 
-                .expectCrafts(8, 16)
-                .expectInput(List.of(
-                    stone, empty,    stone,
-                    empty, bigPearl, empty,
-                    empty, empty,    empty))
+                        .partialInventory(List.of(stone64, bigPearl8, bigPearl8))
+                        .partialInput(List.of(
+                            stone64, empty,     empty,
+                            empty,   bigPearl4, empty,
+                            empty,   empty,     empty))
+                        .badInput(Collections.nCopies(9, bedrock)),
+                    new BadLayoutTestPopulator(test)
+                        .badInventory(Collections.nCopies(9, bedrock))
+                        .badInput(Collections.nCopies(9, bedrock))
+                )).flatMap(TestPopulator::populate),
 
-                .partialInventory(List.of(stone64, bigPearl8, bigPearl8))
-                .partialInput(List.of(
-                    stone64, empty,     empty,
-                    empty,   bigPearl4, empty,
-                    empty,   empty,     empty))
-
-                .badInventory(Collections.nCopies(9, bedrock))
-                .badInput(Collections.nCopies(9, bedrock)),
-
-            new DefaultedTestPopulator(new TestContext("custom_shaped_crafting", CraftingRecipe.shapedBuilder()
+            Stream.of(new TestContext("custom_shaped_crafting", CraftingRecipe.shapedBuilder()
                 .aisle("SSS", "BBB", "SSS")
                 .where('S', smallPearlIngredient)
                 .where('B', bigPearlIngredient)
                 .result(result)))
+                .flatMap(test -> Stream.of(
+                    new DefaultedTestPopulator(test)
+                        .expectCrafts(4, 4)
+                        .expectInput(List.of(
+                            smallPearl, smallPearl, smallPearl,
+                            bigPearl,   bigPearl,   bigPearl,
+                            smallPearl, smallPearl, smallPearl))
 
-                .expectCrafts(4, 4)
-                .expectInput(List.of(
-                    smallPearl, smallPearl, smallPearl,
-                    bigPearl,   bigPearl,   bigPearl,
-                    smallPearl, smallPearl, smallPearl))
+                        .partialInventory(List.of(smallPearl32, bigPearl, bigPearl, bigPearl, bigPearl, smallPearl32))
+                        .partialInput(List.of(
+                            smallPearl4, empty, smallPearl4,
+                            bigPearl4,   empty, bigPearl4,
+                            smallPearl,  empty, empty))
+                        .badInput(Collections.nCopies(9, pearl)),
+                    new BadLayoutTestPopulator(test)
+                        .badInventory(List.of(pearl16))
+                        .badInput(Collections.nCopies(9, pearl))
+                ))
+                .flatMap(TestPopulator::populate),
 
-                .partialInventory(List.of(smallPearl32, bigPearl, bigPearl, bigPearl, bigPearl, smallPearl32))
-                .partialInput(List.of(
-                    smallPearl4, empty, smallPearl4,
-                    bigPearl4,   empty, bigPearl4,
-                    smallPearl,  empty, empty))
+            Stream.of(new TestContext("regular_shapeless_crafting", CraftingRecipe.shapelessBuilder()
+                .addIngredients(
+                    anyPearlIngredient, stoneIngredient, anyPearlIngredient)))
+                .flatMap(test -> Stream.of(
+                    new DefaultedTestPopulator(test)
+                        .expectCrafts(16, 16)
+                        .expectInput(List.of(
+                            smallPearl, stone, smallPearl,
+                            empty,      empty, empty,
+                            empty,      empty, empty))
 
-                .badInventory(List.of(pearl16))
-                .badInput(Collections.nCopies(9, pearl)),
-
-            new DefaultedTestPopulator(new TestContext("regular_shapeless_crafting", CraftingRecipe.shapelessBuilder()
-                .addIngredients(anyPearlIngredient, stoneIngredient, anyPearlIngredient)))
-
-                .expectCrafts(16, 16)
-                .expectInput(List.of(
-                    smallPearl, stone, smallPearl,
-                    empty,      empty, empty,
-                    empty,      empty, empty))
-
-                .partialInventory(List.of(smallPearl32))
-                .partialInput(List.of(
-                    smallPearl4, stone64, empty,
-                    empty,       empty,   empty,
-                    empty,       empty,   empty))
-
-                .badInventory(Collections.nCopies(10, bedrock))
-                .badInput(Collections.nCopies(3, bedrock))/*,
+                        .partialInventory(List.of(smallPearl32))
+                        .partialInput(List.of(
+                            smallPearl4, stone64, empty,
+                            empty,       empty,   empty,
+                            empty,       empty,   empty))
+                        .badInput(Collections.nCopies(3, bedrock)),
+                    new BadLayoutTestPopulator(test)
+                        .badInventory(Collections.nCopies(10, bedrock))
+                        .badInput(Collections.nCopies(3, bedrock))
+                ))
+                .flatMap(TestPopulator::populate)/*,
 
             //TODO uncomment after shapeless recipe fix
-            new DefaultedTestPopulator(new TestContext("custom_shapeless_crafting", CraftingRecipe.shapelessBuilder()
+            Stream.of(new TestContext("custom_shapeless_crafting", CraftingRecipe.shapelessBuilder()
                 .addIngredients(
                     smallPearlIngredient, smallPearlIngredient, smallPearlIngredient,
                     bigPearlIngredient,   bigPearlIngredient,   bigPearlIngredient)))
+                .flatMap(test -> Stream.of(
+                    new DefaultedTestPopulator(test)
+                        .expectCrafts(8, 16)
+                        .expectInput(List.of(
+                            smallPearl, smallPearl, smallPearl,
+                            bigPearl,   bigPearl,   bigPearl,
+                            empty,      empty,      empty))
 
-                .expectCrafts(8, 16)
-                .expectInput(List.of(
-                    smallPearl, smallPearl, smallPearl,
-                    bigPearl,   bigPearl,   bigPearl,
-                    empty,      empty,      empty))
-
-                .partialInventory(Collections.nCopies(5, bigPearl8))
-                .partialInput(List.of(
-                    smallPearl32, smallPearl32, smallPearl,
-                    bigPearl4,    bigPearl4,    empty,
-                    empty,        empty,        empty))
-
-                .badInventory(List.of(pearl16))
-                .badInput(Collections.nCopies(6, pearl))*/
-        ).flatMap(TestPopulator::populate);
+                        .partialInventory(Collections.nCopies(5, bigPearl8))
+                        .partialInput(List.of(
+                            smallPearl32, smallPearl32, smallPearl,
+                            bigPearl4,    bigPearl4,    empty,
+                            empty,        empty,        empty))
+                        .badInput(Collections.nCopies(6, pearl)),
+                    new BadLayoutTestPopulator(test)
+                        .badInventory(List.of(pearl16))
+                        .badInput(Collections.nCopies(6, pearl))
+                ))
+                .flatMap(TestPopulator::populate)*/
+        ).flatMap(Function.identity());
     }
 
     private static Stream<TestContext> streamSmeltingRecipes() {
@@ -222,34 +238,43 @@ public final class RecipePlaceTest {
         bigSnowball.offer(Keys.MAX_STACK_SIZE, 4);
         final ItemStack result = ItemStack.of(ItemTypes.BARRIER);
 
-        return Stream.<TestPopulator>of(
-            new DefaultedTestPopulator(new TestContext("regular_smelting", CookingRecipe.builder()
+        return Stream.of(
+            Stream.of(new TestContext("regular_smelting", CookingRecipe.builder()
                 .type(RecipeTypes.SMELTING)
                 .ingredient(Ingredient.of(snowball.type()))
                 .result(result)))
+                .flatMap(test -> Stream.of(
+                    new DefaultedTestPopulator(test)
+                        .expectCrafts(4, 8)
+                        .expectInput(List.of(bigSnowball))
 
-                .expectCrafts(4, 8)
-                .expectInput(List.of(bigSnowball))
+                        .partialInventory(Collections.nCopies(8, bigSnowball))
+                        .badInput(List.of(bedrock)),
+                    new BadLayoutTestPopulator(test)
+                        .badInventory(List.of(bedrock))
+                        .badInput(List.of(bedrock))
+                ))
+                .flatMap(TestPopulator::populate),
 
-                .partialInventory(Collections.nCopies(8, bigSnowball))
-                .badInventory(List.of(bedrock))
-                .badInput(List.of(bedrock)),
-
-            new DefaultedTestPopulator(new TestContext("custom_smelting", CookingRecipe.builder()
+            Stream.of(new TestContext("custom_smelting", CookingRecipe.builder()
                 .type(RecipeTypes.SMELTING)
                 .ingredient(Ingredient.of(ResourceKey.sponge("big_snowball"),
                     stack -> stack.type() == bigSnowball.type()
                         && stack.maxStackQuantity() == bigSnowball.maxStackQuantity(),
                     snowball))
                 .result(result)))
-
-                .expectCrafts(4, 8)
-                .expectInput(List.of(bigSnowball))
-
-                .partialInventory(Collections.nCopies(8, bigSnowball))
-                .badInventory(List.of(snowball4))
-                .badInput(List.of(snowball4))
-        ).flatMap(TestPopulator::populate);
+                .flatMap(test -> Stream.of(
+                    new DefaultedTestPopulator(test)
+                        .expectCrafts(4, 8)
+                        .expectInput(List.of(bigSnowball))
+                        .partialInventory(Collections.nCopies(8, bigSnowball))
+                        .badInput(List.of(snowball4)),
+                    new BadLayoutTestPopulator(test)
+                        .badInventory(List.of(snowball4))
+                        .badInput(List.of(snowball4))
+                ))
+                .flatMap(TestPopulator::populate)
+        ).flatMap(Function.identity());
     }
 
     @TestFactory
@@ -264,6 +289,10 @@ public final class RecipePlaceTest {
 
     @FunctionalInterface
     private interface TestPopulator {
+
+        static TestPopulator composite(final Stream<TestPopulator> populators) {
+            return () -> populators.flatMap(TestPopulator::populate);
+        }
 
         Stream<TestContext> populate();
     }
@@ -308,8 +337,6 @@ public final class RecipePlaceTest {
         // All of them should be considered for expected crafts
         private List<ItemStack> partialInventory = List.of();
         private List<ItemStack> partialInput = List.of();
-        // "Bad" items exist to ensure placer clears input and doesn't pull wrong items if there is no other choice
-        private List<ItemStack> badInventory = List.of();
         private List<ItemStack> badInput = List.of();
 
         public DefaultedTestPopulator(final TestContext base) {
@@ -337,11 +364,6 @@ public final class RecipePlaceTest {
             return this;
         }
 
-        public DefaultedTestPopulator badInventory(final List<ItemStack> items) {
-            this.badInventory = items;
-            return this;
-        }
-
         public DefaultedTestPopulator badInput(final List<ItemStack> items) {
             this.badInput = items;
             return this;
@@ -351,22 +373,12 @@ public final class RecipePlaceTest {
         public Stream<TestContext> populate() {
             final List<ItemStack> totalInitialInventory = Stream.concat(this.partialInventory.stream(), this.partialInput.stream()).toList();
             final List<ItemStack> expectedShiftInput = RecipePlaceTest.createExpectedInput(this.expectedInput, this.expectedShiftCrafts);
-            final List<TestContext> baseInputs = List.of(
-                this.base.name("Empty input").input(List.of()),
-                this.base.name("Bad input").input(this.badInput)
-            );
 
-            final Stream<TestContext> testBadLayouts = baseInputs.stream()
+            final Stream<TestContext> testSingleClick = Stream.of(this.base)
                 .flatMap(context -> Stream.of(
-                    context.name("Empty inventory").inventory(List.of()),
-                    context.name("Bad inventory").inventory(this.badInventory)
+                    context.name("Empty input").input(List.of()),
+                    context.name("Bad input").input(this.badInput)
                 ))
-                .flatMap(context -> Stream.of(context, context.shift()))
-                .flatMap(context -> Stream.of(context, context.creative()))
-                // 2 clicks is enough to ensure we always get empty input
-                .map(context -> context.expectInputs(List.of(List.of(), List.of())));
-
-            final Stream<TestContext> testSingleClick = baseInputs.stream()
                 .map(context -> context.name("Total inventory").inventory(totalInitialInventory))
                 .flatMap(context -> Stream.of(context, context.creative()))
                 .flatMap(context -> Stream.of(
@@ -400,8 +412,46 @@ public final class RecipePlaceTest {
                     context.creative().expectInput(List.of())
                 ));
 
-            return Stream.of(testBadLayouts, testSingleClick, testMultipleClicks, testFullInventory)
+            return Stream.of(testSingleClick, testMultipleClicks, testFullInventory)
                 .flatMap(Function.identity());
+        }
+    }
+
+    private static final class BadLayoutTestPopulator implements TestPopulator {
+
+        private final TestContext base;
+        private List<ItemStack> badInventory = List.of();
+        private List<ItemStack> badInput = List.of();
+
+        public BadLayoutTestPopulator(final TestContext base) {
+            this.base = base;
+        }
+
+        public BadLayoutTestPopulator badInventory(final List<ItemStack> items) {
+            this.badInventory = items;
+            return this;
+        }
+
+        public BadLayoutTestPopulator badInput(final List<ItemStack> items) {
+            this.badInput = items;
+            return this;
+        }
+
+        @Override
+        public Stream<TestContext> populate() {
+            return Stream.of(this.base)
+                .flatMap(context -> Stream.of(
+                    context.name("Empty input").input(List.of()),
+                    context.name("Bad input").input(this.badInput)
+                ))
+                .flatMap(context -> Stream.of(
+                    context.name("Empty inventory").inventory(List.of()),
+                    context.name("Bad inventory").inventory(this.badInventory)
+                ))
+                .flatMap(context -> Stream.of(context, context.shift()))
+                .flatMap(context -> Stream.of(context, context.creative()))
+                // 2 clicks is enough to ensure we always get empty input
+                .map(context -> context.expectInputs(List.of(List.of(), List.of())));
         }
     }
 
@@ -466,7 +516,7 @@ public final class RecipePlaceTest {
         }
 
         public void testSmelting() {
-            this.test(MenuType.FURNACE, menu -> ((Inventory) ((AbstractFurnaceMenuAccessor) menu).accessor$container()).slot(0).get());
+            this.test(MenuType.FURNACE, menu -> ((Inventory) ((AbstractFurnaceMenuAccessor) menu).accessor$container()).slot(0).orElseThrow());
         }
 
         public void test(
