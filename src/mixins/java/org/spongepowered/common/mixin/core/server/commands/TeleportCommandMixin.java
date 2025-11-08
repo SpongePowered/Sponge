@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.server.commands;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.server.commands.TeleportCommand;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -33,7 +35,6 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.Set;
@@ -41,14 +42,12 @@ import java.util.Set;
 @Mixin(TeleportCommand.class)
 public abstract class TeleportCommandMixin {
 
-    @Redirect(method = "performTeleport", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;teleportTo(Lnet/minecraft/server/level/ServerLevel;DDDLjava/util/Set;FFZ)Z"))
-    private static boolean vanilla$createCauseFrameForPerformTeleport(
-        final Entity instance, final ServerLevel level, final double x, final double y,
-        final double z, final Set<Relative> relativeMovements, final float yRot, final float xRot, final boolean setCamera) {
+    @WrapOperation(method = "performTeleport", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;teleportTo(Lnet/minecraft/server/level/ServerLevel;DDDLjava/util/Set;FFZ)Z"))
+    private static boolean impl$createCauseFrameForPerformTeleport(
+        final Entity instance, final ServerLevel $$0, final double $$1, final double $$2, final double $$3, final Set<Relative> $$4, final float $$5, final float $$6, final boolean $$7, final Operation<Boolean> original) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.COMMAND);
-
-            return instance.teleportTo(level, x, y, z, relativeMovements, yRot, xRot, setCamera);
+            return original.call(instance, $$0, $$1, $$2, $$3, $$4, $$5, $$6, $$7);
         }
     }
 }
