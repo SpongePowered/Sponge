@@ -26,6 +26,7 @@ package org.spongepowered.common.network.status;
 
 import org.spongepowered.api.MinecraftVersion;
 
+import java.util.Optional;
 import java.util.OptionalInt;
 
 public class SpongeLegacyMinecraftVersion implements MinecraftVersion {
@@ -50,6 +51,11 @@ public class SpongeLegacyMinecraftVersion implements MinecraftVersion {
     @Override
     public String name() {
         return this.name;
+    }
+
+    @Override
+    public Optional<String> id() {
+        return Optional.empty();
     }
 
     @Override

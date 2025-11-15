@@ -53,6 +53,7 @@ public final class SpongeCommon {
     private static final Logger LOGGER = LogManager.getLogger(Launch.instance().id());
     private static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion(
         SharedConstants.getCurrentVersion().getName(),
+        SharedConstants.getCurrentVersion().getId(),
         SharedConstants.getCurrentVersion().getProtocolVersion()
     );
 
