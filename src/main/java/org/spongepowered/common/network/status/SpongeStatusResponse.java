@@ -146,6 +146,11 @@ public final class SpongeStatusResponse implements ClientPingServerEvent.Respons
         }
 
         @Override
+        public Optional<String> id() {
+            return Optional.empty();
+        }
+
+        @Override
         public void setName(String name) {
             this.name = Objects.requireNonNull(name, "name");
         }

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.world.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
@@ -36,17 +35,15 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
-import org.spongepowered.common.event.tracking.context.transaction.world.SpawnEntityTransaction;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
 import org.spongepowered.common.world.BlockChange;
 
+import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 public final class PacketCommandState extends PacketState<PlayerCommandPhaseContext> {
 
@@ -86,18 +83,14 @@ public final class PacketCommandState extends PacketState<PlayerCommandPhaseCont
     @Override
     public SpawnEntityEvent createSpawnEvent(
         final PlayerCommandPhaseContext context, final GameTransaction<@NonNull ?> parent,
-        final ImmutableList<Tuple<Entity, SpawnEntityTransaction.DummySnapshot>> collect, final Cause currentCause
+        final List<Entity> collect, final Cause currentCause
     ) {
         final Cause newCauseWithSpawnType = Cause.builder().from(currentCause).build(
             EventContext.builder().from(currentCause.context()).add(
                 EventContextKeys.SPAWN_TYPE,
                 SpawnTypes.PLACEMENT.get()
             ).build());
-        return SpongeEventFactory.createSpawnEntityEvent(newCauseWithSpawnType,
-            collect.stream()
-                .map(t -> (org.spongepowered.api.entity.Entity) t.first())
-                .collect(Collectors.toList())
-        );
+        return SpongeEventFactory.createSpawnEntityEvent(newCauseWithSpawnType, (List) collect);
     }
 
 

@@ -24,21 +24,24 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import com.google.common.collect.Lists;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import com.mojang.serialization.DynamicOps;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minecraft.world.level.block.entity.SignText;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 
 public final class SignItemStackData {
+
 
     private SignItemStackData() {
     }
@@ -57,24 +60,40 @@ public final class SignItemStackData {
                             if (!id.equalsIgnoreCase(Constants.TileEntity.SIGN)) {
                                 return null;
                             }
-                          final GsonComponentSerializer gcs = GsonComponentSerializer.gson();
-                            final List<Component> texts = Lists.newArrayListWithCapacity(4);
-                            for (int i = 0; i < 4; i++) {
-                                texts.add(gcs.deserialize(tag.getString("Text" + (i + 1))));
+                            DynamicOps<Tag> $$2 = SpongeCommon.vanillaRegistryAccess().createSerializationContext(NbtOps.INSTANCE);
+
+                            if (tag.contains("front_text")) {
+                                return SignText.DIRECT_CODEC
+                                    .parse($$2, tag.getCompound("front_text"))
+                                    .resultOrPartial()
+                                    .map(t -> t.getMessages(false))
+                                    .map(List::of)
+                                    .stream()
+                                    .flatMap(List::stream)
+                                    .map(SpongeAdventure::asAdventure)
+                                    .toList();
                             }
-                            return texts;
+                            return List.of();
                         })
                         .set((h, v) -> {
-                            final GsonComponentSerializer gcs = GsonComponentSerializer.gson();
                             final CompoundTag tag = new CompoundTag();
                             tag.putString(Constants.Item.BLOCK_ENTITY_ID, Constants.TileEntity.SIGN);
-                            for (int i = 0; i < 4; i++) {
-                                final @Nullable Component line = v.size() > i ? v.get(i) : Component.empty();
-                                if (line == null) {
-                                    throw new IllegalArgumentException("A null line was given at index " + i);
+                            DynamicOps<Tag> $$2 = SpongeCommon.vanillaRegistryAccess().createSerializationContext(NbtOps.INSTANCE);
+                            final var text = new SignText();
+                            for (int i = 0; i < v.size(); ++i) {
+                                if (i > 3) {
+                                    break;
                                 }
-                                tag.putString("Text" + (i + 1), gcs.serialize(line));
+                                final var translated = SpongeAdventure.asVanilla(v.get(i));
+                                if (translated == null) {
+                                    continue;
+                                }
+                                text.setMessage(i, translated);
                             }
+                            SignText.DIRECT_CODEC.encodeStart($$2, text)
+                                .resultOrPartial(SpongeCommon.logger()::error)
+                                .ifPresent($$1x -> tag.put("front_text", $$1x));
+
                             h.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
                         })
                         .delete(h -> h.remove(DataComponents.BLOCK_ENTITY_DATA));

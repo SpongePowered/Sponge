@@ -24,154 +24,92 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.projectile;
 
-import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.stats.Stats;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.world.entity.ExperienceOrb;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Player;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Cancellable;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.projectile.FishingBobber;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Mixin(FishingHook.class)
 public abstract class FishingHookMixin extends ProjectileMixin {
 
     // @formatter:off
-    @Shadow private net.minecraft.world.entity.@Nullable Entity hookedIn;
+    @Shadow @Nullable private Entity hookedIn;
     @Shadow private int nibble;
-    @Shadow @Final private int luck;
-
-    @Shadow @Nullable public abstract Player shadow$getPlayerOwner();
-    @Shadow protected abstract void shadow$pullEntity(net.minecraft.world.entity.Entity var1);
     // @formatter:on
 
     @Inject(method = "setHookedEntity", at = @At("HEAD"), cancellable = true)
-    private void onSetHookedEntity(final net.minecraft.world.entity.@Nullable Entity hookedIn, final CallbackInfo ci) {
-        if (hookedIn != null && SpongeCommon
-            .post(SpongeEventFactory.createFishingEventHookEntity(PhaseTracker.getInstance().currentCause(), (Entity) hookedIn, (FishingBobber) this))) {
+    private void impl$onSetHookedEntity(final @Nullable Entity hookedIn, final CallbackInfo ci) {
+        if (hookedIn != null && SpongeCommon.post(SpongeEventFactory.createFishingEventHookEntity(PhaseTracker.getInstance().currentCause(), (org.spongepowered.api.entity.Entity) hookedIn, (FishingBobber) this))) {
             this.hookedIn = null;
             ci.cancel();
         }
     }
 
-    /**
-     * @author Aaron1011 - February 6th, 2015
-     * @author Minecrell - December 24th, 2016 (Updated to Minecraft 1.11.2)
-     * @author Minecrell - June 14th, 2017 (Rewritten to handle cases where no items are dropped)
-     * @reason This needs to handle for both cases where a fish and/or an entity is being caught.
-     */
-    @Overwrite
-    public int retrieve(final ItemStack stack) {
-        final Player playerEntity = this.shadow$getPlayerOwner();
+    @Inject(method = "retrieve", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/FishingHook;pullEntity(Lnet/minecraft/world/entity/Entity;)V"), cancellable = true)
+    private void impl$onRetrieveHookedEntity(final ItemStack tool, final CallbackInfoReturnable<Integer> cir) {
+        if (SpongeCommon.post(SpongeEventFactory.createFishingEventStop(PhaseTracker.getInstance().currentCause(), ((FishingBobber) this), List.of()))) {
+            cir.setReturnValue(0);
+        }
+    }
 
-        if (!this.shadow$level().isClientSide && playerEntity != null) {
-            int i = 0;
+    @WrapOperation(method = "retrieve", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/loot/LootTable;getRandomItems(Lnet/minecraft/world/level/storage/loot/LootParams;)Lit/unimi/dsi/fastutil/objects/ObjectArrayList;"))
+    private ObjectArrayList<ItemStack> impl$onRetrieveLootTable(final LootTable lootTable, final LootParams lootParams, final Operation<ObjectArrayList<ItemStack>> original, final @Cancellable CallbackInfoReturnable<Integer> cir) {
+        final List<Transaction<@NotNull ItemStackSnapshot>> transactions = original.call(lootTable, lootParams)
+            .stream().map(ItemStackUtil::snapshotOf).map(snapshot -> new Transaction<>(snapshot, snapshot)).toList();
 
-            // Sponge start
-            final List<Transaction<@NonNull ItemStackSnapshot>> transactions;
-            if (this.nibble > 0) {
-                // Moved from below
-                final LootParams.Builder lootcontext$builder = new LootParams.Builder((ServerLevel) this.shadow$level())
-                        .withParameter(LootContextParams.ORIGIN, this.shadow$position())
-                        .withParameter(LootContextParams.TOOL, stack)
-                        .withParameter(LootContextParams.THIS_ENTITY, (FishingHook) (Object) this)
-                        .withLuck((float)this.luck + playerEntity.getLuck());
-                final LootTable lootTable = this.shadow$level().getServer().reloadableRegistries().getLootTable(BuiltInLootTables.FISHING);
-                final List<ItemStack> list = lootTable.getRandomItems(lootcontext$builder.create(LootContextParamSets.FISHING));
-                transactions = list.stream().map(ItemStackUtil::snapshotOf)
-                        .map(snapshot -> new Transaction<>(snapshot, snapshot))
-                        .collect(Collectors.toList());
-                CriteriaTriggers.FISHING_ROD_HOOKED.trigger((ServerPlayer)playerEntity, stack, (FishingHook) (Object) this, list);
-            } else {
-                transactions = new ArrayList<>();
-            }
-            PhaseTracker.getInstance().pushCause(playerEntity);
+        if (SpongeCommon.post(SpongeEventFactory.createFishingEventStop(PhaseTracker.getInstance().currentCause(), ((FishingBobber) this), transactions))) {
+            cir.setReturnValue(0);
+            return ObjectArrayList.of();
+        }
 
-            if (SpongeCommon.post(SpongeEventFactory.createFishingEventStop(PhaseTracker.getInstance().currentCause(), ((FishingBobber) this), transactions))) {
-                // Event is cancelled
-                return 0;
-            }
-            // Sponge end
+        return transactions.stream().filter(Transaction::isValid)
+            .map(t -> (ItemStack) (Object) t.finalReplacement().asMutable()).collect(ObjectArrayList.toList());
+    }
 
-            if (this.hookedIn != null) {
-                this.shadow$pullEntity(this.hookedIn);
-                CriteriaTriggers.FISHING_ROD_HOOKED.trigger((ServerPlayer) playerEntity, stack, (FishingHook) (Object) this, Collections.emptyList());
-                this.shadow$level().broadcastEntityEvent((FishingHook) (Object) this, (byte) 31);
-                i = this.hookedIn instanceof ItemEntity ? 3 : 5;
-            } // Sponge: Remove else
+    @Inject(method = "retrieve", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/FishingHook;onGround()Z"), cancellable = true)
+    private void impl$onRetrieveEmpty(final ItemStack tool, final CallbackInfoReturnable<Integer> cir) {
+        if (this.hookedIn == null && this.nibble <= 0
+            && SpongeCommon.post(SpongeEventFactory.createFishingEventStop(PhaseTracker.getInstance().currentCause(), ((FishingBobber) this), List.of()))) {
+            cir.setReturnValue(0);
+        }
+    }
 
-            // Sponge start - Moved up to event call
-            if (!transactions.isEmpty()) { // Sponge: Check if we have any transactions instead
-                //LootContext.Builder lootcontext$builder = new LootContext.Builder((WorldServer) this.world);
-                //lootcontext$builder.withLuck((float) this.field_191518_aw + playerEntity.getLuck());
+    @WrapMethod(method = "retrieve")
+    private int impl$wrapRetrieveWithCause(final ItemStack tool, final Operation<Integer> original) {
+        final Entity owner = this.shadow$getOwner();
 
-                // Use transactions
-                for (final Transaction<@NonNull ItemStackSnapshot> transaction : transactions) {
-                    if (!transaction.isValid()) {
-                        continue;
-                    }
-                    final ItemStack itemstack = (ItemStack) (Object) transaction.finalReplacement().asMutable();
-                    // Sponge end
+        if (owner == null) {
+            return original.call(tool);
+        }
 
-                    final ItemEntity entityitem = new ItemEntity(this.shadow$level(), this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), itemstack);
-                    final double d0 = playerEntity.getX() - this.shadow$getX();
-                    final double d1 = playerEntity.getY() - this.shadow$getY();
-                    final double d2 = playerEntity.getZ() - this.shadow$getZ();
-                    final double d3 = Math.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
-                    //double d4 = 0.1D;
-                    entityitem.setDeltaMovement(d0 * 0.1D, d1 * 0.1D + Math.sqrt(d3) * 0.08D, d2 * 0.1D);
-                    this.shadow$level().addFreshEntity(entityitem);
-                    playerEntity.level().addFreshEntity(new ExperienceOrb(playerEntity.level(), playerEntity.getX(), playerEntity.getY() + 0.5D,
-                            playerEntity.getZ() + 0.5D,
-                            this.random.nextInt(6) + 1));
-
-                    if (itemstack.is(ItemTags.FISHES)) {
-                        playerEntity.awardStat(Stats.FISH_CAUGHT, 1);
-                    }
-                }
-                PhaseTracker.getInstance().popCause();
-
-                i = Math.max(i, 1); // Sponge: Don't lower damage if we've also caught an entity
-            }
-
-            if (this.shadow$onGround()) {
-                i = 2;
-            }
-
-            this.shadow$discard();
-            return i;
-        } else {
-            return 0;
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
+            frame.pushCause(owner);
+            return original.call(tool);
         }
     }
 

@@ -9,17 +9,9 @@ pluginManagement {
             name = "architectury"
         }
     }
-    val vanillaGradleVersion = "0.2.1-20241107.194040-91"
     plugins {
-        id("org.spongepowered.gradle.vanilla") version vanillaGradleVersion
+        id("org.spongepowered.gradle.vanilla") version "0.2.2"
         id("implementation-structure")
-    }
-    resolutionStrategy {
-        eachPlugin {
-            if (requested.id.id == "org.spongepowered.gradle.vanilla") {
-                useModule("org.spongepowered:vanillagradle:$vanillaGradleVersion")
-            }
-        }
     }
 }
 

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -57,7 +56,6 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -70,7 +68,6 @@ import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.block.ChangeBlock;
-import org.spongepowered.common.event.tracking.context.transaction.world.SpawnEntityTransaction;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.tick.LocationBasedTickContext;
@@ -81,7 +78,6 @@ import java.util.ArrayDeque;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 /**
  * A literal phase state of which the {@link World} is currently running
@@ -378,14 +374,10 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     default SpawnEntityEvent createSpawnEvent(final C context,
         final @Nullable GameTransaction<@NonNull ?> parent,
-        final ImmutableList<Tuple<Entity, SpawnEntityTransaction.DummySnapshot>> collect,
+        final List<Entity> collect,
         final Cause currentCause
     ) {
-        return SpongeEventFactory.createSpawnEntityEvent(currentCause,
-            collect.stream()
-                .map(t -> (org.spongepowered.api.entity.Entity) t.first())
-                .collect(Collectors.toList())
-        );
+        return SpongeEventFactory.createSpawnEntityEvent(currentCause, (List) collect);
     }
 
     default void populateLootContext(final C phaseContext, final LootParams.Builder lootBuilder) {

@@ -373,6 +373,12 @@
             ]
         },
         {
+            "id": "attributedata",
+            "name": "Attribute Data",
+            "entrypoint": "org.spongepowered.test.data.AttributeDataTest",
+            "description": "Attribute Data"
+        },
+        {
             "id": "decoratedpotdata",
             "name": "Decorated Pot Data",
             "entrypoint": "org.spongepowered.test.data.PotDataTest",

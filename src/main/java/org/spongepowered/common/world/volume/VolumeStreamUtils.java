@@ -61,6 +61,7 @@ import org.spongepowered.api.world.volume.game.Region;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.client.multiplayer.ClientLevelAccessor;
 import org.spongepowered.common.accessor.server.level.ServerLevelAccessor;
 import org.spongepowered.common.accessor.world.level.block.entity.BlockEntityAccessor;
@@ -178,7 +179,8 @@ public final class VolumeStreamUtils {
         final int maskedX = x & 3;
         final int maskedY = y & 3;
         final int maskedZ = z & 3;
-        final var old = ((PalettedContainer<Holder<Biome>>) section.getBiomes()).getAndSet(maskedX, maskedY, maskedZ, Holder.direct((Biome) (Object) biome));
+        final Holder<Biome> biomeHolder = SpongeCommon.vanillaRegistry(Registries.BIOME).wrapAsHolder((Biome) (Object) biome);
+        final var old = ((PalettedContainer<Holder<Biome>>) section.getBiomes()).getAndSet(maskedX, maskedY, maskedZ, biomeHolder);
         if (old.value() == (Object) biome) {
             return false;
         }

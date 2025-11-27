@@ -43,7 +43,7 @@ public class PufferfishMixin {
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;isCreative()Z"))
     private static boolean impl$considerVanishedPlayers(final Player player, final Operation<Boolean> operation) {
         if (player instanceof VanishableBridge vb) {
-            if (vb.bridge$isInvisible() && vb.bridge$vanishState().untargetable()) {
+            if (vb.bridge$vanishState().untargetable()) {
                 return false;
             }
         }
@@ -58,7 +58,7 @@ public class PufferfishMixin {
         final LivingEntity entity, final ServerLevel level
     ) {
         if (entity instanceof VanishableBridge vb) {
-            if (vb.bridge$isInvisible() && vb.bridge$vanishState().untargetable()) {
+            if (vb.bridge$vanishState().untargetable()) {
                 // this is inverted because we want to return true to signify the "entity type is not scary"
                 return true;
             }

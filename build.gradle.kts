@@ -407,12 +407,12 @@ tasks {
         from(applaunch.map { it.output })
     }
 
-    val jar by existing
-    val sourcesJar by existing
-
     shadowJar {
-        mergeServiceFiles()
         archiveClassifier.set("dev")
+
+        mergeServiceFiles()
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+        configurations = listOf()
 
         manifest {
             attributes(mapOf(
@@ -422,16 +422,11 @@ tasks {
             from(commonManifest)
         }
 
-        from(jar)
-        from(sourcesJar)
-        from(mixinsJar)
-        from(accessorsJar)
-        from(launchJar)
-        from(applaunchJar)
-
-        dependencies {
-            include(project(":"))
-        }
+        from(mixins.map { it.output })
+        from(accessors.map { it.output })
+        from(launch.map { it.output })
+        from(applaunch.map { it.output })
+        from(applaunchConf.map { it.output })
     }
 
     test {

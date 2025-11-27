@@ -25,24 +25,37 @@
 package org.spongepowered.common;
 
 import net.minecraft.SharedConstants;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.MinecraftVersion;
 
+import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.StringJoiner;
 
 public final class SpongeMinecraftVersion implements MinecraftVersion {
 
     private final String name;
+    private final @Nullable String id;
     private final int protocol;
 
     public SpongeMinecraftVersion(String name, int protocol) {
+        this(name, null, protocol);
+    }
+
+    public SpongeMinecraftVersion(String name, @Nullable String id, int protocol) {
         this.name = name;
+        this.id = id;
         this.protocol = protocol;
     }
 
     @Override
     public String name() {
         return this.name;
+    }
+
+    @Override
+    public Optional<String> id() {
+        return Optional.ofNullable(this.id);
     }
 
     @Override

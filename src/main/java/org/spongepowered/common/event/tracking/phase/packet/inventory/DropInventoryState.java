@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
-import com.google.common.collect.ImmutableList;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
@@ -34,13 +32,11 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
-import org.spongepowered.common.event.tracking.context.transaction.world.SpawnEntityTransaction;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
+import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 public final class DropInventoryState extends BasicInventoryPacketState {
 
@@ -58,13 +54,10 @@ public final class DropInventoryState extends BasicInventoryPacketState {
     @Override
     public SpawnEntityEvent createSpawnEvent(
         final InventoryPacketContext context, final GameTransaction<@NonNull ?> parent,
-        final ImmutableList<Tuple<net.minecraft.world.entity.Entity, SpawnEntityTransaction.DummySnapshot>> collect,
+        final List<net.minecraft.world.entity.Entity> collect,
         final Cause currentCause
     ) {
-        return SpongeEventFactory.createDropItemEventDispense(currentCause, collect.stream()
-            .map(Tuple::first).map(entity -> (Entity) entity)
-            .collect(Collectors.toList())
-        );
+        return SpongeEventFactory.createDropItemEventDispense(currentCause, (List) collect);
     }
 
 }

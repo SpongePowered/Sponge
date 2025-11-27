@@ -25,10 +25,8 @@
 package org.spongepowered.common.event.tracking.context.transaction.world;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
@@ -38,7 +36,6 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -46,52 +43,28 @@ import org.spongepowered.common.event.tracking.context.transaction.GameTransacti
 import org.spongepowered.common.event.tracking.context.transaction.block.ChangeBlock;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
 import org.spongepowered.common.util.PrettyPrinter;
-import org.spongepowered.math.vector.Vector3d;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @DefaultQualifier(NonNull.class)
 public final class SpawnEntityTransaction extends WorldBasedTransaction<SpawnEntityEvent> {
 
-    final Supplier<ServerLevel> worldSupplier;
-    @MonotonicNonNull CompoundTag entityTag;
     public final Entity entityToSpawn;
-    final Vector3d originalPosition;
     final Supplier<SpawnType> deducedSpawnType;
-
-    public static final class DummySnapshot {
-        final Vector3d originalPosition;
-        final CompoundTag entityTag;
-        final Supplier<ServerLevel> worldSupplier;
-
-        public DummySnapshot(final Vector3d originalPosition, final CompoundTag entityTag,
-            final Supplier<ServerLevel> worldSupplier
-        ) {
-            this.originalPosition = originalPosition;
-            this.entityTag = entityTag;
-            this.worldSupplier = worldSupplier;
-        }
-    }
 
     public SpawnEntityTransaction(
         final Supplier<ServerLevel> worldSupplier, final Entity entityToSpawn,
         final Supplier<SpawnType> deducedSpawnType
     ) {
         super(TransactionTypes.SPAWN_ENTITY.get(), ((org.spongepowered.api.world.server.ServerWorld) worldSupplier.get()).key());
-        this.worldSupplier = worldSupplier;
         this.entityToSpawn = entityToSpawn;
-        this.originalPosition = new Vector3d(entityToSpawn.getX(), entityToSpawn.getY(), entityToSpawn.getZ());
         this.deducedSpawnType = deducedSpawnType;
-    }
-
-    @Override
-    protected void captureState() {
-        super.captureState();
-        this.entityTag = this.entityToSpawn.saveWithoutId(new CompoundTag());
     }
 
     @Override
@@ -131,14 +104,9 @@ public final class SpawnEntityTransaction extends WorldBasedTransaction<SpawnEnt
         final @Nullable GameTransaction<@NonNull ?> parent,
         final ImmutableList<GameTransaction<SpawnEntityEvent>> gameTransactions, final Cause currentCause
     ) {
-        final ImmutableList<Tuple<Entity, DummySnapshot>> collect = gameTransactions.stream()
-            .map(transaction -> (SpawnEntityTransaction) transaction)
-            .map(spawnRequest -> {
-                return new Tuple<>(
-                    spawnRequest.entityToSpawn,
-                    new DummySnapshot(spawnRequest.originalPosition, spawnRequest.entityTag, spawnRequest.worldSupplier)
-                );
-            }).collect(ImmutableList.toImmutableList());
+        final List<Entity> collect = gameTransactions.stream()
+            .map(transaction -> ((SpawnEntityTransaction) transaction).entityToSpawn)
+            .collect(Collectors.toList());
         return Optional.of(context.createSpawnEvent(parent, collect, currentCause));
     }
 
@@ -180,7 +148,6 @@ public final class SpawnEntityTransaction extends WorldBasedTransaction<SpawnEnt
         return new StringJoiner(", ", SpawnEntityTransaction.class.getSimpleName() + "[", "]")
             .add("worldKey=" + this.worldKey)
             .add("entityToSpawn=" + this.entityToSpawn)
-            .add("originalPosition=" + this.originalPosition)
             .toString();
     }
 }

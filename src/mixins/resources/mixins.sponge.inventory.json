@@ -18,6 +18,7 @@
         "api.world.CompoundContainerMixin_Carrier_Inventory_API",
         "api.world.ContainerMixin_Inventory_API",
         "api.world.entity.EquipmentSlot_TypeMixin_Inventory_API",
+        "api.world.entity.EquipmentSlotGroupMixin_Inventory_API",
         "api.world.entity.EquipmentSlotMixin_Inventory_API",
         "api.world.entity.animal.horse.AbstractHorseMixin_Carrier_Inventory_API",
         "api.world.entity.monster.PillagerMixin_Carrier_Inventory_API",

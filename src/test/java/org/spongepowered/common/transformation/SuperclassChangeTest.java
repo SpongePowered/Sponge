@@ -22,17 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin;
+package org.spongepowered.common.transformation;
 
+import net.minecraft.world.entity.ai.goal.Goal;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.spongepowered.asm.mixin.MixinEnvironment;
+import org.spongepowered.api.entity.ai.goal.AbstractGoal;
 
-public class MixinTest {
+public class SuperclassChangeTest {
 
     @Test
-    public void auditMixins() {
-        // Ensure all Mixins apply without error
-        MixinEnvironment.getCurrentEnvironment().audit();
+    public void testSuperclassChange() {
+        assertSuperclassEquals(AbstractGoal.class, Goal.class);
     }
 
+    private static void assertSuperclassEquals(final Class<?> base, final Class<?> expectedSuper) {
+        Assertions.assertEquals(expectedSuper, base.getSuperclass());
+    }
 }

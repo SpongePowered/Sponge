@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.world.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -33,14 +32,12 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
-import org.spongepowered.common.event.tracking.context.transaction.world.SpawnEntityTransaction;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
 
+import java.util.List;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 public final class CloseWindowState extends PacketState<CloseWindowContext> {
 
@@ -56,11 +53,7 @@ public final class CloseWindowState extends PacketState<CloseWindowContext> {
 
     @Override
     public SpawnEntityEvent createSpawnEvent(final CloseWindowContext context, final @Nullable GameTransaction<@NonNull ?> parent,
-            final ImmutableList<Tuple<Entity, SpawnEntityTransaction.DummySnapshot>> collect, final Cause currentCause) {
-        return SpongeEventFactory.createDropItemEventClose(currentCause,
-                collect.stream()
-                        .map(t -> (org.spongepowered.api.entity.Entity) t.first())
-                        .collect(Collectors.toList())
-        );
+            final List<Entity> collect, final Cause currentCause) {
+        return SpongeEventFactory.createDropItemEventClose(currentCause, (List) collect);
     }
 }

@@ -82,6 +82,8 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * The core state machine of Sponge. Acts a as proxy between various engine objects by processing actions through
@@ -873,7 +875,22 @@ public final class PhaseTracker implements CauseStackManager {
         return this.api;
     }
 
-    public void startupRegistryHolder(final RegistryHolder holder) {
+    public <T> T switchStartupRegistryHolder(
+        final SpongeRegistryHolder holder, final Supplier<? extends T> valueSupplier,
+        final Function<? super RuntimeException, ? extends T> exceptionalValueSupplier
+    ) {
+        final @Nullable SpongeRegistryHolder previousHolder = this.startupRegistryHolder();
+        try {
+            this.startupRegistryHolder(holder);
+            return valueSupplier.get();
+        } catch (final RuntimeException e) {
+            return exceptionalValueSupplier.apply(e);
+        } finally {
+            this.startupRegistryHolder(previousHolder);
+        }
+    }
+
+    public void startupRegistryHolder(final @Nullable RegistryHolder holder) {
         if (holder instanceof SpongeRegistryHolder srh) {
             this.startupRegistryHolder = srh;
         } else {

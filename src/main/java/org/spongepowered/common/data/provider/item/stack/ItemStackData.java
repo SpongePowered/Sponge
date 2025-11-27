@@ -43,6 +43,7 @@ import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.item.component.DamageResistant;
 import net.minecraft.world.item.component.DeathProtection;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.component.Unbreakable;
@@ -56,6 +57,7 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.ItemAction;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.entity.attribute.ItemAttribute;
 import org.spongepowered.api.item.ItemRarity;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -82,7 +84,6 @@ public final class ItemStackData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         // TODO DataComponents.SUSPICIOUS_STEW_EFFECTS
-        // TODO maybe DataComponents.ATTRIBUTE_MODIFIERS as keys?
         // TODO DataComponents.BUNDLE_CONTENTS also check for Shulker Boxes? - removing the component prevents using the bundle
         // TODO DataComponents.CONTAINER_LOOT for containers with loottable data, also for blockentity?
         // TODO DataComponents.BLOCK_ENTITY_DATA maybe expose as raw DataContainer? (id MUST have block entity type)
@@ -367,6 +368,16 @@ public final class ItemStackData {
                             return builder.build();
                         })
                         .deleteAndGet(ItemStackData::deleteAndTransactUseCooldown)
+                    .create(Keys.ITEM_ATTRIBUTES)
+                        .get(stack -> {
+                            final var attributes = stack.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY).modifiers();
+                            return attributes.isEmpty() ? null : (List<ItemAttribute>) (Object) List.copyOf(attributes);
+                        })
+                        .set((stack, v) -> {
+                            final var attributes = (List<ItemAttributeModifiers.Entry>) (Object) List.copyOf(v);
+                            stack.update(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY, p -> new ItemAttributeModifiers(attributes, p.showInTooltip()));
+                        })
+                        .resetOnDelete(List.of())
         ;
     }
     // @formatter:on

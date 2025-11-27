@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -51,7 +50,6 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -61,7 +59,6 @@ import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.block.ChangeBlock;
-import org.spongepowered.common.event.tracking.context.transaction.world.SpawnEntityTransaction;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.event.tracking.phase.tick.LocationBasedTickContext;
 import org.spongepowered.common.world.BlockChange;
@@ -292,7 +289,7 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
     }
 
     default SpawnEntityEvent createSpawnEvent(final @Nullable GameTransaction<@NonNull ?> parent,
-        final ImmutableList<Tuple<Entity, SpawnEntityTransaction.DummySnapshot>> collect,
+        final List<Entity> collect,
         final Cause currentCause
     ) {
         return this.getState().createSpawnEvent(this.asContext(), parent, collect, currentCause);

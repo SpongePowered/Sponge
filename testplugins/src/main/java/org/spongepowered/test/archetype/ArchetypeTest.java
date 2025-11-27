@@ -27,33 +27,19 @@ package org.spongepowered.test.archetype;
 import com.google.inject.Inject;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.data.Key;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntityArchetype;
-import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.entity.EntityTypes;
-import org.spongepowered.api.entity.living.animal.Sheep;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.cause.entity.SpawnTypes;
-import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
-import org.spongepowered.test.LoadableModule;
 
-// TODO other Archetypes
 @SuppressWarnings({"unchecked", "rawtypes"})
 @Plugin("archetypetest")
-public final class ArchetypeTest implements LoadableModule {
-
+public final class ArchetypeTest {
     final PluginContainer plugin;
 
     @Inject
@@ -64,20 +50,8 @@ public final class ArchetypeTest implements LoadableModule {
     @Listener
     private void registerCommands(final RegisterCommandEvent<Command.Parameterized> event) {
         event.register(this.plugin, Command.builder()
-                .addChild(Command.builder().executor(this::testEntityArchetype).build(), "entity")
-                .build(), "testarchetypes");
-
-        event.register(this.plugin, Command.builder()
                 .addChild(this.queryBlockArchetype(), "block")
                 .build(), "queryArchetype");
-    }
-
-    private CommandResult testEntityArchetype(CommandContext context) {
-        context.cause().first(ServerPlayer.class).ifPresent(p -> {
-            final Sheep entity = p.world().createEntity(EntityTypes.SHEEP, p.position());
-            this.testEntityArchetype(entity);
-        });
-        return CommandResult.success();
     }
 
     private Command.Parameterized queryBlockArchetype() {
@@ -101,35 +75,5 @@ public final class ArchetypeTest implements LoadableModule {
                     return CommandResult.success();
                 })
                 .build();
-    }
-
-    @Override
-    public void enable(CommandContext ctx) {
-        Sponge.eventManager().registerListeners(this.plugin, new ArchetypeTestListener());
-    }
-
-
-    class ArchetypeTestListener {
-        // TODO we're missing InteractEntityEvent implementation so we cannot test with this yet
-        @Listener
-        private void onRightClickEntity(InteractEntityEvent.Secondary event) {
-            final Entity entity = event.entity();
-            ArchetypeTest.this.testEntityArchetype(entity);
-        }
-    }
-
-
-    public void testEntityArchetype(Entity entity) {
-        Sponge.server().causeStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLUGIN); // Need that for restoring
-
-        final EntityArchetype archetype = entity.createArchetype();
-        // Restore same entity from archetype
-        archetype.apply(entity.serverLocation());
-        // Test restoring from serialized archetype
-        final EntityArchetype rebuiltArchetype = EntityArchetype.builder().build(archetype.toContainer()).get();
-        rebuiltArchetype.apply(entity.serverLocation());
-
-        final EntitySnapshot rebuiltSnapshot = rebuiltArchetype.toSnapshot(entity.serverLocation());
-        rebuiltSnapshot.restore();
     }
 }

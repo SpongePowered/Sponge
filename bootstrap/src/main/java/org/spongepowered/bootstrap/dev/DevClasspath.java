@@ -49,11 +49,11 @@ public class DevClasspath {
         final Set<String> gameShadedNames = Set.of(System.getProperty("sponge.dev.gameShaded").split(File.pathSeparator));
 
         // boot layer
-        final Multimap<String, Path> bootUnions = new Multimap<>();
+        final Multimap<String, WeightedPath> bootUnions = new Multimap<>();
         final List<Path> bootLibs = new ArrayList<>();
 
         // game or plugin layer
-        final Multimap<String, Path> unions = new Multimap<>();
+        final Multimap<String, WeightedPath> unions = new Multimap<>();
         final List<Path> libs = new ArrayList<>();
 
         final AtomicBoolean hasAPISourceSet = new AtomicBoolean(false);
@@ -80,7 +80,7 @@ public class DevClasspath {
                             // ignore
                             break;
                         case "modlauncher-transformers", "library-manager":
-                            bootUnions.add(projectName, path);
+                            bootUnions.add(projectName, new WeightedPath(0, path));
                             break;
                         case "SpongeAPI":
                             switch (sourceSet.name()) {
@@ -91,26 +91,27 @@ public class DevClasspath {
                                     hasAPISourceSet.set(true);
                                     // no break
                                 default:
-                                    unions.add("sponge", path);
+                                    unions.add("sponge", new WeightedPath(0, path));
                                     break;
                             }
                             break;
                         case "", "vanilla", "forge", "neoforge":
+                            final WeightedPath weightedPath = new WeightedPath(projectName.isEmpty() ? 1 : 2, path);
                             switch (sourceSet.name()) {
                                 case "applaunchConfig":
                                 case "applaunch":
-                                    bootUnions.add("applaunch", path);
+                                    bootUnions.add("applaunch", weightedPath);
                                     break;
                                 case "lang":
-                                    unions.add("lang", path);
+                                    unions.add("lang", weightedPath);
                                     break;
                                 default:
-                                    unions.add("sponge", path);
+                                    unions.add("sponge", weightedPath);
                                     break;
                             }
                             break;
                         default:
-                            unions.add(projectName, path);
+                            unions.add(projectName, new WeightedPath(0, path));
                             break;
                     }
                 } else {
@@ -118,7 +119,7 @@ public class DevClasspath {
                         System.out.println("External SourceSet (" + sourceSet + "): " + path);
                     }
 
-                    unions.add(sourceSet.project().toString(), path);
+                    unions.add(sourceSet.project().toString(), new WeightedPath(0, path));
                 }
                 continue;
             }
@@ -144,7 +145,7 @@ public class DevClasspath {
                 if (Bootstrap.DEBUG) {
                     System.out.println("Sponge: " + path);
                 }
-                unions.add("sponge", path);
+                unions.add("sponge", new WeightedPath(0, path));
                 continue;
             }
 
@@ -160,12 +161,13 @@ public class DevClasspath {
             classpath.add(new Path[] { lib });
         }
 
-        for (final List<Path> sourceSets : bootUnions.values()) {
-            classpath.add(sourceSets.toArray(Path[]::new));
+        for (final List<WeightedPath> sourceSets : bootUnions.values()) {
+            classpath.add(sourceSets.stream().sorted().map(WeightedPath::path).toArray(Path[]::new));
         }
 
         if (hasAPISourceSet.get()) {
-            unions.get("sponge").removeIf((path) -> {
+            unions.get("sponge").removeIf((w) -> {
+                final Path path = w.path();
                 if (Files.isRegularFile(path)) {
                     final String fileName = path.getFileName().toString();
                     if (fileName.startsWith("spongeapi") && fileName.endsWith(".jar")) {
@@ -183,10 +185,8 @@ public class DevClasspath {
         for (final Path resource : libs) {
             resourcesEnvBuilder.append(resource).append(File.pathSeparator);
         }
-        for (final List<Path> project : unions.values()) {
-            for (final Path resource : project) {
-                resourcesEnvBuilder.append(resource).append('&');
-            }
+        for (final List<WeightedPath> project : unions.values()) {
+            project.stream().sorted().forEachOrdered(w -> resourcesEnvBuilder.append(w.path()).append('&'));
             resourcesEnvBuilder.setCharAt(resourcesEnvBuilder.length() - 1, File.pathSeparatorChar);
         }
         resourcesEnvBuilder.setLength(resourcesEnvBuilder.length() - 1);

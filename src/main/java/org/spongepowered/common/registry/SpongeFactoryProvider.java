@@ -46,6 +46,7 @@ import org.spongepowered.api.data.type.ToolRule;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.effect.ForwardingViewer;
 import org.spongepowered.api.effect.VanishState;
+import org.spongepowered.api.entity.attribute.ItemAttribute;
 import org.spongepowered.api.event.EventListenerRegistration;
 import org.spongepowered.api.event.cause.entity.damage.DamageStepType;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
@@ -123,6 +124,7 @@ import org.spongepowered.common.data.manipulator.ImmutableDataManipulatorFactory
 import org.spongepowered.common.data.manipulator.MutableDataManipulatorFactory;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.effect.SpongeCustomForwardingViewer;
+import org.spongepowered.common.entity.attribute.SpongeItemAttributeFactory;
 import org.spongepowered.common.entity.effect.SpongeVanishState;
 import org.spongepowered.common.event.SpongeEventListenerRegistration;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageStepType;
@@ -287,6 +289,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(NaturalSpawner.Factory.class, new SpongeNaturalSpawnerFactory())
                 .registerFactory(ScoreFormat.Factory.class, new SpongeScoreFormatFactory())
                 .registerFactory(ToolRule.Factory.class, new SpongeToolRuleFactory())
+                .registerFactory(ItemAttribute.Factory.class, new SpongeItemAttributeFactory())
                 .registerFactory(ItemAction.Factory.class, new SpongeItemActionFactory())
                 .registerFactory(PortalLogic.Factory.class, new SpongePortalLogicFactory())
                 .registerFactory(RecipeInput.Factory.class, new SpongeRecipeInputFactory())

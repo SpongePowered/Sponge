@@ -19,6 +19,8 @@
         "neoforge.registries.RegistryManagerMixin_Neo",
         "neoforge.NeoForgeMixin_Neo",
         "network.ConnectionMixin_Neo",
+        "network.protocol.common.ClientboundCustomPayloadPacketMixin_Neo",
+        "network.protocol.common.ServerboundCustomPayloadPacketMixin_Neo",
         "server.BootstrapMixin_Neo",
         "server.MinecraftServerMixin_Neo",
         "server.commands.SpreadPlayersCommandMixin_Neo",

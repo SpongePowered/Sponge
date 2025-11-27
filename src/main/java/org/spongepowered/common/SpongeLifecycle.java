@@ -122,6 +122,7 @@ public final class SpongeLifecycle implements Lifecycle {
     public void establishEarlyGlobalRegistries() {
         final SpongeRegistryHolder holder = (SpongeRegistryHolder) this.game;
         holder.setRootMinecraftRegistry((Registry<Registry<?>>) BuiltInRegistries.REGISTRY);
+        holder.streamRegistries().forEach(r -> ((WritableRegistryBridge<?>) r).bridge$setRegistryHolder(this.game));
 
         SpongeRegistries.registerEarlyGlobalRegistries(holder);
     }
@@ -136,8 +137,12 @@ public final class SpongeLifecycle implements Lifecycle {
         // Freeze Sponge Root - Registries are now available
         holder.registryHolder().freezeSpongeRootRegistry();
 
-        this.game.eventManager().post(new AbstractRegisterRegistryValueEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game,
-            holder.streamRegistries().collect(Collectors.toMap(org.spongepowered.api.registry.Registry::type, Function.identity()))));
+        final Map<RegistryType<?>, org.spongepowered.api.registry.Registry<?>> map =
+                holder.streamRegistries().collect(Collectors.toMap(org.spongepowered.api.registry.Registry::type, Function.identity()));
+
+        this.game.eventManager().post(new AbstractRegisterRegistryValueEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game, map));
+        map.values().forEach(r -> ((WritableRegistryBridge<?>) r).bridge$markEventCalled());
+        holder.registryHolder().freezeSpongeDynamicRegistries(false);
     }
 
     public void endEstablishGlobalRegistries() {

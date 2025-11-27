@@ -76,7 +76,7 @@ at = { module = "dev.architectury:at", version = "1.0.1" }
 [plugins]
 blossom = { id = "net.kyori.blossom", version = "2.1.0" }
 indra-licenserSpotless = { id = "net.kyori.indra.licenser.spotless", version = "3.1.3" }
-shadow = { id = "com.gradleup.shadow", version = "8.3.8" }
+shadow = { id = "com.gradleup.shadow", version = "9.0.2" }
 versions = { id = "com.github.ben-manes.versions", version = "0.51.0" }
 forgeGradle = { id = "net.minecraftforge.gradle", version = "6.0.35" }
 modDevGradle = { id = "net.neoforged.moddev", version = "2.0.78" }

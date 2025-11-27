@@ -25,8 +25,6 @@
 package org.spongepowered.common.event.tracking.context.transaction.world;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.CombatEntry;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -44,7 +42,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
 import org.spongepowered.common.util.PrettyPrinter;
-import org.spongepowered.common.world.volume.VolumeStreamUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
@@ -55,9 +52,7 @@ import java.util.function.Supplier;
 
 public final class EntityPerformingDropsTransaction extends WorldBasedTransaction<HarvestEntityEvent> {
 
-    private @MonotonicNonNull Supplier<ServerLevel> worldSupplier;
     final Entity destroyingEntity;
-    private @MonotonicNonNull CompoundTag entityTag;
     private @MonotonicNonNull Supplier<Optional<DamageSource>> lastAttacker;
 
     public EntityPerformingDropsTransaction(final Entity destroyingEntity) {
@@ -68,16 +63,10 @@ public final class EntityPerformingDropsTransaction extends WorldBasedTransactio
     @Override
     protected void captureState() {
         super.captureState();
-        final Entity entity = this.destroyingEntity;
-        this.worldSupplier = VolumeStreamUtils.createWeaklyReferencedSupplier((ServerLevel) entity.level(), "ServerLevel");
-
-        final CompoundTag tag = new CompoundTag();
-        entity.saveWithoutId(tag);
-        this.entityTag = tag;
 
         final @Nullable DamageSource lastAttacker;
-        if (entity instanceof LivingEntity) {
-            final List<CombatEntry> entries = ((CombatTrackerAccessor) ((LivingEntity) entity).getCombatTracker()).accessor$entries();
+        if (this.destroyingEntity instanceof LivingEntity living) {
+            final List<CombatEntry> entries = ((CombatTrackerAccessor) living.getCombatTracker()).accessor$entries();
             if (!entries.isEmpty()) {
                 final CombatEntry entry = entries.get(entries.size() - 1);
                 lastAttacker = entry.source();

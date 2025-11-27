@@ -45,6 +45,7 @@ public abstract class AbstractContainerMenuMixin_Fabric_Inventory implements Fab
     @Shadow @Final public NonNullList<Slot> slots;
     @Shadow public abstract Slot shadow$getSlot(int slotId);
     @Shadow public abstract void shadow$broadcastChanges();
+    @Shadow public abstract void shadow$setCarried(ItemStack $$0);
 
     @Nullable private Set<InventoryBridge> all;
 
@@ -93,6 +94,7 @@ public abstract class AbstractContainerMenuMixin_Fabric_Inventory implements Fab
 
     @Override
     public void fabric$clear() {
+        this.shadow$setCarried(ItemStack.EMPTY);
         for (final Slot slot : this.slots) {
             slot.set(ItemStack.EMPTY);
         }

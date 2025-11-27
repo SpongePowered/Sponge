@@ -25,6 +25,8 @@
 package org.spongepowered.common.mixin.inventory.api.world.entity;
 
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
+import org.spongepowered.api.item.inventory.equipment.EquipmentCondition;
 import org.spongepowered.api.item.inventory.equipment.EquipmentGroup;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.asm.mixin.Final;
@@ -39,5 +41,10 @@ public abstract class EquipmentSlotMixin_Inventory_API implements EquipmentType 
     @Override
     public EquipmentGroup group() {
         return (EquipmentGroup) (Object) this.type;
+    }
+
+    @Override
+    public EquipmentCondition condition() {
+        return (EquipmentCondition) (Object) EquipmentSlotGroup.bySlot((EquipmentSlot) (Object) this);
     }
 }
