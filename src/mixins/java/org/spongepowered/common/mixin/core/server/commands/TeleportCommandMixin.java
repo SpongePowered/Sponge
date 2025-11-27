@@ -44,10 +44,11 @@ public abstract class TeleportCommandMixin {
 
     @WrapOperation(method = "performTeleport", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;teleportTo(Lnet/minecraft/server/level/ServerLevel;DDDLjava/util/Set;FFZ)Z"))
     private static boolean impl$createCauseFrameForPerformTeleport(
-        final Entity instance, final ServerLevel $$0, final double $$1, final double $$2, final double $$3, final Set<Relative> $$4, final float $$5, final float $$6, final boolean $$7, final Operation<Boolean> original) {
+        final Entity instance, final ServerLevel level, final double x, final double y, final double z,
+        final Set<Relative> relativeMovements, final float yRot, final float xRot, final boolean setCamera, final Operation<Boolean> original) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.COMMAND);
-            return original.call(instance, $$0, $$1, $$2, $$3, $$4, $$5, $$6, $$7);
+            return original.call(instance, level, x, y, z, relativeMovements, yRot, xRot, setCamera);
         }
     }
 }
