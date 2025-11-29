@@ -220,8 +220,8 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
         this.reset();
         this.compound = compound;
 
-        if (!compound.contains(Constants.Sponge.World.WORLD_KEY)) {
-            this.worldKey = ResourceKey.resolve(compound.getString(Constants.Sponge.World.WORLD_KEY));
+        if (!compound.contains(Constants.Sponge.World.DIMENSION)) {
+            this.worldKey = ResourceKey.resolve(compound.getString(Constants.Sponge.World.DIMENSION));
         }
         final ListTag position = compound.getList(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
         final ListTag rotation = compound.getList(Constants.Entity.ENTITY_ROTATION, Constants.NBT.TAG_FLOAT);
@@ -238,7 +238,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
 
     public void writeCompound(final CompoundTag compound) {
 
-        compound.putString(Constants.Sponge.World.WORLD_KEY, this.worldKey.formatted());
+        compound.putString(Constants.Sponge.World.DIMENSION, this.worldKey.formatted());
 
         this.loadInventory();
         this.loadEnderInventory();

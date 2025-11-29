@@ -287,7 +287,7 @@ public final class Constants {
             public static final String LEVEL_SPONGE_DAT_NEW = org.spongepowered.common.util.Constants.Sponge.World.LEVEL_SPONGE_DAT + "_new";
             public static final String UNIQUE_ID = "UUID";
             public static final String DIMENSIONS_DIRECTORY = "dimensions";
-            public static final String WORLD_KEY = "WorldKey";
+            public static final String DIMENSION = "Dimension";
         }
 
         public static final class Schematic {
