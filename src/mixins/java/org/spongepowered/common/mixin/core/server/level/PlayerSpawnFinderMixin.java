@@ -59,21 +59,9 @@ public abstract class PlayerSpawnFinderMixin {
     @Shadow @Final private int offset;
     @Shadow @Final private int coprime;
 
-    @Shadow
-    private static Vec3 fixupSpawnHeight(CollisionGetter $$0, BlockPos $$1) {
-        throw new IllegalStateException();
-    }
-
-    @Shadow
-    @Nullable
-    protected static BlockPos getOverworldRespawnPos(ServerLevel $$0, int $$1, int $$2) {
-        throw new IllegalStateException();
-    }
-
-    @Shadow
-    private static boolean noCollisionNoLiquid(CollisionGetter $$0, BlockPos $$1) {
-        throw new IllegalStateException();
-    }
+    @Shadow private static Vec3 fixupSpawnHeight(CollisionGetter level, BlockPos pos) { return null; }
+    @Shadow @Nullable protected static BlockPos getOverworldRespawnPos(ServerLevel level, int x, int z) { return null; }
+    @Shadow private static boolean noCollisionNoLiquid(CollisionGetter level, BlockPos pos) { return false; }
 
     /**
      * A mix of loop and recursion.
