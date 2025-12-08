@@ -80,15 +80,16 @@ public final class SpongeTeleportHelper implements TeleportHelper {
         int worldBorderMaxX = GenericMath.floor(worldBorder.getCenterX() + radius);
         int worldBorderMaxZ = GenericMath.floor(worldBorder.getCenterZ() + radius);
 
-        // Get the World and get the maximum Y value.
+        // Get the World and get the minimum and maximum Y value.
         int worldMaxY = worldLocation.world().max().y();
+        int worldMinY = worldLocation.world().min().y();
 
         Vector3i vectorLocation = worldLocation.blockPosition();
 
         // We use clamp to remain within the world confines, so we don't waste time checking blocks outside of the
         // world border and the world height.
-        int minY = GenericMath.clamp(vectorLocation.y() - height, 0, worldMaxY);
-        int maxY = GenericMath.clamp(vectorLocation.y() + height, 0, worldMaxY);
+        int minY = GenericMath.clamp(vectorLocation.y() - height, worldMinY, worldMaxY);
+        int maxY = GenericMath.clamp(vectorLocation.y() + height, worldMinY, worldMaxY);
 
         int minX = GenericMath.clamp(vectorLocation.x() - width, worldBorderMinX, worldBorderMaxX);
         int maxX = GenericMath.clamp(vectorLocation.x() + width, worldBorderMinX, worldBorderMaxX);
@@ -182,7 +183,7 @@ public final class SpongeTeleportHelper implements TeleportHelper {
     }
 
     private BlockData getBlockData(Vector3i vector3i, World world, Map<Vector3i, BlockData> cache, Collection<TeleportHelperFilter> filters) {
-        if (vector3i.y() < 0) {
+        if (vector3i.y() < world.min().y()) {
             // Anything below this isn't safe, no point going further.
             return new BlockData();
         }
