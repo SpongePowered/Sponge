@@ -97,17 +97,17 @@ public abstract class PlayerSpawnFinderMixin {
             return;
         }
 
-        scheduleCandidate(this.spawnSuggestion.getX(), this.spawnSuggestion.getZ(), i, () -> Optional.of(PlayerSpawnFinderMixin.fixupSpawnHeight(this.level, this.spawnSuggestion)));
+        scheduleCandidate(this.spawnSuggestion.getX(), this.spawnSuggestion.getZ(), i, () -> Optional.of(fixupSpawnHeight(this.level, this.spawnSuggestion)));
     }
 
     private boolean scheduleCandidate(final int x, final int z, final int index, final Supplier<Optional<Vec3>> supplier) {
-        int chunkX = SectionPos.blockToSectionCoord(x);
-        int chunkZ = SectionPos.blockToSectionCoord(z);
+        final int chunkX = SectionPos.blockToSectionCoord(x);
+        final int chunkZ = SectionPos.blockToSectionCoord(z);
         final CompletableFuture<?> future = this.level.getChunkSource().addTicketAndLoadWithRadius(TicketType.SPAWN_SEARCH, new ChunkPos(chunkX, chunkZ), 0);
         final MinecraftServer server = this.level.getServer();
 
         // We exit either the loop or the recursion, depending on what happens first.
-        AtomicBoolean exit = new AtomicBoolean(true);
+        final AtomicBoolean exit = new AtomicBoolean(true);
 
         future.whenCompleteAsync((chunk, error) -> {
             if (error == null) {
