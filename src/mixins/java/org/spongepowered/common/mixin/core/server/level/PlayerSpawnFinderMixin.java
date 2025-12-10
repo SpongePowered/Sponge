@@ -43,6 +43,7 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
@@ -99,21 +100,14 @@ public abstract class PlayerSpawnFinderMixin {
         scheduleCandidate(this.spawnSuggestion.getX(), this.spawnSuggestion.getZ(), i, () -> Optional.of(PlayerSpawnFinderMixin.fixupSpawnHeight(this.level, this.spawnSuggestion)));
     }
 
-    private boolean scheduleCandidate(int x, int z, int index, Supplier<Optional<Vec3>> supplier) {
+    private boolean scheduleCandidate(final int x, final int z, final int index, final Supplier<Optional<Vec3>> supplier) {
         int chunkX = SectionPos.blockToSectionCoord(x);
         int chunkZ = SectionPos.blockToSectionCoord(z);
         final CompletableFuture<?> future = this.level.getChunkSource().addTicketAndLoadWithRadius(TicketType.SPAWN_SEARCH, new ChunkPos(chunkX, chunkZ), 0);
         final MinecraftServer server = this.level.getServer();
 
-        if (future.isDone() && server.isSameThread()) {
-            try {
-                future.get();
-                supplier.get().ifPresent(this.finishedFuture::complete);
-            } catch (Throwable error) {
-                this.crash(x, z, index, error);
-            }
-            return false; // stay on loop
-        }
+        // We exit either the loop or the recursion, depending on what happens first.
+        AtomicBoolean exit = new AtomicBoolean(true);
 
         future.whenCompleteAsync((chunk, error) -> {
             if (error == null) {
@@ -121,7 +115,7 @@ public abstract class PlayerSpawnFinderMixin {
                     Optional<Vec3> result = supplier.get();
                     if (result.isPresent()) {
                         this.finishedFuture.complete(result.get());
-                    } else {
+                    } else if (!exit.getAndSet(false)) {
                         this.scheduleNext();
                     }
                 } catch (Exception exception) {
@@ -130,19 +124,16 @@ public abstract class PlayerSpawnFinderMixin {
             }
 
             if (error != null) {
-                this.crash(x, z, index, error);
+                CrashReport report = CrashReport.forThrowable(error, "Searching for spawn");
+                CrashReportCategory category = report.addCategory("Spawn Lookup");
+                category.setDetail("Origin", this.spawnSuggestion::toString);
+                category.setDetail("Radius", () -> Integer.toString(this.radius));
+                category.setDetail("Candidate", () -> "[" + x + "," + z + "]");
+                category.setDetail("Progress", () -> index + " out of " + this.candidateCount);
+                this.finishedFuture.completeExceptionally(new ReportedException(report));
             }
         }, server);
-        return true; // exit loop
-    }
 
-    private void crash(final int x, final int z, final int index, final Throwable error) {
-        CrashReport report = CrashReport.forThrowable(error, "Searching for spawn");
-        CrashReportCategory category = report.addCategory("Spawn Lookup");
-        category.setDetail("Origin", this.spawnSuggestion::toString);
-        category.setDetail("Radius", () -> Integer.toString(this.radius));
-        category.setDetail("Candidate", () -> "[" + x + "," + z + "]");
-        category.setDetail("Progress", () -> index + " out of " + this.candidateCount);
-        this.finishedFuture.completeExceptionally(new ReportedException(report));
+        return exit.getAndSet(false);
     }
 }
