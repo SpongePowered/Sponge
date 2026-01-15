@@ -30,6 +30,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.apache.logging.log4j.Logger;
@@ -38,7 +39,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.SystemSubject;
-import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.CommandResult;
@@ -198,7 +198,7 @@ public final class CommandTest implements LoadableModule {
                 Command.builder()
                         .executor(x -> {
                             x.sendMessage(Identity.nil(), Component.text().content("Click Me")
-                                    .clickEvent(SpongeComponents.executeCallback(ctx -> ctx.sendMessage(Identity.nil(), Component.text("Hello"))))
+                                    .clickEvent(ClickEvent.callback(aud -> aud.sendMessage(Component.text("Hello"))))
                                     .build()
                             );
                             return CommandResult.success();

@@ -25,6 +25,8 @@
 package org.spongepowered.common.scheduler;
 
 import org.spongepowered.api.Sponge;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.entity.player.PlayerInventoryBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
@@ -47,5 +49,9 @@ public final class ServerScheduler extends SyncScheduler {
                 ((PlayerInventoryBridge) ((net.minecraft.world.entity.player.Player) player).getInventory()).bridge$cleanupDirty();
             }
         });
+
+        if (SpongeCommon.server().getTickCount() % (20 * 60) == 0) { // Run once every minute
+            SpongeAdventure.runCallbackHousekeeping();
+        }
     }
 }
