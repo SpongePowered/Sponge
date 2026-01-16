@@ -773,8 +773,8 @@ public final class SpongeAdventure {
         CALLBACKS.values().removeIf(callback -> !callback.isValid());
     }
 
-    public static void runCallback(UUID uuid, CommandCause cause) {
-        final var callback = CALLBACKS.get(uuid);
+    public static void runCallback(final UUID uuid, final CommandCause cause) {
+        final StoredClickCallback callback = CALLBACKS.get(uuid);
 
         if (callback == null) {
             return;
@@ -788,7 +788,7 @@ public final class SpongeAdventure {
         CALLBACKS.remove(uuid, callback);
     }
 
-    public static ClickEvent createCallbackClickEvent(ClickCallback.Options options, Consumer<CommandCause> callback) {
+    public static ClickEvent createCallbackClickEvent(final ClickCallback.Options options, final Consumer<CommandCause> callback) {
         final UUID key = UUID.randomUUID();
         CALLBACKS.put(key, new StoredClickCallback(options, callback));
         return ClickEvent.runCommand(String.format("/%s:%s %s", Launch.instance().id(), CallbackCommand.NAME, key));
@@ -800,13 +800,13 @@ public final class SpongeAdventure {
         private final Instant expiryTime;
         private int useCounter = 0;
 
-        public StoredClickCallback(ClickCallback.Options options, Consumer<CommandCause> handler) {
+        public StoredClickCallback(final ClickCallback.Options options, final Consumer<CommandCause> handler) {
             this.options = options;
             this.handler = handler;
             this.expiryTime = Instant.now().plus(options.lifetime());
         }
 
-        private void useAndRecord(CommandCause cause) {
+        private void useAndRecord(final CommandCause cause) {
             this.useCounter++;
             this.handler.accept(cause);
         }

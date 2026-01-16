@@ -33,7 +33,7 @@ import org.jetbrains.annotations.NotNull;
 public class ClickCallbackProviderImpl implements ClickCallback.Provider {
 
     @Override
-    public @NotNull ClickEvent create(@NotNull ClickCallback<Audience> callback, ClickCallback.@NotNull Options options) {
+    public @NotNull ClickEvent create(final @NotNull ClickCallback<Audience> callback, final ClickCallback.@NotNull Options options) {
         return SpongeAdventure.createCallbackClickEvent(options, cause -> callback.accept(cause.audience()));
     }
 
