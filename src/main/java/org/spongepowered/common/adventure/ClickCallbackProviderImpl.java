@@ -30,7 +30,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("UnstableApiUsage") // permitted provider
-public class ClickCallbackProviderImpl implements ClickCallback.Provider {
+public final class ClickCallbackProviderImpl implements ClickCallback.Provider {
 
     @Override
     public @NotNull ClickEvent create(final @NotNull ClickCallback<Audience> callback, final ClickCallback.@NotNull Options options) {

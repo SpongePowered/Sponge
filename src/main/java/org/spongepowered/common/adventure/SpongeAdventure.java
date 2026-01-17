@@ -794,7 +794,7 @@ public final class SpongeAdventure {
         return ClickEvent.runCommand(String.format("/%s:%s %s", Launch.instance().id(), CallbackCommand.NAME, key));
     }
 
-    private static class StoredClickCallback {
+    private static final class StoredClickCallback {
         private final ClickCallback.Options options;
         private final Consumer<CommandCause> handler;
         private final Instant expiryTime;
