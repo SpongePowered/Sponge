@@ -48,6 +48,7 @@ import net.kyori.adventure.text.SelectorComponent;
 import net.kyori.adventure.text.StorageNBTComponent;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.event.ClickCallback;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.DataComponentValue;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -112,6 +113,8 @@ import org.spongepowered.common.bridge.world.BossEventBridge;
 import org.spongepowered.common.launch.Launch;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -756,6 +759,65 @@ public final class SpongeAdventure {
 
     }
 
+    // -----------------------
+    // ---- ClickCallback ----
+    // -----------------------
+
+    private static final Map<UUID, StoredClickCallback> CALLBACKS = new ConcurrentHashMap<>();
+
+    public static void invalidateCallbacks() {
+        CALLBACKS.clear();
+    }
+
+    public static void runCallbackHousekeeping() {
+        CALLBACKS.values().removeIf(callback -> !callback.isValid());
+    }
+
+    public static void runCallback(final UUID uuid, final CommandCause cause) {
+        final StoredClickCallback callback = CALLBACKS.get(uuid);
+
+        if (callback == null) {
+            return;
+        }
+
+        if (callback.isValid()) {
+            callback.useAndRecord(cause);
+            return;
+        }
+
+        CALLBACKS.remove(uuid, callback);
+    }
+
+    public static ClickEvent createCallbackClickEvent(final ClickCallback.Options options, final Consumer<CommandCause> callback) {
+        final UUID key = UUID.randomUUID();
+        CALLBACKS.put(key, new StoredClickCallback(options, callback));
+        return ClickEvent.runCommand(String.format("/%s:%s %s", Launch.instance().id(), CallbackCommand.NAME, key));
+    }
+
+    private static final class StoredClickCallback {
+        private final ClickCallback.Options options;
+        private final Consumer<CommandCause> handler;
+        private final Instant expiryTime;
+        private int useCounter = 0;
+
+        public StoredClickCallback(final ClickCallback.Options options, final Consumer<CommandCause> handler) {
+            this.options = options;
+            this.handler = handler;
+            this.expiryTime = Instant.now().plus(options.lifetime());
+        }
+
+        private void useAndRecord(final CommandCause cause) {
+            this.useCounter++;
+            this.handler.accept(cause);
+        }
+
+        private boolean isValid() {
+            return (this.options.uses() == ClickCallback.UNLIMITED_USES || this.useCounter < this.options.uses()) &&
+                Instant.now().compareTo(expiryTime) < 0;
+        }
+
+    }
+
     // Key
 
     public static ResourceLocation asVanilla(final Key key) {
@@ -827,9 +889,10 @@ public final class SpongeAdventure {
     public static class Factory implements SpongeComponents.Factory {
         @Override
         public @NonNull ClickEvent callbackClickEvent(final @NonNull Consumer<CommandCause> callback) {
-            Objects.requireNonNull(callback);
-            final UUID key = CallbackCommand.INSTANCE.registerCallback(callback);
-            return ClickEvent.runCommand(String.format("/%s:%s %s", Launch.instance().id(), CallbackCommand.NAME, key));
+            return SpongeAdventure.createCallbackClickEvent(ClickCallback.Options.builder()
+                .uses(ClickCallback.UNLIMITED_USES)
+                .lifetime(Duration.ofMinutes(10))
+                .build(), callback);
         }
 
         @Override

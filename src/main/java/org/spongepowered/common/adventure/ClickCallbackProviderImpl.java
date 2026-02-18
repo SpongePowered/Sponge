@@ -24,34 +24,17 @@
  */
 package org.spongepowered.common.adventure;
 
-import io.leangen.geantyref.TypeToken;
-import net.kyori.adventure.text.Component;
-import org.spongepowered.api.command.Command;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.parameter.Parameter;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.event.ClickCallback;
+import net.kyori.adventure.text.event.ClickEvent;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.UUID;
+@SuppressWarnings("UnstableApiUsage") // permitted provider
+public final class ClickCallbackProviderImpl implements ClickCallback.Provider {
 
-public final class CallbackCommand {
-    public static final String NAME = "callback";
-
-    public static final CallbackCommand INSTANCE = new CallbackCommand();
-
-    private CallbackCommand() {
-    }
-
-    public Command.Parameterized createCommand() {
-        SpongeAdventure.invalidateCallbacks();
-
-        final Parameter.Key<UUID> key = Parameter.key("key", new TypeToken<>() {});
-        return Command.builder()
-                .shortDescription(Component.text("Execute a callback registered as part of a TextComponent. Primarily for internal use"))
-                .addParameter(Parameter.uuid().key(key).build())
-                .executor(context -> {
-                    SpongeAdventure.runCallback(context.requireOne(key), context.cause());
-                    return CommandResult.success();
-                })
-                .build();
+    @Override
+    public @NotNull ClickEvent create(final @NotNull ClickCallback<Audience> callback, final ClickCallback.@NotNull Options options) {
+        return SpongeAdventure.createCallbackClickEvent(options, cause -> callback.accept(cause.audience()));
     }
 
 }
