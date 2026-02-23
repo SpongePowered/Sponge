@@ -54,7 +54,7 @@ public final class VillagerData {
                         .get(h -> h.getVillagerData().level())
                         .set((h, v) -> h.setVillagerData(h.getVillagerData().withLevel(v)))
                     .create(Keys.PROFESSION_TYPE)
-                        .get(h -> (ProfessionType) (Object) h.getVillagerData().profession())
+                        .get(h -> (ProfessionType) (Object) h.getVillagerData().profession().value())
                         .set((h, v) -> {
                             final var villagerType = SpongeCommon.vanillaRegistry(Registries.VILLAGER_PROFESSION)
                                 .wrapAsHolder((VillagerProfession) (Object) v);
