@@ -157,7 +157,7 @@ public final class SpongeBanService implements BanService {
                     .thenApplyAsync(user -> {
                         Sponge.eventManager().post(SpongeEventFactory.createPardonUserEvent(PhaseTracker.getInstance().currentCause(), (Ban.Profile) ban, user));
 
-                        UserListUtil.removeEntry(this.getUserBanList(), SpongeGameProfile.toMcProfile(((Ban.Profile) ban).profile()));
+                        UserListUtil.removeEntry(this.getUserBanList(), SpongeGameProfile.toNameAndId(((Ban.Profile) ban).profile()));
                         return true;
                     }, ((MinecraftServerBridge) SpongeCommon.server()).bridge$spongeMainThreadExecutor());
         } else if (ban.type().equals(BanTypes.IP.get())) {
