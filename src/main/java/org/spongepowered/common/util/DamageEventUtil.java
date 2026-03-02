@@ -270,9 +270,20 @@ public final class DamageEventUtil {
     }
 
     private static DamageModifier buildDamageReductionModifier(final DefaultedRegistryReference<DamageModifierType> modifierType, Object... causes) {
+        // 过滤掉 null 值并确保至少有一个元素
+        List<Object> causeList = Arrays.stream(causes)
+            .filter(c -> c != null)
+            .toList();
+
+        // 如果过滤后为空，添加 modifierType 作为默认 cause
+        if (causeList.isEmpty()) {
+            causeList = List.of(modifierType);
+        }
+
         return DamageModifier.builder().damageReductionGroup()
-                .cause(Cause.of(EventContext.empty(), Arrays.asList(causes))).type(modifierType).build();
+            .cause(Cause.of(EventContext.empty(), causeList)).type(modifierType).build();
     }
+
 
     public static AttackEntityEvent callPlayerAttackEntityEvent(final Attack<Player> attack, final float knockbackModifier) {
         final boolean isMainthread = !attack.sourceEntity().level().isClientSide;

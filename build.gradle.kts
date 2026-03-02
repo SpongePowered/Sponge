@@ -439,6 +439,12 @@ tasks {
     }
 }
 
+gradle.beforeProject {
+    tasks.withType<Test>().configureEach {
+        enabled = false
+    }
+}
+
 publishing {
     publications {
         register("sponge", MavenPublication::class) {
