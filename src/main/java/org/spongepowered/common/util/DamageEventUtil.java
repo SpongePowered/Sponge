@@ -270,12 +270,12 @@ public final class DamageEventUtil {
     }
 
     private static DamageModifier buildDamageReductionModifier(final DefaultedRegistryReference<DamageModifierType> modifierType, Object... causes) {
-        // 过滤掉 null 值并确保至少有一个元素
+        // Filter out null values and ensure there is at least one element
         List<Object> causeList = Arrays.stream(causes)
             .filter(c -> c != null)
             .toList();
 
-        // 如果过滤后为空，添加 modifierType 作为默认 cause
+        // If the filtered result is empty, add modifierType as the default cause
         if (causeList.isEmpty()) {
             causeList = List.of(modifierType);
         }
