@@ -75,6 +75,8 @@ import java.util.Optional;
 import java.util.function.DoubleUnaryOperator;
 import java.util.function.Predicate;
 
+import javax.annotation.Nullable;
+
 public final class DamageEventUtil {
 
     private DamageEventUtil() {
@@ -269,9 +271,19 @@ public final class DamageEventUtil {
                 .cause(Cause.of(EventContext.empty(), Arrays.asList(causes))).type(modifierType).build();
     }
 
-    private static DamageModifier buildDamageReductionModifier(final DefaultedRegistryReference<DamageModifierType> modifierType, Object... causes) {
+    private static DamageModifier buildDamageReductionModifier(final DefaultedRegistryReference<DamageModifierType> modifierType, @Nullable Object... causes) {
+        // Filter out null values and ensure there is at least one element
+        List<Object> causeList = Arrays.stream(causes)
+            .filter(c -> c != null)
+            .toList();
+
+        // If the filtered result is empty, add modifierType as the default cause
+        if (causeList.isEmpty()) {
+            causeList = List.of(modifierType);
+        }
+
         return DamageModifier.builder().damageReductionGroup()
-                .cause(Cause.of(EventContext.empty(), Arrays.asList(causes))).type(modifierType).build();
+            .cause(Cause.of(EventContext.empty(), causeList)).type(modifierType).build();
     }
 
     public static AttackEntityEvent callPlayerAttackEntityEvent(final Attack<Player> attack, final float knockbackModifier) {
