@@ -48,9 +48,9 @@ public final class PigData {
                         .get(Pig::isSaddled)
                         .set((h, v) -> {
                             if (v) {
-                                h.setItemSlot(EquipmentSlot.SADDLE, ItemStack.EMPTY);
-                            } else {
                                 h.setItemSlot(EquipmentSlot.SADDLE, new ItemStack(Items.SADDLE));
+                            } else {
+                                h.setItemSlot(EquipmentSlot.SADDLE, ItemStack.EMPTY);
                             }
                         })
                     .create(Keys.PIG_TYPE)
