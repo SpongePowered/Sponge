@@ -640,7 +640,6 @@ public final class EntityDataTest {
         DataTest.checkOfferData(polarBear, Keys.IS_STANDING, true);
     }
 
-    @Disabled
     @Test
     public void testVillager() {
         final Entity villager = this.location.createEntity(EntityTypes.VILLAGER.get());

@@ -77,7 +77,7 @@ public final class VillagerData {
                         .get(h -> h.getOffers().stream().map(TradeOffer.class::cast).collect(Collectors.toList()))
                         .set((h, v) -> h.setOffers(v.stream().map(MerchantOffer.class::cast).collect(Collectors.toCollection(MerchantOffers::new))))
                     .create(Keys.VILLAGER_TYPE)
-                        .get(h -> (VillagerType) (Object) h.getVillagerData().type())
+                        .get(h -> (VillagerType) (Object) h.getVillagerData().type().value())
                         .set((h, v) -> {
                             final var villagerType = SpongeCommon.vanillaRegistry(Registries.VILLAGER_TYPE)
                                 .wrapAsHolder((net.minecraft.world.entity.npc.VillagerType) (Object) v);
