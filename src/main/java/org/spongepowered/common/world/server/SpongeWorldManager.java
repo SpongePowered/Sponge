@@ -931,8 +931,6 @@ public class SpongeWorldManager implements WorldManager {
             registryKey, levelStem, levelData.isDebugWorld(), seed, spawners, true, null);
         this.worlds.put(registryKey, world);
 
-        // Ensure that the world border is registered.
-        levelData.getLegacyWorldBorderSettings().ifPresent(world.getWorldBorder()::applySettings);
         PlatformHooks.INSTANCE.getWorldHooks().postLoadWorld(world);
         return world;
     }

@@ -38,6 +38,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
 import org.spongepowered.common.world.server.SpongeServerLevelData;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 
@@ -125,6 +126,15 @@ public interface ServerLevelDataBridge {
 
     default Optional<Integer> bridge$viewDistance() {
         return Optional.empty();
+    }
+
+    default @Nullable WorldBorderBridge bridge$worldBorder() {
+        final ServerLevel level = this.bridge$level();
+        if (level != null) {
+            return (WorldBorderBridge) level.getWorldBorder();
+        }
+
+        return null;
     }
 
     default void bridge$triggerViewDistanceLogic() {

@@ -63,7 +63,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
-import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.dimension.end.EndDragonFight;
@@ -375,9 +374,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         if (behavior != SerializationBehavior.NONE) {
             original.call(self, flush);
 
-            // per-world WorldInfo/WorldBorder/BossBars
-            final var border = this.getWorldBorder();
-            levelData.setLegacyWorldBorderSettings(Optional.of(new WorldBorder.Settings(border)));
+            // per-world WorldInfo/BossBars
             if (levelData instanceof WorldData worldData) {
                 worldData.setCustomBossEvents(this.bridge$getBossBarManager().save(SpongeCommon.server().registryAccess()));
                 this.bridge$getLevelSave().saveDataTag(SpongeCommon.server().registryAccess(), worldData, this.shadow$dimension() == Level.OVERWORLD ? SpongeCommon.server().getPlayerList().getSingleplayerData() : null);

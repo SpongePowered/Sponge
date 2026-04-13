@@ -345,7 +345,8 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
         if (worldBorder == null) {
             return (WorldBorder) (Object) net.minecraft.world.level.border.WorldBorder.Settings.DEFAULT;
         }
-        this.serverLevelData.setLegacyWorldBorderSettings(Optional.of((net.minecraft.world.level.border.WorldBorder.Settings) (Object) border));
+
+        ((ServerLevelDataBridge) serverLevelData).bridge$worldBorder().bridge$applyFrom(worldBorder);
         return worldBorder;
     }
 
