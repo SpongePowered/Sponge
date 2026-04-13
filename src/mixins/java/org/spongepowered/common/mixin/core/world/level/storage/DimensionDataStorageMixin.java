@@ -57,7 +57,7 @@ public abstract class DimensionDataStorageMixin implements DimensionDataStorageB
             DataUtil.syncTagToData(dch);
             dch.data$setCompound(null);
         }
-        return null;
+        return result;
     }
 
     @Override
