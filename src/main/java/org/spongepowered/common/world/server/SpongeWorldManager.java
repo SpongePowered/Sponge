@@ -933,6 +933,7 @@ public class SpongeWorldManager implements WorldManager {
 
         // Ensure that the world border is registered.
         levelData.getLegacyWorldBorderSettings().ifPresent(world.getWorldBorder()::applySettings);
+        levelData.setLegacyWorldBorderSettings(Optional.empty());
         PlatformHooks.INSTANCE.getWorldHooks().postLoadWorld(world);
         return world;
     }
