@@ -36,12 +36,16 @@ public class WorldBorderTest {
     @Test
     public void testBorderIsApplied() {
         final ServerWorld world = Sponge.server().worldManager().world(DefaultWorldKeys.DEFAULT).get();
-
+        final WorldBorder worldBorder = world.border();
         final WorldBorder border = WorldBorder.builder().center(1, 1).initialDiameter(1).build();
 
-        world.setBorder(border);
+        try {
+            world.setBorder(border);
 
-        Assertions.assertEquals(border, world.border());
+            Assertions.assertEquals(border, world.border());
+        } finally {
+            world.setBorder(worldBorder);
+        }
     }
 
     @Test
@@ -49,14 +53,22 @@ public class WorldBorderTest {
         final ServerWorld world = Sponge.server().worldManager().world(DefaultWorldKeys.DEFAULT).get();
         final ServerWorld nether = Sponge.server().worldManager().world(DefaultWorldKeys.THE_NETHER).get();
 
+        final WorldBorder worldBorder = world.border();
+        final WorldBorder worldBorderNether = nether.border();
+
         final WorldBorder border = WorldBorder.builder().center(1, 1).initialDiameter(1).build();
         final WorldBorder netherBorder = WorldBorder.builder().center(2, 2).initialDiameter(2).build();
 
-        world.setBorder(border);
-        nether.setBorder(netherBorder);
+        try {
+            world.setBorder(border);
+            nether.setBorder(netherBorder);
 
-        Assertions.assertEquals(border, world.border());
-        Assertions.assertEquals(netherBorder, nether.border());
+            Assertions.assertEquals(border, world.border());
+            Assertions.assertEquals(netherBorder, nether.border());
+        } finally {
+            world.setBorder(worldBorder);
+            nether.setBorder(worldBorderNether);
+        }
     }
 
 }
