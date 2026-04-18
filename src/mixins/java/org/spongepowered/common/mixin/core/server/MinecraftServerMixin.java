@@ -83,6 +83,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -503,11 +504,12 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         return this.impl$serviceProvider;
     }
 
-    @Inject(method = "reloadResources", at = @At(value = "HEAD"))
-    public void impl$reloadResources(final Collection<String> datapacksToLoad, final CallbackInfoReturnable<CompletableFuture<Void>> cir) {
+    @ModifyVariable(method = "reloadResources", at = @At(value = "HEAD"), argsOnly = true)
+    public Collection<String> impl$reloadResources(final Collection<String> datapacksToLoad) {
         final List<String> reloadablePacks = ((SpongeDataPackManager) this.dataPackManager()).registerPacks();
-        datapacksToLoad.addAll(reloadablePacks);
+        reloadablePacks.addAll(datapacksToLoad);
         this.shadow$getPackRepository().reload();
+        return reloadablePacks;
     }
 
     @Override

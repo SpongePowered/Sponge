@@ -109,16 +109,17 @@ public final class SpongeDataPackManager implements DataPackManager {
     }
 
     public List<String> registerPacks() {
+        final List<String> reloadablePacks = new ArrayList<>();
+
         // Ignore reload immediately after first call
         if (this.ignoreNext) {
             this.ignoreNext = false;
-            return List.of();
+            return reloadablePacks;
         }
 
         SpongeIngredient.clearCache();
         IngredientResultUtil.clearCache();
 
-        final List<String> reloadablePacks = new ArrayList<>();
         this.registerAndSerializePack(DataPackTypes.ADVANCEMENT, reloadablePacks);
         this.registerAndSerializePack(DataPackTypes.RECIPE, reloadablePacks);
         this.registerAndSerializePack(DataPackTypes.BLOCK_TAG, reloadablePacks);
