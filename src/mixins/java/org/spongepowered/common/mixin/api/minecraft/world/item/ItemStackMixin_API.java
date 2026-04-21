@@ -29,6 +29,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.event.HoverEventSource;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
@@ -80,6 +81,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
     @Shadow public abstract Item shadow$getItem();
     @Shadow public abstract net.minecraft.network.chat.Component shadow$getDisplayName();
     @Shadow public abstract void shadow$applyComponents(final DataComponentPatch $$0);
+    @Shadow public abstract void shadow$applyComponents(final DataComponentMap $$0);
     @Shadow public abstract DataComponentPatch shadow$getComponentsPatch();
     @Shadow @Nullable public abstract <T> T shadow$update(final DataComponentType<T> $$0, final T $$1, final UnaryOperator<T> $$2);
 
@@ -100,7 +102,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
     @Override
     public boolean validateRawData(final DataView container) {
         Objects.requireNonNull(container);
-        return false;
+        return SpongeItemStack.createItemStack(container).isPresent();
     }
 
     @Override
@@ -111,8 +113,12 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
             throw new IllegalArgumentException("Cannot set data on empty item stacks!");
         }
 
+        final net.minecraft.world.item.ItemStack updated = SpongeItemStack.createItemStack(container)
+            .map(net.minecraft.world.item.ItemStack.class::cast)
+            .orElseThrow(() -> new InvalidDataException("Unable to deserialize item stack data"));
+
         try {
-            this.shadow$applyComponents(SpongeItemStack.patchFromData(container));
+            this.shadow$applyComponents(updated.getComponents());
         } catch (final Exception e) {
             throw new InvalidDataException("Unable to set raw data or translate raw data for ItemStack setting", e);
         }
@@ -168,7 +174,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
 
     @Override
     public int contentVersion() {
-        return 3;
+        return 4;
     }
 
     @Override
