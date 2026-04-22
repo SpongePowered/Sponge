@@ -1192,14 +1192,6 @@ public final class Constants {
 
     public static final class ItemStack {
 
-        public static final DataQuery DATA = of("Data");
-        public static final DataQuery DATA_VERSION = of("DataVersion");
-        public static final DataQuery COUNT = of("count");
-        public static final DataQuery TYPE = of("id");
-        public static final DataQuery COMPONENTS = of("components");
-        public static final DataQuery CUSTOM_DATA = of("minecraft:custom_data");
-        public static final DataQuery DAMAGE = of("minecraft:damage");
-
         @Deprecated
         public static final class V2 {
 
@@ -1207,6 +1199,21 @@ public final class Constants {
             // ItemStacks
             public static final DataQuery COUNT = of("Count");
             public static final DataQuery TYPE = of("ItemType");
+        }
+
+        @Deprecated
+        public static final class V3 {
+
+            public static final DataQuery COUNT = of("count");
+            public static final DataQuery TYPE = of("id");
+            public static final DataQuery COMPONENTS = of("components");
+            public static final DataQuery DAMAGE = of("minecraft:damage");
+        }
+
+        public static final class V4 {
+
+            public static final DataQuery DATA = of("Data");
+            public static final DataQuery DATA_VERSION = of("DataVersion");
         }
 
         // Previously only ItemStackSnapshot

@@ -56,11 +56,11 @@ class ItemStackDataComponentsUpdater implements DataContentUpdater {
         final String type = content.getString(Constants.ItemStack.V2.TYPE).get();
 
         final DataContainer updated = DataContainer.createNew();
-        updated.set(Constants.ItemStack.TYPE, type);
-        updated.set(Constants.ItemStack.COUNT, count);
+        updated.set(Constants.ItemStack.V3.TYPE, type);
+        updated.set(Constants.ItemStack.V3.COUNT, count);
 
         final DataContainer components = DataContainer.createNew();
-        content.getInt(Constants.ItemStack.V2.DAMAGE_VALUE).filter(dmg -> dmg != 0).ifPresent(dmg -> components.set(Constants.ItemStack.DAMAGE, dmg));
+        content.getInt(Constants.ItemStack.V2.DAMAGE_VALUE).filter(dmg -> dmg != 0).ifPresent(dmg -> components.set(Constants.ItemStack.V3.DAMAGE, dmg));
 
         content.getView(Constants.Sponge.UNSAFE_NBT).ifPresent(unsafe -> {
             // Get unsafe nbt data
@@ -77,7 +77,7 @@ class ItemStackDataComponentsUpdater implements DataContentUpdater {
             newComponents.values(false).forEach(components::set);
         });
 
-        updated.set(Constants.ItemStack.COMPONENTS, components);
+        updated.set(Constants.ItemStack.V3.COMPONENTS, components);
         updated.set(Queries.CONTENT_VERSION, this.outputVersion());
 
         return updated;

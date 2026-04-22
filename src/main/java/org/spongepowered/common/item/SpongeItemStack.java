@@ -279,8 +279,8 @@ public final class SpongeItemStack  {
         final CompoundTag stackData = (CompoundTag) mcStack.saveOptional(SpongeCommon.server().registryAccess());
         return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, ((ItemStack) (Object) mcStack).contentVersion())
-                .set(Constants.ItemStack.DATA_VERSION, SharedConstants.getCurrentVersion().getDataVersion().getVersion())
-                .set(Constants.ItemStack.DATA, NBTTranslator.INSTANCE.translate(stackData));
+                .set(Constants.ItemStack.V4.DATA_VERSION, SharedConstants.getCurrentVersion().getDataVersion().getVersion())
+                .set(Constants.ItemStack.V4.DATA, NBTTranslator.INSTANCE.translate(stackData));
     }
 
     @NotNull
@@ -328,17 +328,17 @@ public final class SpongeItemStack  {
         final DataUpdaterDelegate delegate = new DataUpdaterDelegate(builder.build(), version, Constants.ItemStack.Data.CURRENT_VERSION);
         final DataView updatedContainer = delegate.update(container);
 
-        if (!updatedContainer.contains(Constants.ItemStack.DATA_VERSION, Constants.ItemStack.DATA)) {
+        if (!updatedContainer.contains(Constants.ItemStack.V4.DATA_VERSION, Constants.ItemStack.V4.DATA)) {
             return Optional.empty();
         }
 
-        final CompoundTag stackData = updatedContainer.getView(Constants.ItemStack.DATA)
+        final CompoundTag stackData = updatedContainer.getView(Constants.ItemStack.V4.DATA)
                 .map(NBTTranslator.INSTANCE::translate)
                 .orElseThrow(() -> new InvalidDataException("Unable retrieve item stack data"));
         if (stackData.isEmpty()) {
             return Optional.of(ItemStack.empty());
         }
-        final int dataVersion = updatedContainer.getInt(Constants.ItemStack.DATA_VERSION).get();
+        final int dataVersion = updatedContainer.getInt(Constants.ItemStack.V4.DATA_VERSION).get();
         final Dynamic<Tag> fixedData = DataFixers.getDataFixer().update(
                 References.ITEM_STACK,
                 new Dynamic<>(NbtOps.INSTANCE, stackData),

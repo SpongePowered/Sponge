@@ -24,19 +24,12 @@
  */
 package org.spongepowered.common.item;
 
-import com.mojang.serialization.Dynamic;
-import net.minecraft.SharedConstants;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.util.datafix.DataFixers;
-import net.minecraft.util.datafix.fixes.References;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.registry.RegistryTypes;
-import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.util.Constants;
 
 public final class ItemStackDataVersionUpdater implements DataContentUpdater {
@@ -55,29 +48,25 @@ public final class ItemStackDataVersionUpdater implements DataContentUpdater {
 
     @Override
     public DataView update(final DataView content) {
-        final boolean isAir = content.getRegistryValue(Constants.ItemStack.TYPE, RegistryTypes.ITEM_TYPE)
+        final boolean isAir = content.getRegistryValue(Constants.ItemStack.V3.TYPE, RegistryTypes.ITEM_TYPE)
             .map(i -> i == ItemTypes.AIR.get())
             .orElse(false);
 
         final DataContainer updated = DataContainer.createNew();
         updated.set(Queries.CONTENT_VERSION, this.outputVersion());
-        updated.set(Constants.ItemStack.DATA_VERSION, SharedConstants.getCurrentVersion().getDataVersion().getVersion());
+        updated.set(Constants.ItemStack.V4.DATA_VERSION, 3833); // The version from the previous ItemStackDataComponentsUpdater.
 
         if (isAir) {
-            return updated.set(Constants.ItemStack.DATA, DataContainer.createNew());
+            return updated.set(Constants.ItemStack.V4.DATA, DataContainer.createNew());
         }
 
-        final CompoundTag itemStackTag = new CompoundTag();
-        itemStackTag.putString("id", content.getString(Constants.ItemStack.TYPE).get());
-        itemStackTag.putInt("count", content.getInt(Constants.ItemStack.COUNT).get());
+        final DataContainer data = DataContainer.createNew()
+            .set(Constants.ItemStack.V3.TYPE, content.getString(Constants.ItemStack.V3.TYPE).get())
+            .set(Constants.ItemStack.V3.COUNT, content.getInt(Constants.ItemStack.V3.COUNT).get());
 
-        content.getView(Constants.ItemStack.COMPONENTS).ifPresent(components ->
-            itemStackTag.put("components", NBTTranslator.INSTANCE.translate(components)));
+        content.getView(Constants.ItemStack.V3.COMPONENTS)
+            .ifPresent(components -> data.set(Constants.ItemStack.V3.COMPONENTS, components));
 
-        var dataFixed = DataFixers.getDataFixer().update(References.ITEM_STACK, new Dynamic<>(NbtOps.INSTANCE, itemStackTag), 3833, SharedConstants.getCurrentVersion().getDataVersion().getVersion());
-
-        updated.set(Constants.ItemStack.DATA, NBTTranslator.INSTANCE.translate((CompoundTag) dataFixed.getValue()));
-
-        return updated;
+        return updated.set(Constants.ItemStack.V4.DATA, data);
     }
 }
