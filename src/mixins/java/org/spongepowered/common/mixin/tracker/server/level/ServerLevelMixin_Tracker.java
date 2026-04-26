@@ -29,7 +29,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
+import net.minecraft.network.protocol.game.ClientboundExplodePacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
@@ -43,7 +43,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
@@ -55,6 +54,7 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.LocatableBlock;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -340,34 +340,17 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
                 mcExplosion.clearToBlow();
             }
 
-            // Sponge Start - Don't send explosion packets, they're spammy, we can replicate it on the server entirely
-            /*
-            for (EntityPlayer entityplayer : this.playerEntities) {
-                if (entityplayer.getDistanceSq(x, y, z) < 4096.0D) {
-                    ((EntityPlayerMP) entityplayer).connection
-                        .sendPacket(new SPacketExplosion(x, y, z, strength, mcExplosion.getAffectedBlockPositions(),
-                            mcExplosion.getPlayerKnockbackMap().get(entityplayer)));
+            ServerLocation serverLocation = explosion.serverLocation();
+            for (ServerPlayer serverPlayer : this.players) {
+                if (serverPlayer.distanceToSqr(serverLocation.x(), serverLocation.y(), serverLocation.z()) < 4096.0D) {
+                    serverPlayer.connection
+                        .send(new ClientboundExplodePacket(serverLocation.x(), serverLocation.y(), serverLocation.z(),
+                            mcExplosion.radius(), mcExplosion.getToBlow(),
+                            mcExplosion.getHitPlayers().get(serverPlayer), mcExplosion.getBlockInteraction(),
+                            mcExplosion.getSmallExplosionParticles(), mcExplosion.getLargeExplosionParticles(),
+                            mcExplosion.getExplosionSound()));
                 }
             }
-
-             */
-            // Use the knockback map and set velocities, since the explosion packet isn't sent, we need to replicate
-            // the players being moved.
-            for (final ServerPlayer playerEntity : this.players) {
-                final Vec3 knockback = mcExplosion.getHitPlayers().get(playerEntity);
-                if (knockback != null) {
-                    // In Vanilla, doExplosionB always updates the 'motion[xyz]' fields for every entity in range.
-                    // However, this field is completely ignored for players (since 'velocityChanged') is never set, and
-                    // a completely different value is sent through 'SPacketExplosion'.
-
-                    // To replicate this behavior, we manually send a velocity packet. It's critical that we don't simply
-                    // add to the 'motion[xyz]' fields, as that will end up using the value set by 'doExplosionB', which must be
-                    // ignored.
-                    playerEntity.connection.send(new ClientboundSetEntityMotionPacket(playerEntity.getId(), new Vec3(knockback.x, knockback.y, knockback.z)));
-                }
-            }
-            // Sponge End
-
         }
         // Sponge End
         return mcExplosion;
