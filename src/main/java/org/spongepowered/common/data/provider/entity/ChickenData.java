@@ -57,6 +57,11 @@ public final class ChickenData {
                                 .wrapAsHolder((net.minecraft.world.entity.animal.ChickenVariant) (Object) v);
                             h.setVariant(holder);
                         });
+        // @formatter:on
+        final var chicken = registrator.asMutable(Chicken.class);
+        final var components = EntityDataProviders.of(
+            // TODO - EitherHolder is a different kind of thing
+//            EntityDataProviders.eitherHolderOf()
+        );
     }
-    // @formatter:on
 }

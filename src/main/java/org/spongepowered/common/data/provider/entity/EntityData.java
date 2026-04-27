@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.provider.entity;
 
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PortalProcessor;
@@ -80,13 +81,6 @@ public final class EntityData {
                                 return null;
                             }
                             return (org.spongepowered.api.entity.Entity) rootVehicle;
-                        })
-                    .create(Keys.CUSTOM_NAME)
-                        .get(h -> h.hasCustomName() ? SpongeAdventure.asAdventure(h.getCustomName()) : null)
-                        .set((h, v) -> h.setCustomName(SpongeAdventure.asVanilla(v)))
-                        .delete(h -> {
-                            h.setCustomName(null);
-                            h.setCustomNameVisible(false);
                         })
                     .create(Keys.DISPLAY_NAME)
                         .get(h -> SpongeAdventure.asAdventure(h.getDisplayName()))
@@ -266,6 +260,17 @@ public final class EntityData {
                     dv -> dv.getString(Constants.Entity.CUSTOM_NAME).map(GsonComponentSerializer.gson()::deserialize));
 
         // @formatter:on
+        final var entity = registrator.asMutable(Entity.class);
+        final var components = EntityDataProviders.of(
+            EntityDataProviders.optionalTransformed(Keys.CUSTOM_NAME, DataComponents.CUSTOM_NAME, SpongeAdventure::asAdventure, SpongeAdventure::asVanilla),
+            EntityDataProviders.deleter(Keys.CUSTOM_NAME, h -> {
+                h.setCustomName(null);
+                h.setCustomNameVisible(false);
+            })
+        );
+        for (var provider : components) {
+            provider.applyToRegistrator(entity);
+        }
     }
 
 }

@@ -29,22 +29,64 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.registry.DefaultedRegistryValue;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.data.provider.DataProviderRegistratorBuilder;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public final class EntityDataProviders extends DataProviderRegistratorBuilder {
 
-    public sealed interface KeyComponentProvider<A extends DefaultedRegistryValue, MC> {
+    public sealed interface KeyComponentProvider<A, MC> {
         <T extends Entity> void applyToRegistrator(DataProviderRegistrator.MutableRegistrator<T> registrator);
     }
 
     public static List<KeyComponentProvider<?, ?>> of(KeyComponentProvider<?, ?>... providers) {
         return List.of(providers);
+    }
+
+    public static <A, MC> KeyComponentProvider<A, MC> transformed(
+        Key<? extends Value<A>> apiKey,
+        DataComponentType<MC> componentType,
+        Function<MC, A> getter,
+        Function<A, MC> setter
+    ) {
+        return new FunctionalProvider<>(apiKey, componentType, getter, setter);
+    }
+
+    public static <A, MC> KeyComponentProvider<A, MC> transformedWith(
+        Key<? extends Value<A>> apiKey,
+        DataComponentType<MC> componentType,
+        Function<MC, A> getter,
+        BiFunction<A, @Nullable MC, MC> setter
+    ) {
+        return new BiFunctionProvider<>(apiKey, componentType, getter, setter);
+    }
+
+    public static <A, MC> KeyComponentProvider<A, MC> optionalTransformed(
+        Key<Value<A>> apiKey,
+        DataComponentType<MC> componentType,
+        Function<MC, A> getter,
+        Function<A, MC> setter
+    ) {
+        return new OptionalFunctionProvider<>(apiKey, componentType, getter, setter);
+    }
+
+    public static <A, MC> KeyComponentProvider<A, MC> deleter(
+        Key<Value<A>> apiKey,
+        Consumer<Entity> deleter
+    ) {
+        return new DeletionProvider<>(apiKey, deleter);
     }
 
     public static <A extends DefaultedRegistryValue, MC> KeyComponentProvider<A, MC> holderOf(
@@ -62,9 +104,62 @@ public final class EntityDataProviders extends DataProviderRegistratorBuilder {
         return new EnumProvider<>(apiKey, componentType);
     }
 
+    record DeletionProvider<A, MC>(
+        Key<Value<A>> apiKey,
+        Consumer<Entity> deleter
+    ) implements KeyComponentProvider<A, MC> {
+        public <T extends Entity> void applyToRegistrator(DataProviderRegistrator.MutableRegistrator<T> registrator) {
+            registrator.create(this.apiKey)
+                .delete(deleter::accept);
+        }
+    }
+
+    record FunctionalProvider<A, MC>(
+        Key<? extends Value<A>> apiKey,
+        DataComponentType<MC> componentType,
+        Function<MC, A> getter,
+        Function<A, MC> setter
+    ) implements KeyComponentProvider<A, MC> {
+        public <T extends Entity> void applyToRegistrator(DataProviderRegistrator.MutableRegistrator<T> registrator) {
+            registrator.create(this.apiKey)
+                .get(h -> this.getter.apply(h.get(this.componentType)))
+                .set((h, v) -> h.setComponent(this.componentType, this.setter.apply(v)));
+        }
+    }
+
+    record BiFunctionProvider<A, MC>(
+        Key<? extends Value<A>> apiKey,
+        DataComponentType<MC> componentType,
+        Function<MC, A> getter,
+        BiFunction<A, @Nullable MC, MC> setter
+    ) implements KeyComponentProvider<A, MC> {
+        public <T extends Entity> void applyToRegistrator(DataProviderRegistrator.MutableRegistrator<T> registrator) {
+            registrator.create(this.apiKey)
+                .get(h -> this.getter.apply(h.get(this.componentType)))
+                .set((h, v) -> {
+                    final var existing = h.get(this.componentType);
+                    final var newValue = this.setter.apply(v, existing);
+                    h.setComponent(this.componentType, newValue);
+                });
+        }
+    }
+
+    record OptionalFunctionProvider<A, MC>(
+        Key<? extends Value<A>> apiKey,
+        DataComponentType<MC> componentType,
+        Function<MC, A> getter,
+        Function<A, MC> setter
+    ) implements KeyComponentProvider<A, MC> {
+        public <T extends Entity> void applyToRegistrator(DataProviderRegistrator.MutableRegistrator<T> registrator) {
+            registrator.create(this.apiKey)
+                .get(h -> Optional.ofNullable(h.get(this.componentType)).map(this.getter).orElse(null))
+                .set((h, v) -> h.setComponent(this.componentType, v == null ? null : this.setter.apply(v)));
+        }
+    }
+
     @SuppressWarnings("unchecked")
     record HolderProvider<A extends DefaultedRegistryValue, MC>(
-        Key<Value<A>> apiKey,
+        Key<? extends Value<A>> apiKey,
         DataComponentType<Holder<MC>> componentType,
         ResourceKey<Registry<MC>> resourceKey
     ) implements KeyComponentProvider<A, MC> {
@@ -85,7 +180,7 @@ public final class EntityDataProviders extends DataProviderRegistratorBuilder {
 
     @SuppressWarnings("unchecked")
     record EnumProvider<A extends DefaultedRegistryValue, MC extends Enum<MC>>(
-        Key<Value<A>> apiKey,
+        Key<? extends Value<A>> apiKey,
         DataComponentType<MC> componentType
     ) implements KeyComponentProvider<A, MC> {
         public <T extends Entity> void applyToRegistrator(DataProviderRegistrator.MutableRegistrator<T> registrator) {
