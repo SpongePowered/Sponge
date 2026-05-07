@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level.border;
 
 import net.minecraft.world.level.border.WorldBorder;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -61,8 +62,8 @@ public abstract class WorldBorderMixin_Settings_API implements org.spongepowered
     }
 
     @Override
-    public Duration timeUntilTargetDiameter() {
-        return Duration.ofMillis(this.shadow$lerpTime());
+    public Ticks timeUntilTargetDiameter() {
+        return Ticks.of(this.shadow$lerpTime());
     }
 
     @Override

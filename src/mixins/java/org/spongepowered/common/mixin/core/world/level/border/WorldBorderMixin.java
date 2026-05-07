@@ -30,6 +30,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.ChangeWorldBorderEvent;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -83,13 +84,13 @@ public abstract class WorldBorderMixin implements WorldBorderBridge {
     }
 
     @Inject(method = "lerpSizeBetween", at = @At(value = "HEAD"), cancellable = true)
-    private void impl$onLerping(final double initial, final double target, final long milliseconds, final long delay, final CallbackInfo ci) {
+    private void impl$onLerping(final double initial, final double target, final long ticks, final long delay, final CallbackInfo ci) {
         if (this.impl$fireEvent) {
             final Supplier<org.spongepowered.api.world.border.WorldBorder> proposed =
                 () -> new SpongeWorldBorderBuilder().from(this)
                     .initialDiameter(initial)
                     .targetDiameter(target)
-                    .timeToTargetDiameter(Duration.ofMillis(milliseconds))
+                    .timeToTargetDiameter(Ticks.of(ticks))
                     .build();
             if (this.impl$suppressOriginalAction(proposed)) {
                 ci.cancel();
