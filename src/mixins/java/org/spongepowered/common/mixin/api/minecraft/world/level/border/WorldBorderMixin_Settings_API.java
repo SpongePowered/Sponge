@@ -31,6 +31,7 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.math.vector.Vector2d;
 
 import java.time.Duration;
@@ -63,7 +64,7 @@ public abstract class WorldBorderMixin_Settings_API implements org.spongepowered
 
     @Override
     public Ticks timeUntilTargetDiameter() {
-        return this.shadow$lerpTime() == -1 ? Ticks.infinite() : Ticks.of(this.shadow$lerpTime());
+        return SpongeTicks.ticksOrInfinite(this.shadow$lerpTime(), -1);
     }
 
     @Override
