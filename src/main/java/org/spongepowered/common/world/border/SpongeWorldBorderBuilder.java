@@ -79,9 +79,6 @@ public final class SpongeWorldBorderBuilder implements WorldBorder.Builder {
 
     @Override
     public WorldBorder.Builder timeToTargetDiameter(final Ticks ticks) {
-        if (ticks.isInfinite()) {
-            return this;
-        }
         this.ticks = ticks;
         return this;
     }
@@ -154,7 +151,7 @@ public final class SpongeWorldBorderBuilder implements WorldBorder.Builder {
                 (int) this.warningDistance,
                 (int) this.warningTime.getSeconds(),
                 this.initialDiameter == -1 ? this.diameter : this.initialDiameter,
-                this.ticks.ticks(),
+                this.ticks.isInfinite() ? -1 : this.ticks.ticks(),
                 this.diameter
         );
     }

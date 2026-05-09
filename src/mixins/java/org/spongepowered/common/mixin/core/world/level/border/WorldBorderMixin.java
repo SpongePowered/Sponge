@@ -226,7 +226,7 @@ public abstract class WorldBorderMixin implements WorldBorderBridge {
             // TODO - figure out how to get the appropriate game time
             ((WorldBorder) (Object) this).lerpSizeBetween(worldBorder.size(), worldBorder.lerpTarget(), worldBorder.lerpTime(), SpongeCommon.server().overworld().getGameTime());
         } else {
-            ((WorldBorder) (Object) this).setSize(worldBorder.size());
+            ((WorldBorder) (Object) this).setSize(worldBorder.lerpTime() == -1 ? worldBorder.size() : worldBorder.lerpTarget());
         }
     }
 

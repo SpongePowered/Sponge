@@ -63,7 +63,7 @@ public abstract class WorldBorderMixin_Settings_API implements org.spongepowered
 
     @Override
     public Ticks timeUntilTargetDiameter() {
-        return Ticks.of(this.shadow$lerpTime());
+        return this.shadow$lerpTime() == -1 ? Ticks.infinite() : Ticks.of(this.shadow$lerpTime());
     }
 
     @Override
