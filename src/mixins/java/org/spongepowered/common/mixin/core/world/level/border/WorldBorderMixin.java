@@ -30,7 +30,6 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.ChangeWorldBorderEvent;
-import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -40,6 +39,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.world.border.SpongeWorldBorderBuilder;
 
 import java.time.Duration;
@@ -90,7 +90,7 @@ public abstract class WorldBorderMixin implements WorldBorderBridge {
                 () -> new SpongeWorldBorderBuilder().from(this)
                     .initialDiameter(initial)
                     .targetDiameter(target)
-                    .timeToTargetDiameter(Ticks.of(ticks))
+                    .timeToTargetDiameter(SpongeTicks.ticksOrInfinite(ticks, -1))
                     .build();
             if (this.impl$suppressOriginalAction(proposed)) {
                 ci.cancel();
