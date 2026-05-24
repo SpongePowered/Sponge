@@ -28,6 +28,7 @@ import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.border.WorldBorder;
 import org.spongepowered.common.accessor.world.level.border.WorldBorder_SettingsAccessor;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
+import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.math.vector.Vector2d;
 
 import java.time.Duration;
@@ -151,7 +152,7 @@ public final class SpongeWorldBorderBuilder implements WorldBorder.Builder {
                 (int) this.warningDistance,
                 (int) this.warningTime.getSeconds(),
                 this.initialDiameter == -1 ? this.diameter : this.initialDiameter,
-                this.ticks.isInfinite() ? -1 : this.ticks.ticks(),
+                SpongeTicks.toSaturatedLongOrInfinite(this.ticks),
                 this.diameter
         );
     }

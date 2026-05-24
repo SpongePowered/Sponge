@@ -90,7 +90,7 @@ public abstract class WorldBorderMixin implements WorldBorderBridge {
                 () -> new SpongeWorldBorderBuilder().from(this)
                     .initialDiameter(initial)
                     .targetDiameter(target)
-                    .timeToTargetDiameter(SpongeTicks.ticksOrInfinite(ticks, -1))
+                    .timeToTargetDiameter(SpongeTicks.ticksOrInfinite(ticks))
                     .build();
             if (this.impl$suppressOriginalAction(proposed)) {
                 ci.cancel();

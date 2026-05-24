@@ -109,6 +109,21 @@ public final class SpongeTicks implements Ticks {
         return (int) ticksValue;
     }
 
+    public static long toSaturatedLongOrInfinite(final Ticks ticks) {
+        return SpongeTicks.toSaturatedLongOrInfinite(ticks, Constants.TickConversions.INFINITE_TICKS);
+    }
+
+    public static long toSaturatedLongOrInfinite(final Ticks ticks, final long infiniteTicksMarker) {
+        if (ticks.isInfinite()) {
+            return infiniteTicksMarker;
+        }
+        long ticksValue = ticks.ticks();
+        if (infiniteTicksMarker > 0 && ticksValue >= infiniteTicksMarker) {
+            ticksValue = infiniteTicksMarker - 1;
+        }
+        return ticksValue;
+    }
+
     public static Ticks ticksOrInfinite(final long ticks) {
         return SpongeTicks.ticksOrInfinite(ticks, Constants.TickConversions.INFINITE_TICKS);
     }
