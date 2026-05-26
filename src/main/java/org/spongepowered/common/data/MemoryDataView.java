@@ -128,6 +128,11 @@ public class MemoryDataView implements DataView {
     }
 
     @Override
+    public Stream<String> streamRootKeys() {
+        return this.map.keySet().stream();
+    }
+
+    @Override
     public Map<DataQuery, Object> values(final boolean deep) {
         final ImmutableMap.Builder<DataQuery, Object> builder = ImmutableMap.builder();
         for (final DataQuery query : this.keys(deep)) {
