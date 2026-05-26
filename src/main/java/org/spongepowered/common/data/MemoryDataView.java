@@ -142,6 +142,11 @@ public class MemoryDataView implements DataView {
     }
 
     @Override
+    public Stream<Map.Entry<String, Object>> streamRootValues() {
+        return this.map.entrySet().stream().map(e -> Map.entry(e.getKey(), this.transformValue(e.getValue())));
+    }
+
+    @Override
     public final boolean contains(final DataQuery path) {
         Objects.requireNonNull(path, "path");
         final List<String> queryParts = path.parts();
@@ -191,28 +196,7 @@ public class MemoryDataView implements DataView {
             if (object == null) {
                 return Optional.empty();
             }
-            if (this.safety == org.spongepowered.api.data.persistence.DataView.SafetyMode.ALL_DATA_CLONED) {
-                if (object.getClass().isArray()) {
-                    if (object instanceof byte[]) {
-                        return Optional.of(ArrayUtils.clone((byte[]) object));
-                    } else if (object instanceof short[]) {
-                        return Optional.of(ArrayUtils.clone((short[]) object));
-                    } else if (object instanceof int[]) {
-                        return Optional.of(ArrayUtils.clone((int[]) object));
-                    } else if (object instanceof long[]) {
-                        return Optional.of(ArrayUtils.clone((long[]) object));
-                    } else if (object instanceof float[]) {
-                        return Optional.of(ArrayUtils.clone((float[]) object));
-                    } else if (object instanceof double[]) {
-                        return Optional.of(ArrayUtils.clone((double[]) object));
-                    } else if (object instanceof boolean[]) {
-                        return Optional.of(ArrayUtils.clone((boolean[]) object));
-                    } else {
-                        return Optional.of(ArrayUtils.clone((Object[]) object));
-                    }
-                }
-            }
-            return Optional.of(object);
+            return Optional.of(this.transformValue(object));
         }
         final Optional<DataView> subViewOptional = this.getUnsafeView(key);
         if (!subViewOptional.isPresent()) {
@@ -221,6 +205,36 @@ public class MemoryDataView implements DataView {
         final DataView subView = subViewOptional.get();
         return subView.get(path.popFirst());
 
+    }
+
+    private Object transformValue(final Object object) {
+        if (this.safety == org.spongepowered.api.data.persistence.DataView.SafetyMode.ALL_DATA_CLONED) {
+            if (object.getClass().isArray()) {
+                return switch (object) {
+                    case byte[] bytes -> ArrayUtils.clone(bytes);
+                    case short[] shorts -> ArrayUtils.clone(shorts);
+                    case int[] ints -> ArrayUtils.clone(ints);
+                    case long[] longs -> ArrayUtils.clone(longs);
+                    case float[] floats -> ArrayUtils.clone(floats);
+                    case double[] doubles -> ArrayUtils.clone(doubles);
+                    case boolean[] booleans -> ArrayUtils.clone(booleans);
+                    default -> ArrayUtils.clone((Object[]) object);
+                };
+            }
+        }
+
+        return object;
+    }
+
+    @Override
+    public DataView set(final String key, final Object value) {
+        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(value, "value");
+        Preconditions.checkState(this.container != null);
+        Preconditions.checkState(!key.isEmpty(), "The key is empty");
+        Preconditions.checkArgument(value != this, "Cannot set a DataView to itself.");
+
+        return this.set0(key, value);
     }
 
     @Override
@@ -248,20 +262,18 @@ public class MemoryDataView implements DataView {
             return this;
         }
 
+        return this.set0(key, value);
+    }
+
+    private DataView set0(final String key, final Object value) {
         final Object serialized = DataSerializer.serialize(this.safetyMode(), value);
 
         Preconditions.checkArgument(this.isEmpty() || !this.equals(serialized), "Cannot insert self-referencing DataView!");
-        if (serialized instanceof DataView) {
+        if (serialized instanceof final DataView serializedDataView) {
             // always have to copy a data view to avoid overwriting existing
             // views and to set the interior path correctly.
-            final Collection<DataQuery> valueKeys = ((DataView) serialized).keys(true);
-            if (!valueKeys.isEmpty()) {
-                for (final DataQuery oldKey : valueKeys) {
-                    this.set(path.then(oldKey), ((DataView) serialized).get(oldKey).get());
-                }
-            } else {
-                this.createView(path);
-            }
+            final DataView view = this.createView(key);
+            serializedDataView.streamRootValues().forEach(entry -> view.set(entry.getKey(), entry.getValue()));
         } else {
             this.map.put(key, serialized);
         }
@@ -298,20 +310,23 @@ public class MemoryDataView implements DataView {
         Preconditions.checkArgument(sz != 0, "The size of the query must be at least 1");
 
         final String key = queryParts.get(0);
-        final DataQuery keyQuery = DataQuery.of(key);
 
         if (sz == 1) {
-            final DataView result = new MemoryDataView(this, keyQuery, this.safety);
-            this.map.put(key, result);
-            return result;
+            return this.createView(key);
         }
         final DataQuery subQuery = path.popFirst();
         DataView subView = (DataView) this.map.get(key);
         if (subView == null) {
-            subView = new MemoryDataView(this.parent, keyQuery, this.safety);
+            subView = new MemoryDataView(this.parent, DataQuery.of(key), this.safety);
             this.map.put(key, subView);
         }
         return subView.createView(subQuery);
+    }
+
+    private DataView createView(final String key) {
+        final DataView result = new MemoryDataView(this, DataQuery.of(key), this.safety);
+        this.map.put(key, result);
+        return result;
     }
 
     @Override
