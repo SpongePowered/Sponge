@@ -33,6 +33,7 @@ import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.common.launch.plugin.SpongePluginManager;
+import org.spongepowered.common.launch.plugin.loader.PluginCandidateFactory;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.ArrayList;
@@ -47,6 +48,7 @@ public abstract class Launch {
     protected final PluginPlatform pluginPlatform;
     private final Logger logger;
     private final List<PluginContainer> launcherPlugins;
+    private final PluginCandidateFactory pluginFactory;
     private PluginContainer minecraftPlugin, apiPlugin, commonPlugin;
     private Lifecycle lifecycle;
 
@@ -54,6 +56,7 @@ public abstract class Launch {
         this.logger = LogManager.getLogger("launch");
         this.pluginPlatform = pluginPlatform;
         this.launcherPlugins = new ArrayList<>();
+        this.pluginFactory = new PluginCandidateFactory(pluginPlatform.environment());
     }
 
     @SuppressWarnings("unchecked")
@@ -95,8 +98,12 @@ public abstract class Launch {
         return this.logger;
     }
 
-    public PluginPlatform pluginPlatform() {
+    public final PluginPlatform pluginPlatform() {
         return this.pluginPlatform;
+    }
+
+    public final PluginCandidateFactory pluginFactory() {
+        return this.pluginFactory;
     }
 
     public abstract Stage injectionStage();

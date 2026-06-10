@@ -28,43 +28,33 @@ import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.common.applaunch.plugin.PluginPlatform;
+import org.spongepowered.common.applaunch.plugin.discovery.PluginDiscovery;
 import org.spongepowered.common.launch.plugin.SpongePluginManager;
+import org.spongepowered.common.launch.plugin.loader.PluginCandidate;
 import org.spongepowered.common.util.PrettyPrinter;
-import org.spongepowered.plugin.InvalidPluginException;
-import org.spongepowered.plugin.PluginCandidate;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.PluginLanguageService;
-import org.spongepowered.plugin.PluginLoader;
-import org.spongepowered.plugin.PluginResource;
+import org.spongepowered.plugin.discovery.PluginResource;
+import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.plugin.metadata.model.PluginDependency;
-import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 import org.spongepowered.vanilla.launch.VanillaLaunch;
 import org.spongepowered.vanilla.launch.plugin.resolver.DependencyResolver;
 import org.spongepowered.vanilla.launch.plugin.resolver.ResolutionResult;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Singleton
 public final class VanillaPluginManager implements SpongePluginManager {
+    private final VanillaLaunch launch;
     private final Map<String, PluginContainer> plugins;
     private final Map<Object, PluginContainer> instancesToPlugins;
     private final List<PluginContainer> sortedPlugins;
     private final Map<PluginContainer, PluginResource> containerToResource;
     private boolean ready = false;
 
-    public VanillaPluginManager() {
+    public VanillaPluginManager(final VanillaLaunch launch) {
+        this.launch = launch;
         this.plugins = new Object2ObjectOpenHashMap<>();
         this.instancesToPlugins = new IdentityHashMap<>();
         this.sortedPlugins = new ArrayList<>();
@@ -86,33 +76,31 @@ public final class VanillaPluginManager implements SpongePluginManager {
         return Collections.unmodifiableCollection(this.sortedPlugins);
     }
 
-    public void loadPlugins(final VanillaPluginPlatform platform) {
-        final Map<PluginCandidate, PluginLanguageService> pluginLanguageLookup = new HashMap<>();
-        final Map<PluginLanguageService, PluginLoader<?>> pluginLoaders = new HashMap<>();
+    public void loadPlugins() {
+        final PluginPlatform platform = this.launch.pluginPlatform();
 
-        // Initialise the plugin language loaders.
-        for (final Map.Entry<PluginLanguageService, List<PluginCandidate>> candidate : platform.getCandidates().entrySet()) {
-            final PluginLanguageService languageService = candidate.getKey();
-            final String loaderClass = languageService.pluginLoader();
-            try {
-                pluginLoaders.put(languageService, (PluginLoader<?>) Class.forName(loaderClass).getConstructor().newInstance());
-            } catch (final InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
-                throw new RuntimeException(e);
+        final List<PluginCandidate> prioritizedCandidates = new LinkedList<>();
+        final List<PluginCandidate> candidates = new LinkedList<>();
+        for (final PluginDiscovery.Candidate resourceCandidate : platform.discovery().candidates()) {
+            for (final PluginMetadata metadata : resourceCandidate.metadata()) {
+                final List<PluginCandidate> target = this.plugins.containsKey(metadata.id()) ? prioritizedCandidates : candidates;
+                try {
+                    target.add(this.launch.pluginFactory().create(resourceCandidate.resource(), metadata));
+                } catch (final Exception e) {
+                    platform.logger().error("Cannot create plugin {}.", metadata.id(), e);
+                }
             }
-            candidate.getValue().forEach(x -> pluginLanguageLookup.put(x, languageService));
         }
 
         // Priority to platform plugins that will already exist here -- meaning the resolver will act upon them first
         // and if someone decides to give a plugin an ID that is the same as a platform plugin, the resolver will effectively
         // reject it.
-        final Set<PluginCandidate> resources = new LinkedHashSet<>();
-        pluginLanguageLookup.keySet().stream().filter(x -> this.plugins.containsKey(x.metadata().id())).forEach(resources::add);
-        resources.addAll(pluginLanguageLookup.keySet());
+        candidates.addAll(0, prioritizedCandidates);
 
-        final ResolutionResult resolutionResult = DependencyResolver.resolveAndSortCandidates(resources, platform.logger());
+        final ResolutionResult resolutionResult = DependencyResolver.resolveAndSortCandidates(candidates, platform.logger());
         final Map<PluginCandidate, String> failedInstances = new HashMap<>();
         final Map<PluginCandidate, String> consequentialFailedInstances = new HashMap<>();
-        final ClassLoader launchClassloader = VanillaLaunch.instance().getClass().getClassLoader();
+
         for (final PluginCandidate candidate : resolutionResult.sortedSuccesses()) {
             final String id = candidate.metadata().id();
             if (id.indexOf('-') >= 0) {
@@ -149,13 +137,11 @@ public final class VanillaPluginManager implements SpongePluginManager {
             // If a dependency failed to load, then we should bail on required dependencies too.
             // This should work fine, we're sorted so all deps should be in place at this stage.
             if (this.stillValid(candidate, consequentialFailedInstances)) {
-                final PluginLanguageService languageService = pluginLanguageLookup.get(candidate);
-                final PluginLoader<?> pluginLoader = pluginLoaders.get(languageService);
                 try {
-                    final PluginContainer container = pluginLoader.loadPlugin(platform.getEnvironment(), candidate, launchClassloader);
+                    final PluginContainer container = candidate.load();
                     this.addPlugin(container);
                     this.containerToResource.put(container, candidate.resource());
-                } catch (final InvalidPluginException e) {
+                } catch (final Exception e) {
                     failedInstances.put(candidate, "Failed to construct: see stacktrace(s) above this message for details.");
                     platform.logger().error("Failed to construct plugin {}", id, e);
                 }

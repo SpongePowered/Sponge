@@ -29,16 +29,17 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
+import org.spongepowered.common.applaunch.plugin.discovery.PluginDiscovery;
 import org.spongepowered.common.inject.SpongeCommonModule;
 import org.spongepowered.common.inject.SpongeModule;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 import org.spongepowered.vanilla.launch.inject.SpongeVanillaModule;
 import org.spongepowered.vanilla.launch.plugin.VanillaDummyPluginContainer;
 import org.spongepowered.vanilla.launch.plugin.VanillaPluginManager;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -52,7 +53,7 @@ public abstract class VanillaLaunch extends Launch {
     protected VanillaLaunch(final VanillaPluginPlatform pluginPlatform, final Stage injectionStage) {
         super(pluginPlatform);
         this.injectionStage = injectionStage;
-        this.pluginManager = new VanillaPluginManager();
+        this.pluginManager = new VanillaPluginManager(this);
     }
 
     @Override
@@ -71,11 +72,6 @@ public abstract class VanillaLaunch extends Launch {
         }
 
         return this.vanillaPlugin;
-    }
-
-    @Override
-    public final VanillaPluginPlatform pluginPlatform() {
-        return (VanillaPluginPlatform) this.pluginPlatform;
     }
 
     @Override
@@ -102,9 +98,12 @@ public abstract class VanillaLaunch extends Launch {
     protected abstract void performBootstrap(final String[] args);
 
     protected final void createPlatformPlugins() {
-        this.pluginPlatform().getCandidates().values().stream().flatMap(Collection::stream)
-            .filter(plugin -> PLATFORM_IDS.contains(plugin.metadata().id()))
-            .map(plugin -> new VanillaDummyPluginContainer(plugin, this.logger(), this))
-            .forEach(this.pluginManager()::addPlugin);
+        for (final PluginDiscovery.Candidate candidate : this.pluginPlatform().discovery().candidates()) {
+            for (final PluginMetadata metadata : candidate.metadata()) {
+                if (VanillaLaunch.PLATFORM_IDS.contains(metadata.id())) {
+                    this.pluginManager().addPlugin(new VanillaDummyPluginContainer(candidate.resource(), metadata, this));
+                }
+            }
+        }
     }
 }

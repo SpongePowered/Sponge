@@ -29,9 +29,10 @@ import cpw.mods.modlauncher.api.ITransformerActivity;
 import cpw.mods.modlauncher.api.ITransformerVotingContext;
 import cpw.mods.modlauncher.api.TransformerVoteResult;
 import org.objectweb.asm.tree.ClassNode;
+import org.spongepowered.common.applaunch.plugin.discovery.PluginDiscovery;
 import org.spongepowered.common.applaunch.transformation.AccessWidenerTransformer;
-import org.spongepowered.plugin.PluginResource;
-import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
+import org.spongepowered.plugin.discovery.PluginResource;
+import org.spongepowered.plugin.discovery.ResourceLoading;
 
 import java.net.URL;
 import java.util.*;
@@ -40,10 +41,10 @@ import java.util.stream.Collectors;
 public class VanillaAccessWidenerTransformer extends AccessWidenerTransformer implements ITransformer<ClassNode> {
     private static final String[] LABELS = { AccessWidenerTransformer.NAME };
 
-    private final VanillaPluginPlatform pluginPlatform;
+    private final PluginDiscovery discovery;
 
-    public VanillaAccessWidenerTransformer(final VanillaPluginPlatform pluginPlatform) {
-        this.pluginPlatform = pluginPlatform;
+    public VanillaAccessWidenerTransformer(final PluginDiscovery discovery) {
+        this.discovery = discovery;
     }
 
     @Override
@@ -69,16 +70,14 @@ public class VanillaAccessWidenerTransformer extends AccessWidenerTransformer im
     @Override
     protected Collection<URL> collectResources() {
         final Collection<URL> resources = new ArrayList<>();
-        for (final Set<? extends PluginResource> plugins : this.pluginPlatform.getResources().values()) {
-            for (final PluginResource plugin : plugins) {
-                final Optional<String> attribute = plugin.property(AccessWidenerTransformer.MANIFEST_ATTRIBUTE);
-                if (attribute.isPresent()) {
-                    for (final String path : attribute.get().split(",")) {
-                        try {
-                            resources.add(plugin.locateResource(path).get().toURL());
-                        } catch (final Exception e) {
-                            LOGGER.warn("Failed to locate access widener {} from {}", path, plugin.path().getFileName(), e);
-                        }
+        for (final PluginResource plugin : this.discovery.resources(ResourceLoading.GAME_LIBRARY)) {
+            final Optional<String> attribute = plugin.property(AccessWidenerTransformer.MANIFEST_ATTRIBUTE);
+            if (attribute.isPresent()) {
+                for (final String path : attribute.get().split(",")) {
+                    try {
+                        resources.add(plugin.locateResource(path).get().toURL());
+                    } catch (final Exception e) {
+                        LOGGER.warn("Failed to locate access widener {} from {}", path, plugin.path().getFileName(), e);
                     }
                 }
             }

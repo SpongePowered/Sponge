@@ -29,8 +29,7 @@ public final class PluginPlatformConstants {
     private PluginPlatformConstants() {
     }
 
-    public static final String METADATA_FILE_NAME = "sponge_plugins";
-    public static final String METADATA_FILE_NAME_WITH_EXTENSION = PluginPlatformConstants.METADATA_FILE_NAME + ".json";
-    public static final String METADATA_FILE_LOCATION = "META-INF/" + PluginPlatformConstants.METADATA_FILE_NAME_WITH_EXTENSION;
+    public static final String METADATA_FILE_PATH = "META-INF/sponge_plugins.json";
+    public static final String ENVIRONMENT_LOCATOR_VARIABLE_NAME = "SPONGE_PLUGINS";
 
 }

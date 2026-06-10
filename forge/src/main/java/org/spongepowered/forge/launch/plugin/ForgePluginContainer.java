@@ -25,12 +25,12 @@
 package org.spongepowered.forge.launch.plugin;
 
 import com.google.common.collect.MapMaker;
-import com.google.inject.Injector;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
+import net.minecraftforge.forgespi.locating.IModFile;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.common.launch.plugin.SpongePluginContainer;
+import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 
 import java.net.URI;
@@ -40,15 +40,17 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-public class ForgePluginContainer implements SpongePluginContainer {
+@SuppressWarnings("UnstableApiUsage")
+public class ForgePluginContainer implements PluginContainer {
     private final ModContainer modContainer;
+    private final IModFile modFile;
 
-    private Injector injector;
     private Logger logger;
     private PluginMetadata pluginMetadata;
 
     private ForgePluginContainer(final ModContainer modContainer) {
         this.modContainer = modContainer;
+        this.modFile = modContainer.getModInfo().getOwningFile().getFile();
     }
 
     @Override
@@ -69,7 +71,7 @@ public class ForgePluginContainer implements SpongePluginContainer {
 
     @Override
     public Optional<URI> locateResource(String relative) {
-        final Path p = this.modContainer.getModInfo().getOwningFile().getFile().findResource(Objects.requireNonNull(relative, "relative"));
+        final Path p = this.modFile.findResource(Objects.requireNonNull(relative, "relative"));
         return Files.exists(p) ? Optional.of(p.toUri()) : Optional.empty();
     }
 
@@ -78,18 +80,12 @@ public class ForgePluginContainer implements SpongePluginContainer {
         return this.modContainer.getMod();
     }
 
-    @Override
-    public Optional<Injector> injector() {
-        return Optional.ofNullable(this.injector);
-    }
+    private static final Map<ModContainer, ForgePluginContainer> mods = new MapMaker().weakKeys().makeMap();
 
-    public void setInjector(final Injector injector) {
-        this.injector = injector;
-    }
-
-    private static final Map<ModContainer, ForgePluginContainer> containers = new MapMaker().weakKeys().makeMap();
-
-    public static ForgePluginContainer of(final ModContainer modContainer) {
-        return containers.computeIfAbsent(modContainer, ForgePluginContainer::new);
+    public static Optional<PluginContainer> of(final ModContainer modContainer) {
+        if (modContainer instanceof PluginModContainer plugin) {
+            return plugin.container();
+        }
+        return Optional.of(ForgePluginContainer.mods.computeIfAbsent(modContainer, ForgePluginContainer::new));
     }
 }

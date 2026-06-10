@@ -25,11 +25,9 @@
 package org.spongepowered.vanilla.launch.plugin.resolver;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.VersionRange;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.plugin.PluginCandidate;
+import org.spongepowered.common.launch.plugin.loader.PluginCandidate;
+import org.spongepowered.common.launch.plugin.loader.VersionChecker;
 import org.spongepowered.plugin.metadata.model.PluginDependency;
 
 import java.util.ArrayList;
@@ -40,7 +38,6 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -83,7 +80,7 @@ public final class DependencyResolver {
                     continue;
                 }
 
-                if (!DependencyResolver.checkVersion(pd.version(), dep.candidate.metadata().version())) {
+                if (!VersionChecker.check(pd.version(), dep.candidate.metadata().version())) {
                     if (isOptional) {
                         continue; // just move on to the next dep
                     }
@@ -183,23 +180,6 @@ public final class DependencyResolver {
         } else {
             before.dependencies.add(after);
         }
-    }
-
-    private static boolean checkVersion(final @Nullable VersionRange requestedVersion, final ArtifactVersion dependencyVersion) {
-        if (requestedVersion == null || !requestedVersion.hasRestrictions()) {
-            // we don't care which version
-            return true;
-        }
-        // Maven Artifact version resolution has a bug(?) where VersionRange#containsVersion()
-        // returns false if there are no restrictions when logically it should be true because
-        // theoretically all versions are included. Except in our case, the recommended version
-        // might be populated, yet no restrictions are in the VersionRange object, because we
-        // want a specific version, which should be a restriction.
-        //
-        // Further, VersionRange#hasRestrictions() returns true even if VersionRange#getRestrictions()
-        // is empty as it accounts for if there is a recommended version. Thus, we have to do the check
-        // on the recommended version first... which might be null, hence the Objects.equals check.
-        return Objects.equals(requestedVersion.getRecommendedVersion(), dependencyVersion) || requestedVersion.containsVersion(dependencyVersion);
     }
 
     private static void checkCyclic(final Collection<Node> nodes, final ResolutionResult resolutionResult) {

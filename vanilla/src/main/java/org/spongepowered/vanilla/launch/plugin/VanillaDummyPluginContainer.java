@@ -24,24 +24,15 @@
  */
 package org.spongepowered.vanilla.launch.plugin;
 
-import com.google.inject.Injector;
-import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.plugin.DummyPluginContainer;
 import org.spongepowered.common.launch.plugin.SpongePluginContainer;
-import org.spongepowered.plugin.PluginCandidate;
-import org.spongepowered.plugin.builtin.StandardPluginContainer;
+import org.spongepowered.plugin.discovery.PluginResource;
+import org.spongepowered.plugin.metadata.PluginMetadata;
 
-import java.util.Optional;
+public final class VanillaDummyPluginContainer extends SpongePluginContainer implements DummyPluginContainer {
 
-public final class VanillaDummyPluginContainer extends StandardPluginContainer implements SpongePluginContainer, DummyPluginContainer {
-
-    public VanillaDummyPluginContainer(final PluginCandidate candidate, final Logger logger, final Object instance) {
-        super(candidate, logger);
+    public VanillaDummyPluginContainer(final PluginResource resource, final PluginMetadata metadata, final Object instance) {
+        super(resource, metadata);
         this.initializeInstance(instance);
-    }
-
-    @Override
-    public Optional<Injector> injector() {
-        return Optional.empty();
     }
 }

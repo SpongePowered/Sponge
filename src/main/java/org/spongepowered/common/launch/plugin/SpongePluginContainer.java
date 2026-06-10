@@ -25,11 +25,30 @@
 package org.spongepowered.common.launch.plugin;
 
 import com.google.inject.Injector;
-import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.plugin.builtin.StandardPluginContainer;
+import org.spongepowered.plugin.discovery.PluginResource;
+import org.spongepowered.plugin.metadata.PluginMetadata;
 
 import java.util.Optional;
 
-public interface SpongePluginContainer extends PluginContainer {
+public class SpongePluginContainer extends StandardPluginContainer {
 
-    Optional<Injector> injector();
+    private Injector injector;
+
+    public SpongePluginContainer(final PluginResource resource, final PluginMetadata metadata) {
+        super(resource, metadata);
+    }
+
+    @Override
+    public void initializeInstance(final Object instance) {
+        super.initializeInstance(instance);
+    }
+
+    public Optional<Injector> injector() {
+        return Optional.ofNullable(this.injector);
+    }
+
+    public void setInjector(final Injector injector) {
+        this.injector = injector;
+    }
 }

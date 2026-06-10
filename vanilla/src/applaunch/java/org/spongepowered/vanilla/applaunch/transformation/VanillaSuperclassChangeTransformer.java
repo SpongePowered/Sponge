@@ -29,9 +29,10 @@ import cpw.mods.modlauncher.api.ITransformerActivity;
 import cpw.mods.modlauncher.api.ITransformerVotingContext;
 import cpw.mods.modlauncher.api.TransformerVoteResult;
 import org.objectweb.asm.tree.ClassNode;
+import org.spongepowered.common.applaunch.plugin.discovery.PluginDiscovery;
 import org.spongepowered.common.applaunch.transformation.SuperclassChangeTransformer;
-import org.spongepowered.plugin.PluginResource;
-import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
+import org.spongepowered.plugin.discovery.PluginResource;
+import org.spongepowered.plugin.discovery.ResourceLoading;
 
 import java.net.URL;
 import java.util.*;
@@ -41,10 +42,10 @@ public class VanillaSuperclassChangeTransformer extends SuperclassChangeTransfor
     private static final String MIXIN_PLUGIN_REASON = "mixin";
     private static final String[] LABELS = { SuperclassChangeTransformer.NAME };
 
-    private final VanillaPluginPlatform pluginPlatform;
+    private final PluginDiscovery discovery;
 
-    public VanillaSuperclassChangeTransformer(final VanillaPluginPlatform pluginPlatform) {
-        this.pluginPlatform = pluginPlatform;
+    public VanillaSuperclassChangeTransformer(final PluginDiscovery discovery) {
+        this.discovery = discovery;
     }
 
     @Override
@@ -74,16 +75,14 @@ public class VanillaSuperclassChangeTransformer extends SuperclassChangeTransfor
     @Override
     protected Collection<URL> collectResources() {
         final Collection<URL> resources = new ArrayList<>();
-        for (final Set<? extends PluginResource> plugins : this.pluginPlatform.getResources().values()) {
-            for (final PluginResource plugin : plugins) {
-                final Optional<String> attribute = plugin.property(SuperclassChangeTransformer.MANIFEST_ATTRIBUTE);
-                if (attribute.isPresent()) {
-                    for (final String scPath : attribute.get().split(",")) {
-                        try {
-                            resources.add(plugin.locateResource(scPath).get().toURL());
-                        } catch (final Exception e) {
-                            LOGGER.warn("Failed to locate superclass changer {} from {}", scPath, plugin.path().getFileName());
-                        }
+        for (final PluginResource plugin : this.discovery.resources(ResourceLoading.GAME_LIBRARY)) {
+            final Optional<String> attribute = plugin.property(SuperclassChangeTransformer.MANIFEST_ATTRIBUTE);
+            if (attribute.isPresent()) {
+                for (final String scPath : attribute.get().split(",")) {
+                    try {
+                        resources.add(plugin.locateResource(scPath).get().toURL());
+                    } catch (final Exception e) {
+                        LOGGER.warn("Failed to locate superclass changer {} from {}", scPath, plugin.path().getFileName());
                     }
                 }
             }

@@ -36,8 +36,8 @@ import net.minecraft.server.packs.repository.RepositorySource;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.PluginResource;
-import org.spongepowered.plugin.builtin.jvm.JVMPluginResource;
+import org.spongepowered.plugin.discovery.PluginResource;
+import org.spongepowered.vanilla.applaunch.plugin.discovery.SecureJarPluginResource;
 import org.spongepowered.vanilla.bridge.server.packs.repository.PackRepositoryBridge_Vanilla;
 import org.spongepowered.vanilla.launch.plugin.VanillaPluginManager;
 
@@ -66,8 +66,8 @@ public final class PluginRepositorySource implements RepositorySource {
             final PluginResource resource = pluginManager.resource(pluginContainer);
             // TODO: provide hook in the resource to return the file system for all resource types?
             @Nullable Path pluginRoot = null;
-            if (resource instanceof JVMPluginResource jvmResource) {
-                pluginRoot = jvmResource.resourcesRoot();
+            if (resource instanceof SecureJarPluginResource jarResource) {
+                pluginRoot = jarResource.jar().getRootPath();
             }
 
             final PackLocationInfo info = new PackLocationInfo(id, Component.literal(id), PackSource.DEFAULT, Optional.empty());

@@ -28,35 +28,104 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.config.LaunchConfig;
 import org.spongepowered.common.applaunch.config.TokenReplacement;
+import org.spongepowered.common.applaunch.plugin.discovery.PluginDiscovery;
+import org.spongepowered.plugin.Environment;
+import org.spongepowered.plugin.blackboard.Blackboard;
+import org.spongepowered.plugin.blackboard.Keys;
+import org.spongepowered.plugin.builtin.StandardEnvironment;
+import org.spongepowered.plugin.builtin.jvm.JVMKeys;
+import org.spongepowered.plugin.builtin.jvm.JVMPluginResource;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-public interface PluginPlatform {
-    Logger LOGGER = LogManager.getLogger("plugin");
+public abstract class PluginPlatform implements JVMPluginResource.Factory {
+    public static final Logger LOGGER = LogManager.getLogger("plugin");
 
-    String version();
+    private final Environment environment;
+    private final LaunchConfig config;
+    private final TokenReplacement tokens;
+    private final List<Path> pluginDirectories;
 
-    default Logger logger() {
-        return LOGGER;
+    public PluginPlatform() {
+        this.environment = new StandardEnvironment(PluginPlatform.LOGGER);
+
+        final String version = this.version();
+        this.logger().info("SpongePowered PLUGIN Subsystem Version={} Source={}", version, this.getCodeSource());
+
+        final Path baseDirectory = this.baseDirectory();
+        final Path modsDirectory = this.modsDirectory();
+
+        this.tokens = new TokenReplacement();
+        this.tokens.register("BASE_DIR", baseDirectory);
+        this.tokens.register("CONFIG_DIR", this.configDirectory());
+        this.tokens.register("MODS_DIR", modsDirectory);
+
+        final Path additionalPluginsDirectory;
+        try {
+            this.config = LaunchConfig.load(baseDirectory, false);
+            additionalPluginsDirectory = Path.of(this.tokens.replace(this.config.additionalPluginsDirectory()));
+            Files.createDirectories(additionalPluginsDirectory);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        this.pluginDirectories = List.of(modsDirectory, additionalPluginsDirectory);
+
+        final Blackboard blackboard = this.environment.blackboard();
+        blackboard.set(Keys.VERSION, version);
+        blackboard.set(Keys.BASE_DIRECTORY, baseDirectory);
+        blackboard.set(Keys.PLUGIN_DIRECTORIES, this.pluginDirectories);
+        blackboard.set(Keys.METADATA_FILE_PATHS, List.of(PluginPlatformConstants.METADATA_FILE_PATH));
+        blackboard.set(JVMKeys.ENVIRONMENT_LOCATOR_VARIABLE_NAME, PluginPlatformConstants.ENVIRONMENT_LOCATOR_VARIABLE_NAME);
+        blackboard.set(JVMKeys.JVM_PLUGIN_RESOURCE_FACTORY, this);
     }
 
-    boolean vanilla();
+    public final Logger logger() {
+        return PluginPlatform.LOGGER;
+    }
 
-    Path baseDirectory();
+    public abstract String version();
 
-    Path configDirectory();
+    protected String getCodeSource() {
+        try {
+            return this.getClass().getProtectionDomain().getCodeSource().getLocation().toString();
+        } catch (final Throwable th) {
+            return "Unknown";
+        }
+    }
 
-    LaunchConfig config();
+    public abstract boolean vanilla();
 
-    TokenReplacement tokens();
+    public abstract Path baseDirectory();
 
-    List<Path> pluginDirectories();
+    public abstract Path configDirectory();
+
+    public abstract Path modsDirectory();
+
+    public abstract PluginDiscovery discovery();
 
     /**
      * Adds a callback that will be called once, when the platform loader is about to close.
      * When the platform loader is closed, no new class can be loaded, so this is the last thing we can do.
      */
-    void addLoaderCloseCallback(AutoCloseable closeable);
+    public abstract void addLoaderCloseCallback(AutoCloseable closeable);
 
+    public final List<Path> pluginDirectories() {
+        return this.pluginDirectories;
+    }
+
+    public final LaunchConfig config() {
+        return this.config;
+    }
+
+    public final TokenReplacement tokens() {
+        return this.tokens;
+    }
+
+    public final Environment environment() {
+        return this.environment;
+    }
 }

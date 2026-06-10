@@ -41,9 +41,9 @@ public final class NeoPluginManager implements SpongePluginManager {
     @Override
     public Optional<PluginContainer> fromInstance(final Object instance) {
         for (final ModContainer mod : ModList.get().getSortedMods()) {
-            final NeoPluginContainer plugin = NeoPluginContainer.of(mod);
-            if (plugin.instance() == instance) {
-                return Optional.of(plugin);
+            final Optional<PluginContainer> plugin = NeoPluginContainer.of(mod);
+            if (plugin.isPresent() && plugin.get().instance() == instance) {
+                return plugin;
             }
         }
         return Optional.empty();
@@ -51,13 +51,13 @@ public final class NeoPluginManager implements SpongePluginManager {
 
     @Override
     public Optional<PluginContainer> plugin(final String id) {
-        return ModList.get().getModContainerById(Objects.requireNonNull(id, "id")).map(NeoPluginContainer::of);
+        return ModList.get().getModContainerById(Objects.requireNonNull(id, "id")).flatMap(NeoPluginContainer::of);
     }
 
     @Override
     public Collection<PluginContainer> plugins() {
         final ImmutableList.Builder<PluginContainer> builder = ImmutableList.builder();
-        ModList.get().forEachModInOrder(mod -> builder.add(NeoPluginContainer.of(mod)));
+        ModList.get().forEachModInOrder(mod -> NeoPluginContainer.of(mod).ifPresent(builder::add));
         return builder.build();
     }
 

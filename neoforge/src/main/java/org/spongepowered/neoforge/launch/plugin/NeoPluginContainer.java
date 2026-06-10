@@ -25,12 +25,12 @@
 package org.spongepowered.neoforge.launch.plugin;
 
 import com.google.common.collect.MapMaker;
-import com.google.inject.Injector;
 import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.jarcontents.JarContents;
 import net.neoforged.fml.loading.moddiscovery.ModInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.common.launch.plugin.SpongePluginContainer;
+import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 
 import java.net.URI;
@@ -38,16 +38,17 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-public class NeoPluginContainer implements SpongePluginContainer {
+public class NeoPluginContainer implements PluginContainer {
     private final ModContainer modContainer;
+    private final JarContents jar;
+    private final Object instance = new Object();
 
     private Logger logger;
     private PluginMetadata pluginMetadata;
-    private Object instance = new Object();
-    private Injector injector;
 
     private NeoPluginContainer(final ModContainer modContainer) {
         this.modContainer = modContainer;
+        this.jar = modContainer.getModInfo().getOwningFile().getFile().getContents();
     }
 
     @Override
@@ -67,8 +68,8 @@ public class NeoPluginContainer implements SpongePluginContainer {
     }
 
     @Override
-    public Optional<URI> locateResource(String relative) {
-        return this.modContainer.getModInfo().getOwningFile().getFile().getContents().findFile(Objects.requireNonNull(relative, "relative"));
+    public Optional<URI> locateResource(final String relative) {
+        return this.jar.findFile(Objects.requireNonNull(relative, "relative"));
     }
 
     @Override
@@ -76,22 +77,12 @@ public class NeoPluginContainer implements SpongePluginContainer {
         return this.instance;
     }
 
-    public void setInstance(final Object instance) {
-        this.instance = instance;
-    }
+    private static final Map<ModContainer, NeoPluginContainer> mods = new MapMaker().weakKeys().makeMap();
 
-    @Override
-    public Optional<Injector> injector() {
-        return Optional.ofNullable(this.injector);
-    }
-
-    public void setInjector(final Injector injector) {
-        this.injector = injector;
-    }
-
-    private static final Map<ModContainer, NeoPluginContainer> containers = new MapMaker().weakKeys().makeMap();
-
-    public static NeoPluginContainer of(final ModContainer modContainer) {
-        return containers.computeIfAbsent(modContainer, NeoPluginContainer::new);
+    public static Optional<PluginContainer> of(final ModContainer modContainer) {
+        if (modContainer instanceof PluginModContainer plugin) {
+            return plugin.container();
+        }
+        return Optional.of(NeoPluginContainer.mods.computeIfAbsent(modContainer, NeoPluginContainer::new));
     }
 }

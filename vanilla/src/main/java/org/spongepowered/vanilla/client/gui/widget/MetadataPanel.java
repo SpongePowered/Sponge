@@ -45,7 +45,6 @@ import org.spongepowered.vanilla.util.Bounds;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -114,9 +113,9 @@ public final class MetadataPanel extends ScrollPanel implements NarratableEntry 
         // Resources
         this.categories.add(
             new Category("Resources")
-                .addEntry(new Entry("Homepage", metadata.links().homepage().map(URL::toString).orElse(null)))
-                .addEntry(new Entry("Issues", metadata.links().issues().map(URL::toString).orElse(null)))
-                .addEntry(new Entry("Source", metadata.links().source().map(URL::toString).orElse(null))));
+                .addEntry(new Entry("Homepage", metadata.links().homepage().map(URI::toString).orElse(null)))
+                .addEntry(new Entry("Issues", metadata.links().issues().map(URI::toString).orElse(null)))
+                .addEntry(new Entry("Source", metadata.links().source().map(URI::toString).orElse(null))));
 
         // Other
         this.categories.add(new Category("Other",

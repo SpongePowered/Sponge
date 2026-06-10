@@ -72,7 +72,7 @@ import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.plugin.metadata.model.PluginContributor;
 
-import java.net.URL;
+import java.net.URI;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -657,7 +657,7 @@ public class SpongeCommand {
         this.appendPluginMeta(builder, key, Component.text(value));
     }
 
-    private void appendPluginMeta(final TextComponent.Builder builder, final String key, final URL value) {
+    private void appendPluginMeta(final TextComponent.Builder builder, final String key, final URI value) {
         final String url = value.toString();
         this.appendPluginMeta(builder, key, Component.text().content(url).clickEvent(ClickEvent.openUrl(url))
                 .decoration(TextDecoration.UNDERLINED, true).build());

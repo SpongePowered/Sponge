@@ -28,13 +28,13 @@ import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import net.minecraftforge.forgespi.language.IModInfo;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.plugin.metadata.builtin.StandardPluginMetadata;
-import org.spongepowered.plugin.metadata.builtin.model.StandardPluginContributor;
-import org.spongepowered.plugin.metadata.builtin.model.StandardPluginDependency;
-import org.spongepowered.plugin.metadata.builtin.model.StandardPluginLinks;
+import org.spongepowered.plugin.metadata.model.PluginContributor;
 import org.spongepowered.plugin.metadata.model.PluginDependency;
+import org.spongepowered.plugin.metadata.model.PluginLinks;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.Optional;
 
 public final class PluginMetadataConverter {
 
@@ -47,22 +47,22 @@ public final class PluginMetadataConverter {
             .version(info.getVersion().toString())
             .description(info.getDescription())
             .entrypoint("unknown")
-            .addContributor(StandardPluginContributor.builder().name(info.getConfigElement("authors").orElse("unknown").toString()).build())
-            .links(StandardPluginLinks.builder().issues(info.getOwningFile().getIssueURL()).build())
+            .addContributor(new PluginContributor(info.getConfigElement("authors").orElse("unknown").toString(), Optional.empty()))
             .properties(info.getModProperties());
 
-        final List<StandardPluginDependency> dependencies = new ArrayList<>();
+        try {
+            final URL issueURL = info.getOwningFile().getIssueURL();
+            builder.links(new PluginLinks(null, null, issueURL == null ? null : issueURL.toURI()));
+        } catch (URISyntaxException ignored) {}
+
         for (final IModInfo.ModVersion dependency : info.getDependencies()) {
-            final StandardPluginDependency.Builder depBuilder = StandardPluginDependency.builder();
-            depBuilder
-                .id(dependency.getModId())
-                .loadOrder(PluginMetadataConverter.orderingToLoad(dependency.getOrdering()))
-                .version(dependency.getVersionRange().toString());
-
-            dependencies.add(depBuilder.build());
+            builder.addDependency(new PluginDependency(
+                dependency.getModId(),
+                dependency.getVersionRange(),
+                PluginMetadataConverter.orderingToLoad(dependency.getOrdering()),
+                false
+            ));
         }
-
-        builder.dependencies(dependencies);
         return builder.build();
     }
 

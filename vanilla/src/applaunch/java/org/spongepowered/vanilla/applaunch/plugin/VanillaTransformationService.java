@@ -25,7 +25,6 @@
 package org.spongepowered.vanilla.applaunch.plugin;
 
 import cpw.mods.jarhandling.SecureJar;
-import cpw.mods.modlauncher.Launcher;
 import cpw.mods.modlauncher.api.IEnvironment;
 import cpw.mods.modlauncher.api.IModuleLayerManager;
 import cpw.mods.modlauncher.api.ITransformationService;
@@ -35,20 +34,18 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.fusesource.jansi.AnsiConsole;
 import org.spongepowered.asm.launch.MixinLaunchPlugin;
 import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.plugin.PluginResource;
-import org.spongepowered.vanilla.applaunch.plugin.resource.SecureJarPluginResource;
+import org.spongepowered.common.applaunch.plugin.discovery.PluginDiscovery;
+import org.spongepowered.plugin.discovery.PluginResource;
+import org.spongepowered.vanilla.applaunch.plugin.discovery.SecureJarPluginResource;
 import org.spongepowered.vanilla.applaunch.transformation.VanillaAccessWidenerTransformer;
 import org.spongepowered.vanilla.applaunch.transformation.VanillaSuperclassChangeTransformer;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 public final class VanillaTransformationService implements ITransformationService {
-    private @MonotonicNonNull VanillaPluginPlatform pluginPlatform;
+    private @MonotonicNonNull VanillaPluginPlatform platform;
 
     @Override
     public String name() {
@@ -58,100 +55,63 @@ public final class VanillaTransformationService implements ITransformationServic
     @Override
     public void onLoad(final IEnvironment env, final Set<String> otherServices) {
         AnsiConsole.systemInstall();
-
-        final Path baseDirectory = env.getProperty(IEnvironment.Keys.GAMEDIR.get()).orElse(Paths.get("."));
-        try {
-            this.pluginPlatform = new VanillaPluginPlatform(baseDirectory);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        AppLaunch.setPluginPlatform(this.pluginPlatform);
-
-        this.pluginPlatform.logger().info("SpongePowered PLUGIN Subsystem Version={} Source={}", this.pluginPlatform.version(), this.getCodeSource());
+        this.platform = AppLaunch.bootstrap(VanillaPluginPlatform::new);
     }
 
     @Override
-    public void initialize(final IEnvironment environment) {
-        this.pluginPlatform.initializeLanguageServices();
-    }
+    public void initialize(final IEnvironment environment) {}
 
     @Override
-    public List<Resource> beginScanning(final IEnvironment environment) {
-        this.pluginPlatform.discoverLocatorServices();
-        this.pluginPlatform.getLocatorServices().forEach((k, v) -> this.pluginPlatform.logger().info("Plugin resource locator '{}' found.", k));
-
-        this.pluginPlatform.locatePluginResources();
-
-        final List<SecureJar> languageResources = new ArrayList<>();
-
-        for (final Set<? extends PluginResource> resources : this.pluginPlatform.getResources().values()) {
-            for (final PluginResource resource : resources) {
-                if (resource instanceof SecureJarPluginResource secureJarResource) {
-                    if (ResourceType.of(resource) == ResourceType.LANGUAGE) {
-                        languageResources.add(secureJarResource.jar());
-                    }
-                }
-            }
-        }
-
-        return List.of(new Resource(IModuleLayerManager.Layer.PLUGIN, languageResources));
-    }
-
-    @Override
-    public List<Resource> completeScan(final IModuleLayerManager layerManager) {
-        this.pluginPlatform.discoverLanguageServices();
-        this.pluginPlatform.getLanguageServices().forEach((k, v) -> this.pluginPlatform.logger().info("Plugin language loader '{}' found.", k));
-
-        this.pluginPlatform.createPluginCandidates();
-
-        final IEnvironment env = Launcher.INSTANCE.environment();
+    public List<Resource> beginScanning(final IEnvironment env) {
         final ILaunchPluginService mixin = env.findLaunchPlugin(MixinLaunchPlugin.NAME).orElse(null);
 
-        final List<SecureJar> gameResources = new ArrayList<>();
+        this.platform.discovery().discoverPluginResources();
 
-        for (final Set<? extends PluginResource> resources : this.pluginPlatform.getResources().values()) {
-            for (final PluginResource resource : resources) {
-                if (resource instanceof SecureJarPluginResource secureJarResource) {
-                    // Build jar metadata from first candidate, or fallback to standard
-                    secureJarResource.init();
+        final List<SecureJar> libs = new ArrayList<>();
+        final List<SecureJar> gameLibs = new ArrayList<>();
 
-                    if (ResourceType.of(resource) == ResourceType.PLUGIN) {
-                        gameResources.add(secureJarResource.jar());
+        for (final PluginDiscovery.Candidate candidate : this.platform.discovery().candidates()) {
+            final PluginResource resource = candidate.resource();
+            candidate.readMetadata();
+
+            switch (candidate.loading()) {
+                case IGNORED:
+                    break;
+                case LIBRARY:
+                    if (resource instanceof SecureJarPluginResource jarResource) {
+                        libs.add(jarResource.jar());
                     }
-                }
-
-                // Offer jar to the Mixin service
-                if (mixin != null) {
-                    mixin.offerResource(resource.path(), resource.path().getFileName().toString());
-                }
-
-                // Log warning about plugin using Mixin
-                if (mixin != null && resource.property(org.spongepowered.asm.util.Constants.ManifestAttributes.MIXINCONFIGS).isPresent()) {
-                    if (!VanillaTransformationService.isSponge(resource)) {
-                        this.pluginPlatform.logger().warn("Plugin from {} uses Mixins to modify the Minecraft Server. If something breaks, remove it before reporting the problem to Sponge!", resource.path());
+                    break;
+                case GAME_LIBRARY:
+                    if (resource instanceof SecureJarPluginResource jarResource) {
+                        gameLibs.add(candidate.pluginFound() ? jarResource.pluginJar(candidate.metadata().getFirst()) : jarResource.jar());
                     }
-                }
+
+                    // Offer jar to the Mixin service
+                    if (mixin != null) {
+                        mixin.offerResource(resource.path(), resource.path().getFileName().toString());
+                    }
+
+                    // Log warning about plugin using Mixin
+                    if (mixin != null && resource.property(org.spongepowered.asm.util.Constants.ManifestAttributes.MIXINCONFIGS).isPresent()) {
+                        if (candidate.metadata().stream().noneMatch(m -> "spongevanilla".equals(m.id()))) {
+                            this.platform.logger().warn("Plugin from {} uses Mixins to modify the Minecraft Server. If something breaks, remove it before reporting the problem to Sponge!", resource.path());
+                        }
+                    }
+                    break;
             }
+
+            candidate.logResult();
         }
 
-        return List.of(new Resource(IModuleLayerManager.Layer.GAME, gameResources));
-    }
+        this.platform.discovery().logMetadataWarnings();
 
-    private static boolean isSponge(final PluginResource resource) {
-        return resource instanceof SecureJarPluginResource secureJarResource && secureJarResource.jar().name().equals("spongevanilla");
+        return List.of(new Resource(IModuleLayerManager.Layer.PLUGIN, libs), new Resource(IModuleLayerManager.Layer.GAME, gameLibs));
     }
 
     @SuppressWarnings("rawtypes")
     @Override
     public List<ITransformer> transformers() {
-        return List.of(new VanillaAccessWidenerTransformer(this.pluginPlatform), new VanillaSuperclassChangeTransformer(this.pluginPlatform));
-    }
-
-    private String getCodeSource() {
-        try {
-            return this.getClass().getProtectionDomain().getCodeSource().getLocation().toString();
-        } catch (final Throwable th) {
-            return "Unknown";
-        }
+        return List.of(new VanillaAccessWidenerTransformer(this.platform.discovery()), new VanillaSuperclassChangeTransformer(this.platform.discovery()));
     }
 }

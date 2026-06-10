@@ -35,23 +35,22 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Singleton
-@SuppressWarnings("unchecked")
 public final class ForgePluginManager implements SpongePluginManager {
 
     @Override
     public Optional<PluginContainer> fromInstance(final Object instance) {
-        return ModList.get().getModContainerByObject(Objects.requireNonNull(instance, "instance")).map(ForgePluginContainer::of);
+        return ModList.get().getModContainerByObject(Objects.requireNonNull(instance, "instance")).flatMap(ForgePluginContainer::of);
     }
 
     @Override
     public Optional<PluginContainer> plugin(final String id) {
-        return ModList.get().getModContainerById(Objects.requireNonNull(id, "id")).map(ForgePluginContainer::of);
+        return ModList.get().getModContainerById(Objects.requireNonNull(id, "id")).flatMap(ForgePluginContainer::of);
     }
 
     @Override
     public Collection<PluginContainer> plugins() {
         final ImmutableList.Builder<PluginContainer> builder = ImmutableList.builder();
-        ModList.get().forEachModInOrder(mod -> builder.add(ForgePluginContainer.of(mod)));
+        ModList.get().forEachModInOrder(mod -> ForgePluginContainer.of(mod).ifPresent(builder::add));
         return builder.build();
     }
 

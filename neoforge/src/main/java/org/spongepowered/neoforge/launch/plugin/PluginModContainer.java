@@ -24,7 +24,6 @@
  */
 package org.spongepowered.neoforge.launch.plugin;
 
-import com.google.inject.Injector;
 import net.neoforged.bus.EventBusErrorMessage;
 import net.neoforged.bus.api.BusBuilder;
 import net.neoforged.bus.api.Event;
@@ -32,53 +31,48 @@ import net.neoforged.bus.api.EventListener;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.Logging;
 import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.ModLoadingException;
 import net.neoforged.fml.ModLoadingIssue;
 import net.neoforged.fml.event.IModBusEvent;
 import net.neoforged.fml.javafmlmod.AutomaticEventSubscriber;
-import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforgespi.language.IModInfo;
 import net.neoforged.neoforgespi.language.ModFileScanData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.common.inject.plugin.PluginGuice;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.neoforge.launch.event.NeoEventManager;
+import org.spongepowered.common.launch.plugin.loader.PluginCandidate;
+import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.plugin.discovery.PluginResource;
+import org.spongepowered.plugin.metadata.PluginMetadata;
 
-import java.lang.reflect.InvocationTargetException;
+import java.util.Optional;
 
-// Spongified FMLModContainer
 public final class PluginModContainer extends ModContainer {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private final ModFileScanData scanResults;
-    private final IEventBus eventBus;
-    private final Class<?> modClass;
+    private final PluginCandidate candidate;
     private final Module module;
 
-    public PluginModContainer(IModInfo info, String className, ModFileScanData modFileScanResults, ModuleLayer gameLayer) {
+    private final ModFileScanData scanData;
+    private final IEventBus eventBus;
+
+    private @MonotonicNonNull PluginContainer container;
+
+    public PluginModContainer(final IModInfo info, final ModFileScanData scanData, final ModuleLayer layer) {
         super(info);
-        LOGGER.debug(Logging.LOADING, "Creating PluginModContainer instance for {}", className);
-        this.scanResults = modFileScanResults;
+        LOGGER.debug(Logging.LOADING, "Creating PluginModContainer instance for {}", info.getModId());
+        this.scanData = scanData;
         this.eventBus = BusBuilder.builder()
             .setExceptionHandler(this::onEventFailed)
             .markerType(IModBusEvent.class)
             .allowPerPhasePost()
             .build();
-        this.module = gameLayer.findModule(info.getOwningFile().getFile().getId()).orElseThrow();
 
-        ModLoadingContext context = ModLoadingContext.get();
-        try {
-            context.setActiveContainer(this);
-            this.modClass = Class.forName(this.module, className);
-            LOGGER.trace(Logging.LOADING, "Loaded plugin class {} with {}", this.modClass.getName(), this.modClass.getClassLoader());
-        } catch (Throwable e) {
-            LOGGER.error(Logging.LOADING, "Failed to load class {}", className, e);
-            throw new ModLoadingException(ModLoadingIssue.error("fml.modloadingissue.failedtoloadmodclass").withCause(e).withAffectedMod(info));
-        } finally {
-            context.setActiveContainer(null);
-        }
+        final PluginResource resource = info.getOwningFile().getConfig().<PluginResource>getConfigElement("spongeResource").get();
+        final PluginMetadata metadata = info.getConfig().<PluginMetadata>getConfigElement("spongeMetadata").get();
+        this.candidate = Launch.instance().pluginFactory().create(resource, metadata);
+        this.module = layer.findModule(info.getOwningFile().getFile().getId()).orElseThrow();
     }
 
     private void onEventFailed(IEventBus iEventBus, Event event, EventListener[] iEventListeners, int i, Throwable throwable) {
@@ -88,36 +82,30 @@ public final class PluginModContainer extends ModContainer {
     @Override
     protected void constructMod() {
         try {
-            LOGGER.trace(Logging.LOADING, "Loading plugin instance {} of type {}", getModId(), this.modClass.getName());
-
-            final NeoPluginContainer pluginContainer = NeoPluginContainer.of(this);
-            final Injector pluginInjector = PluginGuice.create(pluginContainer, this.modClass, Launch.instance().lifecycle().platformInjector());
-            final Object modInstance = pluginInjector.getInstance(this.modClass);
-            pluginContainer.setInjector(pluginInjector);
-            pluginContainer.setInstance(modInstance);
-            ((NeoEventManager) NeoForge.EVENT_BUS).registerListeners(pluginContainer, modInstance);
-
-            LOGGER.trace(Logging.LOADING, "Loaded plugin instance {} of type {}", getModId(), this.modClass.getName());
-        } catch (Throwable e) {
-            if (e instanceof InvocationTargetException) {
-                e = e.getCause();
-            }
-            LOGGER.error(Logging.LOADING, "Failed to create plugin instance. PluginID: {}, class {}", getModId(), this.modClass.getName(), e);
-            throw new ModLoadingException(ModLoadingIssue.error("fml.modloadingissue.failedtoloadmod").withCause(e).withAffectedMod(modInfo));
+            LOGGER.trace(Logging.LOADING, "Loading plugin container {}", getModId());
+            this.container = this.candidate.load();
+            LOGGER.trace(Logging.LOADING, "Loaded plugin container {}", getModId());
+        } catch (Exception e) {
+            LOGGER.error(Logging.LOADING, "Failed to create plugin container {}.", getModId(), e);
+            throw new ModLoadingException(ModLoadingIssue.error("fml.modloadingissue.failedtoloadmod").withCause(e).withAffectedMod(this.modInfo));
         }
 
         try {
             LOGGER.trace(Logging.LOADING, "Injecting Automatic event subscribers for {}", getModId());
-            AutomaticEventSubscriber.inject(this, this.scanResults, this.module);
+            AutomaticEventSubscriber.inject(this, this.scanData, this.module);
             LOGGER.trace(Logging.LOADING, "Completed Automatic event subscribers for {}", getModId());
         } catch (Throwable e) {
             LOGGER.error(Logging.LOADING, "Failed to register automatic subscribers. ModID: {}", getModId(), e);
-            throw new ModLoadingException(ModLoadingIssue.error("fml.modloadingissue.failedtoloadmod").withCause(e).withAffectedMod(modInfo));
+            throw new ModLoadingException(ModLoadingIssue.error("fml.modloadingissue.failedtoloadmod").withCause(e).withAffectedMod(this.modInfo));
         }
     }
 
     @Override
     public IEventBus getEventBus() {
         return this.eventBus;
+    }
+
+    public Optional<PluginContainer> container() {
+        return Optional.ofNullable(this.container);
     }
 }

@@ -47,7 +47,6 @@ import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryRoots;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.RegistryTypes;
-import org.spongepowered.common.applaunch.plugin.DummyPluginContainer;
 import org.spongepowered.common.bridge.core.WritableRegistryBridge;
 import org.spongepowered.common.bridge.server.packs.resources.ResourceManagerBridge;
 import org.spongepowered.common.data.SpongeDataManager;
@@ -76,7 +75,6 @@ import org.spongepowered.common.util.ExecutorUtil;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.plugin.PluginContainer;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -200,7 +198,7 @@ public final class SpongeLifecycle implements Lifecycle {
 
     @Override
     public void callConstructEvent() {
-        for (final PluginContainer plugin : this.filterInternalPlugins(this.game.pluginManager().plugins())) {
+        for (final PluginContainer plugin : this.game.pluginManager().plugins()) {
             ((SpongeEventManager) this.game.eventManager()).postToPlugin(SpongeEventFactory.createConstructPluginEvent(Cause.of(EventContext.empty(),
                     this.game), this.game, plugin), plugin);
         }
@@ -302,13 +300,6 @@ public final class SpongeLifecycle implements Lifecycle {
     @Override
     public void setWorldDataConfiguration(final WorldDataConfiguration config) {
         this.featureFlags = config.enabledFeatures();
-    }
-
-    private Collection<PluginContainer> filterInternalPlugins(final Collection<PluginContainer> plugins) {
-        return plugins
-                .stream()
-                .filter(plugin -> !(plugin instanceof DummyPluginContainer))
-                .collect(Collectors.toList());
     }
 
     @Override
