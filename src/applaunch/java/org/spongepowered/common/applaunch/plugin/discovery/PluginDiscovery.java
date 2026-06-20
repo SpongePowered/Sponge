@@ -148,7 +148,7 @@ public abstract class PluginDiscovery extends PluginServiceLoader {
         private final PluginResource resource;
         private final List<PluginResourceLocator> locators = new ArrayList<>();
         private @MonotonicNonNull UnknownResourceStrategy unknownResourceStrategy;
-        private final SequencedSet<PluginMetadata> metadata = new LinkedHashSet<>();
+        private final SequencedMap<String, PluginMetadata> metadata = new LinkedHashMap<>();
         private boolean locatorFound, readerFound, loaderFound, modFound;
 
         public Candidate(final PluginResource resource, final UnknownResourceStrategy unknownResourceStrategy) {
@@ -194,16 +194,21 @@ public abstract class PluginDiscovery extends PluginServiceLoader {
         public void readMetadata() {
             this.metadata.clear();
             for (final PluginMetadataReader reader : PluginDiscovery.this.readers) {
+                final Collection<? extends PluginMetadata> plugins;
                 try {
-                    this.metadata.addAll(reader.readPluginMetadata(PluginDiscovery.this.environment, this.resource, this.locators()));
+                    plugins = reader.readPluginMetadata(PluginDiscovery.this.environment, this.resource, this.locators());
                 } catch (final Exception e) {
                     PluginDiscovery.this.environment.logger().error("Service '{}' failed to read plugin metadata", reader.name(), e);
+                    continue;
+                }
+                for (final PluginMetadata plugin : plugins) {
+                    this.metadata.put(plugin.id(), plugin);
                 }
             }
         }
 
-        public SequencedSet<PluginMetadata> metadata() {
-            return Collections.unmodifiableSequencedSet(this.metadata);
+        public SequencedCollection<PluginMetadata> metadata() {
+            return Collections.unmodifiableSequencedCollection(this.metadata.sequencedValues());
         }
 
         public boolean pluginFound() {

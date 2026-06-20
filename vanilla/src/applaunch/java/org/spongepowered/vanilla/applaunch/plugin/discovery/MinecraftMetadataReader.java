@@ -58,7 +58,7 @@ public final class MinecraftMetadataReader implements PluginMetadataReader {
             }
 
             try (final BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
-                return MetadataParser.read(reader).metadata();
+                return MetadataParser.read(reader).plugins();
             }
         }
         return List.of();

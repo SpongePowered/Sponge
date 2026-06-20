@@ -64,8 +64,9 @@ public final class PluginFileConfigurable implements IConfigurable {
         }
 
         if ("license".equals(query)) {
-            return Optional.of((T) this.plugins.values().stream()
-                .map(m -> m.container().license()).distinct().collect(Collectors.joining(", ")));
+            final String joinedLicenses = this.plugins.values().stream()
+                .flatMap(m -> m.license().stream()).distinct().collect(Collectors.joining(", "));
+            return Optional.of((T) (joinedLicenses.isEmpty() ? "?" : joinedLicenses));
         }
 
         if (key.length == 2) {

@@ -29,7 +29,7 @@ import org.spongepowered.plugin.Environment;
 import org.spongepowered.plugin.PluginLoader;
 import org.spongepowered.plugin.discovery.PluginResource;
 import org.spongepowered.plugin.metadata.PluginMetadata;
-import org.spongepowered.plugin.metadata.model.ContainerLoader;
+import org.spongepowered.plugin.metadata.model.PluginLoaderSpecification;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -49,7 +49,7 @@ public final class PluginCandidateFactory extends PluginServiceLoader {
     }
 
     public PluginCandidate create(final PluginResource resource, final PluginMetadata metadata) {
-        final ContainerLoader loaderSpec = metadata.container().loader();
+        final PluginLoaderSpecification loaderSpec = metadata.loader();
         final PluginLoader loader = this.loaders.get(loaderSpec.name());
         if (loader == null) {
             throw new NoSuchElementException("Cannot find loader " + loaderSpec.name());

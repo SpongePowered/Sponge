@@ -25,28 +25,50 @@
 package org.spongepowered.forge.launch.plugin;
 
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
+import net.minecraftforge.forgespi.language.IModFileInfo;
 import net.minecraftforge.forgespi.language.IModInfo;
+import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
+import org.apache.maven.artifact.versioning.VersionRange;
 import org.spongepowered.plugin.metadata.PluginMetadata;
+import org.spongepowered.plugin.metadata.builtin.InheritableMetadata;
 import org.spongepowered.plugin.metadata.builtin.StandardPluginMetadata;
 import org.spongepowered.plugin.metadata.model.PluginContributor;
 import org.spongepowered.plugin.metadata.model.PluginDependency;
 import org.spongepowered.plugin.metadata.model.PluginLinks;
+import org.spongepowered.plugin.metadata.model.PluginLoaderSpecification;
 
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.List;
 import java.util.Optional;
 
 public final class PluginMetadataConverter {
+    private static final VersionRange ANY_VERSION;
+
+    static {
+        try {
+            ANY_VERSION = VersionRange.createFromVersionSpec("*");
+        } catch (InvalidVersionSpecificationException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @SuppressWarnings("UnstableApiUsage")
     public static PluginMetadata modToPlugin(final ModInfo info) {
-        final StandardPluginMetadata.Builder builder = StandardPluginMetadata.builder();
-        builder
-            .id(info.getModId())
+        final List<IModFileInfo.LanguageSpec> loaders = info.getOwningFile().requiredLanguageLoaders();
+        final PluginLoaderSpecification loaderSpec;
+        if (loaders.isEmpty()) {
+            loaderSpec = new PluginLoaderSpecification("forge", PluginMetadataConverter.ANY_VERSION);
+        } else {
+            final VersionRange loaderVersion = loaders.getFirst().acceptedVersions();
+            loaderSpec = new PluginLoaderSpecification("forge:" + loaders.getFirst().languageName(), loaderVersion == null ? PluginMetadataConverter.ANY_VERSION : loaderVersion);
+        }
+
+        final InheritableMetadata.Builder builder = InheritableMetadata.builder()
             .name(info.getDisplayName())
-            .version(info.getVersion().toString())
+            .version(info.getVersion())
+            .loader(loaderSpec)
             .description(info.getDescription())
-            .entrypoint("unknown")
             .addContributor(new PluginContributor(info.getConfigElement("authors").orElse("unknown").toString(), Optional.empty()))
             .properties(info.getModProperties());
 
@@ -63,7 +85,12 @@ public final class PluginMetadataConverter {
                 false
             ));
         }
-        return builder.build();
+
+        return StandardPluginMetadata.builder()
+            .id(info.getModId())
+            .entrypoint("unknown")
+            .override(builder.build())
+            .build();
     }
 
     private static PluginDependency.LoadOrder orderingToLoad(final IModInfo.Ordering ordering) {
