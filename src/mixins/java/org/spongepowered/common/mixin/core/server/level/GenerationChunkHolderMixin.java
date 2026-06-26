@@ -60,7 +60,7 @@ public abstract class GenerationChunkHolderMixin {
      */
     @Inject(method = "lambda$applyStep$0", at = @At("HEAD"), cancellable = true)
     private void impl$guardForUnloadedChunkOnGenerate(final ChunkStep $$0x, final ChunkAccess $$1x, final Throwable $$2x, final CallbackInfoReturnable<ChunkResult<ChunkAccess>> cir) {
-        if ($$2x != null && $$2x.getCause() == SpongeUnloadedChunkException.INSTANCE) {
+        if ($$2x == SpongeUnloadedChunkException.INSTANCE || ($$2x != null && $$2x.getCause() == SpongeUnloadedChunkException.INSTANCE)) {
             cir.setReturnValue(GenerationChunkHolder.UNLOADED_CHUNK);
         }
     }

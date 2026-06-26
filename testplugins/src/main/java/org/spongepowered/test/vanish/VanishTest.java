@@ -76,11 +76,15 @@ public final class VanishTest {
             .setParameter(entityKey)
             .alias("p")
             .build();
+        final Flag tabListEntryFlag = Flag.builder()
+            .setParameter(entityKey)
+            .alias("e")
+            .build();
         event.register(
             this.plugin,
             Command.builder()
                 .addParameter(entityKey)
-                .addFlags(soundFlag, particlesFlag, collisionsFlag, targetingFlag)
+                .addFlags(soundFlag, particlesFlag, collisionsFlag, targetingFlag, tabListEntryFlag)
                 .extendedDescription(Component.text("Vanishes the entities by the selector. Based on the flags -c and -t will enable collisions or targeting by entities. No entities selected will target the sender."))
                 .executor(ctx -> {
                     final Collection<? extends Entity> allEntities = ctx.all(entityKey);
@@ -88,7 +92,8 @@ public final class VanishTest {
                         .untargetable(!ctx.hasFlag(targetingFlag))
                         .ignoreCollisions(!ctx.hasFlag(collisionsFlag))
                         .createParticles(ctx.hasFlag(particlesFlag))
-                        .createSounds(ctx.hasFlag(soundFlag));
+                        .createSounds(ctx.hasFlag(soundFlag))
+                        .hideTabListEntry(!ctx.hasFlag(tabListEntryFlag));
                     allEntities.forEach(entity -> entity.offer(Keys.VANISH_STATE, vanishState));
                     if (allEntities.isEmpty()) {
                         if (ctx.cause().root() instanceof DataHolder.Mutable) {

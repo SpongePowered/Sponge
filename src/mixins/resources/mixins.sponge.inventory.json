@@ -80,6 +80,7 @@
         "impl.server.level.ServerPlayer_Mixin_Inventory",
         "impl.world.ContainerMixin_Fabric_Inventory",
         "impl.world.TraitMixin_TrackedMenuBridge_Inventory",
+        "impl.world.TraitMixin_UniversalFabric_Inventory",
         "impl.world.entity.LivingEntityMixin_EquipmentFabric_Inventory",
         "impl.world.entity.player.InventoryMixin_Bridge_Inventory",
         "impl.world.entity.player.InventoryMixin_Lens_Inventory",

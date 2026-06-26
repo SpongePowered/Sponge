@@ -40,132 +40,92 @@ val commonManifest = java.manifest {
     System.getenv()["GIT_BRANCH"]?.apply { attributes("Git-Branch" to this) }
 }
 
-// SpongeCommon configurations
-val applaunchConfig by configurations.register("applaunch")
-
-val launchConfig by configurations.register("launch") {
+// SpongeCommon libraries
+val serviceLibrariesConfig = configurations.register("serviceLibraries")
+val gameLibrariesConfig = configurations.register("gameLibraries") {
     extendsFrom(configurations.minecraft.get())
-    extendsFrom(applaunchConfig)
+    extendsFrom(configurations.api.get())
 }
-val accessorsConfig by configurations.register("accessors") {
-    extendsFrom(launchConfig)
+
+// Layers
+val serviceLayerConfig = configurations.register("serviceLayer") {
+    extendsFrom(serviceLibrariesConfig.get())
 }
-val mixinsConfig by configurations.register("mixins") {
-    extendsFrom(applaunchConfig)
-    extendsFrom(launchConfig)
+val gameLayerConfig = configurations.register("gameLayer") {
+    extendsFrom(serviceLayerConfig.get())
+    extendsFrom(gameLibrariesConfig.get())
 }
 
 // SpongeCommon source sets
-val main by sourceSets
 
+// Service layer
 // applaunchConfig is also used by vanilla installer, hence the separate sourceset
-val applaunchConf = sourceSets.register("applaunchConfig") {
-    spongeImpl.addDependencyToImplementation(this, main)
-}
-
+val applaunchConf = sourceSets.register("applaunchConfig")
 val applaunch by sourceSets.registering {
     spongeImpl.addDependencyToImplementation(applaunchConf.get(), this)
-    spongeImpl.addDependencyToImplementation(this, main)
 
     configurations.named(implementationConfigurationName) {
-        extendsFrom(applaunchConfig)
+        extendsFrom(serviceLayerConfig.get())
     }
 }
-val launch by sourceSets.registering {
-    spongeImpl.addDependencyToImplementation(applaunchConf.get(), this)
-    spongeImpl.addDependencyToImplementation(applaunch.get(), this)
-    spongeImpl.addDependencyToImplementation(this, main)
 
-    configurations.named(implementationConfigurationName) {
-        extendsFrom(launchConfig)
-    }
-}
+// Game layer
 val accessors by sourceSets.registering {
-    spongeImpl.addDependencyToImplementation(launch.get(), this)
-    spongeImpl.addDependencyToImplementation(this, main)
-
     configurations.named(implementationConfigurationName) {
-        extendsFrom(accessorsConfig)
+        extendsFrom(gameLayerConfig.get())
     }
 }
 val mixins by sourceSets.registering {
     spongeImpl.addDependencyToImplementation(applaunchConf.get(), this)
     spongeImpl.addDependencyToImplementation(applaunch.get(), this)
-    spongeImpl.addDependencyToImplementation(launch.get(), this)
     spongeImpl.addDependencyToImplementation(accessors.get(), this)
-    spongeImpl.addDependencyToImplementation(main, this)
 
     configurations.named(implementationConfigurationName) {
-        extendsFrom(mixinsConfig)
+        extendsFrom(gameLayerConfig.get())
+    }
+}
+val main by sourceSets.named("main") {
+    spongeImpl.addDependencyToImplementation(applaunchConf.get(), this)
+    spongeImpl.addDependencyToImplementation(applaunch.get(), this)
+    spongeImpl.addDependencyToImplementation(accessors.get(), this)
+
+    spongeImpl.addDependencyToImplementation(this, mixins.get())
+
+    configurations.named(implementationConfigurationName) {
+        extendsFrom(gameLayerConfig.get())
     }
 }
 
+
 dependencies {
-    // api
-    api("org.spongepowered:spongeapi:$apiVersion")
-
-    implementation(libs.javaxInject)
-
-    // ASM - required for generating event listeners
-    implementation(libs.asm.util)
-    implementation(libs.asm.tree)
-
-    // Implementation-only Adventure
-    implementation(platform(apiLibs.adventure.bom)) {
-        exclude(group = "org.jetbrains", module = "annotations")
-    }
-    implementation(libs.adventure.serializerConfigurate4) {
-        exclude(group = "org.jetbrains", module = "annotations")
-        exclude(group = "org.checkerframework", module = "checker-qual")
-    }
-    implementation(libs.adventure.serializerAnsi) {
-        exclude(group = "org.jetbrains", module = "annotations")
-        exclude(group = "org.checkerframework", module = "checker-qual")
-    }
-
-    // Launch Dependencies - Needed to bootstrap the engine(s)
-    launchConfig("org.spongepowered:spongeapi:$apiVersion")
-    launchConfig(apiLibs.pluginSpi) {
-        exclude(group = "org.checkerframework", module = "checker-qual")
-        exclude(group = "com.google.code.gson", module = "gson")
-        exclude(group = "org.apache.logging.log4j", module = "log4j-api")
-        exclude(group = "org.apache.commons", module = "commons-lang3")
-    }
-    launchConfig(libs.mixin)
-    launchConfig(libs.mixinextras.common)
-    launchConfig(apiLibs.checkerQual)
-    launchConfig(libs.guava) {
-        exclude(group = "com.google.code.findbugs", module = "jsr305") // We don't want to use jsr305, use checkerframework
-        exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
-        exclude(group = "com.google.j2objc", module = "j2objc-annotations")
-        exclude(group = "org.codehaus.mojo", module = "animal-sniffer-annotations")
-        exclude(group = "com.google.errorprone", module = "error_prone_annotations")
-    }
-    launchConfig(apiLibs.gson)
-    launchConfig(libs.asm.util)
-
-    // Applaunch -- initialization that needs to occur without game access
-    applaunchConfig(apiLibs.checkerQual)
-    applaunchConfig(libs.log4j.api)
-    applaunchConfig(libs.guava) {
+    val service = serviceLibrariesConfig.name
+    service(apiLibs.checkerQual)
+    service(libs.guava) {
         exclude(group = "com.google.errorprone", module = "error_prone_annotations")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
-    applaunchConfig(libs.log4j.core)
-    applaunchConfig(libs.log4j.jpl)
-    applaunchConfig(apiLibs.pluginSpi) {
-        exclude(group = "org.checkerframework", module = "checker-qual")
-        exclude(group = "com.google.code.gson", module = "gson")
-        exclude(group = "org.apache.logging.log4j", module = "log4j-api")
-    }
-    applaunchConfig(libs.asm.commons)
-    applaunchConfig(libs.accessWidener)
+    service(libs.log4j.api)
+    service(libs.log4j.core)
+    service(libs.log4j.jpl)
+    service(apiLibs.pluginSpi)
+
+    service(libs.accessWidener)
+    service(libs.asm.commons)
+    service(libs.asm.util)
+    service(libs.asm.tree)
+    service(libs.mixin)
+    service(libs.mixinextras.common)
+
+    api("org.spongepowered:spongeapi:${apiVersion}")
+    val game = gameLibrariesConfig.name
+    game(libs.javaxInject)
+    game(platform(apiLibs.adventure.bom))
+    game(libs.adventure.serializerConfigurate4)
+    game(libs.adventure.serializerAnsi)
 
     // Optional
     val applaunchCompileOnly = applaunch.get().compileOnlyConfigurationName
     applaunchCompileOnly(libs.jacoco.core)
-
-    add(mixins.get().implementationConfigurationName, "org.spongepowered:spongeapi:$apiVersion")
 
     // Tests
     testImplementation(platform(apiLibs.junit.bom))
@@ -178,8 +138,6 @@ dependencies {
     testImplementation(libs.mockito.junitJupiter) {
         exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
     }
-
-    testImplementation(libs.mixin)
 }
 
 minecraft {
@@ -399,12 +357,6 @@ tasks {
         manifest.from(commonManifest)
         from(accessors.map { it.output })
     }
-    val launchJar by registering(Jar::class) {
-        group = "build"
-        archiveClassifier.set("launch")
-        manifest.from(commonManifest)
-        from(launch.map { it.output })
-    }
     val applaunchJar by registering(Jar::class) {
         group = "build"
         archiveClassifier.set("applaunch")
@@ -429,7 +381,6 @@ tasks {
 
         from(mixins.map { it.output })
         from(accessors.map { it.output })
-        from(launch.map { it.output })
         from(applaunch.map { it.output })
         from(applaunchConf.map { it.output })
     }
@@ -455,9 +406,6 @@ publishing {
 
             artifact(tasks["accessorsJar"])
             artifact(tasks["accessorsSourcesJar"])
-
-            artifact(tasks["launchJar"])
-            artifact(tasks["launchSourcesJar"])
 
             artifact(tasks["applaunchJar"])
             artifact(tasks["applaunchSourcesJar"])

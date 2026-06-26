@@ -51,6 +51,8 @@ import org.spongepowered.common.entity.SpongeEntityArchetype;
 import org.spongepowered.common.entity.SpongeEntitySnapshot;
 import org.spongepowered.common.entity.player.SpongeUserData;
 
+import java.util.function.Consumer;
+
 @Mixin({BlockEntity.class, Entity.class, SpongeUserData.class, ItemStack.class,
         SpongeEntityArchetype.class,
         SpongeEntitySnapshot.class,
@@ -129,5 +131,19 @@ public abstract class SpongeDataHolderMixin implements SpongeDataHolderBridge {
     @Override
     public boolean brigde$isDeserializing() {
         return this.deserializing;
+    }
+
+    @Override
+    public void bridge$deserialize(final Consumer<DataManipulator.Mutable> consumer) {
+        if (this.impl$manipulator == null) {
+            this.impl$manipulator = DataManipulator.mutableOf();
+        }
+
+        try {
+            this.deserializing = true;
+            consumer.accept(this.impl$manipulator);
+        } finally {
+            this.deserializing = false;
+        }
     }
 }

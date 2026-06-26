@@ -232,10 +232,15 @@ public final class CustomDataTest {
 
         @Override
         public DataContainer toContainer() {
-            return DataContainer.createNew()
-                    .set(Queries.CONTENT_VERSION, this.contentVersion())
-                    .set(ENUM_VALUE, enumValue.name())
-                    .set(STRING_VALUE, stringValue);
+            return (DataContainer) this.toView(DataContainer.createNew());
+        }
+
+        @Override
+        public DataView toView(final DataView container) {
+            return container
+                .set(Queries.CONTENT_VERSION, this.contentVersion())
+                .set(ENUM_VALUE, enumValue.name())
+                .set(STRING_VALUE, stringValue);
         }
     }
 

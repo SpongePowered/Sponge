@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data;
 
+import net.minecraft.nbt.CompoundTag;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataView;
@@ -31,31 +32,16 @@ import org.spongepowered.api.data.persistence.DataView;
 import java.util.Optional;
 
 /**
- * The default implementation of {@link DataContainer} that can be instantiated
- * for any use. This is the primary implementation of any {@link DataView} that
- * is used throughout both SpongeAPI and Sponge implementation.
+ * A {@link DataContainer} backed directly by a Minecraft {@link CompoundTag}.
  */
-public final class MemoryDataContainer extends MemoryDataView implements DataContainer {
+public final class CompoundTagDataContainer extends CompoundTagDataView implements DataContainer {
 
-    /**
-     * Creates a new {@link MemoryDataContainer} with a default
-     * {@link org.spongepowered.api.data.persistence.DataView.SafetyMode} of
-     * {@link org.spongepowered.api.data.persistence.DataView.SafetyMode#ALL_DATA_CLONED}.
-     *
-     */
-    public MemoryDataContainer() {
-        this(DataView.SafetyMode.ALL_DATA_CLONED);
+    public CompoundTagDataContainer(final CompoundTag compound) {
+        this(compound, SafetyMode.ALL_DATA_CLONED);
     }
 
-    /**
-     * Creates a new {@link MemoryDataContainer} with the provided
-     * {@link org.spongepowered.api.data.persistence.DataView.SafetyMode}.
-     *
-     * @param safety The safety mode to use
-     * @see org.spongepowered.api.data.persistence.DataView.SafetyMode
-     */
-    public MemoryDataContainer(final DataView.SafetyMode safety) {
-        super(safety);
+    public CompoundTagDataContainer(final CompoundTag compound, final DataView.SafetyMode safety) {
+        super(compound, safety);
     }
 
     @Override
@@ -157,5 +143,4 @@ public final class MemoryDataContainer extends MemoryDataView implements DataCon
     public DataContainer remove(final DataQuery path) {
         return (DataContainer) super.remove(path);
     }
-
 }

@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.persistence;
 
-import static org.spongepowered.api.data.persistence.DataQuery.of;
-
 import com.google.common.collect.Lists;
 import io.leangen.geantyref.TypeToken;
 import net.minecraft.nbt.ByteArrayTag;
@@ -52,6 +50,7 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiFunction;
 
 public final class NBTTranslator implements DataTranslator<CompoundTag> {
 
@@ -72,9 +71,9 @@ public final class NBTTranslator implements DataTranslator<CompoundTag> {
         // from the instance of checks.
         Objects.requireNonNull(container);
         Objects.requireNonNull(compound);
-        for (Map.Entry<DataQuery, Object> entry : container.values(false).entrySet()) {
+        container.streamRootValues().forEach(entry -> {
             Object value = entry.getValue();
-            String key = entry.getKey().asString('.');
+            String key = entry.getKey();
             if (value instanceof DataView) {
                 CompoundTag inner = new CompoundTag();
                 NBTTranslator.containerToCompound(container.getView(entry.getKey()).get(), inner);
@@ -84,11 +83,11 @@ public final class NBTTranslator implements DataTranslator<CompoundTag> {
             } else {
                 compound.put(key, NBTTranslator.getBaseFromObject(value));
             }
-        }
+        });
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static Tag getBaseFromObject(final Object value) {
+    public static Tag getBaseFromObject(final Object value) {
         Objects.requireNonNull(value);
         if (value instanceof Boolean) {
             return ByteTag.valueOf((Boolean) value);
@@ -191,31 +190,31 @@ public final class NBTTranslator implements DataTranslator<CompoundTag> {
         switch (base) {
             case ByteTag bt:
                 if (key.contains(NBTTranslator.BOOLEAN_IDENTIFIER)) {
-                    view.set(of(key.replace(NBTTranslator.BOOLEAN_IDENTIFIER, "")), ((bt.byteValue() != 0)));
+                    view.set(key.replace(NBTTranslator.BOOLEAN_IDENTIFIER, ""), ((bt.byteValue() != 0)));
                 } else {
-                    view.set(of(key), bt.byteValue());
+                    view.set(key, bt.byteValue());
                 }
                 break;
             case ShortTag st:
-                view.set(of(key), st.shortValue());
+                view.set(key, st.shortValue());
                 break;
             case IntTag it:
-                view.set(of(key), it.intValue());
+                view.set(key, it.intValue());
                 break;
             case LongTag lt:
-                view.set(of(key), lt.longValue());
+                view.set(key, lt.longValue());
                 break;
             case FloatTag ft:
-                view.set(of(key), ft.floatValue());
+                view.set(key, ft.floatValue());
                 break;
             case DoubleTag dt:
-                view.set(of(key), dt.doubleValue());
+                view.set(key, dt.doubleValue());
                 break;
             case ByteArrayTag bat:
-                view.set(of(key), bat.getAsByteArray());
+                view.set(key, bat.getAsByteArray());
                 break;
             case StringTag st:
-                view.set(of(key), st.value());
+                view.set(key, st.value());
                 break;
             case ListTag lt:
                 ListTag list = (ListTag) base;
@@ -224,10 +223,10 @@ public final class NBTTranslator implements DataTranslator<CompoundTag> {
                 for (final Tag inbt : list) {
                     objectList.add(NBTTranslator.fromTagBase(inbt));
                 }
-                view.set(of(key), objectList);
+                view.set(key, objectList);
                 break;
             case CompoundTag ct:
-                DataView internalView = view.createView(of(key));
+                DataView internalView = view.createView(key);
                 for (String internalKey : ct.keySet()) {
                     @Nullable Tag internalBase = ct.get(internalKey);
                     if (internalBase == null) {
@@ -241,18 +240,22 @@ public final class NBTTranslator implements DataTranslator<CompoundTag> {
                 }
                 break;
             case IntArrayTag iat:
-                view.set(of(key), iat.getAsIntArray());
+                view.set(key, iat.getAsIntArray());
                 break;
             case LongArrayTag lat:
-                view.set(of(key), lat.getAsLongArray());
+                view.set(key, lat.getAsLongArray());
                 break;
             default:
                 throw new IllegalArgumentException("Unknown NBT type " + base.getClass().getName());
         }
     }
 
+    private static Object fromTagBase(final Tag base) {
+        return NBTTranslator.fromTagBase(base, null, (k, c) -> NBTTranslator.getViewFromCompound(c));
+    }
+
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static Object fromTagBase(Tag base) {
+    public static Object fromTagBase(final Tag base, final @Nullable String key, final BiFunction<@Nullable String, CompoundTag, Object> compoundFunction) {
         switch (base) {
             case ByteTag bt:
                 return bt.byteValue();
@@ -274,16 +277,16 @@ public final class NBTTranslator implements DataTranslator<CompoundTag> {
                 int count = lt.size();
                 List objectList = Lists.newArrayListWithCapacity(count);
                 for (Tag inbt : lt) {
-                    objectList.add(NBTTranslator.fromTagBase(inbt));
+                    objectList.add(NBTTranslator.fromTagBase(inbt, null, compoundFunction));
                 }
                 return objectList;
             case CompoundTag ct:
-                return NBTTranslator.getViewFromCompound(ct);
+                return compoundFunction.apply(key, ct);
             case IntArrayTag iat:
                 return iat.getAsIntArray();
             case LongArrayTag lat:
                 return lat.getAsLongArray();
-            default :
+            default:
                 return null;
         }
     }

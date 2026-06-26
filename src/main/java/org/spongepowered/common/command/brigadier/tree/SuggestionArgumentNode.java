@@ -26,6 +26,7 @@ package org.spongepowered.common.command.brigadier.tree;
 
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
+import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.commands.CommandSourceStack;
 
 import java.util.Objects;
@@ -42,6 +43,9 @@ public final class SuggestionArgumentNode<T> extends ArgumentCommandNode<Command
                 builder.getRedirectModifier(),
                 builder.isFork(),
                 builder.getSuggestionsProvider());
+        for (final CommandNode<CommandSourceStack> argument : builder.getArguments()) {
+            this.addChild(argument);
+        }
     }
 
     @Override

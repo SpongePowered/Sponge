@@ -36,7 +36,6 @@ import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
-import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.data.persistence.datastore.SpongeDataStore;
 import org.spongepowered.common.util.Constants;
 
@@ -60,7 +59,7 @@ public final class DataUtil {
     }
 
     public static DataContainer convertTagToContainer(final CompoundTag compound) {
-        final DataContainer allData = NBTTranslator.INSTANCE.translate(compound);
+        final DataContainer allData = new CompoundTagDataContainer(compound);
 
         DataUtil.upgradeDataVersion(compound, allData); // Upgrade v2->v3
 
@@ -80,10 +79,10 @@ public final class DataUtil {
         // Run content-updaters and collect failed data
         final Class<? extends DataHolder> typeToken = dataHolder.getClass().asSubclass(DataHolder.class);
         allData.getView(Constants.Sponge.Data.V3.SPONGE_DATA_ROOT).ifPresent(customData -> {
-            for (final DataQuery keyNamespace : customData.keys(false)) {
-                final DataView keyedData = customData.getView(keyNamespace).get();
-                for (final DataQuery keyValue : keyedData.keys(false)) {
-                    final ResourceKey dataStoreKey = ResourceKey.of(keyNamespace.asString("."), keyValue.asString("."));
+            customData.streamRootKeys().forEach(namespace -> {
+                final DataView keyedData = customData.getView(namespace).get();
+                keyedData.streamRootKeys().forEach(keyValue -> {
+                    final ResourceKey dataStoreKey = ResourceKey.of(namespace, keyValue);
                     final DataView dataStoreData = keyedData.getView(keyValue).get();
                     final Integer contentVersion = dataStoreData.getInt(Constants.Sponge.Data.V3.CONTENT_VERSION).orElse(1);
                     final Optional<DataStore> dataStore = SpongeDataManager.getDatastoreRegistry().getDataStore(dataStoreKey, typeToken);
@@ -95,23 +94,21 @@ public final class DataUtil {
                             });
                         }
                     } else {
-                        dataHolder.bridge$addFailedData(keyNamespace.then(keyValue), dataStoreData);
+                        dataHolder.bridge$addFailedData(DataQuery.of(namespace).then(keyValue), dataStoreData);
                     }
+                });
+            });
+        });
+
+        dataHolder.bridge$deserialize(manipulator -> {
+            for (final DataStore dataStore : SpongeDataManager.getDatastoreRegistry().getDataStoresForType(typeToken)) {
+                try {
+                    dataStore.deserialize(manipulator, allData);
+                } catch (final Exception e) {
+                    SpongeCommon.logger().error("Could not merge data from datastore: {}", dataStore.deserialize(allData), e);
                 }
             }
         });
-
-        dataHolder.bridge$mergeDeserialized(DataManipulator.mutableOf()); // Initialize sponge data holder
-        for (final DataStore dataStore : SpongeDataManager.getDatastoreRegistry().getDataStoresForType(typeToken)) {
-            // Deserialize to Manipulator
-            final DataManipulator.Mutable deserialized = dataStore.deserialize(allData);
-            try {
-                // and set data in CustomDataHolderBridge
-                dataHolder.bridge$mergeDeserialized(deserialized);
-            } catch (final Exception e) {
-                SpongeCommon.logger().error("Could not merge data from datastore: {}", deserialized, e);
-            }
-        }
     }
 
     @SuppressWarnings("deprecation")
@@ -187,12 +184,19 @@ public final class DataUtil {
         if (compound == null) {
             compound = new CompoundTag();
         } else {
-            compound = compound.copy(); // do not modify the original as it might be shared
+            // do not modify the original as it might be shared
+            // Copy everything but the sponge root data, we are overwriting.
+            compound = compound.entrySet()
+                .stream()
+                .filter(e -> !e.getKey().equals(Constants.Sponge.Data.V3.SPONGE_DATA_ROOT.asString(".")))
+                .collect(
+                    CompoundTag::new,
+                    (t, e) -> t.put(e.getKey(), e.getValue().copy()),
+                    (t, o) -> o.entrySet().forEach(e -> t.put(e.getKey(), e.getValue().copy()))
+                );
         }
-        dataHolder.data$setCompound(compound);
-        compound.remove(Constants.Sponge.Data.V3.SPONGE_DATA_ROOT.asString(".")); // Remove all previous SpongeData
 
-        final DataContainer allData = NBTTranslator.INSTANCE.translate(compound);
+        final DataContainer allData = new CompoundTagDataContainer(compound);
 
         // Clear old custom data root
         final DataView customDataRoot = allData.createView(Constants.Sponge.Data.V3.SPONGE_DATA_ROOT);
@@ -201,29 +205,26 @@ public final class DataUtil {
 
         final DataManipulator.Mutable manipulator = dataHolder.bridge$getManipulator();
         final Type dataHolderType = dataHolder.getClass();
-        manipulator.getKeys().stream()
+        manipulator.streamKeys()
                 .map(key -> SpongeDataManager.getDatastoreRegistry().getDataStore(key, dataHolderType))
                 .forEach(dataStore -> dataStore.serialize(manipulator, allData));
 
-        // If data is still present after cleanup merge it back into nbt
-        if (DataUtil.cleanupEmptySpongeData(allData)) {
-            compound.merge(NBTTranslator.INSTANCE.translate(allData));
-        }
+        DataUtil.cleanupEmptySpongeData(allData);
         if (compound.isEmpty()) {
             dataHolder.data$setCompound(null);
             return false;
+        } else {
+            dataHolder.data$setCompound(compound);
         }
         return true;
     }
 
-    private static boolean cleanupEmptySpongeData(final DataContainer allData) {
-        return allData.getView(Constants.Sponge.Data.V3.SPONGE_DATA_ROOT).map(spongeData -> {
+    private static void cleanupEmptySpongeData(final DataContainer allData) {
+        allData.getView(Constants.Sponge.Data.V3.SPONGE_DATA_ROOT).ifPresent(spongeData -> {
                 if (spongeData.isEmpty()) {
                     allData.remove(Constants.Sponge.Data.V3.SPONGE_DATA_ROOT);
-                    return false;
                 }
-                return true;
-            }).orElse(false);
+            });
     }
 
     public static void setSpongeData(final DataView allData, final DataQuery dataStoreKey, final DataView pluginData, final int version) {
@@ -234,8 +235,15 @@ public final class DataUtil {
     }
 
     public static Optional<DataView> getSpongeData(final DataView allData, final DataQuery dataStoreKey, final int version) {
-        return allData.getView(Constants.Sponge.Data.V3.SPONGE_DATA_ROOT
-                .then(dataStoreKey)
-                .then(Constants.Sponge.Data.V3.CONTENT));
+        return allData.getView(Constants.Sponge.Data.V3.SPONGE_DATA_ROOT)
+            .flatMap(spongeData -> spongeData.getView(dataStoreKey))
+            .flatMap(dataStore -> dataStore.getView(Constants.Sponge.Data.V3.CONTENT));
+    }
+
+    public static DataView createSpongeData(final DataView allData, final DataQuery dataStoreKey, final int version) {
+        final DataView root = allData.getView(Constants.Sponge.Data.V3.SPONGE_DATA_ROOT).orElseGet(() -> allData.createView(Constants.Sponge.Data.V3.SPONGE_DATA_ROOT));
+        final DataView store = root.getView(dataStoreKey).orElseGet(() -> root.createView(dataStoreKey));
+        store.set(Constants.Sponge.Data.V3.CONTENT_VERSION, version);
+        return store.getView(Constants.Sponge.Data.V3.CONTENT).orElseGet(() -> store.createView(Constants.Sponge.Data.V3.CONTENT));
     }
 }

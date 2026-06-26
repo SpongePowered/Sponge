@@ -26,8 +26,8 @@ package org.spongepowered.common.item;
 
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Dynamic;
+import net.minecraft.SharedConstants;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
@@ -35,8 +35,10 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.Identifier;
-import net.minecraft.resources.RegistryOps;
+import net.minecraft.util.datafix.DataFixers;
+import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -66,7 +68,6 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
-import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.DataUpdaterDelegate;
@@ -282,20 +283,13 @@ public final class SpongeItemStack {
 
     @NotNull
     public static DataContainer getDataContainer(final net.minecraft.world.item.ItemStack mcStack) {
-        final Identifier key = BuiltInRegistries.ITEM.getKey(mcStack.getItem());
-        final DataContainer container = DataContainer.createNew()
-            .set(Queries.CONTENT_VERSION, ((ItemStack) (Object) mcStack).contentVersion())
-            .set(Constants.ItemStack.TYPE, key)
-            .set(Constants.ItemStack.COUNT, mcStack.getCount());
         // Cleanup Old Custom Data
         SpongeItemStack.cleanupOldCustomData(mcStack);
-        // Serialize all DataComponents...
-
-        var ops = RegistryOps.create(NbtOps.INSTANCE, SpongeCommon.server().registryAccess());
-        var componentsTag = DataComponentPatch.CODEC.encodeStart(ops, mcStack.getComponentsPatch());
-        var components = NBTTranslator.INSTANCE.translate((CompoundTag) componentsTag.getOrThrow());
-        container.set(Constants.ItemStack.COMPONENTS, components);
-        return container;
+        final CompoundTag stackData = (CompoundTag) net.minecraft.world.item.ItemStack.OPTIONAL_CODEC.encode(mcStack, SpongeCommon.server().registryAccess().createSerializationContext(NbtOps.INSTANCE), new CompoundTag()).getOrThrow();
+        return DataContainer.createNew()
+                .set(Queries.CONTENT_VERSION, ((ItemStack) (Object) mcStack).contentVersion())
+                .set(Constants.ItemStack.V4.DATA_VERSION, SharedConstants.getCurrentVersion().dataVersion().version())
+                .set(Constants.ItemStack.V4.DATA, NBTTranslator.INSTANCE.translate(stackData));
     }
 
     @NotNull
@@ -322,8 +316,9 @@ public final class SpongeItemStack {
 
     // TODO updater for old (maybe V2?) Constants.Sponge.DATA_MANIPULATORS
     public static final ImmutableList<DataContentUpdater> STACK_UPDATERS = ImmutableList.of(
-        ItemStackSnapshotDuplicateManipulatorUpdater.INSTANCE,
-        ItemStackDataComponentsUpdater.INSTANCE);
+                    ItemStackSnapshotDuplicateManipulatorUpdater.INSTANCE,
+                    ItemStackDataComponentsUpdater.INSTANCE,
+                    ItemStackDataVersionUpdater.INSTANCE);
 
     @NotNull
     public static Optional<ItemStack> createItemStack(final DataView container) {
@@ -343,27 +338,24 @@ public final class SpongeItemStack {
         final DataUpdaterDelegate delegate = new DataUpdaterDelegate(builder.build(), version, Constants.ItemStack.Data.CURRENT_VERSION);
         final DataView updatedContainer = delegate.update(container);
 
-        // Check if we have valid updated stack
-        if (!updatedContainer.contains(Constants.ItemStack.TYPE, Constants.ItemStack.COUNT)) {
+        if (!updatedContainer.contains(Constants.ItemStack.V4.DATA_VERSION, Constants.ItemStack.V4.DATA)) {
             return Optional.empty();
         }
 
-        final int count = updatedContainer.getInt(Constants.ItemStack.COUNT).get();
-
-        final ItemType itemType = updatedContainer.getRegistryValue(Constants.ItemStack.TYPE, RegistryTypes.ITEM_TYPE)
-            .orElseThrow(() -> new IllegalStateException("Unable to find item with id: "));
-        final var mcStack = new net.minecraft.world.item.ItemStack((Item) itemType, count);
-        if (!mcStack.isEmpty()) { // ignore components when the stack is empty anyways
-            // Read and apply components from container to mc stack
-            mcStack.applyComponents(SpongeItemStack.patchFromData(updatedContainer));
+        final CompoundTag stackData = updatedContainer.getView(Constants.ItemStack.V4.DATA)
+                .map(NBTTranslator.INSTANCE::translate)
+                .orElseThrow(() -> new InvalidDataException("Unable retrieve item stack data"));
+        if (stackData.isEmpty()) {
+            return Optional.of(ItemStack.empty());
         }
-        return Optional.of((ItemStack) (Object) mcStack);
-    }
-
-    public static DataComponentPatch patchFromData(final DataView container) {
-        return container.getView(Constants.ItemStack.COMPONENTS).map(NBTTranslator.INSTANCE::translate).flatMap(compound -> {
-            var dynamic = new Dynamic<>(RegistryOps.create(NbtOps.INSTANCE, SpongeCommon.server().registryAccess()), compound);
-            return DataComponentPatch.CODEC.decode(dynamic).result().map(Pair::getFirst);
-        }).orElse(DataComponentPatch.EMPTY);
+        final int dataVersion = updatedContainer.getInt(Constants.ItemStack.V4.DATA_VERSION).get();
+        final Dynamic<Tag> fixedData = DataFixers.getDataFixer().update(
+                References.ITEM_STACK,
+                new Dynamic<>(NbtOps.INSTANCE, stackData),
+                dataVersion,
+                SharedConstants.getCurrentVersion().dataVersion().version()
+        );
+        return net.minecraft.world.item.ItemStack.CODEC.parse(SpongeCommon.server().registryAccess().createSerializationContext(NbtOps.INSTANCE), fixedData.getValue())
+                .resultOrPartial().map(ItemStack.class::cast);
     }
 }

@@ -403,7 +403,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     private void impl$onlySendSelfAddPlayerOnVanished(final PlayerList playerList, final Packet<?> addPlayer,
                                                       final Connection playerConnection, final net.minecraft.server.level.ServerPlayer serverPlayer
     ) {
-        if (((VanishableBridge) serverPlayer).bridge$vanishState().invisible()) {
+        if (((VanishableBridge) serverPlayer).bridge$vanishState().hidesTabListEntry()) {
             serverPlayer.connection.send(addPlayer);
             return;
         }
@@ -420,7 +420,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     )
     private ClientboundPlayerInfoUpdatePacket impl$onlySendAddPlayerForUnvanishedPlayers(final Collection<net.minecraft.server.level.ServerPlayer> $$0) {
         // Effectively, don't notify new players of vanished players
-        final List<net.minecraft.server.level.ServerPlayer> vanishFiltered = $$0.stream().filter(p -> !((VanishableBridge) p).bridge$vanishState().invisible()).toList();
+        final List<net.minecraft.server.level.ServerPlayer> vanishFiltered = $$0.stream().filter(p -> !((VanishableBridge) p).bridge$vanishState().hidesTabListEntry()).toList();
         return ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(vanishFiltered);
     }
 
@@ -629,7 +629,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final OutgoingChatMessage original, final @Local(argsOnly = true) PlayerChatMessage message,
         final @Local(argsOnly = true) net.minecraft.server.level.@Nullable ServerPlayer player
     ) {
-        if (player != null && ((VanishableBridge) player).bridge$vanishState().invisible()) {
+        if (player != null && ((VanishableBridge) player).bridge$vanishState().hidesTabListEntry()) {
             return new OutgoingChatMessage.Disguised(message.decoratedContent());
         }
         return original;

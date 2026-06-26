@@ -101,7 +101,7 @@ public interface DefaultImplementedAdapterInventory extends InventoryDataHolder 
     default InventoryTransactionResult offer(ItemStackLike... stacks) {
         InventoryTransactionResult result = InventoryTransactionResult.successNoTransactions();
         for (ItemStackLike stack : stacks) {
-            result = result.and(AdapterLogic.appendSequential(this.impl$getFabric(), this.impl$getLens(), stack.asMutable()));
+            result = result.and(AdapterLogic.appendSequential(this.impl$getFabric(), this.impl$getLens(), stack));
         }
         return result;
     }
@@ -215,7 +215,7 @@ public interface DefaultImplementedAdapterInventory extends InventoryDataHolder 
 
     @Override
     default InventoryTransactionResult offer(int index, ItemStackLike stack) {
-        return AdapterLogic.appendSequential(this.impl$getFabric(), this.impl$getLens().getSlotLens(this.impl$getFabric(), index), stack.asMutable());
+        return AdapterLogic.appendSequential(this.impl$getFabric(), this.impl$getLens().getSlotLens(this.impl$getFabric(), index), stack);
     }
 
     @Override

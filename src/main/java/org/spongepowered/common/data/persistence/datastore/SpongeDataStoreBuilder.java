@@ -31,7 +31,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataStore;
@@ -175,12 +174,8 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
 
         @Override
         public void accept(final DataView view, final T v) {
-            final DataView data = DataUtil.getSpongeData(view, this.key, this.version).orElse(DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED));
+            final DataView data = DataUtil.createSpongeData(view, this.key, this.version);
             this.serializer.accept(data, v);
-            if (data.isEmpty()) {
-                return;
-            }
-            DataUtil.setSpongeData(view, this.key, data, this.version);
         }
     }
 

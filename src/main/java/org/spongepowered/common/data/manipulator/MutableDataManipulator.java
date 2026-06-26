@@ -42,6 +42,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 @SuppressWarnings("unchecked")
 final class MutableDataManipulator extends SpongeDataManipulator implements DataManipulator.Mutable {
@@ -188,5 +189,10 @@ final class MutableDataManipulator extends SpongeDataManipulator implements Data
     @Override
     public Set<Key<?>> getKeys() {
         return ImmutableSet.copyOf(this.values.keySet());
+    }
+
+    @Override
+    public Stream<Key<?>> streamKeys() {
+        return this.values.keySet().stream();
     }
 }
