@@ -42,7 +42,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.world.border.SpongeWorldBorderBuilder;
 
-import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -142,7 +141,7 @@ public abstract class WorldBorderMixin implements WorldBorderBridge {
         if (this.impl$fireEvent) {
             final Supplier<org.spongepowered.api.world.border.WorldBorder> proposed =
                 () -> new SpongeWorldBorderBuilder().from(this)
-                    .warningTime(Duration.ofSeconds(warningTime))
+                    .warningTime(SpongeTicks.ticksOrInfinite(warningTime))
                     .build();
             if (this.impl$suppressOriginalAction(proposed)) {
                 ci.cancel();

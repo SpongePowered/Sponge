@@ -34,7 +34,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.math.vector.Vector2d;
 
-import java.time.Duration;
 
 @Mixin(WorldBorder.Settings.class)
 @Implements(@Interface(iface = org.spongepowered.api.world.border.WorldBorder.class, prefix = "api$"))
@@ -83,8 +82,8 @@ public abstract class WorldBorderMixin_Settings_API implements org.spongepowered
     }
 
     @Intrinsic
-    public Duration api$warningTime() {
-        return Duration.ofMillis(this.shadow$warningTime());
+    public Ticks api$warningTime() {
+        return SpongeTicks.ticksOrInfinite(this.shadow$warningTime());
     }
 
     @Override
