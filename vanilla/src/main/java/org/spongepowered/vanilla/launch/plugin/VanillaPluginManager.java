@@ -61,6 +61,7 @@ public final class VanillaPluginManager implements SpongePluginManager {
         this.containerToResource = new Object2ObjectOpenHashMap<>();
     }
 
+    @SuppressWarnings("removal")
     @Override
     public Optional<PluginContainer> fromInstance(final Object instance) {
         return Optional.ofNullable(this.instancesToPlugins.get(Objects.requireNonNull(instance, "instance")));
@@ -154,6 +155,7 @@ public final class VanillaPluginManager implements SpongePluginManager {
         this.ready = true;
     }
 
+    @SuppressWarnings("removal")
     public void addPlugin(final PluginContainer plugin) {
         this.plugins.put(plugin.metadata().id(), Objects.requireNonNull(plugin, "plugin"));
         this.sortedPlugins.add(plugin);

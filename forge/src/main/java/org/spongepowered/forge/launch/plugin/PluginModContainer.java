@@ -119,9 +119,10 @@ public final class PluginModContainer extends ModContainer {
 
     @Override
     public boolean matches(Object mod) {
-        return mod == this.container.instance();
+        return mod == this.getMod();
     }
 
+    @SuppressWarnings("removal")
     @Override
     public Object getMod() {
         return this.container.instance();

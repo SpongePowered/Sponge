@@ -38,6 +38,7 @@ import java.util.Optional;
 @Singleton
 public final class NeoPluginManager implements SpongePluginManager {
 
+    @SuppressWarnings("removal")
     @Override
     public Optional<PluginContainer> fromInstance(final Object instance) {
         for (final ModContainer mod : ModList.get().getSortedMods()) {

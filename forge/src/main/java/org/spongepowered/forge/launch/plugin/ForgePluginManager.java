@@ -37,6 +37,7 @@ import java.util.Optional;
 @Singleton
 public final class ForgePluginManager implements SpongePluginManager {
 
+    @SuppressWarnings("removal")
     @Override
     public Optional<PluginContainer> fromInstance(final Object instance) {
         return ModList.get().getModContainerByObject(Objects.requireNonNull(instance, "instance")).flatMap(ForgePluginContainer::of);

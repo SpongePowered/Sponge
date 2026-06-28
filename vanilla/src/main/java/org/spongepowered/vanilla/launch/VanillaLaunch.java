@@ -101,7 +101,7 @@ public abstract class VanillaLaunch extends Launch {
         for (final PluginDiscovery.Candidate candidate : this.pluginPlatform().discovery().candidates()) {
             for (final PluginMetadata metadata : candidate.metadata()) {
                 if (VanillaLaunch.PLATFORM_IDS.contains(metadata.id())) {
-                    this.pluginManager().addPlugin(new VanillaDummyPluginContainer(candidate.resource(), metadata, this));
+                    this.pluginManager().addPlugin(new VanillaDummyPluginContainer(candidate.resource(), metadata));
                 }
             }
         }

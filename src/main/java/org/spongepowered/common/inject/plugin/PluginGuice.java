@@ -31,17 +31,18 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public final class PluginGuice {
 
-    public static Injector create(final PluginContainer container, final Class<?> pluginClass, final @Nullable Injector platformInjector) {
-        final List<Module> modules = new ArrayList<>(List.of(new PublicPluginModule(container), new PrivatePluginModule(container, pluginClass)));
+    public static Injector create(final PluginContainer container, final Collection<Class<?>> pluginClasses, final @Nullable Injector platformInjector) {
+        final List<Module> modules = new ArrayList<>(List.of(new PublicPluginModule(container), new PrivatePluginModule(container, pluginClasses)));
 
         final @Nullable Object customModule = container.metadata().property("guice-module").orElse(null);
         if (customModule != null) {
             try {
-                final Class<?> moduleClass = Class.forName(customModule.toString(), true, pluginClass.getClassLoader());
+                final Class<?> moduleClass = Class.forName(customModule.toString());
                 final Module moduleInstance = (Module) moduleClass.getConstructor().newInstance();
                 modules.add(moduleInstance);
             } catch (final Exception ex) {

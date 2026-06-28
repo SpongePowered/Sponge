@@ -75,6 +75,7 @@ public class ForgePluginContainer implements PluginContainer {
         return Files.exists(p) ? Optional.of(p.toUri()) : Optional.empty();
     }
 
+    @SuppressWarnings("removal")
     @Override
     public Object instance() {
         return this.modContainer.getMod();

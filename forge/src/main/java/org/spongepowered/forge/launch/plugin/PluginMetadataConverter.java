@@ -88,7 +88,6 @@ public final class PluginMetadataConverter {
 
         return StandardPluginMetadata.builder()
             .id(info.getModId())
-            .entrypoint("unknown")
             .override(builder.build())
             .build();
     }

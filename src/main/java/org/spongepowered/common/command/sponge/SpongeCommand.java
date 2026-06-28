@@ -691,8 +691,6 @@ public class SpongeCommand {
                 contributor.description().ifPresent(x -> builder.append(Component.text(" (" + x + ")")));
             }
         }
-
-        this.appendPluginMeta(builder, "Entrypoint", pluginMetadata.entrypoint());
         return builder.build();
     }
 

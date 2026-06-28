@@ -92,8 +92,9 @@ public final class MetadataPanel extends ScrollPanel implements NarratableEntry 
 
         // Details
         this.categories.add(new Category("Details")
-            .addEntry(new Entry("ID", metadata.id())).addEntry(new Entry("Name", metadata.name().orElse(null)))
-            .addEntry(new Entry("Version", metadata.version().toString())).addEntry(new Entry("Entry", metadata.entrypoint()))
+            .addEntry(new Entry("ID", metadata.id()))
+            .addEntry(new Entry("Name", metadata.name().orElse(null)))
+            .addEntry(new Entry("Version", metadata.version().toString()))
             .addEntry(new Entry("Description", metadata.description().orElse(null))));
 
         // Contributors

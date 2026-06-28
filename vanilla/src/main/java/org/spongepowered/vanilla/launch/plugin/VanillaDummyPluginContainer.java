@@ -31,8 +31,7 @@ import org.spongepowered.plugin.metadata.PluginMetadata;
 
 public final class VanillaDummyPluginContainer extends SpongePluginContainer implements DummyPluginContainer {
 
-    public VanillaDummyPluginContainer(final PluginResource resource, final PluginMetadata metadata, final Object instance) {
+    public VanillaDummyPluginContainer(final PluginResource resource, final PluginMetadata metadata) {
         super(resource, metadata);
-        this.initializeInstance(instance);
     }
 }

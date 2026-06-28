@@ -32,16 +32,23 @@ import org.spongepowered.plugin.metadata.PluginMetadata;
 import java.util.Optional;
 
 public class SpongePluginContainer extends StandardPluginContainer {
-
+    private Object instance = this;
     private Injector injector;
 
     public SpongePluginContainer(final PluginResource resource, final PluginMetadata metadata) {
         super(resource, metadata);
     }
 
+    @SuppressWarnings("removal")
     @Override
-    public void initializeInstance(final Object instance) {
-        super.initializeInstance(instance);
+    public Object instance() {
+        return this.instance;
+    }
+
+    public void setInstanceIfMissing(final Object instance) {
+        if (this.instance == this) {
+            this.instance = instance;
+        }
     }
 
     public Optional<Injector> injector() {

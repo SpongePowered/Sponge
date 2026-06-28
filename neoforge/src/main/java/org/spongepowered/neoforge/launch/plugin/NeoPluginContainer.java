@@ -41,7 +41,6 @@ import java.util.Optional;
 public class NeoPluginContainer implements PluginContainer {
     private final ModContainer modContainer;
     private final JarContents jar;
-    private final Object instance = new Object();
 
     private Logger logger;
     private PluginMetadata pluginMetadata;
@@ -70,11 +69,6 @@ public class NeoPluginContainer implements PluginContainer {
     @Override
     public Optional<URI> locateResource(final String relative) {
         return this.jar.findFile(Objects.requireNonNull(relative, "relative"));
-    }
-
-    @Override
-    public Object instance() {
-        return this.instance;
     }
 
     private static final Map<ModContainer, NeoPluginContainer> mods = new MapMaker().weakKeys().makeMap();

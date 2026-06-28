@@ -31,6 +31,8 @@ import org.spongepowered.common.inject.InjectionPointProvider;
 import org.spongepowered.common.inject.provider.PluginConfigurationModule;
 import org.spongepowered.plugin.PluginContainer;
 
+import java.util.Collection;
+
 
 /**
  * A module installed for each plugin.
@@ -41,17 +43,19 @@ import org.spongepowered.plugin.PluginContainer;
 public final class PrivatePluginModule extends PrivateModule {
 
     private final PluginContainer container;
-    private final Class<?> pluginClass;
+    private final Collection<Class<?>> pluginClasses;
 
-    PrivatePluginModule(final PluginContainer container, final Class<?> pluginClass) {
+    PrivatePluginModule(final PluginContainer container, final Collection<Class<?>> pluginClasses) {
         this.container = container;
-        this.pluginClass = pluginClass;
+        this.pluginClasses = pluginClasses;
     }
 
     @Override
     protected void configure() {
-        this.bind(this.pluginClass).in(Scopes.SINGLETON);
-        this.expose(this.pluginClass);
+        for (final Class<?> pluginClass : this.pluginClasses) {
+            this.bind(pluginClass).in(Scopes.SINGLETON);
+            this.expose(pluginClass);
+        }
 
         this.install(new InjectionPointProvider());
 
