@@ -1,0 +1,2 @@
+org.spongepowered.common.launch.plugin.loader.JavaPluginLoader
+org.spongepowered.common.plugin.loader.spi.DummyPluginLoader
