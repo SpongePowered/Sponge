@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 
 public abstract class PluginDiscovery extends PluginServiceLoader {
     private Map<PluginResource, Candidate> candidates;
-    private Collection<PluginMetadataReader> readers;
+    private List<PluginMetadataReader> readers;
 
     protected PluginDiscovery(final Environment environment) {
         super(environment);
@@ -47,7 +47,10 @@ public abstract class PluginDiscovery extends PluginServiceLoader {
 
     public final void discoverPluginResources() {
         final Map<PluginResource, Candidate> candidates = new HashMap<>();
-        final Set<Class<? extends PluginResourceLocator>> locatorsFound = new HashSet<>();
+        final List<PluginMetadataReader> readers = new ArrayList<>();
+
+        final Set<String> locatorClasses = new HashSet<>();
+        final Set<String> readerClasses = new HashSet<>();
 
         int maxBatches = 10;
         final String maxBatchesProp = System.getProperty("sponge.discovery.maxBatches");
@@ -60,11 +63,13 @@ public abstract class PluginDiscovery extends PluginServiceLoader {
         int batch = 1;
 
         while (true) {
-            this.environment.logger().info("Running plugin locators batch #{} ...", batch);
+            this.environment.logger().info("Running discovery batch #{} ...", batch);
 
             final List<SpongeJVMPluginResource> batchServices = new ArrayList<>();
 
-            for (final PluginResourceLocator locator : this.<PluginResourceLocator>loadServices("resource locator", PluginResourceLocator.class, locatorsFound::add).values()) {
+            readers.addAll(this.loadServices("metadata reader", PluginMetadataReader.class, cl -> readerClasses.add(cl.getName())));
+
+            for (final PluginResourceLocator locator : this.loadServices("resource locator", PluginResourceLocator.class, cl -> locatorClasses.add(cl.getName()))) {
                 final Collection<PluginResourceLocator.Result> results;
                 try {
                     results = locator.locatePluginResources(this.environment);
@@ -79,8 +84,8 @@ public abstract class PluginDiscovery extends PluginServiceLoader {
                     if (candidate == null) {
                         candidate = new Candidate(result.resource(), result.unknownResourceStrategy());
                         candidates.put(result.resource(), candidate);
-                        candidate.detectServices();
-                        if (candidate.locatorFound || candidate.readerFound) {
+                        candidate.detectServices(locatorClasses, readerClasses);
+                        if (candidate.newDiscoveryServiceFound) {
                             batchServices.add((SpongeJVMPluginResource) result.resource());
                         }
                     } else {
@@ -96,7 +101,7 @@ public abstract class PluginDiscovery extends PluginServiceLoader {
             }
 
             if (++batch > maxBatches) {
-                this.environment.logger().warn("Max locator batches reached.");
+                this.environment.logger().warn("Max batches reached.");
                 break;
             }
 
@@ -111,8 +116,6 @@ public abstract class PluginDiscovery extends PluginServiceLoader {
         for (final Candidate candidate : candidates.values()) {
             this.environment.logger().debug("Found {} located by [{}] ({}).", candidate.resource, candidate.locatorNames(), candidate.serviceNames());
         }
-
-        final Collection<PluginMetadataReader> readers = this.loadServices("metadata reader", PluginMetadataReader.class).values();
 
         this.candidates = candidates;
         this.readers = readers;
@@ -150,6 +153,7 @@ public abstract class PluginDiscovery extends PluginServiceLoader {
         private @MonotonicNonNull UnknownResourceStrategy unknownResourceStrategy;
         private final SequencedMap<String, PluginMetadata> metadata = new LinkedHashMap<>();
         private boolean locatorFound, readerFound, loaderFound, modFound;
+        private boolean newDiscoveryServiceFound;
 
         public Candidate(final PluginResource resource, final UnknownResourceStrategy unknownResourceStrategy) {
             this.resource = resource;
@@ -160,12 +164,19 @@ public abstract class PluginDiscovery extends PluginServiceLoader {
             return this.resource;
         }
 
-        private void detectServices() {
+        private void detectServices(final Set<String> existingLocators, final Set<String> existingReaders) {
             if (this.resource instanceof SpongeJVMPluginResource jvmResource) {
-                final Set<String> services = jvmResource.module().provides().stream().map(ModuleDescriptor.Provides::service).collect(Collectors.toSet());
-                this.locatorFound = services.contains(PluginResourceLocator.class.getName());
-                this.readerFound = services.contains(PluginMetadataReader.class.getName());
-                this.loaderFound = services.contains(PluginLoader.class.getName());
+                final Map<String, List<String>> providers = new HashMap<>();
+                for (final ModuleDescriptor.Provides provides : jvmResource.module().provides()) {
+                    providers.put(provides.service(), provides.providers());
+                }
+                final List<String> locators = providers.getOrDefault(PluginResourceLocator.class.getName(), Collections.emptyList());
+                final List<String> readers = providers.getOrDefault(PluginMetadataReader.class.getName(), Collections.emptyList());
+                final List<String> loaders = providers.getOrDefault(PluginLoader.class.getName(), Collections.emptyList());
+                this.locatorFound = !locators.isEmpty();
+                this.readerFound = !readers.isEmpty();
+                this.loaderFound = !loaders.isEmpty();
+                this.newDiscoveryServiceFound = locators.stream().anyMatch(key -> !existingLocators.contains(key)) || readers.stream().anyMatch(key -> !existingReaders.contains(key));
             }
         }
 

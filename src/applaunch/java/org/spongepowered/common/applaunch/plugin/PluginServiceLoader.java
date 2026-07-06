@@ -27,8 +27,8 @@ package org.spongepowered.common.applaunch.plugin;
 import org.spongepowered.plugin.Environment;
 import org.spongepowered.plugin.PluginService;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 import java.util.function.Predicate;
@@ -40,12 +40,12 @@ public abstract class PluginServiceLoader {
         this.environment = environment;
     }
 
-    protected final <T extends PluginService> Map<String, T> loadServices(final String serviceDescription, final Class<T> serviceClass) {
+    protected final <T extends PluginService> List<T> loadServices(final String serviceDescription, final Class<T> serviceClass) {
         return this.loadServices(serviceDescription, serviceClass, c -> true);
     }
 
-    protected final <T extends PluginService> Map<String, T> loadServices(final String serviceDescription, final Class<T> serviceClass, final Predicate<Class<? extends T>> filter) {
-        final Map<String, T> services = new HashMap<>();
+    protected final <T extends PluginService> List<T> loadServices(final String serviceDescription, final Class<T> serviceClass, final Predicate<Class<? extends T>> filter) {
+        final List<T> services = new ArrayList<>();
         this.newServiceLoader(serviceClass).stream()
             .filter(provider -> filter.test(provider.type()))
             .forEach(provider -> {
@@ -58,7 +58,7 @@ public abstract class PluginServiceLoader {
                 }
 
                 this.environment.logger().info("Found {} '{}'.", serviceDescription, service.name());
-                services.put(service.name(), service);
+                services.add(service);
             });
         return services;
     }

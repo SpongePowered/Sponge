@@ -31,16 +31,19 @@ import org.spongepowered.plugin.discovery.PluginResource;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.plugin.metadata.model.PluginLoaderSpecification;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.ServiceLoader;
 
 public final class PluginCandidateFactory extends PluginServiceLoader {
-    private final Map<String, PluginLoader> loaders;
+    private final Map<String, PluginLoader> loaders = new HashMap<>();
 
     public PluginCandidateFactory(final Environment environment) {
         super(environment);
-        this.loaders = this.loadServices("plugin loader", PluginLoader.class);
+        for (final PluginLoader loader : this.loadServices("plugin loader", PluginLoader.class)) {
+            this.loaders.put(loader.name(), loader);
+        }
     }
 
     @Override
