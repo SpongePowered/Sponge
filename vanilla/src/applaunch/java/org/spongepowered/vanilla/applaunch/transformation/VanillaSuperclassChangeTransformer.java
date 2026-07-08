@@ -82,7 +82,7 @@ public class VanillaSuperclassChangeTransformer extends SuperclassChangeTransfor
                     try {
                         resources.add(plugin.locateResource(scPath).get().toURL());
                     } catch (final Exception e) {
-                        LOGGER.warn("Failed to locate superclass changer {} from {}", scPath, plugin.path().getFileName());
+                        LOGGER.warn("Failed to locate superclass changer {} from {}", scPath, plugin);
                     }
                 }
             }

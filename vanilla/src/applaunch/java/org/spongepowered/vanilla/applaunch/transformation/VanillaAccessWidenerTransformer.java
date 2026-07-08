@@ -77,7 +77,7 @@ public class VanillaAccessWidenerTransformer extends AccessWidenerTransformer im
                     try {
                         resources.add(plugin.locateResource(path).get().toURL());
                     } catch (final Exception e) {
-                        LOGGER.warn("Failed to locate access widener {} from {}", path, plugin.path().getFileName(), e);
+                        LOGGER.warn("Failed to locate access widener {} from {}", path, plugin, e);
                     }
                 }
             }

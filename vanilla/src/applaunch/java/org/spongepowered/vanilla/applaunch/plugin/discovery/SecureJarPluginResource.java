@@ -31,13 +31,14 @@ import org.spongepowered.plugin.metadata.PluginMetadata;
 import java.lang.module.ModuleDescriptor;
 import java.net.URI;
 import java.nio.file.Path;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.jar.Manifest;
 
 public final class SecureJarPluginResource implements SpongeJVMPluginResource {
-    private final Path[] paths;
+    private final Path[] pathsArray;
+    private final List<Path> paths;
     private final SecureJar jar;
 
     public SecureJarPluginResource(final Path[] paths) {
@@ -45,7 +46,8 @@ public final class SecureJarPluginResource implements SpongeJVMPluginResource {
         if (paths.length == 0) {
             throw new IllegalArgumentException("Need at least one path");
         }
-        this.paths = paths;
+        this.pathsArray = paths;
+        this.paths = List.of(paths);
         this.jar = SecureJar.from(jar -> new PluginJarMetadata(jar, paths), paths);
     }
 
@@ -54,12 +56,12 @@ public final class SecureJarPluginResource implements SpongeJVMPluginResource {
     }
 
     public SecureJar pluginJar(final PluginMetadata metadata) {
-        return SecureJar.from(jar -> new PluginJarMetadata(jar, metadata), this.paths);
+        return SecureJar.from(jar -> new PluginJarMetadata(jar, metadata), this.pathsArray);
     }
 
     @Override
-    public Path path() {
-        return this.jar.getPrimaryPath();
+    public List<Path> paths() {
+        return this.paths;
     }
 
     @Override
@@ -85,16 +87,16 @@ public final class SecureJarPluginResource implements SpongeJVMPluginResource {
         if (!(obj instanceof SecureJarPluginResource that)) {
             return false;
         }
-        return Arrays.equals(this.paths, that.paths);
+        return this.paths.equals(that.paths);
     }
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(this.paths);
+        return this.paths.hashCode();
     }
 
     @Override
     public String toString() {
-        return "SecureJarPluginResource[paths=" + Arrays.toString(this.paths) + "]";
+        return "SecureJarPluginResource[paths=" + this.paths + "]";
     }
 }

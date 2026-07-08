@@ -40,6 +40,7 @@ import org.spongepowered.vanilla.applaunch.plugin.discovery.SecureJarPluginResou
 import org.spongepowered.vanilla.applaunch.transformation.VanillaAccessWidenerTransformer;
 import org.spongepowered.vanilla.applaunch.transformation.VanillaSuperclassChangeTransformer;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -85,17 +86,16 @@ public final class VanillaTransformationService implements ITransformationServic
                 case GAME_LIBRARY:
                     if (resource instanceof SecureJarPluginResource jarResource) {
                         gameLibs.add(candidate.pluginFound() ? jarResource.pluginJar(candidate.metadata().getFirst()) : jarResource.jar());
-                    }
 
-                    // Offer jar to the Mixin service
-                    if (mixin != null) {
-                        mixin.offerResource(resource.path(), resource.path().getFileName().toString());
-                    }
+                        if (mixin != null) {
+                            final Path path = jarResource.jar().getPrimaryPath();
+                            mixin.offerResource(path, path.getFileName().toString());
 
-                    // Log warning about plugin using Mixin
-                    if (mixin != null && resource.property(org.spongepowered.asm.util.Constants.ManifestAttributes.MIXINCONFIGS).isPresent()) {
-                        if (candidate.metadata().stream().noneMatch(m -> "spongevanilla".equals(m.id()))) {
-                            this.platform.logger().warn("Plugin from {} uses Mixins to modify the Minecraft Server. If something breaks, remove it before reporting the problem to Sponge!", resource.path());
+                            if (resource.property(org.spongepowered.asm.util.Constants.ManifestAttributes.MIXINCONFIGS).isPresent()) {
+                                if (candidate.metadata().stream().noneMatch(m -> "spongevanilla".equals(m.id()))) {
+                                    this.platform.logger().warn("Plugin from {} uses Mixins to modify the Minecraft Server. If something breaks, remove it before reporting the problem to Sponge!", path);
+                                }
+                            }
                         }
                     }
                     break;

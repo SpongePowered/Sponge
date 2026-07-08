@@ -66,11 +66,12 @@ public final class SpongeNeoModLocator implements IModFileCandidateLocator {
         for (final PluginDiscovery.Candidate candidate : this.discovery.candidates()) {
             if (candidate.resource() instanceof JarContentsPluginResource resource) {
                 // skip duplicates
-                if (!context.addLocated(resource.path())) {
+                if (resource.paths().stream().anyMatch(context::isLocated)) {
                     candidate.setModFound();
                     candidate.logResult();
                     continue;
                 }
+                resource.paths().forEach(context::addLocated);
 
                 // attempt to load as mod or plugin
                 IModFile modFile = null;

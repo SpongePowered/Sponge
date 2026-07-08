@@ -50,7 +50,7 @@ public final class MinecraftMetadataReader implements PluginMetadataReader {
     @Override
     public Collection<? extends PluginMetadata> readPluginMetadata(final Environment environment, final PluginResource resource, final List<PluginResourceLocator> locators) throws Exception {
         if (resource instanceof JVMPluginResource && resource.locateResource("net/minecraft/server/MinecraftServer.class").isPresent()) {
-            environment.logger().debug("Container in path '{}' has been detected as Minecraft.", resource.path());
+            environment.logger().debug("{} has been detected as Minecraft.", resource);
 
             final InputStream input = MinecraftMetadataReader.class.getClassLoader().getResourceAsStream("META-INF/minecraft_sponge_plugins.json");
             if (input == null) {

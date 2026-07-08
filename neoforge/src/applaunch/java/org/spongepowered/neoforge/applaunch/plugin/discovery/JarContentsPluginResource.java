@@ -33,13 +33,13 @@ import java.io.UncheckedIOException;
 import java.lang.module.ModuleDescriptor;
 import java.net.URI;
 import java.nio.file.Path;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.jar.Manifest;
 
 public final class JarContentsPluginResource implements SpongeJVMPluginResource {
-    private final Path[] paths;
+    private final List<Path> paths;
     private final JarContents jar;
 
     public JarContentsPluginResource(final Path[] paths) {
@@ -47,9 +47,9 @@ public final class JarContentsPluginResource implements SpongeJVMPluginResource 
         if (paths.length == 0) {
             throw new IllegalArgumentException("Need at least one path");
         }
-        this.paths = paths;
+        this.paths = List.of(paths);
         try {
-            this.jar = JarContents.ofPaths(Arrays.asList(paths));
+            this.jar = JarContents.ofPaths(this.paths);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -57,7 +57,7 @@ public final class JarContentsPluginResource implements SpongeJVMPluginResource 
 
     public JarContentsPluginResource(final JarContents jar) {
         Objects.requireNonNull(jar, "jar");
-        this.paths = jar.getContentRoots().toArray(new Path[0]);
+        this.paths = List.copyOf(jar.getContentRoots());
         this.jar = jar;
     }
 
@@ -66,8 +66,8 @@ public final class JarContentsPluginResource implements SpongeJVMPluginResource 
     }
 
     @Override
-    public Path path() {
-        return this.jar.getPrimaryPath();
+    public List<Path> paths() {
+        return this.paths;
     }
 
     @Override
@@ -93,16 +93,16 @@ public final class JarContentsPluginResource implements SpongeJVMPluginResource 
         if (!(obj instanceof JarContentsPluginResource that)) {
             return false;
         }
-        return Arrays.equals(this.paths, that.paths);
+        return this.paths.equals(that.paths);
     }
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(this.paths);
+        return this.paths.hashCode();
     }
 
     @Override
     public String toString() {
-        return "JarContentsPluginResource[paths=" + Arrays.toString(this.paths) + "]";
+        return "JarContentsPluginResource[paths=" + this.paths + "]";
     }
 }
