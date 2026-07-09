@@ -24,6 +24,7 @@
  */
 package org.spongepowered.neoforge.applaunch.mod.discovery;
 
+import net.neoforged.fml.jarcontents.JarContents;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.fml.loading.moddiscovery.readers.JarModsDotTomlModFileReader;
@@ -62,6 +63,7 @@ public final class SpongeNeoModLocator implements IModFileCandidateLocator {
     @Override
     public void findCandidates(ILaunchContext context, IDiscoveryPipeline pipeline) {
         final ModFileDiscoveryAttributes attributes = ModFileDiscoveryAttributes.DEFAULT.withLocator(this);
+        int virtualJarCount = 0;
 
         for (final PluginDiscovery.Candidate candidate : this.discovery.candidates()) {
             if (candidate.resource() instanceof JarContentsPluginResource resource) {
@@ -99,9 +101,18 @@ public final class SpongeNeoModLocator implements IModFileCandidateLocator {
                 }
 
                 pipeline.addModFile(modFile);
-            }
+            } else {
+                candidate.readMetadata();
+                if (!candidate.pluginFound()) {
+                    candidate.logResult();
+                    continue;
+                }
 
-            // TODO else: Neo can only loads jar mods, do we make a dummy jar?
+                // This jar is only used as an identifier and does not need to actually exist
+                final JarContents jar = JarContents.empty(Path.of("sponge_resource_" + virtualJarCount++));
+
+                pipeline.addModFile(PluginFileReader.newPluginFile(jar, candidate, attributes));
+            }
 
             candidate.logResult();
         }

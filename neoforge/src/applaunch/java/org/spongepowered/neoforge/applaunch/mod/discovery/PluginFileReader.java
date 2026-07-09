@@ -52,16 +52,20 @@ public class PluginFileReader implements IModFileReader {
         if (!candidate.pluginFound()) {
             return null;
         }
-        final PluginFileConfigurable config = new PluginFileConfigurable(resource, candidate.metadata());
-        final ModJarMetadata mjm = new ModJarMetadata();
-        final IModFile modFile = new ModFile(jar, mjm, file -> newModFileInfo(file, config), attributes);
-        mjm.setModFile(modFile);
-        return modFile;
+        return PluginFileReader.newPluginFile(jar, candidate, attributes);
     }
 
     @Override
     public String toString() {
         return "sponge manifest";
+    }
+
+    static IModFile newPluginFile(final JarContents jar, final PluginDiscovery.Candidate candidate, final ModFileDiscoveryAttributes attributes) {
+        final PluginFileConfigurable config = new PluginFileConfigurable(candidate.resource(), candidate.metadata());
+        final ModJarMetadata mjm = new ModJarMetadata();
+        final IModFile modFile = new ModFile(jar, mjm, file -> newModFileInfo(file, config), attributes);
+        mjm.setModFile(modFile);
+        return modFile;
     }
 
     private static IModFileInfo newModFileInfo(final IModFile file, final PluginFileConfigurable config) throws InvalidModFileException {

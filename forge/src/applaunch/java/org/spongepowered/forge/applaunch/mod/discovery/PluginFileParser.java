@@ -37,6 +37,7 @@ import net.minecraftforge.forgespi.locating.IModProvider;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.applaunch.plugin.discovery.PluginDiscovery;
 import org.spongepowered.forge.applaunch.mod.metadata.PluginFileConfigurable;
+import org.spongepowered.forge.applaunch.plugin.discovery.PluginJarMetadata;
 import org.spongepowered.forge.applaunch.plugin.discovery.SecureJarPluginResource;
 
 import java.lang.reflect.Constructor;
@@ -87,11 +88,18 @@ public final class PluginFileParser {
         return data.findFile(PluginFileParser.MODS_TOML).isPresent();
     }
 
-    public static ModFile newPluginFile(final IModProvider provider, final PluginDiscovery.Candidate candidate) {
+    public static ModFile newJarPluginFile(final IModProvider provider, final PluginDiscovery.Candidate candidate) {
         final SecureJarPluginResource resource = (SecureJarPluginResource) candidate.resource();
-        final SecureJar jar = resource.pluginJar(candidate.metadata().getFirst());
-        final PluginFileConfigurable config = new PluginFileConfigurable(resource, candidate.metadata());
+        return PluginFileParser.newPluginFile(provider, candidate, resource.pluginJar(candidate.metadata().getFirst()));
+    }
 
+    public static ModFile newNonJarPluginFile(final IModProvider provider, final PluginDiscovery.Candidate candidate, final Path tempPath) {
+        final SecureJar jar = SecureJar.from(j -> new PluginJarMetadata(j, candidate.metadata().getFirst()), tempPath);
+        return  PluginFileParser.newPluginFile(provider, candidate, jar);
+    }
+
+    private static ModFile newPluginFile(final IModProvider provider, final PluginDiscovery.Candidate candidate, final SecureJar jar) {
+        final PluginFileConfigurable config = new PluginFileConfigurable(candidate.resource(), candidate.metadata());
         return new ModFile(jar, provider, file -> parsePluginFileInfo(file, config), "MOD");
     }
 

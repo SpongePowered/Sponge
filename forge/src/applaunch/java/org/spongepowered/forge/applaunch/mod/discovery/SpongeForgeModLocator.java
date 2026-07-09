@@ -37,12 +37,15 @@ import org.spongepowered.forge.applaunch.plugin.ForgePluginPlatform;
 import org.spongepowered.forge.applaunch.plugin.discovery.ForgePluginDiscovery;
 import org.spongepowered.forge.applaunch.plugin.discovery.SecureJarPluginResource;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
+import java.util.jar.JarOutputStream;
 
 public final class SpongeForgeModLocator extends AbstractModProvider implements IModLocator {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -65,14 +68,17 @@ public final class SpongeForgeModLocator extends AbstractModProvider implements 
 
         final List<ModFileOrException> mods = new ArrayList<>();
 
+        Path virtualDir = null;
+        int virtualJarCount = 0;
+
         for (final PluginDiscovery.Candidate candidate : this.discovery.candidates()) {
+            IModFile modFile;
             if (candidate.resource() instanceof SecureJarPluginResource resource) {
                 candidate.readMetadata();
 
                 // attempt to load as mod or plugin
-                IModFile modFile;
                 if (candidate.pluginFound()) {
-                    modFile = PluginFileParser.newPluginFile(this, candidate);
+                    modFile = PluginFileParser.newJarPluginFile(this, candidate);
                 } else {
                     modFile = PluginFileParser.newModFile(this, resource);
                     if (modFile != null) {
@@ -94,12 +100,33 @@ public final class SpongeForgeModLocator extends AbstractModProvider implements 
                             break;
                     }
                 }
+            } else {
+                candidate.readMetadata();
+                if (!candidate.pluginFound()) {
+                    candidate.logResult();
+                    continue;
+                }
 
-                mods.add(new ModFileOrException(modFile, null));
+                // Forge requires each mod to have an existing file, so we generate one
+                final Path path;
+                try {
+                    if (virtualDir == null) {
+                        virtualDir = Files.createTempDirectory("sponge_resources_");
+                    }
+                    path = virtualDir.resolve(virtualJarCount++ + ".jar");
+
+                    // an empty jar is enough
+                    new JarOutputStream(Files.newOutputStream(path)).close();
+                } catch (IOException e) {
+                    LOGGER.error("Failed to create virtual jar for resource {}", candidate.resource(), e);
+                    continue;
+                }
+
+                LOGGER.debug("Using temporary jar {} for resource {}", path, candidate.resource());
+                modFile = PluginFileParser.newNonJarPluginFile(this, candidate, path);
             }
 
-            // TODO else: Forge can only loads jar mods, do we make a dummy jar?
-
+            mods.add(new ModFileOrException(modFile, null));
             candidate.logResult();
         }
 
