@@ -30,6 +30,7 @@ public final class PluginPlatformConstants {
     }
 
     public static final String METADATA_FILE_PATH = "META-INF/sponge_plugins.json";
+    public static final String TEST_METADATA_FILE_PATH = "META-INF/sponge_test_plugins.json";
     public static final String ENVIRONMENT_LOCATOR_VARIABLE_NAME = "SPONGE_PLUGINS";
 
     public static final boolean IGNORE_FATAL_CONFLICTS = Boolean.getBoolean("sponge.discovery.ignoreFatalConflicts");

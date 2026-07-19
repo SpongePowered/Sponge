@@ -1,0 +1,32 @@
+{
+    "loader": {
+        "name": "java_plain",
+        "version": "1.0"
+    },
+    "license": "MIT",
+    "global": {
+        "version": "{{ apiVersion }}",
+        "links": {
+            "homepage": "https://www.spongepowered.org",
+            "source": "https://www.spongepowered.org/source",
+            "issues": "https://www.spongepowered.org/issues"
+        },
+        "contributors": [
+            {
+                "name": "SpongePowered",
+                "description": "Lead Developer"
+            }
+        ]
+    },
+    "plugins": [
+        {
+            "id": "entrypoint",
+            "description": "Verifies entrypoints are properly called.",
+            "entrypoints": {
+                "main": [
+                    "org.spongepowered.common.plugin.entrypoint.EntrypointPlugin_Main"
+                ]
+            }
+        }
+    ]
+}

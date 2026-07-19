@@ -22,19 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.plugin;
+package org.spongepowered.common.plugin.entrypoint;
 
-import org.spongepowered.common.applaunch.test.TestEnvironment;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public final class TestPlugin extends AbstractMixinConfigPlugin {
-    private final boolean active;
+import org.junit.jupiter.api.Test;
 
-    public TestPlugin() {
-        this.active = TestEnvironment.isActive();
-    }
+public class PluginEntrypointTest {
 
-    @Override
-    public boolean shouldApplyMixin(final String targetClassName, final String mixinClassName) {
-        return this.active;
+    @Test
+    public void verifyMainEntrypoint() {
+        assertEquals(1, EntrypointPlugin_Main.INSTANCES.get());
     }
 }

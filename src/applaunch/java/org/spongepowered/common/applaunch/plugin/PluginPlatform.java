@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.applaunch.plugin;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.config.LaunchConfig;
 import org.spongepowered.common.applaunch.config.TokenReplacement;
 import org.spongepowered.common.applaunch.plugin.discovery.PluginDiscovery;
+import org.spongepowered.common.applaunch.test.TestEnvironment;
 import org.spongepowered.plugin.Environment;
 import org.spongepowered.plugin.blackboard.Blackboard;
 import org.spongepowered.plugin.blackboard.Keys;
@@ -74,11 +76,17 @@ public abstract class PluginPlatform implements JVMPluginResource.Factory {
         }
         this.pluginDirectories = List.of(modsDirectory, additionalPluginsDirectory);
 
+        ImmutableList.Builder<String> metadataFilePaths = ImmutableList.builder();
+        metadataFilePaths.add(PluginPlatformConstants.METADATA_FILE_PATH);
+        if (TestEnvironment.isActive()) {
+            metadataFilePaths.add(PluginPlatformConstants.TEST_METADATA_FILE_PATH);
+        }
+
         final Blackboard blackboard = this.environment.blackboard();
         blackboard.set(Keys.VERSION, version);
         blackboard.set(Keys.BASE_DIRECTORY, baseDirectory);
         blackboard.set(Keys.PLUGIN_DIRECTORIES, this.pluginDirectories);
-        blackboard.set(Keys.METADATA_FILE_PATHS, List.of(PluginPlatformConstants.METADATA_FILE_PATH));
+        blackboard.set(Keys.METADATA_FILE_PATHS, metadataFilePaths.build());
         blackboard.set(JVMKeys.ENVIRONMENT_LOCATOR_VARIABLE_NAME, PluginPlatformConstants.ENVIRONMENT_LOCATOR_VARIABLE_NAME);
         blackboard.set(JVMKeys.JVM_PLUGIN_RESOURCE_FACTORY, this);
     }

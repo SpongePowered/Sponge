@@ -15,6 +15,7 @@ plugins {
     id("implementation-structure")
     id(apiLibs.plugins.ideaExt.get().pluginId)
     alias(libs.plugins.versions)
+    alias(libs.plugins.blossom)
 }
 
 val apiVersion: String by project
@@ -154,6 +155,14 @@ idea {
             addNotNullAssertions = false
             useReleaseOption = true
             parallelCompilation = true
+        }
+    }
+}
+
+sourceSets {
+    test {
+        blossom.resources {
+            property("apiVersion", apiVersion.replace("-SNAPSHOT", ""))
         }
     }
 }

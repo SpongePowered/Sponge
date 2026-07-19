@@ -22,19 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.plugin;
+package org.spongepowered.common.applaunch.test;
 
-import org.spongepowered.common.applaunch.test.TestEnvironment;
+public class TestEnvironment {
 
-public final class TestPlugin extends AbstractMixinConfigPlugin {
-    private final boolean active;
-
-    public TestPlugin() {
-        this.active = TestEnvironment.isActive();
-    }
-
-    @Override
-    public boolean shouldApplyMixin(final String targetClassName, final String mixinClassName) {
-        return this.active;
+    public static boolean isActive() {
+        return "true".equals(System.getProperty("sponge.test.active"));
     }
 }
