@@ -26,8 +26,8 @@ package org.spongepowered.vanilla.launch.plugin.resolver;
 
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.util.Tuple;
+import org.spongepowered.common.applaunch.plugin.VersionChecker;
 import org.spongepowered.common.launch.plugin.loader.PluginCandidate;
-import org.spongepowered.common.launch.plugin.loader.VersionChecker;
 import org.spongepowered.plugin.metadata.model.PluginDependency;
 
 import java.util.ArrayList;

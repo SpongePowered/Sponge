@@ -22,11 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.neoforge.launch.plugin;
+package org.spongepowered.forge.applaunch.plugin.metadata;
 
-import net.neoforged.fml.loading.moddiscovery.ModInfo;
-import net.neoforged.neoforgespi.language.IModFileInfo;
-import net.neoforged.neoforgespi.language.IModInfo;
+import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
+import net.minecraftforge.forgespi.language.IModFileInfo;
+import net.minecraftforge.forgespi.language.IModInfo;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.spongepowered.plugin.metadata.PluginMetadata;
@@ -53,36 +53,38 @@ public final class PluginMetadataConverter {
         }
     }
 
-    public static PluginMetadata modToPlugin(final ModInfo info) {
+    @SuppressWarnings("UnstableApiUsage")
+    public static PluginMetadata modToPlugin(final IModInfo info) {
         final List<IModFileInfo.LanguageSpec> loaders = info.getOwningFile().requiredLanguageLoaders();
         final PluginLoaderSpecification loaderSpec;
         if (loaders.isEmpty()) {
-            loaderSpec = new PluginLoaderSpecification("neoforge", PluginMetadataConverter.ANY_VERSION);
+            loaderSpec = new PluginLoaderSpecification("forge", PluginMetadataConverter.ANY_VERSION);
         } else {
             final VersionRange loaderVersion = loaders.getFirst().acceptedVersions();
-            loaderSpec = new PluginLoaderSpecification("neoforge:" + loaders.getFirst().languageName(), loaderVersion == null ? PluginMetadataConverter.ANY_VERSION : loaderVersion);
+            loaderSpec = new PluginLoaderSpecification("forge:" + loaders.getFirst().languageName(), loaderVersion == null ? PluginMetadataConverter.ANY_VERSION : loaderVersion);
         }
 
-        final InheritableMetadata.Builder builder = InheritableMetadata.builder();
-        builder
+        final InheritableMetadata.Builder builder = InheritableMetadata.builder()
             .name(info.getDisplayName())
             .version(info.getVersion())
             .loader(loaderSpec)
             .description(info.getDescription())
-            .addContributor(new PluginContributor(info.getConfigElement("authors").orElse("unknown").toString(), Optional.empty()))
             .properties(info.getModProperties());
 
-        try {
-            final URL issueURL = info.getOwningFile().getIssueURL();
-            builder.links(new PluginLinks(null, null, issueURL == null ? null : issueURL.toURI()));
-        } catch (URISyntaxException ignored) {}
+        if (info instanceof ModInfo modInfo) {
+            builder.addContributor(new PluginContributor(modInfo.getConfigElement("authors").orElse("unknown").toString(), Optional.empty()));
+            try {
+                final URL issueURL = modInfo.getOwningFile().getIssueURL();
+                builder.links(new PluginLinks(null, null, issueURL == null ? null : issueURL.toURI()));
+            } catch (URISyntaxException ignored) {}
+        }
 
         for (final IModInfo.ModVersion dependency : info.getDependencies()) {
             builder.addDependency(new PluginDependency(
                 dependency.getModId(),
                 dependency.getVersionRange(),
                 PluginMetadataConverter.orderingToLoad(dependency.getOrdering()),
-                false
+                !dependency.isMandatory()
             ));
         }
 

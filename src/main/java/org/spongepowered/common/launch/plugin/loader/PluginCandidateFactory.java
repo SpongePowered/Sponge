@@ -25,6 +25,7 @@
 package org.spongepowered.common.launch.plugin.loader;
 
 import org.spongepowered.common.applaunch.plugin.PluginServiceLoader;
+import org.spongepowered.common.applaunch.plugin.VersionChecker;
 import org.spongepowered.plugin.Environment;
 import org.spongepowered.plugin.PluginLoader;
 import org.spongepowered.plugin.discovery.PluginResource;

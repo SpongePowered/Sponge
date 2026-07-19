@@ -33,11 +33,15 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.forge.applaunch.mod.discovery.library.Log4JLogger;
+import org.spongepowered.forge.applaunch.plugin.metadata.PluginMetadataConverter;
 import org.spongepowered.libs.LibraryManager;
+import org.spongepowered.plugin.metadata.PluginMetadata;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class SpongeForgeDependencyLocator extends AbstractModProvider implements IDependencyLocator {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -45,6 +49,14 @@ public class SpongeForgeDependencyLocator extends AbstractModProvider implements
     @Override
     public List<IModFile> scanMods(final Iterable<IModFile> loadedMods) {
         final List<IModFile> modFiles = new ArrayList<>();
+
+        final Stream<PluginMetadata> allMetadata = StreamSupport.stream(loadedMods.spliterator(), false)
+            .flatMap(file -> file.getModInfos().stream())
+            .map(info -> info.getConfig().<PluginMetadata>getConfigElement("spongeMetadata").orElseGet(() -> PluginMetadataConverter.modToPlugin(info)));
+
+        if (AppLaunch.pluginPlatform().discovery().checkConflicts(allMetadata)) {
+            throw new IllegalStateException("Fatal plugin conflicts have been detected.");
+        }
 
         // Add Sponge-specific libraries
         if (FMLEnvironment.production) {

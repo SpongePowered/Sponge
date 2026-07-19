@@ -27,9 +27,9 @@ package org.spongepowered.neoforge.launch.plugin;
 import com.google.common.collect.MapMaker;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.jarcontents.JarContents;
-import net.neoforged.fml.loading.moddiscovery.ModInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.neoforge.applaunch.plugin.metadata.PluginMetadataConverter;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 
@@ -53,7 +53,7 @@ public class NeoPluginContainer implements PluginContainer {
     @Override
     public PluginMetadata metadata() {
         if (this.pluginMetadata == null) {
-            this.pluginMetadata = PluginMetadataConverter.modToPlugin((ModInfo) this.modContainer.getModInfo());
+            this.pluginMetadata = PluginMetadataConverter.modToPlugin(this.modContainer.getModInfo());
         }
         return this.pluginMetadata;
     }

@@ -26,10 +26,10 @@ package org.spongepowered.forge.launch.plugin;
 
 import com.google.common.collect.MapMaker;
 import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import net.minecraftforge.forgespi.locating.IModFile;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.forge.applaunch.plugin.metadata.PluginMetadataConverter;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 
@@ -40,7 +40,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-@SuppressWarnings("UnstableApiUsage")
 public class ForgePluginContainer implements PluginContainer {
     private final ModContainer modContainer;
     private final IModFile modFile;
@@ -56,7 +55,7 @@ public class ForgePluginContainer implements PluginContainer {
     @Override
     public PluginMetadata metadata() {
         if (this.pluginMetadata == null) {
-            this.pluginMetadata = PluginMetadataConverter.modToPlugin((ModInfo) this.modContainer.getModInfo());
+            this.pluginMetadata = PluginMetadataConverter.modToPlugin(this.modContainer.getModInfo());
         }
         return this.pluginMetadata;
     }

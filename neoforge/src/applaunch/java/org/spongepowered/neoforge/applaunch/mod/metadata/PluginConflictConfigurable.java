@@ -26,19 +26,20 @@ package org.spongepowered.neoforge.applaunch.mod.metadata;
 
 import net.neoforged.neoforgespi.language.IConfigurable;
 import net.neoforged.neoforgespi.language.IModInfo;
-import org.spongepowered.plugin.metadata.model.PluginDependency;
+import org.spongepowered.common.applaunch.plugin.PluginPlatformConstants;
+import org.spongepowered.plugin.metadata.model.PluginConflict;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 // ModVersion
-public final class PluginDependencyConfigurable implements IConfigurable {
+public final class PluginConflictConfigurable implements IConfigurable {
 
-    private final PluginDependency dependency;
+    private final PluginConflict conflict;
 
-    public PluginDependencyConfigurable(final PluginDependency dependency) {
-        this.dependency = dependency;
+    public PluginConflictConfigurable(final PluginConflict conflict) {
+        this.conflict = conflict;
     }
 
     @SuppressWarnings("unchecked")
@@ -49,10 +50,10 @@ public final class PluginDependencyConfigurable implements IConfigurable {
         }
 
         return switch (key[0]) {
-            case "modId" -> (Optional<T>) Optional.of(this.dependency.id());
-            case "type" -> (Optional<T>) Optional.of(PluginDependencyConfigurable.optionalToDependencyType(this.dependency.optional()).toString());
-            case "versionRange" -> (Optional<T>) Optional.of(this.dependency.version().toString());
-            case "ordering" -> (Optional<T>) Optional.of(PluginDependencyConfigurable.loadToOrdering(this.dependency.loadOrder()).toString());
+            case "modId" -> (Optional<T>) Optional.of(this.conflict.id());
+            case "type" -> (Optional<T>) Optional.of(PluginConflictConfigurable.fatalToDependencyType(this.conflict.fatal()).toString());
+            case "versionRange" -> (Optional<T>) Optional.of(this.conflict.version().toString());
+            case "reason" -> (Optional<T>) this.conflict.reason();
             case "side" -> (Optional<T>) Optional.of(IModInfo.DependencySide.BOTH.toString());
             default -> Optional.empty();
         };
@@ -63,15 +64,7 @@ public final class PluginDependencyConfigurable implements IConfigurable {
         return Collections.emptyList();
     }
 
-    private static IModInfo.Ordering loadToOrdering(final PluginDependency.LoadOrder order) {
-        return switch (order) {
-            case UNDEFINED -> IModInfo.Ordering.NONE;
-            case BEFORE -> IModInfo.Ordering.BEFORE;
-            case AFTER -> IModInfo.Ordering.AFTER;
-        };
-    }
-
-    private static IModInfo.DependencyType optionalToDependencyType(final boolean optional) {
-        return optional ? IModInfo.DependencyType.OPTIONAL : IModInfo.DependencyType.REQUIRED;
+    private static IModInfo.DependencyType fatalToDependencyType(final boolean fatal) {
+        return fatal && !PluginPlatformConstants.IGNORE_FATAL_CONFLICTS ? IModInfo.DependencyType.INCOMPATIBLE : IModInfo.DependencyType.DISCOURAGED;
     }
 }

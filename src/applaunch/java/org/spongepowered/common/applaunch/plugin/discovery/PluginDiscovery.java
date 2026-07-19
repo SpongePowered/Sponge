@@ -25,17 +25,22 @@
 package org.spongepowered.common.applaunch.plugin.discovery;
 
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.common.applaunch.plugin.PluginPlatformConstants;
 import org.spongepowered.common.applaunch.plugin.PluginServiceLoader;
+import org.spongepowered.common.applaunch.plugin.VersionChecker;
 import org.spongepowered.plugin.Environment;
 import org.spongepowered.plugin.PluginLoader;
 import org.spongepowered.plugin.PluginService;
 import org.spongepowered.plugin.discovery.*;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.plugin.metadata.builtin.MetadataParser;
+import org.spongepowered.plugin.metadata.model.PluginConflict;
 
 import java.lang.module.ModuleDescriptor;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class PluginDiscovery extends PluginServiceLoader {
     private Map<PluginResource, Candidate> candidates;
@@ -145,6 +150,34 @@ public abstract class PluginDiscovery extends PluginServiceLoader {
         for (final String warning : MetadataParser.warnings()) {
             this.environment.logger().warn(warning);
         }
+    }
+
+    public final boolean checkConflicts() {
+        return this.checkConflicts(this.candidates.values().stream().flatMap(c -> c.metadata.values().stream()));
+    }
+
+    public final boolean checkConflicts(final Stream<PluginMetadata> allMetadata) {
+        final Map<String, PluginMetadata> map = new LinkedHashMap<>();
+        allMetadata.forEachOrdered(m -> map.put(m.id(), m));
+
+        boolean anyFatal = false;
+        for (final PluginMetadata metadata : map.values()) {
+            for (final PluginConflict conflict : metadata.conflicts()) {
+                final @Nullable PluginMetadata target = map.get(conflict.id());
+                if (target != null && VersionChecker.check(conflict.version(), target.version())) {
+                    if (conflict.fatal() && !PluginPlatformConstants.IGNORE_FATAL_CONFLICTS) {
+                        this.environment.logger().fatal("Plugin {}={} is fatally conflicting with {}={} in range {}. Reason: {}",
+                            metadata.id(), metadata.version(), target.id(), target.version(), conflict.version(), conflict.reason().orElse("?"));
+                        anyFatal = true;
+                    } else {
+                        this.environment.logger().warn("Plugin {}={} is conflicting with {}={} in range {}. Reason: {}",
+                            metadata.id(), metadata.version(), target.id(), target.version(), conflict.version(), conflict.reason().orElse("?"));
+                    }
+                }
+            }
+        }
+
+        return anyFatal;
     }
 
     public final class Candidate {

@@ -52,7 +52,7 @@ public final class PluginDependencyConfigurable implements IConfigurable {
             case "modId" -> (Optional<T>) Optional.of(this.dependency.id());
             case "mandatory" -> (Optional<T>) Optional.of(!this.dependency.optional());
             case "versionRange" -> (Optional<T>) Optional.of(this.dependency.version().toString());
-            case "ordering" -> (Optional<T>) Optional.of(this.loadToOrdering(this.dependency.loadOrder()).toString());
+            case "ordering" -> (Optional<T>) Optional.of(PluginDependencyConfigurable.loadToOrdering(this.dependency.loadOrder()).toString());
             case "side" -> (Optional<T>) Optional.of(IModInfo.DependencySide.BOTH.toString());
             default -> Optional.empty();
         };
@@ -63,7 +63,7 @@ public final class PluginDependencyConfigurable implements IConfigurable {
         return Collections.emptyList();
     }
 
-    private IModInfo.Ordering loadToOrdering(final PluginDependency.LoadOrder order) {
+    private static IModInfo.Ordering loadToOrdering(final PluginDependency.LoadOrder order) {
         return switch (order) {
             case UNDEFINED -> IModInfo.Ordering.NONE;
             case BEFORE -> IModInfo.Ordering.BEFORE;

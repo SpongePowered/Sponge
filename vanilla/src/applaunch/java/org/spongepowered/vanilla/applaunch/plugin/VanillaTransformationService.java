@@ -106,6 +106,10 @@ public final class VanillaTransformationService implements ITransformationServic
 
         this.platform.discovery().logMetadataWarnings();
 
+        if (this.platform.discovery().checkConflicts()) {
+            throw new IllegalStateException("Fatal plugin conflicts have been detected.");
+        }
+
         return List.of(new Resource(IModuleLayerManager.Layer.PLUGIN, libs), new Resource(IModuleLayerManager.Layer.GAME, gameLibs));
     }
 

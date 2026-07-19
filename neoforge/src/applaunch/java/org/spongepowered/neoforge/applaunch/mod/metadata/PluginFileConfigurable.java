@@ -30,6 +30,7 @@ import org.spongepowered.plugin.metadata.PluginMetadata;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 // ModFileInfo
 public final class PluginFileConfigurable implements IConfigurable {
@@ -123,7 +124,10 @@ public final class PluginFileConfigurable implements IConfigurable {
         }
 
         if ("dependencies".equals(query)) {
-            return metadata.dependencies().stream().map(PluginDependencyConfigurable::new).toList();
+            return Stream.concat(
+                metadata.dependencies().stream().map(PluginDependencyConfigurable::new),
+                metadata.conflicts().stream().map(PluginConflictConfigurable::new)
+            ).toList();
         }
 
         return Collections.emptyList();
