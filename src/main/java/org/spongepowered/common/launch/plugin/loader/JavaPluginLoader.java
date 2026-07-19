@@ -29,7 +29,6 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.common.inject.plugin.PluginGuice;
-import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.plugin.SpongePluginContainer;
 import org.spongepowered.plugin.*;
 import org.spongepowered.plugin.discovery.PluginResource;
@@ -60,7 +59,7 @@ public final class JavaPluginLoader implements PluginLoader {
             pluginClasses.add(Class.forName(className));
         }
 
-        final Injector pluginInjector = PluginGuice.create(container, pluginClasses, Launch.instance().lifecycle().platformInjector());
+        final Injector pluginInjector = PluginGuice.create(container, pluginClasses);
         container.setInjector(pluginInjector);
 
         for (final Class<?> pluginClass : pluginClasses) {

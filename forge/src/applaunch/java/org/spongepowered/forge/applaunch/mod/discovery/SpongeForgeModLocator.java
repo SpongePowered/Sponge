@@ -24,8 +24,6 @@
  */
 package org.spongepowered.forge.applaunch.mod.discovery;
 
-import com.google.common.collect.ImmutableMap;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.forgespi.locating.IModFile;
 import net.minecraftforge.forgespi.locating.IModLocator;
 import org.apache.logging.log4j.LogManager;
@@ -38,10 +36,6 @@ import org.spongepowered.forge.applaunch.plugin.discovery.ForgePluginDiscovery;
 import org.spongepowered.forge.applaunch.plugin.discovery.SecureJarPluginResource;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -131,33 +125,6 @@ public final class SpongeForgeModLocator extends AbstractModProvider implements 
         }
 
         this.discovery.logMetadataWarnings();
-
-        if (!FMLEnvironment.production) {
-            return mods;
-        }
-
-        try {
-            URL rootJar = SpongeForgeModLocator.class.getProtectionDomain().getCodeSource().getLocation();
-            FileSystem fs = FileSystems.getFileSystem(rootJar.toURI()); // FML has already opened a file system for this jar
-            Files.list(fs.getPath("jars"))
-                .filter(path -> path.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".jar"))
-                .map(path -> {
-                    try {
-                        URI jij = new URI("jij:" + path.toAbsolutePath().toUri().getRawSchemeSpecificPart()).normalize();
-                        final Map<String, ?> env = ImmutableMap.of("packagePath", path);
-                        FileSystem jijFS = FileSystems.newFileSystem(jij, env);
-                        return jijFS.getPath("/"); // root of the archive to load
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .map((path) -> PluginFileParser.newModFile(this, path))
-                .filter(Objects::nonNull)
-                .map((modFile -> new ModFileOrException(modFile, null)))
-                .forEach(mods::add);
-        } catch (Exception e) {
-            LOGGER.error("Failed to scan embedded mod candidates", e);
-        }
 
         return mods;
     }

@@ -25,6 +25,7 @@
 package org.spongepowered.common.launch;
 
 import com.google.inject.Injector;
+import com.google.inject.Module;
 import com.google.inject.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -39,6 +40,7 @@ import org.spongepowered.plugin.PluginContainer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public abstract class Launch {
 
@@ -166,4 +168,8 @@ public abstract class Launch {
     }
 
     public abstract Injector createInjector();
+
+    public Optional<Module> modModule(final PluginContainer plugin) {
+        return Optional.empty();
+    }
 }

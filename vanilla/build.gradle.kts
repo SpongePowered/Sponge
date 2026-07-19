@@ -319,8 +319,9 @@ appLaunch.apply {
 main.apply {
     blossom.resources {
         property("apiVersion", apiVersion)
-        property("minecraftVersion", minecraftVersion)
         property("version", version.toString())
+        property("description", description.toString())
+        property("minecraftVersion", minecraftVersion)
     }
 }
 installer.apply {

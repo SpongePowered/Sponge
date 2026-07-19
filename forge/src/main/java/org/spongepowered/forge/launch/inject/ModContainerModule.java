@@ -22,10 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge;
+package org.spongepowered.forge.launch.inject;
 
-import net.minecraftforge.fml.common.Mod;
+import com.google.inject.PrivateModule;
+import net.minecraftforge.eventbus.api.bus.BusGroup;
+import net.minecraftforge.fml.ModContainer;
 
-@Mod("sponge")
-public class SpongeMod {
+public final class ModContainerModule extends PrivateModule {
+    private final ModContainer modContainer;
+
+    public ModContainerModule(final ModContainer modContainer) {
+        this.modContainer = modContainer;
+    }
+
+    @Override
+    protected void configure() {
+        this.bind(ModContainer.class).toInstance(this.modContainer);
+        this.bind(BusGroup.class).toInstance(this.modContainer.getModBusGroup());
+    }
 }

@@ -128,6 +128,11 @@ public final class PluginModContainer extends ModContainer {
         return this.container.instance();
     }
 
+    @Override
+    public BusGroup getModBusGroup() {
+        return this.busGroup;
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     protected <T extends IModBusEvent> void acceptEvent(final T e) {

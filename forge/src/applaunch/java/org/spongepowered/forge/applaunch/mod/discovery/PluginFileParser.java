@@ -24,7 +24,6 @@
  */
 package org.spongepowered.forge.applaunch.mod.discovery;
 
-import cpw.mods.jarhandling.JarMetadata;
 import cpw.mods.jarhandling.SecureJar;
 import net.minecraftforge.fml.loading.moddiscovery.AbstractModProvider;
 import net.minecraftforge.fml.loading.moddiscovery.ModFile;
@@ -106,12 +105,6 @@ public final class PluginFileParser {
     public static @Nullable ModFile newModFile(final IModProvider provider, SecureJarPluginResource resource) {
         final ModJarMetadata mjm = newModJarMetadata();
         final SecureJar jar = PluginFileParser.useModJarMetadata(resource.jar()) ? resource.modJar(mjm) : resource.jar();
-        return PluginFileParser.newModFile(provider, mjm, jar);
-    }
-
-    public static @Nullable ModFile newModFile(final IModProvider provider, final Path... paths) {
-        final ModJarMetadata mjm = newModJarMetadata();
-        final SecureJar jar = SecureJar.from(j -> PluginFileParser.useModJarMetadata(j) ? mjm : JarMetadata.from(j, paths), paths);
         return PluginFileParser.newModFile(provider, mjm, jar);
     }
 

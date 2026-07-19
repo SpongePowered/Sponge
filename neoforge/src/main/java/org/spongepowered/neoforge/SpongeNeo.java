@@ -24,10 +24,10 @@
  */
 package org.spongepowered.neoforge;
 
+import com.google.inject.Inject;
 import net.minecraft.client.Minecraft;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
@@ -50,13 +50,15 @@ import org.spongepowered.neoforge.hook.NeoEventHooks;
 import org.spongepowered.neoforge.hook.NeoGeneralHooks;
 import org.spongepowered.neoforge.hook.NeoItemHooks;
 import org.spongepowered.neoforge.hook.NeoWorldHooks;
+import org.spongepowered.plugin.builtin.jvm.Plugin;
 
-@Mod("spongeneo")
-public final class SpongeNeoMod {
+@Plugin("spongeneo")
+public final class SpongeNeo {
 
     private final Logger logger = LogManager.getLogger("spongeneo");
 
-    public SpongeNeoMod(IEventBus modBus) {
+    @Inject
+    public SpongeNeo(IEventBus modBus) {
         // modBus: add all FML events with it
         modBus.addListener(this::onCommonSetup);
         modBus.addListener(this::onClientSetup);

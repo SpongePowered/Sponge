@@ -19,14 +19,15 @@
     },
     "plugins": [
         {
-            "id": "spongevanilla",
-            "name": "SpongeVanilla",
+            "id": "spongeforge",
+            "name": "SpongeForge",
             "version": "{{ version }}",
+            "entrypoints": ["org.spongepowered.forge.SpongeForge"],
             "description": "{{ description }}",
             "dependencies": [
                 {
-                    "id": "minecraft",
-                    "version": "{{ minecraftVersion }}"
+                    "id": "forge",
+                    "version": "[{{ forgeVersion }},)"
                 },
                 {
                     "id": "sponge",

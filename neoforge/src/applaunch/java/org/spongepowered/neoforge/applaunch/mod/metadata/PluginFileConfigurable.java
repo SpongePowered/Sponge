@@ -70,6 +70,17 @@ public final class PluginFileConfigurable implements IConfigurable {
             return Optional.of((T) (joinedLicenses.isEmpty() ? "?" : joinedLicenses));
         }
 
+        if ("lithium:options".equals(query)) {
+            return this.resource.property("LithiumOptions").map(value -> {
+                final Map<String, Boolean> map = new HashMap<>();
+                for (final String entry : value.split(",")) {
+                    final int i = entry.indexOf('=');
+                    map.put(entry.substring(0, i), Boolean.valueOf(entry.substring(i + 1)));
+                }
+                return (T) map;
+            });
+        }
+
         if (key.length == 2) {
             final String plugin = key[1];
             final PluginMetadata metadata = this.plugins.get(plugin);

@@ -19,18 +19,27 @@
     },
     "plugins": [
         {
-            "id": "spongevanilla",
-            "name": "SpongeVanilla",
+            "id": "spongeneo",
+            "name": "SpongeNeo",
             "version": "{{ version }}",
+            "entrypoints": ["org.spongepowered.neoforge.SpongeNeo"],
             "description": "{{ description }}",
             "dependencies": [
                 {
-                    "id": "minecraft",
-                    "version": "{{ minecraftVersion }}"
+                    "id": "neoforge",
+                    "version": "[{{ neoForgeVersion }},)"
                 },
                 {
                     "id": "sponge",
                     "version": "{{ version }}"
+                }
+            ],
+            "conflicts": [
+                {
+                    "id": "adventure_platform_neoforge",
+                    "version": "*",
+                    "fatal": true,
+                    "reason": "SpongeNeo provides its own implementation of Adventure"
                 }
             ]
         },

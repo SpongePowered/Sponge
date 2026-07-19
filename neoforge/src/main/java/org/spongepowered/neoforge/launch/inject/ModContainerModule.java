@@ -22,10 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.neoforge;
+package org.spongepowered.neoforge.launch.inject;
 
-import net.neoforged.fml.common.Mod;
+import com.google.inject.PrivateModule;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
 
-@Mod("sponge")
-public class SpongeMod {
+public final class ModContainerModule extends PrivateModule {
+    private final ModContainer modContainer;
+
+    public ModContainerModule(final ModContainer modContainer) {
+        this.modContainer = modContainer;
+    }
+
+    @Override
+    protected void configure() {
+        this.bind(ModContainer.class).toInstance(this.modContainer);
+        this.bind(IEventBus.class).toInstance(this.modContainer.getEventBus());
+    }
 }

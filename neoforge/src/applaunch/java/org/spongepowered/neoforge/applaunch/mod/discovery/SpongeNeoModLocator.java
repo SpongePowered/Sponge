@@ -25,34 +25,21 @@
 package org.spongepowered.neoforge.applaunch.mod.discovery;
 
 import net.neoforged.fml.jarcontents.JarContents;
-import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.fml.loading.moddiscovery.readers.JarModsDotTomlModFileReader;
 import net.neoforged.neoforgespi.ILaunchContext;
 import net.neoforged.neoforgespi.locating.IDiscoveryPipeline;
 import net.neoforged.neoforgespi.locating.IModFile;
 import net.neoforged.neoforgespi.locating.IModFileCandidateLocator;
-import net.neoforged.neoforgespi.locating.IncompatibleFileReporting;
 import net.neoforged.neoforgespi.locating.ModFileDiscoveryAttributes;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.common.applaunch.plugin.discovery.PluginDiscovery;
 import org.spongepowered.neoforge.applaunch.plugin.NeoPluginPlatform;
 import org.spongepowered.neoforge.applaunch.plugin.discovery.JarContentsPluginResource;
 import org.spongepowered.neoforge.applaunch.plugin.discovery.NeoPluginDiscovery;
 
-import java.net.URI;
-import java.net.URL;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
 
 public final class SpongeNeoModLocator implements IModFileCandidateLocator {
-    private static final Logger LOGGER = LogManager.getLogger();
-
     private final NeoPluginDiscovery discovery;
 
     public SpongeNeoModLocator() {
@@ -118,39 +105,6 @@ public final class SpongeNeoModLocator implements IModFileCandidateLocator {
         }
 
         this.discovery.logMetadataWarnings();
-
-        if (!FMLEnvironment.isProduction()) {
-            return;
-        }
-
-        // Official JiJ cannot be used in a service jar. We have to reimplement it.
-        // FML 10 only supports files directly on disk, so we must extract them.
-        try {
-            final URL rootJar = SpongeNeoModLocator.class.getProtectionDomain().getCodeSource().getLocation();
-            final Path cacheDir = FMLPaths.JIJ_CACHEDIR.get();
-
-            try (final FileSystem fs = FileSystems.newFileSystem(new URI("jar:" + rootJar), Map.of())) {
-                final Path jarsDir = fs.getPath("jars");
-
-                // Difference with the official JiJ: our checksums are precalculated, to avoid unnecessary IO.
-                for (final String line : Files.readAllLines(jarsDir.resolve("checksums.txt"))) {
-                    final int i = line.indexOf(' ');
-                    final String digest = line.substring(0, i), name = line.substring(i + 1);
-                    final Path target = cacheDir.resolve(digest).resolve(name);
-
-                    // FML does not verify the cached file checksum, so neither do we.
-                    // The checksum is only there to distinguish different files.
-                    if (!Files.exists(target)) {
-                        Files.createDirectories(target.getParent());
-                        Files.copy(jarsDir.resolve(name), target);
-                    }
-
-                    pipeline.addPath(target, attributes, IncompatibleFileReporting.WARN_ALWAYS);
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.error("Failed to register embedded mod candidates", e);
-        }
     }
 
     @Override

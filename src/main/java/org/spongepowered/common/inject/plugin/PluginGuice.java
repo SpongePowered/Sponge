@@ -24,20 +24,25 @@
  */
 package org.spongepowered.common.inject.plugin;
 
-import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
 public final class PluginGuice {
 
-    public static Injector create(final PluginContainer container, final Collection<Class<?>> pluginClasses, final @Nullable Injector platformInjector) {
-        final List<Module> modules = new ArrayList<>(List.of(new PublicPluginModule(container), new PrivatePluginModule(container, pluginClasses)));
+    public static Injector create(final PluginContainer container, final Collection<Class<?>> pluginClasses) {
+        final List<Module> modules = new LinkedList<>();
+        modules.add(new PublicPluginModule(container));
+        modules.add(new PrivatePluginModule(container, pluginClasses));
+
+        final Launch launch = Launch.instance();
+        launch.modModule(container).ifPresent(modules::add);
 
         final @Nullable Object customModule = container.metadata().property("guice-module").orElse(null);
         if (customModule != null) {
@@ -51,11 +56,6 @@ public final class PluginGuice {
         }
 
         final Module module = new PriorityOverrideModule(modules);
-
-        if (platformInjector != null) {
-            return platformInjector.createChildInjector(module);
-        } else {
-            return Guice.createInjector(module);
-        }
+        return launch.lifecycle().platformInjector().createChildInjector(module);
     }
 }
