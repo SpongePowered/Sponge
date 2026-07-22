@@ -24,8 +24,6 @@
  */
 package org.spongepowered.forge.applaunch.plugin;
 
-import cpw.mods.modlauncher.Launcher;
-import cpw.mods.modlauncher.api.IEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.forge.applaunch.plugin.discovery.ForgePluginDiscovery;
@@ -45,10 +43,6 @@ public final class ForgePluginPlatform extends PluginPlatform {
         this.discovery = new ForgePluginDiscovery(this.environment());
     }
 
-    @Override
-    public String version() {
-        return Launcher.INSTANCE.environment().getProperty(IEnvironment.Keys.VERSION.get()).orElse("dev");
-    }
     @Override
     public boolean vanilla() {
         return false;

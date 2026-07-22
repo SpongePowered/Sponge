@@ -28,7 +28,6 @@ import cpw.mods.modlauncher.Launcher;
 import cpw.mods.modlauncher.api.IEnvironment;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
-import org.spongepowered.plugin.builtin.StandardEnvironment;
 import org.spongepowered.plugin.builtin.jvm.JVMPluginResource;
 import org.spongepowered.vanilla.applaunch.plugin.discovery.SecureJarPluginResource;
 import org.spongepowered.vanilla.applaunch.plugin.discovery.VanillaPluginDiscovery;
@@ -46,12 +45,6 @@ public final class VanillaPluginPlatform extends PluginPlatform {
 
     public VanillaPluginPlatform() {
         this.discovery = new VanillaPluginDiscovery(this.environment());
-    }
-
-    @Override
-    public String version() {
-        final String implVersion = StandardEnvironment.class.getPackage().getImplementationVersion();
-        return implVersion == null ? "dev" : implVersion;
     }
 
     @Override

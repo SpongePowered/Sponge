@@ -68,6 +68,10 @@ val applaunch by sourceSets.registering {
     configurations.named(implementationConfigurationName) {
         extendsFrom(serviceLayerConfig.get())
     }
+
+    blossom.javaSources {
+        property("pluginSpiVersion", apiLibs.pluginSpi.get().version)
+    }
 }
 
 // Game layer

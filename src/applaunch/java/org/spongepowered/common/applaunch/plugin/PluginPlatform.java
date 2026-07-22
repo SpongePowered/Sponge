@@ -55,8 +55,7 @@ public abstract class PluginPlatform implements JVMPluginResource.Factory {
     public PluginPlatform() {
         this.environment = new StandardEnvironment(PluginPlatform.LOGGER);
 
-        final String version = this.version();
-        this.logger().info("SpongePowered PLUGIN Subsystem Version={} Source={}", version, this.getCodeSource());
+        this.logger().info("SpongePowered PLUGIN Subsystem Version={} Source={}", PluginPlatformConstants.SPI_VERSION, this.getCodeSource());
 
         final Path baseDirectory = this.baseDirectory();
         final Path modsDirectory = this.modsDirectory();
@@ -83,7 +82,7 @@ public abstract class PluginPlatform implements JVMPluginResource.Factory {
         }
 
         final Blackboard blackboard = this.environment.blackboard();
-        blackboard.set(Keys.VERSION, version);
+        blackboard.set(Keys.VERSION, PluginPlatformConstants.SPI_VERSION);
         blackboard.set(Keys.BASE_DIRECTORY, baseDirectory);
         blackboard.set(Keys.PLUGIN_DIRECTORIES, this.pluginDirectories);
         blackboard.set(Keys.METADATA_FILE_PATHS, metadataFilePaths.build());
@@ -94,8 +93,6 @@ public abstract class PluginPlatform implements JVMPluginResource.Factory {
     public final Logger logger() {
         return PluginPlatform.LOGGER;
     }
-
-    public abstract String version();
 
     protected String getCodeSource() {
         try {

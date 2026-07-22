@@ -29,6 +29,8 @@ public final class PluginPlatformConstants {
     private PluginPlatformConstants() {
     }
 
+    public static final String SPI_VERSION = "{{ pluginSpiVersion }}";
+
     public static final String METADATA_FILE_PATH = "META-INF/sponge_plugins.json";
     public static final String TEST_METADATA_FILE_PATH = "META-INF/sponge_test_plugins.json";
     public static final String ENVIRONMENT_LOCATOR_VARIABLE_NAME = "SPONGE_PLUGINS";

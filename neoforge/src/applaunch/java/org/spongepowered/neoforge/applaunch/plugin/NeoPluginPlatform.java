@@ -26,7 +26,6 @@ package org.spongepowered.neoforge.applaunch.plugin;
 
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.FMLPaths;
-import net.neoforged.neoforge.common.NeoForgeVersion;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.neoforge.applaunch.plugin.discovery.JarContentsPluginResource;
 import org.spongepowered.neoforge.applaunch.plugin.discovery.NeoPluginDiscovery;
@@ -39,12 +38,6 @@ public final class NeoPluginPlatform extends PluginPlatform {
 
     public NeoPluginPlatform() {
         this.discovery = new NeoPluginDiscovery(this.environment());
-    }
-
-    @SuppressWarnings("UnstableApiUsage")
-    @Override
-    public String version() {
-        return NeoForgeVersion.getVersion();
     }
 
     @Override
