@@ -71,10 +71,10 @@ public final class ArmorItemStackData {
                                 .map(e -> (EntityType<?>) (Object) e)
                                 .collect(Collectors.toSet());
                         })
-                        .set((h, v) -> {
+                        .setAnd((h, v) -> {
                             final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
                             if (equippable == null) {
-                                return;
+                                return false;
                             }
                             final HolderSet<net.minecraft.world.entity.EntityType<?>> holderSet = HolderSet.direct(
                                 e -> BuiltInRegistries.ENTITY_TYPE.wrapAsHolder((net.minecraft.world.entity.EntityType<?>) (Object) e),
@@ -93,8 +93,10 @@ public final class ArmorItemStackData {
                                 equippable.canBeSheared(),
                                 equippable.shearingSound()
                             ));
+
+                            return true;
                         })
-                        .delete(h -> {
+                        .deleteAnd(h -> {
                             final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
                             if (equippable != null) {
                                 h.set(DataComponents.EQUIPPABLE, new Equippable(
@@ -110,7 +112,11 @@ public final class ArmorItemStackData {
                                     equippable.canBeSheared(),
                                     equippable.shearingSound()
                                 ));
+
+                                return true;
                             }
+
+                            return false;
                         })
                     .create(Keys.ARMOR_MATERIAL)
                         .get(h -> {
@@ -124,10 +130,10 @@ public final class ArmorItemStackData {
                                 .map(RegistryEntry::value)
                                 .orElse(null);
                         })
-                        .set((h, v) -> {
+                        .setAnd((h, v) -> {
                             final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
                             if (equippable == null) {
-                                return;
+                                return false;
                             }
                             final ResourceKey key = RegistryTypes.ARMOR_MATERIAL.get().valueKey(v);
                             final Optional<net.minecraft.resources.ResourceKey<EquipmentAsset>> assetId =
@@ -145,8 +151,10 @@ public final class ArmorItemStackData {
                                 equippable.canBeSheared(),
                                 equippable.shearingSound()
                             ));
+
+                            return true;
                         })
-                        .delete(h -> {
+                        .deleteAnd(h -> {
                             final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
                             if (equippable != null) {
                                 h.set(DataComponents.EQUIPPABLE, new Equippable(
@@ -162,7 +170,11 @@ public final class ArmorItemStackData {
                                     equippable.canBeSheared(),
                                     equippable.shearingSound()
                                 ));
+
+                                return true;
                             }
+
+                            return false;
                         })
                     .create(Keys.ARMOR_TRIM)
                         .get(h -> {
@@ -188,10 +200,10 @@ public final class ArmorItemStackData {
                             }
                             return (ResourceKey) (Object) equippable.cameraOverlay().get();
                         })
-                        .set((h, v) -> {
+                        .setAnd((h, v) -> {
                             final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
                             if (equippable == null) {
-                                return;
+                                return false;
                             }
                             h.set(DataComponents.EQUIPPABLE, new Equippable(
                                 equippable.slot(),
@@ -206,8 +218,10 @@ public final class ArmorItemStackData {
                                 equippable.canBeSheared(),
                                 equippable.shearingSound()
                             ));
+
+                            return true;
                         })
-                        .delete(h -> {
+                        .deleteAnd(h -> {
                             final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
                             if (equippable != null) {
                                 h.set(DataComponents.EQUIPPABLE, new Equippable(
@@ -223,7 +237,11 @@ public final class ArmorItemStackData {
                                     equippable.canBeSheared(),
                                     equippable.shearingSound()
                                 ));
+
+                                return true;
                             }
+
+                            return false;
                         })
                     .create(Keys.CAN_BE_SHEARED)
                         .get(h -> {
@@ -233,10 +251,10 @@ public final class ArmorItemStackData {
                             }
                             return equippable.canBeSheared();
                         })
-                        .set((h, v) -> {
+                        .setAnd((h, v) -> {
                             final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
                             if (equippable == null) {
-                                return;
+                                return false;
                             }
                             h.set(DataComponents.EQUIPPABLE, new Equippable(
                                 equippable.slot(),
@@ -251,6 +269,8 @@ public final class ArmorItemStackData {
                                 v,
                                 equippable.shearingSound()
                             ));
+
+                            return true;
                         })
                     .create(Keys.DAMAGE_ABSORPTION)
                         .get(h -> {
@@ -272,10 +292,10 @@ public final class ArmorItemStackData {
                             }
                             return equippable.damageOnHurt();
                         })
-                        .set((h, v) -> {
+                        .setAnd((h, v) -> {
                             final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
                             if (equippable == null) {
-                                return;
+                                return false;
                             }
                             h.set(DataComponents.EQUIPPABLE, new Equippable(
                                 equippable.slot(),
@@ -290,6 +310,8 @@ public final class ArmorItemStackData {
                                 equippable.canBeSheared(),
                                 equippable.shearingSound()
                             ));
+
+                            return true;
                         })
                     .create(Keys.EQUIP_ON_INTERACT)
                         .get(h -> {
@@ -299,10 +321,10 @@ public final class ArmorItemStackData {
                             }
                             return equippable.equipOnInteract();
                         })
-                        .set((h, v) -> {
+                        .setAnd((h, v) -> {
                             final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
                             if (equippable == null) {
-                                return;
+                                return false;
                             }
                             h.set(DataComponents.EQUIPPABLE, new Equippable(
                                 equippable.slot(),
@@ -317,6 +339,8 @@ public final class ArmorItemStackData {
                                 equippable.canBeSheared(),
                                 equippable.shearingSound()
                             ));
+
+                            return true;
                         })
                     .create(Keys.EQUIP_SOUND)
                         .get(h -> {
@@ -326,10 +350,10 @@ public final class ArmorItemStackData {
                             }
                             return (SoundType) (Object) equippable.equipSound().value();
                         })
-                        .set((h, v) -> {
+                        .setAnd((h, v) -> {
                             final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
                             if (equippable == null) {
-                                return;
+                                return false;
                             }
                             h.set(DataComponents.EQUIPPABLE, new Equippable(
                                 equippable.slot(),
@@ -344,6 +368,8 @@ public final class ArmorItemStackData {
                                 equippable.canBeSheared(),
                                 equippable.shearingSound()
                             ));
+
+                            return true;
                         })
                     .create(Keys.EQUIPMENT_TYPE)
                         .get(h -> {
@@ -383,10 +409,10 @@ public final class ArmorItemStackData {
                             }
                             return equippable.dispensable();
                         })
-                        .set((h, v) -> {
+                        .setAnd((h, v) -> {
                             final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
                             if (equippable == null) {
-                                return;
+                                return false;
                             }
                             h.set(DataComponents.EQUIPPABLE, new Equippable(
                                 equippable.slot(),
@@ -401,6 +427,8 @@ public final class ArmorItemStackData {
                                 equippable.canBeSheared(),
                                 equippable.shearingSound()
                             ));
+
+                            return true;
                         })
                     .create(Keys.IS_SWAPPABLE)
                         .get(h -> {
@@ -410,10 +438,10 @@ public final class ArmorItemStackData {
                             }
                             return equippable.swappable();
                         })
-                        .set((h, v) -> {
+                        .setAnd((h, v) -> {
                             final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
                             if (equippable == null) {
-                                return;
+                                return false;
                             }
                             h.set(DataComponents.EQUIPPABLE, new Equippable(
                                 equippable.slot(),
@@ -428,6 +456,8 @@ public final class ArmorItemStackData {
                                 equippable.canBeSheared(),
                                 equippable.shearingSound()
                             ));
+
+                            return true;
                         })
                     .create(Keys.SHEARING_SOUND)
                         .get(h -> {
@@ -437,10 +467,10 @@ public final class ArmorItemStackData {
                             }
                             return (SoundType) (Object) equippable.shearingSound().value();
                         })
-                        .set((h, v) -> {
+                        .setAnd((h, v) -> {
                             final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
                             if (equippable == null) {
-                                return;
+                                return false;
                             }
                             h.set(DataComponents.EQUIPPABLE, new Equippable(
                                 equippable.slot(),
@@ -455,6 +485,8 @@ public final class ArmorItemStackData {
                                 equippable.canBeSheared(),
                                 Holder.direct((SoundEvent) (Object) v)
                             ));
+
+                            return true;
                         });
     }
     // @formatter:on
