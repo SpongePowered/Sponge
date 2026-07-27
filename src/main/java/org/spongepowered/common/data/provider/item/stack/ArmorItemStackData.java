@@ -37,7 +37,6 @@ import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.equipment.EquipmentAsset;
 import net.minecraft.world.item.equipment.EquipmentAssets;
 import net.minecraft.world.item.equipment.Equippable;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Keys;
@@ -50,7 +49,6 @@ import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public final class ArmorItemStackData {
@@ -178,7 +176,6 @@ public final class ArmorItemStackData {
                             h.set(DataComponents.TRIM, (net.minecraft.world.item.equipment.trim.ArmorTrim) (Object) v);
                         })
                         .delete(h -> h.remove(DataComponents.TRIM))
-                        .supports(isArmorItem())
                     .create(Keys.CAMERA_OVERLAY)
                         .get(h -> {
                             final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
@@ -257,7 +254,6 @@ public final class ArmorItemStackData {
                                 .map(e -> e.modifier().amount())
                                 .orElse(null);
                         })
-                        .supports(isArmorItem())
                     .create(Keys.DAMAGE_ON_HURT)
                         .get(h -> {
                             final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
@@ -430,18 +426,4 @@ public final class ArmorItemStackData {
     }
     // @formatter:on
 
-    private static @NonNull Function<ItemStack, Boolean> isArmorItem() {
-        return h -> {
-            final var components = h.getItem().components();
-            final @Nullable Integer stackSize = components.get(DataComponents.MAX_STACK_SIZE);
-            if (stackSize == null) {
-                return false;
-            }
-            return components.has(DataComponents.EQUIPPABLE)
-                   && components.has(DataComponents.ENCHANTABLE)
-                   && components.has(DataComponents.MAX_DAMAGE)
-                   && components.has(DataComponents.MAX_STACK_SIZE)
-                   && (1 == stackSize);
-        };
-    }
 }
