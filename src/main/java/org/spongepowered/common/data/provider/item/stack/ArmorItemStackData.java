@@ -68,7 +68,7 @@ public final class ArmorItemStackData {
                             }
                             return equippable.allowedEntities().get().stream()
                                 .map(Holder::value)
-                                .map(e -> (EntityType<?>) (Object) e)
+                                .map(e -> (EntityType<?>) e)
                                 .collect(Collectors.toSet());
                         })
                         .setAnd((h, v) -> {
