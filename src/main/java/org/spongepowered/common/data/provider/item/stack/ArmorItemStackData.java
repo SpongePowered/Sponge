@@ -53,8 +53,6 @@ import java.util.stream.Collectors;
 
 public final class ArmorItemStackData {
 
-    private static final Equippable EQUIPPABLE_DEFAULTS = Equippable.builder(EquipmentSlot.CHEST).build();
-
     private ArmorItemStackData() {
     }
 
@@ -74,7 +72,10 @@ public final class ArmorItemStackData {
                                 .collect(Collectors.toSet());
                         })
                         .set((h, v) -> {
-                            final @Nullable Equippable equippable = h.getOrDefault(DataComponents.EQUIPPABLE, EQUIPPABLE_DEFAULTS);
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return;
+                            }
                             final HolderSet<net.minecraft.world.entity.EntityType<?>> holderSet = HolderSet.direct(
                                 e -> BuiltInRegistries.ENTITY_TYPE.wrapAsHolder((net.minecraft.world.entity.EntityType<?>) (Object) e),
                                 v.stream().map(e -> (net.minecraft.world.entity.EntityType<?>) (Object) e).toList()
@@ -124,7 +125,10 @@ public final class ArmorItemStackData {
                                 .orElse(null);
                         })
                         .set((h, v) -> {
-                            final @Nullable Equippable equippable = h.getOrDefault(DataComponents.EQUIPPABLE, EQUIPPABLE_DEFAULTS);
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return;
+                            }
                             final ResourceKey key = RegistryTypes.ARMOR_MATERIAL.get().valueKey(v);
                             final Optional<net.minecraft.resources.ResourceKey<EquipmentAsset>> assetId =
                                 Optional.of(net.minecraft.resources.ResourceKey.create(EquipmentAssets.ROOT_ID, (Identifier) (Object) key));
@@ -185,7 +189,10 @@ public final class ArmorItemStackData {
                             return (ResourceKey) (Object) equippable.cameraOverlay().get();
                         })
                         .set((h, v) -> {
-                            final @Nullable Equippable equippable = h.getOrDefault(DataComponents.EQUIPPABLE, EQUIPPABLE_DEFAULTS);
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return;
+                            }
                             h.set(DataComponents.EQUIPPABLE, new Equippable(
                                 equippable.slot(),
                                 equippable.equipSound(),
@@ -227,7 +234,10 @@ public final class ArmorItemStackData {
                             return equippable.canBeSheared();
                         })
                         .set((h, v) -> {
-                            final @Nullable Equippable equippable = h.getOrDefault(DataComponents.EQUIPPABLE, EQUIPPABLE_DEFAULTS);
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return;
+                            }
                             h.set(DataComponents.EQUIPPABLE, new Equippable(
                                 equippable.slot(),
                                 equippable.equipSound(),
@@ -263,7 +273,10 @@ public final class ArmorItemStackData {
                             return equippable.damageOnHurt();
                         })
                         .set((h, v) -> {
-                            final @Nullable Equippable equippable = h.getOrDefault(DataComponents.EQUIPPABLE, EQUIPPABLE_DEFAULTS);
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return;
+                            }
                             h.set(DataComponents.EQUIPPABLE, new Equippable(
                                 equippable.slot(),
                                 equippable.equipSound(),
@@ -287,7 +300,10 @@ public final class ArmorItemStackData {
                             return equippable.equipOnInteract();
                         })
                         .set((h, v) -> {
-                            final @Nullable Equippable equippable = h.getOrDefault(DataComponents.EQUIPPABLE, EQUIPPABLE_DEFAULTS);
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return;
+                            }
                             h.set(DataComponents.EQUIPPABLE, new Equippable(
                                 equippable.slot(),
                                 equippable.equipSound(),
@@ -311,7 +327,10 @@ public final class ArmorItemStackData {
                             return (SoundType) (Object) equippable.equipSound().value();
                         })
                         .set((h, v) -> {
-                            final @Nullable Equippable equippable = h.getOrDefault(DataComponents.EQUIPPABLE, EQUIPPABLE_DEFAULTS);
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return;
+                            }
                             h.set(DataComponents.EQUIPPABLE, new Equippable(
                                 equippable.slot(),
                                 Holder.direct((SoundEvent) (Object) v),
@@ -335,9 +354,14 @@ public final class ArmorItemStackData {
                             return (EquipmentType) (Object) equippable.slot();
                         })
                         .set((h, v) -> {
-                            final @Nullable Equippable equippable = h.getOrDefault(DataComponents.EQUIPPABLE, EQUIPPABLE_DEFAULTS);
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            final EquipmentSlot slot = (EquipmentSlot) (Object) v;
+                            if (equippable == null) {
+                                h.set(DataComponents.EQUIPPABLE, Equippable.builder(slot).build());
+                                return;
+                            }
                             h.set(DataComponents.EQUIPPABLE, new Equippable(
-                                (EquipmentSlot) (Object) v,
+                                slot,
                                 equippable.equipSound(),
                                 equippable.assetId(),
                                 equippable.cameraOverlay(),
@@ -360,7 +384,10 @@ public final class ArmorItemStackData {
                             return equippable.dispensable();
                         })
                         .set((h, v) -> {
-                            final @Nullable Equippable equippable = h.getOrDefault(DataComponents.EQUIPPABLE, EQUIPPABLE_DEFAULTS);
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return;
+                            }
                             h.set(DataComponents.EQUIPPABLE, new Equippable(
                                 equippable.slot(),
                                 equippable.equipSound(),
@@ -384,7 +411,10 @@ public final class ArmorItemStackData {
                             return equippable.swappable();
                         })
                         .set((h, v) -> {
-                            final @Nullable Equippable equippable = h.getOrDefault(DataComponents.EQUIPPABLE, EQUIPPABLE_DEFAULTS);
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return;
+                            }
                             h.set(DataComponents.EQUIPPABLE, new Equippable(
                                 equippable.slot(),
                                 equippable.equipSound(),
@@ -408,7 +438,10 @@ public final class ArmorItemStackData {
                             return (SoundType) (Object) equippable.shearingSound().value();
                         })
                         .set((h, v) -> {
-                            final @Nullable Equippable equippable = h.getOrDefault(DataComponents.EQUIPPABLE, EQUIPPABLE_DEFAULTS);
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return;
+                            }
                             h.set(DataComponents.EQUIPPABLE, new Equippable(
                                 equippable.slot(),
                                 equippable.equipSound(),
