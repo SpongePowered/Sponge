@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.ResourceKeyed;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.Keys;
@@ -37,9 +38,11 @@ import org.spongepowered.api.data.type.ShieldDamageReduction;
 import org.spongepowered.api.data.type.ShieldItemDamageFunction;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.effect.sound.SoundTypes;
+import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.tag.DamageTypeTags;
 import org.spongepowered.api.util.Ticks;
 
@@ -68,7 +71,17 @@ public class KeysTest {
                 .minAttackDamage(2.5)
                 .build())),
             Arguments.of(Keys.SHIELD_BLOCK_SOUND, SoundTypes.ENTITY_SHULKER_HURT.get()),
-            Arguments.of(Keys.SHIELD_DISABLE_SOUND, SoundTypes.ENTITY_ENDER_DRAGON_DEATH.get())
+            Arguments.of(Keys.SHIELD_DISABLE_SOUND, SoundTypes.ENTITY_ENDER_DRAGON_DEATH.get()),
+            Arguments.of(Keys.ALLOWED_ENTITIES, Set.of(EntityTypes.PLAYER.get(), EntityTypes.ZOMBIE.get())),
+            Arguments.of(Keys.CAMERA_OVERLAY, ResourceKey.minecraft("textures/misc/pumpkinblur.png")),
+            Arguments.of(Keys.CAN_BE_SHEARED, true),
+            Arguments.of(Keys.DAMAGE_ON_HURT, false),
+            Arguments.of(Keys.EQUIP_ON_INTERACT, true),
+            Arguments.of(Keys.EQUIP_SOUND, SoundTypes.ITEM_ARMOR_EQUIP_DIAMOND.get()),
+            Arguments.of(Keys.EQUIPMENT_TYPE, EquipmentTypes.HEAD.get()),
+            Arguments.of(Keys.IS_DISPENSABLE, false),
+            Arguments.of(Keys.IS_SWAPPABLE, false),
+            Arguments.of(Keys.SHEARING_SOUND, SoundTypes.ENTITY_SHEEP_SHEAR.get())
         );
     }
 
