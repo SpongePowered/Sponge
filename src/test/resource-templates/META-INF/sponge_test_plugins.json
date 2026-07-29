@@ -25,6 +25,9 @@
             "entrypoints": {
                 "main": [
                     "org.spongepowered.common.plugin.entrypoint.EntrypointPlugin_Main"
+                ],
+                "server": [
+                    "org.spongepowered.common.plugin.entrypoint.EntrypointPlugin_Server"
                 ]
             }
         }

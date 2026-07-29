@@ -24,18 +24,14 @@
  */
 package org.spongepowered.common.launch.plugin.loader;
 
-import com.google.inject.Injector;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.common.inject.plugin.PluginGuice;
 import org.spongepowered.common.launch.plugin.SpongePluginContainer;
-import org.spongepowered.plugin.*;
+import org.spongepowered.plugin.Environment;
+import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.plugin.PluginLoader;
 import org.spongepowered.plugin.discovery.PluginResource;
 import org.spongepowered.plugin.metadata.PluginMetadata;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public final class JavaPluginLoader implements PluginLoader {
     private static final ArtifactVersion version = new DefaultArtifactVersion("1.0");
@@ -53,21 +49,7 @@ public final class JavaPluginLoader implements PluginLoader {
     @Override
     public PluginContainer loadPlugin(Environment environment, PluginResource resource, PluginMetadata metadata) throws Exception {
         final SpongePluginContainer container = new SpongePluginContainer(resource, metadata);
-
-        final List<Class<?>> pluginClasses = new ArrayList<>();
-        for (final String className : container.metadata().entrypoints().main()) {
-            pluginClasses.add(Class.forName(className));
-        }
-
-        final Injector pluginInjector = PluginGuice.create(container, pluginClasses);
-        container.setInjector(pluginInjector);
-
-        for (final Class<?> pluginClass : pluginClasses) {
-            final Object plugin = pluginInjector.getInstance(pluginClass);
-            container.setInstanceIfMissing(plugin);
-            Sponge.eventManager().registerListeners(container, plugin);
-        }
-
+        container.loadMainEntrypoints();
         return container;
     }
 }

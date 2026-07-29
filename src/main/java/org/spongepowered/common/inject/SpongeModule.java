@@ -25,6 +25,9 @@
 package org.spongepowered.common.inject;
 
 import com.google.inject.AbstractModule;
+import org.spongepowered.api.Client;
+import org.spongepowered.api.Server;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.inject.provider.ConfigDirAnnotation;
 
@@ -35,6 +38,8 @@ public final class SpongeModule extends AbstractModule {
     @Override
     protected void configure() {
         this.bind(Path.class).annotatedWith(ConfigDirAnnotation.SHARED).toInstance(SpongeCommon.pluginConfigDirectory());
-    }
 
+        this.bind(Server.class).toProvider(Sponge::server);
+        this.bind(Client.class).toProvider(Sponge::client);
+    }
 }

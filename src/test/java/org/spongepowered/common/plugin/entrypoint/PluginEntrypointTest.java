@@ -32,6 +32,13 @@ public class PluginEntrypointTest {
 
     @Test
     public void verifyMainEntrypoint() {
-        assertEquals(1, EntrypointPlugin_Main.INSTANCES.get());
+        assertEquals(1, EntrypointPlugin_Main.INSTANCES_COUNT.get());
+        EntrypointPlugin_Main.INSTANCE.get().test();
+    }
+
+    @Test
+    public void verifyServerEntrypoint() {
+        assertEquals(1, EntrypointPlugin_Server.INSTANCES_COUNT.get());
+        EntrypointPlugin_Server.INSTANCE.get().test();
     }
 }

@@ -39,6 +39,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Client;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
@@ -47,6 +48,7 @@ import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryRoots;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.common.bridge.core.WritableRegistryBridge;
 import org.spongepowered.common.bridge.server.packs.resources.ResourceManagerBridge;
 import org.spongepowered.common.data.SpongeDataManager;
@@ -61,6 +63,7 @@ import org.spongepowered.common.event.lifecycle.RegisterTagEventImpl;
 import org.spongepowered.common.event.manager.SpongeEventManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Lifecycle;
+import org.spongepowered.common.launch.plugin.SpongePluginContainer;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
 import org.spongepowered.common.profile.SpongeGameProfileManager;
 import org.spongepowered.common.registry.SpongeBuilderProvider;
@@ -258,6 +261,17 @@ public final class SpongeLifecycle implements Lifecycle {
 
     @Override
     public void callStartingEngineEvent(final Engine engine) {
+        final boolean server = engine instanceof Server;
+        for (final PluginContainer container : this.game.pluginManager().plugins()) {
+            if (container instanceof SpongePluginContainer spongeContainer) {
+                try {
+                    spongeContainer.loadSidedEntrypoints(server);
+                } catch (final Exception e) {
+                    PluginPlatform.LOGGER.error("Failed to load {} sided entrypoints of plugin {}", server ? "server" : "client", container.metadata().id(), e);
+                }
+            }
+        }
+
         this.game.eventManager().post(SpongeEventFactory.createStartingEngineEvent(PhaseTracker.getInstance().currentCause(),
                 engine, this.game, (TypeToken<Engine>) TypeToken.get(engine.getClass())));
     }

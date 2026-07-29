@@ -22,30 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.plugin.entrypoint;
+package org.spongepowered.common.inject.plugin;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import com.google.inject.PrivateModule;
+import com.google.inject.Scopes;
 
-import com.google.inject.Inject;
-import org.spongepowered.api.Game;
-import org.spongepowered.api.Sponge;
+import java.util.Collection;
 
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
-public class EntrypointPlugin_Main {
-    public static final AtomicInteger INSTANCES_COUNT = new AtomicInteger();
-    public static final AtomicReference<EntrypointPlugin_Main> INSTANCE = new AtomicReference<>();
+/**
+ * A private module installed for each plugin.
+ * Contains the entrypoint classes.
+ */
+public final class PluginEntrypointModule extends PrivateModule {
 
-    @Inject
-    private Game game;
+    private final Collection<Class<?>> pluginClasses;
 
-    public EntrypointPlugin_Main() {
-        EntrypointPlugin_Main.INSTANCES_COUNT.incrementAndGet();
-        EntrypointPlugin_Main.INSTANCE.set(this);
+    PluginEntrypointModule(final Collection<Class<?>> pluginClasses) {
+        this.pluginClasses = pluginClasses;
     }
 
-    public void test() {
-        assertEquals(Sponge.game(), this.game);
+    @Override
+    protected void configure() {
+        for (final Class<?> pluginClass : this.pluginClasses) {
+            this.bind(pluginClass).in(Scopes.SINGLETON);
+            this.expose(pluginClass);
+        }
     }
+
 }

@@ -28,24 +28,29 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.inject.Inject;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class EntrypointPlugin_Main {
+public class EntrypointPlugin_Server {
     public static final AtomicInteger INSTANCES_COUNT = new AtomicInteger();
-    public static final AtomicReference<EntrypointPlugin_Main> INSTANCE = new AtomicReference<>();
+    public static final AtomicReference<EntrypointPlugin_Server> INSTANCE = new AtomicReference<>();
 
     @Inject
     private Game game;
 
-    public EntrypointPlugin_Main() {
-        EntrypointPlugin_Main.INSTANCES_COUNT.incrementAndGet();
-        EntrypointPlugin_Main.INSTANCE.set(this);
+    @Inject
+    private Server server;
+
+    public EntrypointPlugin_Server() {
+        EntrypointPlugin_Server.INSTANCES_COUNT.incrementAndGet();
+        EntrypointPlugin_Server.INSTANCE.set(this);
     }
 
     public void test() {
         assertEquals(Sponge.game(), this.game);
+        assertEquals(Sponge.server(), this.server);
     }
 }

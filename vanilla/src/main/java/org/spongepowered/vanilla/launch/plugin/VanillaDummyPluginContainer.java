@@ -34,4 +34,10 @@ public final class VanillaDummyPluginContainer extends SpongePluginContainer imp
     public VanillaDummyPluginContainer(final PluginResource resource, final PluginMetadata metadata) {
         super(resource, metadata);
     }
+
+    @Override
+    public void loadMainEntrypoints() {}
+
+    @Override
+    public void loadSidedEntrypoints(boolean server) {}
 }

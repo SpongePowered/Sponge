@@ -28,7 +28,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.common.launch.plugin.SpongePluginContainer;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -36,10 +36,11 @@ import java.util.List;
 
 public final class PluginGuice {
 
-    public static Injector create(final PluginContainer container, final Collection<Class<?>> pluginClasses) {
+    public static Injector createMain(final SpongePluginContainer container, final Collection<Class<?>> pluginClasses) {
         final List<Module> modules = new LinkedList<>();
-        modules.add(new PublicPluginModule(container));
-        modules.add(new PrivatePluginModule(container, pluginClasses));
+        modules.add(new PluginDependencyModule(container));
+        modules.add(new PluginEntrypointModule(pluginClasses));
+        modules.add(new PrivatePluginModule(container));
 
         final Launch launch = Launch.instance();
         launch.modModule(container).ifPresent(modules::add);
@@ -55,7 +56,10 @@ public final class PluginGuice {
             }
         }
 
-        final Module module = new PriorityOverrideModule(modules);
-        return launch.lifecycle().platformInjector().createChildInjector(module);
+        return launch.lifecycle().platformInjector().createChildInjector(new PriorityOverrideModule(modules));
+    }
+
+    public static Injector createChild(final SpongePluginContainer container, final Collection<Class<?>> pluginClasses) {
+        return container.injector().get().createChildInjector(new PluginEntrypointModule(pluginClasses));
     }
 }

@@ -26,6 +26,7 @@ package org.spongepowered.common.inject.plugin;
 
 import com.google.inject.AbstractModule;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.common.launch.plugin.SpongePluginContainer;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.model.PluginDependency;
@@ -35,36 +36,39 @@ import org.spongepowered.plugin.metadata.model.PluginDependency;
  * Contains the values that are publicly visible and shared
  * across dependencies.
  */
-public final class PublicPluginModule extends AbstractModule {
+public final class PluginDependencyModule extends AbstractModule {
 
     private final PluginContainer container;
 
-    PublicPluginModule(final PluginContainer container) {
+    PluginDependencyModule(final PluginContainer container) {
         this.container = container;
     }
 
     @Override
     protected void configure() {
         final BindingHelper bindingHelper = new BindingHelper(this.binder().withSource(BindingHelper.class));
+        final PluginManager manager = Sponge.pluginManager();
+
         for (final PluginDependency dependency : this.container.metadata().dependencies()) {
             if (dependency.loadOrder() != PluginDependency.LoadOrder.AFTER) {
                 continue;
             }
 
-            Sponge.pluginManager().plugin(dependency.id())
-                .flatMap(p -> ((SpongePluginContainer) p).injector())
-                .ifPresent(bindingHelper::bindFrom);
+            if (manager.plugin(dependency.id()).orElse(null) instanceof SpongePluginContainer spongeContainer) {
+                spongeContainer.injector().ifPresent(bindingHelper::bindFrom);
+            }
         }
 
         // Indirect dependencies
-        Sponge.pluginManager()
-            .plugins()
-            .stream()
-            .filter(p -> p.metadata().dependency(this.container.metadata().id())
-                .map(PluginDependency::loadOrder)
-                .orElse(PluginDependency.LoadOrder.UNDEFINED) == PluginDependency.LoadOrder.BEFORE)
-            .flatMap(p -> ((SpongePluginContainer) p).injector().stream())
-            .forEach(bindingHelper::bindFrom);
+        for (final PluginContainer other : manager.plugins()) {
+            if (other.metadata().dependency(this.container.metadata().id()).map(PluginDependency::loadOrder).orElse(PluginDependency.LoadOrder.UNDEFINED) != PluginDependency.LoadOrder.BEFORE) {
+                continue;
+            }
+
+            if (other instanceof SpongePluginContainer spongeContainer) {
+                spongeContainer.injector().ifPresent(bindingHelper::bindFrom);
+            }
+        }
 
         bindingHelper.bind();
     }
