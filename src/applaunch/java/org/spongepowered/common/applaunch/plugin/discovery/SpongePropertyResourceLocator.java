@@ -27,7 +27,6 @@ package org.spongepowered.common.applaunch.plugin.discovery;
 import org.spongepowered.plugin.Environment;
 import org.spongepowered.plugin.builtin.jvm.JVMPluginResource;
 import org.spongepowered.plugin.discovery.PluginResourceLocator;
-import org.spongepowered.plugin.discovery.ResourceLoading;
 import org.spongepowered.plugin.discovery.UnknownResourceStrategy;
 
 import java.io.File;
@@ -49,7 +48,7 @@ public final class SpongePropertyResourceLocator implements PluginResourceLocato
         final Set<Result> resources = new HashSet<>();
         final String resourcesProp = System.getProperty("sponge.resources");
         if (resourcesProp != null) {
-            final UnknownResourceStrategy strategy = new UnknownResourceStrategy(false, ResourceLoading.GAME_LIBRARY);
+            final UnknownResourceStrategy strategy = new UnknownResourceStrategy(false, true);
 
             for (final String entry : resourcesProp.split(File.pathSeparator)) {
                 if (entry.isBlank()) {

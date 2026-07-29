@@ -81,18 +81,12 @@ public final class SpongeForgeModLocator extends AbstractModProvider implements 
                 }
 
                 if (modFile == null) {
-                    // determine fallback type
-                    switch (candidate.loading()) {
-                        case IGNORED:
-                            candidate.logResult();
-                            continue;
-                        case LIBRARY:
-                            modFile = PluginFileParser.newLibraryFile(this, false, resource.jar());
-                            break;
-                        case GAME_LIBRARY:
-                            modFile = PluginFileParser.newLibraryFile(this, true, resource.jar());
-                            break;
+                    // fallback
+                    if (!candidate.gameResource()) {
+                        candidate.logResult();
+                        continue;
                     }
+                    modFile = PluginFileParser.newGameLibraryFile(this, resource.jar());
                 }
             } else {
                 candidate.readMetadata();

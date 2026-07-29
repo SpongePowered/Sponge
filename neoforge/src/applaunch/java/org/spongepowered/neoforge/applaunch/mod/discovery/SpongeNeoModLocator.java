@@ -69,20 +69,12 @@ public final class SpongeNeoModLocator implements IModFileCandidateLocator {
                 } catch (Exception ignored) {}
 
                 if (modFile == null) {
-                    // determine fallback type
-                    IModFile.Type type = null;
-                    switch (candidate.loading()) {
-                        case IGNORED:
-                            candidate.logResult();
-                            continue;
-                        case LIBRARY:
-                            type = IModFile.Type.LIBRARY;
-                            break;
-                        case GAME_LIBRARY:
-                            type = IModFile.Type.GAMELIBRARY;
-                            break;
+                    // fallback
+                    if (!candidate.gameResource()) {
+                        candidate.logResult();
+                        continue;
                     }
-                    modFile = IModFile.create(resource.jar(), JarModsDotTomlModFileReader::manifestParser, type, attributes);
+                    modFile = IModFile.create(resource.jar(), JarModsDotTomlModFileReader::manifestParser, IModFile.Type.GAMELIBRARY, attributes);
                 } else if (!candidate.pluginFound()) {
                     candidate.setModFound();
                 }

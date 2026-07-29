@@ -68,37 +68,25 @@ public final class VanillaTransformationService implements ITransformationServic
 
         this.platform.discovery().discoverPluginResources();
 
-        final List<SecureJar> libs = new ArrayList<>();
         final List<SecureJar> gameLibs = new ArrayList<>();
 
         for (final PluginDiscovery.Candidate candidate : this.platform.discovery().candidates()) {
             final PluginResource resource = candidate.resource();
             candidate.readMetadata();
 
-            switch (candidate.loading()) {
-                case IGNORED:
-                    break;
-                case LIBRARY:
-                    if (resource instanceof SecureJarPluginResource jarResource) {
-                        libs.add(jarResource.jar());
-                    }
-                    break;
-                case GAME_LIBRARY:
-                    if (resource instanceof SecureJarPluginResource jarResource) {
-                        gameLibs.add(candidate.pluginFound() ? jarResource.pluginJar(candidate.metadata().getFirst()) : jarResource.jar());
+            if (candidate.gameResource() && resource instanceof SecureJarPluginResource jarResource) {
+                gameLibs.add(candidate.pluginFound() ? jarResource.pluginJar(candidate.metadata().getFirst()) : jarResource.jar());
 
-                        if (mixin != null) {
-                            final Path path = jarResource.jar().getPrimaryPath();
-                            mixin.offerResource(path, path.getFileName().toString());
+                if (mixin != null) {
+                    final Path path = jarResource.jar().getPrimaryPath();
+                    mixin.offerResource(path, path.getFileName().toString());
 
-                            if (resource.property(org.spongepowered.asm.util.Constants.ManifestAttributes.MIXINCONFIGS).isPresent()) {
-                                if (candidate.metadata().stream().noneMatch(m -> "spongevanilla".equals(m.id()))) {
-                                    this.platform.logger().warn("Plugin from {} uses Mixins to modify the Minecraft Server. If something breaks, remove it before reporting the problem to Sponge!", path);
-                                }
-                            }
+                    if (resource.property(org.spongepowered.asm.util.Constants.ManifestAttributes.MIXINCONFIGS).isPresent()) {
+                        if (candidate.metadata().stream().noneMatch(m -> "spongevanilla".equals(m.id()))) {
+                            this.platform.logger().warn("Plugin from {} uses Mixins to modify the Minecraft Server. If something breaks, remove it before reporting the problem to Sponge!", path);
                         }
                     }
-                    break;
+                }
             }
 
             candidate.logResult();
@@ -110,7 +98,7 @@ public final class VanillaTransformationService implements ITransformationServic
             throw new IllegalStateException("Fatal plugin conflicts have been detected.");
         }
 
-        return List.of(new Resource(IModuleLayerManager.Layer.PLUGIN, libs), new Resource(IModuleLayerManager.Layer.GAME, gameLibs));
+        return List.of(new Resource(IModuleLayerManager.Layer.GAME, gameLibs));
     }
 
     @SuppressWarnings("rawtypes")

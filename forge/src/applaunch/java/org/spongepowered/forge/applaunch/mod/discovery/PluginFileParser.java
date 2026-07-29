@@ -125,8 +125,8 @@ public final class PluginFileParser {
         return new ModFile(jar, provider, PluginFileParser::parseLibraryFileInfo, type);
     }
 
-    public static ModFile newLibraryFile(final IModProvider provider, final boolean game, final SecureJar jar) {
-        return new ModFile(jar, provider, PluginFileParser::parseLibraryFileInfo, game ? "GAMELIBRARY" : "LIBRARY");
+    public static ModFile newGameLibraryFile(final IModProvider provider, final SecureJar jar) {
+        return new ModFile(jar, provider, PluginFileParser::parseLibraryFileInfo, "GAMELIBRARY");
     }
 
     private static class DummyModProvider extends AbstractModProvider {

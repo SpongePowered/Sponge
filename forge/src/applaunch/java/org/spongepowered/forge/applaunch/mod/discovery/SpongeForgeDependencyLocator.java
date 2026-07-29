@@ -78,7 +78,7 @@ public class SpongeForgeDependencyLocator extends AbstractModProvider implements
             for (final LibraryManager.Library library : libraryManager.getAll("main")) {
                 final Path path = library.file();
                 SpongeForgeDependencyLocator.LOGGER.debug("Proposing jar {} as a game library", path);
-                modFiles.add(PluginFileParser.newLibraryFile(this, true, SecureJar.from(path)));
+                modFiles.add(PluginFileParser.newGameLibraryFile(this, SecureJar.from(path)));
             }
         }
 

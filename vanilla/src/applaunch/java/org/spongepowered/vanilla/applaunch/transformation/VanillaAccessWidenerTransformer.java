@@ -32,7 +32,6 @@ import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.common.applaunch.plugin.discovery.PluginDiscovery;
 import org.spongepowered.common.applaunch.transformation.AccessWidenerTransformer;
 import org.spongepowered.plugin.discovery.PluginResource;
-import org.spongepowered.plugin.discovery.ResourceLoading;
 
 import java.net.URL;
 import java.util.*;
@@ -70,7 +69,7 @@ public class VanillaAccessWidenerTransformer extends AccessWidenerTransformer im
     @Override
     protected Collection<URL> collectResources() {
         final Collection<URL> resources = new ArrayList<>();
-        for (final PluginResource plugin : this.discovery.resources(ResourceLoading.GAME_LIBRARY)) {
+        for (final PluginResource plugin : this.discovery.gameResources()) {
             final Optional<String> attribute = plugin.property(AccessWidenerTransformer.MANIFEST_ATTRIBUTE);
             if (attribute.isPresent()) {
                 for (final String path : attribute.get().split(",")) {

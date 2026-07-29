@@ -142,8 +142,8 @@ public abstract class PluginDiscovery extends PluginServiceLoader {
         return candidate;
     }
 
-    public final Collection<PluginResource> resources(final ResourceLoading loading) {
-        return this.candidates.values().stream().filter((c) -> c.loading() == loading).map(Candidate::resource).toList();
+    public final Collection<PluginResource> gameResources() {
+        return this.candidates.values().stream().filter(Candidate::gameResource).map(Candidate::resource).toList();
     }
 
     public final void logMetadataWarnings() {
@@ -259,14 +259,14 @@ public abstract class PluginDiscovery extends PluginServiceLoader {
             return !this.metadata.isEmpty();
         }
 
-        public ResourceLoading loading() {
+        public boolean gameResource() {
             if (this.pluginFound() || this.loaderFound) {
-                return ResourceLoading.GAME_LIBRARY;
+                return true;
             }
             if (this.locatorFound || this.readerFound) {
-                return ResourceLoading.IGNORED;
+                return false;
             }
-            return this.unknownResourceStrategy.loading();
+            return this.unknownResourceStrategy.load();
         }
 
         public void setModFound() {
@@ -282,12 +282,7 @@ public abstract class PluginDiscovery extends PluginServiceLoader {
                 return;
             }
 
-            final String result = switch (this.unknownResourceStrategy.loading()) {
-                case IGNORED -> "ignored";
-                case LIBRARY -> "loaded as a standard library";
-                case GAME_LIBRARY -> "loaded as a game library";
-            };
-
+            final String result = this.unknownResourceStrategy.load() ? "loaded as a game library" : "ignored";
             if (this.unknownResourceStrategy.warn()) {
                 PluginDiscovery.this.environment.logger().warn("The unknown resource {} will be {}.", this.resource, result);
             } else {

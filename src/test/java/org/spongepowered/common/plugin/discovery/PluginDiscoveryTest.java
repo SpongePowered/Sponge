@@ -31,7 +31,6 @@ import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.common.applaunch.plugin.discovery.PluginDiscovery;
 import org.spongepowered.common.plugin.discovery.spi.DummyMetadataReader;
 import org.spongepowered.plugin.PluginService;
-import org.spongepowered.plugin.discovery.ResourceLoading;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,7 +47,7 @@ public class PluginDiscoveryTest {
         assertIterableEquals(List.of("dummy_locator"), candidate.get().locators().stream().map(PluginService::name).toList());
 
         // reader
-        assertEquals(ResourceLoading.GAME_LIBRARY, candidate.get().loading());
+        assertTrue(candidate.get().gameResource());
         assertIterableEquals(List.of(DummyMetadataReader.DUMMY_METADATA), candidate.get().metadata());
     }
 }
