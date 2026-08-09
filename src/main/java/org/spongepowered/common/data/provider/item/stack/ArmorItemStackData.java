@@ -77,8 +77,8 @@ public final class ArmorItemStackData {
                                 return false;
                             }
                             final HolderSet<net.minecraft.world.entity.EntityType<?>> holderSet = HolderSet.direct(
-                                e -> BuiltInRegistries.ENTITY_TYPE.wrapAsHolder((net.minecraft.world.entity.EntityType<?>) (Object) e),
-                                v.stream().map(e -> (net.minecraft.world.entity.EntityType<?>) (Object) e).toList()
+                                e -> BuiltInRegistries.ENTITY_TYPE.wrapAsHolder((net.minecraft.world.entity.EntityType<?>) e),
+                                v
                             );
                             h.set(DataComponents.EQUIPPABLE, ArmorItemStackData.asBuilder(equippable).setAllowedEntities(holderSet).build());
                             return true;
