@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.world.portal;
 
+import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -45,39 +46,46 @@ public final class SpongeCustomPortalLogic implements net.minecraft.world.level.
 
     private final PortalLogic.PortalExitCalculator exitCalculator;
     private final PortalLogic.PortalFinder finder;
+    private final PortalLogic.TeleportBehavior teleporter;
     private final PortalLogic.PortalGenerator generator;
 
     private int searchRange = 16;
     private Axis axis = Axis.X;
 
-    public SpongeCustomPortalLogic(final PortalLogic.PortalExitCalculator calulator,
-            final PortalLogic.PortalFinder finder,
-            final PortalLogic.PortalGenerator generator) {
+    public SpongeCustomPortalLogic(final PortalLogic.PortalExitCalculator calculator,
+                                   final PortalLogic.PortalFinder finder,
+                                   final PortalLogic.TeleportBehavior teleporter,
+                                   final PortalLogic.PortalGenerator generator) {
 
-        this.exitCalculator = calulator;
+        this.exitCalculator = calculator;
         this.finder = finder;
+        this.teleporter = teleporter;
         this.generator = generator;
     }
 
-    @Nullable @Override
+    @Nullable
+    @Override
     public DimensionTransition getPortalDestination(final ServerLevel fromLevel, final Entity entity, final BlockPos fromPos) {
         final var spongeEntity = (org.spongepowered.api.entity.Entity) entity;
         // Calculate desired portal location
         // Then find existing portal or generate if not found
         return this.exitCalculator.calculatePortalExit((ServerWorld) fromLevel, VecHelper.toVector3i(fromPos), spongeEntity)
-                .flatMap(calcExit -> this.finder.findPortal(calcExit, this.searchRange).map(Portal::position).or(() -> this.generator.generatePortal(calcExit, this.axis).map(Portal::position))
-                        .map(realExit -> SpongeCustomPortalLogic.generateTransition(entity, realExit))
-                ).orElse(null);
+            .flatMap(calcExit -> this.finder.findPortal(calcExit, this.searchRange)
+                .flatMap(p -> this.teleporter().map(b -> b.spawnLocation(((ServerWorld) fromLevel).location(VecHelper.toVector3d(fromPos)), p.position(), spongeEntity)))
+                .or(() -> this.generator.generatePortal(calcExit, this.axis)
+                    .flatMap(p -> this.teleporter().map(b -> b.spawnLocation(((ServerWorld) fromLevel).location(VecHelper.toVector3d(fromPos)), p.position(), spongeEntity))))
+                .map(realExit -> SpongeCustomPortalLogic.generateTransition(entity, realExit))
+            ).orElse(null);
     }
 
     private static DimensionTransition generateTransition(final Entity entity, final ServerLocation finalExit) {
         return new DimensionTransition(
-                (ServerLevel) finalExit.world(),
-                VecHelper.toVanillaVector3d(finalExit.position()),
-                entity.getDeltaMovement(),
-                entity.getYRot(),
-                entity.getXRot(),
-                DimensionTransition.PLACE_PORTAL_TICKET);
+            (ServerLevel) finalExit.world(),
+            VecHelper.toVanillaVector3d(finalExit.position()),
+            entity.getDeltaMovement(),
+            entity.getYRot(),
+            entity.getXRot(),
+            DimensionTransition.PLACE_PORTAL_TICKET);
     }
 
     @Override
@@ -91,19 +99,24 @@ public final class SpongeCustomPortalLogic implements net.minecraft.world.level.
     }
 
     @Override
+    public Optional<TeleportBehavior> teleporter() {
+        return Optional.of(this.teleporter);
+    }
+
+    @Override
     public Optional<PortalGenerator> generator() {
         return Optional.of(this.generator);
     }
 
     @Override
-    public boolean teleport(final org.spongepowered.api.entity.Entity entity, final ServerLocation destination, final boolean generateDestinationPortal) {
+    public boolean teleport(final ServerLocation origin, final org.spongepowered.api.entity.Entity entity, final ServerLocation destination, final boolean generateDestinationPortal) {
         final var foundPortal = this.finder.findPortal(destination, this.searchRange);
         if (foundPortal.isPresent()) {
-            return foundPortal.map(Portal::position).map(entity::setLocation).orElse(false);
+            return foundPortal.flatMap(p -> this.teleporter().map(b -> b.spawnLocation(origin, destination, entity))).map(entity::setLocation).orElse(false);
         }
         if (generateDestinationPortal) {
             var generatedPortal = this.generator.generatePortal(destination, this.axis);
-            return generatedPortal.map(Portal::position).map(entity::setLocation).orElse(false);
+            return generatedPortal.flatMap(p -> this.teleporter().map(b -> b.spawnLocation(origin, destination, entity))).map(entity::setLocation).orElse(false);
         }
         return false;
     }

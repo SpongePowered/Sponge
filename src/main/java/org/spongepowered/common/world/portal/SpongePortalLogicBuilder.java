@@ -43,17 +43,24 @@ public final class SpongePortalLogicBuilder implements PortalLogic.Builder {
 
 
     @Override
-    public PortalLogic.Builder addPortal(final PortalLogic.PortalExitCalculator calulator,
+    public PortalLogic.Builder addPortal(final PortalLogic.PortalExitCalculator calculator,
             final PortalLogic.PortalFinder finder,
             final PortalLogic.PortalGenerator generator) {
-        var portal = new SpongeCustomPortalLogic(calulator, finder, generator);
+        var portal = new SpongeCustomPortalLogic(calculator, finder, (from, to, entity) -> to, generator);
         this.rules.add(portal);
         return this;
     }
 
     @Override
-    public <T extends PortalLogic.PortalExitCalculator & PortalLogic.PortalFinder & PortalLogic.PortalGenerator> PortalLogic.Builder addPortal(final T logic) {
-        var portal = new SpongeCustomPortalLogic(logic, logic, logic);
+    public PortalLogic.Builder addPortal(PortalLogic.PortalExitCalculator calculator, PortalLogic.PortalFinder finder, PortalLogic.TeleportBehavior teleporter, PortalLogic.PortalGenerator generator) {
+        var portal = new SpongeCustomPortalLogic(calculator, finder, teleporter, generator);
+        this.rules.add(portal);
+        return this;
+    }
+
+    @Override
+    public <T extends PortalLogic.PortalExitCalculator & PortalLogic.PortalFinder & PortalLogic.TeleportBehavior & PortalLogic.PortalGenerator> PortalLogic.Builder addPortal(final T logic) {
+        var portal = new SpongeCustomPortalLogic(logic, logic, logic, logic);
         this.rules.add(portal);
         return this;
     }
@@ -62,6 +69,5 @@ public final class SpongePortalLogicBuilder implements PortalLogic.Builder {
     public PortalLogic build() {
         return new SpongeCompositePortalLogic(this.rules);
     }
-
 
 }
