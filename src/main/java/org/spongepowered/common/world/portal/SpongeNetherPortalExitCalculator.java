@@ -62,7 +62,7 @@ public final class SpongeNetherPortalExitCalculator implements PortalLogic.Porta
             return Optional.empty();
         }
         final var scale = this.calculateScale(fromLevel, toLevel);
-        final var exitPosition = toLevel.getWorldBorder().clampToBounds(fromPos.x() * scale, fromPos.y(), fromPos.z() * scale);
+        final var exitPosition = toLevel.getWorldBorder().clampToBounds(entity.getX() * scale, entity.getY(), entity.getZ() * scale);
         return Optional.of(ServerLocation.of((ServerWorld) toLevel, VecHelper.toVector3i(exitPosition)));
     }
 
