@@ -245,9 +245,8 @@ public class AbstractReferentArchetypeVolume<A extends ArchetypeVolume> implemen
 
     @Override
     public void addEntity(final EntityArchetypeEntry entry) {
-        final Vector3d position = entry.position();
-        final Vector3i transformed = this.inverseTransform(position.x(), position.y(), position.z());
-        this.consumeReference(a -> a.addEntity(entry.archetype(), transformed.toDouble()));
+        final Vector3d transformed = this.transformation.inverse().transformPosition(entry.position());
+        this.consumeReference(a -> a.addEntity(entry.archetype(), transformed));
     }
 
     @Override
