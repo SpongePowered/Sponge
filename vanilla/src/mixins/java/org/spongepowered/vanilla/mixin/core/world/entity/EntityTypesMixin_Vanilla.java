@@ -25,15 +25,15 @@
 package org.spongepowered.vanilla.mixin.core.world.entity;
 
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.entity.SpongeEntityTypes;
 
-@Mixin(EntityType.class)
-public abstract class EntityTypeMixin_Vanilla {
+@Mixin(EntityTypes.class)
+public abstract class EntityTypesMixin_Vanilla {
 
     @Inject(method = "<clinit>", at = @At("TAIL"))
     private static void impl$registerSpongeTypes(CallbackInfo ci) {
