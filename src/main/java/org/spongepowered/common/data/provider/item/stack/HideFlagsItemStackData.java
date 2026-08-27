@@ -46,7 +46,8 @@ public final class HideFlagsItemStackData {
             Keys.HIDE_CAN_PLACE, DataComponents.CAN_PLACE_ON,
             Keys.HIDE_STORED_ENCHANTMENTS, DataComponents.STORED_ENCHANTMENTS,
             Keys.HIDE_UNBREAKABLE, DataComponents.UNBREAKABLE,
-            Keys.HIDE_MISCELLANEOUS, DataComponents.CUSTOM_DATA
+            Keys.HIDE_MISCELLANEOUS, DataComponents.CUSTOM_DATA,
+            Keys.HIDE_POTION_EFFECTS, DataComponents.POTION_CONTENTS
         );
 
         final var mutableItem = registrator

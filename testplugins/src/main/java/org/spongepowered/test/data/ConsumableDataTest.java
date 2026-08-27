@@ -99,7 +99,11 @@ public class ConsumableDataTest implements LoadableModule {
         stack4.offer(Keys.CUSTOM_NAME, Component.text("Teleport on death"));
         stack4.offerSingle(Keys.DEATH_PROTECTION_ACTIONS, ItemAction.teleportRandomly(20));
 
-        player.inventory().offer(stack1, stack2, stack3, stack4);
+        final ItemStack stack5 = ItemStack.of(ItemTypes.POTION);
+        stack5.offer(Keys.CUSTOM_NAME, Component.text("Hide potion effects"));
+        stack5.offer(Keys.HIDE_POTION_EFFECTS, true);
+
+        player.inventory().offer(stack1, stack2, stack3, stack4, stack5);
         return CommandResult.success();
     }
 
