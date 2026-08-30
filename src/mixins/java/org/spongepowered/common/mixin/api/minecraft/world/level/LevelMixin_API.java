@@ -356,7 +356,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
             .map((world, entity, x, y, z) -> entity.get().createArchetype())
             .apply(VolumeCollectors.of(
                 volume,
-                VolumePositionTranslators.offset(origin),
+                VolumePositionTranslators.offset(origin.toDouble()),
                 VolumeApplicators.applyEntityArchetypes()
             ));
         return volume;
