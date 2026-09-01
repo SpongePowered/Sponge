@@ -176,6 +176,13 @@ configurations.configureEach {
     if (name != "minecraft") { // awful terrible hack sssh
         exclude(group = "com.mojang", module = "minecraft")
     }
+    // modlauncher 8.0.9 (bundled with Forge 36.2.5) directly calls the single-arg
+    // ManifestEntryVerifier(Manifest) constructor which was removed in Java 8u321+
+    // (and JDK 11/17 from 2021-10 onwards). 8.1.3 fixes this via reflection.
+    resolutionStrategy {
+        force("cpw.mods:modlauncher:8.1.3")
+        force("cpw.mods:modlauncher-api:8.1.3")
+    }
 }
 
 dependencies {

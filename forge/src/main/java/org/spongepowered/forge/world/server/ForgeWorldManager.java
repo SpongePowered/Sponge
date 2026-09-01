@@ -25,11 +25,18 @@
 package org.spongepowered.forge.world.server;
 
 import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.common.world.StructureSpawnManager;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 
 public final class ForgeWorldManager extends SpongeWorldManager {
 
     public ForgeWorldManager(final MinecraftServer server) {
         super(server);
+    }
+
+    @Override
+    public void loadLevel() {
+        StructureSpawnManager.gatherEntitySpawns();
+        super.loadLevel();
     }
 }
