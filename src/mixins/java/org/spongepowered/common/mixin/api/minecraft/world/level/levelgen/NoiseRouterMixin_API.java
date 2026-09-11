@@ -34,13 +34,13 @@ import org.spongepowered.asm.mixin.Shadow;
 public abstract class NoiseRouterMixin_API implements org.spongepowered.api.world.generation.config.noise.NoiseRouter {
 
     // @formatter:off
-    @Shadow @Final private net.minecraft.world.level.levelgen.DensityFunction temperature;
-    @Shadow @Final private net.minecraft.world.level.levelgen.DensityFunction vegetation;
-    @Shadow @Final private net.minecraft.world.level.levelgen.DensityFunction continents;
-    @Shadow @Final private net.minecraft.world.level.levelgen.DensityFunction erosion;
-    @Shadow @Final private net.minecraft.world.level.levelgen.DensityFunction depth;
-    @Shadow @Final private net.minecraft.world.level.levelgen.DensityFunction ridges;
-    @Shadow @Final private net.minecraft.world.level.levelgen.DensityFunction finalDensity;
+    @Shadow @Final private net.minecraft.world.level.levelgen.densityfunction.DensityFunction temperature;
+    @Shadow @Final private net.minecraft.world.level.levelgen.densityfunction.DensityFunction vegetation;
+    @Shadow @Final private net.minecraft.world.level.levelgen.densityfunction.DensityFunction continents;
+    @Shadow @Final private net.minecraft.world.level.levelgen.densityfunction.DensityFunction erosion;
+    @Shadow @Final private net.minecraft.world.level.levelgen.densityfunction.DensityFunction depth;
+    @Shadow @Final private net.minecraft.world.level.levelgen.densityfunction.DensityFunction ridges;
+    @Shadow @Final private net.minecraft.world.level.levelgen.densityfunction.DensityFunction finalDensity;
     // @formatter:on
 
     @Override

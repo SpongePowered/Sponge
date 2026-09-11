@@ -35,6 +35,7 @@ import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.UpdateInterval;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -55,7 +56,6 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 @Mixin(ServerEntity.class)
@@ -88,7 +88,7 @@ public abstract class ServerEntityMixin {
      */
     @Inject(method = "<init>", at = @At("TAIL"))
     private void impl$wrapConsumer(
-        final ServerLevel serverLevel, final Entity entity, final int trackingRange,
+        final ServerLevel serverLevel, final Entity entity, final UpdateInterval trackingRange,
         final boolean trackMovementDeltas, final ServerEntity.Synchronizer broadcaster,
         final CallbackInfo ci) {
         this.synchronizer = new VanishedFilteringSynchronizer(broadcaster, new WeakReference<>(this.entity));
@@ -166,16 +166,16 @@ public abstract class ServerEntityMixin {
     }
 
     @WrapOperation(method = "sendChanges",
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/level/ServerEntity$Synchronizer;sendToTrackingPlayersFiltered(Lnet/minecraft/network/protocol/Packet;Ljava/util/function/Predicate;)V"))
+        at = @At(value = "INVOKE", ordinal = 0,
+            target = "Lnet/minecraft/server/level/ServerEntity$Synchronizer;sendToTrackingPlayers(Lnet/minecraft/network/protocol/Packet;)V"))
     private void impl$sendSetPassengersToSelf(
         final ServerEntity.Synchronizer instance, final Packet<? super ClientGamePacketListener> packet,
-        final Predicate<ServerPlayer> serverPlayerPredicate, final Operation<Void> original) {
+        final Operation<Void> original) {
         // When passengers are removed from a player entity, the target
         // is the player itself, and we need to synchronize it to them.
         // In vanilla, it is not possible to ride player entities
         // so we never end up hitting this code path.
-        original.call(instance, packet, serverPlayerPredicate);
+        original.call(instance, packet);
         if (this.entity instanceof final ServerPlayer player) {
             player.connection.send(packet);
         }

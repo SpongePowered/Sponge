@@ -60,6 +60,7 @@ import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.UpdateInterval;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -408,7 +409,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
         this.pushPackets(new ClientboundRemoveEntitiesPacket(this.getId()), this.createPlayerListPacket(EnumSet.allOf(ClientboundPlayerInfoUpdatePacket.Action.class)));
         this.pushPackets(this.getAddEntityPacket(new ServerEntity(
             (ServerLevel) this.level(),
-            this, 1, true, NoOpSynchronizer.INSTANCE
+            this, UpdateInterval.periodic(1), true, NoOpSynchronizer.INSTANCE
         )));
     }
 

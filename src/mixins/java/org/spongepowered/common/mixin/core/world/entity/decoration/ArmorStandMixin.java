@@ -33,6 +33,7 @@ import net.minecraft.world.entity.Entity.RemovalReason;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.level.gameevent.GameEvent;
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
@@ -79,7 +80,7 @@ public abstract class ArmorStandMixin extends LivingEntityMixin {
      */
     @Inject(method = "hurtServer", cancellable = true,
             slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/tags/DamageTypeTags;BYPASSES_INVULNERABILITY:Lnet/minecraft/tags/TagKey;")),
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/decoration/ArmorStand;kill(Lnet/minecraft/server/level/ServerLevel;)V", ordinal = 0))
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/decoration/ArmorStand;kill(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Entity;)V", ordinal = 0))
     private void impl$fireDamageEventOutOfWorld(final ServerLevel level, final DamageSource source, final float damage, final CallbackInfoReturnable<Boolean> cir) {
         this.impl$callDamageBeforeKill(source, cir);
     }
@@ -169,10 +170,10 @@ public abstract class ArmorStandMixin extends LivingEntityMixin {
      *
      * @param self the killed stand
      */
-    @Redirect(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/decoration/ArmorStand;kill(Lnet/minecraft/server/level/ServerLevel;)V"))
-    private void impl$actuallyKill(final ArmorStand self, final ServerLevel level) {
+    @Redirect(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/decoration/ArmorStand;kill(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Entity;)V"))
+    private void impl$actuallyKill(final ArmorStand self, final ServerLevel level, final net.minecraft.world.entity.@Nullable Entity attributedTo) {
         self.remove(RemovalReason.KILLED);
-        self.gameEvent(GameEvent.ENTITY_DIE);
+        self.gameEvent(GameEvent.ENTITY_DIE, attributedTo != null ? attributedTo : self);
     }
 
     /**
@@ -182,10 +183,10 @@ public abstract class ArmorStandMixin extends LivingEntityMixin {
      *
      * @param self the killed stand
      */
-    @Redirect(method = "causeDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/decoration/ArmorStand;kill(Lnet/minecraft/server/level/ServerLevel;)V"))
-    private void impl$actuallyKill2(final ArmorStand self, final ServerLevel level) {
+    @Redirect(method = "causeDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/decoration/ArmorStand;kill(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Entity;)V"))
+    private void impl$actuallyKill2(final ArmorStand self, final ServerLevel level, final net.minecraft.world.entity.@Nullable Entity attributedTo) {
         self.remove(RemovalReason.KILLED);
-        self.gameEvent(GameEvent.ENTITY_DIE);
+        self.gameEvent(GameEvent.ENTITY_DIE, attributedTo != null ? attributedTo : self);
     }
 
     /**
@@ -198,7 +199,7 @@ public abstract class ArmorStandMixin extends LivingEntityMixin {
      * This needs to be reimplemented in {@link #impl$actuallyKill}!
      */
     @Overwrite
-    public void kill(final ServerLevel level) {
+    public void kill(final ServerLevel level, final net.minecraft.world.entity.@Nullable Entity attributedTo) {
         super.shadow$kill(level);
     }
 }

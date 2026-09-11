@@ -84,7 +84,7 @@ public abstract class StructureMixin_API implements org.spongepowered.api.world.
             level.dimension(),
             level.registryAccess(),
             chunkSource.getGenerator(),
-            chunkSource.getGenerator().getBiomeSource(),
+            level.uncachedBiomeResolver(),
             chunkSource.randomState(),
             level.getStructureManager(),
             level.getSeed(),

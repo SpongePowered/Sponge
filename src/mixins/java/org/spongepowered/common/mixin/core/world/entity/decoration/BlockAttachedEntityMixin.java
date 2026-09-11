@@ -56,7 +56,7 @@ public abstract class BlockAttachedEntityMixin extends EntityMixin {
     }
 
     @Inject(method = "hurtServer", cancellable = true, at = @At(value = "INVOKE",
-        target = "Lnet/minecraft/world/entity/decoration/BlockAttachedEntity;kill(Lnet/minecraft/server/level/ServerLevel;)V"))
+        target = "Lnet/minecraft/world/entity/decoration/BlockAttachedEntity;kill(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Entity;)V"))
     private void attackImpl$postEventOnAttackEntityFrom(final ServerLevel level, final DamageSource source, final float damage, final CallbackInfoReturnable<Boolean> cir) {
         if (SpongeDamageTracker.callDamageEvents((Entity) this, source, damage) == null) {
             cir.setReturnValue(true);

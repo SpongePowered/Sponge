@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen;
 
 import net.minecraft.util.Interval;
-import net.minecraft.world.level.levelgen.DensityFunction;
-import net.minecraft.world.level.levelgen.DensityFunctions;
+import net.minecraft.world.level.levelgen.densityfunction.DensityFunction;
+import net.minecraft.world.level.levelgen.densityfunction.DensityFunctions;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.asm.mixin.Mixin;
