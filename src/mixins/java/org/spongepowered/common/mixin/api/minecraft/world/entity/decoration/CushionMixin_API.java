@@ -22,17 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.network.protocol.game;
+package org.spongepowered.common.mixin.api.minecraft.world.entity.decoration;
 
-import net.minecraft.core.PositionAndRotation;
-import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
+import net.minecraft.world.entity.decoration.Cushion;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
-import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(ServerboundMoveVehiclePacket.class)
-public interface ServerboundMoveVehiclePacketAccessor {
-
-    @Accessor("movingTo") @Mutable void accessor$movingTo(final PositionAndRotation movingTo);
+@Mixin(Cushion.class)
+public abstract class CushionMixin_API extends BlockAttachedEntityMixin_API implements org.spongepowered.api.entity.hanging.Cushion {
 
 }

@@ -37,6 +37,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Unit;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.attribute.BedRule;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -46,6 +47,8 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.AbstractBedBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -105,7 +108,8 @@ public abstract class PlayerMixin extends AvatarMixin implements PlayerBridge, G
     @Shadow public abstract void shadow$awardStat(Identifier stat);
     @Shadow public abstract Inventory shadow$getInventory();
     @Shadow public abstract PermissionSet shadow$permissions();
-    @Shadow public Either<BedSleepingProblem, Unit> shadow$startSleepInBed(final BlockPos param0) {
+    @Shadow public Either<BedSleepingProblem, Unit> shadow$startSleepInBed(final AbstractBedBlock param0, final BlockState param1,
+            final BedRule param2, final BlockPos param3) {
         return null; // Shadowed
     }
     // @formatter: on

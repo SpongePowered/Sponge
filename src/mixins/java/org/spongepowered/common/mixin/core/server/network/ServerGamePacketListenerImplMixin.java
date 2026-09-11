@@ -34,6 +34,7 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.PositionAndRotation;
 import net.minecraft.network.chat.LastSeenMessages;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
@@ -319,9 +320,10 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
         // We need this because we ignore very small position changes as to not spam as many move events.
         final Vector3d fromPosition = VecHelper.toVector3d(rootVehicle.position());
 
-        final var position = param0.position();
+        final var movingTo = param0.movingTo();
+        final var position = movingTo.position();
         final Vector3d originalToPosition = new Vector3d(position.x, position.y(), position.z());
-        final Vector3d originalToRotation = new Vector3d(param0.yRot(), param0.xRot(), 0);
+        final Vector3d originalToRotation = new Vector3d(movingTo.yRot(), movingTo.xRot(), 0);
 
         // common checks and throws are done here.
         final @Nullable Vector3d toPosition = SpongeCommonEventFactory.callMoveEvent(
@@ -356,9 +358,7 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
 
             // update the packet, let MC take care of the rest.
             final var newPos = VecHelper.toVanillaVector3d(toPosition);
-            packet.accessor$position(newPos);
-            packet.accessor$yRot((float) toRotation.x());
-            packet.accessor$xRot((float) toRotation.y());
+            packet.accessor$movingTo(PositionAndRotation.of(newPos, (float) toRotation.x(), (float) toRotation.y()));
 
             // set the first and last good position now so we don't cause the "moved too quickly" warnings.
             this.vehicleFirstGoodX = toPosition.x();

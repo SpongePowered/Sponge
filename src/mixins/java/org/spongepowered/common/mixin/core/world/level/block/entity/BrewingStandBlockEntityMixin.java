@@ -29,7 +29,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BrewingStandBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.Sponge;
@@ -72,9 +72,9 @@ public class BrewingStandBlockEntityMixin {
 
     @Inject(method = "serverTick",
             locals = LocalCapture.CAPTURE_FAILEXCEPTION,
-            slice = @Slice(to = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;isBrewable(Lnet/minecraft/world/item/alchemy/PotionBrewing;Lnet/minecraft/core/NonNullList;)Z")),
+            slice = @Slice(to = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;isBrewable(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;)Z")),
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;setChanged(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)V"))
-    private static void impl$onConsumeFuel(final Level param0, final BlockPos param1, final BlockState param2, final BrewingStandBlockEntity param3,
+    private static void impl$onConsumeFuel(final ServerLevel param0, final BlockPos param1, final BlockState param2, final BrewingStandBlockEntity param3,
                                            final CallbackInfo ci, final ItemStack fuelStack) {
         final Cause currentCause = PhaseTracker.getInstance().currentCause();
         fuelStack.grow(1);
@@ -98,8 +98,8 @@ public class BrewingStandBlockEntityMixin {
         }
     }
 
-    @Inject(method = "serverTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;doBrew(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/NonNullList;)V"))
-    private static void impl$captureOriginalItems(final Level $$0, final BlockPos $$1, final BlockState $$2, final BrewingStandBlockEntity $$3, final CallbackInfo ci) {
+    @Inject(method = "serverTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;doBrew(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;)V"))
+    private static void impl$captureOriginalItems(final ServerLevel $$0, final BlockPos $$1, final BlockState $$2, final BrewingStandBlockEntity $$3, final CallbackInfo ci) {
         for (int i = 0; i < 3; i++) {
             ((BrewingStandBlockEntityMixin) (Object) $$3).impl$originalSlots[i] = ((BrewingStandBlockEntityMixin) (Object) $$3).items.get(i);
         }
@@ -107,12 +107,12 @@ public class BrewingStandBlockEntityMixin {
     }
 
     @Inject(method = "serverTick",
-            slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;isBrewable(Lnet/minecraft/world/item/alchemy/PotionBrewing;Lnet/minecraft/core/NonNullList;)Z")),
+            slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;isBrewable(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;)Z")),
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;" +
                     "setChanged(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)V"))
-    private static void impl$callBrewEvents(final Level level, final BlockPos pos, final BlockState state, final BrewingStandBlockEntity entity, final CallbackInfo ci) {
+    private static void impl$callBrewEvents(final ServerLevel level, final BlockPos pos, final BlockState state, final BrewingStandBlockEntity entity, final CallbackInfo ci) {
         final NonNullList<ItemStack> items = ((BrewingStandBlockEntityAccessor) entity).accessor$items();
-        final boolean isBrewable = BrewingStandBlockEntityAccessor.invoker$isBrewable(level.potionBrewing(), items);
+        final boolean isBrewable = BrewingStandBlockEntityAccessor.invoker$isBrewable(level, entity);
         final boolean isBrewing = ((BrewingStandBlockEntityAccessor) entity).accessor$brewTime() > 0;
         final ItemStack ingredientStack = items.get(3);
 
@@ -158,7 +158,7 @@ public class BrewingStandBlockEntityMixin {
     @Inject(method = "serverTick", cancellable = true, locals = LocalCapture.CAPTURE_FAILEXCEPTION,
             at = @At(value = "FIELD", target = "Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;brewTime:I", ordinal = 1))
     private static void impl$onTick(
-            final Level param0, final BlockPos param1, final BlockState param2, final BrewingStandBlockEntity param3, final CallbackInfo ci,
+            final ServerLevel param0, final BlockPos param1, final BlockState param2, final BrewingStandBlockEntity param3, final CallbackInfo ci,
             final ItemStack fuelStack, final boolean isBrewable, final boolean isBrewing, final ItemStack ingredientStack) {
         if (((BrewingStandBlockEntityMixin) (Object) param3).brewTime != 0 && isBrewable &&
                 ((BrewingStandBlockEntityMixin) (Object) param3).ingredient == ingredientStack.getItem()) {

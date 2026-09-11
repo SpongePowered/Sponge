@@ -25,8 +25,8 @@
 package org.spongepowered.common.accessor.world.level.block.entity;
 
 import net.minecraft.core.NonNullList;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.level.block.entity.BrewingStandBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -46,7 +46,7 @@ public interface BrewingStandBlockEntityAccessor extends BlockEntityAccessor {
 
     @Accessor("items") NonNullList<ItemStack> accessor$items();
 
-    @Invoker("isBrewable") static boolean invoker$isBrewable(PotionBrewing $$0, NonNullList<ItemStack> $$1) {
+    @Invoker("isBrewable") static boolean invoker$isBrewable(ServerLevel $$0, BrewingStandBlockEntity $$1) {
         throw new UntransformedInvokerError();
     }
 

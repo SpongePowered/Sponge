@@ -119,7 +119,7 @@ public final class SpongeWorldTypeBuilder implements WorldType.Builder {
                 : blocks.get(((TagBridge<Block>) infiniburn).bridge$asVanillaTag()).map(h -> (HolderSet<Block>) h).orElse(HolderSet.empty());
             final var attributes = EnvironmentAttributeMap.builder();
             attributes.set(EnvironmentAttributes.PIGLINS_ZOMBIFY, !piglinSafe);
-            attributes.set(EnvironmentAttributes.BED_RULE, bedsUsable ? BedRule.CAN_SLEEP_WHEN_DARK : BedRule.EXPLODES);
+            attributes.set(EnvironmentAttributes.BED_RULE, bedsUsable ? BedRule.CAN_SLEEP_WHEN_DARK : BedRule.DESTROY_ON_USE);
             attributes.set(EnvironmentAttributes.RESPAWN_ANCHOR_WORKS, respawnAnchorsUsable);
             attributes.set(EnvironmentAttributes.CAN_START_RAID, hasRaids);
             final DimensionType dimensionType =

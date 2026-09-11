@@ -26,9 +26,10 @@ package org.spongepowered.common.mixin.core.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.attribute.BedRule;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.BedBlock;
+import net.minecraft.world.level.block.AbstractBedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.spongepowered.api.Sponge;
@@ -38,13 +39,18 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
-@Mixin(BedBlock.class)
-public class BedBlockMixin {
+@Mixin(AbstractBedBlock.class)
+public abstract class AbstractBedBlockMixin {
+
+    // @formatter:off
+    @Shadow public abstract BedRule shadow$getBedRule(final Level level, final BlockPos pos);
+    // @formatter:on
 
     @Inject(method = "useWithoutItem", at = @At(value = "HEAD"), cancellable = true)
     private void impl$onUseBed(final BlockState param0, final Level param1, final BlockPos param2, final Player param3, final BlockHitResult param5,
@@ -59,14 +65,18 @@ public class BedBlockMixin {
         }
     }
 
-    @Inject(method = "useWithoutItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;removeBlock(Lnet/minecraft/core/BlockPos;Z)Z"), cancellable = true)
-    private void impl$onExplodeBed(final BlockState param0, final Level param1, final BlockPos param2, final Player param3, final BlockHitResult param5,
+    @Inject(method = "useWithoutItem",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/AbstractBedBlock;destroyOnUse(Lnet/minecraft/world/level/block/state/BlockState;"
+                    + "Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/player/Player;)Lnet/minecraft/world/InteractionResult;"),
+            cancellable = true)
+    private void impl$onDestroyBedOnUse(final BlockState param0, final Level param1, final BlockPos param2, final Player param3, final BlockHitResult param5,
             final CallbackInfoReturnable<InteractionResult> cir) {
         final Cause currentCause = PhaseTracker.getInstance().currentCause();
         final BlockPos bedLocation = param5.getBlockPos();
         final BlockSnapshot snapshot = ((ServerWorld) param1).createSnapshot(bedLocation.getX(), bedLocation.getY(), bedLocation.getZ());
         if (Sponge.eventManager().post(SpongeEventFactory.createSleepingEventFailed(currentCause, snapshot, (Living) param3))) {
-            param3.startSleepInBed(param2).ifLeft((param1x) -> {
+            final AbstractBedBlock self = (AbstractBedBlock) (Object) this;
+            param3.startSleepInBed(self, param0, this.shadow$getBedRule(param1, param2), param2).ifLeft((param1x) -> {
                 if (param1x != null && param1x.message() != null) {
                     param3.sendOverlayMessage(param1x.message());
                 }

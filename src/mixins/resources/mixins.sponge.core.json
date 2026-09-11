@@ -17,7 +17,7 @@
     "adventure.chat.SignedMessageMixin",
     "adventure.text.AbstractComponentMixin",
     "adventure.text.format.StyleImplMixin",
-    "block.BedBlockMixin",
+    "block.AbstractBedBlockMixin",
     "block.BlockMixin",
     "block.DyeColorBlockPropertiesMixin",
     "commands.CommandFunctionMixin",

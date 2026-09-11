@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.provider.block.entity;
 
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BrewingStandBlockEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.world.level.block.entity.BrewingStandBlockEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -48,12 +50,12 @@ public final class BrewingStandData {
                             return true;
                         })
                     .create(Keys.REMAINING_BREW_TIME)
-                        .get(h -> BrewingStandBlockEntityAccessor.invoker$isBrewable(h.accessor$level().potionBrewing(), h.accessor$items()) ? new SpongeTicks(h.accessor$brewTime()) : null)
+                        .get(h -> BrewingStandData.isBrewable(h) ? new SpongeTicks(h.accessor$brewTime()) : null)
                         .setAnd((h, v) -> {
                             if (v.isInfinite()) {
                                 return false;
                             }
-                            if (BrewingStandBlockEntityAccessor.invoker$isBrewable(h.accessor$level().potionBrewing(), h.accessor$items())) {
+                            if (BrewingStandData.isBrewable(h)) {
                                 h.accessor$brewTime(SpongeTicks.toSaturatedIntOrInfinite(v));
                                 return true;
                             }
@@ -61,4 +63,11 @@ public final class BrewingStandData {
                         });
     }
     // @formatter:on
+
+    private static boolean isBrewable(final BrewingStandBlockEntityAccessor accessor) {
+        if (!(accessor.accessor$level() instanceof ServerLevel serverLevel)) {
+            return false;
+        }
+        return BrewingStandBlockEntityAccessor.invoker$isBrewable(serverLevel, (BrewingStandBlockEntity) (Object) accessor);
+    }
 }

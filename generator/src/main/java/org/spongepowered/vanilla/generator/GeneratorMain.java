@@ -140,14 +140,14 @@ public final class GeneratorMain {
         // WorldLoader.load
         final LayeredRegistryAccess<RegistryLayer> staticRegistries = RegistryLayer.createRegistryAccess();
         List<Registry.PendingTags<?>> pendingTags = TagLoader.loadTagsForExistingRegistries(rm, staticRegistries.getLayer(RegistryLayer.STATIC));
-        final var wga = staticRegistries.getAccessForLoading(RegistryLayer.WORLDGEN);
+        final var wga = staticRegistries.getAccessForLoading(RegistryLayer.WORLD);
         List<HolderLookup.RegistryLookup<?>> tl = TagLoader.buildUpdatedLookups(wga, pendingTags);
-        RegistryAccess.Frozen wgr = RegistryDataLoader.load(rm, tl, RegistryDataLoader.WORLDGEN_REGISTRIES, executor).join();
+        RegistryAccess.Frozen wgr = RegistryDataLoader.load(rm, tl, RegistryDataLoader.WORLD_REGISTRIES, executor).join();
         List<HolderLookup.RegistryLookup<?>> cl = Stream.concat(tl.stream(), wgr.listRegistries()).toList();
-        final LayeredRegistryAccess<RegistryLayer> withWorldGen = staticRegistries.replaceFrom(RegistryLayer.WORLDGEN, wgr);
+        final LayeredRegistryAccess<RegistryLayer> withWorldGen = staticRegistries.replaceFrom(RegistryLayer.WORLD, wgr);
         RegistryAccess.Frozen da = RegistryDataLoader.load(rm, cl, RegistryDataLoader.DIMENSION_REGISTRIES, executor).join();
         final LayeredRegistryAccess<RegistryLayer> withDimensions = withWorldGen.replaceFrom(RegistryLayer.DIMENSIONS, da);
-        TagLoader.loadTagsForExistingRegistries(rm, withDimensions.getLayer(RegistryLayer.WORLDGEN));
+        TagLoader.loadTagsForExistingRegistries(rm, withDimensions.getLayer(RegistryLayer.WORLD));
 
         final RegistryAccess.Frozen compositeRegistries = withDimensions.getAccessForLoading(RegistryLayer.RELOADABLE);
         final var resourcesFuture = ReloadableServerResources.loadResources(

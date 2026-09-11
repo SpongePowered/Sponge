@@ -65,7 +65,7 @@ public final class WorldTypeData {
                     .create(Keys.PIGLIN_SAFE)
                         .get(d -> d.attributes().applyModifier(EnvironmentAttributes.NETHER_PORTAL_SPAWNS_PIGLINS, false))
                     .create(Keys.BEDS_USABLE)
-                        .get(d -> d.attributes().applyModifier(EnvironmentAttributes.BED_RULE, BedRule.CAN_SLEEP_WHEN_DARK).explodes())
+                        .get(d -> d.attributes().applyModifier(EnvironmentAttributes.BED_RULE, BedRule.CAN_SLEEP_WHEN_DARK).destroyOnUse())
                     .create(Keys.RESPAWN_ANCHOR_USABLE)
                         .get(d -> d.attributes().applyModifier(EnvironmentAttributes.RESPAWN_ANCHOR_WORKS, false))
                     .create(Keys.INFINIBURN)

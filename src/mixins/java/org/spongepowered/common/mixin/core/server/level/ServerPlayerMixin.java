@@ -60,6 +60,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.util.Unit;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.attribute.BedRule;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -71,6 +72,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.AbstractBedBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.portal.TeleportTransition;
@@ -685,18 +688,21 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     }
 
     @Inject(method = "startSleepInBed", at = @At(value = "RETURN"), cancellable = true)
-    private void impl$onReturnSleep(final BlockPos param0, final CallbackInfoReturnable<Either<Player.BedSleepingProblem, Unit>> cir) {
+    private void impl$onReturnSleep(final AbstractBedBlock param0, final BlockState param1, final BedRule param2, final BlockPos param3,
+            final CallbackInfoReturnable<Either<Player.BedSleepingProblem, Unit>> cir) {
         final Either<Player.BedSleepingProblem, Unit> returnValue = cir.getReturnValue();
         returnValue.ifLeft(problem -> {
             if (problem.message() == null) {
                 return;
             }
             final Cause currentCause = PhaseTracker.getInstance().currentCause();
-            final BlockSnapshot snapshot = ((ServerWorld) this.shadow$level()).createSnapshot(param0.getX(), param0.getY(), param0.getZ());
+            final BlockSnapshot snapshot = ((ServerWorld) this.shadow$level()).createSnapshot(param3.getX(), param3.getY(), param3.getZ());
             if (Sponge.eventManager().post(SpongeEventFactory.createSleepingEventFailed(currentCause, snapshot, (Living) this))) {
-                final Either<Player.BedSleepingProblem, Unit> var5 = super.shadow$startSleepInBed(param0).ifRight((param0x) -> {
-                    this.shadow$awardStat(Stats.SLEEP_IN_BED);
-                    CriteriaTriggers.SLEPT_IN_BED.trigger((net.minecraft.server.level.ServerPlayer) (Object) this);
+                final Either<Player.BedSleepingProblem, Unit> var5 = super.shadow$startSleepInBed(param0, param1, param2, param3).ifRight((param0x) -> {
+                    this.shadow$awardStat(param0.getSleptInBedStatType());
+                    if (param2.canSetSpawn(this.shadow$level())) {
+                        CriteriaTriggers.SLEPT_IN_BED.trigger((net.minecraft.server.level.ServerPlayer) (Object) this);
+                    }
                 });
                 ((ServerLevel) this.shadow$level()).updateSleepingPlayerList();
                 cir.setReturnValue(var5);

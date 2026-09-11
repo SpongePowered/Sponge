@@ -380,10 +380,12 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
             // see ServerLevel#explode/Level#explode
             ParticleOptions particle = mcExplosion.isSmall() ? ParticleTypes.EXPLOSION : ParticleTypes.EXPLOSION_EMITTER;
             var sound = SoundEvents.GENERIC_EXPLODE;
+            final var explosionSource = mcExplosion.getDirectSourceEntity();
+            final boolean playSound = explosionSource == null || !explosionSource.isSilent();
             for (ServerPlayer player : this.players) {
                 if (player.distanceToSqr(mcExplosion.center()) < 4096.0) {
                     Optional<Vec3> kb = Optional.ofNullable(mcExplosion.getHitPlayers().get(player));
-                    final var packet = new ClientboundExplodePacket(mcExplosion.center(), explosion.radius(), 1, kb, particle, sound, WeightedList.of());
+                    final var packet = new ClientboundExplodePacket(mcExplosion.center(), explosion.radius(), 1, kb, particle, sound, WeightedList.of(), playSound);
                     this.bridge$handleExplosionPacket(player.connection, explosion, packet);
                     player.connection.send(packet);
                 }
@@ -400,7 +402,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         var soundEvent = Holder.direct(new SoundEvent(Identifier.parse("sponge:none"), Optional.of(0f))); // "no" sound
         soundEvent = packet.explosionSound();
         // TODO apiExplosion.shouldPlaySmoke() is not initialized correctly
-        var newPacket = new ClientboundExplodePacket(packet.center(), packet.radius(), packet.blockCount(), packet.playerKnockback(), particleData, soundEvent, packet.blockParticles());
+        var newPacket = new ClientboundExplodePacket(packet.center(), packet.radius(), packet.blockCount(), packet.playerKnockback(), particleData, soundEvent, packet.blockParticles(), packet.playSound());
         instance.send(newPacket);
     }
 

@@ -22,17 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.network.protocol.game;
+package org.spongepowered.common.mixin.api.minecraft.world.item.crafting;
 
-import net.minecraft.core.PositionAndRotation;
-import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
+import net.minecraft.world.item.crafting.BrewingRecipe;
+import net.minecraft.world.item.crafting.PotionIngredient;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 
-@Mixin(ServerboundMoveVehiclePacket.class)
-public interface ServerboundMoveVehiclePacketAccessor {
+@Mixin(BrewingRecipe.class)
+public abstract class BrewingRecipeMixin_API implements org.spongepowered.api.item.recipe.brewing.BrewingRecipe {
 
-    @Accessor("movingTo") @Mutable void accessor$movingTo(final PositionAndRotation movingTo);
+    // @formatter:off
+    @Shadow public abstract PotionIngredient shadow$getInput();
+    @Shadow public abstract PotionIngredient shadow$getReagent();
+    // @formatter:on
 
+    @Override
+    public org.spongepowered.api.item.recipe.crafting.Ingredient input() {
+        return IngredientUtil.fromNative(this.shadow$getInput().ingredient());
+    }
+
+    @Override
+    public org.spongepowered.api.item.recipe.crafting.Ingredient reagent() {
+        return IngredientUtil.fromNative(this.shadow$getReagent().ingredient());
+    }
 }
