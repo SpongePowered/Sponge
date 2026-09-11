@@ -26,11 +26,11 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen;
 
 import net.minecraft.core.Holder;
 import net.minecraft.world.level.biome.Climate;
-import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.Aquifer;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.NoiseRouter;
-import net.minecraft.world.level.levelgen.OreVeinifier;
 import net.minecraft.world.level.levelgen.NoiseSettings;
+import net.minecraft.world.level.levelgen.OreVeinifier;
 import net.minecraft.world.level.levelgen.SurfaceRules;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.persistence.DataContainer;
