@@ -219,7 +219,6 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     @Override
     public void aiStep() {
         super.aiStep();
-        this.updateSwingTime();
     }
 
     @Override

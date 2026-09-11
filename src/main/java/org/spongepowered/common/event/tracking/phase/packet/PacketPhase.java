@@ -47,10 +47,10 @@ import net.minecraft.network.protocol.game.ServerboundPlayerAbilitiesPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerInputPacket;
+import net.minecraft.network.protocol.game.ServerboundPunchPacket;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
 import net.minecraft.network.protocol.game.ServerboundSignUpdatePacket;
-import net.minecraft.network.protocol.game.ServerboundSwingPacket;
 import net.minecraft.network.protocol.game.ServerboundTeleportToEntityPacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
@@ -294,7 +294,7 @@ public final class PacketPhase {
         this.packetTranslationMap.put(ServerboundUseItemOnPacket.class, packet -> General.PLACE_BLOCK);
         this.packetTranslationMap.put(ServerboundUseItemPacket.class, packet -> PacketPhase.General.USE_ITEM);
         this.packetTranslationMap.put(ServerboundSetCarriedItemPacket.class, packet -> PacketPhase.Inventory.SET_CARRIED_ITEM);
-        this.packetTranslationMap.put(ServerboundSwingPacket.class, packet -> PacketPhase.General.ANIMATION);
+        this.packetTranslationMap.put(ServerboundPunchPacket.class, packet -> PacketPhase.General.ANIMATION);
         this.packetTranslationMap.put(ServerboundPlayerCommandPacket.class, packet -> {
             final ServerboundPlayerCommandPacket playerAction = (ServerboundPlayerCommandPacket) packet;
             final ServerboundPlayerCommandPacket.Action action = playerAction.getAction();

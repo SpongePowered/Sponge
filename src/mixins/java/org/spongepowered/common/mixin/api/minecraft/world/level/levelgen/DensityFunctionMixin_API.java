@@ -41,7 +41,7 @@ public interface DensityFunctionMixin_API extends org.spongepowered.api.world.ge
 
     // @formatter:off
     @Shadow Interval shadow$range();
-    @Shadow double shadow$compute(final DensityFunction.FunctionContext var1);
+    @Shadow float shadow$compute(final DensityFunction.FunctionContext var1);
     // @formatter:on
 
     @Override

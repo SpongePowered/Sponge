@@ -48,7 +48,7 @@ import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
-import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.network.protocol.game.ServerboundPunchPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.server.network.FilteredText;
@@ -354,15 +354,15 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
     }
 
     @SuppressWarnings("ConstantConditions")
-    @Inject(method = "handleAnimate",
+    @Inject(method = "handlePunch",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/server/level/ServerPlayer;resetLastActionTime()V"),
             cancellable = true)
-    private void impl$throwAnimationAndInteractEvents(final ServerboundSwingPacket packetIn, final CallbackInfo ci) {
+    private void impl$throwAnimationAndInteractEvents(final ServerboundPunchPacket packetIn, final CallbackInfo ci) {
         if (PhaseTracker.getInstance().getPhaseContext().isEmpty()) {
             return;
         }
-        final InteractionHand hand = packetIn.getHand();
+        final InteractionHand hand = InteractionHand.MAIN_HAND;
 
         if (!((ServerPlayerGameModeAccessor) this.player.gameMode).accessor$isDestroyingBlock()) {
             if (this.impl$ignorePackets > 0) {

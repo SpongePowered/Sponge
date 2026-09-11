@@ -36,12 +36,12 @@ public final class RecipeUtil {
 
     public static ContextMap serverBasedContextMap() {
         if (!Sponge.isServerAvailable()) {
-            return new ContextMap.Builder().create(SlotDisplayContext.CONTEXT);
+            return ContextMap.builder().buildAndValidate(SlotDisplayContext.CONTEXT);
         }
         final var server = SpongeCommon.server();
-        return new ContextMap.Builder()
-            .withParameter(SlotDisplayContext.REGISTRIES, server.registryAccess())
-            .create(SlotDisplayContext.CONTEXT);
+        return ContextMap.builder()
+            .set(SlotDisplayContext.REGISTRIES, server.registryAccess())
+            .buildAndValidate(SlotDisplayContext.CONTEXT);
     }
 
     public class RemainderResolver<T> implements DisplayContentsFactory.ForRemainders<T> {
