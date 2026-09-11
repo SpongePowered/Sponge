@@ -30,7 +30,6 @@ import com.mojang.serialization.Dynamic;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentPatch;
-import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -151,7 +150,9 @@ public final class SpongeItemStack {
             modifiers = modifiers.withModifierAdded(attribute, (net.minecraft.world.entity.ai.attributes.AttributeModifier) (Object) modifier, slotGroup);
 
             final DataComponentPatch.Builder builder = DataComponentPatch.builder();
-            this.components.entrySet().forEach(entry -> builder.set((DataComponentType) entry.getKey(), entry.getValue().orElse(null)));
+            final DataComponentPatch.SplitResult split = this.components.split();
+            builder.set(split.added());
+            split.removed().forEach(builder::remove);
             builder.set(DataComponents.ATTRIBUTE_MODIFIERS, modifiers);
             this.components = builder.build();
 

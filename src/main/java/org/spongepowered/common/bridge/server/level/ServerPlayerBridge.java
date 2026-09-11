@@ -44,6 +44,7 @@ import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
 
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 
 public interface ServerPlayerBridge extends ServerPlayerEntityHealthScaleBridge {
@@ -97,7 +98,7 @@ public interface ServerPlayerBridge extends ServerPlayerEntityHealthScaleBridge 
             key,
             hashedSeed,
             gameType,
-            previousGameType,
+            Optional.ofNullable(previousGameType),
             isDebug,
             isFlat,
             ((ServerPlayer) this).getLastDeathLocation(),

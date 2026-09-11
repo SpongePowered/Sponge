@@ -185,9 +185,9 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
                     return this.getChild().findSuggestionContext(cursor);
                 } else if (!this.getNodes().isEmpty()) {
                     final ParsedCommandNode<CommandSourceStack> last = this.getNodes().get(this.getNodes().size() - 1);
-                    return new SuggestionContext<>(last.getNode(), last.getRange().getEnd() + 1);
+                    return new SuggestionContext<>(this, last.getNode(), last.getRange().getEnd() + 1);
                 } else {
-                    return new SuggestionContext<>(this.getRootNode(), this.getRange().getStart());
+                    return new SuggestionContext<>(this, this.getRootNode(), this.getRange().getStart());
                 }
             } else {
                 CommandNode<CommandSourceStack> prev = this.getRootNode();
@@ -197,7 +197,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
                     if (SpongeCommandContextBuilder.checkNodeCannotBeEmpty(node.getNode(), nodeRange)) {
                         // Sponge End
                         if (nodeRange.getStart() <= cursor && cursor <= nodeRange.getEnd()) {
-                            return new SuggestionContext<>(prev, nodeRange.getStart());
+                            return new SuggestionContext<>(this, prev, nodeRange.getStart());
                         }
                         // Sponge Start: End if
                     }
@@ -207,7 +207,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
                 if (prev == null) {
                     throw new IllegalStateException("Can't find node before cursor");
                 }
-                return new SuggestionContext<>(prev, this.getRange().getStart());
+                return new SuggestionContext<>(this, prev, this.getRange().getStart());
             }
         }
         throw new IllegalStateException("Can't find node before cursor");

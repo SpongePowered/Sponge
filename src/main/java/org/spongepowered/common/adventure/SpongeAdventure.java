@@ -923,10 +923,11 @@ public final class SpongeAdventure {
         }
 
         Map<Key, DataComponentValue> map = new HashMap<>();
-        components.entrySet().forEach(entry -> {
-            final Identifier key = BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(entry.getKey());
-            map.put(SpongeAdventure.asAdventure(key), new SpongeDataComponentValue<>(entry.getValue()));
-        });
+        final DataComponentPatch.SplitResult split = components.split();
+        split.added().forEach(component -> map.put(SpongeAdventure.asAdventure(BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(component.type())),
+                new SpongeDataComponentValue<>(Optional.of(component.value()))));
+        split.removed().forEach(type -> map.put(SpongeAdventure.asAdventure(BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(type)),
+                new SpongeDataComponentValue<>(Optional.empty())));
         return map;
     }
 
