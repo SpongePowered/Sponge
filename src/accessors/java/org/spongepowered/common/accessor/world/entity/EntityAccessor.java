@@ -70,6 +70,8 @@ public interface EntityAccessor {
         throw new UntransformedAccessorError();
     }
 
+    @Accessor("invulnerableTime") int accessor$invulnerableTime();
+
     @Accessor("remainingFireTicks") int accessor$remainingFireTicks();
 
     @Accessor("remainingFireTicks") void accessor$remainingFireTicks(final int remainingFireTicks);

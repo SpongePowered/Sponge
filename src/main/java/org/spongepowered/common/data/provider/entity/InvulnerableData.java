@@ -39,9 +39,9 @@ public final class InvulnerableData {
         registrator
                 .asMutable(Entity.class)
                     .create(Keys.INVULNERABLE)
-                        .get(Entity::isInvulnerable)
+                        .get(Entity::isPermanentlyInvulnerable)
                         .resetOnDelete(false)
-                        .set(Entity::setInvulnerable)
+                        .set(Entity::setPermanentlyInvulnerable)
                 .asMutable(SpongeUserData.class)
                     .create(Keys.INVULNERABLE)
                         .get(SpongeUserData::isInvulnerable)

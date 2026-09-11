@@ -153,15 +153,16 @@ public final class EntityData {
                     .create(Keys.HEIGHT)
                         .get(h -> (double) h.getBbHeight())
                     .create(Keys.INVULNERABILITY_TICKS)
-                        .get(h -> new SpongeTicks(h.invulnerableTime))
+                        .get(h -> new SpongeTicks(((EntityAccessor) h).accessor$invulnerableTime()))
                         .resetOnDelete(Ticks.zero())
                         .setAnd((h, v) -> {
                             final int ticks = SpongeTicks.toSaturatedIntOrInfinite(v);
                             if (v.isInfinite() || ticks < 0) {
                                 return false;
                             }
-                            h.invulnerableTime = ticks;
+                            h.setInvulnerableTime(ticks);
                             if (h instanceof LivingEntity) {
+                                ((LivingEntity) h).damageCooldownTime = ticks;
                                 ((LivingEntity) h).hurtTime = ticks;
                             }
                             return true;

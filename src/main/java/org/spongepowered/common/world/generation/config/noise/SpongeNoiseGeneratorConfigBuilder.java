@@ -175,7 +175,7 @@ public final class SpongeNoiseGeneratorConfigBuilder implements NoiseGeneratorCo
         return SpongeCommon.scopedHolder().registryHolder().lookupOrThrow(Registries.DENSITY_FUNCTION);
     }
 
-    private HolderGetter<NormalNoise.NoiseParameters> noises() {
+    private HolderGetter<NormalNoise> noises() {
         return SpongeCommon.scopedHolder().registryHolder().lookupOrThrow(Registries.NOISE);
     }
 

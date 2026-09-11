@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.world.generation.config.noise;
 
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.generation.config.noise.Noise;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.DoubleStream;
@@ -77,6 +77,6 @@ public final class SpongeNoiseBuilder implements Noise.Builder {
     public Noise build() {
         Objects.requireNonNull(this.octave, "octave");
         Objects.requireNonNull(this.amplitudes, "amplitudes");
-        return (Noise) (Object) new NormalNoise.NoiseParameters(this.octave, new ArrayList<>(this.amplitudes));
+        return (Noise) (Object) NormalNoise.createParity(this.octave, new DoubleArrayList(this.amplitudes));
     }
 }

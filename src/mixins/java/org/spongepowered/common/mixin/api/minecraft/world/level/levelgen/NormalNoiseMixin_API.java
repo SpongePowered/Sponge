@@ -24,39 +24,46 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen;
 
-import it.unimi.dsi.fastutil.doubles.DoubleList;
+import com.mojang.serialization.JavaOps;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.world.generation.config.noise.Noise;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.DataPackUtil;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
-@Mixin(NormalNoise.NoiseParameters.class)
-public abstract class NormalNoise_NoiseParametersMixin_API implements Noise {
+@Mixin(NormalNoise.class)
+public abstract class NormalNoiseMixin_API implements Noise {
 
-    // @formatter:off
-    @Shadow @Final private int firstOctave;
-    @Shadow @Final private DoubleList amplitudes;
-    // @formatter:on
-
-    @Override
-    public int octave() {
-        return this.firstOctave;
+    // ponytail: NormalNoise.Parameters is a private record, so read it back through the codec instead of an access widener
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> api$parameters() {
+        return (Map<String, Object>) NormalNoise.DIRECT_CODEC.encodeStart(JavaOps.INSTANCE, (NormalNoise) (Object) this).getOrThrow();
     }
 
     @Override
+    public int octave() {
+        return ((Number) this.api$parameters().get("base_octave")).intValue();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
     public List<Double> amplitudes() {
-        return this.amplitudes;
+        final Map<String, Object> parameters = this.api$parameters();
+        final List<Double> modifiers = (List<Double>) parameters.getOrDefault("amplitude_modifiers", List.of());
+        if (!modifiers.isEmpty()) {
+            return modifiers;
+        }
+        return Collections.nCopies(((Number) parameters.getOrDefault("octave_count", 1)).intValue(), 1.0);
     }
 
     @Override
     public Optional<DataContainer> toDataPack(final RegistryHolder registryHolder) {
-        return DataPackUtil.toDataContainer(registryHolder, NormalNoise.NoiseParameters.DIRECT_CODEC, (NormalNoise.NoiseParameters) (Object) this);
+        return DataPackUtil.toDataContainer(registryHolder, NormalNoise.DIRECT_CODEC, (NormalNoise) (Object) this);
     }
 }

@@ -42,7 +42,7 @@ import java.util.List;
 public interface NoiseRouterDataAccessor {
 
     @Invoker("overworldAquifers") static Aquifer.Config invoker$overworldAquifers(final HolderGetter<DensityFunction> functions,
-        final HolderGetter<NormalNoise.NoiseParameters> noises, final OverworldFunctionSet<ResourceKey<DensityFunction>> names) {
+        final HolderGetter<NormalNoise> noises, final OverworldFunctionSet<ResourceKey<DensityFunction>> names) {
         throw new UntransformedInvokerError();
     }
 

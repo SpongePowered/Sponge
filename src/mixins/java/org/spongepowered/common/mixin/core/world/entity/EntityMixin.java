@@ -142,7 +142,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     // @formatter:off
 
     @Shadow public abstract Level shadow$level();
-    @Shadow public int invulnerableTime;
     @Shadow @Final protected RandomSource random;
     @Shadow @Final protected SynchedEntityData entityData;
     @Shadow public float yRotO;

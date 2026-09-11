@@ -213,7 +213,7 @@ public final class SpongeSurfaceRulesFactory implements SurfaceRule.Factory {
 
     @Override
     public SurfaceRule.Condition noiseThreshold(final RegistryReference<Noise> noise, final double min, final double max) {
-        final net.minecraft.resources.ResourceKey<NormalNoise.NoiseParameters> key = net.minecraft.resources.ResourceKey.create(Registries.NOISE, ((Identifier) (Object) noise.location()));
+        final net.minecraft.resources.ResourceKey<NormalNoise> key = net.minecraft.resources.ResourceKey.create(Registries.NOISE, ((Identifier) (Object) noise.location()));
         return (SurfaceRule.Condition) SurfaceRules.noiseCondition2d(key, min, max);
     }
 

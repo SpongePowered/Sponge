@@ -634,13 +634,13 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
     }
 
     public Boolean isInvulnerable() {
-        return this.player().map(player -> ((net.minecraft.world.entity.Entity) player).isInvulnerable()).orElse(this.invulnerable);
+        return this.player().map(player -> ((net.minecraft.world.entity.Entity) player).isPermanentlyInvulnerable()).orElse(this.invulnerable);
     }
 
     public void setInvulnerable(final boolean invulnerable) {
         final Optional<ServerPlayer> playerOpt = this.player();
         if (playerOpt.isPresent()) {
-            ((net.minecraft.world.entity.Entity) playerOpt.get()).setInvulnerable(invulnerable);
+            ((net.minecraft.world.entity.Entity) playerOpt.get()).setPermanentlyInvulnerable(invulnerable);
             return;
         }
         this.invulnerable = invulnerable;
