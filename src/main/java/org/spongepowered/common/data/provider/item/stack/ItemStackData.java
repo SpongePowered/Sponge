@@ -36,7 +36,13 @@ import net.minecraft.util.Unit;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CookingFuel;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.providers.number.NumberProviders;
 import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.BlockItemStateProperties;
@@ -109,11 +115,13 @@ public final class ItemStackData {
                 .asMutable(ItemStack.class)
                     .create(Keys.BURN_TIME)
                         .get(h -> {
-                            if (SpongeCommon.game().isServerAvailable()) {
-                                return SpongeCommon.server().fuelValues().burnDuration(h);
-                            } else {
+                            if (!SpongeCommon.game().isServerAvailable()) {
                                 return null;
                             }
+                            final ServerLevel level = SpongeCommon.server().overworld();
+                            return NumberProviders.getFromItemComponent(level, h, DataComponents.COOKING_FUEL, CookingFuel::burnTime)
+                                .map(p -> p.getInt(new LootContext.Builder(new LootParams.Builder(level).create(LootContextParamSets.EMPTY)).create(Optional.empty())))
+                                .orElse(0);
                         })
                     .create(Keys.CONTAINER_ITEM)
                         .get(h -> (ItemType) h.getItem().getCraftingRemainder().item())

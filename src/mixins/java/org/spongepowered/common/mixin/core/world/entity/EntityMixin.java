@@ -395,9 +395,13 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     /**
      * See {@link PortalProcessorMixin#impl$onGetPortalDestination} for portal events
      */
-    @Redirect(method = "handlePortal",
+    @Redirect(method = "teleportToPortalDestination",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;teleport(Lnet/minecraft/world/level/portal/TeleportTransition;)Lnet/minecraft/world/entity/Entity;"))
     public Entity impl$onChangeDimension(final Entity instance, final TeleportTransition transition) {
+        if (this.portalProcess == null) {
+            // spectator clicking a portal block (ServerPlayerGameMode#useItemOn) has no active portal process
+            return instance.teleport(transition);
+        }
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(this);
             var be = this.shadow$level().getBlockEntity(this.portalProcess.getEntryPosition());

@@ -26,8 +26,8 @@ package org.spongepowered.common.advancement.criterion;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.advancements.predicates.ContextAwarePredicate;
-import net.minecraft.advancements.predicates.entity.EntityPredicate;
+import net.minecraft.core.Holder;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.advancements.triggers.SimpleCriterionTrigger;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -46,9 +46,9 @@ public final class SpongeDummyTrigger extends SimpleCriterionTrigger<SpongeDummy
         return TriggerInstance.CODEC;
     }
 
-    public record TriggerInstance(Optional<ContextAwarePredicate> player) implements SimpleCriterionTrigger.SimpleInstance {
+    public record TriggerInstance(Optional<Holder<LootItemCondition>> player) implements SimpleCriterionTrigger.SimpleInstance {
 
-        public static final Codec<TriggerInstance> CODEC = RecordCodecBuilder.create(($$0) -> $$0.group(EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(TriggerInstance::player)).apply($$0, TriggerInstance::new));
+        public static final Codec<TriggerInstance> CODEC = RecordCodecBuilder.create(($$0) -> $$0.group(LootItemCondition.CODEC.optionalFieldOf("player").forGetter(TriggerInstance::player)).apply($$0, TriggerInstance::new));
 
 
         public static TriggerInstance dummy() {

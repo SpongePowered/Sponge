@@ -29,6 +29,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.BoneMealItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.BonemealSource;
 import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -64,7 +65,7 @@ public abstract class BoneMealItemMixin_Tracker {
         method = "growCrop",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/level/block/BonemealableBlock;performBonemeal(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/util/RandomSource;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)V"
+            target = "Lnet/minecraft/world/level/block/BonemealableBlock;performBonemeal(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/util/RandomSource;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/BonemealSource;)V"
         ),
         require = 0, // Will be removed once the above github issue is resolved with a proper solution
         // Even though we're in a group, expecting this to succeed in forge environments will not work since there is a different mixin
@@ -72,10 +73,10 @@ public abstract class BoneMealItemMixin_Tracker {
     )
     private static void tracker$wrapGrowWithPhaseEntry(
         final BonemealableBlock iGrowable, final ServerLevel worldIn, final RandomSource rand, final BlockPos pos,
-        final BlockState state, final ItemStack stack
+        final BlockState state, final BonemealSource source, final ItemStack stack
     ) {
         if (((LevelBridge) worldIn).bridge$isFake() || !ShouldFire.CHANGE_BLOCK_EVENT_ALL) {
-            iGrowable.performBonemeal(worldIn, rand, pos, state);
+            iGrowable.performBonemeal(worldIn, rand, pos, state, source);
             return;
         }
 
@@ -90,7 +91,7 @@ public abstract class BoneMealItemMixin_Tracker {
                 .block(state)
                 .pos(pos)) {
                 context.buildAndSwitch();
-                iGrowable.performBonemeal(worldIn, rand, pos, state);
+                iGrowable.performBonemeal(worldIn, rand, pos, state, source);
             }
         }
 

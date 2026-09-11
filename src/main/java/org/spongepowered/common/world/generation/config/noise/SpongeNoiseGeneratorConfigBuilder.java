@@ -27,10 +27,13 @@ package org.spongepowered.common.world.generation.config.noise;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.biome.OverworldBiomeBuilder;
+import net.minecraft.world.level.levelgen.Aquifer;
 import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.NoiseRouterData;
 import net.minecraft.world.level.levelgen.NoiseSettings;
+import net.minecraft.world.level.levelgen.OreVeinifier;
+import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.world.biome.BiomeAttributes;
@@ -40,16 +43,20 @@ import org.spongepowered.api.world.generation.config.noise.NoiseConfigs;
 import org.spongepowered.api.world.generation.config.noise.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseRouter;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.world.level.levelgen.NoiseRouterDataAccessor;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public final class SpongeNoiseGeneratorConfigBuilder implements NoiseGeneratorConfig.Builder {
 
     public NoiseConfig noiseConfig;
     public BlockState defaultBlock, defaultFluid;
     public int seaLevel;
-    public boolean aquifers, oreVeins, legacyRandomSource, disableMobGeneration;
+    public boolean legacyRandomSource, disableMobGeneration;
+    private Optional<Aquifer.Config> aquifers;
+    private List<OreVeinifier> oreVeins;
     public SurfaceRule surfaceRule;
     // Copied straight from the source settings so that a from()/build() round trip does not
     // resolve the material rule while its registry is still loading.
@@ -101,13 +108,13 @@ public final class SpongeNoiseGeneratorConfigBuilder implements NoiseGeneratorCo
 
     @Override
     public NoiseGeneratorConfig.Builder aquifers(final boolean enableAquifers) {
-        this.aquifers = enableAquifers;
+        this.aquifers = enableAquifers ? Optional.of(NoiseRouterDataAccessor.invoker$overworldAquifers(this.functions(), this.noises(), NoiseRouterData.OVERWORLD_FUNCTIONS)) : Optional.empty();
         return this;
     }
 
     @Override
     public NoiseGeneratorConfig.Builder oreVeins(final boolean enableOreVeins) {
-        this.oreVeins = enableOreVeins;
+        this.oreVeins = enableOreVeins ? NoiseRouterDataAccessor.invoker$overworldOreVeins(this.functions()) : List.of();
         return this;
     }
 
@@ -137,17 +144,13 @@ public final class SpongeNoiseGeneratorConfigBuilder implements NoiseGeneratorCo
         this.surfaceRule = SurfaceRule.overworld();
         this.materialRule = null;
         this.seaLevel = 63;
-        this.aquifers = false;
-        this.oreVeins = false;
+        this.aquifers = Optional.empty();
+        this.oreVeins = List.of();
         this.legacyRandomSource = false;
         this.router = null;
-        final HolderGetter<DensityFunction> functions =
-            SpongeCommon.scopedHolder().registryHolder().lookupOrThrow(Registries.DENSITY_FUNCTION);
+        final HolderGetter<DensityFunction> functions = this.functions();
         this.spawnTargets = (List) new OverworldBiomeBuilder().spawnTarget(
-            functions.getOrThrow(NoiseRouterData.TEMPERATURE),
-            functions.getOrThrow(NoiseRouterData.VEGETATION),
-            functions.getOrThrow(NoiseRouterData.CONTINENTS),
-            functions.getOrThrow(NoiseRouterData.EROSION),
+            NoiseRouterData.OVERWORLD_FUNCTIONS.map(functions::getOrThrow),
             functions.getOrThrow(NoiseRouterData.RIDGES));
         return this;
     }
@@ -160,12 +163,20 @@ public final class SpongeNoiseGeneratorConfigBuilder implements NoiseGeneratorCo
         this.materialRule = ((NoiseGeneratorSettings) (Object) value).materialRule();
         this.surfaceRule = null;
         this.seaLevel = value.seaLevel();
-        this.aquifers = value.aquifers();
-        this.oreVeins = value.oreVeins();
+        this.aquifers = ((NoiseGeneratorSettings) (Object) value).aquifers();
+        this.oreVeins = ((NoiseGeneratorSettings) (Object) value).oreVeins();
         this.legacyRandomSource = value.legacyRandomSource();
         this.router = value.noiseRouter();
         this.spawnTargets = value.spawnTargets();
         return this;
+    }
+
+    private HolderGetter<DensityFunction> functions() {
+        return SpongeCommon.scopedHolder().registryHolder().lookupOrThrow(Registries.DENSITY_FUNCTION);
+    }
+
+    private HolderGetter<NormalNoise.NoiseParameters> noises() {
+        return SpongeCommon.scopedHolder().registryHolder().lookupOrThrow(Registries.NOISE);
     }
 
     @Override

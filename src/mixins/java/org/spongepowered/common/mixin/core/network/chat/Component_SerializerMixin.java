@@ -31,7 +31,7 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(targets = "net/minecraft/network/codec/ByteBufCodecs$34")
+@Mixin(targets = "net/minecraft/network/codec/ByteBufCodecs$35")
 public abstract class Component_SerializerMixin {
 
     // inject into the anonymous function to build a gson instance

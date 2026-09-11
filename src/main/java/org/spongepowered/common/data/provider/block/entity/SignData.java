@@ -29,6 +29,7 @@ import net.minecraft.world.level.block.StandingSignBlock;
 import net.minecraft.world.level.block.WallSignBlock;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
+import net.minecraft.world.level.block.entity.SignTextSlot;
 import org.spongepowered.api.block.entity.Sign;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.world.server.ServerLocation;
@@ -43,8 +44,6 @@ import java.util.List;
 
 public final class SignData {
 
-    private static final boolean FRONT_SIGN = true;
-    private static final boolean BACK_SIGN = false;
     private SignData() {
     }
 
@@ -78,14 +77,14 @@ public final class SignData {
                         })
                         .supports(h -> h.getLevel() != null)
                     .create(Keys.GLOWING_TEXT)
-                        .get(h -> h.getFrontText().hasGlowingText())
-                        .set((h, v) -> h.updateText(text -> text.setHasGlowingText(v), FRONT_SIGN))
+                        .get(h -> h.getText(SignTextSlot.FRONT).hasGlowingText())
+                        .set((h, v) -> h.updateText(text -> text.withGlowingText(v), SignTextSlot.FRONT))
                     .create(Keys.SIGN_FRONT_TEXT)
-                        .get(h -> (Sign.SignText) h.getFrontText())
-                        .set((h, v) -> h.setText((SignText) v, FRONT_SIGN))
+                        .get(h -> (Sign.SignText) h.getText(SignTextSlot.FRONT))
+                        .set((h, v) -> h.setText((SignText) v, SignTextSlot.FRONT))
                     .create(Keys.SIGN_BACK_TEXT)
-                        .get(h -> (Sign.SignText) h.getBackText())
-                        .set((h, v) -> h.setText((SignText) v, BACK_SIGN))
+                        .get(h -> (Sign.SignText) h.getText(SignTextSlot.BACK))
+                        .set((h, v) -> h.setText((SignText) v, SignTextSlot.BACK))
                     .create(Keys.SIGN_WAXED)
                         .get(SignBlockEntity::isWaxed)
                         .set(SignBlockEntity::setWaxed)
@@ -102,7 +101,7 @@ public final class SignData {
                         .delete(h -> SignData.setSignLines(h, Collections.emptyList()))
                     .create(Keys.GLOWING_TEXT)
                         .get(SignText::hasGlowingText)
-                        .set(SignText::setHasGlowingText);
+                        .set(SignText::withGlowingText);
     }
     // @formatter:on
 
@@ -115,14 +114,15 @@ public final class SignData {
     }
 
     private static void setSignLines(final SignBlockEntity holder, final List<Component> value) {
-        holder.updateText(signText -> SignData.setSignLines(signText, value), FRONT_SIGN);
+        holder.updateText(signText -> SignData.setSignLines(signText, value), SignTextSlot.FRONT);
     }
 
-    private static SignText setSignLines(SignText holder, final List<Component> value) {
-        for (int i = 0; i < holder.getMessages(true).length; i++) {
-            holder = holder.setMessage(i, SpongeAdventure.asVanilla(i > value.size() - 1 ? Component.empty() : value.get(i)));
+    private static SignText setSignLines(final SignText holder, final List<Component> value) {
+        final SignText.Mutable mutable = holder.asMutable();
+        for (int i = 0; i < holder.getMessages(true).size(); i++) {
+            mutable.setLine(i, SpongeAdventure.asVanilla(i > value.size() - 1 ? Component.empty() : value.get(i)));
         }
-        return holder;
+        return mutable.asImmutable();
     }
 
     private static List<Component> getSignLines(ServerLocation h) {
@@ -130,13 +130,13 @@ public final class SignData {
     }
 
     private static List<Component> getSignLines(SignBlockEntity holder) {
-        return SignData.getSignLines(holder.getFrontText());
+        return SignData.getSignLines(holder.getText(SignTextSlot.FRONT));
     }
 
     private static List<Component> getSignLines(SignText holder) {
         final List<Component> lines = new ArrayList<>();
-        for (int i = 0; i < holder.getMessages(true).length; i++) {
-            lines.add(SpongeAdventure.asAdventure(holder.getMessage(i, true)));
+        for (final net.minecraft.network.chat.Component line : holder.getMessages(true)) {
+            lines.add(SpongeAdventure.asAdventure(line));
         }
         return lines;
     }

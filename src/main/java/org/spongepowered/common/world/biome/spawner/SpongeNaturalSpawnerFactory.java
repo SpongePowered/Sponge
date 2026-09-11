@@ -25,6 +25,8 @@
 package org.spongepowered.common.world.biome.spawner;
 
 import net.minecraft.util.random.Weighted;
+import net.minecraft.util.valueproviders.ConstantInt;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.world.biome.spawner.NaturalSpawner;
@@ -34,6 +36,6 @@ public class SpongeNaturalSpawnerFactory implements NaturalSpawner.Factory {
 
     @Override
     public NaturalSpawner of(final EntityType<?> type, final int weight, final int min, final int max) {
-        return new BiomeData.WeightedSpanwer(new Weighted<>(new MobSpawnSettings.SpawnerData((net.minecraft.world.entity.EntityType<?>) type, min, max), weight));
+        return new BiomeData.WeightedSpanwer(new Weighted<>(new MobSpawnSettings.SpawnerData((net.minecraft.world.entity.EntityType<?>) type, min == max ? new ConstantInt(min) : new UniformInt(min, max)), weight));
     }
 }

@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server.network;
 
-import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.kyori.adventure.audience.Audience;
@@ -66,6 +64,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
+import net.minecraft.world.level.block.entity.SignTextSlot;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -164,10 +163,9 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
         this.impl$ignorePackets++;
     }
 
-    @Inject(method = "handleCustomCommandSuggestions", at = @At(value = "NEW", target = "(Ljava/lang/String;)Lcom/mojang/brigadier/StringReader;", remap = false),
-            cancellable = true)
+    @Inject(method = "handleCustomCommandSuggestions", at = @At("HEAD"), cancellable = true)
     private void impl$getSuggestionsFromNonBrigCommand(final ServerboundCommandSuggestionPacket packet, final CallbackInfo ci) {
-        final String rawCommand = packet.getCommand();
+        final String rawCommand = packet.command();
         final String[] command = CommandUtil.extractCommandString(rawCommand);
         final CommandCause cause = CommandCause.create();
         final SpongeCommandManager manager = SpongeCommandManager.get(this.server);
@@ -178,7 +176,7 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
             } else {
                 manager.getAliasesThatStartWithForCause(cause, command[0]).forEach(builder::suggest);
             }
-            this.connection.send(new ClientboundCommandSuggestionsPacket(packet.getId(), builder.build()));
+            this.connection.send(new ClientboundCommandSuggestionsPacket(packet.id(), builder.build()));
             ci.cancel();
         } else {
             final Optional<CommandMapping> mappingOptional =
@@ -188,25 +186,13 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
                 final CommandMapping mapping = mappingOptional.get();
                 if (mapping.registrar().canExecute(cause, mapping)) {
                     final SuggestionsBuilder builder = CommandUtil.createSuggestionsForRawCommand(rawCommand, command, cause, mapping);
-                    this.connection.send(new ClientboundCommandSuggestionsPacket(packet.getId(), builder.build()));
+                    this.connection.send(new ClientboundCommandSuggestionsPacket(packet.id(), builder.build()));
                 } else {
-                    this.connection.send(new ClientboundCommandSuggestionsPacket(packet.getId(), Suggestions.empty().join()));
+                    this.connection.send(new ClientboundCommandSuggestionsPacket(packet.id(), Suggestions.empty().join()));
                 }
                 ci.cancel();
             }
         }
-    }
-
-    @Redirect(method = "handleCustomCommandSuggestions",
-            at = @At(value = "INVOKE",
-                    target = "Lcom/mojang/brigadier/CommandDispatcher;parse(Lcom/mojang/brigadier/StringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/ParseResults;",
-                    remap = false
-            )
-    )
-    private ParseResults<CommandSourceStack> impl$informParserThisIsASuggestionCheck(final CommandDispatcher<CommandSourceStack> commandDispatcher,
-            final StringReader command,
-            final Object source) {
-        return SpongeCommandManager.get(this.server).getDispatcher().parse(command, (CommandSourceStack) source, true);
     }
 
     @Inject(method = "handleMovePlayer",
@@ -495,9 +481,9 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
     }
 
     @Redirect(method = "updateSignText",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/SignBlockEntity;updateSignText(Lnet/minecraft/world/entity/player/Player;ZLjava/util/List;)V"))
-    private void impl$callChangeSignEvent(final SignBlockEntity sign, final Player player, final boolean isFrontText, final List<FilteredText> list) {
-        final SignText oldText = isFrontText ? sign.getFrontText() : sign.getBackText();
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/SignBlockEntity;updateSignText(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/block/entity/SignTextSlot;Ljava/util/List;)V"))
+    private void impl$callChangeSignEvent(final SignBlockEntity sign, final Player player, final SignTextSlot slot, final List<FilteredText> list) {
+        final SignText oldText = sign.getText(slot);
         final ListValue.Immutable<Component> originalLines = ((Sign.SignText) oldText).lines().asImmutable();
 
         final List<Component> newLines = new ArrayList<>();
@@ -514,28 +500,29 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
             final ChangeSignEvent event = SpongeEventFactory.createChangeSignEvent(PhaseTracker.getInstance().currentCause(),
                     originalLines, newLinesValue,
                     (Sign) sign,
-                    isFrontText);
+                    slot == SignTextSlot.FRONT);
             final ListValue<Component> toApply = SpongeCommon.post(event) ? originalLines : newLinesValue;
-            this.impl$updateSignText(sign, player, isFrontText, toApply.get());
+            this.impl$updateSignText(sign, player, slot, toApply.get());
         }
 
     }
 
     /**
-     * Mirrors {@link SignBlockEntity#updateSignText(Player, boolean, List)}
+     * Mirrors {@link SignBlockEntity#updateSignText(Player, SignTextSlot, List)}
      */
-    private void impl$updateSignText(final SignBlockEntity sign, final Player player, final boolean isFrontText, final List<Component> lines) {
+    private void impl$updateSignText(final SignBlockEntity sign, final Player player, final SignTextSlot slot, final List<Component> lines) {
         if (!sign.isWaxed() && player.getUUID().equals(sign.getPlayerWhoMayEdit()) && sign.getLevel() != null) {
 
             if (player.isTextFilteringEnabled()) {
                 // TODO text filtering?
             }
             sign.updateText(signText -> {
+                final SignText.Mutable mutable = signText.asMutable();
                 for (int i = 0; i < lines.size(); i++) {
-                    signText = signText.setMessage(i, SpongeAdventure.asVanilla(lines.get(i)));
+                    mutable.setLine(i, SpongeAdventure.asVanilla(lines.get(i)));
                 }
-                return signText;
-            }, isFrontText);
+                return mutable.asImmutable();
+            }, slot);
 
             sign.setAllowedPlayerEditor(null);
             sign.getLevel().sendBlockUpdated(sign.getBlockPos(), sign.getBlockState(), sign.getBlockState(), 3);

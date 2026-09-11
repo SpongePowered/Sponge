@@ -27,7 +27,9 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen;
 import net.minecraft.core.Holder;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.Aquifer;
 import net.minecraft.world.level.levelgen.NoiseRouter;
+import net.minecraft.world.level.levelgen.OreVeinifier;
 import net.minecraft.world.level.levelgen.NoiseSettings;
 import net.minecraft.world.level.levelgen.SurfaceRules;
 import org.spongepowered.api.block.BlockState;
@@ -62,8 +64,8 @@ public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorC
     @Shadow @Final private List<Climate.ParameterPoint> spawnTarget;
     @Shadow @Final private int seaLevel;
     @Shadow @Final private boolean disableMobGeneration;
-    @Shadow @Final private boolean aquifersEnabled;
-    @Shadow @Final private boolean oreVeinsEnabled;
+    @Shadow @Final private Optional<Aquifer.Config> aquifers;
+    @Shadow @Final private List<OreVeinifier> oreVeins;
     @Shadow @Final private boolean useLegacyRandomSource;
     // @formatter:on
 
@@ -99,12 +101,12 @@ public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorC
 
     @Override
     public boolean aquifers() {
-        return this.aquifersEnabled;
+        return this.aquifers.isPresent();
     }
 
     @Override
     public boolean oreVeins() {
-        return this.oreVeinsEnabled;
+        return !this.oreVeins.isEmpty();
     }
 
     @Override

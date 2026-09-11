@@ -49,7 +49,6 @@ import org.spongepowered.api.world.generation.feature.DecorationStep;
 import org.spongepowered.api.world.generation.feature.PlacedFeature;
 import org.spongepowered.common.accessor.world.level.biome.BiomeAccessor;
 import org.spongepowered.common.accessor.world.level.biome.Biome_ClimateSettingsAccessor;
-import org.spongepowered.common.accessor.world.level.biome.MobSpawnSettingsAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 import java.util.ArrayList;
@@ -84,7 +83,7 @@ public final class BiomeData {
                     .create(Keys.FEATURES)
                         .get(BiomeData::features)
                     .create(Keys.SPAWN_CHANCE)
-                        .get(h -> (double) h.getMobSettings().getCreatureProbability())
+                        .get(h -> (double) h.getAttributes().applyModifier(EnvironmentAttributes.CREATURE_WORLD_GEN_SPAWN_PROBABILITY, EnvironmentAttributes.CREATURE_WORLD_GEN_SPAWN_PROBABILITY.defaultValue()))
                     .create(Keys.NATURAL_SPAWNERS)
                         .get(BiomeData::naturalSpawners)
                     .create(Keys.NATURAL_SPAWNER_COST)
@@ -180,12 +179,12 @@ public final class BiomeData {
 
         @Override
         public int min() {
-            return this.data.value().minCount();
+            return this.data.value().count().minInclusive();
         }
 
         @Override
         public int max() {
-            return this.data.value().maxCount();
+            return this.data.value().count().maxInclusive();
         }
 
         @Override
@@ -195,7 +194,7 @@ public final class BiomeData {
     }
 
     private static Optional<List<NaturalSpawner>> naturalSpawner(Biome biome, MobCategory cat) {
-        final List<Weighted<MobSpawnSettings.SpawnerData>> unwrap = biome.getMobSettings().getMobs(cat).unwrap();
+        final List<Weighted<MobSpawnSettings.SpawnerData>> unwrap = BiomeData.mobSettings(biome).getMobsToSpawn(cat).unwrap();
         if (unwrap.isEmpty()) {
             return Optional.empty();
         }
@@ -204,8 +203,12 @@ public final class BiomeData {
         return Optional.of(result);
     }
 
+    private static MobSpawnSettings mobSettings(final Biome biome) {
+        return biome.getAttributes().applyModifier(EnvironmentAttributes.NATURAL_MOB_SPAWNS, MobSpawnSettings.EMPTY);
+    }
+
     private static Map<EntityType<?>, NaturalSpawnCost> naturalSpawnerCost(Biome biome) {
-        final var costs = ((MobSpawnSettingsAccessor) biome.getMobSettings()).accessor$mobSpawnCosts();
+        final var costs = BiomeData.mobSettings(biome).allSpawnCosts();
         return costs.entrySet().stream()
                         .collect(Collectors.toMap(e -> (EntityType<?>) e.getKey(),
                                                   e -> (NaturalSpawnCost) (Object) e.getValue()));

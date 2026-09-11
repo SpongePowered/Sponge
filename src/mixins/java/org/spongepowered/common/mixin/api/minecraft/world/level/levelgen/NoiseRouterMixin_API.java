@@ -34,10 +34,6 @@ import org.spongepowered.asm.mixin.Shadow;
 public abstract class NoiseRouterMixin_API implements org.spongepowered.api.world.generation.config.noise.NoiseRouter {
 
     // @formatter:off
-    @Shadow @Final private net.minecraft.world.level.levelgen.DensityFunction barrierNoise;
-    @Shadow @Final private net.minecraft.world.level.levelgen.DensityFunction fluidLevelFloodednessNoise;
-    @Shadow @Final private net.minecraft.world.level.levelgen.DensityFunction fluidLevelSpreadNoise;
-    @Shadow @Final private net.minecraft.world.level.levelgen.DensityFunction lavaNoise;
     @Shadow @Final private net.minecraft.world.level.levelgen.DensityFunction temperature;
     @Shadow @Final private net.minecraft.world.level.levelgen.DensityFunction vegetation;
     @Shadow @Final private net.minecraft.world.level.levelgen.DensityFunction continents;
@@ -45,30 +41,7 @@ public abstract class NoiseRouterMixin_API implements org.spongepowered.api.worl
     @Shadow @Final private net.minecraft.world.level.levelgen.DensityFunction depth;
     @Shadow @Final private net.minecraft.world.level.levelgen.DensityFunction ridges;
     @Shadow @Final private net.minecraft.world.level.levelgen.DensityFunction finalDensity;
-    @Shadow @Final private net.minecraft.world.level.levelgen.DensityFunction veinToggle;
-    @Shadow @Final private net.minecraft.world.level.levelgen.DensityFunction veinRidged;
-    @Shadow @Final private net.minecraft.world.level.levelgen.DensityFunction veinGap;
     // @formatter:on
-
-    @Override
-    public DensityFunction barrierNoise() {
-        return (DensityFunction) this.barrierNoise;
-    }
-
-    @Override
-    public DensityFunction fluidLevelFloodednessNoise() {
-        return (DensityFunction) this.fluidLevelFloodednessNoise;
-    }
-
-    @Override
-    public DensityFunction fluidLevelSpreadNoise() {
-        return (DensityFunction) this.fluidLevelSpreadNoise;
-    }
-
-    @Override
-    public DensityFunction lavaNoise() {
-        return (DensityFunction) this.lavaNoise;
-    }
 
     @Override
     public DensityFunction temperature() {
@@ -105,18 +78,4 @@ public abstract class NoiseRouterMixin_API implements org.spongepowered.api.worl
         return (DensityFunction) this.finalDensity;
     }
 
-    @Override
-    public DensityFunction veinToggle() {
-        return (DensityFunction) this.veinToggle;
-    }
-
-    @Override
-    public DensityFunction veinRidged() {
-        return (DensityFunction) this.veinRidged;
-    }
-
-    @Override
-    public DensityFunction veinGap() {
-        return (DensityFunction) this.veinGap;
-    }
 }

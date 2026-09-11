@@ -139,13 +139,13 @@ public final class SpongeBiomeBuilder implements Biome.Builder {
 
         backgroundMusic.ifPresent(m -> attributes.set(EnvironmentAttributes.BACKGROUND_MUSIC, new BackgroundMusic((Music) (Object) m)));
 
-        final MobSpawnSettings.Builder spawnerBuilder = new MobSpawnSettings.Builder()
-            .creatureGenerationProbability(spawnChance.floatValue());
+        attributes.set(EnvironmentAttributes.CREATURE_WORLD_GEN_SPAWN_PROBABILITY, spawnChance.floatValue());
+        final MobSpawnSettings.Builder spawnerBuilder = new MobSpawnSettings.Builder();
         spawners.forEach((cat, spawner) -> spawner.forEach(sp -> {
             final var data = ((BiomeData.WeightedSpanwer) sp).data();
-            spawnerBuilder.addSpawn((MobCategory) (Object) cat, data.weight(), data.value());
+            spawnerBuilder.addSpawn(data.value().type(), (MobCategory) (Object) cat, data.weight(), data.value().count());
         }));
-        spawnerCosts.forEach((type, cost) -> spawnerBuilder.addMobCharge((net.minecraft.world.entity.EntityType<?>) (Object) type, cost.budget(),
+        spawnerCosts.forEach((type, cost) -> spawnerBuilder.addMobSpawnCost((net.minecraft.world.entity.EntityType<?>) (Object) type, cost.budget(),
             cost.charge()));
 
         final BiomeGenerationSettings.PlainBuilder generationBuilder = new BiomeGenerationSettings.PlainBuilder();

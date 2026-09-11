@@ -40,7 +40,7 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
 
-import java.util.Arrays;
+import java.util.List;
 
 public final class SignItemStackData {
 
@@ -63,9 +63,9 @@ public final class SignItemStackData {
                             if (!id.equalsIgnoreCase(Constants.TileEntity.SIGN)) {
                                 return null;
                             }
-                            return tag.read("front_text", SignText.DIRECT_CODEC).map(t -> t.getMessages(false))
+                            return tag.read("front_text", SignText.CODEC).map(t -> t.getMessages(false))
                                 .stream()
-                                .flatMap(Arrays::stream)
+                                .flatMap(List::stream)
                                 .map(SpongeAdventure::asAdventure)
                                 .toList();
                         })
@@ -73,7 +73,7 @@ public final class SignItemStackData {
                             final CompoundTag tag = new CompoundTag();
                             tag.putString(Constants.Item.BLOCK_ENTITY_ID, Constants.TileEntity.SIGN);
                             DynamicOps<Tag> $$2 = SpongeCommon.vanillaRegistryAccess().createSerializationContext(NbtOps.INSTANCE);
-                            final var text = new SignText();
+                            final SignText.Mutable text = SignText.EMPTY.asMutable();
                             for (int i = 0; i < v.size(); ++i) {
                                 if (i > 3) {
                                     break;
@@ -82,9 +82,9 @@ public final class SignItemStackData {
                                 if (translated == null) {
                                     continue;
                                 }
-                                text.setMessage(i, translated);
+                                text.setLine(i, translated);
                             }
-                            SignText.DIRECT_CODEC.encodeStart($$2, text)
+                            SignText.CODEC.encodeStart($$2, text.asImmutable())
                                 .resultOrPartial(SpongeCommon.logger()::error)
                                 .ifPresent($$1x -> tag.put("front_text", $$1x));
 

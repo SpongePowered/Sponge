@@ -26,10 +26,11 @@ package org.spongepowered.common.mixin.core.world.level.block.entity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.BrewingFuel;
 import net.minecraft.world.item.Items;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BrewingStandBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.Sponge;
@@ -159,7 +160,7 @@ public class BrewingStandBlockEntityMixin {
             at = @At(value = "FIELD", target = "Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;brewTime:I", ordinal = 1))
     private static void impl$onTick(
             final ServerLevel param0, final BlockPos param1, final BlockState param2, final BrewingStandBlockEntity param3, final CallbackInfo ci,
-            final ItemStack fuelStack, final boolean isBrewable, final boolean isBrewing, final ItemStack ingredientStack) {
+            final ItemStack fuelStack, final BrewingFuel brewingFuel, final boolean isBrewable, final boolean isBrewing, final ItemStack ingredientStack) {
         if (((BrewingStandBlockEntityMixin) (Object) param3).brewTime != 0 && isBrewable &&
                 ((BrewingStandBlockEntityMixin) (Object) param3).ingredient == ingredientStack.getItem()) {
             final Cause currentCause = PhaseTracker.getInstance().currentCause();

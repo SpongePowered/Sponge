@@ -106,6 +106,6 @@ public interface RecipeMixin_API<I extends RecipeInput, I2 extends org.spongepow
 
     @Override
     default Optional<DataContainer> toDataPack(final RegistryHolder registryHolder) {
-        return DataPackUtil.toDataContainer(registryHolder, net.minecraft.world.item.crafting.Recipe.CODEC, (net.minecraft.world.item.crafting.Recipe<?>) this);
+        return DataPackUtil.toDataContainer(registryHolder, net.minecraft.world.item.crafting.Recipe.DIRECT_CODEC, (net.minecraft.world.item.crafting.Recipe<?>) this);
     }
 }
