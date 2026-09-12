@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.monster;
 
-import net.minecraft.world.entity.monster.EnderMan;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.Enderman;
@@ -32,8 +31,8 @@ import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Set;
 
-@Mixin(EnderMan.class)
-public abstract class EnderManMixin_API extends MonsterMixin_API implements Enderman {
+@Mixin(net.minecraft.world.entity.monster.Enderman.class)
+public abstract class EndermanMixin_API extends MonsterMixin_API implements Enderman {
 
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {

@@ -22,13 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.server;
+package org.spongepowered.common.mixin.core.advancements;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.advancements.AdvancementNode;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.server.ServerAdvancementManager;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -38,16 +36,17 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
-@Mixin(ServerAdvancementManager.class)
-public abstract class ServerAdvancementManagerMixin {
+@Mixin(net.minecraft.advancements.AdvancementTree.class)
+public abstract class AdvancementTreeMixin {
 
     // Advancements are a reloadable datapack registry as of 26.3-snapshot-3, so registering them into
     // Sponge's registry and firing the plugin registration lifecycle is handled generically by
-    // RegistryDataLoaderMixin_* instead of here. Only the tree layout event remains, and it moved
-    // from the (now removed) apply(...) reload callback into the constructor.
-    @WrapOperation(method = "<init>",
+    // RegistryDataLoaderMixin_* instead of here. Only the tree layout event remains. As of
+    // 26.3-snapshot-9, the per-root TreeNodePosition.run(...) call moved out of
+    // ServerAdvancementManager's constructor into AdvancementTree#repositionNodes().
+    @WrapOperation(method = "repositionNodes",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/TreeNodePosition;run(Lnet/minecraft/advancements/AdvancementNode;)V"))
-    private void impl$onLayout(final AdvancementNode instance, final Operation<Void> original, final HolderLookup.Provider registries) {
+    private void impl$onLayout(final AdvancementNode instance, final Operation<Void> original) {
         original.call(instance);
 
         final Cause cause = PhaseTracker.getInstance().currentCause();

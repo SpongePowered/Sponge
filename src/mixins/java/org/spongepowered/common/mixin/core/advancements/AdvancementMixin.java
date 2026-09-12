@@ -76,15 +76,15 @@ public abstract class AdvancementMixin implements AdvancementBridge {
     @Inject(method = "<init>(Ljava/util/Optional;Ljava/util/Optional;Lnet/minecraft/advancements/AdvancementRewards;Ljava/util/Map;Lnet/minecraft/advancements/AdvancementRequirements;Z)V", at = @At("RETURN"))
     private void impl$setUpSpongeFields(final Optional<Identifier> parent, final Optional<DisplayInfo> displayInfo, final AdvancementRewards $$2,
             final  Map<String, Criterion<?>> criteria, final AdvancementRequirements requirements, final boolean sendsTelemetryEvent, final CallbackInfo ci) {
-        displayInfo.ifPresent(info -> ((DisplayInfoBridge) info).bridge$setAdvancement((org.spongepowered.api.advancement.Advancement) this));
+        displayInfo.ifPresent(info -> ((DisplayInfoBridge) (Object) info).bridge$setAdvancement((org.spongepowered.api.advancement.Advancement) this));
     }
 
     private ImmutableList<Component> impl$generateToastText() {
         final ImmutableList.Builder<Component> toastText = ImmutableList.builder();
         if (this.display.isPresent()) {
-            final AdvancementType frameType = this.display.get().getType();
+            final AdvancementType frameType = this.display.get().type();
             toastText.add(Component.translatable("advancements.toast." + frameType.getSerializedName(), SpongeAdventure.asAdventureNamed(frameType.getChatColor())));
-            toastText.add(SpongeAdventure.asAdventure(this.display.get().getTitle()));
+            toastText.add(SpongeAdventure.asAdventure(this.display.get().title()));
         } // else no display
         return toastText.build();
     }

@@ -24,8 +24,10 @@
  */
 package org.spongepowered.vanilla.mixin.core.world.item;
 
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.consume_effects.TeleportRandomlyConsumeEffect;
+import net.minecraft.world.level.block.Block;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
@@ -37,13 +39,13 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 @Mixin(TeleportRandomlyConsumeEffect.class)
 public abstract class TeleportRandomlyConsumeEffectMixin_Vanilla {
 
-    @Redirect(method = "apply", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;randomTeleport(DDDZ)Z"))
+    @Redirect(method = "apply", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;randomTeleport(DDDZLnet/minecraft/tags/TagKey;)Z"))
     private boolean vanilla$createCauseFrameForTeleport(final LivingEntity entity, final double x, final double y, final double z,
-                                                        final boolean changeState) {
+                                                        final boolean changeState, final TagKey<Block> avoidanceTag) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.CHORUS_FRUIT.get());
 
-            return entity.randomTeleport(x, y, z, changeState);
+            return entity.randomTeleport(x, y, z, changeState, avoidanceTag);
         }
     }
 }

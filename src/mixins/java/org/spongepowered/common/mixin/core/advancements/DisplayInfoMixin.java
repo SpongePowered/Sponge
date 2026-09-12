@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.advancements;
 
 
+import net.minecraft.advancements.AdvancementNode;
 import net.minecraft.advancements.DisplayInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.advancement.Advancement;
@@ -36,6 +37,7 @@ import org.spongepowered.common.util.Preconditions;
 public abstract class DisplayInfoMixin implements DisplayInfoBridge {
 
     @Nullable private Advancement impl$advancement;
+    @Nullable private AdvancementNode impl$node;
 
     @Override
     public Advancement bridge$getAdvancement() {
@@ -46,6 +48,17 @@ public abstract class DisplayInfoMixin implements DisplayInfoBridge {
     @Override
     public void bridge$setAdvancement(Advancement advancement) {
         this.impl$advancement = advancement;
+    }
+
+    @Override
+    public AdvancementNode bridge$getNode() {
+        Preconditions.checkState(this.impl$node != null, "The advancement node is not yet initialized");
+        return this.impl$node;
+    }
+
+    @Override
+    public void bridge$setNode(AdvancementNode node) {
+        this.impl$node = node;
     }
 
 }

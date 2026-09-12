@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.animal.feline;
 
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.animal.feline.Cat;
+import net.minecraft.world.level.block.Block;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -37,15 +39,15 @@ public abstract class Cat_CatRelaxOnOwnerGoalMixin {
     private boolean impl$teleportResult;
 
     @Redirect(method = "giveMorningGift()V",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/feline/Cat;randomTeleport(DDDZ)Z"))
-    private boolean impl$storeTeleportResult(Cat entity, double x, double y, double z, boolean changeState) {
-        this.impl$teleportResult = entity.randomTeleport(x, y, z, changeState);
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/feline/Cat;randomTeleport(DDDZLnet/minecraft/tags/TagKey;)Z"))
+    private boolean impl$storeTeleportResult(Cat entity, double x, double y, double z, boolean changeState, TagKey<Block> avoidanceTag) {
+        this.impl$teleportResult = entity.randomTeleport(x, y, z, changeState, avoidanceTag);
         return this.impl$teleportResult;
     }
 
     @Inject(method = "giveMorningGift()V",
         at = @At(value = "INVOKE_ASSIGN",
-            target = "Lnet/minecraft/world/entity/animal/feline/Cat;randomTeleport(DDDZ)Z",
+            target = "Lnet/minecraft/world/entity/animal/feline/Cat;randomTeleport(DDDZLnet/minecraft/tags/TagKey;)Z",
             shift = At.Shift.AFTER),
         cancellable = true)
     private void impl$makeCatsRespectTeleportResult(final CallbackInfo ci) {

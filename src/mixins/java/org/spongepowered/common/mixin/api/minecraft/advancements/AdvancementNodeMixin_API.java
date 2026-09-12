@@ -75,7 +75,7 @@ public abstract class AdvancementNodeMixin_API implements AdvancementTree {
     @Override
     public Optional<ResourceKey> backgroundPath() {
         final Optional<DisplayInfo> displayInfo = this.holder.value().display();
-        return displayInfo.map(di -> (ResourceKey) (Object) di.getBackground());
+        return displayInfo.map(di -> (ResourceKey) (Object) di.background());
     }
 
     @Override

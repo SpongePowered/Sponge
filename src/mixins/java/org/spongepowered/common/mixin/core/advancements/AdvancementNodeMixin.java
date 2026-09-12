@@ -22,31 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.mixin.core.advancements;
 
-import net.minecraft.world.entity.monster.Enderman;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.world.entity.monster.EndermanAccessor;
-import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.advancements.AdvancementNode;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.advancements.DisplayInfoBridge;
 
-public final class EndermanData {
+@Mixin(AdvancementNode.class)
+public abstract class AdvancementNodeMixin {
 
-    private EndermanData() {
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void impl$linkDisplayToNode(final AdvancementHolder holder, final AdvancementNode parent, final CallbackInfo ci) {
+        holder.value().display().ifPresent(display -> ((DisplayInfoBridge) (Object) display).bridge$setNode((AdvancementNode) (Object) this));
     }
 
-    // @formatter:off
-    public static void register(final DataProviderRegistrator registrator) {
-        registrator
-                .asMutable(Enderman.class)
-                    .create(Keys.IS_SCREAMING)
-                        .get(Enderman::isCreepy)
-                        .set((h, v) -> h.getEntityData().set(EndermanAccessor.accessor$DATA_CREEPY(), v))
-                    .create(Keys.BLOCK_STATE)
-                        .get(h -> (BlockState) h.getCarriedBlock())
-                        .set((h, v) -> h.setCarriedBlock((net.minecraft.world.level.block.state.BlockState) v))
-                        .delete(h -> h.setCarriedBlock(null));
-        ;
-    }
-    // @formatter:on
 }

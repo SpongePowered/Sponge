@@ -26,6 +26,7 @@ package org.spongepowered.vanilla.mixin.core.world.entity;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
@@ -42,6 +43,8 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.math.vector.Vector3d;
+
+import java.util.function.Predicate;
 
 @Mixin(value = LivingEntity.class)
 public abstract class LivingEntityMixin_Vanilla extends EntityMixin_Vanilla {
@@ -60,16 +63,16 @@ public abstract class LivingEntityMixin_Vanilla extends EntityMixin_Vanilla {
     protected void vanilla$onElytraUse(final CallbackInfo ci) {
     }
 
-    @Inject(method = "randomTeleport", at = @At("HEAD"))
+    @Inject(method = "randomTeleport(DDDZLjava/util/function/Predicate;)Z", at = @At("HEAD"))
     private void vanilla$snapshotPositionBeforeVanillaTeleportLogic(final double x, final double y, final double z, final boolean changeState,
-                                                                    final CallbackInfoReturnable<Boolean> cir) {
+                                                                    final Predicate<BlockState> isInvalidPosition, final CallbackInfoReturnable<Boolean> cir) {
         final Entity self = (Entity) (Object) this;
         this.vanilla$preTeleportPosition = new Vector3d(self.getX(), self.getY(), self.getZ());
     }
 
-    @Inject(method = "randomTeleport", at = @At(value = "RETURN", ordinal = 0, shift = At.Shift.BY, by = 2), cancellable = true)
+    @Inject(method = "randomTeleport(DDDZLjava/util/function/Predicate;)Z", at = @At(value = "RETURN", ordinal = 0, shift = At.Shift.BY, by = 2), cancellable = true)
     private void vanilla$callMoveEntityEventForTeleport(final double x, final double y, final double z, final boolean changeState,
-                                                        final CallbackInfoReturnable<Boolean> cir) {
+                                                        final Predicate<BlockState> isInvalidPosition, final CallbackInfoReturnable<Boolean> cir) {
         if (!ShouldFire.MOVE_ENTITY_EVENT) {
             return;
         }

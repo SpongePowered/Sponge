@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.bridge.advancements;
 
+import net.minecraft.advancements.AdvancementNode;
 import org.spongepowered.api.advancement.Advancement;
 
 public interface DisplayInfoBridge {
@@ -31,5 +32,9 @@ public interface DisplayInfoBridge {
     Advancement bridge$getAdvancement();
 
     void bridge$setAdvancement(Advancement advancement);
+
+    AdvancementNode bridge$getNode();
+
+    void bridge$setNode(AdvancementNode node);
 
 }

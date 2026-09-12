@@ -95,7 +95,7 @@ public final class SpongeAdvancementBuilder implements Advancement.Builder.RootS
         this.criterion = value.criterion();
         this.displayInfo = value.displayInfo().orElse(null);
         this.backgroundPath = ((net.minecraft.advancements.Advancement) (Object) value).display()
-            .map(net.minecraft.advancements.DisplayInfo::getBackground).map(Optional::get).orElse(null);
+            .map(net.minecraft.advancements.DisplayInfo::background).map(Optional::get).orElse(null);
         return this;
     }
 

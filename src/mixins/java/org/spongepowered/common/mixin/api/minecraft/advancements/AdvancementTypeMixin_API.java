@@ -40,7 +40,7 @@ public abstract class AdvancementTypeMixin_API implements AdvancementType {
     private @Nullable TextColor api$textColor;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void api$setFields(String enumName, int ordinal, String name, ChatFormatting format, CallbackInfo ci) {
+    private void api$setFields(String enumName, int ordinal, int id, String name, ChatFormatting format, CallbackInfo ci) {
         this.api$textColor = SpongeAdventure.asAdventure(format);
     }
 

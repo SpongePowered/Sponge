@@ -51,10 +51,7 @@ public abstract class DisplayInfoMixin_API implements TreeLayoutElement, org.spo
     @Shadow @Final private net.minecraft.network.chat.Component title;
     @Shadow @Final private net.minecraft.network.chat.Component description;
     @Shadow @Final private boolean showToast;
-    @Shadow private float x;
-    @Shadow private float y;
-    @Shadow public abstract boolean shadow$shouldAnnounceChat();
-    @Shadow public abstract boolean shadow$isHidden();
+    @Shadow public abstract boolean shadow$announceToChat();
 
     @Shadow @Final private ItemStackTemplate icon;
 
@@ -67,13 +64,13 @@ public abstract class DisplayInfoMixin_API implements TreeLayoutElement, org.spo
 
     @Override
     public Vector2d position() {
-        return new Vector2d(this.x, this.y);
+        final var node = ((DisplayInfoBridge) this).bridge$getNode();
+        return new Vector2d(node.x(), node.y());
     }
 
     @Override
     public void setPosition(double x, double y) {
-        this.x = (float) x;
-        this.y = (float) y;
+        ((DisplayInfoBridge) this).bridge$getNode().setLocation((float) x, (float) y);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -109,12 +106,12 @@ public abstract class DisplayInfoMixin_API implements TreeLayoutElement, org.spo
 
     @Override
     public boolean doesAnnounceToChat() {
-        return this.shadow$shouldAnnounceChat();
+        return this.shadow$announceToChat();
     }
 
     @Intrinsic
     public boolean displayInfo$isHidden() {
-        return this.shadow$isHidden();
+        return this.hidden;
     }
 
 }

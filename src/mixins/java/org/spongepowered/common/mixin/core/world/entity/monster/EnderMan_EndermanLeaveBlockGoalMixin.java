@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.world.entity.monster;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.monster.Enderman;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -48,11 +48,11 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import java.util.ArrayList;
 import java.util.List;
 
-@Mixin(targets = "net/minecraft/world/entity/monster/EnderMan$EndermanLeaveBlockGoal")
-public abstract class EnderMan_EndermanLeaveBlockGoalMixin extends Goal {
+@Mixin(targets = "net/minecraft/world/entity/monster/Enderman$EndermanLeaveBlockGoal")
+public abstract class Enderman_EndermanLeaveBlockGoalMixin extends Goal {
 
     // @formatter:off
-    @Shadow @Final private EnderMan enderman;
+    @Shadow @Final private Enderman enderman;
     // @formatter:on
 
     /**
@@ -70,11 +70,11 @@ public abstract class EnderMan_EndermanLeaveBlockGoalMixin extends Goal {
         method = "canUse()Z",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/monster/EnderMan;getCarriedBlock()Lnet/minecraft/world/level/block/state/BlockState;"
+            target = "Lnet/minecraft/world/entity/monster/Enderman;getCarriedBlock()Lnet/minecraft/world/level/block/state/BlockState;"
         )
     )
     @Nullable
-    private BlockState impl$onCanGrief(final EnderMan endermanEntity) {
+    private BlockState impl$onCanGrief(final Enderman endermanEntity) {
         final BlockState heldBlockState = endermanEntity.getCarriedBlock();
         return ((GrieferBridge) this.enderman).bridge$canGrief() ? heldBlockState : null;
     }

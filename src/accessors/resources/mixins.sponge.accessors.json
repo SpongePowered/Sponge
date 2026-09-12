@@ -103,7 +103,7 @@
     "world.entity.item.PrimedTntAccessor",
     "world.entity.monster.BlazeAccessor",
     "world.entity.monster.CreeperAccessor",
-    "world.entity.monster.EnderManAccessor",
+    "world.entity.monster.EndermanAccessor",
     "world.entity.monster.EndermiteAccessor",
     "world.entity.monster.GuardianAccessor",
     "world.entity.monster.PatrollingMonsterAccessor",

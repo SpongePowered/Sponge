@@ -235,7 +235,7 @@
     "minecraft.world.entity.monster.BlazeMixin_API",
     "minecraft.world.entity.monster.CreeperMixin_API",
     "minecraft.world.entity.monster.ElderGuardianMixin_API",
-    "minecraft.world.entity.monster.EnderManMixin_API",
+    "minecraft.world.entity.monster.EndermanMixin_API",
     "minecraft.world.entity.monster.EndermiteMixin_API",
     "minecraft.world.entity.monster.EnemyMixin_API",
     "minecraft.world.entity.monster.GhastMixin_API",

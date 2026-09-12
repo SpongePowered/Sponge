@@ -78,10 +78,10 @@ public final class PlaceBlockPacketState extends BasicPacketState {
     @Override
     public void populateContext(final net.minecraft.server.level.ServerPlayer playerMP, final Packet<?> packet, final BasicPacketContext context) {
         final ServerboundUseItemOnPacket placeBlock = (ServerboundUseItemOnPacket) packet;
-        final net.minecraft.world.item.ItemStack itemUsed = playerMP.getItemInHand(placeBlock.getHand());
+        final net.minecraft.world.item.ItemStack itemUsed = playerMP.getItemInHand(placeBlock.hand());
         final ItemStack itemstack = ItemStackUtil.cloneDefensive(itemUsed);
         context.itemUsed(itemstack);
-        final HandType handType = (HandType) (Object) placeBlock.getHand();
+        final HandType handType = (HandType) (Object) placeBlock.hand();
         context.handUsed(handType);
     }
 
