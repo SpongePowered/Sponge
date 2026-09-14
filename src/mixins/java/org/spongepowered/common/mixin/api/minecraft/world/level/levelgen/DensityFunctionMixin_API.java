@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Interval;
 import net.minecraft.world.level.levelgen.densityfunction.DensityFunction;
 import net.minecraft.world.level.levelgen.densityfunction.DensityFunctions;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.registry.RegistryHolder;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.DataPackUtil;
@@ -41,7 +43,6 @@ public interface DensityFunctionMixin_API extends org.spongepowered.api.world.ge
 
     // @formatter:off
     @Shadow Interval shadow$range();
-    @Shadow float shadow$compute(final DensityFunction.FunctionContext var1);
     // @formatter:on
 
     @Override
@@ -55,13 +56,13 @@ public interface DensityFunctionMixin_API extends org.spongepowered.api.world.ge
     }
 
     @Override
-    default double compute(final Vector3i pos) {
-        return this.compute(pos.x(), pos.y(), pos.z());
+    default double compute(final ServerWorld world, final Vector3i pos) {
+        return this.compute(world, pos.x(), pos.y(), pos.z());
     }
 
     @Override
-    default double compute(final int x, final int y, final int z) {
-        return this.shadow$compute(new DensityFunction.SinglePointContext(x, y, z));
+    default double compute(final ServerWorld world, final int x, final int y, final int z) {
+        return ((ServerLevel) world).getChunkSource().randomState().sampleBlockValueUncached((DensityFunction) this, x, y, z);
     }
 
     @Override

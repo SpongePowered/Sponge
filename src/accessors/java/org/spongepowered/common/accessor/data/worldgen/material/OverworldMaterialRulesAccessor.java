@@ -27,26 +27,28 @@ package org.spongepowered.common.accessor.data.worldgen.material;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.data.worldgen.material.OverworldMaterialRules;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.levelgen.SurfaceRules;
+import net.minecraft.world.level.levelgen.material.rule.MaterialRule;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
 
+import java.util.List;
+
 @Mixin(OverworldMaterialRules.class)
 public interface OverworldMaterialRulesAccessor {
 
-    @Accessor("SURFACE") static ResourceKey<SurfaceRules.RuleSource> accessor$SURFACE() {
+    @Accessor("SURFACE") static ResourceKey<MaterialRule> accessor$SURFACE() {
         throw new UntransformedInvokerError();
     }
 
-    @Accessor("UNDERGROUND") static ResourceKey<SurfaceRules.RuleSource> accessor$UNDERGROUND() {
+    @Accessor("UNDERGROUND") static ResourceKey<MaterialRule> accessor$UNDERGROUND() {
         throw new UntransformedInvokerError();
     }
 
-    @Invoker("createOverworldLike") static SurfaceRules.RuleSource invoker$createOverworldLike(
-        final HolderGetter<SurfaceRules.RuleSource> rules, final boolean doPreliminarySurfaceCheck, final boolean bedrockRoof,
-        final boolean bedrockFloor, final SurfaceRules.RuleSource mainRuleCloseToSurface, final SurfaceRules.RuleSource underground
+    @Invoker("createOverworldLike") static MaterialRule invoker$createOverworldLike(
+        final HolderGetter<MaterialRule> rules, final boolean doPreliminarySurfaceCheck, final boolean bedrockRoof,
+        final boolean bedrockFloor, final MaterialRule mainRuleCloseToSurface, final MaterialRule underground, final List<MaterialRule> oreVeins
     ) {
         throw new UntransformedInvokerError();
     }

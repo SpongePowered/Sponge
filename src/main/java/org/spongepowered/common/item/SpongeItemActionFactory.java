@@ -84,10 +84,10 @@ public class SpongeItemActionFactory implements ItemAction.Factory {
     }
 
     @Override
-    public ItemAction.TeleportRandomly teleportRandomly(final double distance) {
+    public ItemAction.TeleportRandomly teleportRandomly(final double distance, final boolean directionalParticles) {
         if (distance <= 0) {
             throw new IllegalArgumentException("distance must be positive: " + distance);
         }
-        return (ItemAction.TeleportRandomly) (Object) new TeleportRandomlyConsumeEffect((float) distance * 2);
+        return (ItemAction.TeleportRandomly) (Object) new TeleportRandomlyConsumeEffect((float) distance * 2, directionalParticles);
     }
 }

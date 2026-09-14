@@ -38,6 +38,7 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.GenerationStep;
+import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureSpawnOverride;
@@ -84,9 +85,10 @@ public abstract class StructureMixin_API implements org.spongepowered.api.world.
             level.dimension(),
             level.registryAccess(),
             chunkSource.getGenerator(),
-            level.uncachedBiomeResolver(),
+            chunkSource.getGenerator().getBiomeSource(),
+            chunkSource.randomState().createClimateSampler(SamplerContext.EMPTY_UNCACHED),
             chunkSource.randomState(),
-            level.getStructureManager(),
+            level.getStructureTemplateManager(),
             level.getSeed(),
             ChunkPos.containing(VecHelper.toBlockPos(pos)),
             0,

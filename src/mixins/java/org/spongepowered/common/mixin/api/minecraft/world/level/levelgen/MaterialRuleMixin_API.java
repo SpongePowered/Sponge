@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen;
 
-import net.minecraft.world.level.levelgen.SurfaceRules;
+import net.minecraft.world.level.levelgen.material.rule.MaterialRule;
 import org.spongepowered.api.world.generation.config.SurfaceRule;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(SurfaceRules.RuleSource.class)
-public interface SurfaceRules_RulesSourceMixin_API extends SurfaceRule {
+@Mixin(MaterialRule.class)
+public interface MaterialRuleMixin_API extends SurfaceRule {
 
 }

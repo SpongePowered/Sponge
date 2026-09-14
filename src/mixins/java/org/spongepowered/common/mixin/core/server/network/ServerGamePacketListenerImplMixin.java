@@ -229,22 +229,15 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
         }
     }
 
-    @Inject(method = "handleMovePlayer",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/game/ServerboundMovePlayerPacket;getX(D)D"),
-        cancellable = true,
-        slice = @Slice(
-            from = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;updateAwaitingTeleport()Z"),
-            to = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;isPassenger()Z")))
-    private void impl$callMoveEntityEvent(final ServerboundMovePlayerPacket packetIn, final CallbackInfo ci) {
-        if (!packetIn.hasPosition()) {
-            return;
-        }
-
+    @Inject(method = "handlePlayerPositionChange", at = @At(value = "HEAD"), cancellable = true)
+    private void impl$callMoveEntityEvent(final double targetX, final double targetY, final double targetZ,
+                                          final float targetYRot, final  float targetXRot,
+                                          final boolean isOnGround, final  boolean horizontalCollision,
+                                          final CallbackInfo ci) {
         final ServerPlayer player = (ServerPlayer) this.player;
         final Vector3d fromPosition = player.position();
 
-        final Vector3d originalToPosition = new Vector3d(packetIn.getX(this.player.getX()),
-                packetIn.getY(this.player.getY()), packetIn.getZ(this.player.getZ()));
+        final Vector3d originalToPosition = new Vector3d(targetX, targetY, targetZ);
 
         // common checks and throws are done here.
         final @Nullable Vector3d toPosition;

@@ -24,20 +24,22 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen;
 
-import net.minecraft.world.level.levelgen.SurfaceRules;
+import net.minecraft.world.level.levelgen.material.MaterialRules;
+import net.minecraft.world.level.levelgen.material.condition.MaterialCondition;
+import net.minecraft.world.level.levelgen.material.rule.MaterialRule;
 import org.spongepowered.api.world.generation.config.SurfaceRule;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(SurfaceRules.ConditionSource.class)
-public interface SurfaceRules_ConditionSourceMixin_API extends SurfaceRule.Condition {
+@Mixin(MaterialCondition.class)
+public interface MaterialConditionMixin_API extends SurfaceRule.Condition {
 
     @Override
     default SurfaceRule then(SurfaceRule rule) {
-        return (SurfaceRule) SurfaceRules.ifTrue((SurfaceRules.ConditionSource) this, (SurfaceRules.RuleSource) rule);
+        return (SurfaceRule) MaterialRules.ifTrue((MaterialCondition) this, (MaterialRule) rule);
     }
 
     @Override
     default SurfaceRule.Condition not() {
-        return (SurfaceRule.Condition) SurfaceRules.not((SurfaceRules.ConditionSource) this);
+        return (SurfaceRule.Condition) MaterialRules.not((MaterialCondition) this);
     }
 }

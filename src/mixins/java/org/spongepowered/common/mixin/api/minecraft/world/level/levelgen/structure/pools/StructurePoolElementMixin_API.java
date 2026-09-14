@@ -71,7 +71,7 @@ public abstract class StructurePoolElementMixin_API implements JigsawPoolElement
 
     @Override
     public boolean place(final ServerLocation location, final boolean withStructureBlocks, final boolean waterLogging) {
-        final StructureTemplateManager stm = SpongeCommon.server().getStructureManager();
+        final StructureTemplateManager stm = SpongeCommon.server().getStructureTemplateManager();
         final ServerLevel level = (ServerLevel) location.world();
         return this.shadow$place(stm, level, level.structureManager(), level.getChunkSource().getGenerator(),
                 VecHelper.toBlockPos(location.blockPosition()), BlockPos.ZERO, Rotation.NONE, BoundingBox.infinite(), level.getRandom(),

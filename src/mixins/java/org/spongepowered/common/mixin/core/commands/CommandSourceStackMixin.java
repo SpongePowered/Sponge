@@ -29,7 +29,6 @@ import net.minecraft.commands.CommandSigningContext;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.permissions.PermissionSet;
@@ -77,8 +76,7 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
     @Shadow @Final @Mutable private ServerLevel level;
     @Shadow @Final @Mutable private PermissionSet permissions;
 
-    @Shadow @Final private Component displayName;
-    @Shadow @Final private String textName;
+    @Shadow @Final private CommandSourceStack.NamesProvider namesProvider;
     @Shadow @Final @Nullable private Entity entity;
 
     @Shadow @Final private MinecraftServer server;
@@ -94,23 +92,22 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
     @Nullable private Supplier<String> impl$potentialPermissionNode = null;
     private @Nullable PermissionService impl$permissionService;
 
-    @Inject(method = "<init>(Lnet/minecraft/commands/CommandSource;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec2;Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/server/permissions/PermissionSet;Ljava/lang/String;Lnet/minecraft/network/chat/Component;Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/world/entity/Entity;ZLnet/minecraft/commands/CommandResultCallback;Lnet/minecraft/commands/arguments/EntityAnchorArgument$Anchor;Lnet/minecraft/commands/CommandSigningContext;Lnet/minecraft/util/TaskChainer;)V",
+    @Inject(method = "<init>(Lnet/minecraft/commands/CommandSource;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec2;Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/server/permissions/PermissionSet;Lnet/minecraft/commands/CommandSourceStack$NamesProvider;Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/world/entity/Entity;ZLnet/minecraft/commands/CommandResultCallback;Lnet/minecraft/commands/arguments/EntityAnchorArgument$Anchor;Lnet/minecraft/commands/CommandSigningContext;Lnet/minecraft/util/TaskChainer;)V",
         at = @At("RETURN"))
     private void impl$setCauseOnConstruction(
-        final CommandSource $$0,
-        final Vec3 $$1,
-        final Vec2 $$2,
-        final ServerLevel $$3,
-        final PermissionSet permissionLevel,
-        final String $$5,
-        final Component $$6,
-        final MinecraftServer $$7,
-        final Entity $$8,
-        final boolean $$9,
-        final CommandResultCallback $$10,
-        final EntityAnchorArgument.Anchor $$11,
-        final CommandSigningContext $$12,
-        final TaskChainer $$13,
+        final CommandSource source,
+        final Vec3 position,
+        final Vec2 rotation,
+        final ServerLevel level,
+        final PermissionSet permissions,
+        final CommandSourceStack.NamesProvider namesProvider,
+        final MinecraftServer server,
+        final @Nullable Entity entity,
+        final boolean silent,
+        final CommandResultCallback resultCallback,
+        final EntityAnchorArgument.Anchor anchor,
+        final CommandSigningContext signingContext,
+        final TaskChainer chatMessageChainer,
         final CallbackInfo ci
     ) {
         this.impl$cause = PhaseTracker.getInstance().currentCause();
@@ -141,7 +138,7 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
                 }
                 return ((CommandCause) this).hasPermission(perm);
             }
-            return permissionLevel.hasPermission(incoming);
+            return permissions.hasPermission(incoming);
         };
     }
 
@@ -174,7 +171,7 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
     public CommandCause bridge$withCurrentCause() {
         // Cause is set in ctor.
         final CommandCause instance = (CommandCause) CommandSourceStackAccessor.invoker$new(this.source, this.worldPosition, this.rotation, this.level, this.permissions,
-            this.textName, this.displayName, this.server, this.entity, this.silent, this.resultCallback, this.anchor, this.signingContext, this.chatMessageChainer);
+            this.namesProvider, this.server, this.entity, this.silent, this.resultCallback, this.anchor, this.signingContext, this.chatMessageChainer);
         ((CommandSourceStackBridge) instance).bridge$permissionService(this.impl$permissionService);
         return instance;
     }

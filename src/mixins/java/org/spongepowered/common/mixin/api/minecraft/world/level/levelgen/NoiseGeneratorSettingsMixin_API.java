@@ -30,8 +30,7 @@ import net.minecraft.world.level.levelgen.Aquifer;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.NoiseRouter;
 import net.minecraft.world.level.levelgen.NoiseSettings;
-import net.minecraft.world.level.levelgen.OreVeinifier;
-import net.minecraft.world.level.levelgen.SurfaceRules;
+import net.minecraft.world.level.levelgen.material.rule.MaterialRule;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.registry.RegistryHolder;
@@ -60,12 +59,11 @@ public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorC
     @Shadow @Final private net.minecraft.world.level.block.state.BlockState defaultBlock;
     @Shadow @Final private net.minecraft.world.level.block.state.BlockState defaultFluid;
     @Shadow @Final private NoiseRouter noiseRouter;
-    @Shadow @Final private Holder<SurfaceRules.RuleSource> materialRule;
+    @Shadow @Final private Holder<MaterialRule> materialRule;
     @Shadow @Final private List<Climate.ParameterPoint> spawnTarget;
     @Shadow @Final private int seaLevel;
     @Shadow @Final private boolean disableMobGeneration;
     @Shadow @Final private Optional<Aquifer.Config> aquifers;
-    @Shadow @Final private List<OreVeinifier> oreVeins;
     @Shadow @Final private boolean useLegacyRandomSource;
     // @formatter:on
 
@@ -102,11 +100,6 @@ public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorC
     @Override
     public boolean aquifers() {
         return this.aquifers.isPresent();
-    }
-
-    @Override
-    public boolean oreVeins() {
-        return !this.oreVeins.isEmpty();
     }
 
     @Override

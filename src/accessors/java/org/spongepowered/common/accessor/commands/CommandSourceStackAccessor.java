@@ -29,7 +29,6 @@ import net.minecraft.commands.CommandSigningContext;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.permissions.PermissionSet;
@@ -47,19 +46,20 @@ public interface CommandSourceStackAccessor {
 
     @Invoker("<init>")
     static CommandSourceStack invoker$new(
-            final CommandSource $$0,
-            final Vec3 $$1,
-            final Vec2 $$2,
-            final ServerLevel $$3,
-            final PermissionSet $$4,
-            final String $$5,
-            final Component $$6, final MinecraftServer $$7,
-            @Nullable final Entity $$8,
-            final boolean $$9,
-            final CommandResultCallback $$10,
-            final EntityAnchorArgument.Anchor $$11,
-            final CommandSigningContext $$12,
-            TaskChainer $$13) {
+        final CommandSource source,
+        final Vec3 position,
+        final Vec2 rotation,
+        final ServerLevel level,
+        final PermissionSet permissions,
+        final CommandSourceStack.NamesProvider namesProvider,
+        final MinecraftServer server,
+        final @Nullable Entity entity,
+        final boolean silent,
+        final CommandResultCallback resultCallback,
+        final EntityAnchorArgument.Anchor anchor,
+        final CommandSigningContext signingContext,
+        final TaskChainer chatMessageChainer
+    ) {
         throw new UntransformedInvokerError();
     }
 

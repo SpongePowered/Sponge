@@ -39,23 +39,11 @@ public abstract class NoiseSettingsMixin_API implements NoiseConfig {
 
     // @formatter:off
     @Shadow public abstract int shadow$height();
-    @Shadow public abstract int shadow$noiseSizeHorizontal();
-    @Shadow public abstract int shadow$noiseSizeVertical();
     // @formatter:on
 
     @Intrinsic
     public int noiseConfig$height() {
         return this.shadow$height();
-    }
-
-    @Override
-    public int horizontalSize() {
-        return this.shadow$noiseSizeHorizontal();
-    }
-
-    @Override
-    public int verticalSize() {
-        return this.shadow$noiseSizeVertical();
     }
 
 }

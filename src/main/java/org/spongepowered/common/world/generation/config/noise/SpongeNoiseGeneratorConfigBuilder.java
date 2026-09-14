@@ -31,8 +31,8 @@ import net.minecraft.world.level.levelgen.Aquifer;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.NoiseRouterData;
 import net.minecraft.world.level.levelgen.NoiseSettings;
-import net.minecraft.world.level.levelgen.OreVeinifier;
 import net.minecraft.world.level.levelgen.densityfunction.DensityFunction;
+import net.minecraft.world.level.levelgen.material.rule.MaterialRule;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
@@ -56,11 +56,10 @@ public final class SpongeNoiseGeneratorConfigBuilder implements NoiseGeneratorCo
     public int seaLevel;
     public boolean legacyRandomSource, disableMobGeneration;
     private Optional<Aquifer.Config> aquifers;
-    private List<OreVeinifier> oreVeins;
     public SurfaceRule surfaceRule;
     // Copied straight from the source settings so that a from()/build() round trip does not
     // resolve the material rule while its registry is still loading.
-    private net.minecraft.core.@org.checkerframework.checker.nullness.qual.Nullable Holder<net.minecraft.world.level.levelgen.SurfaceRules.RuleSource> materialRule;
+    private net.minecraft.core.@org.checkerframework.checker.nullness.qual.Nullable Holder<MaterialRule> materialRule;
     private NoiseRouter router;
     private List<BiomeAttributes> spawnTargets;
 
@@ -113,12 +112,6 @@ public final class SpongeNoiseGeneratorConfigBuilder implements NoiseGeneratorCo
     }
 
     @Override
-    public NoiseGeneratorConfig.Builder oreVeins(final boolean enableOreVeins) {
-        this.oreVeins = enableOreVeins ? NoiseRouterDataAccessor.invoker$overworldOreVeins(this.functions()) : List.of();
-        return this;
-    }
-
-    @Override
     public NoiseGeneratorConfig.Builder randomSource(boolean useLegacyRandomSource) {
         this.legacyRandomSource = useLegacyRandomSource;
         return this;
@@ -145,7 +138,6 @@ public final class SpongeNoiseGeneratorConfigBuilder implements NoiseGeneratorCo
         this.materialRule = null;
         this.seaLevel = 63;
         this.aquifers = Optional.empty();
-        this.oreVeins = List.of();
         this.legacyRandomSource = false;
         this.router = null;
         final HolderGetter<DensityFunction> functions = this.functions();
@@ -164,7 +156,6 @@ public final class SpongeNoiseGeneratorConfigBuilder implements NoiseGeneratorCo
         this.surfaceRule = null;
         this.seaLevel = value.seaLevel();
         this.aquifers = ((NoiseGeneratorSettings) (Object) value).aquifers();
-        this.oreVeins = ((NoiseGeneratorSettings) (Object) value).oreVeins();
         this.legacyRandomSource = value.legacyRandomSource();
         this.router = value.noiseRouter();
         this.spawnTargets = value.spawnTargets();
@@ -181,19 +172,32 @@ public final class SpongeNoiseGeneratorConfigBuilder implements NoiseGeneratorCo
 
     @Override
     public NoiseGeneratorConfig build() {
+        final var mcRouter = (net.minecraft.world.level.levelgen.NoiseRouter) (Object) Objects.requireNonNull(this.router, "router");
         final NoiseGeneratorSettings settings = new NoiseGeneratorSettings(
             (NoiseSettings) (Object) this.noiseConfig,
             (net.minecraft.world.level.block.state.BlockState) this.defaultBlock,
             (net.minecraft.world.level.block.state.BlockState) this.defaultFluid,
-            (net.minecraft.world.level.levelgen.NoiseRouter) (Object) Objects.requireNonNull(this.router, "router"),
+            mcRouter,
             this.materialRule != null ? this.materialRule
-                : net.minecraft.core.Holder.direct((net.minecraft.world.level.levelgen.SurfaceRules.RuleSource) this.surfaceRule),
+                : net.minecraft.core.Holder.direct((MaterialRule) this.surfaceRule),
             (List) this.spawnTargets,
             this.seaLevel,
             this.disableMobGeneration,
             this.aquifers,
-            this.oreVeins,
-            this.legacyRandomSource
+            this.legacyRandomSource,
+            new NoiseGeneratorSettings.DebugFunctions(
+                List.of(
+                    new NoiseGeneratorSettings.DebugFunctionEntry("N", mcRouter.finalDensity()),
+                    new NoiseGeneratorSettings.DebugFunctionEntry("T", mcRouter.temperature()),
+                    new NoiseGeneratorSettings.DebugFunctionEntry("V", mcRouter.vegetation()),
+                    new NoiseGeneratorSettings.DebugFunctionEntry("C", mcRouter.continents()),
+                    new NoiseGeneratorSettings.DebugFunctionEntry("E", mcRouter.erosion()),
+                    new NoiseGeneratorSettings.DebugFunctionEntry("D", mcRouter.depth()),
+                    new NoiseGeneratorSettings.DebugFunctionEntry("W", mcRouter.ridges()),
+                    new NoiseGeneratorSettings.DebugFunctionEntry("PV", NoiseRouterData.peaksAndValleys(mcRouter.ridges())),
+                    new NoiseGeneratorSettings.DebugFunctionEntry("PS", mcRouter.chunkSurfaceLevel())
+                )
+            )
         );
         return (NoiseGeneratorConfig) (Object) settings;
     }

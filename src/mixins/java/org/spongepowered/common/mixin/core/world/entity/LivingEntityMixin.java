@@ -41,7 +41,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
@@ -214,7 +213,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     }
 
     @Inject(method = "onEquippedItemBroken", at = @At("HEAD"), cancellable = true)
-    private void impl$vanishDoesNotBroadcastBreakEvents(final Item $$0, final EquipmentSlot $$1, final CallbackInfo ci) {
+    private void impl$vanishDoesNotBroadcastBreakEvents(final ItemStack brokenItem, final EquipmentSlot inSlot, final CallbackInfo ci) {
         if (this.bridge$vanishState().invisible()) {
             ci.cancel();
         }

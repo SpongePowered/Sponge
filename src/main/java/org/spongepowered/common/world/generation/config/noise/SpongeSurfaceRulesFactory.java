@@ -30,8 +30,10 @@ import net.minecraft.data.worldgen.material.NetherMaterialRules;
 import net.minecraft.data.worldgen.material.OverworldMaterialRules;
 import net.minecraft.data.worldgen.material.VanillaMaterialConditions;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.level.levelgen.SurfaceRules;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
+import net.minecraft.world.level.levelgen.material.MaterialRules;
+import net.minecraft.world.level.levelgen.material.condition.MaterialCondition;
+import net.minecraft.world.level.levelgen.material.rule.MaterialRule;
 import net.minecraft.world.level.levelgen.placement.CaveSurface;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import org.spongepowered.api.block.BlockState;
@@ -47,12 +49,12 @@ import java.util.List;
 
 public final class SpongeSurfaceRulesFactory implements SurfaceRule.Factory {
 
-    private static SurfaceRules.RuleSource rule(final net.minecraft.resources.ResourceKey<SurfaceRules.RuleSource> key) {
-        return SurfaceRules.getRule(SpongeCommon.vanillaRegistry(Registries.MATERIAL_RULE), key);
+    private static MaterialRule rule(final net.minecraft.resources.ResourceKey<MaterialRule> key) {
+        return MaterialRules.getRule(SpongeCommon.vanillaRegistry(Registries.MATERIAL_RULE), key);
     }
 
-    private static SurfaceRules.ConditionSource condition(final net.minecraft.resources.ResourceKey<SurfaceRules.ConditionSource> key) {
-        return SurfaceRules.getCondition(SpongeCommon.vanillaRegistry(Registries.MATERIAL_CONDITION), key);
+    private static MaterialCondition condition(final net.minecraft.resources.ResourceKey<MaterialCondition> key) {
+        return MaterialRules.getCondition(SpongeCommon.vanillaRegistry(Registries.MATERIAL_CONDITION), key);
     }
 
     @Override
@@ -68,7 +70,8 @@ public final class SpongeSurfaceRulesFactory implements SurfaceRule.Factory {
             bedrockRoof,
             bedrockFloor,
             SpongeSurfaceRulesFactory.rule(OverworldMaterialRulesAccessor.accessor$SURFACE()),
-            SpongeSurfaceRulesFactory.rule(OverworldMaterialRulesAccessor.accessor$UNDERGROUND())
+            SpongeSurfaceRulesFactory.rule(OverworldMaterialRulesAccessor.accessor$UNDERGROUND()),
+            List.of() // TODO
         );
     }
 
@@ -84,7 +87,7 @@ public final class SpongeSurfaceRulesFactory implements SurfaceRule.Factory {
 
     @Override
     public SurfaceRule firstOf(final List<SurfaceRule> surfaceRules) {
-        return (SurfaceRule) SurfaceRules.sequence(surfaceRules.stream().map(SurfaceRules.RuleSource.class::cast).toArray(SurfaceRules.RuleSource[]::new));
+        return (SurfaceRule) MaterialRules.sequence(surfaceRules.stream().map(MaterialRule.class::cast).toArray(MaterialRule[]::new));
     }
 
     @Override
@@ -94,19 +97,19 @@ public final class SpongeSurfaceRulesFactory implements SurfaceRule.Factory {
 
     @Override
     public SurfaceRule badlands() {
-        return (SurfaceRule) SurfaceRules.bandlands();
+        return (SurfaceRule) MaterialRules.bandlands();
     }
 
     @Override
     public SurfaceRule block(final BlockState blockState) {
-        return (SurfaceRule) SurfaceRules.state((net.minecraft.world.level.block.state.BlockState) blockState);
+        return (SurfaceRule) MaterialRules.state((net.minecraft.world.level.block.state.BlockState) blockState);
     }
 
     @Override
     public SurfaceRule test(final List<SurfaceRule.Condition> conditions, final SurfaceRule rule) {
-        SurfaceRules.RuleSource mcRule = (SurfaceRules.RuleSource) rule;
+        MaterialRule mcRule = (MaterialRule) rule;
         for (final SurfaceRule.Condition condition : conditions) {
-            mcRule = SurfaceRules.ifTrue((SurfaceRules.ConditionSource) condition, mcRule);
+            mcRule = MaterialRules.ifTrue((MaterialCondition) condition, mcRule);
         }
         return (SurfaceRule) mcRule;
     }
@@ -118,12 +121,12 @@ public final class SpongeSurfaceRulesFactory implements SurfaceRule.Factory {
 
     @Override
     public SurfaceRule.Condition liquidDepth(final int offset, final int depthMultiplier) {
-        return (SurfaceRule.Condition) SurfaceRules.waterBlockCheck(offset, depthMultiplier);
+        return (SurfaceRule.Condition) MaterialRules.waterBlockCheck(offset, depthMultiplier);
     }
 
     @Override
     public SurfaceRule.Condition liquidDepthFromSurface(final int offset, final int depthMultiplier) {
-        return (SurfaceRule.Condition) SurfaceRules.waterStartCheck(offset, depthMultiplier);
+        return (SurfaceRule.Condition) MaterialRules.waterStartCheck(offset, depthMultiplier);
     }
 
     @Override
@@ -131,34 +134,34 @@ public final class SpongeSurfaceRulesFactory implements SurfaceRule.Factory {
         final var stream = biomes.stream()
                 .map(r -> net.minecraft.resources.ResourceKey.create(Registries.BIOME, ((Identifier) (Object) r.location())));
         final net.minecraft.resources.ResourceKey<net.minecraft.world.level.biome.Biome>[] keys = stream.toArray(net.minecraft.resources.ResourceKey[]::new);
-        return (SurfaceRule.Condition) SurfaceRules.isBiome(SpongeCommon.vanillaRegistry(Registries.BIOME), keys);
+        return (SurfaceRule.Condition) MaterialRules.isBiome(SpongeCommon.vanillaRegistry(Registries.BIOME), keys);
     }
 
     @Override
     public SurfaceRule.Condition nearSurface() {
-        return (SurfaceRule.Condition) SurfaceRules.abovePreliminarySurface();
+        return (SurfaceRule.Condition) MaterialRules.abovePreliminarySurface();
     }
 
     @Override
     public SurfaceRule.Condition hole() {
-        return (SurfaceRule.Condition) SurfaceRules.hole();
+        return (SurfaceRule.Condition) MaterialRules.hole();
     }
 
     @Override
     public SurfaceRule.Condition verticalGradient(final String randomSource, final int fromY, final int toY) {
         final VerticalAnchor trueAtAndBelowAnchor = new VerticalAnchor.Absolute(fromY);
         final VerticalAnchor falseAtAndAboveAnchor = new VerticalAnchor.Absolute(toY);
-        return (SurfaceRule.Condition) SurfaceRules.verticalGradient(randomSource, trueAtAndBelowAnchor, falseAtAndAboveAnchor);
+        return (SurfaceRule.Condition) MaterialRules.verticalGradient(randomSource, trueAtAndBelowAnchor, falseAtAndAboveAnchor);
     }
 
     @Override
     public SurfaceRule.Condition verticalGradient(final String randomSource, final SurfaceRule.VerticalAnchor trueAtAndBelow, final SurfaceRule.VerticalAnchor falseAtAndAbove) {
-        return (SurfaceRule.Condition) SurfaceRules.verticalGradient(randomSource, (VerticalAnchor) trueAtAndBelow, (VerticalAnchor) falseAtAndAbove);
+        return (SurfaceRule.Condition) MaterialRules.verticalGradient(randomSource, (VerticalAnchor) trueAtAndBelow, (VerticalAnchor) falseAtAndAbove);
     }
 
     @Override
     public SurfaceRule.Condition steep() {
-        return (SurfaceRule.Condition) SurfaceRules.steep();
+        return (SurfaceRule.Condition) MaterialRules.steep();
     }
 
     @Override
@@ -168,12 +171,12 @@ public final class SpongeSurfaceRulesFactory implements SurfaceRule.Factory {
 
     @Override
     public SurfaceRule.Condition underFloor(final int depth) {
-        return (SurfaceRule.Condition) SurfaceRules.stoneDepthCheck(0, true, depth, CaveSurface.FLOOR);
+        return (SurfaceRule.Condition) MaterialRules.stoneDepthCheck(0, true, depth, CaveSurface.FLOOR);
     }
 
     @Override
     public SurfaceRule.Condition floor(final int offset, final boolean useDepth, final int secondaryDepth) {
-        return (SurfaceRule.Condition) SurfaceRules.stoneDepthCheck(offset, useDepth, secondaryDepth, CaveSurface.FLOOR);
+        return (SurfaceRule.Condition) MaterialRules.stoneDepthCheck(offset, useDepth, secondaryDepth, CaveSurface.FLOOR);
     }
 
     @Override
@@ -183,38 +186,38 @@ public final class SpongeSurfaceRulesFactory implements SurfaceRule.Factory {
 
     @Override
     public SurfaceRule.Condition underCeiling(final int depth) {
-        return (SurfaceRule.Condition) SurfaceRules.stoneDepthCheck(0, true, depth, CaveSurface.CEILING);
+        return (SurfaceRule.Condition) MaterialRules.stoneDepthCheck(0, true, depth, CaveSurface.CEILING);
     }
 
     @Override
     public SurfaceRule.Condition ceiling(final int offset, final boolean useDepth, final int secondaryDepth) {
-        return (SurfaceRule.Condition) SurfaceRules.stoneDepthCheck(offset, useDepth, secondaryDepth, CaveSurface.CEILING);
+        return (SurfaceRule.Condition) MaterialRules.stoneDepthCheck(offset, useDepth, secondaryDepth, CaveSurface.CEILING);
     }
 
     @Override
     public SurfaceRule.Condition not(SurfaceRule.Condition condition) {
-        return (SurfaceRule.Condition) SurfaceRules.not((SurfaceRules.ConditionSource) condition);
+        return (SurfaceRule.Condition) MaterialRules.not((MaterialCondition) condition);
     }
 
     @Override
     public SurfaceRule.Condition snowyTemperature() {
-        return (SurfaceRule.Condition) SurfaceRules.temperature();
+        return (SurfaceRule.Condition) MaterialRules.temperature();
     }
 
     @Override
     public SurfaceRule.Condition blockAbove(final SurfaceRule.VerticalAnchor anchor, final int depthMultiplier) {
-        return (SurfaceRule.Condition) SurfaceRules.yBlockCheck((VerticalAnchor) anchor, depthMultiplier);
+        return (SurfaceRule.Condition) MaterialRules.yBlockCheck((VerticalAnchor) anchor, depthMultiplier);
     }
 
     @Override
     public SurfaceRule.Condition surfaceAbove(final SurfaceRule.VerticalAnchor anchor, final int depthMultiplier) {
-        return (SurfaceRule.Condition) SurfaceRules.yStartCheck((VerticalAnchor) anchor, depthMultiplier);
+        return (SurfaceRule.Condition) MaterialRules.yStartCheck((VerticalAnchor) anchor, depthMultiplier);
     }
 
     @Override
     public SurfaceRule.Condition noiseThreshold(final RegistryReference<Noise> noise, final double min, final double max) {
         final net.minecraft.resources.ResourceKey<NormalNoise> key = net.minecraft.resources.ResourceKey.create(Registries.NOISE, ((Identifier) (Object) noise.location()));
-        return (SurfaceRule.Condition) SurfaceRules.noiseCondition2d(key, min, max);
+        return (SurfaceRule.Condition) MaterialRules.noiseCondition2d(key, min, max);
     }
 
     // Anchors

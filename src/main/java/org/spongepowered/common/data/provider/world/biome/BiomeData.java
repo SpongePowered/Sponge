@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.provider.world.biome;
 
 import net.minecraft.core.Holder;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.random.Weighted;
 import net.minecraft.world.attribute.AmbientSounds;
 import net.minecraft.world.attribute.EnvironmentAttributes;
@@ -91,19 +92,19 @@ public final class BiomeData {
                     .create(Keys.FOG_COLOR)
                     .get(h -> {
                         final var value = h.getAttributes().applyModifier(EnvironmentAttributes.FOG_COLOR, EnvironmentAttributes.FOG_COLOR.defaultValue());
-                        return Color.ofRgb(value);
+                        return Color.ofRgb(ARGB.colorFromVector3f(value));
                     })
                     .create(Keys.WATER_COLOR)
                         .get(h -> Color.ofRgb(h.getSpecialEffects().waterColor()))
                     .create(Keys.WATER_FOG_COLOR)
                     .get(h -> {
                         final var value = h.getAttributes().applyModifier(EnvironmentAttributes.WATER_FOG_COLOR, EnvironmentAttributes.WATER_FOG_COLOR.defaultValue());
-                        return Color.ofRgb(value);
+                        return Color.ofRgb(ARGB.colorFromVector3f(value));
                     })
                     .create(Keys.SKY_COLOR)
                     .get(h -> {
                         final var value = h.getAttributes().applyModifier(EnvironmentAttributes.SKY_COLOR, EnvironmentAttributes.SKY_COLOR.defaultValue());
-                        return Color.ofRgb(value);
+                        return Color.ofRgb(ARGB.colorFromVector3f(value));
                     })
                     .create(Keys.FOLIAGE_COLOR)
                         .get(h -> h.getSpecialEffects().foliageColorOverride().map(Color::ofRgb).orElse(null))

@@ -64,10 +64,9 @@ public final class ServerConsoleSystemSubject extends SpongeSystemSubject implem
             Vec2.ZERO,
             SpongeCommon.server().getLevel(Level.OVERWORLD),
             LevelBasedPermissionSet.OWNER,
-            "System Subject",
             net.minecraft.network.chat.Component.literal("System Subject"),
-            SpongeCommon.server(),
-            null);
+            SpongeCommon.server()
+        );
     }
 
     @Override

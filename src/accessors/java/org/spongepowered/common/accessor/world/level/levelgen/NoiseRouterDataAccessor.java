@@ -28,7 +28,6 @@ import net.minecraft.core.HolderGetter;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.levelgen.Aquifer;
 import net.minecraft.world.level.levelgen.NoiseRouterData;
-import net.minecraft.world.level.levelgen.OreVeinifier;
 import net.minecraft.world.level.levelgen.OverworldFunctionSet;
 import net.minecraft.world.level.levelgen.densityfunction.DensityFunction;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
@@ -36,17 +35,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
 
-import java.util.List;
-
 @Mixin(NoiseRouterData.class)
 public interface NoiseRouterDataAccessor {
 
     @Invoker("overworldAquifers") static Aquifer.Config invoker$overworldAquifers(final HolderGetter<DensityFunction> functions,
         final HolderGetter<NormalNoise> noises, final OverworldFunctionSet<ResourceKey<DensityFunction>> names) {
-        throw new UntransformedInvokerError();
-    }
-
-    @Invoker("overworldOreVeins") static List<OreVeinifier> invoker$overworldOreVeins(final HolderGetter<DensityFunction> functions) {
         throw new UntransformedInvokerError();
     }
 }

@@ -27,6 +27,7 @@ package org.spongepowered.common.world.biome;
 import net.minecraft.core.Holder;
 import net.minecraft.sounds.Music;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.attribute.AmbientAdditionsSettings;
 import net.minecraft.world.attribute.AmbientMoodSettings;
 import net.minecraft.world.attribute.AmbientParticle;
@@ -123,9 +124,9 @@ public final class SpongeBiomeBuilder implements Biome.Builder {
         final List<Carver> carvers = this.manipulator.getOrElse(Keys.CARVERS, List.of());
 
         final var attributes = EnvironmentAttributeMap.builder();
-        attributes.set(EnvironmentAttributes.FOG_COLOR, fogColor.rgb())
-            .set(EnvironmentAttributes.WATER_FOG_COLOR, waterFogColor.rgb())
-            .set(EnvironmentAttributes.SKY_COLOR, skyColor.rgb());
+        attributes.set(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(fogColor.rgb()))
+            .set(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(waterFogColor.rgb()))
+            .set(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(skyColor.rgb()));
         final BiomeSpecialEffects.Builder effectsBuilder = new BiomeSpecialEffects.Builder()
             .waterColor(waterColor.rgb())
             .grassColorModifier((BiomeSpecialEffects.GrassColorModifier) (Object) grassColorModifier);

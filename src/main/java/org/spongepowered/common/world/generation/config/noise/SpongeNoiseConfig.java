@@ -37,7 +37,7 @@ public final class SpongeNoiseConfig {
 
     public static final class BuilderImpl implements NoiseConfig.Builder {
 
-        public int minY, height, horizontalSize, verticalSize;
+        public int minY, height;
 
         public BuilderImpl() {
             this.reset();
@@ -56,26 +56,10 @@ public final class SpongeNoiseConfig {
         }
 
         @Override
-        public NoiseConfig.Builder horizontalSize(final int horizontal) {
-            this.horizontalSize = horizontal;
-            return this;
-        }
-
-        @Override
-        public NoiseConfig.Builder verticalSize(final int vertical) {
-            this.verticalSize = vertical;
-            return this;
-        }
-
-
-        @Override
         public NoiseConfig.Builder reset() {
-
             // defaults like overworld
             this.minY = -64;
             this.height = 384;
-            this.horizontalSize = 1;
-            this.verticalSize = 2;
             return this;
         }
 
@@ -84,14 +68,12 @@ public final class SpongeNoiseConfig {
             Objects.requireNonNull(value, "value");
             this.minY = value.minY();
             this.height = value.height();
-            this.horizontalSize = value.horizontalSize();
-            this.verticalSize = value.verticalSize();
             return this;
         }
 
         @Override
         public @NonNull NoiseConfig build() {
-            return (NoiseConfig) (Object) NoiseSettings.create(this.minY, this.height, this.horizontalSize, this.verticalSize);
+            return (NoiseConfig) (Object) NoiseSettings.create(this.minY, this.height);
         }
     }
 
