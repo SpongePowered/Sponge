@@ -63,8 +63,8 @@ import java.util.List;
 public class BrewingStandBlockEntityMixin {
 
     // @formatter:off
-    @Shadow int brewTime;
-    @Shadow int fuel;
+    @Shadow private int brewTime;
+    @Shadow private int fuel;
     @Shadow private NonNullList<ItemStack> items;
     @Shadow private Item ingredient;
     // @formatter:on
@@ -75,27 +75,27 @@ public class BrewingStandBlockEntityMixin {
             locals = LocalCapture.CAPTURE_FAILEXCEPTION,
             slice = @Slice(to = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;isBrewable(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;)Z")),
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;setChanged(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)V"))
-    private static void impl$onConsumeFuel(final ServerLevel param0, final BlockPos param1, final BlockState param2, final BrewingStandBlockEntity param3,
-                                           final CallbackInfo ci, final ItemStack fuelStack) {
+    private static void impl$onConsumeFuel(final ServerLevel level, final BlockPos pos, final BlockState selfState, final BrewingStandBlockEntity entity,
+                                           final CallbackInfo ci, final NonNullList<ItemStack> items, final ItemStack fuelStack) {
         final Cause currentCause = PhaseTracker.getInstance().currentCause();
         fuelStack.grow(1);
         final ItemStackSnapshot originalStack = ItemStackUtil.snapshotOf(fuelStack);
         fuelStack.shrink(1);
-        final Lens lens = ((InventoryAdapter) param3).inventoryAdapter$getRootLens();
+        final Lens lens = ((InventoryAdapter) entity).inventoryAdapter$getRootLens();
         final SlotTransaction fuelTransaction = new SlotTransaction(
-            (Slot) lens.getLens(4).getAdapter(((InventoryAdapter) param3).inventoryAdapter$getFabric(), ((BrewingStand) param3).inventory()),
+            (Slot) lens.getLens(4).getAdapter(((InventoryAdapter) entity).inventoryAdapter$getFabric(), ((BrewingStand) entity).inventory()),
             originalStack,
             ItemStackUtil.snapshotOf(fuelStack)
         );
-        final ItemStackSnapshot ingredientStack = ItemStackUtil.snapshotOf(((BrewingStandBlockEntityMixin) (Object) param3).items.get(3));
+        final ItemStackSnapshot ingredientStack = ItemStackUtil.snapshotOf(((BrewingStandBlockEntityMixin) (Object) entity).items.get(3));
         final BrewingEvent.ConsumeFuel
-                event = SpongeEventFactory.createBrewingEventConsumeFuel(currentCause, (BrewingStand) param3, ingredientStack, Collections.singletonList(fuelTransaction));
+                event = SpongeEventFactory.createBrewingEventConsumeFuel(currentCause, (BrewingStand) entity, ingredientStack, Collections.singletonList(fuelTransaction));
         if (Sponge.eventManager().post(event)) {
             fuelStack.grow(1);
-            ((BrewingStandBlockEntityMixin) (Object) param3).fuel = 0;
+            ((BrewingStandBlockEntityMixin) (Object) entity).fuel = 0;
         } else if (fuelTransaction.custom().isPresent()) {
             final ItemStackSnapshot finalFuel = fuelTransaction.finalReplacement();
-            ((BrewingStandBlockEntityMixin) (Object) param3).items.set(4, ItemStackUtil.fromSnapshotToNative(finalFuel));
+            ((BrewingStandBlockEntityMixin) (Object) entity).items.set(4, ItemStackUtil.fromSnapshotToNative(finalFuel));
         }
     }
 
@@ -159,14 +159,14 @@ public class BrewingStandBlockEntityMixin {
     @Inject(method = "serverTick", cancellable = true, locals = LocalCapture.CAPTURE_FAILEXCEPTION,
             at = @At(value = "FIELD", target = "Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;brewTime:I", ordinal = 1))
     private static void impl$onTick(
-            final ServerLevel param0, final BlockPos param1, final BlockState param2, final BrewingStandBlockEntity param3, final CallbackInfo ci,
-            final ItemStack fuelStack, final BrewingFuel brewingFuel, final boolean isBrewable, final boolean isBrewing, final ItemStack ingredientStack) {
-        if (((BrewingStandBlockEntityMixin) (Object) param3).brewTime != 0 && isBrewable &&
-                ((BrewingStandBlockEntityMixin) (Object) param3).ingredient == ingredientStack.getItem()) {
+        final ServerLevel level, final BlockPos pos, final BlockState selfState, final BrewingStandBlockEntity entity, final CallbackInfo ci,
+        final NonNullList<ItemStack> items, final ItemStack fuelStack, final BrewingFuel brewingFuel, final boolean isBrewable, final boolean isBrewing, final ItemStack ingredientStack) {
+        if (((BrewingStandBlockEntityMixin) (Object) entity).brewTime != 0 && isBrewable &&
+                ((BrewingStandBlockEntityMixin) (Object) entity).ingredient == ingredientStack.getItem()) {
             final Cause currentCause = PhaseTracker.getInstance().currentCause();
-            final BrewingEvent.Tick event = SpongeEventFactory.createBrewingEventTick(currentCause, (BrewingStand) param3, ItemStackUtil.snapshotOf(ingredientStack));
+            final BrewingEvent.Tick event = SpongeEventFactory.createBrewingEventTick(currentCause, (BrewingStand) entity, ItemStackUtil.snapshotOf(ingredientStack));
             if (Sponge.eventManager().post(event)) {
-                ((BrewingStandBlockEntityMixin) (Object) param3).brewTime++;
+                ((BrewingStandBlockEntityMixin) (Object) entity).brewTime++;
             }
         }
     }

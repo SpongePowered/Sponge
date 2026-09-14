@@ -58,7 +58,7 @@ import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-import net.minecraft.world.level.storage.loot.providers.number.ResolvableNumber;
+import net.minecraft.world.level.storage.loot.providers.number.ints.ResolvableInt;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.ResourceKey;
@@ -120,7 +120,7 @@ public final class ItemStackData {
                             }
                             final ServerLevel level = SpongeCommon.server().overworld();
                             final LootContext context = new LootContext.Builder(new LootParams.Builder(level).create(LootContextParamSets.EMPTY)).create(Optional.empty());
-                            return ResolvableNumber.getIntFromItem(h, DataComponents.COOKING_FUEL, CookingFuel::burnTime, context, 0);
+                            return ResolvableInt.getFromItem(h, DataComponents.COOKING_FUEL, CookingFuel::burnTime, context, 0);
                         })
                     .create(Keys.CONTAINER_ITEM)
                         .get(h -> (ItemType) h.getItem().getCraftingRemainder().item())

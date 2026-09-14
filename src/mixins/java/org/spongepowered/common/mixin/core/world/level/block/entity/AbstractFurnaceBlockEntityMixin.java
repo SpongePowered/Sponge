@@ -76,8 +76,8 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
     // Shrink Fuel
     @Redirect(method = "consumeFuel", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;shrink(I)V"))
     private static void impl$throwFuelEventIfOrShrink(
-        ItemStack instance, int amount,
-        final NonNullList<ItemStack> slots, final ItemStack fuel
+        final ItemStack instance, final int amount,
+        final ServerLevel level, final BlockPos pos, final NonNullList<ItemStack> items, final ItemStack fuel
     ) {
         final Cause cause = PhaseTracker.getInstance().currentCause();
         // This is injected or switched in as a context by the platform dependent mixins
