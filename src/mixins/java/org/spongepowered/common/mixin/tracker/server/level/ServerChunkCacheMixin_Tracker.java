@@ -62,7 +62,7 @@ public abstract class ServerChunkCacheMixin_Tracker {
         }
     }
 
-   @WrapOperation(method = "tickChunks(Lnet/minecraft/util/profiling/ProfilerFiller;J)V",
+   @WrapOperation(method = "tickChunks(Lnet/minecraft/util/profiling/ProfilerFiller;)V",
    at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;tickCustomSpawners(Z)V"))
     private void tracker$wrapGeneratorEntitySpawner(
        final ServerLevel serverWorld, final boolean spawnEnemies, final Operation<Void> wrapped
