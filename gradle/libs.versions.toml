@@ -7,10 +7,10 @@ format = { version = "1.1" }
 asm = "9.8"
 log4j = "2.25.2"
 mixin = "0.8.7"
-mixinextras = "0.5.3"
+mixinextras = "0.5.5"
 modlauncher = "10.2.3"
 securemodules = "2.2.22"
-fancymodloader = "10.0.36"
+fancymodloader = "12.0.7"
 jarjar = "0.3.26"
 guava = "32.1.2-jre"
 jline = "3.25.1"
@@ -70,5 +70,5 @@ blossom = { id = "net.kyori.blossom", version = "2.1.0" }
 indra-licenserSpotless = { id = "net.kyori.indra.licenser.spotless", version = "3.1.3" }
 shadow = { id = "com.gradleup.shadow", version = "9.0.2" }
 versions = { id = "com.github.ben-manes.versions", version = "0.51.0" }
-forgeGradle = { id = "net.minecraftforge.gradle", version = "7.0.17" }
-modDevGradle = { id = "net.neoforged.moddev", version = "2.0.141" }
+forgeGradle = { id = "net.minecraftforge.gradle", version = "7.0.40" }
+modDevGradle = { id = "net.neoforged.moddev", version = "2.0.148" }

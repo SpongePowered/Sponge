@@ -237,6 +237,11 @@ AWToAT.convert(awFiles, atFile)
 
 val mixinConfigs: MutableSet<String> = spongeImpl.mixinConfigurations
 
+// FG resolves its tools on exactly the Java version they target (SlimeLauncher: 8) unless overridden; any newer JDK runs it fine
+fgtools.configure("slimelauncher") {
+    javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
+}
+
 minecraft {
     mappings("official", minecraftVersion)
     accessTransformers.from(atFile)
@@ -316,7 +321,7 @@ sourceSets {
 }
 
 tasks {
-    withType(JavaExec::class) {
+    withType(JavaExec::class).configureEach {
         if (group == "Slime Launcher") {
             standardInput = System.`in`
         }

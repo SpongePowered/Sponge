@@ -24,9 +24,11 @@
  */
 package org.spongepowered.neoforge.mixin.core.world.item;
 
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.consume_effects.TeleportRandomlyConsumeEffect;
+import net.minecraft.world.level.block.Block;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
@@ -42,13 +44,13 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 public abstract class TeleportRandomlyConsumeEffectMixin_Neo {
 
     @Redirect(method = "apply", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/LivingEntity;randomTeleport(DDDZLnet/minecraft/world/item/ItemStack;)Z"))
+            target = "Lnet/minecraft/world/entity/LivingEntity;randomTeleport(DDDZLnet/minecraft/tags/TagKey;Lnet/minecraft/world/item/ItemStack;)Z"))
     private boolean neo$createCauseFrameForTeleport(final LivingEntity entity, final double x, final double y, final double z,
-                                                    final boolean changeState, final ItemStack consumedStack) {
+                                                    final boolean changeState, final TagKey<Block> avoidanceTag, final ItemStack consumedStack) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.CHORUS_FRUIT.get());
 
-            return entity.randomTeleport(x, y, z, changeState, consumedStack);
+            return entity.randomTeleport(x, y, z, changeState, avoidanceTag, consumedStack);
         }
     }
 }
