@@ -249,6 +249,8 @@ minecraft {
     runs {
         configureEach {
 //             jvmArgs("-Dsponge.bootstrap.debug=true") // Uncomment to debug bootstrap classpath
+            // No mixin.debug.strict: Forge ATs widen targets (e.g. BrewingStandMenu$PotionSlot) that mixins must name by string for
+            // vanilla, which strict rejects, and its strict.targets sub-option can't be turned off on its own
             jvmArgs("-Dmixin.debug=true", "-Dmixin.debug.export=true", "-Dmixin.dumpTargetOnFailure=true")
             mainClass.set("org.spongepowered.bootstrap.forge.ForgeBootstrap")
 
@@ -265,6 +267,28 @@ minecraft {
         register("server") {
             args("--nogui")
         }
+    }
+}
+
+// FG 7 launches runs through SlimeLauncher and only generates Eclipse configs, so describe native IntelliJ runs that
+// start ForgeBootstrap directly from Forge's userdev run metadata plus our run options
+val downloadAssets = rootProject.tasks.named<org.spongepowered.gradle.vanilla.task.DownloadAssetsTask>("downloadAssets")
+tasks.named("genIntelliJRuns") {
+    dependsOn("slimeLauncherMetadataForForge", downloadAssets)
+}
+listOf("server", "client").forEach { side ->
+    val options = minecraft.runs.named(side)
+    intellijRuns.register("run${side.replaceFirstChar(Char::uppercase)} (${project.name})") {
+        forgeUserdev(layout.buildDirectory.dir("minecraftforge/forgegradle/slimeLauncherMetadataForForge"), side,
+            downloadAssets.flatMap { it.assetsDirectory }, "official_$minecraftVersion")
+        args.addAll(options.flatMap { it.args })
+        jvmArgs.addAll(options.flatMap { it.jvmArgs })
+        environment.putAll(options.flatMap { it.environment })
+        mainClass = options.flatMap { it.mainClass }
+        module = "${rootProject.name}.${bootstrapProject.name}.${bootstrapForge.get().name}"
+        classpath.from(main.runtimeClasspath)
+        moduleClasspath.from(bootstrapForge.get().runtimeClasspath)
+        workingDirectory = layout.projectDirectory.dir("runs/main/$side").asFile.absolutePath
     }
 }
 

@@ -31,6 +31,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -58,7 +59,9 @@ public class DevClasspath {
 
         final AtomicBoolean hasAPISourceSet = new AtomicBoolean(false);
 
-        boolean skipMixinExtras = false;
+        // Forge ships MixinExtras jar-in-jar inside mixinextras-forge, so mixinextras-common would be a duplicate JPMS module.
+        // Decided up front because IDEs order the classpath differently than Gradle.
+        final boolean skipMixinExtras = Arrays.stream(cp).anyMatch(entry -> Paths.get(entry).getFileName().toString().startsWith("mixinextras-forge"));
         for (final String str : cp) {
             final Path path = Paths.get(str);
             if (!Files.exists(path)) {
@@ -97,9 +100,6 @@ public class DevClasspath {
                             }
                             break;
                         case "", "vanilla", "forge", "neoforge":
-                            if ("forge".equals(projectName)) {
-                                skipMixinExtras = true;
-                            }
                             final WeightedPath weightedPath = new WeightedPath(projectName.isEmpty() ? 1 : 2, path);
                             switch (sourceSet.name()) {
                                 case "applaunchConfig":
@@ -136,8 +136,6 @@ public class DevClasspath {
                 }
                 continue;
             }
-            // We need to skip mixinextras-common in Forge's UserDev mode as this will cause duplicate module
-            // errors with JPMS.
             if (fileName.startsWith("mixinextras-common") && skipMixinExtras) {
                 if (Bootstrap.DEBUG) {
                     System.out.println("Ignored: " + path);
