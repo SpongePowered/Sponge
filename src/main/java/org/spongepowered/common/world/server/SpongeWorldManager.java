@@ -800,10 +800,25 @@ public class SpongeWorldManager implements WorldManager {
 
             PlatformHooks.INSTANCE.getWorldHooks().preUnloadWorld(level);
 
-
             final var configAdapter = ((ServerLevelDataBridge) level.getLevelData()).bridge$spongeData().configAdapter();
             if (configAdapter != null) {
                 configAdapter.save();
+            }
+
+            while (level.getChunkSource().chunkMap.hasWork()) {
+                level.getChunkSource().deactivateTicketsOnClosing();
+
+                final boolean noSave = level.noSave;
+                level.noSave = false;
+                try {
+                    level.getChunkSource().tick(() -> true, false);
+                } finally {
+                    level.noSave = noSave;
+                }
+
+                while (level.getChunkSource().pollTask()) {
+                    // Consumes main thread task on poll
+                }
             }
 
             try {

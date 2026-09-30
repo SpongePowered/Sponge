@@ -213,10 +213,27 @@ public final class Constants {
 
         public static final class EntityArchetype {
 
-            public static final int BASE_VERSION = 1;
             public static final String ENTITY_ID = "Id";
-            public static final DataQuery ENTITY_TYPE = of("EntityType");
-            public static final DataQuery ENTITY_DATA = of("EntityData");
+
+            @Deprecated
+            public static final class V1 {
+
+                public static final DataQuery ENTITY_TYPE = of("EntityType");
+                public static final DataQuery ENTITY_DATA = of("EntityData");
+            }
+
+            public static final class V2 {
+
+                public static final DataQuery DATA = of("Data");
+                public static final DataQuery DATA_VERSION = of("DataVersion");
+            }
+
+            public static final class Data {
+
+                public static final int BASE_VERSION = 1;
+                public static final int DATA_VERSIONED = 2;
+                public static final int CONTENT_VERSION = Data.DATA_VERSIONED;
+            }
         }
 
         public static final class Entity {
@@ -763,6 +780,19 @@ public final class Constants {
 
         public static final Set<Relative> RELATIVE_POSITION = EnumSet.of(Relative.X, Relative.Y, Relative.Z);
 
+        public static final class V2 {
+
+            public static final DataQuery DATA = of("Data");
+            public static final DataQuery DATA_VERSION = of("DataVersion");
+        }
+
+        public static final class Data {
+
+            public static final int BASE_VERSION = 1;
+            public static final int DATA_VERSIONED = 2;
+            public static final int CONTENT_VERSION = Data.DATA_VERSIONED;
+        }
+
         public static final class Ageable {
 
             public static final int ADULT = 6000;
@@ -1192,12 +1222,6 @@ public final class Constants {
 
     public static final class ItemStack {
 
-        public static final DataQuery COUNT = of("count");
-        public static final DataQuery TYPE = of("id");
-        public static final DataQuery COMPONENTS = of("components");
-        public static final DataQuery CUSTOM_DATA = of("minecraft:custom_data");
-        public static final DataQuery DAMAGE = of("minecraft:damage");
-
         @Deprecated
         public static final class V2 {
 
@@ -1207,13 +1231,29 @@ public final class Constants {
             public static final DataQuery TYPE = of("ItemType");
         }
 
+        @Deprecated
+        public static final class V3 {
+
+            public static final DataQuery COUNT = of("count");
+            public static final DataQuery TYPE = of("id");
+            public static final DataQuery COMPONENTS = of("components");
+            public static final DataQuery DAMAGE = of("minecraft:damage");
+        }
+
+        public static final class V4 {
+
+            public static final DataQuery DATA = of("Data");
+            public static final DataQuery DATA_VERSION = of("DataVersion");
+        }
+
         // Previously only ItemStackSnapshot
         public static final class Data {
 
             public static final int DUPLICATE_MANIPULATOR_DATA_VERSION = 1;
             public static final int REMOVED_DUPLICATE_DATA = 2;
             public static final int DATA_COMPONENTS = 3;
-            public static final int CURRENT_VERSION = Data.DATA_COMPONENTS;
+            public static final int DATA_VERSIONED = 4;
+            public static final int CURRENT_VERSION = Data.DATA_VERSIONED;
         }
     }
 

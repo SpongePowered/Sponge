@@ -24,6 +24,10 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.BlockItemStateProperties;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -174,6 +178,12 @@ public final class BlockStateDataProvider {
                     .supports(bs -> bs.getOptionalValue(property).isPresent())
                     .get(bs -> ((org.spongepowered.api.block.BlockState) bs).stateProperty((StateProperty<T>) property).orElse(null))
                     .set((bs, v) -> (BlockState) ((org.spongepowered.api.block.BlockState) bs).withStateProperty((StateProperty<T>) property, v).orElse((org.spongepowered.api.block.BlockState) bs));
+
+        registrator.asMutable(ItemStack.class)
+                .create(key)
+                    .supports(is -> is.getItem() instanceof final BlockItem block && block.getBlock().getStateDefinition().getProperty(property.getName()) != null)
+                    .get(is -> is.getOrDefault(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY).get((Property<T>) property))
+                    .set((is, v) -> is.update(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY, c -> c.with((Property<T>) property, v)));
     }
     // @formatter:on
 

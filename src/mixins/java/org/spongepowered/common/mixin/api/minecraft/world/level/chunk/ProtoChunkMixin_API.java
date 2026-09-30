@@ -148,7 +148,8 @@ public abstract class ProtoChunkMixin_API extends ChunkAccess implements Generat
         if (!this.shadow$getPersistedStatus().isOrAfter(ChunkStatus.BIOMES) && (this.belowZeroRetrogen == null || !this.belowZeroRetrogen.targetStatus().isOrAfter(ChunkStatus.BIOMES))) {
             throw new IllegalStateException("Asking for biomes before we have biomes");
         }
-        return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, biome, () -> this.getSection(this.getSectionIndex(y)), () -> {});
+        return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, this.getMinY(), this.getHeight(),
+            biome, i -> this.getSection(this.getSectionIndex(i)), () -> {});
     }
 
     public Collection<? extends BlockEntity> blockEntities() {

@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.api.minecraft.world.entity;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.minecraft.SharedConstants;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
@@ -65,7 +66,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
-import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
@@ -264,7 +264,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public int contentVersion() {
-        return 1;
+        return Constants.Entity.Data.CONTENT_VERSION;
     }
 
     @Override
@@ -273,10 +273,8 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         final CompoundTag compound = new CompoundTag();
         compound.putString("id", entityTypeRegistry.getKey((net.minecraft.world.entity.EntityType<?>) this.type()).toString());
         this.shadow$saveWithoutId(compound);
-        final DataContainer unsafeNbt = NBTTranslator.INSTANCE.translateFrom(compound);
         final DataContainer container = DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, this.contentVersion())
-                .set(Constants.Entity.CLASS, this.getClass().getName())
                 .set(Queries.WORLD_KEY, ((org.spongepowered.api.world.server.ServerWorld) this.world()).key().formatted())
                 .createView(Constants.Sponge.SNAPSHOT_WORLD_POSITION)
                 .set(Queries.POSITION_X, this.position().x())
@@ -293,8 +291,8 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                 .set(Queries.POSITION_Y, this.scale().y())
                 .set(Queries.POSITION_Z, this.scale().z())
                 .container()
-                .set(Constants.Entity.TYPE, entityTypeRegistry.getKey((net.minecraft.world.entity.EntityType<?>) this.type()))
-                .set(Constants.Sponge.UNSAFE_NBT, unsafeNbt);
+                .set(Constants.Entity.V2.DATA_VERSION, SharedConstants.getCurrentVersion().getDataVersion().getVersion())
+                .set(Constants.Entity.V2.DATA, compound);
         return container;
     }
 

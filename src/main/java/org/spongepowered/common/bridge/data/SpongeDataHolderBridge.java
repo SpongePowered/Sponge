@@ -33,6 +33,7 @@ import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.value.Value;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public interface SpongeDataHolderBridge {
 
@@ -61,4 +62,6 @@ public interface SpongeDataHolderBridge {
     void bridge$addFailedData(DataQuery nameSpace, DataView keyedData);
 
     boolean brigde$isDeserializing();
+
+    void bridge$deserialize(Consumer<DataManipulator.Mutable> consumer);
 }

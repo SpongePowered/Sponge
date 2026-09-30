@@ -37,41 +37,46 @@ import java.util.Collection;
 @SuppressWarnings("unchecked")
 public interface UniversalFabric extends Fabric, InventoryBridge {
 
+    @SuppressWarnings("rawtypes")
+    default InventoryTranslator fabric$translator() {
+        return InventoryTranslators.getTranslator(this.getClass());
+    }
+
     @Override
     default Collection<InventoryBridge> fabric$allInventories() {
-        return InventoryTranslators.getTranslator(this.getClass()).allInventories(this);
+        return this.fabric$translator().allInventories(this);
     }
 
     @Override
     default InventoryBridge fabric$get(int index) {
-        return InventoryTranslators.getTranslator(this.getClass()).get(this, index);
+        return this.fabric$translator().get(this, index);
     }
 
     @Override
     default ItemStack fabric$getStack(int index) {
-        return InventoryTranslators.getTranslator(this.getClass()).getStack(this, index);
+        return this.fabric$translator().getStack(this, index);
     }
 
     @Override
     default void fabric$setStack(int index, ItemStack stack) {
-        InventoryTranslators.getTranslator(this.getClass()).setStack(this, index, stack);
+        this.fabric$translator().setStack(this, index, stack);
     }
 
     @Override default int fabric$getMaxStackSize() {
-        return InventoryTranslators.getTranslator(this.getClass()).getMaxStackSize(this);
+        return this.fabric$translator().getMaxStackSize(this);
     }
 
     @Override default int fabric$getSize() {
-        return InventoryTranslators.getTranslator(this.getClass()).getSize(this);
+        return this.fabric$translator().getSize(this);
     }
 
     @Override default void fabric$clear() {
-        InventoryTranslators.getTranslator(this.getClass()).clear(this);
+        this.fabric$translator().clear(this);
         this.fabric$captureContainer();
     }
 
     @Override default void fabric$markDirty() {
-        InventoryTranslators.getTranslator(this.getClass()).markDirty(this);
+        this.fabric$translator().markDirty(this);
         this.fabric$captureContainer();
     }
 }

@@ -74,6 +74,7 @@
     "world.entity.LivingEntityAccessor",
     "world.entity.MobAccessor",
     "world.entity.PortalProcessorAccessor",
+    "world.entity.ai.attributes.AttributeMapAccessor",
     "world.entity.ai.targeting.TargetingConditionsAccessor",
     "world.entity.animal.AnimalAccessor",
     "world.entity.animal.CatAccessor",
