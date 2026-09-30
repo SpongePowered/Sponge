@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.api.minecraft.world.entity;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.minecraft.SharedConstants;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
@@ -264,19 +265,17 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public int contentVersion() {
-        return 1;
+        return Constants.Entity.Data.CONTENT_VERSION;
     }
 
     @Override
     public DataContainer toContainer() {
-        final Registry<net.minecraft.world.entity.EntityType<?>> entityTypeRegistry = SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE);
         final var output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, this.level.registryAccess());
         output.store("id", net.minecraft.world.entity.EntityType.CODEC, this.type);
         this.shadow$saveWithoutId(output);
-        final DataContainer unsafeNbt = NBTTranslator.INSTANCE.translateFrom(output.buildResult());
+        final DataContainer entityData = NBTTranslator.INSTANCE.translateFrom(output.buildResult());
         final DataContainer container = DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, this.contentVersion())
-                .set(Constants.Entity.CLASS, this.getClass().getName())
                 .set(Queries.WORLD_KEY, ((org.spongepowered.api.world.server.ServerWorld) this.world()).key().formatted())
                 .createView(Constants.Sponge.SNAPSHOT_WORLD_POSITION)
                 .set(Queries.POSITION_X, this.position().x())
@@ -293,8 +292,8 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                 .set(Queries.POSITION_Y, this.scale().y())
                 .set(Queries.POSITION_Z, this.scale().z())
                 .container()
-                .set(Constants.Entity.TYPE, entityTypeRegistry.getKey((net.minecraft.world.entity.EntityType<?>) this.type()))
-                .set(Constants.Sponge.UNSAFE_NBT, unsafeNbt);
+                .set(Constants.Entity.V2.DATA_VERSION, SharedConstants.getCurrentVersion().dataVersion().version())
+                .set(Constants.Entity.V2.DATA, entityData);
         return container;
     }
 
