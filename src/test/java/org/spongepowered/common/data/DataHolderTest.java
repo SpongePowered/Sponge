@@ -95,8 +95,8 @@ public class DataHolderTest {
 
         final DataContainer copyContainer = copy.toContainer();
 
-        originalContainer.remove(Constants.Sponge.UNSAFE_NBT.then(Constants.Entity.ENTITY_UUID));
-        copyContainer.remove(Constants.Sponge.UNSAFE_NBT.then(Constants.Entity.ENTITY_UUID));
+        originalContainer.remove(Constants.Entity.V2.DATA.then(Constants.Entity.ENTITY_UUID));
+        copyContainer.remove(Constants.Entity.V2.DATA.then(Constants.Entity.ENTITY_UUID));
 
         Assertions.assertEquals(originalContainer, copyContainer);
     }

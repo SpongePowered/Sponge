@@ -34,13 +34,14 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataStore;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -49,10 +50,11 @@ public final class DataStoreRegistry {
     private final DataStore NO_OP_DATASTORE = new VanillaDataStore(Collections.emptyMap(), Collections.emptyList());
     private final Multimap<Key<?>, DataStore> dataStoreByValueKey = HashMultimap.create();
     private final Multimap<ResourceKey, DataStore> dataStoreByDataStoreKey = HashMultimap.create();
-    private final List<DataStore> allDataStores = new ArrayList<>();
+    private final Set<DataStore> allDataStores = new HashSet<>();
 
-    private final Map<LookupKey, DataStore> dataStoreCache = new ConcurrentHashMap<>();
-    private final Multimap<Type, DataStore> dataStoreByTokenCache = HashMultimap.create();
+    private final Map<LookupKey<Key<?>>, DataStore> dataStoreCache = new ConcurrentHashMap<>();
+    private final Map<LookupKey<ResourceKey>, Optional<DataStore>> dataStoreByResourceKeyCache = new ConcurrentHashMap<>();
+    private final Map<Type, Set<DataStore>> dataStoreByTokenCache =  new ConcurrentHashMap<>();
 
     public void register(final DataStore dataStore, Iterable<Key<?>> keys) {
         keys.forEach(k -> this.dataStoreByValueKey.put(k, dataStore));
@@ -74,19 +76,14 @@ public final class DataStoreRegistry {
     }
 
     public DataStore getDataStore(final Key<?> dataKey, final Type holderType) {
-        return this.dataStoreCache.computeIfAbsent(new LookupKey(holderType, dataKey), this::loadDataStore);
+        return this.dataStoreCache.computeIfAbsent(new LookupKey<>(holderType, dataKey), this::loadDataStoreKey);
     }
 
     public Optional<DataStore> getDataStore(final ResourceKey key, final Type holderType) {
-        // TODO do we need caching for this too?
-        final List<DataStore> dataStores = this.filterDataStoreCandidates(this.dataStoreByDataStoreKey.get(key), holderType);
-        if (dataStores.size() > 1) {
-            throw new IllegalStateException("Multiple data-stores registered for the same key (" + key + ") and data-holder " + holderType.toString());
-        }
-        return dataStores.stream().findAny();
+        return this.dataStoreByResourceKeyCache.computeIfAbsent(new LookupKey<>(holderType, key), this::loadDataStoreResourceKey);
     }
 
-    private DataStore loadDataStore(final LookupKey lookupKey) {
+    private DataStore loadDataStoreKey(final LookupKey<Key<?>> lookupKey) {
         final List<DataStore> dataStores = filterDataStoreCandidates(this.dataStoreByValueKey.get(lookupKey.key), lookupKey.holderType);
         if (dataStores.size() > 1) {
             throw new IllegalStateException("Multiple data-stores registered for the same data-key (" + lookupKey.key.key() + ") and data-holder " + lookupKey.holderType.toString());
@@ -97,29 +94,40 @@ public final class DataStoreRegistry {
         return dataStores.get(0);
     }
 
+    private Optional<DataStore> loadDataStoreResourceKey(final LookupKey<ResourceKey> lookupKey) {
+        final List<DataStore> dataStores = this.filterDataStoreCandidates(this.dataStoreByDataStoreKey.get(lookupKey.key), lookupKey.holderType);
+        if (dataStores.size() > 1) {
+            throw new IllegalStateException("Multiple data-stores registered for the same key (" + lookupKey.key + ") and data-holder " + lookupKey.holderType.toString());
+        }
+        return dataStores.stream().findAny();
+    }
+
     private List<DataStore> filterDataStoreCandidates(Collection<DataStore> candidates, Type holderType) {
         return candidates.stream()
                 .filter(ds -> ds.supportedTypes().stream().anyMatch(token -> GenericTypeReflector.isSuperType(token, holderType)))
                 .collect(Collectors.toList());
     }
 
-    public Collection<DataStore> getDataStoresForType(Class<? extends DataHolder> holderType) {
-        if (!this.dataStoreByTokenCache.containsKey(holderType)) {
-            for (DataStore dataStore : this.allDataStores) {
-                if (dataStore.supportedTypes().stream().anyMatch(token -> GenericTypeReflector.isSuperType(token, holderType))) {
-                    this.dataStoreByTokenCache.put(holderType, dataStore);
-                }
-            }
-        }
-        return this.dataStoreByTokenCache.get(holderType);
+    public Collection<DataStore> getDataStoresForType(final Class<? extends DataHolder> holderType) {
+        return this.dataStoreByTokenCache.computeIfAbsent(holderType, this::loadDataStoresType);
     }
 
-    private static class LookupKey {
+    private Set<DataStore> loadDataStoresType(final Type holderType) {
+        final Set<DataStore> dataStores = new HashSet<>();
+        for (DataStore dataStore : this.allDataStores) {
+            if (dataStore.supportedTypes().stream().anyMatch(token -> GenericTypeReflector.isSuperType(token, holderType))) {
+                dataStores.add(dataStore);
+            }
+        }
+        return dataStores;
+    }
+
+    private static final class LookupKey<T> {
 
         private final Type holderType;
-        private final Key<?> key;
+        private final T key;
 
-        public LookupKey(final Type holderType, final Key<?> key) {
+        public LookupKey(final Type holderType, final T key) {
             this.holderType = holderType;
             this.key = key;
         }
@@ -132,7 +140,7 @@ public final class DataStoreRegistry {
             if (o == null || this.getClass() != o.getClass()) {
                 return false;
             }
-            final LookupKey lookupKey = (LookupKey) o;
+            final LookupKey<?> lookupKey = (LookupKey<?>) o;
             return this.holderType.equals(lookupKey.holderType) &&
                     this.key.equals(lookupKey.key);
         }

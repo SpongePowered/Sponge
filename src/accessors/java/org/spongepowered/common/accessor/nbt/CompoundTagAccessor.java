@@ -22,39 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.bootstrap;
+package org.spongepowered.common.accessor.nbt;
 
-import java.lang.module.ModuleReference;
-import java.util.Collection;
-import java.util.HashSet;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Invoker;
+
+import java.util.Map;
 import java.util.Set;
 
-public final class FilteringPassthroughClassLoader extends ClassLoader {
+@Mixin(CompoundTag.class)
+public interface CompoundTagAccessor {
 
-    private final Set<String> filteredPackages = new HashSet<>();
-
-    static {
-        ClassLoader.registerAsParallelCapable();
-    }
-
-    FilteringPassthroughClassLoader(final ClassLoader parent, final Collection<ModuleReference> modules) {
-        super(parent);
-        modules.forEach(m -> this.filteredPackages.addAll(m.descriptor().packages()));
-    }
-
-    @Override
-    protected Class<?> loadClass(final String name, final boolean resolve) throws ClassNotFoundException {
-        if (!this.filteredPackages.contains(FilteringPassthroughClassLoader.nameToPackage(name))) {
-            return super.loadClass(name, resolve);
-        }
-        throw new ClassNotFoundException(name);
-    }
-
-    private static String nameToPackage(final String name) {
-        final int index = name.lastIndexOf('.');
-        if (index == -1 || index == name.length() - 1) {
-            return "";
-        }
-        return name.substring(0, index);
-    }
+    @Invoker("entrySet") Set<Map.Entry<String, Tag>> invoker$entrySet();
 }

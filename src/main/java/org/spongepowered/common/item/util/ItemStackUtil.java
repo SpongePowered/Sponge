@@ -28,6 +28,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.common.item.SpongeItemStackSnapshot;
 
 import java.util.Arrays;
 import java.util.List;
@@ -99,6 +100,16 @@ public abstract class ItemStackUtil {
         return clone;
     }
 
+    public static net.minecraft.world.item.ItemStack cloneDefensiveNative(final ItemStackLike stack) {
+        return ItemStackUtil.toNative(stack.asMutableCopy());
+    }
+
+    public static net.minecraft.world.item.ItemStack cloneDefensiveNative(final ItemStackLike stack, final int newSize) {
+        final net.minecraft.world.item.ItemStack clone = ItemStackUtil.cloneDefensiveNative(stack);
+        clone.setCount(newSize);
+        return clone;
+    }
+
     public static ItemStack cloneDefensive(net.minecraft.world.item.ItemStack stack) {
         return (ItemStack) (Object) ItemStackUtil.cloneDefensiveNative(stack);
     }
@@ -113,6 +124,12 @@ public abstract class ItemStackUtil {
 
     public static ItemStack cloneDefensive(@Nullable ItemStack stack, int newSize) {
         return ItemStackUtil.cloneDefensive(ItemStackUtil.toNative(stack), newSize);
+    }
+
+    public static ItemStack cloneDefensive(final ItemStackLike stack, final int newSize) {
+        final ItemStack cloned = stack.asMutableCopy();
+        cloned.setQuantity(newSize);
+        return cloned;
     }
 
     public static Optional<ItemStack> cloneDefensiveOptional(net.minecraft.world.item.ItemStack stack) {
@@ -137,6 +154,19 @@ public abstract class ItemStackUtil {
 
     public static boolean compareIgnoreQuantity(ItemStack stack1, net.minecraft.world.item.ItemStack stack2) {
         return ItemStackUtil.compareIgnoreQuantity(ItemStackUtil.toNative(stack1), stack2);
+    }
+
+    public static boolean compareIgnoreQuantity(final ItemStackLike stack1, final ItemStackLike stack2) {
+        return ItemStackUtil.compareIgnoreQuantity(ItemStackUtil.underlyingNativeStack(stack1), ItemStackUtil.underlyingNativeStack(stack2));
+    }
+
+    private static net.minecraft.world.item.ItemStack underlyingNativeStack(final ItemStackLike stack) {
+        if ((Object) stack instanceof final net.minecraft.world.item.ItemStack nativeStack) {
+            return nativeStack;
+        } else if (stack instanceof final SpongeItemStackSnapshot snapshot) {
+            return snapshot.underlyingNativeStack();
+        }
+        return ItemStackUtil.cloneDefensiveNative(stack.asMutableCopy());
     }
 
     public static ItemStackSnapshot snapshotOf(net.minecraft.world.item.ItemStack itemStack) {

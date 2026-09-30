@@ -83,7 +83,6 @@ val bootstrapForge = bootstrapProject.sourceSets.named("forge")
 
 // SpongeCommon source sets
 val commonAccessors = commonProject.sourceSets.named("accessors")
-val commonLaunch = commonProject.sourceSets.named("launch")
 val commonAppLaunch = commonProject.sourceSets.named("applaunch")
 val commonAppLaunchConf = commonProject.sourceSets.named("applaunchConfig")
 val commonMixins = commonProject.sourceSets.named("mixins")
@@ -109,17 +108,6 @@ val lang by sourceSets.register("lang") {
 }
 
 // Game layer
-val launch by sourceSets.register("launch") {
-    spongeImpl.addDependencyToImplementation(commonAppLaunchConf.get(), this)
-    spongeImpl.addDependencyToImplementation(commonAppLaunch.get(), this)
-    spongeImpl.addDependencyToImplementation(commonLaunch.get(), this)
-    spongeImpl.addDependencyToImplementation(commonMain.get(), this)
-    spongeImpl.addDependencyToImplementation(appLaunch, this)
-
-    configurations.named(implementationConfigurationName) {
-        extendsFrom(gameLayerConfig.get())
-    }
-}
 val accessors by sourceSets.register("accessors") {
     spongeImpl.addDependencyToImplementation(commonAccessors.get(), this)
 
@@ -130,12 +118,10 @@ val accessors by sourceSets.register("accessors") {
 val mixins by sourceSets.register("mixins") {
     spongeImpl.addDependencyToImplementation(commonAppLaunchConf.get(), this)
     spongeImpl.addDependencyToImplementation(commonAppLaunch.get(), this)
-    spongeImpl.addDependencyToImplementation(commonLaunch.get(), this)
     spongeImpl.addDependencyToImplementation(commonAccessors.get(), this)
     spongeImpl.addDependencyToImplementation(commonMixins.get(), this)
     spongeImpl.addDependencyToImplementation(commonMain.get(), this)
     spongeImpl.addDependencyToImplementation(appLaunch, this)
-    spongeImpl.addDependencyToImplementation(launch, this)
     spongeImpl.addDependencyToImplementation(accessors, this)
 
     configurations.named(implementationConfigurationName) {
@@ -145,11 +131,9 @@ val mixins by sourceSets.register("mixins") {
 val main by sourceSets.named("main") {
     spongeImpl.addDependencyToImplementation(commonAppLaunchConf.get(), this)
     spongeImpl.addDependencyToImplementation(commonAppLaunch.get(), this)
-    spongeImpl.addDependencyToImplementation(commonLaunch.get(), this)
     spongeImpl.addDependencyToImplementation(commonAccessors.get(), this)
     spongeImpl.addDependencyToImplementation(commonMain.get(), this)
     spongeImpl.addDependencyToImplementation(appLaunch, this)
-    spongeImpl.addDependencyToImplementation(launch, this)
     spongeImpl.addDependencyToImplementation(accessors, this)
 
     spongeImpl.addDependencyToImplementation(this, mixins)
@@ -398,9 +382,7 @@ tasks {
         from(commonMain.map { it.output })
         from(commonMixins.map { it.output })
         from(commonAccessors.map { it.output })
-        from(commonLaunch.map { it.output })
 
-        from(launch.output)
         from(accessors.output)
         from(mixins.output)
     }
@@ -455,8 +437,8 @@ tasks {
     }
 
     jacocoTestReport {
-        sourceSets(commonAppLaunchConf.get(), commonAppLaunch.get(), commonLaunch.get(), commonAccessors.get(), commonMixins.get(), commonMain.get())
-        sourceSets(appLaunch, launch, lang, accessors, mixins, main)
+        sourceSets(commonAppLaunchConf.get(), commonAppLaunch.get(), commonAccessors.get(), commonMixins.get(), commonMain.get())
+        sourceSets(appLaunch, lang, accessors, mixins, main)
         dependsOn(test)
     }
 }
@@ -483,9 +465,6 @@ publishing {
 
             artifact(tasks["accessorsJar"])
             artifact(tasks["accessorsSourcesJar"])
-
-            artifact(tasks["launchJar"])
-            artifact(tasks["launchSourcesJar"])
 
             artifact(tasks["applaunchJar"])
             artifact(tasks["applaunchSourcesJar"])

@@ -29,7 +29,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.api.data.persistence.DataTranslator;
@@ -40,66 +39,65 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class DataSerializer {
 
     public static Object serialize(final DataView.SafetyMode safetyMode, final Object value) {
-        if (value instanceof DataView) {
-            switch (safetyMode) {
-                case ALL_DATA_CLONED:
-                case CLONED_ON_SET:
-                    final MemoryDataView view = new MemoryDataContainer(safetyMode);
-                    for (final Map.Entry<DataQuery, Object> entry : ((DataView) value).values(false).entrySet()) {
-                        view.set(entry.getKey(), entry.getValue());
-                    }
-                    return view;
-                default:
-                    return value;
-            }
-        }
-
-        if (value instanceof DataSerializable) {
-            return ((DataSerializable) value).toContainer();
-        }
-        final Optional<? extends DataTranslator<?>> translator = SpongeDataManager.INSTANCE.translator(value.getClass());
-        if (translator.isPresent()) {
-            final DataTranslator serializer = translator.get();
-            return serializer.translate(value);
-        }
-
-        final Optional<RegistryType<Object>> optRegistryType = SpongeDataManager.INSTANCE.findRegistryTypeFor(value.getClass());
-        if (optRegistryType.isPresent()) {
-            final ResourceKey valueKey = Sponge.game().registry(optRegistryType.get()).valueKey(value);
-            // TODO if we serialize into a DataView - deserialize needs to do it too
-            //            final DataView view = this.createView(path);
-            //            view.set(DataQuery.of("registryroot"), registry.root());
-            //            view.set(DataQuery.of("registrylocation"), registry.location());
-            //            view.set(DataQuery.of("valuekey"), valueKey);
-            //            view.set(DataQuery.of("scope"), scope);
-            return valueKey.toString();
-        }
-        if (value instanceof ResourceKey) {
-            return value.toString();
-        }
-        if (value instanceof Collection) {
-            return DataSerializer.serializeCollection(safetyMode, (Collection<?>) value);
-        }
-        if (value instanceof Map) {
-            return DataSerializer.serializeMap((Map<?, ?>) value);
-        }
-        if (value.getClass().isArray()) {
-            return DataSerializer.serializeArray(safetyMode, value);
-        }
-        return value;
+        final var result = new Object() { Object v = value; };
+        DataSerializer.serialize(safetyMode, value, () -> {
+                final MemoryDataView view = new MemoryDataContainer(safetyMode);
+                result.v = view;
+                return view;
+            }, v -> result.v = v);
+        return result.v;
     }
 
-    private static DataContainer serializeMap(final Map<?, ?> value) {
-        final DataContainer map = DataContainer.createNew();
+    public static void serialize(final DataView.SafetyMode safetyMode, final Object value, final Supplier<DataView> viewSupplier, final Consumer<Object> valueConsumer) {
+        if (value instanceof final DataView dataView) {
+            final DataView view = viewSupplier.get();
+            dataView.streamRootValues().forEach(e -> view.set(e.getKey(), e.getValue()));
+        } else if (value instanceof final DataSerializable dataSerializable) {
+            dataSerializable.toView(viewSupplier.get());
+        } else {
+            final Optional<? extends DataTranslator<?>> translator = SpongeDataManager.INSTANCE.translator(value.getClass());
+            if (translator.isPresent()) {
+                final DataTranslator serializer = translator.get();
+                serializer.addTo(value, viewSupplier.get());
+
+                return;
+            }
+
+            final Optional<RegistryType<Object>> optRegistryType = SpongeDataManager.INSTANCE.findRegistryTypeFor(value.getClass());
+            if (optRegistryType.isPresent()) {
+                final ResourceKey valueKey = Sponge.game().registry(optRegistryType.get()).valueKey(value);
+                // TODO if we serialize into a DataView - deserialize needs to do it too
+                //            final DataView view = this.createView(path);
+                //            view.set(DataQuery.of("registryroot"), registry.root());
+                //            view.set(DataQuery.of("registrylocation"), registry.location());
+                //            view.set(DataQuery.of("valuekey"), valueKey);
+                //            view.set(DataQuery.of("scope"), scope);
+                valueConsumer.accept(valueKey.toString());
+            } else if (value instanceof ResourceKey) {
+                valueConsumer.accept(value.toString());
+            } else if (value instanceof Collection) {
+                valueConsumer.accept(DataSerializer.serializeCollection(safetyMode, (Collection<?>) value));
+            } else if (value instanceof Map) {
+                DataSerializer.serializeMap((Map<?, ?>) value, viewSupplier.get());
+            } else if (value.getClass().isArray()) {
+                valueConsumer.accept(DataSerializer.serializeArray(safetyMode, value));
+            } else {
+                valueConsumer.accept(value);
+            }
+        }
+    }
+
+    private static void serializeMap(final Map<?, ?> value, final DataView view) {
         for (Map.Entry<?, ?> entry : value.entrySet()) {
             final DataQuery mapKey = DataSerializer.serializeMapKey(entry.getKey());
-            map.set(mapKey, entry.getValue());
+            view.set(mapKey, entry.getValue());
         }
-        return map;
     }
 
     private static ImmutableList<Object> serializeCollection(final DataView.SafetyMode safetyMode, final Collection<?> value) {

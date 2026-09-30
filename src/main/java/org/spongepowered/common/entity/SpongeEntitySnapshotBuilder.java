@@ -27,7 +27,6 @@ package org.spongepowered.common.entity;
 import net.minecraft.nbt.CompoundTag;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
@@ -38,7 +37,6 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
@@ -221,21 +219,19 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
 
     @Override
     protected Optional<EntitySnapshot> buildContent(final DataView container) throws InvalidDataException {
-        if (!container.contains(Queries.WORLD_KEY, Constants.Entity.TYPE, Constants.Entity.ROTATION, Constants.Entity.SCALE, Constants.Sponge.SNAPSHOT_WORLD_POSITION)) {
+        final DataView updatedContainer = EntityDataUtil.upgradeEntityContainer(container);
+        if (!updatedContainer.contains(Queries.WORLD_KEY, Constants.Entity.ROTATION, Constants.Entity.SCALE, Constants.Sponge.SNAPSHOT_WORLD_POSITION, Constants.Entity.V2.DATA, Constants.Entity.V2.DATA_VERSION)) {
             return Optional.empty();
         }
-        this.worldKey = ResourceKey.resolve(container.getString(Queries.WORLD_KEY).get());
-        this.position = DataUtil.getPosition3d(container, Constants.Sponge.SNAPSHOT_WORLD_POSITION);
-        this.rotation = DataUtil.getPosition3d(container, Constants.Entity.ROTATION);
-        this.scale = DataUtil.getPosition3d(container, Constants.Entity.SCALE);
-        final String entityTypeId = container.getString(Constants.Entity.TYPE).get();
-        this.entityType = Sponge.game().registry(RegistryTypes.ENTITY_TYPE).value(ResourceKey.resolve(entityTypeId));
+        this.worldKey = ResourceKey.resolve(updatedContainer.getString(Queries.WORLD_KEY).get());
+        this.position = DataUtil.getPosition3d(updatedContainer, Constants.Sponge.SNAPSHOT_WORLD_POSITION);
+        this.rotation = DataUtil.getPosition3d(updatedContainer, Constants.Entity.ROTATION);
+        this.scale = DataUtil.getPosition3d(updatedContainer, Constants.Entity.SCALE);
+        this.compound = updatedContainer.getView(Constants.Entity.V2.DATA).map(NBTTranslator.INSTANCE::translate).get();
+        this.entityType = EntityDataUtil.entityType(this.compound);
         this.manipulator = null; // lazy read from nbt
-        if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
-            this.compound = NBTTranslator.INSTANCE.translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
-        }
-        if (container.contains(Constants.Entity.UUID)) {
-            this.uniqueId = UUID.fromString(container.getString(Constants.Entity.UUID).get());
+        if (updatedContainer.contains(Constants.Entity.UUID)) {
+            this.uniqueId = UUID.fromString(updatedContainer.getString(Constants.Entity.UUID).get());
         }
         return Optional.of(this.build());
     }

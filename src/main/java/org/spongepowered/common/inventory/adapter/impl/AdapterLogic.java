@@ -28,6 +28,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
@@ -185,37 +186,42 @@ public abstract class AdapterLogic {
         return result.build();
     }
 
-    public static InventoryTransactionResult appendSequential(Fabric fabric, @Nullable Lens lens, ItemStack stack) {
+    public static InventoryTransactionResult appendSequential(final Fabric fabric, final @Nullable Lens lens, final ItemStackLike stack) {
         if (lens == null) {
-            return InventoryTransactionResult.builder().type(Type.FAILURE).reject(ItemStackUtil.cloneDefensive(stack)).build();
+            return InventoryTransactionResult.builder().type(Type.FAILURE).reject(stack.asImmutable()).build();
         }
         InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(Type.SUCCESS);
-        net.minecraft.world.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 
-        int maxStackSize = Math.min(lens.getMaxStackSize(fabric), nativeStack.getMaxStackSize());
+        final int maxStackSize = Math.min(lens.getMaxStackSize(fabric), stack.maxStackQuantity());
         int remaining = stack.quantity();
 
         for (int ord = 0; ord < lens.slotCount() && remaining > 0; ord++) {
-            net.minecraft.world.item.ItemStack old = lens.getStack(fabric, ord);
+            final SlotLens slotLens = lens.getSlotLens(fabric, ord);
+            final net.minecraft.world.item.ItemStack old = slotLens.getStack(fabric);
             int push = Math.min(remaining, maxStackSize);
-            if (old.isEmpty() && lens.setStack(fabric, ord, ItemStackUtil.cloneDefensiveNative(nativeStack, push))) {
+            if (old.isEmpty() && slotLens.setStack(fabric, ItemStackUtil.cloneDefensiveNative(stack, push))) {
+                final Slot slot = slotLens.getAdapter(fabric, null);
                 remaining -= push;
-                Slot slot = ((SlotAdapter) lens.getSlotLens(fabric, ord).getAdapter(fabric, null));
-                result.transaction(new SlotTransaction(slot, ItemStackUtil.snapshotOf(old), ItemStackUtil.snapshotOf(lens.getStack(fabric, ord))));
-            } else if (!old.isEmpty() && ItemStackUtil.compareIgnoreQuantity(old, stack) && maxStackSize > old.getCount()) {
-                ItemStackSnapshot oldSnap = ItemStackUtil.snapshotOf(old);
+                if (push == stack.quantity()) {
+                    result.transaction(new SlotTransaction(slot, ItemStackUtil.snapshotOf(old), stack.asImmutable()));
+                } else {
+                    result.transaction(new SlotTransaction(slot, ItemStackUtil.snapshotOf(old), ItemStackUtil.snapshotOf(slotLens.getStack(fabric))));
+                }
+            } else if (!old.isEmpty() && ItemStackUtil.compareIgnoreQuantity((ItemStackLike) (Object) old, stack) && maxStackSize > old.getCount()) {
                 push = Math.max(Math.min(maxStackSize - old.getCount(), remaining), 0); // max() accounts for oversized stacks
-                old.setCount(old.getCount() + push);
-                lens.setStack(fabric, ord, old);
                 remaining -= push;
-                Slot slot = ((SlotAdapter) lens.getSlotLens(fabric, ord).getAdapter(fabric, null));
-                result.transaction(new SlotTransaction(slot, oldSnap, ItemStackUtil.snapshotOf(lens.getStack(fabric, ord))));
+
+                final ItemStackSnapshot oldSnap = ItemStackUtil.snapshotOf(old);
+                old.setCount(old.getCount() + push);
+                slotLens.setStack(fabric, old);
+                final Slot slot = slotLens.getAdapter(fabric, null);
+                result.transaction(new SlotTransaction(slot, oldSnap, ItemStackUtil.snapshotOf(old)));
             }
 
         }
 
         if (remaining > 0) {
-            result.type(Type.FAILURE).reject(ItemStackUtil.cloneDefensive(nativeStack, remaining));
+            result.type(Type.FAILURE).reject(ItemStackUtil.cloneDefensive(stack, remaining));
         }
 
         if (remaining != stack.quantity()) {

@@ -22,40 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.server.level;
+package org.spongepowered.common.bridge.server.level;
 
-import net.minecraft.server.level.ServerChunkCache;
-import net.minecraft.util.thread.BlockableEventLoop;
-import org.spongepowered.asm.mixin.Mixin;
+public interface ChunkHolderBridge {
 
-@Mixin(ServerChunkCache.MainThreadExecutor.class)
-public abstract class ServerChunkCache_MainThreadExecutorMixin extends BlockableEventLoop<Runnable> {
-
-    private volatile boolean impl$closed;
-
-    protected ServerChunkCache_MainThreadExecutorMixin(final String $$0) {
-        super($$0);
-    }
-
-    @Override
-    public void schedule(final Runnable $$0) {
-        if (this.impl$closed) {
-            $$0.run();
-            return;
-        }
-
-        super.schedule($$0);
-
-        if (this.impl$closed) {
-            this.runAllTasks();
-        }
-    }
-
-    @Override
-    public void close() {
-        super.close();
-
-        this.impl$closed = true;
-        this.runAllTasks();
-    }
+    void bridge$markBiomesDirty();
 }

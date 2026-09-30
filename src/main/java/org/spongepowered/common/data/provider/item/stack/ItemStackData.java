@@ -35,9 +35,11 @@ import net.minecraft.util.StringUtil;
 import net.minecraft.util.Unit;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.component.BlockItemStateProperties;
 import net.minecraft.world.item.component.ChargedProjectiles;
 import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.CustomModelData;
@@ -50,9 +52,11 @@ import net.minecraft.world.item.component.Unbreakable;
 import net.minecraft.world.item.component.UseCooldown;
 import net.minecraft.world.item.component.UseRemainder;
 import net.minecraft.world.item.consume_effects.ConsumeEffect;
+import net.minecraft.world.level.block.state.properties.Property;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.ItemAction;
@@ -69,7 +73,10 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @SuppressWarnings({"unchecked", "UnstableApiUsage"})
@@ -378,7 +385,33 @@ public final class ItemStackData {
                             stack.update(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY, p -> new ItemAttributeModifiers(attributes, p.showInTooltip()));
                         })
                         .resetOnDelete(List.of())
-        ;
+                    .create(Keys.BLOCK_STATE)
+                        .get(stack -> {
+                            if (!(stack.getItem() instanceof final BlockItem block)) {
+                                return null;
+                            }
+                            final @Nullable BlockItemStateProperties state = stack.get(DataComponents.BLOCK_STATE);
+                            if (state == null) {
+                                return null;
+                            }
+                            return (BlockState) state.apply(block.getBlock().defaultBlockState());
+                        })
+                        .setAnd((stack, v) -> {
+                            if (!(stack.getItem() instanceof final BlockItem block)) {
+                                return false;
+                            }
+                            final Map<String, String> properties = new HashMap<>();
+                            block.getBlock().getStateDefinition().getProperties().forEach(property ->
+                                ItemStackData.propertyValue((net.minecraft.world.level.block.state.BlockState) v, property)
+                                    .ifPresent(value -> properties.put(property.getName(), value)));
+                            if (properties.isEmpty()) {
+                                return false;
+                            }
+                            stack.set(DataComponents.BLOCK_STATE, new BlockItemStateProperties(Collections.unmodifiableMap(properties)));
+                            return true;
+                        })
+                        .supports(stack -> stack.getItem() instanceof BlockItem)
+                    ;
     }
     // @formatter:on
 
@@ -419,4 +452,7 @@ public final class ItemStackData {
                 )));
     }
 
+    private static <T extends Comparable<T>> Optional<String> propertyValue(final net.minecraft.world.level.block.state.BlockState blockState, final Property<T> property) {
+        return blockState.getOptionalValue(property).map(property::getName);
+    }
 }

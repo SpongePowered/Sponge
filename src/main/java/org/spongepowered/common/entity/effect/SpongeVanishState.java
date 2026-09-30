@@ -29,8 +29,8 @@ import org.spongepowered.api.effect.VanishState;
 import java.util.Objects;
 
 public final class SpongeVanishState implements VanishState {
-    private static final VanishState VISIBLE = new SpongeVanishState(false, true, false, true, true, true, true);
-    private static final VanishState DEFAULT_VANISHED = new SpongeVanishState(true, false, true, false, false, false, false);
+    private static final VanishState VISIBLE = new SpongeVanishState(false, true, false, true, true, true, true, false);
+    private static final VanishState DEFAULT_VANISHED = new SpongeVanishState(true, false, true, false, false, false, false, true);
 
     private final boolean vanished;
     private final boolean ignoresCollisions;
@@ -39,6 +39,7 @@ public final class SpongeVanishState implements VanishState {
     private final boolean createsSounds;
     private final boolean createsParticles;
     private final boolean triggersVibrations;
+    private final boolean hidesTabListEntry;
 
     SpongeVanishState(
         final boolean vanished,
@@ -47,7 +48,8 @@ public final class SpongeVanishState implements VanishState {
         final boolean affectsSpawning,
         final boolean createsSounds,
         final boolean createsParticles,
-        final boolean triggersVibrations
+        final boolean triggersVibrations,
+        final boolean hidesTabListEntry
     ) {
         this.vanished = vanished;
         if (!vanished) {
@@ -57,6 +59,7 @@ public final class SpongeVanishState implements VanishState {
             this.createsSounds = true;
             this.createsParticles = true;
             this.triggersVibrations = true;
+            this.hidesTabListEntry = false;
             return;
         }
         this.ignoresCollisions = collisions;
@@ -65,6 +68,7 @@ public final class SpongeVanishState implements VanishState {
         this.createsSounds = createsSounds;
         this.createsParticles = createsParticles;
         this.triggersVibrations = triggersVibrations;
+        this.hidesTabListEntry = hidesTabListEntry;
     }
 
     @Override
@@ -105,7 +109,8 @@ public final class SpongeVanishState implements VanishState {
             this.affectsSpawning,
             this.createsSounds,
             this.createsParticles,
-            this.triggersVibrations
+            this.triggersVibrations,
+            this.hidesTabListEntry
         );
     }
 
@@ -129,7 +134,8 @@ public final class SpongeVanishState implements VanishState {
             this.affectsSpawning,
             this.createsSounds,
             this.createsParticles,
-            this.triggersVibrations
+            this.triggersVibrations,
+            this.hidesTabListEntry
         );
     }
 
@@ -153,7 +159,8 @@ public final class SpongeVanishState implements VanishState {
             affectsMonsterSpawning,
             this.createsSounds,
             this.createsParticles,
-            this.triggersVibrations
+            this.triggersVibrations,
+            this.hidesTabListEntry
         );
     }
 
@@ -177,7 +184,8 @@ public final class SpongeVanishState implements VanishState {
             this.affectsSpawning,
             createSounds,
             this.createsParticles,
-            this.triggersVibrations
+            this.triggersVibrations,
+            this.hidesTabListEntry
         );
     }
 
@@ -201,7 +209,8 @@ public final class SpongeVanishState implements VanishState {
             this.affectsSpawning,
             this.createsSounds,
             createParticles,
-            this.triggersVibrations
+            this.triggersVibrations,
+            this.hidesTabListEntry
         );
     }
 
@@ -225,7 +234,33 @@ public final class SpongeVanishState implements VanishState {
             this.affectsSpawning,
             this.createsSounds,
             this.createsParticles,
-            triggerVibrations
+            triggerVibrations,
+            this.hidesTabListEntry
+        );
+    }
+
+    @Override
+    public boolean hidesTabListEntry() {
+        return this.hidesTabListEntry;
+    }
+
+    @Override
+    public VanishState hideTabListEntry(final boolean hideTabListEntry) {
+        if (!this.vanished) {
+            return this;
+        }
+        if (this.hidesTabListEntry == hideTabListEntry) {
+            return this;
+        }
+        return new SpongeVanishState(
+            true,
+            this.ignoresCollisions,
+            this.untargetable,
+            this.affectsSpawning,
+            this.createsSounds,
+            this.createsParticles,
+            this.triggersVibrations,
+            hideTabListEntry
         );
     }
 
@@ -238,13 +273,14 @@ public final class SpongeVanishState implements VanishState {
                 ", affectsSpawning=" + this.affectsSpawning +
                 ", createsSounds=" + this.createsSounds +
                 ", createsParticles=" + this.createsParticles +
+                ", hidesTabListEntry=" + this.hidesTabListEntry +
                 '}';
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(this.vanished, this.ignoresCollisions, this.untargetable,
-                this.affectsSpawning, this.createsSounds, this.createsParticles);
+                this.affectsSpawning, this.createsSounds, this.createsParticles, this.hidesTabListEntry);
     }
 
     @Override
@@ -262,7 +298,8 @@ public final class SpongeVanishState implements VanishState {
                 && this.untargetable == other.untargetable()
                 && this.affectsSpawning == other.affectsMonsterSpawning()
                 && this.createsSounds == other.createsSounds()
-                && this.createsParticles == other.createsParticles();
+                && this.createsParticles == other.createsParticles()
+                && this.hidesTabListEntry == other.hidesTabListEntry();
     }
 
     public static final class SpongeVanishStateFactory implements VanishState.Factory {

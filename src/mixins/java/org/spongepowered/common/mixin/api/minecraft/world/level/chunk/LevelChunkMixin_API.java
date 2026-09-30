@@ -78,6 +78,7 @@ import org.spongepowered.common.accessor.server.level.ServerLevelAccessor;
 import org.spongepowered.common.accessor.world.level.LevelAccessor;
 import org.spongepowered.common.accessor.world.level.entity.PersistentEntitySectionManagerAccessor;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
+import org.spongepowered.common.bridge.world.level.chunk.ChunkSourceBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.data.holder.SpongeServerLocationBaseDataHolder;
 import org.spongepowered.common.entity.EntityUtil;
@@ -147,7 +148,12 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
 
     @Override
     public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
-        return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, biome, () -> this.getSection(this.getSectionIndex(y)), this::markUnsaved);
+        return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, this.getMinY(), this.getHeight(),
+            biome, i -> this.getSection(this.getSectionIndex(i)), () -> {
+                this.markUnsaved();
+
+                ((ChunkSourceBridge) this.level.getChunkSource()).bridge$biomeChanged(this.chunkPos);
+            });
     }
 
     @Intrinsic

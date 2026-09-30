@@ -28,7 +28,6 @@ import net.minecraft.nbt.CompoundTag;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
@@ -39,7 +38,6 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.data.nbt.validation.DelegateDataValidator;
 import org.spongepowered.common.data.nbt.validation.ValidationTypes;
 import org.spongepowered.common.data.persistence.NBTTranslator;
@@ -74,7 +72,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
     private final boolean pooled;
 
     private SpongeEntityArchetypeBuilder(final boolean pooled) {
-        super(EntityArchetype.class, Constants.Sponge.EntityArchetype.BASE_VERSION);
+        super(EntityArchetype.class, 1);
         this.pooled = pooled;
     }
 
@@ -99,18 +97,13 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
 
     @Override
     protected Optional<EntityArchetype> buildContent(final DataView container) throws InvalidDataException {
+        final DataView updatedContainer = EntityDataUtil.upgradeEntityArchetypeContainer(container);
+        final CompoundTag entityData = updatedContainer.getView(Constants.Sponge.EntityArchetype.V2.DATA)
+            .map(NBTTranslator.INSTANCE::translate)
+            .orElseThrow(() -> new InvalidDataException("Unable retrieve entity data"));
         final SpongeEntityArchetypeBuilder builder = SpongeEntityArchetypeBuilder.pooled();
-        if (container.contains(Constants.Sponge.EntityArchetype.ENTITY_TYPE)) {
-            builder.type(container.getRegistryValue(Constants.Sponge.EntityArchetype.ENTITY_TYPE, RegistryTypes.ENTITY_TYPE,
-                Sponge.game()).orElseThrow(() -> new InvalidDataException("Could not deserialize an EntityType!")));
-        } else {
-            throw new InvalidDataException("Missing the EntityType! Cannot re-construct an EntityArchetype!");
-        }
-
-        if (container.contains(Constants.Sponge.EntityArchetype.ENTITY_DATA)) {
-            builder.entityData(container.getView(Constants.Sponge.EntityArchetype.ENTITY_DATA)
-                    .orElseThrow(() -> new InvalidDataException("No DataView found for the 'EntityData' data tag!")));
-        }
+        builder.type(EntityDataUtil.entityType(entityData));
+        builder.entityData(entityData);
         return Optional.of(builder.build());
     }
 

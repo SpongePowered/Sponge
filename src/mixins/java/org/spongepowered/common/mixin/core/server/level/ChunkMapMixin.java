@@ -25,9 +25,7 @@
 package org.spongepowered.common.mixin.core.server.level;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ChunkMap;
-import net.minecraft.server.level.ChunkResult;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.level.ChunkPos;
@@ -63,6 +61,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.DirectionUtil;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.level.chunk.SpongeUnloadedChunkException;
 import org.spongepowered.common.world.level.chunk.storage.SpongeIOWorkerType;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -146,9 +145,9 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
     }
 
     @Inject(method = "applyStep", at = @At("HEAD"), cancellable = true)
-    private void impl$onApplyStep(final CallbackInfoReturnable<CompletableFuture<ChunkResult<ChunkAccess>>> cir) {
+    private void impl$onApplyStep(final CallbackInfoReturnable<CompletableFuture<ChunkAccess>> cir) {
         if (!((ServerLevelBridge) this.level).bridge$isLoaded()) {
-            cir.setReturnValue(ChunkHolder.UNLOADED_CHUNK_FUTURE);
+            cir.setReturnValue(SpongeUnloadedChunkException.INSTANCE_FUTURE);
         }
     }
 }
