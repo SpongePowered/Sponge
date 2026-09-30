@@ -37,6 +37,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
+import java.util.stream.Stream;
 
 @SuppressWarnings("unchecked")
 abstract class SpongeDataManipulator implements DataManipulator {
@@ -74,11 +75,15 @@ abstract class SpongeDataManipulator implements DataManipulator {
     }
 
     @Override
-    @SuppressWarnings("rawtypes")
     public Set<Value.Immutable<?>> getValues() {
+        return this.streamValues().collect(ImmutableSet.toImmutableSet());
+    }
+
+    @Override
+    @SuppressWarnings("rawtypes")
+    public Stream<Value.Immutable<?>> streamValues() {
         return this.values.entrySet().stream()
-                .map(entry -> (Value.Immutable<?>)Value.immutableOf((Key) entry.getKey(), CopyHelper.copy(entry.getValue())).asImmutable())
-                .collect(ImmutableSet.toImmutableSet());
+                .map(entry -> (Value.Immutable<?>)Value.immutableOf((Key) entry.getKey(), CopyHelper.copy(entry.getValue())).asImmutable());
     }
 
     @Override

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.entity;
 
+import net.minecraft.SharedConstants;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.level.storage.TagValueInput;
@@ -124,12 +125,13 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
 
     @Override
     public int contentVersion() {
-        return 1;
+        return Constants.Entity.Data.CONTENT_VERSION;
     }
 
     @Override
     public DataContainer toContainer() {
-        final DataContainer unsafeNbt = NBTTranslator.INSTANCE.translateFrom(this.compound == null ? new CompoundTag() : this.compound);
+        final DataContainer data = NBTTranslator.INSTANCE.translateFrom(this.compound == null ? new CompoundTag() : this.compound);
+        data.set(Constants.Entity.ENTITY_TYPE_ID, net.minecraft.world.entity.EntityType.getKey((net.minecraft.world.entity.EntityType<?>) this.entityType));
         final DataContainer container = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED)
                 .set(Queries.CONTENT_VERSION, this.contentVersion())
                 .set(Queries.WORLD_KEY, this.worldKey.formatted())
@@ -148,8 +150,8 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
                 .set(Queries.POSITION_Y, this.scale.y())
                 .set(Queries.POSITION_Z, this.scale.z())
                 .container()
-                .set(Constants.Entity.TYPE, net.minecraft.world.entity.EntityType.getKey((net.minecraft.world.entity.EntityType<?>) this.entityType))
-                .set(Constants.Sponge.UNSAFE_NBT, unsafeNbt);
+                .set(Constants.Entity.V2.DATA_VERSION, SharedConstants.getCurrentVersion().dataVersion().version())
+                .set(Constants.Entity.V2.DATA, data);
 
         if (this.uniqueId != null) {
             container.set(Constants.Entity.UUID, this.uniqueId.toString());

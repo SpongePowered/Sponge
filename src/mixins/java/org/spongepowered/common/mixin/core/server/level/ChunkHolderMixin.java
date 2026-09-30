@@ -24,36 +24,46 @@
  */
 package org.spongepowered.common.mixin.core.server.level;
 
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundChunksBiomesPacket;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ChunkResult;
 import net.minecraft.server.level.FullChunkStatus;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.chunk.ChunkEvent;
 import org.spongepowered.api.world.chunk.WorldChunk;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.server.level.ChunkHolderBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @Mixin(ChunkHolder.class)
-abstract class ChunkHolderMixin extends GenerationChunkHolderMixin {
+abstract class ChunkHolderMixin extends GenerationChunkHolderMixin implements ChunkHolderBridge {
 
     // @formatter:off
+    @Shadow @Final private ChunkHolder.PlayerProvider playerProvider;
+
     @Shadow public abstract CompletableFuture<ChunkResult<LevelChunk>> shadow$getEntityTickingChunkFuture();
+    @Shadow protected abstract void shadow$broadcast(List<ServerPlayer> $$0, Packet<?> $$1);
     // @formatter:on
 
     private LevelChunk impl$loadedChunk;
+    private boolean impl$biomesChanged;
 
     /**
      * After onFullChunkStatusChange
@@ -92,5 +102,20 @@ abstract class ChunkHolderMixin extends GenerationChunkHolderMixin {
             SpongeCommon.post(event);
         }
         this.impl$loadedChunk = null;
+    }
+
+    @Override
+    public void bridge$markBiomesDirty() {
+        this.impl$biomesChanged = true;
+    }
+
+    @Inject(method = "broadcastChanges", at = @At("RETURN"))
+    private void impl$onBroadcastChanges(final LevelChunk $$0, final CallbackInfo ci) {
+        if (this.impl$biomesChanged) {
+            final List<ServerPlayer> players = this.playerProvider.getPlayers(this.pos, false);
+            this.shadow$broadcast(players, ClientboundChunksBiomesPacket.forChunks(List.of($$0)));
+
+            this.impl$biomesChanged = false;
+        }
     }
 }

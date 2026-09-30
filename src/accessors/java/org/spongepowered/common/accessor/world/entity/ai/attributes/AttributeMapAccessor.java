@@ -22,39 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.bootstrap;
+package org.spongepowered.common.accessor.world.entity.ai.attributes;
 
-import java.lang.module.ModuleReference;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import net.minecraft.world.entity.ai.attributes.AttributeMap;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public final class FilteringPassthroughClassLoader extends ClassLoader {
+@Mixin(AttributeMap.class)
+public interface AttributeMapAccessor {
 
-    private final Set<String> filteredPackages = new HashSet<>();
-
-    static {
-        ClassLoader.registerAsParallelCapable();
-    }
-
-    FilteringPassthroughClassLoader(final ClassLoader parent, final Collection<ModuleReference> modules) {
-        super(parent);
-        modules.forEach(m -> this.filteredPackages.addAll(m.descriptor().packages()));
-    }
-
-    @Override
-    protected Class<?> loadClass(final String name, final boolean resolve) throws ClassNotFoundException {
-        if (!this.filteredPackages.contains(FilteringPassthroughClassLoader.nameToPackage(name))) {
-            return super.loadClass(name, resolve);
-        }
-        throw new ClassNotFoundException(name);
-    }
-
-    private static String nameToPackage(final String name) {
-        final int index = name.lastIndexOf('.');
-        if (index == -1 || index == name.length() - 1) {
-            return "";
-        }
-        return name.substring(0, index);
-    }
+    @Accessor("supplier") AttributeSupplier accessor$supplier();
 }

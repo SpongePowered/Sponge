@@ -30,7 +30,6 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import io.leangen.geantyref.GenericTypeReflector;
 import io.leangen.geantyref.TypeToken;
-import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.BiGenericEvent;
@@ -72,6 +71,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -90,12 +90,12 @@ public abstract class SpongeEventManager implements EventManager {
      */
     protected final LoadingCache<EventType<?>, RegisteredListener.Cache> handlersCache =
             Caffeine.newBuilder().initialCapacity(150).build(this::bakeHandlers);
-    private final Set<Object> registeredListeners;
+    protected final Set<Object> registeredListeners;
 
     public SpongeEventManager() {
         this.lock = new Object();
         this.handlersByEvent = HashMultimap.create();
-        this.registeredListeners = new ReferenceOpenHashSet<>();
+        this.registeredListeners = ConcurrentHashMap.newKeySet();
         this.checker = new ListenerChecker(ShouldFire.class);
     }
 
@@ -300,8 +300,9 @@ public abstract class SpongeEventManager implements EventManager {
                     method.getKey().declaringClass().getName(), method.getValue());
         }
 
-        this.registeredListeners.add(listenerObject);
-        this.register(handlers);
+        if (this.registeredListeners.add(listenerObject)) {
+            this.register(handlers);
+        }
     }
 
     @Override

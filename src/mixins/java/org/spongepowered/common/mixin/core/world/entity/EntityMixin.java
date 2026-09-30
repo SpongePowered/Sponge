@@ -296,6 +296,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     @Override
     public void bridge$vanishState(VanishState state) {
+        final VanishState oldState = this.impl$vanishState;
         this.impl$vanishState = state;
 
         final ChunkMap_TrackedEntityAccessor trackerAccessor = ((ChunkMapAccessor) ((ServerWorld) this.shadow$level()).chunkManager()).accessor$entityMap().get(this.shadow$getId());
@@ -313,7 +314,13 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                     if ((Object) this == entityPlayerMP) {
                         continue;
                     }
-                    entityPlayerMP.connection.send(new ClientboundPlayerInfoRemovePacket(List.of(this.uuid)));
+                    if (state.hidesTabListEntry() != oldState.hidesTabListEntry()) {
+                        if (state.hidesTabListEntry()) {
+                            entityPlayerMP.connection.send(new ClientboundPlayerInfoRemovePacket(List.of(this.uuid)));
+                        } else if (oldState.hidesTabListEntry() && (Entity) (Object) this instanceof ServerPlayer player) {
+                            entityPlayerMP.connection.send(ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(List.of(player)));
+                        }
+                    }
                 }
             }
         } else {
@@ -321,10 +328,12 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                 if ((Object) this == entityPlayerMP) {
                     continue;
                 }
-                if ((Entity) (Object) this instanceof ServerPlayer player) {
+                if (oldState.hidesTabListEntry() && (Entity) (Object) this instanceof ServerPlayer player) {
                     entityPlayerMP.connection.send(ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(List.of(player)));
                 }
-                trackerAccessor.accessor$updatePlayer(entityPlayerMP);
+                if (this.shadow$level() == entityPlayerMP.level()) {
+                    trackerAccessor.accessor$updatePlayer(entityPlayerMP);
+                }
             }
         }
     }
@@ -806,15 +815,15 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         }
     }
 
-    @Redirect(method = "spawnSprintParticle",
+    @WrapOperation(method = "spawnSprintParticle",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/level/Level;addParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V"))
     private void impl$runningSpawnParticle(
         final Level instance, final ParticleOptions particleOptions, final double xCoord, final double yCoord,
-        final double zCoord, final double xOffset, final double yOffset, final double zOffset
+        final double zCoord, final double xOffset, final double yOffset, final double zOffset, final Operation<Void> original
     ) {
         if (this.bridge$vanishState().createsParticles()) {
-            instance.addParticle(particleOptions, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset);
+            original.call(instance, particleOptions, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset);
         }
     }
 

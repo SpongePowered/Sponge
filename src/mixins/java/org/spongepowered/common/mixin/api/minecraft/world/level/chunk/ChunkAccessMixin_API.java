@@ -96,7 +96,8 @@ public abstract class ChunkAccessMixin_API<P extends Chunk<P>> implements Chunk<
 
     @Override
     public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
-        return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, biome, () -> this.shadow$getSection(this.getSectionIndex(y)), this::shadow$markUnsaved);
+        return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, this.getMinY(), this.getHeight(),
+            biome, i -> this.shadow$getSection(this.getSectionIndex(i)), this::shadow$markUnsaved);
     }
 
     @Override

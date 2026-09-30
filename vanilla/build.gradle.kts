@@ -51,7 +51,6 @@ val bootstrapForge = bootstrapProject.sourceSets.named("forge")
 
 // SpongeCommon source sets
 val commonAccessors = commonProject.sourceSets.named("accessors")
-val commonLaunch = commonProject.sourceSets.named("launch")
 val commonAppLaunch = commonProject.sourceSets.named("applaunch")
 val commonAppLaunchConf = commonProject.sourceSets.named("applaunchConfig")
 val commonMixins = commonProject.sourceSets.named("mixins")
@@ -82,17 +81,6 @@ val appLaunch by sourceSets.register("applaunch") {
 }
 
 // Game layer
-val launch by sourceSets.register("launch") {
-    spongeImpl.addDependencyToImplementation(commonAppLaunchConf.get(), this)
-    spongeImpl.addDependencyToImplementation(commonAppLaunch.get(), this)
-    spongeImpl.addDependencyToImplementation(commonLaunch.get(), this)
-    spongeImpl.addDependencyToImplementation(commonMain.get(), this)
-    spongeImpl.addDependencyToImplementation(appLaunch, this)
-
-    configurations.named(implementationConfigurationName) {
-        extendsFrom(gameLayerConfig.get())
-    }
-}
 val accessors by sourceSets.register("accessors") {
     spongeImpl.addDependencyToImplementation(commonAccessors.get(), this)
 
@@ -103,12 +91,10 @@ val accessors by sourceSets.register("accessors") {
 val mixins by sourceSets.register("mixins") {
     spongeImpl.addDependencyToImplementation(commonAppLaunchConf.get(), this)
     spongeImpl.addDependencyToImplementation(commonAppLaunch.get(), this)
-    spongeImpl.addDependencyToImplementation(commonLaunch.get(), this)
     spongeImpl.addDependencyToImplementation(commonAccessors.get(), this)
     spongeImpl.addDependencyToImplementation(commonMixins.get(), this)
     spongeImpl.addDependencyToImplementation(commonMain.get(), this)
     spongeImpl.addDependencyToImplementation(appLaunch, this)
-    spongeImpl.addDependencyToImplementation(launch, this)
     spongeImpl.addDependencyToImplementation(accessors, this)
 
     configurations.named(implementationConfigurationName) {
@@ -118,11 +104,9 @@ val mixins by sourceSets.register("mixins") {
 val main by sourceSets.named("main") {
     spongeImpl.addDependencyToImplementation(commonAppLaunchConf.get(), this)
     spongeImpl.addDependencyToImplementation(commonAppLaunch.get(), this)
-    spongeImpl.addDependencyToImplementation(commonLaunch.get(), this)
     spongeImpl.addDependencyToImplementation(commonAccessors.get(), this)
     spongeImpl.addDependencyToImplementation(commonMain.get(), this)
     spongeImpl.addDependencyToImplementation(appLaunch, this)
-    spongeImpl.addDependencyToImplementation(launch, this)
     spongeImpl.addDependencyToImplementation(accessors, this)
 
     spongeImpl.addDependencyToImplementation(this, mixins)
@@ -196,10 +180,7 @@ dependencies {
     boot(libs.modlauncher) {
         exclude(group = "org.apache.logging.log4j")
     }
-    boot(apiLibs.pluginSpi) {
-        exclude(group = "org.checkerframework", module = "checker-qual")
-        exclude(group = "org.apache.logging.log4j", module = "log4j-api")
-    }
+    boot(apiLibs.pluginSpi)
     boot(libs.lmaxDisruptor)
     boot(apiLibs.checkerQual)
 
@@ -233,17 +214,10 @@ dependencies {
 
     val game = gameLibrariesConfig.name
     game("org.spongepowered:spongeapi:$apiVersion")
-    game(platform(apiLibs.adventure.bom)) {
-        exclude(group = "org.jetbrains", module = "annotations")
-    }
-    game(libs.adventure.serializerConfigurate4) {
-        exclude(group = "org.checkerframework", module = "checker-qual")
-    }
     game(libs.javaxInject)
-    game(libs.adventure.serializerAnsi) {
-        exclude(group = "org.jetbrains", module = "annotations")
-        exclude(group = "org.checkerframework", module = "checker-qual")
-    }
+    game(platform(apiLibs.adventure.bom))
+    game(libs.adventure.serializerConfigurate4)
+    game(libs.adventure.serializerAnsi)
 
     val bootShadedLibraries = bootShadedLibrariesConfig.name
     bootShadedLibraries(project(transformersProject.path)) { isTransitive = false }
@@ -349,7 +323,7 @@ appLaunch.apply {
         property("minecraftVersion", minecraftVersion)
     }
 }
-launch.apply {
+main.apply {
     blossom.resources {
         property("apiVersion", apiVersion)
         property("minecraftVersion", minecraftVersion)
@@ -475,9 +449,7 @@ tasks {
         from(commonMain.map { it.output })
         from(commonMixins.map { it.output })
         from(commonAccessors.map { it.output })
-        from(commonLaunch.map { it.output })
 
-        from(launch.output)
         from(accessors.output)
         from(mixins.output)
     }
@@ -532,8 +504,8 @@ tasks {
     }
 
     jacocoTestReport {
-        sourceSets(commonAppLaunchConf.get(), commonAppLaunch.get(), commonLaunch.get(), commonAccessors.get(), commonMixins.get(), commonMain.get())
-        sourceSets(appLaunch, launch, accessors, mixins, main)
+        sourceSets(commonAppLaunchConf.get(), commonAppLaunch.get(), commonAccessors.get(), commonMixins.get(), commonMain.get())
+        sourceSets(appLaunch, accessors, mixins, main)
         dependsOn(test)
     }
 }
@@ -554,9 +526,6 @@ publishing {
 
             artifact(tasks["accessorsJar"])
             artifact(tasks["accessorsSourcesJar"])
-
-            artifact(tasks["launchJar"])
-            artifact(tasks["launchSourcesJar"])
 
             artifact(tasks["applaunchJar"])
             artifact(tasks["applaunchSourcesJar"])

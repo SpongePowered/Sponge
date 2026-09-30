@@ -181,7 +181,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public ItemStack asMutable() {
-        final net.minecraft.world.item.ItemStack nativeStack = ItemStackUtil.cloneDefensiveNative(ItemStackUtil.toNative(this.privateStack.copy()));
+        final net.minecraft.world.item.ItemStack nativeStack = ItemStackUtil.cloneDefensiveNative(this.privateStack);
         if (this.components != null) {
             nativeStack.applyComponents(this.components);
         }
@@ -310,5 +310,14 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     public HoverEvent<HoverEvent.ShowItem> asHoverEvent(final UnaryOperator<HoverEvent.ShowItem> op) {
         final ResourceKey resourceKey = Sponge.game().registry(RegistryTypes.ITEM_TYPE).valueKey(this.itemType);
         return HoverEvent.showItem(op.apply(HoverEvent.ShowItem.showItem(resourceKey, this.quantity(), SpongeAdventure.asAdventure(this.getComponentsPatch()))));
+    }
+
+    @Override
+    public int maxStackQuantity() {
+        return this.privateStack.maxStackQuantity();
+    }
+
+    public net.minecraft.world.item.ItemStack underlyingNativeStack() {
+        return ItemStackUtil.toNative(this.privateStack);
     }
 }

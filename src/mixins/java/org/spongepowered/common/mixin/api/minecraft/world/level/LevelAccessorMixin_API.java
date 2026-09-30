@@ -98,7 +98,8 @@ public interface LevelAccessorMixin_API<P extends WorldLike<P>> extends WorldLik
             return false;
         }
 
-        return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, biome, () -> iChunk.getSection(iChunk.getSectionIndex(y)), iChunk::markUnsaved);
+        return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, ((LevelReader) this).getMinY(), ((LevelReader) this).getHeight(),
+            biome, i -> iChunk.getSection(iChunk.getSectionIndex(i)), iChunk::markUnsaved);
     }
 
     // Volume

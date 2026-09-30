@@ -24,26 +24,30 @@
  */
 package org.spongepowered.common.mixin.core.server.level;
 
+import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.accessor.server.level.ChunkMapAccessor;
+import org.spongepowered.common.bridge.server.level.ChunkHolderBridge;
+import org.spongepowered.common.mixin.core.world.level.chunk.ChunkSourceMixin;
 
 @Mixin(ServerChunkCache.class)
-public abstract class ServerChunkCacheMixin {
+public abstract class ServerChunkCacheMixin extends ChunkSourceMixin {
 
     // @formatter:off
     @Shadow @Final private ServerLevel level;
-    @Shadow @Final private ServerChunkCache.MainThreadExecutor mainThreadProcessor;
+
+    @Shadow @Nullable protected abstract ChunkHolder shadow$getVisibleChunkIfPresent(long $$0);
     // @formatter:on
 
     @Redirect(method = "save", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ChunkMap;saveAllChunks(Z)V"))
@@ -55,8 +59,11 @@ public abstract class ServerChunkCacheMixin {
         }
     }
 
-    @Inject(method = "close", at = @At("TAIL"))
-    private void impl$onClose(final CallbackInfo ci) {
-        this.mainThreadProcessor.close();
+    @Override
+    public void bridge$biomeChanged(final ChunkPos pos) {
+        final @Nullable ChunkHolder holder = this.shadow$getVisibleChunkIfPresent(pos.toLong());
+        if (holder != null) {
+            ((ChunkHolderBridge) holder).bridge$markBiomesDirty();
+        }
     }
 }

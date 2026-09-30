@@ -27,11 +27,13 @@ package org.spongepowered.common.world.volume;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
@@ -171,17 +173,21 @@ public final class VolumeStreamUtils {
         return VolumeStreamUtils.getElementByPosition(VolumeStreamUtils.chunkSectionBlockStateGetter(), min, max);
     }
 
-    public static boolean setBiomeOnNativeChunk(final int x, final int y, final int z,
-        final org.spongepowered.api.world.biome.Biome biome, final Supplier<@Nullable LevelChunkSection> accessor,
+    public static boolean setBiomeOnNativeChunk(final int x, final int y, final int z, final int minY, final int height,
+        final org.spongepowered.api.world.biome.Biome biome, final Function<Integer, @Nullable LevelChunkSection> accessor,
         final Runnable finalizer
     ) {
-        @Nullable final LevelChunkSection section = accessor.get();
+        // See ChunkAccess#getNoiseBiome
+        final int quartYMin = QuartPos.fromBlock(minY);
+        final int quartYMax = quartYMin + QuartPos.fromBlock(height) - 1;
+        final int quartY = Mth.clamp(QuartPos.fromBlock(y), quartYMin, quartYMax);
+        final @Nullable LevelChunkSection section = accessor.apply(QuartPos.toBlock(quartY));
         if (section == null) {
             return false;
         }
-        final int maskedX = x & 3;
-        final int maskedY = y & 3;
-        final int maskedZ = z & 3;
+        final int maskedX = QuartPos.quartLocal(QuartPos.fromBlock(x));
+        final int maskedY = QuartPos.quartLocal(quartY);
+        final int maskedZ = QuartPos.quartLocal(QuartPos.fromBlock(z));
         final Holder<Biome> biomeHolder = SpongeCommon.vanillaRegistry(Registries.BIOME).wrapAsHolder((Biome) (Object) biome);
         final var old = ((PalettedContainer<Holder<Biome>>) section.getBiomes()).getAndSet(maskedX, maskedY, maskedZ, biomeHolder);
         if (old.value() == (Object) biome) {

@@ -55,6 +55,9 @@ public final class MobData {
                             return true;
                         })
                         .delete(h -> h.setTarget(null))
+                    .create(Keys.CAN_PICK_UP_LOOT)
+                        .get(Mob::canPickUpLoot)
+                        .set(Mob::setCanPickUpLoot)
                 .asMutable(MobAccessor.class)
                     .create(Keys.IS_AI_ENABLED)
                         .get(h -> !h.invoker$isNoAi())
