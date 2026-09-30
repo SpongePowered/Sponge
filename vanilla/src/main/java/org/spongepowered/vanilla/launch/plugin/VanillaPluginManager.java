@@ -27,14 +27,12 @@ package org.spongepowered.vanilla.launch.plugin;
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.apache.logging.log4j.Level;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.common.applaunch.plugin.discovery.PluginDiscovery;
 import org.spongepowered.common.launch.plugin.SpongePluginManager;
 import org.spongepowered.common.launch.plugin.loader.PluginCandidate;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.discovery.PluginResource;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.plugin.metadata.model.PluginDependency;
 import org.spongepowered.vanilla.launch.VanillaLaunch;
@@ -50,7 +48,6 @@ public final class VanillaPluginManager implements SpongePluginManager {
     private final Map<String, PluginContainer> plugins;
     private final Map<Object, PluginContainer> instancesToPlugins;
     private final List<PluginContainer> sortedPlugins;
-    private final Map<PluginContainer, PluginResource> containerToResource;
     private boolean ready = false;
 
     public VanillaPluginManager(final VanillaLaunch launch) {
@@ -58,7 +55,6 @@ public final class VanillaPluginManager implements SpongePluginManager {
         this.plugins = new Object2ObjectOpenHashMap<>();
         this.instancesToPlugins = new IdentityHashMap<>();
         this.sortedPlugins = new ArrayList<>();
-        this.containerToResource = new Object2ObjectOpenHashMap<>();
     }
 
     @SuppressWarnings("removal")
@@ -141,7 +137,6 @@ public final class VanillaPluginManager implements SpongePluginManager {
                 try {
                     final PluginContainer container = candidate.load();
                     this.addPlugin(container);
-                    this.containerToResource.put(container, candidate.resource());
                 } catch (final Exception e) {
                     failedInstances.put(candidate, "Failed to construct: see stacktrace(s) above this message for details.");
                     platform.logger().error("Failed to construct plugin {}", id, e);
@@ -163,11 +158,6 @@ public final class VanillaPluginManager implements SpongePluginManager {
         if (!(plugin instanceof VanillaDummyPluginContainer)) {
             this.instancesToPlugins.put(plugin.instance(), plugin);
         }
-    }
-
-    @Nullable
-    public PluginResource resource(final PluginContainer container) {
-        return this.containerToResource.get(container);
     }
 
     private boolean stillValid(final PluginCandidate candidate, final Map<PluginCandidate, String> consequential) {

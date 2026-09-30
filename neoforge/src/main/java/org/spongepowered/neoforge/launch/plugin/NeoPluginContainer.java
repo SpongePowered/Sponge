@@ -29,13 +29,13 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.jarcontents.JarContents;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.neoforge.applaunch.plugin.discovery.JarContentsPluginResource;
 import org.spongepowered.neoforge.applaunch.plugin.metadata.PluginMetadataConverter;
 import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.plugin.discovery.PluginResource;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 
-import java.net.URI;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 public class NeoPluginContainer implements PluginContainer {
@@ -44,10 +44,19 @@ public class NeoPluginContainer implements PluginContainer {
 
     private Logger logger;
     private PluginMetadata pluginMetadata;
+    private PluginResource pluginResource;
 
     private NeoPluginContainer(final ModContainer modContainer) {
         this.modContainer = modContainer;
         this.jar = modContainer.getModInfo().getOwningFile().getFile().getContents();
+    }
+
+    @Override
+    public PluginResource resource() {
+        if (this.pluginResource == null) {
+            this.pluginResource = new JarContentsPluginResource(this.jar);
+        }
+        return this.pluginResource;
     }
 
     @Override
@@ -64,11 +73,6 @@ public class NeoPluginContainer implements PluginContainer {
             this.logger = LogManager.getLogger(this.modContainer.getModId());
         }
         return this.logger;
-    }
-
-    @Override
-    public Optional<URI> locateResource(final String relative) {
-        return this.jar.findFile(Objects.requireNonNull(relative, "relative"));
     }
 
     private static final Map<ModContainer, NeoPluginContainer> mods = new MapMaker().weakKeys().makeMap();

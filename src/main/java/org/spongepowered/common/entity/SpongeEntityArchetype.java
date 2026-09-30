@@ -25,6 +25,7 @@
 package org.spongepowered.common.entity;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.SharedConstants;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.ListTag;
@@ -192,15 +193,16 @@ public final class SpongeEntityArchetype extends AbstractArchetype<EntityType, E
 
     @Override
     public int contentVersion() {
-        return Constants.Sponge.EntityArchetype.BASE_VERSION;
+        return Constants.Sponge.EntityArchetype.Data.CONTENT_VERSION;
     }
 
     @Override
     public DataContainer toContainer() {
         return DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED)
                 .set(Queries.CONTENT_VERSION, this.contentVersion())
-                .set(Constants.Sponge.EntityArchetype.ENTITY_TYPE, this.type)
-                .set(Constants.Sponge.EntityArchetype.ENTITY_DATA, this.entityData());
+                .set(Constants.Sponge.EntityArchetype.V2.DATA_VERSION, SharedConstants.getCurrentVersion().dataVersion().version())
+                .set(Constants.Sponge.EntityArchetype.V2.DATA, this.entityData()
+                    .set(Constants.Entity.ENTITY_TYPE_ID, net.minecraft.world.entity.EntityType.getKey((net.minecraft.world.entity.EntityType<?>) this.type)));
     }
 
     @Override

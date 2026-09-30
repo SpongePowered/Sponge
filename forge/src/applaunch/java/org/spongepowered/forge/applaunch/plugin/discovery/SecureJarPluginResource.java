@@ -29,6 +29,7 @@ import net.minecraftforge.fml.loading.moddiscovery.ModJarMetadata;
 import org.spongepowered.common.applaunch.plugin.discovery.SpongeJVMPluginResource;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 
+import java.io.InputStream;
 import java.lang.module.ModuleDescriptor;
 import java.net.URI;
 import java.nio.file.Path;
@@ -52,6 +53,16 @@ public final class SecureJarPluginResource implements SpongeJVMPluginResource {
         this.jar = SecureJar.from(jar -> new PluginJarMetadata(jar, paths), paths);
     }
 
+    /**
+     * We can't determine all paths from the jar. Use this constructor as a last resort.
+     */
+    public SecureJarPluginResource(final SecureJar jar) {
+        Objects.requireNonNull(jar, "jar");
+        this.pathsArray = new Path[]{jar.getPrimaryPath()};
+        this.paths = List.of(jar.getPrimaryPath());
+        this.jar = jar;
+    }
+
     public SecureJar jar() {
         return this.jar;
     }
@@ -71,8 +82,13 @@ public final class SecureJarPluginResource implements SpongeJVMPluginResource {
     }
 
     @Override
-    public Optional<URI> locateResource(final String path) {
-        return this.jar.moduleDataProvider().findFile(path);
+    public Optional<URI> locate(final String path) {
+        return this.jar.moduleDataProvider().findFile(Objects.requireNonNull(path, "path"));
+    }
+
+    @Override
+    public Optional<InputStream> open(final String path) {
+        return this.jar.moduleDataProvider().open(Objects.requireNonNull(path, "path"));
     }
 
     @Override
