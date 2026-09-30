@@ -216,10 +216,27 @@ public final class Constants {
 
         public static final class EntityArchetype {
 
-            public static final int BASE_VERSION = 1;
             public static final String ENTITY_ID = "Id";
-            public static final DataQuery ENTITY_TYPE = of("EntityType");
-            public static final DataQuery ENTITY_DATA = of("EntityData");
+
+            @Deprecated
+            public static final class V1 {
+
+                public static final DataQuery ENTITY_TYPE = of("EntityType");
+                public static final DataQuery ENTITY_DATA = of("EntityData");
+            }
+
+            public static final class V2 {
+
+                public static final DataQuery DATA = of("Data");
+                public static final DataQuery DATA_VERSION = of("DataVersion");
+            }
+
+            public static final class Data {
+
+                public static final int BASE_VERSION = 1;
+                public static final int DATA_VERSIONED = 2;
+                public static final int CONTENT_VERSION = Data.DATA_VERSIONED;
+            }
         }
 
         public static final class Entity {
@@ -771,6 +788,19 @@ public final class Constants {
         public static final DataQuery CUSTOM_NAME = of("CustomName");
 
         public static final Set<Relative> RELATIVE_POSITION = EnumSet.of(Relative.X, Relative.Y, Relative.Z);
+
+        public static final class V2 {
+
+            public static final DataQuery DATA = of("Data");
+            public static final DataQuery DATA_VERSION = of("DataVersion");
+        }
+
+        public static final class Data {
+
+            public static final int BASE_VERSION = 1;
+            public static final int DATA_VERSIONED = 2;
+            public static final int CONTENT_VERSION = Data.DATA_VERSIONED;
+        }
 
         public static final class Ageable {
 

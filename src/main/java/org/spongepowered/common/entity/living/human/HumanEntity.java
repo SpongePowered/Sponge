@@ -304,6 +304,8 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
 
     @Override
     protected void tickHeadTurn(final float p_110146_1_) {
+        // Must run first, it is the only thing that updates yBodyRot, which the look control clamps yHeadRot against
+        super.tickHeadTurn(p_110146_1_);
         // Make the body rotation follow head rotation
         this.setYRot(this.getYHeadRot());
     }
