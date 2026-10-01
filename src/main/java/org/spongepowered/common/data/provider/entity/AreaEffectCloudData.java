@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.provider.entity;
 
 import com.google.common.collect.Streams;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.item.alchemy.PotionContents;
 import org.spongepowered.api.data.Keys;
@@ -93,12 +94,6 @@ public final class AreaEffectCloudData {
                             h.accessor$durationOnUse(SpongeTicks.toSaturatedIntOrInfinite(v));
                             return true;
                         })
-                    .create(Keys.POTION_EFFECTS)
-                        .get(h -> PotionEffectUtil.copyAsPotionEffects(Streams.stream(h.accessor$potionContents().getAllEffects()).toList()))
-                        .set((h, v) -> {
-                            final PotionContents contents = h.accessor$potionContents();
-                            ((AreaEffectCloud) h).setPotionContents(new PotionContents(contents.potion(), contents.customColor(), PotionEffectUtil.copyAsEffectInstances(v), contents.customName()));
-                        })
                     .create(Keys.REAPPLICATION_DELAY)
                         .get(h -> new SpongeTicks(h.accessor$reapplicationDelay()))
                         .setAnd((h, v) -> {
@@ -108,6 +103,14 @@ public final class AreaEffectCloudData {
                             h.accessor$reapplicationDelay(SpongeTicks.toSaturatedIntOrInfinite(v));
                             return true;
                         });
+        // @formatter:on
+        final var areaEffectCloud = registrator.asMutable(AreaEffectCloud.class);
+        final var components = EntityDataProviders.of(
+            EntityDataProviders.transformedWith(Keys.POTION_EFFECTS, DataComponents.POTION_CONTENTS,
+                (p) -> PotionEffectUtil.copyAsPotionEffects(Streams.stream(p.getAllEffects()).toList()),
+                (a, original) -> new PotionContents(original.potion(), original.customColor(), PotionEffectUtil.copyAsEffectInstances(a), original.customName())
+            )
+        );
+        components.forEach(p -> p.applyToRegistrator(areaEffectCloud));
     }
-    // @formatter:on
 }

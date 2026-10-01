@@ -25,6 +25,8 @@
 package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.entity.animal.CatVariant;
 import org.spongepowered.api.data.Keys;
@@ -43,12 +45,6 @@ public final class CatData {
     public static void register(final DataProviderRegistrator registrator) {
         registrator
                 .asMutable(Cat.class)
-                    .create(Keys.CAT_TYPE)
-                        .get(h -> (CatType) (Object) h.getVariant().value())
-                        .set((h, v) -> ((CatAccessor) h).invoker$setVariant(Holder.direct((CatVariant) (Object) v)))
-                    .create(Keys.DYE_COLOR)
-                        .get(h -> (DyeColor) (Object) h.getCollarColor())
-                        .set((h, v) -> ((CatAccessor)h).invoker$setCollarColor((net.minecraft.world.item.DyeColor) (Object) v))
                     .create(Keys.IS_BEGGING_FOR_FOOD)
                         .get(h -> {
                             throw new MissingImplementationException("CatData", "IS_BEGGING_FOR_FOOD::getter");
@@ -75,6 +71,12 @@ public final class CatData {
                     .create(Keys.IS_RELAXED)
                         .get(CatAccessor::invoker$isRelaxStateOne)
                         .set(CatAccessor::invoker$setRelaxStateOne);
+        // @formatter:on
+        final var cat = registrator.asMutable(Cat.class);
+        final var components = EntityDataProviders.of(
+            EntityDataProviders.holderOf(Keys.CAT_TYPE, DataComponents.CAT_VARIANT, Registries.CAT_VARIANT),
+            EntityDataProviders.enumOf(Keys.DYE_COLOR, DataComponents.CAT_COLLAR)
+        );
+        components.forEach(p -> p.applyToRegistrator(cat));
     }
-    // @formatter:on
 }
