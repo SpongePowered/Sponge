@@ -25,26 +25,25 @@
 package org.spongepowered.common.bridge.world;
 
 import org.spongepowered.api.util.Ticks;
-import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.Ticket;
 import org.spongepowered.api.world.server.TicketType;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Collection;
-import java.util.Optional;
+import java.util.function.Predicate;
 
 public interface DistanceManagerBridge {
 
-    boolean bridge$checkTicketValid(Ticket<?> ticket);
+    boolean bridge$checkTicketValid(Ticket ticket);
 
-    Ticks bridge$timeLeft(Ticket<?> ticket);
+    Ticks bridge$timeLeft(Ticket ticket);
 
-    <S, T> Optional<Ticket<T>> bridge$registerTicket(ServerWorld world, TicketType<T> ticketType, Vector3i pos, T value, int distanceLimit);
+    Ticket bridge$registerTicket(TicketType ticketType, Vector3i pos, int radius);
 
-    boolean bridge$renewTicket(Ticket<?> ticket);
+    boolean bridge$renewTicket(Ticket ticket);
 
-    boolean bridge$releaseTicket(Ticket<?> ticket);
+    boolean bridge$releaseTicket(Ticket ticket);
 
-    <T> Collection<Ticket<T>> bridge$tickets(TicketType<T> ticketType);
+    Collection<Ticket> bridge$tickets(Predicate<org.spongepowered.api.world.server.TicketType> typePredicate);
 
 }
