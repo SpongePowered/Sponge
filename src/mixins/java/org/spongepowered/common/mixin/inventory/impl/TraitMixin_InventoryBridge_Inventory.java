@@ -29,6 +29,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.decoration.Mannequin;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.vehicle.minecart.AbstractMinecartContainer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -68,6 +69,7 @@ import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
         ResultContainer.class,
         AbstractMinecartContainer.class,
         ArmorStand.class,
+        Mannequin.class,
         Mob.class,
         MerchantContainer.class,
         CampfireBlockEntity.class,
