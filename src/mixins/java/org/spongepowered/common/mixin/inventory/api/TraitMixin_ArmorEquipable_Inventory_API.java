@@ -28,6 +28,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.decoration.Mannequin;
 import net.minecraft.world.entity.player.Player;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.type.HandType;
@@ -49,7 +50,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 // All living implementors of ArmorEquipable
-@Mixin({ArmorStand.class, Mob.class, Player.class})
+@Mixin({ArmorStand.class, Mannequin.class, Mob.class, Player.class})
 public abstract class TraitMixin_ArmorEquipable_Inventory_API implements ArmorEquipable {
 
     // TODO can we implement canEquip?

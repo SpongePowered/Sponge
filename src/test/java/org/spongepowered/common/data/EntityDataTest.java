@@ -57,6 +57,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.entity.Mannequin;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.animal.Sheep;
@@ -332,6 +333,18 @@ public final class EntityDataTest {
             BodyParts.LEFT_LEG.get(), new Vector3d(0, 90, 45),
             BodyParts.RIGHT_LEG.get(), new Vector3d(0, -90, -45)
         ));
+    }
+
+    @Test
+    public void testMannequin() {
+        final Mannequin mannequin = this.location.createEntity(EntityTypes.MANNEQUIN.get());
+
+        mannequin.equip(EquipmentTypes.CHEST.get(), ItemStack.of(ItemTypes.LEATHER_CHESTPLATE));
+        mannequin.equip(EquipmentTypes.FEET.get(), ItemStack.of(ItemTypes.CHAINMAIL_BOOTS));
+        mannequin.equip(EquipmentTypes.HEAD.get(), ItemStack.of(ItemTypes.GOLDEN_HELMET));
+        mannequin.equip(EquipmentTypes.LEGS.get(), ItemStack.of(ItemTypes.DIAMOND_LEGGINGS));
+        mannequin.equip(EquipmentTypes.MAINHAND.get(), ItemStack.of(ItemTypes.DIAMOND));
+        mannequin.equip(EquipmentTypes.OFFHAND.get(), ItemStack.of(ItemTypes.DIAMOND));
     }
 
     @Test
