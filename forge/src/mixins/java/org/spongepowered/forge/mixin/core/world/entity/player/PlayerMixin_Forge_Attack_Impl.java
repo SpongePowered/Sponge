@@ -24,14 +24,14 @@
  */
 package org.spongepowered.forge.mixin.core.world.entity.player;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.util.DamageEventUtil;
 import org.spongepowered.forge.mixin.core.world.entity.LivingEntityMixin_Forge_Attack_Impl;
 
@@ -39,9 +39,9 @@ import org.spongepowered.forge.mixin.core.world.entity.LivingEntityMixin_Forge_A
 public abstract class PlayerMixin_Forge_Attack_Impl extends LivingEntityMixin_Forge_Attack_Impl {
     private DamageEventUtil.Attack<Player> attackImpl$attack;
 
-    @Redirect(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/common/ForgeHooks;getCriticalHit(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/entity/Entity;ZF)Lnet/minecraftforge/event/entity/player/CriticalHitEvent;"))
-    private CriticalHitEvent attackImpl$critHook(final Player player, final Entity target, final boolean vanillaCritical, final float damageModifier) {
-        final CriticalHitEvent event = ForgeHooks.getCriticalHit(player, target, vanillaCritical, damageModifier);
+    @WrapOperation(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/common/ForgeHooks;getCriticalHit(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/entity/Entity;ZF)Lnet/minecraftforge/event/entity/player/CriticalHitEvent;"))
+    private CriticalHitEvent attackImpl$critHook(final Player player, final Entity target, final boolean vanillaCritical, final float damageModifier, final Operation<CriticalHitEvent> original) {
+        final CriticalHitEvent event = original.call(player, target, vanillaCritical, damageModifier);
         if (event != null) {
             this.attackImpl$attack.functions().add(DamageEventUtil.provideCriticalAttackFunction(this.attackImpl$attack.sourceEntity(), event.getDamageModifier()));
         }

@@ -24,12 +24,14 @@
  */
 package org.spongepowered.neoforge.mixin.core.world.entity.player;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.event.entity.player.CriticalHitEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.util.DamageEventUtil;
 import org.spongepowered.neoforge.mixin.core.world.entity.LivingEntityMixin_Neo_Attack_Impl;
@@ -38,13 +40,13 @@ import org.spongepowered.neoforge.mixin.core.world.entity.LivingEntityMixin_Neo_
 public abstract class PlayerMixin_Neo_Attack_Impl extends LivingEntityMixin_Neo_Attack_Impl {
     private DamageEventUtil.Attack<Player> attackImpl$attack;
 
-    @Redirect(method = "attack", at = @At(value = "INVOKE", target = "Lnet/neoforged/neoforge/event/entity/player/CriticalHitEvent;isCriticalHit()Z"))
-    private boolean attackImpl$critHook(final CriticalHitEvent event) {
+    @WrapOperation(method = "attack", at = @At(value = "INVOKE", target = "Lnet/neoforged/neoforge/common/CommonHooks;fireCriticalHit(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/entity/Entity;ZF)Lnet/neoforged/neoforge/event/entity/player/CriticalHitEvent;"))
+    private CriticalHitEvent attackImpl$critHook(final Player player, final Entity target, final boolean vanillaCritical, final float damageModifier, final Operation<CriticalHitEvent> original) {
+        final CriticalHitEvent event = original.call(player, target, vanillaCritical, damageModifier);
         if (event.isCriticalHit()) {
             this.attackImpl$attack.functions().add(DamageEventUtil.provideCriticalAttackFunction(this.attackImpl$attack.sourceEntity(), event.getDamageMultiplier()));
-            return true;
         }
-        return false;
+        return event;
     }
 
     /**
