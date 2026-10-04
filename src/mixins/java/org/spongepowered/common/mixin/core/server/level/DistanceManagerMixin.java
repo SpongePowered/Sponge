@@ -42,7 +42,7 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Collection;
-import java.util.function.Predicate;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Mixin(DistanceManager.class)
@@ -104,10 +104,24 @@ public abstract class DistanceManagerMixin implements DistanceManagerBridge {
     }
 
     @Override
-    public Collection<Ticket> bridge$tickets(final Predicate<org.spongepowered.api.world.server.TicketType> typePredicate) {
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public Collection<Ticket> bridge$tickets(final Vector3i pos) {
+        return (Collection) List.copyOf(this.ticketStorage.getTickets(VecHelper.toChunkPos(pos).toLong()));
+    }
+
+    @Override
+    public Collection<Ticket> bridge$tickets(final org.spongepowered.api.world.server.TicketType type) {
         return ((TicketStorageAccessor) this.ticketStorage).accessor$tickets().values()
             .stream().flatMap(Collection::stream)
-            .map(Ticket.class::cast).filter(ticket -> typePredicate.test(ticket.type()))
+            .map(Ticket.class::cast).filter(ticket -> ticket.type().equals(type))
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public Collection<Ticket> bridge$tickets() {
+        return ((TicketStorageAccessor) this.ticketStorage).accessor$tickets().values()
+            .stream().flatMap(Collection::stream)
+            .map(Ticket.class::cast)
             .collect(Collectors.toList());
     }
 }

@@ -30,7 +30,6 @@ import org.spongepowered.api.world.server.TicketType;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Collection;
-import java.util.function.Predicate;
 
 public interface DistanceManagerBridge {
 
@@ -44,6 +43,10 @@ public interface DistanceManagerBridge {
 
     boolean bridge$releaseTicket(Ticket ticket);
 
-    Collection<Ticket> bridge$tickets(Predicate<org.spongepowered.api.world.server.TicketType> typePredicate);
+    Collection<Ticket> bridge$tickets(Vector3i pos);
+
+    Collection<Ticket> bridge$tickets(org.spongepowered.api.world.server.TicketType type);
+
+    Collection<Ticket> bridge$tickets();
 
 }

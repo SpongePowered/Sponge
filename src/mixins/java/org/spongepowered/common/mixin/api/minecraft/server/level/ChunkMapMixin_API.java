@@ -41,7 +41,6 @@ import org.spongepowered.math.vector.Vector3i;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Predicate;
 
 @Mixin(ChunkMap.class)
 public abstract class ChunkMapMixin_API implements org.spongepowered.api.world.server.ChunkManager {
@@ -90,9 +89,20 @@ public abstract class ChunkMapMixin_API implements org.spongepowered.api.world.s
     }
 
     @Override
-    public @NonNull Collection<Ticket> findTickets(final @NonNull Predicate<TicketType> typePredicate) {
-        Objects.requireNonNull(typePredicate, "typePredicate");
-        return ((ChunkMapBridge) this).bridge$distanceManager().bridge$tickets(typePredicate);
+    public @NonNull Collection<Ticket> findTickets(final @NonNull Vector3i chunkOrigin) {
+        Objects.requireNonNull(chunkOrigin, "chunkOrigin");
+        return ((ChunkMapBridge) this).bridge$distanceManager().bridge$tickets(chunkOrigin);
+    }
+
+    @Override
+    public @NonNull Collection<Ticket> findTickets(final @NonNull TicketType type) {
+        Objects.requireNonNull(type, "type");
+        return ((ChunkMapBridge) this).bridge$distanceManager().bridge$tickets(type);
+    }
+
+    @Override
+    public @NonNull Collection<Ticket> findTickets() {
+        return ((ChunkMapBridge) this).bridge$distanceManager().bridge$tickets();
     }
 
     @Override
