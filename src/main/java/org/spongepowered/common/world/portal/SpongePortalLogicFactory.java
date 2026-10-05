@@ -103,5 +103,4 @@ public class SpongePortalLogicFactory implements PortalLogic.Factory {
         return new SpongePortal(position, logic, aabb);
     }
 
-
 }

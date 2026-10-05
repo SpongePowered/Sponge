@@ -74,6 +74,14 @@ public final class SpongeCompositePortalLogic implements net.minecraft.world.lev
     }
 
     @Override
+    public Optional<TeleportBehavior> teleporter() {
+        return Optional.of((from, to, entity) -> this.rules.stream().map(PortalLogic.class::cast)
+            .map(PortalLogic::teleporter).flatMap(Optional::stream)
+            .map(c -> c.spawnLocation(from, to, entity))
+            .findFirst().get());
+    }
+
+    @Override
     public Optional<PortalGenerator> generator() {
         return Optional.of((at, axis) -> this.rules.stream().map(PortalLogic.class::cast)
                 .map(PortalLogic::generator).flatMap(Optional::stream)
@@ -82,17 +90,19 @@ public final class SpongeCompositePortalLogic implements net.minecraft.world.lev
     }
 
     @Override
-    public boolean teleport(final org.spongepowered.api.entity.Entity entity, final ServerLocation destination, final boolean generateDestinationPortal) {
+    public boolean teleport(final ServerLocation origin, final org.spongepowered.api.entity.Entity entity, final ServerLocation destination, final boolean generateDestinationPortal) {
         final var searchRange = 1;
         final var axis = Axis.X;
 
         var foundPortal = this.finder().flatMap(finder -> finder.findPortal(destination, searchRange));
         if (foundPortal.isPresent()) {
-            return foundPortal.map(Portal::position).map(entity::setLocation).orElse(false);
+            return foundPortal.flatMap(p -> this.teleporter().map(b -> b.spawnLocation(origin, destination, entity)))
+                    .map(entity::setLocation).orElse(false);
         }
         if (generateDestinationPortal) {
             var generatedPortal = this.generator().flatMap(generator -> generator.generatePortal(destination, axis));
-            return generatedPortal.map(Portal::position).map(entity::setLocation).orElse(false);
+            return generatedPortal.flatMap(p -> this.teleporter().map(b -> b.spawnLocation(origin, destination, entity)))
+               .map(entity::setLocation).orElse(false);
         }
         return false;
     }
