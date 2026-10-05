@@ -477,8 +477,7 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
 
     @Override
     public Optional<Entity> createEntity(final DataContainer container) {
-        return Optional.ofNullable(((LevelBridge) this.level).bridge$createEntity(container, null,
-                position -> VecHelper.inBounds(position, this.min(), this.max())));
+        return Optional.ofNullable(((LevelBridge) this.level).bridge$createEntity(container, null, this::api$isInBounds));
     }
 
     @Override
@@ -518,7 +517,7 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
     }
 
     private boolean api$isInBounds(final Vector3d position) {
-        return VecHelper.inBounds(position, this.min(), this.max());
+        return VecHelper.inBounds(position.toInt(), this.min(), this.max());
     }
 
 

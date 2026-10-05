@@ -57,6 +57,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.entity.Mannequin;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.animal.Sheep;
@@ -294,7 +295,6 @@ public final class EntityDataTest {
         DataTest.checkOfferData(fallingBlock, Keys.MAX_FALL_DAMAGE, 50.0);
     }
 
-    @Disabled
     @Test
     public void testArmorStand() {
         final ArmorStand armorStand = this.location.createEntity(EntityTypes.ARMOR_STAND.get());
@@ -306,9 +306,6 @@ public final class EntityDataTest {
         armorStand.equip(EquipmentTypes.MAINHAND.get(), ItemStack.of(ItemTypes.DIAMOND));
         armorStand.equip(EquipmentTypes.OFFHAND.get(), ItemStack.of(ItemTypes.DIAMOND));
 
-        DataTest.checkOfferData(armorStand, Keys.BODY_ROTATIONS, Map.of(BodyParts.CHEST.get(), Vector3d.RIGHT));
-        DataTest.checkOfferData(armorStand, Keys.CHEST_ROTATION, Vector3d.from(0, 90, 0));
-
         DataTest.checkOfferData(armorStand, Keys.HAS_ARMS, false);
         DataTest.checkOfferData(armorStand, Keys.HAS_ARMS, true);
 
@@ -318,14 +315,36 @@ public final class EntityDataTest {
         DataTest.checkOfferData(armorStand, Keys.HAS_MARKER, true);
         DataTest.checkOfferData(armorStand, Keys.HAS_MARKER, false);
 
-        DataTest.checkOfferData(armorStand, Keys.HEAD_ROTATION, Vector3d.from(0, 90, 0));
-        DataTest.checkOfferData(armorStand, Keys.LEFT_ARM_ROTATION, Vector3d.from(0, -90, -90));
-        DataTest.checkOfferData(armorStand, Keys.LEFT_LEG_ROTATION, Vector3d.from(0, -90, -45));
-        DataTest.checkOfferData(armorStand, Keys.RIGHT_ARM_ROTATION, Vector3d.from(0, 90, 90));
-        DataTest.checkOfferData(armorStand, Keys.RIGHT_LEG_ROTATION, Vector3d.from(0, 90, 45));
-
         DataTest.checkOfferData(armorStand, Keys.IS_SMALL, true);
         DataTest.checkOfferData(armorStand, Keys.IS_SMALL, false);
+
+        DataTest.checkOfferData(armorStand, Keys.HEAD_ROTATION, new Vector3d(0, 90, 0));
+        DataTest.checkOfferData(armorStand, Keys.CHEST_ROTATION, new Vector3d(0, 90, 0));
+        DataTest.checkOfferData(armorStand, Keys.LEFT_ARM_ROTATION, new Vector3d(0, -90, -90));
+        DataTest.checkOfferData(armorStand, Keys.RIGHT_ARM_ROTATION, new Vector3d(0, 90, 90));
+        DataTest.checkOfferData(armorStand, Keys.LEFT_LEG_ROTATION, new Vector3d(0, -90, -45));
+        DataTest.checkOfferData(armorStand, Keys.RIGHT_LEG_ROTATION, new Vector3d(0, 90, 45));
+
+        DataTest.checkOfferData(armorStand, Keys.BODY_ROTATIONS, Map.of(
+            BodyParts.HEAD.get(), new Vector3d(0, -90, 0),
+            BodyParts.CHEST.get(), new Vector3d(0, -90, 0),
+            BodyParts.LEFT_ARM.get(), new Vector3d(0, 90, 90),
+            BodyParts.RIGHT_ARM.get(), new Vector3d(0, -90, -90),
+            BodyParts.LEFT_LEG.get(), new Vector3d(0, 90, 45),
+            BodyParts.RIGHT_LEG.get(), new Vector3d(0, -90, -45)
+        ));
+    }
+
+    @Test
+    public void testMannequin() {
+        final Mannequin mannequin = this.location.createEntity(EntityTypes.MANNEQUIN.get());
+
+        mannequin.equip(EquipmentTypes.CHEST.get(), ItemStack.of(ItemTypes.LEATHER_CHESTPLATE));
+        mannequin.equip(EquipmentTypes.FEET.get(), ItemStack.of(ItemTypes.CHAINMAIL_BOOTS));
+        mannequin.equip(EquipmentTypes.HEAD.get(), ItemStack.of(ItemTypes.GOLDEN_HELMET));
+        mannequin.equip(EquipmentTypes.LEGS.get(), ItemStack.of(ItemTypes.DIAMOND_LEGGINGS));
+        mannequin.equip(EquipmentTypes.MAINHAND.get(), ItemStack.of(ItemTypes.DIAMOND));
+        mannequin.equip(EquipmentTypes.OFFHAND.get(), ItemStack.of(ItemTypes.DIAMOND));
     }
 
     @Test
