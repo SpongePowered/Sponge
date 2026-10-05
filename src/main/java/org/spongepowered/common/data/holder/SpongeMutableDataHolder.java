@@ -293,7 +293,7 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
         for (final Value<?> value : result.successfulData()) {
             builder.absorbResult(this.remove(value));
         }
-        return DataTransactionResult.failNoData();
+        return builder.build();
     }
 
     // Delegated
