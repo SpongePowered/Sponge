@@ -24,24 +24,31 @@
  */
 package org.spongepowered.common.inject.plugin;
 
-import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.launch.plugin.SpongePluginContainer;
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
 public final class PluginGuice {
 
-    public static Injector create(final PluginContainer container, final Class<?> pluginClass, final @Nullable Injector platformInjector) {
-        final List<Module> modules = new ArrayList<>(List.of(new PublicPluginModule(container), new PrivatePluginModule(container, pluginClass)));
+    public static Injector createMain(final SpongePluginContainer container, final Collection<Class<?>> pluginClasses) {
+        final List<Module> modules = new LinkedList<>();
+        modules.add(new PluginDependencyModule(container));
+        modules.add(new PluginEntrypointModule(pluginClasses));
+        modules.add(new PrivatePluginModule(container));
+
+        final Launch launch = Launch.instance();
+        launch.modModule(container).ifPresent(modules::add);
 
         final @Nullable Object customModule = container.metadata().property("guice-module").orElse(null);
         if (customModule != null) {
             try {
-                final Class<?> moduleClass = Class.forName(customModule.toString(), true, pluginClass.getClassLoader());
+                final Class<?> moduleClass = Class.forName(customModule.toString());
                 final Module moduleInstance = (Module) moduleClass.getConstructor().newInstance();
                 modules.add(moduleInstance);
             } catch (final Exception ex) {
@@ -49,12 +56,10 @@ public final class PluginGuice {
             }
         }
 
-        final Module module = new PriorityOverrideModule(modules);
+        return launch.lifecycle().platformInjector().createChildInjector(new PriorityOverrideModule(modules));
+    }
 
-        if (platformInjector != null) {
-            return platformInjector.createChildInjector(module);
-        } else {
-            return Guice.createInjector(module);
-        }
+    public static Injector createChild(final SpongePluginContainer container, final Collection<Class<?>> pluginClasses) {
+        return container.injector().get().createChildInjector(new PluginEntrypointModule(pluginClasses));
     }
 }

@@ -39,6 +39,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Client;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
@@ -47,7 +48,7 @@ import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryRoots;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.RegistryTypes;
-import org.spongepowered.common.applaunch.plugin.DummyPluginContainer;
+import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.common.bridge.core.WritableRegistryBridge;
 import org.spongepowered.common.bridge.server.packs.resources.ResourceManagerBridge;
 import org.spongepowered.common.data.SpongeDataManager;
@@ -62,6 +63,7 @@ import org.spongepowered.common.event.lifecycle.RegisterTagEventImpl;
 import org.spongepowered.common.event.manager.SpongeEventManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Lifecycle;
+import org.spongepowered.common.launch.plugin.SpongePluginContainer;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
 import org.spongepowered.common.profile.SpongeGameProfileManager;
 import org.spongepowered.common.registry.SpongeBuilderProvider;
@@ -76,7 +78,6 @@ import org.spongepowered.common.util.ExecutorUtil;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.plugin.PluginContainer;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -207,7 +208,7 @@ public final class SpongeLifecycle implements Lifecycle {
 
     @Override
     public void callConstructEvent() {
-        for (final PluginContainer plugin : this.filterInternalPlugins(this.game.pluginManager().plugins())) {
+        for (final PluginContainer plugin : this.game.pluginManager().plugins()) {
             ((SpongeEventManager) this.game.eventManager()).postToPlugin(SpongeEventFactory.createConstructPluginEvent(Cause.of(EventContext.empty(),
                     this.game), this.game, plugin), plugin);
         }
@@ -267,6 +268,17 @@ public final class SpongeLifecycle implements Lifecycle {
 
     @Override
     public void callStartingEngineEvent(final Engine engine) {
+        final boolean server = engine instanceof Server;
+        for (final PluginContainer container : this.game.pluginManager().plugins()) {
+            if (container instanceof SpongePluginContainer spongeContainer) {
+                try {
+                    spongeContainer.loadSidedEntrypoints(server);
+                } catch (final Exception e) {
+                    PluginPlatform.LOGGER.error("Failed to load {} sided entrypoints of plugin {}", server ? "server" : "client", container.metadata().id(), e);
+                }
+            }
+        }
+
         this.game.eventManager().post(SpongeEventFactory.createStartingEngineEvent(PhaseTracker.getInstance().currentCause(),
                 engine, this.game, (TypeToken<Engine>) TypeToken.get(engine.getClass())));
     }
@@ -309,13 +321,6 @@ public final class SpongeLifecycle implements Lifecycle {
     @Override
     public void setWorldDataConfiguration(final WorldDataConfiguration config) {
         this.featureFlags = config.enabledFeatures();
-    }
-
-    private Collection<PluginContainer> filterInternalPlugins(final Collection<PluginContainer> plugins) {
-        return plugins
-                .stream()
-                .filter(plugin -> !(plugin instanceof DummyPluginContainer))
-                .collect(Collectors.toList());
     }
 
     @Override

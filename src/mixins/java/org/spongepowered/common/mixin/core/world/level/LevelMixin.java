@@ -24,16 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.world.level;
 
-import com.mojang.serialization.Dynamic;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.util.RandomSource;
-import net.minecraft.util.datafix.DataFixers;
-import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
@@ -43,12 +39,10 @@ import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.WritableLevelData;
 import net.minecraft.world.phys.AABB;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -60,6 +54,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.data.persistence.NBTTranslator;
+import org.spongepowered.common.entity.EntityDataUtil;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.DataUtil;
 import org.spongepowered.math.vector.Vector3d;
@@ -112,11 +107,11 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
         final @Nullable Vector3d position,
         final @Nullable Predicate<Vector3d> positionCheck) throws IllegalArgumentException, IllegalStateException {
 
-        final EntityType<@NonNull ?> type = dataContainer.getRegistryValue(Constants.Entity.TYPE, RegistryTypes.ENTITY_TYPE)
-            .orElseThrow(() -> new IllegalArgumentException("DataContainer does not contain a valid entity type."));
+        final DataView updatedContainer = EntityDataUtil.upgradeEntityContainer(dataContainer);
+
         final Vector3d proposedPosition;
         if (position == null) {
-            proposedPosition = DataUtil.getPosition3d(dataContainer, Constants.Sponge.SNAPSHOT_WORLD_POSITION);
+            proposedPosition = DataUtil.getPosition3d(updatedContainer, Constants.Sponge.SNAPSHOT_WORLD_POSITION);
         } else {
             proposedPosition = position;
         }
@@ -129,33 +124,31 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
         }
 
         final @Nullable Vector3d rotation;
-        if (dataContainer.contains(Constants.Entity.ROTATION)) {
-            rotation = DataUtil.getPosition3d(dataContainer, Constants.Entity.ROTATION);
+        if (updatedContainer.contains(Constants.Entity.ROTATION)) {
+            rotation = DataUtil.getPosition3d(updatedContainer, Constants.Entity.ROTATION);
         } else {
             rotation = null;
         }
 
         final @Nullable Vector3d scale;
-        if (dataContainer.contains(Constants.Entity.SCALE)) {
-            scale = DataUtil.getPosition3d(dataContainer, Constants.Entity.SCALE);
+        if (updatedContainer.contains(Constants.Entity.SCALE)) {
+            scale = DataUtil.getPosition3d(updatedContainer, Constants.Entity.SCALE);
         } else {
             scale = null;
         }
 
-        final Entity createdEntity = this.bridge$createEntity(type, proposedPosition, false);
-        dataContainer.getView(Constants.Sponge.UNSAFE_NBT)
-                .map(NBTTranslator.INSTANCE::translate)
-                .ifPresent(x -> {
-                    final var dataFixed = DataFixers.getDataFixer().update(References.ENTITY, new Dynamic<>(NbtOps.INSTANCE, x), 3692, 3833);
-                    final var e = ((net.minecraft.world.entity.Entity) createdEntity);
-                    // mimicing Entity#restoreFrom
-                    dataFixed.remove("Dimension");
-                    final var tag = (CompoundTag) dataFixed.getValue();
-                    final var input = TagValueInput.create(ProblemReporter.DISCARDING, this.shadow$registryAccess(), tag);
-                    e.load(input);
-                    // position needs a reset
-                    e.snapTo(proposedPosition.x(), proposedPosition.y(), proposedPosition.z());
-                });
+        final CompoundTag entityData = updatedContainer.getView(Constants.Entity.V2.DATA)
+            .map(NBTTranslator.INSTANCE::translate)
+            .orElseThrow(() -> new IllegalArgumentException("Missing entity data!"));
+        // mimicing Entity#restoreFrom
+        entityData.remove("Dimension");
+
+        final Entity createdEntity = this.bridge$createEntity(EntityDataUtil.entityType(entityData), proposedPosition, false);
+        final var e = (net.minecraft.world.entity.Entity) createdEntity;
+        e.load(TagValueInput.create(ProblemReporter.DISCARDING, this.shadow$registryAccess(), entityData));
+        // position needs a reset
+        e.snapTo(proposedPosition.x(), proposedPosition.y(), proposedPosition.z());
+
         if (rotation != null) {
             createdEntity.setRotation(rotation);
         }

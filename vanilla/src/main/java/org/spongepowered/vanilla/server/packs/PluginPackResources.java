@@ -39,7 +39,8 @@ import net.minecraft.util.InclusiveRange;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.plugin.discovery.PluginResource;
+import org.spongepowered.vanilla.applaunch.plugin.discovery.SecureJarPluginResource;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,15 +58,16 @@ import java.util.stream.Stream;
 public final class PluginPackResources extends AbstractPackMetadataResources implements PackResources {
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    private final PluginContainer container;
+    private final PluginResource resource;
     private final PackMetadataSection metadata;
     private final @Nullable Path pluginRoot;
 
-    public PluginPackResources(final PackLocationInfo info, final PluginContainer container, final @Nullable Path pluginRoot) {
+    public PluginPackResources(final PackLocationInfo info, final PluginResource resource) {
         super(info);
-        this.container = container;
+        this.resource = resource;
         this.metadata = new PackMetadataSection(Component.literal("Plugin Resources"), new InclusiveRange<>(PackFormat.of(6)));
-        this.pluginRoot = pluginRoot;
+        // TODO: provide hook in the resource to return the file system for all resource types?
+        this.pluginRoot = resource instanceof SecureJarPluginResource jarResource ? jarResource.jar().getRootPath() : null;
     }
 
     @Override
@@ -75,7 +77,7 @@ public final class PluginPackResources extends AbstractPackMetadataResources imp
     }
 
     private IoSupplier<InputStream> getResource(final String rawPath) {
-        final Optional<URI> uri = this.container.locateResource(rawPath);
+        final Optional<URI> uri = this.resource.locate(rawPath);
         if (uri.isEmpty()) {
             return null;
         }

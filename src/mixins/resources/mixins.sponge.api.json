@@ -192,6 +192,7 @@
     "minecraft.world.entity.animal.golem.CopperGolemMixin_API",
     "minecraft.world.entity.animal.golem.IronGolemMixin_API",
     "minecraft.world.entity.animal.golem.SnowGolemMixin_API",
+    "minecraft.world.entity.animal.happyghast.HappyGhastMixin_API",
     "minecraft.world.entity.animal.equine.AbstractChestedHorseMixin_API",
     "minecraft.world.entity.animal.equine.AbstractHorseMixin_API",
     "minecraft.world.entity.animal.equine.DonkeyMixin_API",

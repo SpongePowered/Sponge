@@ -35,7 +35,7 @@
     "server.packs.repository.PackRepositoryMixin_Vanilla",
     "tags.TagLoaderMixin_Vanilla",
     "world.entity.EntityMixin_Vanilla",
-    "world.entity.EntityTypeMixin_Vanilla",
+    "world.entity.EntityTypesMixin_Vanilla",
     "world.entity.LivingEntityMixin_Vanilla",
     "world.entity.LivingEntityMixin_Vanilla_Damage",
     "world.entity.ai.attributes.DefaultAttributesMixin",

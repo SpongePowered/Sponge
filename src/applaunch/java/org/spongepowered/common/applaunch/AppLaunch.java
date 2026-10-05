@@ -28,6 +28,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 
+import java.util.function.Supplier;
+
 public final class AppLaunch {
 
     private static final Logger LOGGER = LogManager.getLogger("app launch");
@@ -37,12 +39,11 @@ public final class AppLaunch {
         return AppLaunch.LOGGER;
     }
 
-    public static <P extends PluginPlatform> P setPluginPlatform(final PluginPlatform pluginPlatform) {
-        if (AppLaunch.pluginPlatform != null) {
-            throw new RuntimeException("The plugin platform cannot be set twice! (Same classloader ?)");
+    public static synchronized <P extends PluginPlatform> P bootstrap(final Supplier<P> supplier) {
+        if (AppLaunch.pluginPlatform == null) {
+            AppLaunch.pluginPlatform = supplier.get();
         }
-        AppLaunch.pluginPlatform = pluginPlatform;
-        return (P) pluginPlatform;
+        return (P) AppLaunch.pluginPlatform;
     }
 
     public static <P extends PluginPlatform> P pluginPlatform() {

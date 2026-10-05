@@ -24,13 +24,15 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
+import com.google.common.collect.ImmutableMap;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.TooltipDisplay;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-
-import java.util.Map;
 
 public final class HideFlagsItemStackData {
 
@@ -39,15 +41,22 @@ public final class HideFlagsItemStackData {
 
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
-        final var keyToComponentMapping = Map.of(
-            Keys.HIDE_ATTRIBUTES, DataComponents.ATTRIBUTE_MODIFIERS,
-            Keys.HIDE_ENCHANTMENTS, DataComponents.ENCHANTMENTS,
-            Keys.HIDE_CAN_DESTROY, DataComponents.CAN_BREAK,
-            Keys.HIDE_CAN_PLACE, DataComponents.CAN_PLACE_ON,
-            Keys.HIDE_STORED_ENCHANTMENTS, DataComponents.STORED_ENCHANTMENTS,
-            Keys.HIDE_UNBREAKABLE, DataComponents.UNBREAKABLE,
-            Keys.HIDE_MISCELLANEOUS, DataComponents.CUSTOM_DATA
-        );
+        final ImmutableMap<Key<Value<Boolean>>, DataComponentType<?>> keyToComponentMapping = new ImmutableMap.Builder<Key<Value<Boolean>>, DataComponentType<?>>()
+            .put(Keys.HIDE_ARMOR_TRIM, DataComponents.TRIM)
+            .put(Keys.HIDE_ATTRIBUTES, DataComponents.ATTRIBUTE_MODIFIERS)
+            .put(Keys.HIDE_BANNER_PATTERNS, DataComponents.BANNER_PATTERNS)
+            .put(Keys.HIDE_BUNDLE_CONTENTS, DataComponents.BUNDLE_CONTENTS)
+            .put(Keys.HIDE_CAN_DESTROY, DataComponents.CAN_BREAK)
+            .put(Keys.HIDE_CAN_PLACE, DataComponents.CAN_PLACE_ON)
+            .put(Keys.HIDE_COLOR, DataComponents.DYED_COLOR)
+            .put(Keys.HIDE_ENCHANTMENTS, DataComponents.ENCHANTMENTS)
+            .put(Keys.HIDE_INSTRUMENT, DataComponents.INSTRUMENT)
+            .put(Keys.HIDE_MISCELLANEOUS, DataComponents.CUSTOM_DATA)
+            .put(Keys.HIDE_MUSIC_DISC, DataComponents.JUKEBOX_PLAYABLE)
+            .put(Keys.HIDE_POTION_EFFECTS, DataComponents.POTION_CONTENTS)
+            .put(Keys.HIDE_STORED_ENCHANTMENTS, DataComponents.STORED_ENCHANTMENTS)
+            .put(Keys.HIDE_UNBREAKABLE, DataComponents.UNBREAKABLE)
+            .build();
 
         final var mutableItem = registrator
                 .asMutable(ItemStack.class);

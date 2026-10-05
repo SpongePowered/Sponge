@@ -25,35 +25,44 @@
 package org.spongepowered.neoforge.launch.plugin;
 
 import com.google.common.collect.MapMaker;
-import com.google.inject.Injector;
 import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.loading.moddiscovery.ModInfo;
+import net.neoforged.fml.jarcontents.JarContents;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.common.launch.plugin.SpongePluginContainer;
+import org.spongepowered.neoforge.applaunch.plugin.discovery.JarContentsPluginResource;
+import org.spongepowered.neoforge.applaunch.plugin.metadata.PluginMetadataConverter;
+import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.plugin.discovery.PluginResource;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 
-import java.net.URI;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
-public class NeoPluginContainer implements SpongePluginContainer {
+public class NeoPluginContainer implements PluginContainer {
     private final ModContainer modContainer;
+    private final JarContents jar;
 
     private Logger logger;
     private PluginMetadata pluginMetadata;
-    private Object instance = new Object();
-    private Injector injector;
+    private PluginResource pluginResource;
 
     private NeoPluginContainer(final ModContainer modContainer) {
         this.modContainer = modContainer;
+        this.jar = modContainer.getModInfo().getOwningFile().getFile().getContents();
+    }
+
+    @Override
+    public PluginResource resource() {
+        if (this.pluginResource == null) {
+            this.pluginResource = new JarContentsPluginResource(this.jar);
+        }
+        return this.pluginResource;
     }
 
     @Override
     public PluginMetadata metadata() {
         if (this.pluginMetadata == null) {
-            this.pluginMetadata = PluginMetadataConverter.modToPlugin((ModInfo) this.modContainer.getModInfo());
+            this.pluginMetadata = PluginMetadataConverter.modToPlugin(this.modContainer.getModInfo());
         }
         return this.pluginMetadata;
     }
@@ -66,32 +75,12 @@ public class NeoPluginContainer implements SpongePluginContainer {
         return this.logger;
     }
 
-    @Override
-    public Optional<URI> locateResource(String relative) {
-        return this.modContainer.getModInfo().getOwningFile().getFile().getContents().findFile(Objects.requireNonNull(relative, "relative"));
-    }
+    private static final Map<ModContainer, NeoPluginContainer> mods = new MapMaker().weakKeys().makeMap();
 
-    @Override
-    public Object instance() {
-        return this.instance;
-    }
-
-    public void setInstance(final Object instance) {
-        this.instance = instance;
-    }
-
-    @Override
-    public Optional<Injector> injector() {
-        return Optional.ofNullable(this.injector);
-    }
-
-    public void setInjector(final Injector injector) {
-        this.injector = injector;
-    }
-
-    private static final Map<ModContainer, NeoPluginContainer> containers = new MapMaker().weakKeys().makeMap();
-
-    public static NeoPluginContainer of(final ModContainer modContainer) {
-        return containers.computeIfAbsent(modContainer, NeoPluginContainer::new);
+    public static Optional<PluginContainer> of(final ModContainer modContainer) {
+        if (modContainer instanceof PluginModContainer plugin) {
+            return plugin.container();
+        }
+        return Optional.of(NeoPluginContainer.mods.computeIfAbsent(modContainer, NeoPluginContainer::new));
     }
 }

@@ -29,13 +29,19 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.ArmorMaterials;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.data.type.ItemTiers;
 import org.spongepowered.api.data.type.NotePitches;
+import org.spongepowered.api.data.type.ShieldDamageReduction;
+import org.spongepowered.api.data.type.ShieldItemDamageFunction;
+import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.effect.sound.music.MusicDiscs;
+import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.fluid.FluidStackSnapshot;
 import org.spongepowered.api.fluid.FluidTypes;
 import org.spongepowered.api.item.ItemRarities;
@@ -43,11 +49,13 @@ import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.item.potion.PotionTypes;
 import org.spongepowered.api.item.recipe.smithing.ArmorTrim;
 import org.spongepowered.api.item.recipe.smithing.TrimMaterials;
 import org.spongepowered.api.item.recipe.smithing.TrimPatterns;
 import org.spongepowered.api.util.Color;
+import org.spongepowered.api.util.Ticks;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -55,6 +63,54 @@ import java.util.List;
 import java.util.Set;
 
 public final class ItemStackDataTest {
+
+    @Test
+    public void testWeapon() {
+        final ItemStack weapon = ItemStack.of(ItemTypes.DIAMOND_SWORD);
+        DataTest.checkOfferData(weapon, Keys.WEAPON_DAMAGE_PER_ATTACK, 5);
+        DataTest.checkOfferData(weapon, Keys.DISABLE_SHIELD_TICKS, Ticks.of(10));
+    }
+
+    @Test
+    public void testShield() {
+        final ItemStack shield = ItemStack.of(ItemTypes.SHIELD);
+        DataTest.checkOfferData(shield, Keys.SHIELD_DEPLOY_TICKS, Ticks.of(15));
+        DataTest.checkOfferData(shield, Keys.DISABLE_SHIELD_TICKS_SCALE, 2.5);
+        DataTest.checkOfferData(shield, Keys.SHIELD_DAMAGE_REDUCTIONS, List.of(
+            ShieldDamageReduction.of(ShieldDamageReduction.MultiplyAdd.builder()
+                .horizontalBlockingAngle(45)
+                .constantReduction(2)
+                .fractionalReduction(0.5)
+                .damageTypes(Set.of(DamageTypes.ARROW.get(), DamageTypes.PLAYER_ATTACK.get()))
+                .build()
+            )
+        ));
+        DataTest.checkOfferData(shield, Keys.SHIELD_ITEM_DAMAGE_FUNCTION, ShieldItemDamageFunction.of(
+            ShieldItemDamageFunction.MultiplyAdd.builder()
+                .constantDamage(5)
+                .fractionalDamage(2)
+                .minAttackDamage(2.5)
+                .build()
+            )
+        );
+        DataTest.checkOfferData(shield, Keys.SHIELD_BLOCK_SOUND, SoundTypes.ENTITY_SHULKER_HURT.get());
+        DataTest.checkOfferData(shield, Keys.SHIELD_DISABLE_SOUND, SoundTypes.ENTITY_ENDER_DRAGON_DEATH.get());
+    }
+
+    @Test
+    public void testEquippable() {
+        final ItemStack armor = ItemStack.of(ItemTypes.DIAMOND_CHESTPLATE);
+        DataTest.checkOfferData(armor, Keys.ALLOWED_ENTITIES, Set.of(EntityTypes.PLAYER.get(), EntityTypes.ZOMBIE.get()));
+        DataTest.checkOfferData(armor, Keys.CAMERA_OVERLAY, ResourceKey.minecraft("textures/misc/pumpkinblur.png"));
+        DataTest.checkOfferData(armor, Keys.CAN_BE_SHEARED, true);
+        DataTest.checkOfferData(armor, Keys.DAMAGE_ON_HURT, false);
+        DataTest.checkOfferData(armor, Keys.EQUIP_ON_INTERACT, true);
+        DataTest.checkOfferData(armor, Keys.EQUIP_SOUND, SoundTypes.ITEM_ARMOR_EQUIP_DIAMOND.get());
+        DataTest.checkOfferData(armor, Keys.EQUIPMENT_TYPE, EquipmentTypes.HEAD.get());
+        DataTest.checkOfferData(armor, Keys.IS_DISPENSABLE, false);
+        DataTest.checkOfferData(armor, Keys.IS_SWAPPABLE, false);
+        DataTest.checkOfferData(armor, Keys.SHEARING_SOUND, SoundTypes.ENTITY_SHEEP_SHEAR.get());
+    }
 
     @Test
     public void testEnchantments() {

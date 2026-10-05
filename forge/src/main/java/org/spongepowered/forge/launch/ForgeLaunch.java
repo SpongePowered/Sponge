@@ -30,16 +30,19 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLLoader;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.common.inject.SpongeCommonModule;
 import org.spongepowered.common.inject.SpongeModule;
 import org.spongepowered.common.launch.Launch;
+import org.spongepowered.forge.launch.inject.ModContainerModule;
 import org.spongepowered.forge.launch.inject.SpongeForgeModule;
 import org.spongepowered.forge.launch.plugin.ForgePluginManager;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.List;
+import java.util.Optional;
 
 public final class ForgeLaunch extends Launch {
 
@@ -87,5 +90,10 @@ public final class ForgeLaunch extends Launch {
         }
 
         return this.spongeForgePlugin;
+    }
+
+    @Override
+    public Optional<Module> modModule(final PluginContainer plugin) {
+        return ModList.getModContainerById(plugin.metadata().id()).map(ModContainerModule::new);
     }
 }

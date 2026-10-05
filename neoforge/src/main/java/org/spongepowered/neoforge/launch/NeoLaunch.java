@@ -30,16 +30,19 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
 import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLEnvironment;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.common.inject.SpongeCommonModule;
 import org.spongepowered.common.inject.SpongeModule;
 import org.spongepowered.common.launch.Launch;
+import org.spongepowered.neoforge.launch.inject.ModContainerModule;
 import org.spongepowered.neoforge.launch.inject.SpongeNeoModule;
 import org.spongepowered.neoforge.launch.plugin.NeoPluginManager;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.List;
+import java.util.Optional;
 
 public final class NeoLaunch extends Launch {
 
@@ -87,5 +90,10 @@ public final class NeoLaunch extends Launch {
         }
 
         return this.spongeNeoPlugin;
+    }
+
+    @Override
+    public Optional<Module> modModule(final PluginContainer plugin) {
+        return ModList.get().getModContainerById(plugin.metadata().id()).map(ModContainerModule::new);
     }
 }

@@ -15,6 +15,7 @@ plugins {
     id("implementation-structure")
     id(apiLibs.plugins.ideaExt.get().pluginId)
     alias(libs.plugins.versions)
+    alias(libs.plugins.blossom)
 }
 
 val apiVersion: String by project
@@ -66,6 +67,10 @@ val applaunch by sourceSets.registering {
 
     configurations.named(implementationConfigurationName) {
         extendsFrom(serviceLayerConfig.get())
+    }
+
+    blossom.javaSources {
+        property("pluginSpiVersion", apiLibs.pluginSpi.get().version)
     }
 }
 
@@ -153,6 +158,14 @@ idea {
             addNotNullAssertions = false
             useReleaseOption = true
             parallelCompilation = true
+        }
+    }
+}
+
+sourceSets {
+    test {
+        blossom.resources {
+            property("apiVersion", apiVersion.replace("-SNAPSHOT", ""))
         }
     }
 }

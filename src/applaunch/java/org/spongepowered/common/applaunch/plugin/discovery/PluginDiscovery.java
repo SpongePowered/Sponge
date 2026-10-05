@@ -1,0 +1,301 @@
+/*
+ * This file is part of Sponge, licensed under the MIT License (MIT).
+ *
+ * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+package org.spongepowered.common.applaunch.plugin.discovery;
+
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.common.applaunch.plugin.PluginPlatformConstants;
+import org.spongepowered.common.applaunch.plugin.PluginServiceLoader;
+import org.spongepowered.common.applaunch.plugin.VersionChecker;
+import org.spongepowered.plugin.Environment;
+import org.spongepowered.plugin.PluginLoader;
+import org.spongepowered.plugin.PluginService;
+import org.spongepowered.plugin.discovery.*;
+import org.spongepowered.plugin.metadata.PluginMetadata;
+import org.spongepowered.plugin.metadata.builtin.MetadataParser;
+import org.spongepowered.plugin.metadata.model.PluginConflict;
+
+import java.lang.module.ModuleDescriptor;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public abstract class PluginDiscovery extends PluginServiceLoader {
+    private Map<PluginResource, Candidate> candidates;
+    private List<PluginMetadataReader> readers;
+
+    protected PluginDiscovery(final Environment environment) {
+        super(environment);
+    }
+
+    public final void discoverPluginResources() {
+        final Map<PluginResource, Candidate> candidates = new HashMap<>();
+        final List<PluginMetadataReader> readers = new ArrayList<>();
+
+        final Set<String> locatorClasses = new HashSet<>();
+        final Set<String> readerClasses = new HashSet<>();
+
+        int maxBatches = 10;
+        final String maxBatchesProp = System.getProperty("sponge.discovery.maxBatches");
+        if (maxBatchesProp != null) {
+            try {
+                maxBatches = Integer.parseInt(maxBatchesProp);
+            } catch (final NumberFormatException ignored) {}
+        }
+
+        int batch = 1;
+
+        while (true) {
+            this.environment.logger().info("Running discovery batch #{} ...", batch);
+
+            final List<SpongeJVMPluginResource> batchServices = new ArrayList<>();
+
+            readers.addAll(this.loadServices("metadata reader", PluginMetadataReader.class, cl -> readerClasses.add(cl.getName())));
+
+            for (final PluginResourceLocator locator : this.loadServices("resource locator", PluginResourceLocator.class, cl -> locatorClasses.add(cl.getName()))) {
+                final Collection<PluginResourceLocator.Result> results;
+                try {
+                    results = locator.locatePluginResources(this.environment);
+                } catch (final Exception e) {
+                    this.environment.logger().error("Service '{}' failed to locate plugin resources.", locator.name(), e);
+                    continue;
+                }
+                this.environment.logger().info("Service '{}' located {} resources.", locator.name(), results.size());
+
+                for (final PluginResourceLocator.Result result : results) {
+                    Candidate candidate = candidates.get(result.resource());
+                    if (candidate == null) {
+                        candidate = new Candidate(result.resource(), result.unknownResourceStrategy());
+                        candidates.put(result.resource(), candidate);
+                        candidate.detectServices(locatorClasses, readerClasses);
+                        if (candidate.newDiscoveryServiceFound) {
+                            batchServices.add((SpongeJVMPluginResource) result.resource());
+                        }
+                    } else {
+                        candidate.unknownResourceStrategy = candidate.unknownResourceStrategy.merge(result.unknownResourceStrategy());
+                    }
+                    candidate.locators.add(locator);
+                }
+            }
+
+            this.environment.logger().info("Found {} new discovery services.", batchServices.size());
+            if (batchServices.isEmpty()) {
+                break;
+            }
+
+            if (++batch > maxBatches) {
+                this.environment.logger().warn("Max batches reached.");
+                break;
+            }
+
+            try {
+                this.appendDiscoveryServices(batchServices, batch);
+            } catch (final Exception e) {
+                this.environment.logger().error("Failed to build new service layer.", e);
+                break;
+            }
+        }
+
+        for (final Candidate candidate : candidates.values()) {
+            this.environment.logger().debug("Found {} located by [{}] ({}).", candidate.resource, candidate.locatorNames(), candidate.serviceNames());
+        }
+
+        this.candidates = candidates;
+        this.readers = readers;
+    }
+
+    protected abstract void appendDiscoveryServices(final List<SpongeJVMPluginResource> resources, final int batch) throws Exception;
+
+    public final Collection<Candidate> candidates() {
+        return Collections.unmodifiableCollection(this.candidates.values());
+    }
+
+    public final Candidate candidate(final PluginResource resource) {
+        Candidate candidate = this.candidates.get(resource);
+        if (candidate == null) {
+            candidate = new Candidate(resource, UnknownResourceStrategy.IGNORE);
+            this.candidates.put(resource, candidate);
+            this.environment.logger().debug("Found {} located by the platform.", resource);
+        }
+        return candidate;
+    }
+
+    public final Collection<PluginResource> gameResources() {
+        return this.candidates.values().stream().filter(Candidate::gameResource).map(Candidate::resource).toList();
+    }
+
+    public final void logMetadataWarnings() {
+        for (final String warning : MetadataParser.warnings()) {
+            this.environment.logger().warn(warning);
+        }
+    }
+
+    public final boolean checkConflicts() {
+        return this.checkConflicts(this.candidates.values().stream().flatMap(c -> c.metadata.values().stream()));
+    }
+
+    public final boolean checkConflicts(final Stream<PluginMetadata> allMetadata) {
+        final Map<String, PluginMetadata> map = new LinkedHashMap<>();
+        allMetadata.forEachOrdered(m -> map.put(m.id(), m));
+
+        boolean anyFatal = false;
+        for (final PluginMetadata metadata : map.values()) {
+            for (final PluginConflict conflict : metadata.conflicts()) {
+                final @Nullable PluginMetadata target = map.get(conflict.id());
+                if (target != null && VersionChecker.check(conflict.version(), target.version())) {
+                    if (conflict.fatal() && !PluginPlatformConstants.IGNORE_FATAL_CONFLICTS) {
+                        this.environment.logger().fatal("Plugin {}={} is fatally conflicting with {}={} in range {}. Reason: {}",
+                            metadata.id(), metadata.version(), target.id(), target.version(), conflict.version(), conflict.reason().orElse("?"));
+                        anyFatal = true;
+                    } else {
+                        this.environment.logger().warn("Plugin {}={} is conflicting with {}={} in range {}. Reason: {}",
+                            metadata.id(), metadata.version(), target.id(), target.version(), conflict.version(), conflict.reason().orElse("?"));
+                    }
+                }
+            }
+        }
+
+        return anyFatal;
+    }
+
+    public final class Candidate {
+        private final PluginResource resource;
+        private final List<PluginResourceLocator> locators = new ArrayList<>();
+        private @MonotonicNonNull UnknownResourceStrategy unknownResourceStrategy;
+        private final SequencedMap<String, PluginMetadata> metadata = new LinkedHashMap<>();
+        private boolean locatorFound, readerFound, loaderFound, modFound;
+        private boolean newDiscoveryServiceFound;
+
+        public Candidate(final PluginResource resource, final UnknownResourceStrategy unknownResourceStrategy) {
+            this.resource = resource;
+            this.unknownResourceStrategy = unknownResourceStrategy;
+        }
+
+        public PluginResource resource() {
+            return this.resource;
+        }
+
+        private void detectServices(final Set<String> existingLocators, final Set<String> existingReaders) {
+            if (this.resource instanceof SpongeJVMPluginResource jvmResource) {
+                final ModuleDescriptor descriptor;
+                try {
+                    descriptor = jvmResource.module();
+                } catch (Exception ex) {
+                    PluginDiscovery.this.environment.logger().warn("Cannot read module descriptor of {}", jvmResource, ex);
+                    return;
+                }
+
+                final Map<String, List<String>> providers = new HashMap<>();
+                for (final ModuleDescriptor.Provides provides : descriptor.provides()) {
+                    providers.put(provides.service(), provides.providers());
+                }
+                final List<String> locators = providers.getOrDefault(PluginResourceLocator.class.getName(), Collections.emptyList());
+                final List<String> readers = providers.getOrDefault(PluginMetadataReader.class.getName(), Collections.emptyList());
+                final List<String> loaders = providers.getOrDefault(PluginLoader.class.getName(), Collections.emptyList());
+                this.locatorFound = !locators.isEmpty();
+                this.readerFound = !readers.isEmpty();
+                this.loaderFound = !loaders.isEmpty();
+                this.newDiscoveryServiceFound = locators.stream().anyMatch(key -> !existingLocators.contains(key)) || readers.stream().anyMatch(key -> !existingReaders.contains(key));
+            }
+        }
+
+        private String serviceNames() {
+            final StringJoiner joiner = new StringJoiner(", ");
+            if (this.locatorFound) {
+                joiner.add("locator");
+            }
+            if (this.readerFound) {
+                joiner.add("reader");
+            }
+            if (this.loaderFound) {
+                joiner.add("loader");
+            }
+            return joiner.toString();
+        }
+
+        private String locatorNames() {
+            return this.locators.stream().map(PluginService::name).collect(Collectors.joining(", "));
+        }
+
+        public List<PluginResourceLocator> locators() {
+            return Collections.unmodifiableList(this.locators);
+        }
+
+        public void readMetadata() {
+            this.metadata.clear();
+            for (final PluginMetadataReader reader : PluginDiscovery.this.readers) {
+                final Collection<? extends PluginMetadata> plugins;
+                try {
+                    plugins = reader.readPluginMetadata(PluginDiscovery.this.environment, this.resource, this.locators());
+                } catch (final Exception e) {
+                    PluginDiscovery.this.environment.logger().error("Service '{}' failed to read plugin metadata", reader.name(), e);
+                    continue;
+                }
+                for (final PluginMetadata plugin : plugins) {
+                    this.metadata.put(plugin.id(), plugin);
+                }
+            }
+        }
+
+        public SequencedCollection<PluginMetadata> metadata() {
+            return Collections.unmodifiableSequencedCollection(this.metadata.sequencedValues());
+        }
+
+        public boolean pluginFound() {
+            return !this.metadata.isEmpty();
+        }
+
+        public boolean gameResource() {
+            if (this.pluginFound() || this.loaderFound) {
+                return true;
+            }
+            if (this.locatorFound || this.readerFound) {
+                return false;
+            }
+            return this.unknownResourceStrategy.load();
+        }
+
+        public void setModFound() {
+            this.modFound = true;
+        }
+
+        public void logResult() {
+            if (this.pluginFound()) {
+                PluginDiscovery.this.environment.logger().debug("Found {} metadata in {}.",  this.metadata.size(), this.resource);
+                return;
+            }
+            if (this.locatorFound || this.readerFound || this.loaderFound || this.modFound) {
+                return;
+            }
+
+            final String result = this.unknownResourceStrategy.load() ? "loaded as a game library" : "ignored";
+            if (this.unknownResourceStrategy.warn()) {
+                PluginDiscovery.this.environment.logger().warn("The unknown resource {} will be {}.", this.resource, result);
+            } else {
+                PluginDiscovery.this.environment.logger().debug("The unknown resource {} will be {}.", this.resource, result);
+            }
+        }
+    }
+}

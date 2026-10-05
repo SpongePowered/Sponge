@@ -277,27 +277,11 @@ public class SpongeInventoryMenu implements InventoryMenu {
             // else no slot present
             switch (clickTypeIn) {
                 case PICKUP:
+                case THROW:
                     if (slotId == -999 && this.clickHandler != null) {
                         if (dragType == 0) {return this.clickHandler.handle(cause, container, ClickTypes.CLICK_LEFT_OUTSIDE.get());
                         } else if (dragType == 1) {  return this.clickHandler.handle(cause, container, ClickTypes.CLICK_RIGHT_OUTSIDE.get());
                         } }  // else unknown slotId/drag-type
-                    break;
-                case THROW:
-                    if (slotId == -999) {
-                        // TODO check packets - does THROW with slotid -999 exist or is this actually PICKUP?
-                        // its supposed to be l/r-click with nothing in hand
-                        // TODO check if those exist
-                        ///**
-                        // * Throwing one item on the cursor by clicking outside the inventory window.
-                        // */
-                        //public static final org.spongepowered.api.item.inventory.menu.ClickType
-                        //        CLICK_THROW_ONE = DummyObjectProvider.createFor(org.spongepowered.api.item.inventory.menu.ClickType.class, "click_throw_one");
-                        ///**
-                        // * Throwing all items on the cursor by clicking outside the inventory window.
-                        // */
-                        //public static final org.spongepowered.api.item.inventory.menu.ClickType
-                        //        CLICK_THROW_ALL = DummyObjectProvider.createFor(org.spongepowered.api.item.inventory.menu.ClickType.class, "click_throw_all");
-                    }        // else unknown slotId/drag-type
                     break;
             }
             return true;

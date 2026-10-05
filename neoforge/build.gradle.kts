@@ -240,6 +240,15 @@ val neoManifest = java.manifest {
     System.getenv()["GIT_BRANCH"]?.apply { attributes("Git-Branch" to this) }
 }
 
+val modManifest = java.manifest {
+    attributes(
+        "Access-Widener" to "common.accesswidener",
+        "Superclass-Transformer" to "common.superclasschange,neoforge.superclasschange",
+        "MixinConfigs" to mixinConfigs.joinToString(","),
+        "LithiumOptions" to "mixin.world.tick_scheduler=false,mixin.collections.entity_filtering=false"
+    )
+}
+
 sourceSets {
     main {
         blossom.resources {
@@ -247,7 +256,6 @@ sourceSets {
             property("version", version.toString())
             property("description", description.toString())
             property("neoForgeVersion", neoForgeVersion)
-            property("mixins", mixinConfigs.joinToString(",") { "{config=\"$it\"}" })
         }
     }
 
@@ -293,6 +301,13 @@ tasks {
         dependsOn(emitDependencies)
     }
 
+    named(main.processResourcesTaskName, ProcessResources::class) {
+        val manifestFile = this.destinationDir.resolve("META-INF/MANIFEST.MF")
+        doLast {
+            modManifest.writeTo(manifestFile)
+        }
+    }
+
     val servicesShadowJar by register("servicesShadowJar", ShadowJar::class) {
         group = "build"
         archiveClassifier.set("services")
@@ -327,10 +342,7 @@ tasks {
 
         manifest {
             from(neoManifest)
-            attributes(
-                "Access-Widener" to "common.accesswidener",
-                "Superclass-Transformer" to "common.superclasschange,neoforge.superclasschange"
-            )
+            from(modManifest)
         }
 
         from(commonMain.map { it.output })

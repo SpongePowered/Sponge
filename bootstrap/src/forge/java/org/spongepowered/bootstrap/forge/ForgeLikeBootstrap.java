@@ -35,6 +35,7 @@ import org.spongepowered.bootstrap.forge.classloader.ResourceClassLoader;
 import java.io.File;
 import java.lang.module.Configuration;
 import java.lang.module.ModuleFinder;
+import java.lang.module.ModuleReference;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -123,12 +124,18 @@ public abstract class ForgeLikeBootstrap {
         final Configuration config = ModuleLayer.boot().configuration().resolveAndBind(finder, ModuleFinder.ofSystem(), moduleNames);
         final List<ModuleLayer> parentLayers = List.of(ModuleLayer.boot());
 
-        // Isolation
         final ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
-        ClassLoader parentLoader = ClassLoader.getPlatformClassLoader();
-        if (!isolated) {
-            // Make sure we don't leak classes that are supposed to be
-            // in the game layer from the boostrap layer.
+
+        // Isolation
+        ClassLoader parentLoader;
+        if (isolated) {
+            parentLoader = ClassLoader.getPlatformClassLoader();
+        } else {
+            // Don't leak classes that we manage already
+            final List<ModuleReference> modules = new ArrayList<>();
+            modules.addAll(finder.findAll());
+            modules.addAll(SecureModuleFinder.of(resourceJars).findAll());
+
             final String resources = System.getProperty("sponge.resources");
             if (resources != null) {
                 final List<SecureJar> spongeJars = new ArrayList<>();
@@ -136,11 +143,10 @@ public abstract class ForgeLikeBootstrap {
                     final Path[] paths = Stream.of(entry.split("&")).map(Path::of).toArray(Path[]::new);
                     spongeJars.add(SecureJar.from(paths));
                 }
-                final ModuleFinder spongeFinder = SecureModuleFinder.of(spongeJars);
-                final ModuleFinder resourceFinder = SecureModuleFinder.of(resourceJars);
-                parentLoader = new FilteringPassthroughClassLoader(contextLoader,
-                    Stream.concat(spongeFinder.findAll().stream(), resourceFinder.findAll().stream()));
+                modules.addAll(SecureModuleFinder.of(spongeJars).findAll());
             }
+
+            parentLoader = new FilteringPassthroughClassLoader(contextLoader, modules);
         }
 
         // Intermediate classloader to include resources but not modules

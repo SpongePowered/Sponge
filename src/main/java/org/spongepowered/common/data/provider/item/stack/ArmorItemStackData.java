@@ -24,22 +24,32 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.equipment.EquipmentAsset;
+import net.minecraft.world.item.equipment.EquipmentAssets;
 import net.minecraft.world.item.equipment.Equippable;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.effect.sound.SoundType;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.recipe.smithing.ArmorTrim;
 import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
-import java.util.function.Function;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public final class ArmorItemStackData {
 
@@ -50,6 +60,49 @@ public final class ArmorItemStackData {
     public static void register(final DataProviderRegistrator registrator) {
         registrator
                 .asMutable(ItemStack.class)
+                    .create(Keys.ALLOWED_ENTITIES)
+                        .get(h -> {
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null || equippable.allowedEntities().isEmpty()) {
+                                return null;
+                            }
+                            return equippable.allowedEntities().get().stream()
+                                .map(Holder::value)
+                                .map(e -> (EntityType<?>) e)
+                                .collect(Collectors.toSet());
+                        })
+                        .setAnd((h, v) -> {
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return false;
+                            }
+                            final HolderSet<net.minecraft.world.entity.EntityType<?>> holderSet = HolderSet.direct(
+                                e -> BuiltInRegistries.ENTITY_TYPE.wrapAsHolder((net.minecraft.world.entity.EntityType<?>) e),
+                                v
+                            );
+                            h.set(DataComponents.EQUIPPABLE, ArmorItemStackData.asBuilder(equippable).setAllowedEntities(holderSet).build());
+                            return true;
+                        })
+                        .deleteAnd(h -> {
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return false;
+                            }
+                            h.set(DataComponents.EQUIPPABLE, new Equippable(
+                                equippable.slot(),
+                                equippable.equipSound(),
+                                equippable.assetId(),
+                                equippable.cameraOverlay(),
+                                Optional.empty(),
+                                equippable.dispensable(),
+                                equippable.swappable(),
+                                equippable.damageOnHurt(),
+                                equippable.equipOnInteract(),
+                                equippable.canBeSheared(),
+                                equippable.shearingSound()
+                            ));
+                            return true;
+                        })
                     .create(Keys.ARMOR_MATERIAL)
                         .get(h -> {
                             final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
@@ -62,7 +115,37 @@ public final class ArmorItemStackData {
                                 .map(RegistryEntry::value)
                                 .orElse(null);
                         })
-                        .supports(isArmorItem())
+                        .setAnd((h, v) -> {
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return false;
+                            }
+                            final ResourceKey key = RegistryTypes.ARMOR_MATERIAL.get().valueKey(v);
+                            final net.minecraft.resources.ResourceKey<EquipmentAsset> assetKey =
+                                net.minecraft.resources.ResourceKey.create(EquipmentAssets.ROOT_ID, (Identifier) (Object) key);
+                            h.set(DataComponents.EQUIPPABLE, ArmorItemStackData.asBuilder(equippable).setAsset(assetKey).build());
+                            return true;
+                        })
+                        .deleteAnd(h -> {
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return false;
+                            }
+                            h.set(DataComponents.EQUIPPABLE, new Equippable(
+                                equippable.slot(),
+                                equippable.equipSound(),
+                                Optional.empty(),
+                                equippable.cameraOverlay(),
+                                equippable.allowedEntities(),
+                                equippable.dispensable(),
+                                equippable.swappable(),
+                                equippable.damageOnHurt(),
+                                equippable.equipOnInteract(),
+                                equippable.canBeSheared(),
+                                equippable.shearingSound()
+                            ));
+                            return true;
+                        })
                     .create(Keys.ARMOR_TRIM)
                         .get(h -> {
                             final net.minecraft.world.item.equipment.trim.@Nullable ArmorTrim trim = h.get(DataComponents.TRIM);
@@ -79,7 +162,58 @@ public final class ArmorItemStackData {
                             h.set(DataComponents.TRIM, (net.minecraft.world.item.equipment.trim.ArmorTrim) (Object) v);
                         })
                         .delete(h -> h.remove(DataComponents.TRIM))
-                    .supports(isArmorItem())
+                    .create(Keys.CAMERA_OVERLAY)
+                        .get(h -> {
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null || equippable.cameraOverlay().isEmpty()) {
+                                return null;
+                            }
+                            return (ResourceKey) (Object) equippable.cameraOverlay().get();
+                        })
+                        .setAnd((h, v) -> {
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return false;
+                            }
+                            h.set(DataComponents.EQUIPPABLE, ArmorItemStackData.asBuilder(equippable).setCameraOverlay((Identifier) (Object) v).build());
+                            return true;
+                        })
+                        .deleteAnd(h -> {
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return false;
+                            }
+                            h.set(DataComponents.EQUIPPABLE, new Equippable(
+                                equippable.slot(),
+                                equippable.equipSound(),
+                                equippable.assetId(),
+                                Optional.empty(),
+                                equippable.allowedEntities(),
+                                equippable.dispensable(),
+                                equippable.swappable(),
+                                equippable.damageOnHurt(),
+                                equippable.equipOnInteract(),
+                                equippable.canBeSheared(),
+                                equippable.shearingSound()
+                            ));
+                            return true;
+                        })
+                    .create(Keys.CAN_BE_SHEARED)
+                        .get(h -> {
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return null;
+                            }
+                            return equippable.canBeSheared();
+                        })
+                        .setAnd((h, v) -> {
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return false;
+                            }
+                            h.set(DataComponents.EQUIPPABLE, ArmorItemStackData.asBuilder(equippable).setCanBeSheared(v).build());
+                            return true;
+                        })
                     .create(Keys.DAMAGE_ABSORPTION)
                         .get(h -> {
                             final @Nullable ItemAttributeModifiers modifiersContainer = h.get(DataComponents.ATTRIBUTE_MODIFIERS);
@@ -92,32 +226,148 @@ public final class ArmorItemStackData {
                                 .map(e -> e.modifier().amount())
                                 .orElse(null);
                         })
-                        .supports(isArmorItem())
+                    .create(Keys.DAMAGE_ON_HURT)
+                        .get(h -> {
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return null;
+                            }
+                            return equippable.damageOnHurt();
+                        })
+                        .setAnd((h, v) -> {
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return false;
+                            }
+                            h.set(DataComponents.EQUIPPABLE, ArmorItemStackData.asBuilder(equippable).setDamageOnHurt(v).build());
+                            return true;
+                        })
+                    .create(Keys.EQUIP_ON_INTERACT)
+                        .get(h -> {
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return null;
+                            }
+                            return equippable.equipOnInteract();
+                        })
+                        .setAnd((h, v) -> {
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return false;
+                            }
+                            h.set(DataComponents.EQUIPPABLE, ArmorItemStackData.asBuilder(equippable).setEquipOnInteract(v).build());
+                            return true;
+                        })
+                    .create(Keys.EQUIP_SOUND)
+                        .get(h -> {
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return null;
+                            }
+                            return (SoundType) (Object) equippable.equipSound().value();
+                        })
+                        .setAnd((h, v) -> {
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return false;
+                            }
+                            h.set(DataComponents.EQUIPPABLE, ArmorItemStackData.asBuilder(equippable).setEquipSound(Holder.direct((SoundEvent) (Object) v)).build());
+                            return true;
+                        })
                     .create(Keys.EQUIPMENT_TYPE)
                         .get(h -> {
                             final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
                             if (equippable == null) {
                                 return null;
                             }
-
                             return (EquipmentType) (Object) equippable.slot();
                         })
-                        .supports(isArmorItem());
+                        .set((h, v) -> {
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            final EquipmentSlot slot = (EquipmentSlot) (Object) v;
+                            if (equippable == null) {
+                                h.set(DataComponents.EQUIPPABLE, Equippable.builder(slot).build());
+                                return;
+                            }
+                            h.set(DataComponents.EQUIPPABLE, new Equippable(
+                                slot,
+                                equippable.equipSound(),
+                                equippable.assetId(),
+                                equippable.cameraOverlay(),
+                                equippable.allowedEntities(),
+                                equippable.dispensable(),
+                                equippable.swappable(),
+                                equippable.damageOnHurt(),
+                                equippable.equipOnInteract(),
+                                equippable.canBeSheared(),
+                                equippable.shearingSound()
+                            ));
+                        })
+                        .delete(h -> h.remove(DataComponents.EQUIPPABLE))
+                    .create(Keys.IS_DISPENSABLE)
+                        .get(h -> {
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return null;
+                            }
+                            return equippable.dispensable();
+                        })
+                        .setAnd((h, v) -> {
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return false;
+                            }
+                            h.set(DataComponents.EQUIPPABLE, ArmorItemStackData.asBuilder(equippable).setDispensable(v).build());
+                            return true;
+                        })
+                    .create(Keys.IS_SWAPPABLE)
+                        .get(h -> {
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return null;
+                            }
+                            return equippable.swappable();
+                        })
+                        .setAnd((h, v) -> {
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return false;
+                            }
+                            h.set(DataComponents.EQUIPPABLE, ArmorItemStackData.asBuilder(equippable).setSwappable(v).build());
+                            return true;
+                        })
+                    .create(Keys.SHEARING_SOUND)
+                        .get(h -> {
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return null;
+                            }
+                            return (SoundType) (Object) equippable.shearingSound().value();
+                        })
+                        .setAnd((h, v) -> {
+                            final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
+                            if (equippable == null) {
+                                return false;
+                            }
+                            h.set(DataComponents.EQUIPPABLE, ArmorItemStackData.asBuilder(equippable).setShearingSound(Holder.direct((SoundEvent) (Object) v)).build());
+                            return true;
+                        });
     }
     // @formatter:on
 
-    private static @NonNull Function<ItemStack, Boolean> isArmorItem() {
-        return h -> {
-            final var components = h.getItem().components();
-            final @Nullable Integer stackSize = components.get(DataComponents.MAX_STACK_SIZE);
-            if (stackSize == null) {
-                return false;
-            }
-            return components.has(DataComponents.EQUIPPABLE)
-                   && components.has(DataComponents.ENCHANTABLE)
-                   && components.has(DataComponents.MAX_DAMAGE)
-                   && components.has(DataComponents.MAX_STACK_SIZE)
-                   && (1 == stackSize);
-        };
+    private static Equippable.Builder asBuilder(final Equippable equippable) {
+        final Equippable.Builder builder = Equippable.builder(equippable.slot())
+            .setEquipSound(equippable.equipSound())
+            .setDispensable(equippable.dispensable())
+            .setSwappable(equippable.swappable())
+            .setDamageOnHurt(equippable.damageOnHurt())
+            .setEquipOnInteract(equippable.equipOnInteract())
+            .setCanBeSheared(equippable.canBeSheared())
+            .setShearingSound(equippable.shearingSound());
+        equippable.assetId().ifPresent(builder::setAsset);
+        equippable.cameraOverlay().ifPresent(builder::setCameraOverlay);
+        equippable.allowedEntities().ifPresent(builder::setAllowedEntities);
+        return builder;
     }
+
 }

@@ -25,11 +25,65 @@
 package org.spongepowered.common.launch.plugin;
 
 import com.google.inject.Injector;
-import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.common.inject.plugin.PluginGuice;
+import org.spongepowered.plugin.builtin.StandardPluginContainer;
+import org.spongepowered.plugin.discovery.PluginResource;
+import org.spongepowered.plugin.metadata.PluginMetadata;
+import org.spongepowered.plugin.metadata.model.PluginEntrypoints;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
-public interface SpongePluginContainer extends PluginContainer {
+@SuppressWarnings("deprecation") // registerListeners
+public class SpongePluginContainer extends StandardPluginContainer {
+    private Object instance = this;
+    private Injector injector;
 
-    Optional<Injector> injector();
+    public SpongePluginContainer(final PluginResource resource, final PluginMetadata metadata) {
+        super(resource, metadata);
+    }
+
+    @SuppressWarnings("removal")
+    @Override
+    public Object instance() {
+        return this.instance;
+    }
+
+    public Optional<Injector> injector() {
+        return Optional.ofNullable(this.injector);
+    }
+
+    public void loadMainEntrypoints() throws Exception {
+        final List<Class<?>> pluginClasses = new ArrayList<>();
+        for (final String className : this.metadata().entrypoints().main()) {
+            pluginClasses.add(Class.forName(className));
+        }
+
+        final Injector pluginInjector = PluginGuice.createMain(this, pluginClasses);
+        this.injector = pluginInjector;
+
+        for (final Class<?> pluginClass : pluginClasses) {
+            final Object plugin = pluginInjector.getInstance(pluginClass);
+            if (this.instance == this) {
+                this.instance = plugin;
+            }
+            Sponge.eventManager().registerListeners(this, plugin);
+        }
+    }
+
+    public void loadSidedEntrypoints(boolean server) throws Exception {
+        final List<Class<?>> pluginClasses = new ArrayList<>();
+        final PluginEntrypoints entrypoints = this.metadata().entrypoints();
+        for (final String className : server ? entrypoints.server() : entrypoints.client()) {
+            pluginClasses.add(Class.forName(className));
+        }
+
+        final Injector pluginInjector = PluginGuice.createChild(this, pluginClasses);
+        for (final Class<?> pluginClass : pluginClasses) {
+            final Object plugin = pluginInjector.getInstance(pluginClass);
+            Sponge.eventManager().registerListeners(this, plugin);
+        }
+    }
 }

@@ -25,9 +25,9 @@
 package org.spongepowered.bootstrap.forge.classloader;
 
 import java.lang.module.ModuleReference;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Stream;
 
 public final class FilteringPassthroughClassLoader extends ClassLoader {
 
@@ -37,7 +37,7 @@ public final class FilteringPassthroughClassLoader extends ClassLoader {
         ClassLoader.registerAsParallelCapable();
     }
 
-    public FilteringPassthroughClassLoader(final ClassLoader parent, final Stream<ModuleReference> modules) {
+    public FilteringPassthroughClassLoader(final ClassLoader parent, final Collection<ModuleReference> modules) {
         super(parent);
         modules.forEach(m -> this.filteredPackages.addAll(m.descriptor().packages()));
     }

@@ -24,61 +24,23 @@
  */
 package org.spongepowered.forge.applaunch.plugin;
 
-import cpw.mods.modlauncher.Environment;
-import cpw.mods.modlauncher.api.IEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
-import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.common.applaunch.config.LaunchConfig;
-import org.spongepowered.common.applaunch.config.TokenReplacement;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
+import org.spongepowered.forge.applaunch.plugin.discovery.ForgePluginDiscovery;
+import org.spongepowered.forge.applaunch.plugin.discovery.SecureJarPluginResource;
+import org.spongepowered.plugin.builtin.jvm.JVMPluginResource;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class ForgePluginPlatform implements PluginPlatform {
+public final class ForgePluginPlatform extends PluginPlatform {
     private static final List<AutoCloseable> closeCallbacks = new ArrayList<>();
 
-    private static volatile boolean bootstrapped;
+    private final ForgePluginDiscovery discovery;
 
-    private final Environment environment;
-    private final LaunchConfig config;
-    private final TokenReplacement tokens;
-    private final List<Path> pluginDirectories;
-
-    public static synchronized void bootstrap(final Environment environment) {
-        if (ForgePluginPlatform.bootstrapped) {
-            return;
-        }
-        ForgePluginPlatform.bootstrapped = true;
-        final ForgePluginPlatform platform;
-        try {
-            platform = new ForgePluginPlatform(environment);
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
-        AppLaunch.setPluginPlatform(platform);
-    }
-
-    private ForgePluginPlatform(final Environment environment) throws IOException {
-        this.environment = environment;
-        this.config = LaunchConfig.load(this.baseDirectory(), true);
-
-        this.tokens = new TokenReplacement();
-        this.tokens.register("BASE_DIR", this.baseDirectory());
-        this.tokens.register("CONFIG_DIR", this.configDirectory());
-        this.tokens.register("MODS_DIR", FMLPaths.MODSDIR.get());
-
-        final Path additionalPluginsDirectory = Path.of(this.tokens.replace(this.config.additionalPluginsDirectory()));
-        Files.createDirectories(additionalPluginsDirectory);
-        this.pluginDirectories = List.of(FMLPaths.MODSDIR.get(), additionalPluginsDirectory);
-    }
-
-    @Override
-    public String version() {
-        return this.environment.getProperty(IEnvironment.Keys.VERSION.get()).orElse("dev");
+    public ForgePluginPlatform() {
+        this.discovery = new ForgePluginDiscovery(this.environment());
     }
 
     @Override
@@ -97,18 +59,18 @@ public final class ForgePluginPlatform implements PluginPlatform {
     }
 
     @Override
-    public LaunchConfig config() {
-        return this.config;
+    public Path modsDirectory() {
+        return FMLPaths.MODSDIR.get();
     }
 
     @Override
-    public TokenReplacement tokens() {
-        return this.tokens;
+    public ForgePluginDiscovery discovery() {
+        return this.discovery;
     }
 
     @Override
-    public List<Path> pluginDirectories() {
-        return this.pluginDirectories;
+    public JVMPluginResource create(final Path[] paths) {
+        return new SecureJarPluginResource(paths);
     }
 
     @Override

@@ -27,8 +27,8 @@ package org.spongepowered.vanilla.launch.plugin.resolver;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.util.Tuple;
+import org.spongepowered.common.launch.plugin.loader.PluginCandidate;
 import org.spongepowered.common.util.PrettyPrinter;
-import org.spongepowered.plugin.PluginCandidate;
 
 import java.util.Collection;
 import java.util.HashMap;

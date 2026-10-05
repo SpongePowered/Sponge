@@ -1,0 +1,57 @@
+{
+    "global": {
+        "loader": {
+          "name": "java_plain",
+          "version": "1.0"
+        },
+        "license": "MIT",
+        "links": {
+            "homepage": "https://www.spongepowered.org",
+            "source": "https://www.spongepowered.org/source",
+            "issues": "https://www.spongepowered.org/issues"
+        },
+        "contributors": [
+            {
+                "name": "SpongePowered",
+                "description": "Lead Developer"
+            }
+        ]
+    },
+    "plugins": [
+        {
+            "id": "spongeforge",
+            "name": "SpongeForge",
+            "version": "{{ version }}",
+            "entrypoints": ["org.spongepowered.forge.SpongeForge"],
+            "description": "{{ description }}",
+            "dependencies": [
+                {
+                    "id": "forge",
+                    "version": "[{{ forgeVersion }},)"
+                },
+                {
+                    "id": "sponge",
+                    "version": "{{ version }}"
+                }
+            ]
+        },
+        {
+            "id": "sponge",
+            "name": "Sponge",
+            "version": "{{ version }}",
+            "description": "The common Sponge implementation",
+            "dependencies": [
+                {
+                    "id": "spongeapi",
+                    "version": "{{ apiVersion }}"
+                }
+            ]
+        },
+        {
+            "id": "spongeapi",
+            "name": "SpongeAPI",
+            "version": "{{ apiVersion }}",
+            "description": "The Minecraft API specification"
+        }
+    ]
+}

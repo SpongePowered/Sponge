@@ -67,16 +67,18 @@ public final class PluginConfigManager implements ConfigManager {
                 .build();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public ConfigRoot sharedConfig(final PluginContainer container) {
-        return new PluginConfigRoot(this.serializers, container.metadata().id().toLowerCase(),
+        return new PluginConfigRoot(this.serializers, container.metadata().originalId().toLowerCase(),
                                     SpongeCommon.pluginConfigDirectory());
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public ConfigRoot pluginConfig(final PluginContainer container) {
-        return new PluginConfigRoot(this.serializers, container.metadata().id().toLowerCase(),
-                                    SpongeCommon.pluginConfigDirectory().resolve(container.metadata().id().toLowerCase()));
+        return new PluginConfigRoot(this.serializers, container.metadata().originalId().toLowerCase(),
+                                    SpongeCommon.pluginConfigDirectory().resolve(container.metadata().originalId().toLowerCase()));
     }
 
     @Override

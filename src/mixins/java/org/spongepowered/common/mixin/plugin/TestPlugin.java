@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.mixin.plugin;
 
+import org.spongepowered.common.applaunch.test.TestEnvironment;
+
 public final class TestPlugin extends AbstractMixinConfigPlugin {
     private final boolean active;
 
     public TestPlugin() {
-        this.active = "true".equals(System.getProperty("sponge.test.active"));
+        this.active = TestEnvironment.isActive();
     }
 
     @Override

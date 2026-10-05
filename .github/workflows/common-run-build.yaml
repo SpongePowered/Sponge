@@ -34,7 +34,7 @@ jobs:
           runtime_version: 25
           publishing_branch_regex: 'api-\d+'
       - name: setup / cache minecraft dependencies
-        uses: "actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf" # v4.2.2
+        uses: "actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9" # v6.1.0
         if: "!startsWith(github.ref, 'refs/heads/update/') || matrix.project == 'vanilla'"
         with:
           path: |

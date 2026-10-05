@@ -248,7 +248,7 @@ minecraft {
 
     runs {
         configureEach {
-//             jvmArgs("-Dsponge.bootstrap.debug=true") // Uncomment to debug bootstrap classpath
+//          // jvmArgs("-Dsponge.bootstrap.debug=true") // Uncomment to debug bootstrap classpath
             // No mixin.debug.strict: Forge ATs widen targets (e.g. BrewingStandMenu$PotionSlot) that mixins must name by string for
             // vanilla, which strict rejects, and its strict.targets sub-option can't be turned off on its own
             jvmArgs("-Dmixin.debug=true", "-Dmixin.debug.export=true", "-Dmixin.dumpTargetOnFailure=true")
