@@ -302,7 +302,7 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
             this.entityArchetypeStream(this.min(), this.max(), StreamOptions.lazily())
                 .apply(VolumeCollectors.of(
                     target,
-                    VolumePositionTranslators.relativeTo(placement),
+                    VolumePositionTranslators.relativeTo(placement.toDouble()),
                     VolumeApplicators.applyEntityArchetype()
                 ));
         }
