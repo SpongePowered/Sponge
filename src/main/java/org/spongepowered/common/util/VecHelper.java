@@ -182,6 +182,11 @@ public final class VecHelper {
         return VecHelper.inBounds(pos.getX(), pos.getY(), pos.getZ(), min, max);
     }
 
+    public static boolean inBounds(final org.spongepowered.math.vector.Vector3i pos, final org.spongepowered.math.vector.Vector3i min,
+                                   final org.spongepowered.math.vector.Vector3i max) {
+        return VecHelper.inBounds(pos.x(), pos.y(), pos.z(), min, max);
+    }
+
     public static boolean inBounds(final org.spongepowered.math.vector.Vector3d pos, final org.spongepowered.math.vector.Vector3i min,
                                    final org.spongepowered.math.vector.Vector3i max) {
         return VecHelper.inBounds(pos.x(), pos.y(), pos.z(), min, max);

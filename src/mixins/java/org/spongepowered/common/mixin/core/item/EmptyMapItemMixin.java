@@ -71,7 +71,7 @@ public abstract class EmptyMapItemMixin {
             frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(usedItem));
 
             final Set<Value<?>> mapValues = Sets.newHashSet(
-                Value.immutableOf(Keys.MAP_LOCATION, Vector2i.from((int) player.getX(), (int) player.getZ())),
+                Value.immutableOf(Keys.MAP_LOCATION, Vector2i.from(player.getBlockX(), player.getBlockZ())),
                 Value.immutableOf(Keys.MAP_WORLD, ((ServerWorld) level).key())
             );
 

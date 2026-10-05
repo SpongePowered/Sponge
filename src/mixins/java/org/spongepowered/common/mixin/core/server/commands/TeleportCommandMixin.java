@@ -100,7 +100,7 @@ public abstract class TeleportCommandMixin {
 
                 if (entityIn instanceof ServerPlayer) {
 
-                    ChunkPos chunkpos = new ChunkPos(new BlockPos((int) actualX, (int) actualY, (int) actualZ));
+                    ChunkPos chunkpos = new ChunkPos(BlockPos.containing(actualX, actualY, actualZ));
                     worldIn.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkpos, 1, entityIn.getId());
 
                     entityIn.stopRiding();

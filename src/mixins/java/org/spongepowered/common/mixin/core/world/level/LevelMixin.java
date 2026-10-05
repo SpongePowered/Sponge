@@ -228,7 +228,7 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
 
         if (naturally && entity instanceof Mob) {
             // Adding the default equipment
-            final DifficultyInstance difficulty = this.shadow$getCurrentDifficultyAt(new BlockPos((int) x, (int) y, (int) z));
+            final DifficultyInstance difficulty = this.shadow$getCurrentDifficultyAt(BlockPos.containing(x, y, z));
             ((MobAccessor) entity).invoker$populateDefaultEquipmentSlots(this.random, difficulty);
         }
 
