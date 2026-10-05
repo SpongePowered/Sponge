@@ -74,7 +74,7 @@ public class VanillaAccessWidenerTransformer extends AccessWidenerTransformer im
             if (attribute.isPresent()) {
                 for (final String path : attribute.get().split(",")) {
                     try {
-                        resources.add(plugin.locateResource(path).get().toURL());
+                        resources.add(plugin.locate(path).get().toURL());
                     } catch (final Exception e) {
                         LOGGER.warn("Failed to locate access widener {} from {}", path, plugin, e);
                     }

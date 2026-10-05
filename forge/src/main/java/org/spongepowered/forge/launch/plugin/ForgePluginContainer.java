@@ -29,15 +29,13 @@ import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.forgespi.locating.IModFile;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.forge.applaunch.plugin.discovery.SecureJarPluginResource;
 import org.spongepowered.forge.applaunch.plugin.metadata.PluginMetadataConverter;
 import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.plugin.discovery.PluginResource;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 public class ForgePluginContainer implements PluginContainer {
@@ -46,10 +44,19 @@ public class ForgePluginContainer implements PluginContainer {
 
     private Logger logger;
     private PluginMetadata pluginMetadata;
+    private PluginResource pluginResource;
 
     private ForgePluginContainer(final ModContainer modContainer) {
         this.modContainer = modContainer;
         this.modFile = modContainer.getModInfo().getOwningFile().getFile();
+    }
+
+    @Override
+    public PluginResource resource() {
+        if (this.pluginResource == null) {
+            this.pluginResource = new SecureJarPluginResource(this.modFile.getSecureJar());
+        }
+        return this.pluginResource;
     }
 
     @Override
@@ -66,12 +73,6 @@ public class ForgePluginContainer implements PluginContainer {
             this.logger = LogManager.getLogger(this.modContainer.getModId());
         }
         return this.logger;
-    }
-
-    @Override
-    public Optional<URI> locateResource(String relative) {
-        final Path p = this.modFile.findResource(Objects.requireNonNull(relative, "relative"));
-        return Files.exists(p) ? Optional.of(p.toUri()) : Optional.empty();
     }
 
     @SuppressWarnings("removal")

@@ -47,7 +47,7 @@ public class DummyPluginResource implements PluginResource {
     }
 
     @Override
-    public Optional<URI> locateResource(final String path) {
+    public Optional<URI> locate(final String path) {
         return Optional.empty();
     }
 }

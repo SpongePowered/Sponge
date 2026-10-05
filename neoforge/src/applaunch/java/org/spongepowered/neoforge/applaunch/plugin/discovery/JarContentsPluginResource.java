@@ -30,6 +30,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.common.applaunch.plugin.discovery.SpongeJVMPluginResource;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.lang.module.ModuleDescriptor;
 import java.net.URI;
@@ -73,8 +74,17 @@ public final class JarContentsPluginResource implements SpongeJVMPluginResource 
     }
 
     @Override
-    public Optional<URI> locateResource(String path) {
-        return this.jar.findFile(path);
+    public Optional<URI> locate(final String path) {
+        return this.jar.findFile(Objects.requireNonNull(path, "path"));
+    }
+
+    @Override
+    public Optional<InputStream> open(final String path) {
+        try {
+            return Optional.ofNullable(this.jar.openFile(Objects.requireNonNull(path, "path")));
+        } catch (final IOException ignored) {
+            return Optional.empty();
+        }
     }
 
     @Override

@@ -1,5 +1,6 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import net.neoforged.moddevgradle.internal.RunGameTask
+import net.neoforged.nfrtgradle.NeoFormRuntimeTask
 import org.spongepowered.gradle.impl.AWToAT
 import org.spongepowered.gradle.impl.DigestUtil
 
@@ -274,6 +275,11 @@ sourceSets {
 tasks {
     withType(RunGameTask::class) {
         standardInput = System.`in`
+    }
+
+    // NFRT tasks default to a Java 21 launcher; reuse the project toolchain so no extra JDK must be installed
+    withType(NeoFormRuntimeTask::class).configureEach {
+        javaExecutable.set(project.javaToolchains.launcherFor(project.java.toolchain).map { it.executablePath.asFile.absolutePath })
     }
 
     jar {

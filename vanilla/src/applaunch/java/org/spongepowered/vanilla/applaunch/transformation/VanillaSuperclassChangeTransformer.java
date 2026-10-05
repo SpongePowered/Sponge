@@ -79,7 +79,7 @@ public class VanillaSuperclassChangeTransformer extends SuperclassChangeTransfor
             if (attribute.isPresent()) {
                 for (final String scPath : attribute.get().split(",")) {
                     try {
-                        resources.add(plugin.locateResource(scPath).get().toURL());
+                        resources.add(plugin.locate(scPath).get().toURL());
                     } catch (final Exception e) {
                         LOGGER.warn("Failed to locate superclass changer {} from {}", scPath, plugin);
                     }

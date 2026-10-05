@@ -33,15 +33,11 @@ import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.repository.RepositorySource;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.discovery.PluginResource;
-import org.spongepowered.vanilla.applaunch.plugin.discovery.SecureJarPluginResource;
 import org.spongepowered.vanilla.bridge.server.packs.repository.PackRepositoryBridge_Vanilla;
 import org.spongepowered.vanilla.launch.plugin.VanillaPluginManager;
 
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -63,15 +59,8 @@ public final class PluginRepositorySource implements RepositorySource {
             // The pack ID is prepended with "plugin-", as this will be the namespace we have to use a valid
             // character as a separator
             final String id = "plugin-" + pluginContainer.metadata().id();
-            final PluginResource resource = pluginManager.resource(pluginContainer);
-            // TODO: provide hook in the resource to return the file system for all resource types?
-            @Nullable Path pluginRoot = null;
-            if (resource instanceof SecureJarPluginResource jarResource) {
-                pluginRoot = jarResource.jar().getRootPath();
-            }
-
             final PackLocationInfo info = new PackLocationInfo(id, Component.literal(id), PackSource.DEFAULT, Optional.empty());
-            final PluginPackResources packResources = new PluginPackResources(info, pluginContainer, pluginRoot);
+            final PluginPackResources packResources = new PluginPackResources(info, pluginContainer.resource());
             final Pack.ResourcesSupplier packSupplier = new Pack.ResourcesSupplier() {
 
                 @Override
