@@ -27,11 +27,9 @@ package org.spongepowered.gradle.impl;
 import org.gradle.api.NamedDomainObjectContainer;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.tasks.TaskProvider;
-import org.gradle.plugins.ide.idea.model.IdeaModel;
-import org.jetbrains.gradle.ext.ProjectSettings;
-import org.jetbrains.gradle.ext.TaskTriggersConfig;
+
+import java.util.Optional;
 
 /**
  * Set up the appropriate variants of a project (accessors, main, mixins, launch, applaunch)
@@ -51,17 +49,6 @@ public class SpongeImplementationPlugin implements Plugin<Project> {
             task.getOutputDirectory().set(target.getRootProject().getLayout().getProjectDirectory().dir(".idea/runConfigurations"));
         });
 
-        // Regenerate on every IDE sync, like VanillaGradle and ModDevGradle do for their runs. The trigger needs the realized
-        // task, so only register it while syncing to keep regular builds from configuring it
-        target.afterEvaluate(p -> {
-            if (intellijRuns.isEmpty() || !IdeHelper.isIdeaSync()) {
-                return;
-            }
-            final Project root = p.getRootProject();
-            root.getPluginManager().withPlugin("org.jetbrains.gradle.plugin.idea-ext", ideaExt -> {
-                final ProjectSettings settings = ((ExtensionAware) root.getExtensions().getByType(IdeaModel.class).getProject()).getExtensions().getByType(ProjectSettings.class);
-                ((ExtensionAware) settings).getExtensions().getByType(TaskTriggersConfig.class).afterSync(genIntelliJRuns.get());
-            });
-        });
+        IdeaIntegration.addSynchronizationTask(target, () -> intellijRuns.isEmpty() ? Optional.empty() : Optional.of(genIntelliJRuns));
     }
 }

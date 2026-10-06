@@ -1,5 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import org.spongepowered.gradle.impl.IdeHelper
+import org.spongepowered.gradle.impl.IdeaIntegration
 
 plugins {
     id("org.spongepowered.gradle.vanilla")
@@ -265,7 +265,7 @@ minecraft {
             targetVersion(apiJavaTarget.toInt())
             workingDirectory(project.file("run/"))
 
-            if (IdeHelper.isIdeaActive()) {
+            if (IdeaIntegration.isIdea()) {
                 // IntelliJ does not properly report its compatibility
                 jvmArgs("-Dterminal.ansi=true", "-Djansi.mode=force")
             }
