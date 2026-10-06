@@ -25,8 +25,36 @@
 package org.spongepowered.common.mixin.api.minecraft.server.level;
 
 import net.minecraft.server.level.Ticket;
+import net.minecraft.world.level.ChunkPos;
+import org.spongepowered.api.world.server.TicketType;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.world.server.TicketBridge;
+import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.math.vector.Vector3i;
 
 @Mixin(Ticket.class)
-public abstract class TicketMixin_API<T> implements org.spongepowered.api.world.server.Ticket<T> {
+public abstract class TicketMixin_API implements org.spongepowered.api.world.server.Ticket {
+
+    // @formatter:off
+    @Shadow @Final private net.minecraft.server.level.TicketType type;
+    @Shadow @Final private int ticketLevel;
+    // @formatter:on
+
+    @Override
+    public TicketType type() {
+        return (TicketType) (Object) this.type;
+    }
+
+    @Override
+    public Vector3i chunkOrigin() {
+        return VecHelper.toVector3i(new ChunkPos(((TicketBridge) this).bridge$chunkPosition()));
+    }
+
+    @Override
+    public int radius() {
+        return Math.max(0, Constants.ChunkTicket.FULL_CHUNK_MAX_TICKET_LEVEL - this.ticketLevel);
+    }
 }

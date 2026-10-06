@@ -25,43 +25,64 @@
 package org.spongepowered.common.world.server;
 
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.server.TicketType;
 import org.spongepowered.common.util.Constants;
 
-import java.util.Comparator;
 import java.util.Objects;
 
-@SuppressWarnings("unchecked")
-public final class SpongeTicketTypeBuilder<T> implements TicketType.Builder<T> {
+public final class SpongeTicketTypeBuilder implements TicketType.Builder {
 
-    private @MonotonicNonNull String name;
-    private @Nullable Comparator<T> comparator;
     private @MonotonicNonNull Ticks lifetime;
+    private int flags;
 
     @Override
-    public TicketType.Builder<T> reset() {
-        this.name = null;
-        this.comparator = null;
+    public TicketType.Builder reset() {
         this.lifetime = null;
+        this.flags = 0;
+        return this;
+    }
+
+    private void setFlag(int flag, boolean value) {
+        if (value) {
+            this.flags |= flag;
+        } else {
+            this.flags &= ~flag;
+        }
+    }
+
+    @Override
+    public TicketType.Builder persists(boolean persists) {
+        this.setFlag(net.minecraft.server.level.TicketType.FLAG_PERSIST, persists);
         return this;
     }
 
     @Override
-    public TicketType.Builder<T> name(final String name) {
-        this.name = Objects.requireNonNull(name, "Name cannot null");
+    public TicketType.Builder loadsChunks(boolean loadsChunks) {
+        this.setFlag(net.minecraft.server.level.TicketType.FLAG_LOADING, loadsChunks);
         return this;
     }
 
     @Override
-    public TicketType.Builder<T> comparator(final @Nullable Comparator<T> comparator) {
-        this.comparator = comparator;
+    public TicketType.Builder simulatesChunks(boolean simulatesChunks) {
+        this.setFlag(net.minecraft.server.level.TicketType.FLAG_SIMULATION, simulatesChunks);
         return this;
     }
 
     @Override
-    public TicketType.Builder<T> lifetime(final Ticks lifetime) {
+    public TicketType.Builder keepsWorldActive(boolean keepsWorldActive) {
+        this.setFlag(net.minecraft.server.level.TicketType.FLAG_KEEP_DIMENSION_ACTIVE, keepsWorldActive);
+        return this;
+    }
+
+    @Override
+    public TicketType.Builder canExpireIfUnloaded(boolean canExpireIfUnloaded) {
+        this.setFlag(net.minecraft.server.level.TicketType.FLAG_CAN_EXPIRE_IF_UNLOADED, canExpireIfUnloaded);
+        return this;
+    }
+
+    @Override
+    public TicketType.Builder lifetime(final Ticks lifetime) {
         Objects.requireNonNull(lifetime, "Lifetime cannot be null");
         if (!lifetime.isInfinite() && lifetime.ticks() <= 0) {
             throw new IllegalArgumentException("The lifetime is required to be a positive integer");
@@ -71,16 +92,9 @@ public final class SpongeTicketTypeBuilder<T> implements TicketType.Builder<T> {
     }
 
     @Override
-    public TicketType<T> build() {
-        Objects.requireNonNull(this.name, "Name cannot null");
+    public TicketType build() {
         Objects.requireNonNull(this.lifetime, "Lifetime cannot be null");
-        if (this.comparator == null) {
-            this.comparator = (v1, v2) -> 0;
-        }
-        final var flag = net.minecraft.server.level.TicketType.FLAG_LOADING
-            | net.minecraft.server.level.TicketType.FLAG_SIMULATION
-            | net.minecraft.server.level.TicketType.FLAG_KEEP_DIMENSION_ACTIVE;
         final var timeout = this.lifetime.isInfinite() ? Constants.ChunkTicket.INFINITE_TIMEOUT : this.lifetime.ticks();
-        return (TicketType<T>) (Object) new net.minecraft.server.level.TicketType(timeout,flag);
+        return (TicketType) (Object) new net.minecraft.server.level.TicketType(timeout, this.flags);
     }
 }

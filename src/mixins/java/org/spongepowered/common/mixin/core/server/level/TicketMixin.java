@@ -47,13 +47,9 @@ public abstract class TicketMixin implements TicketBridge {
         this.impl$chunkPosition = chunkPos;
     }
 
-    @SuppressWarnings({"unchecked", "ConstantConditions"})
     @Override
-    public <T> org.spongepowered.api.world.server.Ticket<T> bridge$retrieveAppropriateTicket() {
-        if (this.impl$parent != null) {
-            return (org.spongepowered.api.world.server.Ticket<T>) (Object) this.impl$parent;
-        }
-        return (org.spongepowered.api.world.server.Ticket<T>) this;
+    public Ticket bridge$retrieveAppropriateTicket() {
+        return this.impl$parent == null ? (Ticket) (Object) this : this.impl$parent;
     }
 
     @Override
