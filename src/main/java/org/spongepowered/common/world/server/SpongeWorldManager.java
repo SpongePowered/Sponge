@@ -70,12 +70,7 @@ import net.minecraft.world.level.levelgen.WorldDimensions;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.storage.LevelData;
-import net.minecraft.world.level.storage.LevelDataAndDimensions;
-import net.minecraft.world.level.storage.LevelStorageSource;
-import net.minecraft.world.level.storage.PrimaryLevelData;
-import net.minecraft.world.level.storage.ServerLevelData;
-import net.minecraft.world.level.storage.WorldData;
+import net.minecraft.world.level.storage.*;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -763,6 +758,14 @@ public class SpongeWorldManager implements WorldManager {
                     continue;
                 }
 
+                final var saveDataPath = storageSource.getDimensionPath(registryKey).resolve("data");
+                final var saveDataStorage = new SavedDataStorage(saveDataPath, this.server.getFixerUpper(), this.server.registryAccess());
+                @Nullable WorldGenSettings worldGen = saveDataStorage.get(WorldGenSettings.TYPE);
+
+                if (worldGen != null) {
+                    ((PrimaryLevelDataBridge) levelData.data()).bridge$spongeData().setWorldOptions(worldGen.options());
+                }
+
                 final ServerLevel world = this.createLevel(registryKey, levelData.stem(), storageSource, levelData.data());
                 this.prepareLevel(world);
             } catch (final Exception e) {
@@ -1020,10 +1023,9 @@ public class SpongeWorldManager implements WorldManager {
         final LevelStorageSource.LevelStorageAccess storageSource,
         final PrimaryLevelData levelData
     ) {
-
         final ResourceKey worldKey = (ResourceKey) (Object) registryKey.identifier();
         final Registry<DimensionType> dimensionTypes = this.server.registryAccess().lookupOrThrow(Registries.DIMENSION_TYPE);
-        final var saveDataSotrage = this.server.getDataStorage();
+        final var saveDataStorage = this.server.getDataStorage();
 
         // Resolve inline DimensionType holders to registry references.
         // When a LevelStem is deserialized from WorldGenSettings with an inline DimensionType
@@ -1037,7 +1039,7 @@ public class SpongeWorldManager implements WorldManager {
         final List<CustomSpawner> spawners;
         if (resolvedStem.type().value() == dimensionTypes.getValue(BuiltinDimensionTypes.OVERWORLD) || resolvedStem.type().value() == dimensionTypes.getValue(BuiltinDimensionTypes.OVERWORLD_CAVES)) {
             // TODO - 26.1-snapshot-6 figure out if we need to do anything here per world?
-            spawners = ImmutableList.of(new PhantomSpawner(), new PatrolSpawner(), new CatSpawner(), new VillageSiege(), new WanderingTraderSpawner(saveDataSotrage));
+            spawners = ImmutableList.of(new PhantomSpawner(), new PatrolSpawner(), new CatSpawner(), new VillageSiege(), new WanderingTraderSpawner(saveDataStorage));
         } else {
             spawners = ImmutableList.of();
         }
