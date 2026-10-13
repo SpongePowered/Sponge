@@ -35,6 +35,7 @@ public class SpongeEntityTypes {
     public static final EntityType<HumanEntity> HUMAN = EntityType.Builder.of(HumanEntity::new, MobCategory.MISC)
         .noSave()
         .sized(0.6F, 1.8F)
+        .eyeHeight(1.62F)
         .clientTrackingRange(Constants.Entity.Player.TRACKING_RANGE)
         .updateInterval(2)
         .build("sponge:human");

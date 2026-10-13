@@ -30,9 +30,6 @@ import net.minecraft.world.item.BannerItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.EntityBlock;
-import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -64,22 +61,7 @@ public final class BlockItemStackData {
                             }
                             h.set(DataComponents.LOCK, new LockCode(v));
                         })
-                        .delete(h -> h.remove(DataComponents.LOCK))
-                        .supports(h -> {
-                            if (!(h.getItem() instanceof BlockItem)) {
-                                return false;
-                            }
-                            final Block block = ((BlockItem) h.getItem()).getBlock();
-                            if (!(block instanceof EntityBlock)) {
-                                return false;
-                            }
-                            try {
-                                final BlockEntity tile = ((EntityBlock) block).newBlockEntity(null, null);
-                                return tile instanceof BaseContainerBlockEntity;
-                            } catch (final NullPointerException ex) {
-                                return false;
-                            }
-                        });
+                        .delete(h -> h.remove(DataComponents.LOCK));
     }
     // @formatter:on
 

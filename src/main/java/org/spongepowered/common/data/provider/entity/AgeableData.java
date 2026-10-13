@@ -40,7 +40,7 @@ public final class AgeableData {
         registrator
                 .asMutable(AgeableMob.class)
                     .create(Keys.BABY_TICKS)
-                        .get(h -> h.getAge() < 0 ? new SpongeTicks(-h.getAge()) : null)
+                        .get(h -> h.getAge() <= 0 ? new SpongeTicks(-h.getAge()) : null)
                         .setAnd((h, v) -> {
                             final int ticks = SpongeTicks.toSaturatedIntOrInfinite(v);
                             if (v.isInfinite() || ticks < 0) {
