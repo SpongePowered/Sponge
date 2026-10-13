@@ -463,7 +463,9 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     private void impl$usePerWorldSeed(final CallbackInfoReturnable<Long> cir) {
         if (levelData instanceof PrimaryLevelDataBridge bridge) {
             final WorldOptions options = bridge.bridge$spongeData().worldGenOptions();
-            cir.setReturnValue(options.seed());
+            if (options != null) {
+                cir.setReturnValue(options.seed());
+            }
         }
     }
 
