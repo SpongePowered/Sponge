@@ -1,5 +1,6 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.spongepowered.gradle.impl.IdeHelper
+import java.time.Duration
 
 plugins {
     id("org.spongepowered.gradle.vanilla")
@@ -55,6 +56,7 @@ val commonAppLaunchConf = commonProject.sourceSets.named("applaunchConfig")
 val commonMixins = commonProject.sourceSets.named("mixins")
 val commonMain = commonProject.sourceSets.named("main")
 val commonTest = commonProject.sourceSets.named("test")
+val commonGametest = commonProject.sourceSets.named("gametest")
 
 // SpongeVanilla source sets
 // Prod launch
@@ -121,6 +123,20 @@ val main by sourceSets.named("main") {
     // The bootstrap
     spongeImpl.addDependencyToRuntimeOnly(bootstrapMain.get(), this)
     spongeImpl.addDependencyToRuntimeOnly(bootstrapForge.get(), this)
+}
+// Vanilla-only gametests and gametest mixins; the common gametests come along through commonGametest
+val gametest by sourceSets.register("gametest") {
+    spongeImpl.addDependencyToImplementation(commonGametest.get(), this)
+    spongeImpl.addDependencyToImplementation(main, this)
+    spongeImpl.addDependencyToImplementation(commonMixins.get(), this)
+    spongeImpl.addDependencyToImplementation(mixins, this)
+
+    configurations.named(implementationConfigurationName) {
+        extendsFrom(configurations.implementation.get())
+    }
+    configurations.named(runtimeOnlyConfigurationName) {
+        extendsFrom(configurations.runtimeOnly.get())
+    }
 }
 val testSources = sourceSets.named("test") {
     spongeImpl.addDependencyToImplementation(commonTest.get(), this)
@@ -256,6 +272,21 @@ minecraft {
         }
         client("integrationTestClient") {
             args("--launchTarget", "sponge_client_it")
+        }
+
+        // Minecraft gametests (common + vanilla); exits non-zero when a required test fails
+        server("gameTestServer") {
+            sourceSet.set(gametest)
+            args("--launchTarget", "sponge_server_gametest")
+            args("--mixin.config", "mixins.sponge.gametest.json", "--mixin.config", "mixins.spongevanilla.gametest.json")
+            args("--report", "gametest-report.xml") // relative to run/
+        }
+        // Dev client with the gametests registered, for /test run sponge:* in a world
+        client("gameTestClient") {
+            sourceSet.set(gametest)
+            ideaRunSourceSet.set(gametest)
+            args("--launchTarget", "sponge_client_dev")
+            args("--mixin.config", "mixins.sponge.gametest.json")
         }
 
         // Configure bootstrap dev
@@ -497,10 +528,44 @@ tasks {
         finalizedBy(jacocoTestReport)
     }
 
+    // Runs the gametests through JUnit on the test boot, for test reports and coverage; gameTestServer/gameTestClient still work as before
+    val gameTest = register("gameTest", Test::class) {
+        group = "verification"
+        useJUnitPlatform()
+
+        maxHeapSize = "4G"
+        testClassesDirs = commonGametest.get().output.classesDirs
+        include("**/GameTestSuite.class") // the rest are mixins and test functions, which must not be loaded directly
+        // The platform test boot launches the game; JUnit itself comes from the test runtime
+        classpath = gametest.runtimeClasspath + testSources.get().runtimeClasspath
+
+        val runGameTest = minecraft.runs.getByName("gameTestServer")
+        jvmArgs(runGameTest.allJvmArguments())
+        jvmArgs("-Dsponge.test.args=" + runGameTest.allArguments().joinToString(" "))
+        jvmArgs("-Dsponge.jacoco.packages=org.spongepowered")
+        jvmArgs("-Djunit.platform.launcher.interceptors.enabled=true")
+        workingDir = layout.buildDirectory.dir("gametest-run").get().asFile
+        timeout = Duration.ofMinutes(15)
+
+        doFirst {
+            workingDir.deleteRecursively()
+            workingDir.mkdirs()
+            workingDir.resolve("eula.txt").writeText("eula=true")
+        }
+
+        extensions.configure(JacocoTaskExtension::class) {
+            excludeClassLoaders = listOf("cpw.mods.modlauncher.TransformingClassLoader")
+        }
+
+        finalizedBy(jacocoTestReport)
+    }
+
     jacocoTestReport {
         sourceSets(commonAppLaunchConf.get(), commonAppLaunch.get(), commonAccessors.get(), commonMixins.get(), commonMain.get())
         sourceSets(appLaunch, accessors, mixins, main)
-        dependsOn(test)
+        // Combines whichever of test and gameTest have run
+        executionData.setFrom(fileTree(layout.buildDirectory.dir("jacoco")).include("*.exec"))
+        mustRunAfter(test, gameTest)
     }
 }
 

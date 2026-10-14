@@ -253,6 +253,11 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         if (currentContext.ignoresBlockEvent()) {
             return original.call(list, curr);
         }
+        // Vanilla drops identical block events (a lever notifies a piston twice before it extends),
+        // so don't fire Pre or log a transaction for one that is already queued
+        if (list.contains(curr)) {
+            return original.call(list, curr);
+        }
 
         final BlockState state = this.shadow$getBlockState(pos);
         if (((TrackableBridge) blockIn).bridge$allowsBlockEventCreation()) {

@@ -3,6 +3,7 @@ import net.minecraftforge.gradle.common.util.RunConfig
 import org.gradle.internal.DefaultTaskExecutionRequest
 import org.spongepowered.gradle.impl.AWToAT
 import org.spongepowered.gradle.impl.IdeHelper
+import java.time.Duration
 
 buildscript {
     repositories {
@@ -90,6 +91,7 @@ val commonAppLaunchConf = commonProject.sourceSets.named("applaunchConfig")
 val commonMixins = commonProject.sourceSets.named("mixins")
 val commonMain = commonProject.sourceSets.named("main")
 val commonTest = commonProject.sourceSets.named("test")
+val commonGametest = commonProject.sourceSets.named("gametest")
 
 // SpongeForge source sets
 // Service layer
@@ -152,6 +154,20 @@ val main by sourceSets.named("main") {
     // The bootstrap
     spongeImpl.addDependencyToRuntimeOnly(bootstrapMain.get(), this)
     spongeImpl.addDependencyToRuntimeOnly(bootstrapForge.get(), this)
+}
+// Forge-only gametests; the common gametests come along through commonGametest
+val gametest by sourceSets.register("gametest") {
+    spongeImpl.addDependencyToImplementation(commonGametest.get(), this)
+    spongeImpl.addDependencyToImplementation(commonMixins.get(), this)
+    spongeImpl.addDependencyToImplementation(mixins, this)
+    spongeImpl.addDependencyToImplementation(main, this)
+
+    configurations.named(implementationConfigurationName) {
+        extendsFrom(configurations.implementation.get())
+    }
+    configurations.named(runtimeOnlyConfigurationName) {
+        extendsFrom(configurations.runtimeOnly.get())
+    }
 }
 val testSources = sourceSets.named("test") {
     spongeImpl.addDependencyToImplementation(commonTest.get(), this)
@@ -250,6 +266,13 @@ minecraft {
 
         create("server") {
             args("--nogui")
+        }
+
+        // Minecraft gametests (common + forge); exits non-zero when a required test fails
+        create("gameTestServer") {
+            source(gametest)
+            args("--mixin.config", "mixins.sponge.gametest.json", "--mixin.config", "mixins.spongeforge.gametest.json")
+            args("--report", "gametest-report.xml") // relative to run/
         }
     }
 }
@@ -436,10 +459,44 @@ tasks {
         finalizedBy(jacocoTestReport)
     }
 
+    // Runs the gametests through JUnit on the test boot, for test reports and coverage; runGameTestServer still works as before
+    val gameTest = register("gameTest", Test::class) {
+        group = "verification"
+        useJUnitPlatform()
+
+        maxHeapSize = "4G"
+        testClassesDirs = commonGametest.get().output.classesDirs
+        include("**/GameTestSuite.class") // the rest are mixins and test functions, which must not be loaded directly
+        // The platform test boot launches the game; JUnit itself comes from the test runtime
+        classpath = gametest.runtimeClasspath + testSources.get().runtimeClasspath
+
+        val runGameTest = minecraft.runs.getByName("gameTestServer")
+        jvmArgs(runGameTest.jvmArgs)
+        jvmArgs("-Dsponge.test.args=" + runGameTest.args.joinToString(" "))
+        jvmArgs("-Dsponge.jacoco.packages=org.spongepowered")
+        jvmArgs("-Djunit.platform.launcher.interceptors.enabled=true")
+        workingDir = layout.buildDirectory.dir("gametest-run").get().asFile
+        timeout = Duration.ofMinutes(15)
+
+        doFirst {
+            workingDir.deleteRecursively()
+            workingDir.mkdirs()
+            workingDir.resolve("eula.txt").writeText("eula=true")
+        }
+
+        extensions.configure(JacocoTaskExtension::class) {
+            excludeClassLoaders = listOf("cpw.mods.modlauncher.TransformingClassLoader")
+        }
+
+        finalizedBy(jacocoTestReport)
+    }
+
     jacocoTestReport {
         sourceSets(commonAppLaunchConf.get(), commonAppLaunch.get(), commonAccessors.get(), commonMixins.get(), commonMain.get())
         sourceSets(appLaunch, lang, accessors, mixins, main)
-        dependsOn(test)
+        // Combines whichever of test and gameTest have run
+        executionData.setFrom(fileTree(layout.buildDirectory.dir("jacoco")).include("*.exec"))
+        mustRunAfter(test, gameTest)
     }
 }
 
