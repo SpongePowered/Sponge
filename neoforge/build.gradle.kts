@@ -2,7 +2,6 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import net.neoforged.moddevgradle.internal.RunGameTask
 import org.spongepowered.gradle.impl.AWToAT
 import org.spongepowered.gradle.impl.DigestUtil
-import java.time.Duration
 
 buildscript {
     repositories {
@@ -77,7 +76,6 @@ val commonAppLaunchConf = commonProject.sourceSets.named("applaunchConfig")
 val commonMixins = commonProject.sourceSets.named("mixins")
 val commonMain = commonProject.sourceSets.named("main")
 val commonTest = commonProject.sourceSets.named("test")
-val commonGametest = commonProject.sourceSets.named("gametest")
 
 // SpongeNeo source sets
 // Service layer
@@ -133,20 +131,8 @@ val main by sourceSets.named("main") {
     spongeImpl.addDependencyToRuntimeOnly(bootstrapMain.get(), this)
     spongeImpl.addDependencyToRuntimeOnly(bootstrapNeoForge.get(), this)
 }
-// Neo-only gametests; the common gametests come along through commonGametest
-val gametest by sourceSets.register("gametest") {
-    spongeImpl.addDependencyToImplementation(commonGametest.get(), this)
-    spongeImpl.addDependencyToImplementation(commonMixins.get(), this)
-    spongeImpl.addDependencyToImplementation(mixins, this)
-    spongeImpl.addDependencyToImplementation(main, this)
-
-    configurations.named(implementationConfigurationName) {
-        extendsFrom(configurations.implementation.get())
-    }
-    configurations.named(runtimeOnlyConfigurationName) {
-        extendsFrom(configurations.runtimeOnly.get())
-    }
-}
+// Neo-only gametests and gametest mixins; the common gametests come along through the root project's
+val gametest = spongeImpl.gameTestSourceSet()
 val testSources = sourceSets.named("test") {
     spongeImpl.addDependencyToImplementation(commonTest.get(), this)
 
@@ -325,11 +311,12 @@ tasks {
 
     named(main.processResourcesTaskName, ProcessResources::class) {
         val manifestFile = this.destinationDir.resolve("META-INF/MANIFEST.MF")
-        // This dev manifest is how mixin configs reach Mixin on Neo, so only the gametest run and suite add the gametest config
-        val gameTests = gradle.startParameter.taskNames.any { it.endsWith("runGameTestServer") || it.endsWith("gameTest") }
+        // This dev manifest is how mixin configs reach Mixin on Neo, so only the gametest run and suite add the gametest config.
+        // Read from the task graph rather than the requested task names: IntelliJ selects tests without naming tasks.
+        val gameTests = provider { gradle.taskGraph.allTasks.any { it.project == project && (it.name == "runGameTestServer" || it.name == "gameTest") } }
         inputs.property("gameTests", gameTests)
         doLast {
-            val configs = if (gameTests) mixinConfigs + "mixins.sponge.gametest.json" + "mixins.spongeneo.gametest.json" else mixinConfigs
+            val configs = if (gameTests.get()) mixinConfigs + "mixins.sponge.gametest.json" + "mixins.spongeneo.gametest.json" else mixinConfigs
             java.manifest { attributes(modManifest.attributes + ("MixinConfigs" to configs.joinToString(","))) }
                 .writeTo(manifestFile)
         }
@@ -434,48 +421,21 @@ tasks {
         finalizedBy(jacocoTestReport)
     }
 
-    // Runs the gametests through JUnit on the test boot, for test reports and coverage; runGameTestServer still works as before
-    val runGameTestServer = named("runGameTestServer", JavaExec::class)
-    val gameTest = register("gameTest", Test::class) {
-        group = "verification"
-        useJUnitPlatform()
-
-        maxHeapSize = "4G"
-        testClassesDirs = commonGametest.get().output.classesDirs + gametest.output.classesDirs
-        exclude("**/mixin/**") // mixin classes must never be loaded directly
-        // The platform test boot launches the game; JUnit itself comes from the test runtime
-        classpath = gametest.runtimeClasspath + testSources.get().runtimeClasspath
-
-        jvmArgs(runGameTestServer.get().jvmArgs)
-        jvmArgs("-Dsponge.test.args=" + runGameTestServer.get().args!!.joinToString(" "))
-        jvmArgs("-Dsponge.test.main=net.minecraft.gametest.Main")
-        jvmArgs("-Dsponge.jacoco.packages=org.spongepowered")
-        jvmArgs("-Djunit.platform.launcher.interceptors.enabled=true")
-        workingDir = layout.buildDirectory.dir("gametest-run").get().asFile
-        timeout = Duration.ofMinutes(15)
-
-        doFirst {
-            workingDir.deleteRecursively()
-            workingDir.mkdirs()
-            workingDir.resolve("eula.txt").writeText("eula=true")
-        }
-
-        dependsOn(named("prepareGameTestServerRun"))
-
-        extensions.configure(JacocoTaskExtension::class) {
-            excludeClassLoaders = listOf("cpw.mods.modlauncher.TransformingClassLoader")
-        }
-
-        finalizedBy(jacocoTestReport)
-    }
-
     jacocoTestReport {
         sourceSets(commonAppLaunchConf.get(), commonAppLaunch.get(), commonAccessors.get(), commonMixins.get(), commonMain.get())
         sourceSets(appLaunch, accessors, mixins, main)
-        // Combines whichever of test and gameTest have run
-        executionData.setFrom(fileTree(layout.buildDirectory.dir("jacoco")).include("*.exec"))
-        mustRunAfter(test, gameTest)
     }
+}
+
+// The gametests through JUnit, booted like the gameTestServer run; runGameTestServer still works as before
+spongeImpl.gameTests {
+    platformName = "Neo"
+    val run = tasks.named("runGameTestServer", JavaExec::class)
+    bootArguments = provider { run.get().args!! } // an argfile, read by SpongeTestBoot
+    jvmArguments = provider { run.get().jvmArgs!! }
+    gameClassLoader = "cpw.mods.modlauncher.TransformingClassLoader"
+    systemProperty("sponge.test.main", "net.minecraft.gametest.Main")
+    dependsOn("prepareGameTestServerRun")
 }
 
 publishing {
