@@ -100,13 +100,20 @@ public abstract class GameTransaction<E extends Event & Cancellable> implements 
         for (final ResultingTransactionBySideEffect sideEffect : this.sideEffects) {
             @Nullable GameTransaction<@NonNull ?> transaction = sideEffect.head;
             while (transaction != null) {
-                if (transaction.transactionType.isPrimary() || transaction.hasChildTransactions()) {
+                if (transaction.transactionType.isPrimary() || transaction.childrenEndBatch()) {
                     return true;
                 }
                 transaction = transaction.next;
             }
         }
         return false;
+    }
+
+    /**
+     * Whether this transaction's children end the batch its parent is in, so they get their events before the rest of it
+     */
+    protected boolean childrenEndBatch() {
+        return this.hasChildTransactions();
     }
 
     public abstract Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator(
@@ -128,12 +135,26 @@ public abstract class GameTransaction<E extends Event & Cancellable> implements 
 
     public abstract void restore(PhaseContext<@NonNull ?> context, E event);
 
+    public final boolean isCancelled() {
+        return this.cancelled;
+    }
+
     public final void markCancelled() {
         this.cancelled = true;
         this.childIterator().forEachRemaining(GameTransaction::markCancelled);
     }
 
     public abstract boolean markCancelledTransactions(E event, ImmutableList<? extends GameTransaction<E>> transactions);
+
+    /**
+     * Cancels this transaction before its event is thrown if it only happened because of an earlier transaction in
+     * its chain that has since been cancelled.
+     *
+     * @return true if this transaction was cancelled
+     */
+    protected boolean cancelIfCauseCancelled() {
+        return false;
+    }
 
     public void postProcessEvent(final PhaseContext<@NonNull ?> context, final E event) {
 
