@@ -415,15 +415,16 @@ tasks {
         dependsOn(prepareServerRun)
 
         extensions.configure(JacocoTaskExtension::class) {
-            excludeClassLoaders = listOf("cpw.mods.modlauncher.TransformingClassLoader")
+            excludeClassLoaders = listOf("net.neoforged.fml.classloading.ModuleClassLoader") // the game layer, which NeoJacocoTransformer instruments
         }
 
         finalizedBy(jacocoTestReport)
     }
 
     jacocoTestReport {
-        sourceSets(commonAppLaunchConf.get(), commonAppLaunch.get(), commonAccessors.get(), commonMixins.get(), commonMain.get())
-        sourceSets(appLaunch, accessors, mixins, main)
+        // Accessors are left out: Mixin replaces their bodies, so they never carry meaningful coverage
+        sourceSets(commonAppLaunchConf.get(), commonAppLaunch.get(), commonMixins.get(), commonMain.get())
+        sourceSets(appLaunch, mixins, main)
     }
 }
 
@@ -433,7 +434,7 @@ spongeImpl.gameTests {
     val run = tasks.named("runGameTestServer", JavaExec::class)
     bootArguments = provider { run.get().args!! } // an argfile, read by SpongeTestBoot
     jvmArguments = provider { run.get().jvmArgs!! }
-    gameClassLoader = "cpw.mods.modlauncher.TransformingClassLoader"
+    gameClassLoader = "net.neoforged.fml.classloading.ModuleClassLoader" // the game layer, which NeoJacocoTransformer instruments
     systemProperty("sponge.test.main", "net.minecraft.gametest.Main")
     dependsOn("prepareGameTestServerRun")
 }

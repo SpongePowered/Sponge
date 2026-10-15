@@ -515,8 +515,9 @@ tasks {
     }
 
     jacocoTestReport {
-        sourceSets(commonAppLaunchConf.get(), commonAppLaunch.get(), commonAccessors.get(), commonMixins.get(), commonMain.get())
-        sourceSets(appLaunch, accessors, mixins, main)
+        // Accessors are left out: Mixin replaces their bodies, so they never carry meaningful coverage
+        sourceSets(commonAppLaunchConf.get(), commonAppLaunch.get(), commonMixins.get(), commonMain.get())
+        sourceSets(appLaunch, mixins, main)
     }
 }
 
