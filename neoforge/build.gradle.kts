@@ -143,6 +143,8 @@ val main by sourceSets.named("main") {
     spongeImpl.addDependencyToRuntimeOnly(bootstrapMain.get(), this)
     spongeImpl.addDependencyToRuntimeOnly(bootstrapNeoForge.get(), this)
 }
+// Neo-only gametests; the common gametests come along through the root project's
+val gametest = spongeImpl.gameTestSourceSet()
 val testSources = sourceSets.named("test") {
     spongeImpl.addDependencyToImplementation(commonTest.get(), this)
 
@@ -180,11 +182,19 @@ neoForge {
             server()
             programArgument("--nogui")
         }
+
+        // Minecraft gametests (common + neo); exits non-zero when a required test fails
+        create("gameTestServer") {
+            type = "gameTestServer"
+            sourceSet = gametest
+            programArguments.addAll("--mixin.config", "mixins.sponge.gametest.json")
+        }
     }
 }
 
 bootLibrariesConfig.get().extendsFrom(configurations.getByName("modDevCompileDependencies"))
 configurations.testRuntimeOnly.get().extendsFrom(configurations.getByName("modDevRuntimeDependencies"))
+configurations.named(gametest.runtimeOnlyConfigurationName) { extendsFrom(configurations.getByName("modDevRuntimeDependencies")) }
 
 dependencies {
     val service = serviceLibrariesConfig.name
@@ -417,8 +427,17 @@ tasks {
     jacocoTestReport {
         sourceSets(commonAppLaunchConf.get(), commonAppLaunch.get(), commonAccessors.get(), commonMixins.get(), commonMain.get())
         sourceSets(appLaunch, lang, accessors, mixins, main)
-        dependsOn(test)
     }
+}
+
+// The gametests through JUnit, booted like the gameTestServer run; runGameTestServer still works as before
+spongeImpl.gameTests {
+    platformName = "Neo"
+    val run = tasks.named("runGameTestServer", JavaExec::class)
+    bootArguments = provider { run.get().args!! } // an argfile, read by SpongeTestBoot
+    jvmArguments = provider { run.get().jvmArgs!! }
+    gameClassLoader = "cpw.mods.modlauncher.TransformingClassLoader"
+    dependsOn("prepareGameTestServerRun")
 }
 
 publishing {
