@@ -35,5 +35,6 @@ public class SpongeImplementationPlugin implements Plugin<Project> {
     @Override
     public void apply(final Project target) {
         target.getExtensions().create("spongeImpl", SpongeImplementationExtension.class, target, target.getLogger());
+        GameTests.markTestSources(target);
     }
 }
