@@ -8,6 +8,7 @@ plugins {
     `maven-publish`
     `java-library`
     eclipse
+    jacoco
     id("org.spongepowered.gradle.vanilla")
     alias(libs.plugins.shadow)
     alias(apiLibs.plugins.spongeGradle.convention) apply false // for version json generation
@@ -408,6 +409,19 @@ tasks {
     check {
         dependsOn(gradle.includedBuild("SpongeAPI").task(":check"))
     }
+}
+
+// Coverage across whichever platforms' test and gameTest runs left data behind; it runs no tests itself
+val jacocoAggregateReport by tasks.registering(JacocoReport::class) {
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    description = "Combines the coverage of every platform's last test and gameTest runs"
+    val platformReports = provider { subprojects.mapNotNull { it.tasks.findByName("jacocoTestReport") as JacocoReport? } }
+    executionData.from(platformReports.map { reports -> reports.map { it.executionData } })
+    sourceDirectories.from(platformReports.map { reports -> reports.map { it.sourceDirectories } })
+    classDirectories.from(platformReports.map { reports -> reports.map { it.classDirectories } })
+    mustRunAfter(platformReports)
+    // JaCoCo only adds pages, so packages no longer reported would otherwise linger
+    doFirst { delete(reports.html.outputLocation) }
 }
 
 publishing {
