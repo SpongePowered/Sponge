@@ -123,6 +123,16 @@ val main by sourceSets.named("main") {
     spongeImpl.addDependencyToRuntimeOnly(bootstrapMain.get(), this)
     spongeImpl.addDependencyToRuntimeOnly(bootstrapForge.get(), this)
 }
+// Vanilla-only gametests and gametest mixins; the common gametests come along through the root project's
+val gametest = spongeImpl.gameTestSourceSet()
+// IntelliJ imports gametest as test sources, and an Application run leaves its own module's test output off the
+// classpath; launching from this empty production module pulls the gametests in as a production-on-test dependency
+val gametestLaunch by sourceSets.registering {
+    spongeImpl.addDependencyToRuntimeOnly(gametest, this)
+    configurations.named(runtimeOnlyConfigurationName) {
+        extendsFrom(configurations.getByName(gametest.runtimeClasspathConfigurationName))
+    }
+}
 val testSources = sourceSets.named("test") {
     spongeImpl.addDependencyToImplementation(commonTest.get(), this)
 
@@ -263,6 +273,23 @@ minecraft {
         }
         client("integrationTestClient") {
             args("--launchTarget", "sponge_client_it")
+        }
+
+        // Minecraft gametests (common + vanilla); exits non-zero when a required test fails
+        server("gameTestServer") {
+            sourceSet.set(gametest)
+            ideaRunSourceSet.set(gametestLaunch)
+            args("--launchTarget", "sponge_server_gametest")
+            args("--mixin.config", "mixins.sponge.gametest.json", "--mixin.config", "mixins.spongevanilla.gametest.json")
+            args("--report", "gametest-report.xml") // relative to run/
+        }
+        // Dev client with the gametests registered, for /test runall in a world
+        client("gameTestClient") {
+            sourceSet.set(gametest)
+            ideaRunSourceSet.set(gametestLaunch)
+            args("--launchTarget", "sponge_client_dev")
+            // 1.21.1 only ticks gametests and registers /test from Mojang's IDE setup; the vanilla gametest mixins turn both on
+            args("--mixin.config", "mixins.sponge.gametest.json", "--mixin.config", "mixins.spongevanilla.gametest.json")
         }
 
         // Configure bootstrap dev
@@ -506,8 +533,16 @@ tasks {
     jacocoTestReport {
         sourceSets(commonAppLaunchConf.get(), commonAppLaunch.get(), commonAccessors.get(), commonMixins.get(), commonMain.get())
         sourceSets(appLaunch, accessors, mixins, main)
-        dependsOn(test)
     }
+}
+
+// The gametests through JUnit, booted like the gameTestServer run; that run and gameTestClient still work as before
+spongeImpl.gameTests {
+    platformName = "Vanilla"
+    val run = minecraft.runs.getByName("gameTestServer")
+    bootArguments = provider { run.allArguments() }
+    jvmArguments = provider { run.allJvmArguments() }
+    gameClassLoader = "cpw.mods.modlauncher.TransformingClassLoader"
 }
 
 publishing {
