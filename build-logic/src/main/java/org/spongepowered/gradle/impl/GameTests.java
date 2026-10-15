@@ -137,6 +137,7 @@ final class GameTests {
         project.getPlugins().withId("jacoco", jacoco -> project.getTasks().named(GameTests.REPORT, JacocoReport.class, report -> {
             // Combines whichever of test and gameTest have run
             report.getExecutionData().setFrom(project.fileTree(project.getLayout().getBuildDirectory().dir("jacoco")).include("*.exec"));
+            report.getReports().getXml().getRequired().set(true); // for CI's coverage upload
             // JaCoCo only adds pages, so packages no longer reported would otherwise linger
             report.doFirst(new DeleteHtmlReport());
             report.mustRunAfter(project.getTasks().named(JavaPlugin.TEST_TASK_NAME), task);
