@@ -151,6 +151,8 @@ val main by sourceSets.named("main") {
     spongeImpl.addDependencyToRuntimeOnly(bootstrapMain.get(), this)
     spongeImpl.addDependencyToRuntimeOnly(bootstrapForge.get(), this)
 }
+// Forge-only gametests; the common gametests come along through the root project's
+val gametest = spongeImpl.gameTestSourceSet()
 val testSources = sourceSets.named("test") {
     spongeImpl.addDependencyToImplementation(commonTest.get(), this)
 
@@ -250,6 +252,13 @@ minecraft {
 
         create("server") {
             args("--nogui")
+        }
+
+        // Minecraft gametests (common + forge); exits non-zero when a required test fails
+        create("gameTestServer") {
+            source(gametest)
+            // Forge runs the server Main, which takes no --report; JUnit through gameTest reports instead
+            args("--mixin.config", "mixins.sponge.gametest.json")
         }
     }
 }
@@ -439,8 +448,16 @@ tasks {
     jacocoTestReport {
         sourceSets(commonAppLaunchConf.get(), commonAppLaunch.get(), commonAccessors.get(), commonMixins.get(), commonMain.get())
         sourceSets(appLaunch, lang, accessors, mixins, main)
-        dependsOn(test)
     }
+}
+
+// The gametests through JUnit, booted like the gameTestServer run; runGameTestServer still works as before
+spongeImpl.gameTests {
+    platformName = "Forge"
+    val run = minecraft.runs.getByName("gameTestServer")
+    bootArguments = provider { run.args }
+    jvmArguments = provider { run.jvmArgs }
+    gameClassLoader = "cpw.mods.modlauncher.TransformingClassLoader"
 }
 
 if (IdeHelper.isIdeaSync()) {
