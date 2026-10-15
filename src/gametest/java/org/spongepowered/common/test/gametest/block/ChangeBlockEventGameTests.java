@@ -26,18 +26,18 @@ package org.spongepowered.common.test.gametest.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.gametest.framework.GeneratedTest;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.common.test.gametest.GameTest;
+import org.spongepowered.common.test.gametest.GameTestGroup;
 import org.spongepowered.common.test.gametest.SpongeGameTests;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -48,19 +48,13 @@ import java.util.concurrent.atomic.AtomicReference;
  * when that context unwinds at the end of the tick. Assertions therefore run
  * on a later tick through {@link GameTestHelper#succeedWhen(Runnable)}.
  */
-public final class ChangeBlockEventGameTests implements SpongeGameTests.Provider {
+@GameTestGroup("change_block")
+public final class ChangeBlockEventGameTests {
 
     private static final BlockPos POS = new BlockPos(0, 1, 0);
 
-    @Override
-    public List<GeneratedTest> tests() {
-        return List.of(
-            SpongeGameTests.test("change_block/event_fires", 20, ChangeBlockEventGameTests::eventFires),
-            SpongeGameTests.test("change_block/cancel_restores", 20, ChangeBlockEventGameTests::cancelRestores)
-        );
-    }
-
-    private static void eventFires(final GameTestHelper helper) {
+    @GameTest
+    void eventFires(final GameTestHelper helper) {
         final Vector3i target = VecHelper.toVector3i(helper.absolutePos(ChangeBlockEventGameTests.POS));
         final AtomicReference<BlockTransaction> seen = new AtomicReference<>();
         final EventListener<ChangeBlockEvent.All> listener = event -> ChangeBlockEventGameTests.find(event, target).ifPresent(seen::set);
@@ -77,7 +71,8 @@ public final class ChangeBlockEventGameTests implements SpongeGameTests.Provider
         });
     }
 
-    private static void cancelRestores(final GameTestHelper helper) {
+    @GameTest
+    void cancelRestores(final GameTestHelper helper) {
         final Vector3i target = VecHelper.toVector3i(helper.absolutePos(ChangeBlockEventGameTests.POS));
         final AtomicBoolean cancelled = new AtomicBoolean();
         // Each test ticks in its own capture, so cancelling the whole event only rolls back this test's change

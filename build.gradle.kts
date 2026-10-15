@@ -154,10 +154,10 @@ dependencies {
         exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
     }
 
-    // Only the JUnit suite that runs the gametests needs it; each platform's gameTest task supplies the runtime
+    // The JUnit engine that runs the gametests, and @Testable for IDE run icons; each platform's gameTest task supplies the runtime
     val gametestCompileOnly = gametest.get().compileOnlyConfigurationName
     gametestCompileOnly(platform(apiLibs.junit.bom))
-    gametestCompileOnly(apiLibs.junit.api)
+    gametestCompileOnly(apiLibs.junit.launcher)
 }
 
 minecraft {

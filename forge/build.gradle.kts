@@ -465,8 +465,8 @@ tasks {
         useJUnitPlatform()
 
         maxHeapSize = "4G"
-        testClassesDirs = commonGametest.get().output.classesDirs
-        include("**/GameTestSuite.class") // the rest are mixins and test functions, which must not be loaded directly
+        testClassesDirs = commonGametest.get().output.classesDirs + gametest.output.classesDirs
+        exclude("**/mixin/**") // mixin classes must never be loaded directly
         // The platform test boot launches the game; JUnit itself comes from the test runtime
         classpath = gametest.runtimeClasspath + testSources.get().runtimeClasspath
 

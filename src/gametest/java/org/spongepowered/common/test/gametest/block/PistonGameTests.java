@@ -26,8 +26,6 @@ package org.spongepowered.common.test.gametest.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.gametest.framework.GeneratedTest;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.piston.PistonBaseBlock;
@@ -37,6 +35,8 @@ import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.test.gametest.EventRecorder;
+import org.spongepowered.common.test.gametest.GameTest;
+import org.spongepowered.common.test.gametest.GameTestGroup;
 import org.spongepowered.common.test.gametest.SpongeGameTests;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
@@ -56,42 +56,26 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * {@link ChangeBlockEvent.All}: the row moving, then the piston base extending,
  * because the block entity and neighbor transactions in between split the batch.</p>
  */
-public final class PistonGameTests implements SpongeGameTests.Provider {
+@GameTestGroup("piston")
+public final class PistonGameTests {
 
-    private static final Identifier STRUCTURE = Identifier.fromNamespaceAndPath("sponge", "piston/push_row");
+    private static final String STRUCTURE = "sponge:piston/push_row";
     private static final BlockPos LEVER = new BlockPos(0, 1, 1);
     private static final BlockPos PISTON = new BlockPos(1, 1, 1);
     private static final BlockPos STONE = new BlockPos(2, 1, 1);
     private static final BlockPos GOLD = new BlockPos(3, 1, 1);
     private static final BlockPos END = new BlockPos(4, 1, 1);
     // sponge:piston/sticky_row: as push_row with a sticky piston and only the stone
-    private static final Identifier STICKY = Identifier.fromNamespaceAndPath("sponge", "piston/sticky_row");
+    private static final String STICKY = "sponge:piston/sticky_row";
     // sponge:piston/push_break: as push_row with a pumpkin at (4,1,1)
-    private static final Identifier BREAK = Identifier.fromNamespaceAndPath("sponge", "piston/push_break");
+    private static final String BREAK = "sponge:piston/push_break";
     // sponge:piston/push_limit: lever and piston as push_row, stone from (2,1,1) to (14,1,1)
-    private static final Identifier LIMIT = Identifier.fromNamespaceAndPath("sponge", "piston/push_limit");
+    private static final String LIMIT = "sponge:piston/push_limit";
     private static final BlockPos LIMIT_LAST = new BlockPos(14, 1, 1);
 
-    @Override
-    public List<GeneratedTest> tests() {
-        return List.of(
-            SpongeGameTests.test("piston/push_row", PistonGameTests.STRUCTURE, 40, PistonGameTests::pushRow),
-            SpongeGameTests.test("piston/push_cancel", PistonGameTests.STRUCTURE, 40, PistonGameTests::pushCancel),
-            SpongeGameTests.test("piston/pre_cancel", PistonGameTests.STRUCTURE, 40, PistonGameTests::preCancel),
-            SpongeGameTests.test("piston/push_sequence", PistonGameTests.STRUCTURE, 40, PistonGameTests::pushSequence),
-            // Known issue until decided otherwise: cancelling only the row event leaves the base extended with no head
-            SpongeGameTests.test("piston/cancel_first_only", PistonGameTests.STRUCTURE, 40, false, PistonGameTests::cancelFirstOnly),
-            SpongeGameTests.test("piston/sticky_retract", PistonGameTests.STICKY, 60, PistonGameTests::stickyRetract),
-            SpongeGameTests.test("piston/sticky_retract_pre_cancel", PistonGameTests.STICKY, 60, PistonGameTests::stickyRetractPreCancel),
-            SpongeGameTests.test("piston/push_break", PistonGameTests.BREAK, 40, PistonGameTests::pushBreak),
-            SpongeGameTests.test("piston/push_break_cancel", PistonGameTests.BREAK, 40, PistonGameTests::pushBreakCancel),
-            SpongeGameTests.test("piston/push_limit", PistonGameTests.LIMIT, 40, PistonGameTests::pushLimit),
-            SpongeGameTests.test("piston/push_max", PistonGameTests.LIMIT, 40, PistonGameTests::pushMax)
-        );
-    }
-
     // Two steps: extend to push the stone to (3,1,1), then unpower so the sticky piston pulls it back
-    private static void stickyRetract(final GameTestHelper helper) {
+    @GameTest(structure = PistonGameTests.STICKY, maxTicks = 60)
+    void stickyRetract(final GameTestHelper helper) {
         final List<String> pre = new ArrayList<>();
         final EventListener<ChangeBlockEvent.Pre> listener = event -> {
             if (PistonGameTests.isPistonPre(helper, event)) {
@@ -117,7 +101,8 @@ public final class PistonGameTests implements SpongeGameTests.Provider {
     }
 
     // Cancelling the retract Pre leaves the piston extended, holding the stone out at (3,1,1), with the lever off
-    private static void stickyRetractPreCancel(final GameTestHelper helper) {
+    @GameTest(structure = PistonGameTests.STICKY, maxTicks = 60)
+    void stickyRetractPreCancel(final GameTestHelper helper) {
         final AtomicBoolean cancelled = new AtomicBoolean();
         final EventListener<ChangeBlockEvent.Pre> listener = event -> {
             if (PistonGameTests.isPistonPre(helper, event) && event.context().containsKey(EventContextKeys.PISTON_RETRACT)) {
@@ -143,7 +128,8 @@ public final class PistonGameTests implements SpongeGameTests.Provider {
     }
 
     // sponge:piston/push_break has a pumpkin at (4,1,1), which the push destroys instead of moving
-    private static void pushBreak(final GameTestHelper helper) {
+    @GameTest(structure = PistonGameTests.BREAK, maxTicks = 40)
+    void pushBreak(final GameTestHelper helper) {
         final EventRecorder recorder = EventRecorder.start(helper);
 
         helper.pullLever(PistonGameTests.LEVER);
@@ -160,7 +146,8 @@ public final class PistonGameTests implements SpongeGameTests.Provider {
     }
 
     // Cancelling the push must restore the pumpkin without also dropping it
-    private static void pushBreakCancel(final GameTestHelper helper) {
+    @GameTest(structure = PistonGameTests.BREAK, maxTicks = 40)
+    void pushBreakCancel(final GameTestHelper helper) {
         final AtomicBoolean cancelled = new AtomicBoolean();
         final EventListener<ChangeBlockEvent.All> listener = event -> {
             if (PistonGameTests.causedByPiston(helper, event)) {
@@ -184,7 +171,8 @@ public final class PistonGameTests implements SpongeGameTests.Provider {
 
     // sponge:piston/push_limit has 13 stones from (2,1,1) to (14,1,1), one more than a piston can push, so
     // vanilla never queues the block event and Sponge throws nothing for the piston
-    private static void pushLimit(final GameTestHelper helper) {
+    @GameTest(structure = PistonGameTests.LIMIT, maxTicks = 40)
+    void pushLimit(final GameTestHelper helper) {
         final EventRecorder recorder = EventRecorder.start(helper);
 
         helper.pullLever(PistonGameTests.LEVER);
@@ -202,7 +190,8 @@ public final class PistonGameTests implements SpongeGameTests.Provider {
     }
 
     // Removing the last stone leaves exactly 12, which the piston can push
-    private static void pushMax(final GameTestHelper helper) {
+    @GameTest(structure = PistonGameTests.LIMIT, maxTicks = 40)
+    void pushMax(final GameTestHelper helper) {
         helper.setBlock(PistonGameTests.LIMIT_LAST, Blocks.AIR);
         helper.pullLever(PistonGameTests.LEVER);
 
@@ -213,7 +202,8 @@ public final class PistonGameTests implements SpongeGameTests.Provider {
         });
     }
 
-    private static void pushRow(final GameTestHelper helper) {
+    @GameTest(structure = PistonGameTests.STRUCTURE, maxTicks = 40)
+    void pushRow(final GameTestHelper helper) {
         final EventRecorder recorder = EventRecorder.start(helper);
 
         helper.pullLever(PistonGameTests.LEVER);
@@ -231,7 +221,8 @@ public final class PistonGameTests implements SpongeGameTests.Provider {
     }
 
     // The order Sponge throws the push's events in, from the lever pull to the moved blocks settling two ticks later
-    private static void pushSequence(final GameTestHelper helper) {
+    @GameTest(structure = PistonGameTests.STRUCTURE, maxTicks = 40)
+    void pushSequence(final GameTestHelper helper) {
         final EventRecorder recorder = EventRecorder.start(helper);
 
         helper.pullLever(PistonGameTests.LEVER);
@@ -265,7 +256,8 @@ public final class PistonGameTests implements SpongeGameTests.Provider {
     }
 
     // Cancels both events of the push
-    private static void pushCancel(final GameTestHelper helper) {
+    @GameTest(structure = PistonGameTests.STRUCTURE, maxTicks = 40)
+    void pushCancel(final GameTestHelper helper) {
         final AtomicBoolean cancelled = new AtomicBoolean();
         final EventListener<ChangeBlockEvent.All> listener = event -> {
             if (PistonGameTests.causedByPiston(helper, event)) {
@@ -284,7 +276,8 @@ public final class PistonGameTests implements SpongeGameTests.Provider {
     }
 
     // Cancelling Pre stops the push before anything moves, so no All event is thrown for it at all
-    private static void preCancel(final GameTestHelper helper) {
+    @GameTest(structure = PistonGameTests.STRUCTURE, maxTicks = 40)
+    void preCancel(final GameTestHelper helper) {
         final AtomicBoolean cancelled = new AtomicBoolean();
         final AtomicBoolean moved = new AtomicBoolean();
         final EventListener<ChangeBlockEvent.Pre> pre = event -> {
@@ -311,7 +304,9 @@ public final class PistonGameTests implements SpongeGameTests.Provider {
     }
 
     // A plugin that only vetoes the blocks being pushed; expected to roll the whole push back
-    private static void cancelFirstOnly(final GameTestHelper helper) {
+    // Known issue until decided otherwise: cancelling only the row event leaves the base extended with no head
+    @GameTest(structure = PistonGameTests.STRUCTURE, maxTicks = 40, required = false)
+    void cancelFirstOnly(final GameTestHelper helper) {
         final Vector3i piston = VecHelper.toVector3i(helper.absolutePos(PistonGameTests.PISTON));
         final AtomicBoolean cancelled = new AtomicBoolean();
         final EventListener<ChangeBlockEvent.All> listener = event -> {

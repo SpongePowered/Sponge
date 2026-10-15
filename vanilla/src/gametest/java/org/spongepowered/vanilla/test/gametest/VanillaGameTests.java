@@ -25,22 +25,18 @@
 package org.spongepowered.vanilla.test.gametest;
 
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.gametest.framework.GeneratedTest;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.common.test.gametest.GameTest;
+import org.spongepowered.common.test.gametest.GameTestGroup;
 import org.spongepowered.common.test.gametest.SpongeGameTests;
 
-import java.util.List;
-
 /** Vanilla-only gametests, discovered by {@link SpongeGameTests} through {@code META-INF/services}. */
+@GameTestGroup("vanilla")
 public final class VanillaGameTests implements SpongeGameTests.Provider {
 
-    @Override
-    public List<GeneratedTest> tests() {
-        return List.of(SpongeGameTests.test("vanilla/platform_is_vanilla", 1, VanillaGameTests::platformIsVanilla));
-    }
-
-    private static void platformIsVanilla(final GameTestHelper helper) {
+    @GameTest(maxTicks = 1)
+    void platformIsVanilla(final GameTestHelper helper) {
         final String id = Sponge.platform().container(Platform.Component.IMPLEMENTATION).metadata().id();
         helper.assertValueEqual("spongevanilla", id, "implementation id");
         helper.succeed();

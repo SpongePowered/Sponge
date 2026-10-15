@@ -24,17 +24,21 @@
  */
 package org.spongepowered.common.mixin.gametest;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.minecraft.gametest.framework.GameTestServer;
+import net.minecraft.gametest.framework.MultipleTestTracker;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import org.spongepowered.api.Server;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.applaunch.test.TestEnvironment;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -47,6 +51,10 @@ import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 @Mixin(GameTestServer.class)
 public abstract class GameTestServerMixin_GameTest implements MinecraftServerBridge {
 
+    // @formatter:off
+    @Shadow private MultipleTestTracker testTracker;
+    // @formatter:on
+
     @Inject(method = "<init>", at = @At("TAIL"))
     private void gametest$setServerOnGame(final CallbackInfo ci) {
         SpongeCommon.game().setServer((Server) this);
@@ -58,14 +66,25 @@ public abstract class GameTestServerMixin_GameTest implements MinecraftServerBri
         return false;
     }
 
-    // Test structures are spawned after super.tickServer() returns, outside the tracked server tick
+    // Test structures are spawned after super.tickServer() returns, outside the tracked server tick.
+    // Under JUnit the engine starts the selected tests itself, so the server tracks nothing and starts nothing.
     @WrapMethod(method = "startTests")
     private void gametest$trackStartTests(final ServerLevel level, final Operation<Void> original) {
+        if (TestEnvironment.isActive()) {
+            this.testTracker = new MultipleTestTracker();
+            return;
+        }
         try (final PhaseContext<?> context = TickPhase.Tick.SERVER_TICK.createPhaseContext(PhaseTracker.getServerInstanceExplicitly())
             .server((MinecraftServer) (Object) this)
         ) {
             context.buildAndSwitch();
             original.call(level);
         }
+    }
+
+    // An empty tracker is done at once, which would halt the server before the engine runs anything
+    @ModifyExpressionValue(method = "tickServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/gametest/framework/MultipleTestTracker;isDone()Z"))
+    private boolean gametest$keepRunningUnderJUnit(final boolean done) {
+        return done && !TestEnvironment.isActive();
     }
 }

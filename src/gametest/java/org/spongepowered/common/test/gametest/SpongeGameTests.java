@@ -39,53 +39,54 @@ import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.test.gametest.block.ChangeBlockEventGameTests;
 import org.spongepowered.common.test.gametest.block.PistonGameTests;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
- * Collects every gametest visible to the running platform: the common tests
- * listed here, plus whatever the platform's own gametest source set provides
- * through {@link Provider} in {@code META-INF/services}.
+ * Collects every gametest visible to the running platform: the {@link GameTest}
+ * methods of the common classes listed here, plus those of the platform classes
+ * that implement {@link Provider} and are listed in {@code META-INF/services}.
  *
- * <p>Common tests are listed in code rather than in a service file because
+ * <p>Common classes are listed in code rather than in a service file because
  * all Sponge source sets are unioned into one module in development, where
  * same-named resources shadow each other and only one service file would win.</p>
  */
 public final class SpongeGameTests {
 
+    /** Marks a platform's gametest class, so it can be listed in {@code META-INF/services} */
     public interface Provider {
-        List<GeneratedTest> tests();
     }
 
-    private static final List<Provider> COMMON = List.of(
-        new ChangeBlockEventGameTests(),
-        new PistonGameTests()
+    private static final List<Class<?>> COMMON = List.of(
+        ChangeBlockEventGameTests.class,
+        PistonGameTests.class
     );
+    private static final Pattern WORD_START = Pattern.compile("(?<=[a-z0-9])(?=[A-Z])");
 
     public static List<GeneratedTest> all() {
         return Holder.ALL;
     }
 
-    public static GeneratedTest test(final String name, final int maxTicks, final Consumer<GameTestHelper> function) {
-        return SpongeGameTests.test(name, Identifier.withDefaultNamespace("empty"), maxTicks, function);
+    public static boolean isTest(final Method method) {
+        return method.isAnnotationPresent(GameTest.class);
     }
 
-    /** @param structure a template at {@code data/<namespace>/structure/<path>.nbt} */
-    public static GeneratedTest test(final String name, final Identifier structure, final int maxTicks, final Consumer<GameTestHelper> function) {
-        return SpongeGameTests.test(name, structure, maxTicks, true, function);
-    }
-
-    /** @param required false for a known issue: it still runs and is reported, but does not fail the run */
-    public static GeneratedTest test(final String name, final Identifier structure, final int maxTicks, final boolean required,
-        final Consumer<GameTestHelper> function
-    ) {
-        return new GeneratedTest(
-            Identifier.fromNamespaceAndPath("sponge", name),
-            new TestData<>(GameTestEnvironments.DEFAULT_KEY, structure, maxTicks, 0, required),
-            function
-        );
+    /** {@code sponge:<group>/<method_name>}, e.g. {@code sponge:piston/push_row} for {@code PistonGameTests#pushRow} */
+    public static Identifier id(final Method method) {
+        final GameTestGroup group = method.getDeclaringClass().getAnnotation(GameTestGroup.class);
+        if (group == null) {
+            throw new IllegalStateException(method.getDeclaringClass().getName() + " has gametests but no @GameTestGroup");
+        }
+        return Identifier.fromNamespaceAndPath("sponge", group.value() + "/" + SpongeGameTests.WORD_START.matcher(method.getName()).replaceAll("_").toLowerCase());
     }
 
     public static <E extends Event> void listen(final Class<E> type, final EventListener<? super E> listener) {
@@ -102,14 +103,58 @@ public final class SpongeGameTests {
             .build());
     }
 
+    private static Stream<GeneratedTest> tests(final Class<?> type) {
+        final Object instance;
+        try {
+            final Constructor<?> constructor = type.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            instance = constructor.newInstance();
+        } catch (final ReflectiveOperationException e) {
+            throw new IllegalStateException("Gametest class " + type.getName() + " needs a no-argument constructor", e);
+        }
+        return Arrays.stream(type.getDeclaredMethods()).filter(SpongeGameTests::isTest).map(method -> SpongeGameTests.test(instance, method));
+    }
+
+    // Instance methods rather than static: IntelliJ only gives non-static methods a run icon
+    private static GeneratedTest test(final Object instance, final Method method) {
+        if (Modifier.isStatic(method.getModifiers()) || !Arrays.equals(method.getParameterTypes(), new Class<?>[] {GameTestHelper.class})) {
+            throw new IllegalStateException("@GameTest " + method + " must not be static, and must take only a GameTestHelper");
+        }
+        final GameTest test = method.getAnnotation(GameTest.class);
+        return new GeneratedTest(
+            SpongeGameTests.id(method),
+            new TestData<>(GameTestEnvironments.DEFAULT_KEY, Identifier.parse(test.structure()), test.maxTicks(), test.setupTicks(), test.required()),
+            SpongeGameTests.function(instance, method)
+        );
+    }
+
+    private static Consumer<GameTestHelper> function(final Object instance, final Method method) {
+        final MethodHandle handle;
+        try {
+            method.setAccessible(true);
+            handle = MethodHandles.lookup().unreflect(method).bindTo(instance);
+        } catch (final IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
+        return helper -> {
+            try {
+                handle.invoke(helper);
+            } catch (final RuntimeException | Error e) {
+                throw e;
+            } catch (final Throwable t) {
+                throw new RuntimeException(t);
+            }
+        };
+    }
+
     // Resolved once: functions are registered at registry bootstrap, instances on every datapack load,
     // and both must agree on the same function objects.
     private static final class Holder {
         static final List<GeneratedTest> ALL = Stream.concat(
                 SpongeGameTests.COMMON.stream(),
-                ServiceLoader.load(Provider.class, Provider.class.getClassLoader()).stream().map(ServiceLoader.Provider::get)
+                ServiceLoader.load(Provider.class, Provider.class.getClassLoader()).stream().map(ServiceLoader.Provider::type)
             )
-            .flatMap(provider -> provider.tests().stream())
+            .flatMap(SpongeGameTests::tests)
             .toList();
     }
 
