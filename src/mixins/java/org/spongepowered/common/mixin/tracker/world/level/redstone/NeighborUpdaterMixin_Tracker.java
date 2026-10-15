@@ -70,7 +70,8 @@ public interface NeighborUpdaterMixin_Tracker {
             LevelChunk.EntityCreationType.CHECK
         );
 
-        var fromPos = targetPos; // TODO fromPos is gone THIS IS ALMOST CERTAINLY WRONG
+        // Vanilla no longer passes where the update came from; the queued update that knows records it on the context
+        final BlockPos fromPos = peek.takeNeighborUpdateSource(targetPos);
         peek.getTransactor().logNeighborNotification(worldSupplier, fromPos, fromBlock, targetPos, targetState, existingTile);
 
         peek.associateNeighborStateNotifier(fromPos, targetState.getBlock(), targetPos, serverLevel, PlayerTracker.Type.NOTIFIER);

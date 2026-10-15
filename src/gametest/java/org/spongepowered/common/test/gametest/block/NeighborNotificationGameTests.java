@@ -109,8 +109,7 @@ public final class NeighborNotificationGameTests {
     }
 
     // A ticket's notifier is the block whose change notified the target: the lever, for the lamp
-    // Known issue: the notifier position is the target's position when the source of the multi-neighbor update is unknown
-    @GameTest(structure = NeighborNotificationGameTests.LEVER_LAMP, required = false)
+    @GameTest(structure = NeighborNotificationGameTests.LEVER_LAMP)
     void notifierIsTheLever(final GameTestHelper helper) {
         final Vector3i lamp = VecHelper.toVector3i(helper.absolutePos(NeighborNotificationGameTests.LAMP));
         final Vector3i lever = VecHelper.toVector3i(helper.absolutePos(NeighborNotificationGameTests.LEVER));
