@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.test.gametest;
 
+import io.leangen.geantyref.TypeToken;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
@@ -38,7 +39,13 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.TestInstanceBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.junit.platform.engine.EngineDiscoveryRequest;
 import org.junit.platform.engine.EngineExecutionListener;
 import org.junit.platform.engine.ExecutionRequest;
@@ -57,17 +64,27 @@ import org.junit.platform.engine.support.discovery.EngineDiscoveryRequestResolve
 import org.junit.platform.engine.support.discovery.SelectorResolver;
 import org.opentest4j.TestAbortedException;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.EventListener;
+import org.spongepowered.api.event.Order;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -84,6 +101,8 @@ public final class SpongeGameTestEngine implements TestEngine {
 
     // Where the first structure is placed; the game test world is a superflat with its surface at y=-60
     private static final BlockPos ORIGIN = new BlockPos(0, -59, 0);
+    // How long a passed test's structure must then stay as it was
+    private static final int SETTLE_TICKS = 20;
 
     @Override
     public String getId() {
@@ -123,6 +142,11 @@ public final class SpongeGameTestEngine implements TestEngine {
         final MinecraftServer server = (MinecraftServer) Sponge.server();
         final ServerLevel level = server.overworld();
         final Map<GameTestInfo, TestMethod> running = new LinkedHashMap<>();
+        // Reported at the end, once the capture and any settle checks are in
+        final Set<GameTestInfo> passed = new LinkedHashSet<>();
+        // Tests opted in to settling, each with its structure's blocks as they were when it passed
+        final Map<GameTestInfo, Map<BlockPos, BlockState>> settling = new LinkedHashMap<>();
+        final Map<GameTestInfo, List<String>> problems = new HashMap<>();
         for (final TestMethod test : tests) {
             listener.executionStarted(test);
             final Optional<Holder.Reference<GameTestInstance>> instance = server.registryAccess().lookupOrThrow(Registries.TEST_INSTANCE)
@@ -140,7 +164,10 @@ public final class SpongeGameTestEngine implements TestEngine {
 
                 @Override
                 public void testPassed(final GameTestInfo info, final GameTestRunner runner) {
-                    listener.executionFinished(test, TestExecutionResult.successful());
+                    passed.add(info);
+                    if (test.settle) {
+                        settling.put(info, SpongeGameTestEngine.blocks(info));
+                    }
                 }
 
                 @Override
@@ -158,18 +185,107 @@ public final class SpongeGameTestEngine implements TestEngine {
             return;
         }
 
-        // Starting places the first batch's structures right away, so like GameTestServer#startTests it needs a tracked tick
-        try (final PhaseContext<?> context = TickPhase.Tick.SERVER_TICK.createPhaseContext(PhaseTracker.getServerInstanceExplicitly()).server(server)) {
-            context.buildAndSwitch();
-            GameTestRunner.Builder.fromInfo(running.keySet(), level)
+        // Sponge lets a captured entity into the world, then throws its spawn event as the capture unwinds and removes
+        // it again if that or a parent event is cancelled. So by the end of each tick, every entity added in a test's
+        // structure must have had a spawn event or be gone; one still there without an event got past the capture.
+        final Set<UUID> spawned = new HashSet<>();
+        final EventListener<SpawnEntityEvent> spawns = event -> event.entities().forEach(spawn -> {
+            final Entity entity = (Entity) spawn;
+            spawned.add(entity.getUUID());
+            SpongeGameTestEngine.containing(settling.keySet(), entity).ifPresent(info ->
+                SpongeGameTestEngine.problem(problems, info, "spawned " + SpongeGameTestEngine.describe(info, entity) + " after passing"));
+        });
+        SpongeGameTests.listen(TypeToken.get(SpawnEntityEvent.class), Order.POST, spawns);
+        final Map<Entity, GameTestInfo> added = new LinkedHashMap<>();
+        CreatedEntities.listen(entity -> {
+            if (!(entity instanceof Player)) {
+                SpongeGameTestEngine.containing(running.keySet(), entity).ifPresent(info -> added.put(entity, info));
+            }
+        });
+        final Runnable tick = () -> {
+            ((MinecraftServerBridge) server).bridge$tickServer(1);
+            added.forEach((entity, info) -> {
+                if (!entity.isRemoved() && !spawned.contains(entity.getUUID())) {
+                    SpongeGameTestEngine.problem(problems, info, SpongeGameTestEngine.describe(info, entity) + " was added without a SpawnEntityEvent");
+                }
+            });
+            added.clear();
+        };
+        try {
+            // Starting places the first batch's structures right away, so like GameTestServer#startTests it needs a tracked tick
+            SpongeGameTestEngine.inServerTick(server, () -> GameTestRunner.Builder.fromInfo(running.keySet(), level)
                 .newStructureSpawner(new StructureGridSpawner(SpongeGameTestEngine.ORIGIN, GameTestRunner.DEFAULT_TESTS_PER_ROW, false))
                 .build()
-                .start();
+                .start());
+            final MultipleTestTracker tracker = new MultipleTestTracker(running.keySet());
+            while (!tracker.isDone() && server.isRunning()) {
+                tick.run();
+            }
+
+            // Nothing a settling test leaves behind may still act, such as a queued block event or a moving block. The
+            // runner releases a batch's chunks once it finishes, and queued block events only run in ticking chunks, so
+            // they're held loaded for the settle like a player standing nearby would.
+            final Set<ChunkPos> chunks = new HashSet<>();
+            settling.keySet().forEach(info -> info.getTestInstanceBlockEntity().getStructureBoundingBox().intersectingChunks().forEach(chunks::add));
+            chunks.forEach(chunk -> level.setChunkForced(chunk.x, chunk.z, true));
+            for (int settled = 0; !settling.isEmpty() && settled < SpongeGameTestEngine.SETTLE_TICKS && server.isRunning(); settled++) {
+                tick.run();
+            }
+            chunks.forEach(chunk -> level.setChunkForced(chunk.x, chunk.z, false));
+            settling.forEach((info, blocks) -> blocks.forEach((pos, before) -> {
+                final BlockState now = level.getBlockState(pos);
+                if (now != before) {
+                    SpongeGameTestEngine.problem(problems, info, SpongeGameTestEngine.relative(info, pos) + " changed from " + before + " to " + now + " after passing");
+                }
+            }));
+        } finally {
+            CreatedEntities.listen(null);
+            Sponge.eventManager().unregisterListeners(spawns);
         }
-        final MultipleTestTracker tracker = new MultipleTestTracker(running.keySet());
-        while (!tracker.isDone() && server.isRunning()) {
-            ((MinecraftServerBridge) server).bridge$tickServer(1);
+
+        passed.forEach(info -> {
+            final List<String> found = problems.getOrDefault(info, List.of());
+            listener.executionFinished(running.get(info), found.isEmpty()
+                ? TestExecutionResult.successful()
+                : TestExecutionResult.failed(new AssertionError("Passed, but: " + String.join("; ", found))));
+        });
+    }
+
+    private static void inServerTick(final MinecraftServer server, final Runnable action) {
+        try (final PhaseContext<?> context = TickPhase.Tick.SERVER_TICK.createPhaseContext(PhaseTracker.getServerInstanceExplicitly()).server(server)) {
+            context.buildAndSwitch();
+            action.run();
         }
+    }
+
+    private static Map<BlockPos, BlockState> blocks(final GameTestInfo info) {
+        final Map<BlockPos, BlockState> blocks = new LinkedHashMap<>();
+        BlockPos.betweenClosedStream(info.getTestInstanceBlockEntity().getStructureBoundingBox())
+            .forEach(pos -> blocks.put(pos.immutable(), info.getLevel().getBlockState(pos)));
+        return blocks;
+    }
+
+    // The test whose structure the entity is in or next to: vanilla clears entities that close when a test passes
+    private static Optional<GameTestInfo> containing(final Collection<GameTestInfo> infos, final Entity entity) {
+        return infos.stream()
+            .filter(info -> info.getLevel() == entity.level() && info.getTestBlockPos() != null
+                && info.getLevel().getBlockEntity(info.getTestBlockPos()) instanceof TestInstanceBlockEntity)
+            .filter(info -> info.getStructureBounds().inflate(1.0).contains(entity.position()))
+            .findFirst();
+    }
+
+    private static void problem(final Map<GameTestInfo, List<String>> problems, final GameTestInfo info, final String problem) {
+        problems.computeIfAbsent(info, key -> new ArrayList<>()).add(problem);
+    }
+
+    private static String describe(final GameTestInfo info, final Entity entity) {
+        return EntityType.getKey(entity.getType()).getPath() + " at " + SpongeGameTestEngine.relative(info, entity.blockPosition());
+    }
+
+    // Relative to the structure, as tests address it; the engine never rotates tests
+    private static String relative(final GameTestInfo info, final BlockPos pos) {
+        final BlockPos relative = pos.subtract(info.getTestOrigin());
+        return "(" + relative.getX() + "," + relative.getY() + "," + relative.getZ() + ")";
     }
 
     private static TestExecutionResult failure(final GameTestInfo info) {
@@ -228,11 +344,13 @@ public final class SpongeGameTestEngine implements TestEngine {
     private static final class TestMethod extends AbstractTestDescriptor {
 
         final Identifier id;
+        final boolean settle;
         private final String methodName;
 
         TestMethod(final UniqueId uniqueId, final Method method) {
             super(uniqueId, SpongeGameTests.id(method).toString(), MethodSource.from(method));
             this.id = SpongeGameTests.id(method);
+            this.settle = method.getAnnotation(GameTest.class).settle();
             this.methodName = method.getName();
         }
 

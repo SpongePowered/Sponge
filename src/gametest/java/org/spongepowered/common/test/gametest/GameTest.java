@@ -53,4 +53,18 @@ public @interface GameTest {
 
     /** False for a known issue: it still runs and is reported, but does not fail the run */
     boolean required() default true;
+
+    /**
+     * Also fails if anything in the structure changes, or an entity spawns in it, during the 20 ticks after it passes:
+     * for a test whose point is that nothing is left pending, such as a cancelled push leaving no queued block event.
+     * Only checked when run through JUnit.
+     */
+    boolean settle() default false;
+
+    /**
+     * Leaves out the barrier ceiling vanilla puts over the structure while the test runs. Removing barriers updates
+     * their neighbors, so a test that leaves a block out of step on purpose, such as a piston whose push was
+     * cancelled, needs this to keep it that way once the test is over.
+     */
+    boolean skyAccess() default false;
 }

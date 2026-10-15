@@ -46,6 +46,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Uses {@code sponge:piston/push_row}: on a bedrock floor along z=1,
@@ -101,7 +102,7 @@ public final class PistonGameTests {
     }
 
     // Cancelling the retract Pre leaves the piston extended, holding the stone out at (3,1,1), with the lever off
-    @GameTest(structure = PistonGameTests.STICKY, maxTicks = 60)
+    @GameTest(structure = PistonGameTests.STICKY, maxTicks = 60, settle = true, skyAccess = true)
     void stickyRetractPreCancel(final GameTestHelper helper) {
         final AtomicBoolean cancelled = new AtomicBoolean();
         final EventListener<ChangeBlockEvent.Pre> listener = event -> {
@@ -117,11 +118,45 @@ public final class PistonGameTests {
             .thenWaitUntil(() -> helper.assertBlockPresent(Blocks.STONE, PistonGameTests.GOLD))
             .thenExecute(() -> helper.pullLever(PistonGameTests.LEVER))
             .thenWaitUntil(() -> helper.assertTrue(cancelled.get(), "No ChangeBlockEvent.Pre was thrown for the piston retracting"))
-            .thenIdle(5)
+            .thenExecuteFor(10, () -> PistonGameTests.assertHeldOut(helper))
+            .thenExecute(() -> Sponge.eventManager().unregisterListeners(listener))
+            .thenSucceed();
+    }
+
+    // With the retract cancelled the piston is still extended, so switching the lever back on asks nothing of it:
+    // the only events from then on are the lever's own
+    @GameTest(structure = PistonGameTests.STICKY, maxTicks = 60, settle = true)
+    void stickyRetractPreCancelRepower(final GameTestHelper helper) {
+        final AtomicBoolean cancelled = new AtomicBoolean();
+        final EventListener<ChangeBlockEvent.Pre> listener = event -> {
+            if (PistonGameTests.isPistonPre(helper, event) && event.context().containsKey(EventContextKeys.PISTON_RETRACT)) {
+                event.setCancelled(true);
+                cancelled.set(true);
+            }
+        };
+        SpongeGameTests.listen(ChangeBlockEvent.Pre.class, listener);
+        final EventRecorder recorder = EventRecorder.start(helper);
+        final AtomicLong repowered = new AtomicLong();
+
+        helper.pullLever(PistonGameTests.LEVER);
+        helper.startSequence()
+            .thenWaitUntil(() -> helper.assertBlockPresent(Blocks.STONE, PistonGameTests.GOLD))
+            .thenExecute(() -> helper.pullLever(PistonGameTests.LEVER))
+            .thenWaitUntil(() -> helper.assertTrue(cancelled.get(), "No ChangeBlockEvent.Pre was thrown for the piston retracting"))
+            .thenIdle(1) // the sequence would otherwise switch it back on in the tick the retract was cancelled
             .thenExecute(() -> {
-                helper.assertBlockProperty(PistonGameTests.PISTON, PistonBaseBlock.EXTENDED, true);
-                helper.assertBlockPresent(Blocks.PISTON_HEAD, PistonGameTests.STONE);
-                helper.assertBlockPresent(Blocks.STONE, PistonGameTests.GOLD);
+                repowered.set(helper.getTick());
+                helper.pullLever(PistonGameTests.LEVER);
+            })
+            .thenExecuteFor(10, () -> PistonGameTests.assertHeldOut(helper))
+            .thenExecute(() -> {
+                // The lever changing and notifying its neighbors, the piston among them, which has nothing left to do
+                final List<EventRecorder.Entry> after = recorder.entries().stream().filter(entry -> entry.tick() >= repowered.get()).toList();
+                helper.assertValueEqual(List.of("All", "NotifyNeighbor", "NotifyNeighbor", "Post"), after.stream().map(EventRecorder.Entry::event).toList(),
+                    "events after switching the lever back on, recorded: " + after);
+                helper.assertTrue(after.stream().filter(entry -> !entry.event().equals("NotifyNeighbor")).allMatch(entry -> entry.positions().equals(List.of(PistonGameTests.LEVER))),
+                    "Block changes other than the lever's after switching it back on, recorded: " + after);
+                recorder.stop();
                 Sponge.eventManager().unregisterListeners(listener);
             })
             .thenSucceed();
@@ -146,7 +181,7 @@ public final class PistonGameTests {
     }
 
     // Cancelling the push must restore the pumpkin without also dropping it
-    @GameTest(structure = PistonGameTests.BREAK, maxTicks = 40)
+    @GameTest(structure = PistonGameTests.BREAK, maxTicks = 40, settle = true, skyAccess = true)
     void pushBreakCancel(final GameTestHelper helper) {
         final AtomicBoolean cancelled = new AtomicBoolean();
         final EventListener<ChangeBlockEvent.All> listener = event -> {
@@ -256,7 +291,7 @@ public final class PistonGameTests {
     }
 
     // Cancels both events of the push
-    @GameTest(structure = PistonGameTests.STRUCTURE, maxTicks = 40)
+    @GameTest(structure = PistonGameTests.STRUCTURE, maxTicks = 40, settle = true, skyAccess = true)
     void pushCancel(final GameTestHelper helper) {
         final AtomicBoolean cancelled = new AtomicBoolean();
         final EventListener<ChangeBlockEvent.All> listener = event -> {
@@ -276,7 +311,7 @@ public final class PistonGameTests {
     }
 
     // Cancelling Pre stops the push before anything moves, so no All event is thrown for it at all
-    @GameTest(structure = PistonGameTests.STRUCTURE, maxTicks = 40)
+    @GameTest(structure = PistonGameTests.STRUCTURE, maxTicks = 40, settle = true, skyAccess = true)
     void preCancel(final GameTestHelper helper) {
         final AtomicBoolean cancelled = new AtomicBoolean();
         final AtomicBoolean moved = new AtomicBoolean();
@@ -328,16 +363,14 @@ public final class PistonGameTests {
         });
     }
 
-    // Checks the rollback holds for a while, then switches the lever off before letting the listeners go: the piston
-    // is still powered, so once nothing cancels it, its next neighbor update would push after all
+    // Checks the rollback holds for a while before letting the listeners go. The piston is left powered but unextended,
+    // as the cancel left it, and only a later neighbor update would have vanilla push again; the tests using this have
+    // sky access, so vanilla removing the barrier ceiling above the piston after the test doesn't make one.
     private static void holdCancelled(final GameTestHelper helper, final Runnable assertions, final EventListener<?>... listeners) {
         helper.startSequence()
             .thenWaitUntil(assertions)
             .thenExecuteFor(10, assertions)
-            .thenExecute(() -> {
-                helper.pullLever(PistonGameTests.LEVER);
-                Arrays.stream(listeners).forEach(Sponge.eventManager()::unregisterListeners);
-            })
+            .thenExecute(() -> Arrays.stream(listeners).forEach(Sponge.eventManager()::unregisterListeners))
             .thenSucceed();
     }
 
@@ -348,6 +381,13 @@ public final class PistonGameTests {
     private static void assertUnmoved(final GameTestHelper helper) {
         PistonGameTests.assertRowUnmoved(helper);
         helper.assertBlockProperty(PistonGameTests.PISTON, PistonBaseBlock.EXTENDED, false);
+    }
+
+    // sponge:piston/sticky_row after a cancelled retract: still extended, with the stone held out at (3,1,1)
+    private static void assertHeldOut(final GameTestHelper helper) {
+        helper.assertBlockProperty(PistonGameTests.PISTON, PistonBaseBlock.EXTENDED, true);
+        helper.assertBlockPresent(Blocks.PISTON_HEAD, PistonGameTests.STONE);
+        helper.assertBlockPresent(Blocks.STONE, PistonGameTests.GOLD);
     }
 
     private static void assertRowUnmoved(final GameTestHelper helper) {

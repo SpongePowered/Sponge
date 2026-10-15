@@ -30,6 +30,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.gametest.framework.GeneratedTest;
 import net.minecraft.gametest.framework.TestData;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.block.Rotation;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventListener;
@@ -123,7 +124,8 @@ public final class SpongeGameTests {
         final GameTest test = method.getAnnotation(GameTest.class);
         return new GeneratedTest(
             SpongeGameTests.id(method),
-            new TestData<>(GameTestEnvironments.DEFAULT_KEY, Identifier.parse(test.structure()), test.maxTicks(), test.setupTicks(), test.required()),
+            new TestData<>(GameTestEnvironments.DEFAULT_KEY, Identifier.parse(test.structure()), test.maxTicks(), test.setupTicks(), test.required(),
+                Rotation.NONE, false, 1, 1, test.skyAccess()),
             SpongeGameTests.function(instance, method)
         );
     }

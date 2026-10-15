@@ -6,6 +6,7 @@
         "BuiltinTestFunctionsMixin_GameTest",
         "GameTestInfoMixin_GameTest",
         "GameTestServerMixin_GameTest",
-        "RegistryDataLoaderMixin_GameTest"
+        "RegistryDataLoaderMixin_GameTest",
+        "ServerLevel_EntityCallbacksMixin_GameTest"
     ]
 }
