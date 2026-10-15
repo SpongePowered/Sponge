@@ -31,6 +31,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.units.qual.A;
 import org.checkerframework.checker.units.qual.C;
+import net.minecraft.core.BlockPos;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
@@ -39,11 +41,14 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.ICaptureSupplier;
+import org.spongepowered.common.event.tracking.context.transaction.block.ChangeBlock;
 import org.spongepowered.common.event.tracking.context.transaction.effect.ProcessingSideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Spliterator;
@@ -65,6 +70,10 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
     private @Nullable GameTransaction<@NonNull ?> head;
     private @Nullable ResultingTransactionBySideEffect effect;
     private final PhaseContext<@NonNull ?> context;
+    // The latest block change logged at each position, which a neighbor notification from there is about
+    private final Map<Position, ChangeBlock> latestChanges = new HashMap<>();
+
+    private record Position(ResourceKey world, BlockPos pos) {}
 
     public TransactionalCaptureSupplier(final PhaseContext<@NonNull ?> context) {
         this.context = context;
@@ -119,6 +128,9 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
     @Deprecated
     @Override
     public @Nullable EffectTransactor logTransaction(final StatefulTransaction transaction) {
+        if (transaction instanceof final ChangeBlock change) {
+            this.latestChanges.put(new Position(change.original.world(), change.original.getBlockPos()), change);
+        }
         // todo - abstract the rest of this out into StatefulTransaction
         if (this.head == null) {
             final GameTransaction<@NonNull ?> gameTransaction = transaction.recordState();
@@ -159,6 +171,12 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
         this.head = null;
         this.tail = null;
         this.effect = null;
+        this.latestChanges.clear();
+    }
+
+    @Override
+    public @Nullable ChangeBlock latestChange(final ResourceKey world, final BlockPos pos) {
+        return this.latestChanges.get(new Position(world, pos));
     }
 
     @SuppressWarnings("unchecked")
@@ -175,7 +193,6 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
             final Event event = eventWithTransactions.event();
             final boolean parentOrDeciderCancelled = eventWithTransactions.isParentOrDeciderCancelled();
             // Only a cancellation so far can have cancelled what caused these
-            // ponytail: each check walks back along the chain, O(n²) for a long chain once anything is cancelled
             if (cancelledAny && !parentOrDeciderCancelled) {
                 eventWithTransactions.transactions().forEach(GameTransaction::cancelIfCauseCancelled);
             }
@@ -355,6 +372,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
     }
 
     public void reset() {
+        this.latestChanges.clear();
         if (this.head != null) {
             this.head = null;
             this.tail = null;

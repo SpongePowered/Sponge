@@ -44,6 +44,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.ticks.ScheduledTick;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.entity.SpawnType;
@@ -132,6 +133,9 @@ interface TransactionSink {
     @Deprecated
     @Nullable EffectTransactor logTransaction(StatefulTransaction transaction);
 
+    // The latest block change logged at the position, if any
+    @Nullable ChangeBlock latestChange(ResourceKey world, BlockPos pos);
+
     <T, C, A extends ProcessingSideEffect.Args, @Nullable R> EffectTransactor pushEffect(final ResultingTransactionBySideEffect<T, C, A, R> effect);
 
     <T, C, A extends ProcessingSideEffect.Args, @Nullable R> EffectTransactor pushEffect(final ResultingTransactionBySideEffect<T, C, A, R> effect, final GameTransaction<?> parentTransaction);
@@ -210,7 +214,8 @@ interface TransactionSink {
         final BlockPos immutableTarget, final BlockState targetBlockState,
         final @Nullable BlockEntity existingTile
     ) {
-        final NeighborNotification notificationTransaction = new NeighborNotification(serverWorldSupplier, targetBlockState, immutableTarget, blockIn, immutableFrom, existingTile);
+        final NeighborNotification notificationTransaction = new NeighborNotification(serverWorldSupplier, targetBlockState, immutableTarget, blockIn, immutableFrom, existingTile,
+            this.latestChange(((org.spongepowered.api.world.server.ServerWorld) serverWorldSupplier.get()).key(), immutableFrom));
         this.logTransaction(notificationTransaction);
         return this.pushEffect(new ResultingTransactionBySideEffect<>(NotifyNeighborSideEffect.getInstance()), notificationTransaction);
     }

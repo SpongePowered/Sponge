@@ -46,7 +46,6 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 @DefaultQualifier(NonNull.class)
@@ -102,13 +101,20 @@ public abstract class GameTransaction<E extends Event & Cancellable> implements 
         for (final ResultingTransactionBySideEffect<?, ?, ?, ?> sideEffect : this.sideEffects) {
             @Nullable GameTransaction<@NonNull ?> transaction = sideEffect.head;
             while (transaction != null) {
-                if (transaction.transactionType.isPrimary() || transaction.hasChildTransactions()) {
+                if (transaction.transactionType.isPrimary() || transaction.childrenEndBatch()) {
                     return true;
                 }
                 transaction = transaction.next;
             }
         }
         return false;
+    }
+
+    /**
+     * Whether this transaction's children end the batch its parent is in, so they get their events before the rest of it
+     */
+    protected boolean childrenEndBatch() {
+        return this.hasChildTransactions();
     }
 
     public abstract Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator(
@@ -129,6 +135,10 @@ public abstract class GameTransaction<E extends Event & Cancellable> implements 
     );
 
     public abstract void restore(PhaseContext<@NonNull ?> context, E event);
+
+    public final boolean isCancelled() {
+        return this.cancelled;
+    }
 
     public final void markCancelled() {
         this.cancelled = true;
@@ -151,18 +161,6 @@ public abstract class GameTransaction<E extends Event & Cancellable> implements 
      * @return true if this transaction was cancelled
      */
     protected boolean cancelIfCauseCancelled() {
-        return false;
-    }
-
-    /**
-     * Whether the latest transaction before this one in its chain that matches was cancelled.
-     */
-    protected final boolean wasLatestCancelled(final Predicate<? super GameTransaction<@NonNull ?>> match) {
-        for (@Nullable GameTransaction<@NonNull ?> earlier = this.previous; earlier != null; earlier = earlier.previous) {
-            if (match.test(earlier)) {
-                return earlier.cancelled;
-            }
-        }
         return false;
     }
 
