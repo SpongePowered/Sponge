@@ -324,7 +324,7 @@ public final class TrackingUtil {
             return tick.getAsBoolean();
         }
         final BlockEventTickContext phaseContext = TickPhase.Tick.BLOCK_EVENT.createPhaseContext(PhaseTracker.SERVER);
-        phaseContext.source(source);
+        phaseContext.source(blockEvent);
 
         final UUID user = ((TrackableBlockEventDataBridge) (Object) event).bridge$getSourceUserUUID();
         if (user != null) {

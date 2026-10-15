@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.tracker.world.level.redstone;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -35,11 +37,10 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 
 import java.util.function.Supplier;
@@ -48,36 +49,35 @@ import java.util.function.Supplier;
 public interface NeighborUpdaterMixin_Tracker {
 
     /**
-     * Logs a transaction to the {@link PhaseContext} for neighbor notifications. Otherwise,
-     * we will fail to create notification events in the API. This avoids a redirect or overwrite
-     *
-     * @param level
-     * @param targetState
-     * @param targetPos
-     * @param fromBlock
-     * @param fromPos
-     * @param movement
-     * @param ci
+     * Logs a transaction to the {@link PhaseContext} for neighbor notifications, otherwise we will fail to create
+     * notification events in the API. Delivery happens as vanilla would, with the notification as the parent of
+     * whatever the target does in response, so cancelling the notification rolls that back too.
      */
-    @Inject(method = "executeUpdate", at = @At(
+    @WrapOperation(method = "executeUpdate", at = @At(
         value = "INVOKE",
         target = "Lnet/minecraft/world/level/block/state/BlockState;handleNeighborChanged(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/Block;Lnet/minecraft/core/BlockPos;Z)V"
     ))
-    private static void tracker$wrapNeighborUpdateInSideEffect(Level level, BlockState targetState, BlockPos targetPos, Block fromBlock, BlockPos fromPos, boolean movement, CallbackInfo ci) {
+    private static void tracker$wrapNeighborUpdateInSideEffect(
+        final BlockState targetState, final Level level, final BlockPos targetPos, final Block fromBlock, final BlockPos fromPos,
+        final boolean movement, final Operation<Void> original
+    ) {
         // Sponge start - prepare notification
-        final PhaseContext<@NonNull ?> peek = PhaseTracker.getInstance().getPhaseContext();
         if (!(level instanceof ServerLevel serverLevel)) {
+            original.call(targetState, level, targetPos, fromBlock, fromPos, movement);
             return;
         }
 
+        final PhaseContext<@NonNull ?> peek = PhaseTracker.getInstance().getPhaseContext();
         final var targetChunk = serverLevel.getChunkAt(targetPos);
         final Supplier<ServerLevel> worldSupplier = VolumeStreamUtils.createWeaklyReferencedSupplier(serverLevel, "ServerWorld");
         final net.minecraft.world.level.block.entity.@Nullable BlockEntity existingTile = targetChunk.getBlockEntity(
             targetPos,
             LevelChunk.EntityCreationType.CHECK
         );
-        peek.getTransactor().logNeighborNotification(worldSupplier, fromPos, fromBlock, targetPos, targetState, existingTile);
 
         peek.associateNeighborStateNotifier(fromPos, targetState.getBlock(), targetPos, serverLevel, PlayerTracker.Type.NOTIFIER);
+        try (final EffectTransactor ignored = peek.getTransactor().logNeighborNotification(worldSupplier, fromPos, fromBlock, targetPos, targetState, existingTile)) {
+            original.call(targetState, level, targetPos, fromBlock, fromPos, movement);
+        }
     }
 }

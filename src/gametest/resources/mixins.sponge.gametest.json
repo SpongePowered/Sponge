@@ -1,0 +1,12 @@
+{
+    "required": true,
+    "parent": "mixins.sponge.parent.json",
+    "package": "org.spongepowered.common.mixin.gametest",
+    "mixins": [
+        "GameTestHelperMixin_GameTest",
+        "GameTestInfoMixin_GameTest",
+        "GameTestRegistryMixin_GameTest",
+        "GameTestServerMixin_GameTest",
+        "ServerLevel_EntityCallbacksMixin_GameTest"
+    ]
+}

@@ -1,0 +1,11 @@
+{
+    "required": true,
+    "parent": "mixins.sponge.parent.json",
+    "package": "org.spongepowered.vanilla.mixin.gametest",
+    "mixins": [
+        "ArgumentTypeInfosMixin_Vanilla_GameTest",
+        "CommandsMixin_Vanilla_GameTest",
+        "GameTestServerMixin_Vanilla",
+        "MinecraftServerMixin_Vanilla_GameTest"
+    ]
+}
