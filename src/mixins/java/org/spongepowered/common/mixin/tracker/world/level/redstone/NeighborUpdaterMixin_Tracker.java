@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.tracker.world.level.redstone;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -36,11 +38,10 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 
 import java.util.function.Supplier;
@@ -49,16 +50,21 @@ import java.util.function.Supplier;
 public interface NeighborUpdaterMixin_Tracker {
 
     /**
-     * Logs a transaction to the {@link PhaseContext} for neighbor notifications. Otherwise,
-     * we will fail to create notification events in the API. This avoids a redirect or overwrite
+     * Logs a transaction to the {@link PhaseContext} for neighbor notifications, otherwise we will fail to create
+     * notification events in the API. Delivery happens as vanilla would, with the notification as the parent of
+     * whatever the target does in response, so cancelling the notification rolls that back too.
      */
-    @Inject(method = "executeUpdate", at = @At(
+    @WrapOperation(method = "executeUpdate", at = @At(
         value = "INVOKE",
         target = "Lnet/minecraft/world/level/block/state/BlockState;handleNeighborChanged(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/Block;Lnet/minecraft/world/level/redstone/Orientation;Z)V"
     ))
-    private static void tracker$wrapNeighborUpdateInSideEffect(Level level, BlockState targetState, BlockPos targetPos, Block fromBlock, @Nullable Orientation orientation, boolean movement, CallbackInfo ci) {
+    private static void tracker$wrapNeighborUpdateInSideEffect(
+        final BlockState targetState, final Level level, final BlockPos targetPos, final Block fromBlock,
+        final @Nullable Orientation orientation, final boolean movement, final Operation<Void> original
+    ) {
         // Sponge start - prepare notification
         if (!(level instanceof ServerLevel serverLevel)) {
+            original.call(targetState, level, targetPos, fromBlock, orientation, movement);
             return;
         }
 
@@ -72,8 +78,9 @@ public interface NeighborUpdaterMixin_Tracker {
 
         // Vanilla no longer passes where the update came from; the queued update that knows records it on the context
         final BlockPos fromPos = peek.takeNeighborUpdateSource(targetPos);
-        peek.getTransactor().logNeighborNotification(worldSupplier, fromPos, fromBlock, targetPos, targetState, existingTile);
-
         peek.associateNeighborStateNotifier(fromPos, targetState.getBlock(), targetPos, serverLevel, PlayerTracker.Type.NOTIFIER);
+        try (final EffectTransactor ignored = peek.getTransactor().logNeighborNotification(worldSupplier, fromPos, fromBlock, targetPos, targetState, existingTile)) {
+            original.call(targetState, level, targetPos, fromBlock, orientation, movement);
+        }
     }
 }

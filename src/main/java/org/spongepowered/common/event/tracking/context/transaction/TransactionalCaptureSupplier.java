@@ -173,7 +173,13 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
         boolean cancelledAny = false;
         for (final EventByTransaction<@NonNull ?> eventWithTransactions : batched) {
             final Event event = eventWithTransactions.event();
-            if (eventWithTransactions.isParentOrDeciderCancelled()) {
+            final boolean parentOrDeciderCancelled = eventWithTransactions.isParentOrDeciderCancelled();
+            // Only a cancellation so far can have cancelled what caused these
+            // ponytail: each check walks back along the chain, O(n²) for a long chain once anything is cancelled
+            if (cancelledAny && !parentOrDeciderCancelled) {
+                eventWithTransactions.transactions().forEach(GameTransaction::cancelIfCauseCancelled);
+            }
+            if (parentOrDeciderCancelled || eventWithTransactions.transactions().stream().allMatch(transaction -> transaction.cancelled)) {
                 cancelledAny = true;
                 eventWithTransactions.markCancelled();
                 continue;

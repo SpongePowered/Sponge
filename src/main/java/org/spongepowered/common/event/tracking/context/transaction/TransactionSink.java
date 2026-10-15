@@ -76,6 +76,7 @@ import org.spongepowered.common.event.tracking.context.transaction.effect.BlockA
 import org.spongepowered.common.event.tracking.context.transaction.effect.EntityPerformingDropsEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.InteractionItemEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.InventoryEffect;
+import org.spongepowered.common.event.tracking.context.transaction.effect.NotifyNeighborSideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.PrepareBlockDrops;
 import org.spongepowered.common.event.tracking.context.transaction.effect.ProcessingSideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.ClickCreativeMenuTransaction;
@@ -203,13 +204,15 @@ interface TransactionSink {
         this.logTransaction(transaction);
     }
 
-    default void logNeighborNotification(
+    // Whatever delivering the notification does is logged as its children, so they are rolled back with it
+    default EffectTransactor logNeighborNotification(
         final Supplier<ServerLevel> serverWorldSupplier, final BlockPos immutableFrom, final Block blockIn,
         final BlockPos immutableTarget, final BlockState targetBlockState,
         final @Nullable BlockEntity existingTile
     ) {
         final NeighborNotification notificationTransaction = new NeighborNotification(serverWorldSupplier, targetBlockState, immutableTarget, blockIn, immutableFrom, existingTile);
         this.logTransaction(notificationTransaction);
+        return this.pushEffect(new ResultingTransactionBySideEffect<>(NotifyNeighborSideEffect.getInstance()), notificationTransaction);
     }
 
     @SuppressWarnings("ConstantConditions")

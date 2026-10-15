@@ -46,6 +46,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 @DefaultQualifier(NonNull.class)
@@ -140,6 +141,28 @@ public abstract class GameTransaction<E extends Event & Cancellable> implements 
     public abstract boolean markCancelledTransactions(E event, ImmutableList<? extends GameTransaction<E>> transactions);
 
     protected boolean hasUnknownChainRequiringCancellation() {
+        return false;
+    }
+
+    /**
+     * Cancels this transaction before its event is thrown if it only happened because of an earlier transaction in
+     * its chain that has since been cancelled.
+     *
+     * @return true if this transaction was cancelled
+     */
+    protected boolean cancelIfCauseCancelled() {
+        return false;
+    }
+
+    /**
+     * Whether the latest transaction before this one in its chain that matches was cancelled.
+     */
+    protected final boolean wasLatestCancelled(final Predicate<? super GameTransaction<@NonNull ?>> match) {
+        for (@Nullable GameTransaction<@NonNull ?> earlier = this.previous; earlier != null; earlier = earlier.previous) {
+            if (match.test(earlier)) {
+                return earlier.cancelled;
+            }
+        }
         return false;
     }
 

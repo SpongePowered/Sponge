@@ -24,14 +24,21 @@
  */
 package org.spongepowered.common.test.gametest.block;
 
+import io.leangen.geantyref.TypeToken;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RedstoneLampBlock;
+import net.minecraft.world.level.block.piston.PistonBaseBlock;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.transaction.NotificationTicket;
+import org.spongepowered.api.block.transaction.ScheduleUpdateTicket;
+import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventListener;
+import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
+import org.spongepowered.api.event.block.ScheduleBlockUpdateEvent;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.test.gametest.GameTest;
 import org.spongepowered.common.test.gametest.GameTestGroup;
@@ -39,9 +46,12 @@ import org.spongepowered.common.test.gametest.SpongeGameTests;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 /**
  * Whether neighbor notifications reach their targets as {@link NotifyNeighborBlockEvent} describes. A redstone lamp is
@@ -62,6 +72,8 @@ public final class NeighborNotificationGameTests {
     private static final String PUSH_LAMP = "sponge:piston/push_lamp";
     private static final BlockPos ROW_LEVER = new BlockPos(0, 1, 2);
     private static final BlockPos ROW_PISTON = new BlockPos(1, 1, 2);
+    private static final BlockPos ROW_STONE = new BlockPos(2, 1, 2);
+    private static final BlockPos ROW_GOLD = new BlockPos(3, 1, 2);
     private static final BlockPos ROW_LAMP = new BlockPos(3, 1, 3);
 
     // The lever's notification is what lights the lamp
@@ -85,9 +97,9 @@ public final class NeighborNotificationGameTests {
         });
     }
 
-    // An invalidated ticket is a notification that doesn't happen, so the lamp is never told to check its power
-    // Known issue: the update is delivered as it happens and the event is only thrown afterwards, so invalidating does nothing
-    @GameTest(structure = NeighborNotificationGameTests.LEVER_LAMP, required = false)
+    // An invalidated ticket is a notification that doesn't happen. It has already been delivered by the time its event is
+    // thrown, so what the lamp did in response, lighting up, is rolled back with it and never shown to listeners
+    @GameTest(structure = NeighborNotificationGameTests.LEVER_LAMP)
     void invalidTicketKeepsLampUnlit(final GameTestHelper helper) {
         final Vector3i lamp = VecHelper.toVector3i(helper.absolutePos(NeighborNotificationGameTests.LAMP));
         final AtomicBoolean invalidated = new AtomicBoolean();
@@ -98,13 +110,24 @@ public final class NeighborNotificationGameTests {
             }
         });
         SpongeGameTests.listen(NotifyNeighborBlockEvent.class, listener);
+        final AtomicBoolean lampChangeShown = new AtomicBoolean();
+        final EventListener<ChangeBlockEvent.All> changes = event -> {
+            if (event.transactions().stream().anyMatch(transaction -> transaction.original().position().equals(lamp))) {
+                lampChangeShown.set(true);
+            }
+        };
+        SpongeGameTests.listen(ChangeBlockEvent.All.class, changes);
 
         helper.pullLever(NeighborNotificationGameTests.LEVER);
 
         helper.startSequence()
             .thenWaitUntil(() -> helper.assertTrue(invalidated.get(), "No NotifyNeighborBlockEvent had a ticket for the lamp"))
+            .thenExecute(() -> helper.assertFalse(lampChangeShown.get(), "A ChangeBlockEvent.All showed the lamp lighting up"))
             .thenExecuteFor(10, () -> helper.assertBlockProperty(NeighborNotificationGameTests.LAMP, RedstoneLampBlock.LIT, false))
-            .thenExecute(() -> Sponge.eventManager().unregisterListeners(listener))
+            .thenExecute(() -> {
+                Sponge.eventManager().unregisterListeners(listener);
+                Sponge.eventManager().unregisterListeners(changes);
+            })
             .thenSucceed();
     }
 
@@ -137,34 +160,153 @@ public final class NeighborNotificationGameTests {
             .thenSucceed();
     }
 
-    // The push updates the gold block's neighbors, the lamp among them, so it goes out
+    // The push updates the gold block's neighbors, the lamp among them, so it goes out. Sponge's events follow the order
+    // things happened in: the push's block changes, its notification of the lamp from where the gold block was, then the
+    // lamp's scheduled tick, caused by that notification
     @GameTest(structure = NeighborNotificationGameTests.PUSH_LAMP, maxTicks = 40, skyAccess = true)
     void pushUpdatesLamp(final GameTestHelper helper) {
+        final Vector3i gold = VecHelper.toVector3i(helper.absolutePos(NeighborNotificationGameTests.ROW_GOLD));
+        final PistonEvents seen = PistonEvents.listen(helper);
+
         helper.pullLever(NeighborNotificationGameTests.ROW_LEVER);
 
-        helper.succeedWhen(() -> helper.assertBlockProperty(NeighborNotificationGameTests.ROW_LAMP, RedstoneLampBlock.LIT, false));
+        helper.succeedWhen(() -> {
+            helper.assertBlockProperty(NeighborNotificationGameTests.ROW_LAMP, RedstoneLampBlock.LIT, false);
+            final List<Seen> notifications = seen.lampTickets(NotifyNeighborBlockEvent.class);
+            final List<Seen> ticks = seen.lampTickets(ScheduleBlockUpdateEvent.class);
+            helper.assertValueEqual(1, notifications.size(), "piston NotifyNeighborBlockEvents with a ticket for the lamp, in " + seen);
+            helper.assertValueEqual(1, ticks.size(), "piston ScheduleBlockUpdateEvents with a ticket for the lamp, in " + seen);
+            final Seen notification = notifications.getFirst();
+            final Seen tick = ticks.getFirst();
+            helper.assertValueEqual(List.of(true), notification.lampTicketsValid(), "lamp tickets' validity when notified");
+            helper.assertValueEqual(List.of(true), tick.lampTicketsValid(), "lamp tickets' validity when its tick was scheduled");
+            helper.assertValueEqual(Set.of(gold), ((NotifyNeighborBlockEvent) notification.event()).tickets().stream()
+                .filter(ticket -> ticket.targetPosition().equals(seen.lamp))
+                .map(NotificationTicket::notifierPosition)
+                .collect(Collectors.toSet()), "notifiers of the lamp's tickets");
+            final int push = seen.indexOf(ChangeBlockEvent.All.class);
+            helper.assertTrue(push >= 0, "No ChangeBlockEvent.All from the piston in " + seen);
+            helper.assertTrue(push < seen.events.indexOf(notification) && seen.events.indexOf(notification) < seen.events.indexOf(tick),
+                "Expected the push, then the lamp's notification, then its tick, got " + seen);
+            helper.assertTrue(tick.event().cause().contains(notification.event()),
+                "The lamp's tick wasn't caused by its notification: " + tick.event().cause());
+            seen.unregister();
+        });
     }
 
-    // A cancelled push is rolled back as if it never happened, so its neighbors shouldn't have been told it did
-    // Known issue: the push's updates are delivered before its event can be cancelled, and the rollback doesn't undo them
-    @GameTest(structure = NeighborNotificationGameTests.PUSH_LAMP, maxTicks = 40, required = false, skyAccess = true)
+    // A cancelled push is rolled back as if it never happened: its notifications are cancelled with it, and so is what
+    // they caused, the lamp's scheduled tick. No listener is shown a notification or tick that's been rolled back.
+    @GameTest(structure = NeighborNotificationGameTests.PUSH_LAMP, maxTicks = 40, skyAccess = true)
     void cancelledPushLeavesLampLit(final GameTestHelper helper) {
-        final Vector3i piston = VecHelper.toVector3i(helper.absolutePos(NeighborNotificationGameTests.ROW_PISTON));
         final AtomicBoolean cancelled = new AtomicBoolean();
+        final PistonEvents seen = PistonEvents.listen(helper);
         final EventListener<ChangeBlockEvent.All> listener = event -> {
-            if (event.cause().allOf(LocatableBlock.class).stream().anyMatch(block -> block.blockPosition().equals(piston))) {
+            if (seen.causedByPiston(event)) {
                 event.setCancelled(true);
                 cancelled.set(true);
             }
         };
         SpongeGameTests.listen(ChangeBlockEvent.All.class, listener);
+        final BlockPos lamp = helper.absolutePos(NeighborNotificationGameTests.ROW_LAMP);
 
         helper.pullLever(NeighborNotificationGameTests.ROW_LEVER);
 
         helper.startSequence()
             .thenWaitUntil(() -> helper.assertTrue(cancelled.get(), "No ChangeBlockEvent.All was caused by the piston"))
+            .thenExecute(() -> {
+                helper.assertBlockProperty(NeighborNotificationGameTests.ROW_PISTON, PistonBaseBlock.EXTENDED, false);
+                helper.assertBlockPresent(Blocks.STONE, NeighborNotificationGameTests.ROW_STONE);
+                helper.assertBlockPresent(Blocks.GOLD_BLOCK, NeighborNotificationGameTests.ROW_GOLD);
+                helper.assertBlockPresent(Blocks.AIR, NeighborNotificationGameTests.ROW_GOLD.east());
+                helper.assertFalse(helper.getLevel().getBlockTicks().hasScheduledTick(lamp, Blocks.REDSTONE_LAMP),
+                    "The lamp's tick is still scheduled");
+                for (final Seen event : seen.events) {
+                    helper.assertFalse(event.lampTicketsValid().contains(true), "A listener was shown a rolled back lamp ticket: " + seen);
+                }
+            })
             .thenExecuteFor(10, () -> helper.assertBlockProperty(NeighborNotificationGameTests.ROW_LAMP, RedstoneLampBlock.LIT, true))
-            .thenExecute(() -> Sponge.eventManager().unregisterListeners(listener))
+            .thenExecute(() -> {
+                Sponge.eventManager().unregisterListeners(listener);
+                seen.unregister();
+            })
             .thenSucceed();
+    }
+
+    /**
+     * A {@link ChangeBlockEvent.All}, {@link NotifyNeighborBlockEvent} or {@link ScheduleBlockUpdateEvent} the piston
+     * caused, with whether each of its tickets for the lamp was valid when it was thrown.
+     */
+    private record Seen(Event event, List<Boolean> lampTicketsValid) {
+
+        @Override
+        public String toString() {
+            return this.event.getClass().getSimpleName() + this.lampTicketsValid;
+        }
+    }
+
+    // Every event the piston causes in push_lamp, in the order they're thrown, seen before any other listener
+    private static final class PistonEvents implements EventListener<Event> {
+
+        final List<Seen> events = new CopyOnWriteArrayList<>();
+        final Vector3i piston;
+        final Vector3i lamp;
+
+        private PistonEvents(final GameTestHelper helper) {
+            this.piston = VecHelper.toVector3i(helper.absolutePos(NeighborNotificationGameTests.ROW_PISTON));
+            this.lamp = VecHelper.toVector3i(helper.absolutePos(NeighborNotificationGameTests.ROW_LAMP));
+        }
+
+        static PistonEvents listen(final GameTestHelper helper) {
+            final PistonEvents seen = new PistonEvents(helper);
+            SpongeGameTests.listen(TypeToken.get(ChangeBlockEvent.All.class), Order.PRE, seen);
+            SpongeGameTests.listen(TypeToken.get(NotifyNeighborBlockEvent.class), Order.PRE, seen);
+            SpongeGameTests.listen(new TypeToken<ScheduleBlockUpdateEvent<?>>() {}, Order.PRE, seen);
+            return seen;
+        }
+
+        boolean causedByPiston(final Event event) {
+            return event.cause().allOf(LocatableBlock.class).stream().anyMatch(block -> block.blockPosition().equals(this.piston));
+        }
+
+        @Override
+        public void handle(final Event event) {
+            if (!this.causedByPiston(event)) {
+                return;
+            }
+            final List<Boolean> valid = switch (event) {
+                case final NotifyNeighborBlockEvent notify -> notify.tickets().stream()
+                    .filter(ticket -> ticket.targetPosition().equals(this.lamp))
+                    .map(NotificationTicket::valid)
+                    .toList();
+                case final ScheduleBlockUpdateEvent<?> schedule -> schedule.tickets().stream()
+                    .filter(ticket -> ticket.block().blockPosition().equals(this.lamp))
+                    .map(ScheduleUpdateTicket::valid)
+                    .toList();
+                default -> List.of();
+            };
+            this.events.add(new Seen(event, valid));
+        }
+
+        List<Seen> lampTickets(final Class<? extends Event> type) {
+            return this.events.stream().filter(seen -> type.isInstance(seen.event()) && !seen.lampTicketsValid().isEmpty()).toList();
+        }
+
+        int indexOf(final Class<? extends Event> type) {
+            for (int i = 0; i < this.events.size(); i++) {
+                if (type.isInstance(this.events.get(i).event())) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        void unregister() {
+            Sponge.eventManager().unregisterListeners(this);
+        }
+
+        @Override
+        public String toString() {
+            return this.events.toString();
+        }
     }
 }

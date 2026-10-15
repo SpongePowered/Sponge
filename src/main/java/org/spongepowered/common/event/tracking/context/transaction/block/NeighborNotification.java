@@ -165,25 +165,27 @@ public final class NeighborNotification extends WorldBasedTransaction<NotifyNeig
 
     }
 
+    // A notification is about the latest change at its source; once that is rolled back the notification never happened
+    @Override
+    protected boolean cancelIfCauseCancelled() {
+        if (this.cancelled || !this.wasLatestCancelled(earlier -> earlier instanceof ChangeBlock change && change.affectedPosition.equals(this.sourcePos))) {
+            return false;
+        }
+        this.markCancelled();
+        this.ticketSupplier.get().invalidate();
+        return true;
+    }
+
     @Override
     public boolean markCancelledTransactions(final NotifyNeighborBlockEvent event,
         final ImmutableList<? extends GameTransaction<NotifyNeighborBlockEvent>> blockTransactions
     ) {
         boolean cancelledAny = false;
-        for (final NotificationTicket transaction : event.tickets()) {
-            if (!transaction.valid()) {
+        // Each notification has its own ticket, positions alone can match notifications the ticket isn't for
+        for (final GameTransaction<NotifyNeighborBlockEvent> gameTransaction : blockTransactions) {
+            if (!((NeighborNotification) gameTransaction).ticketSupplier.get().valid()) {
                 cancelledAny = true;
-                for (final GameTransaction<NotifyNeighborBlockEvent> gameTransaction : blockTransactions) {
-                    final NeighborNotification blockTransaction = (NeighborNotification) gameTransaction;
-                    final Vector3i position = transaction.targetPosition();
-                    final BlockPos affectedPosition = blockTransaction.affectedPosition;
-                    if (position.x() == affectedPosition.getX()
-                            && position.y() == affectedPosition.getY()
-                            && position.z() == affectedPosition.getZ()
-                    ) {
-                        gameTransaction.markCancelled();
-                    }
-                }
+                gameTransaction.markCancelled();
             }
         }
 
