@@ -109,7 +109,7 @@ public final class DataTest {
         this.location.setBlock(BlockTypes.RED_BANNER.get().defaultState());
         final BlockEntity bannerEntity = this.location.blockEntity().get();
         DataTest.checkOfferData(bannerEntity, Keys.BANNER_PATTERN_LAYERS, pattern);
-        DataTest.checkOfferData(bannerEntity, Keys.DYE_COLOR, DyeColors.PINK.get());
+        DataTest.checkGetData(bannerEntity, Keys.DYE_COLOR, DyeColors.RED.get());
 
         DataTest.checkOfferData(shieldStack, Keys.HIDE_MISCELLANEOUS, true);
     }
