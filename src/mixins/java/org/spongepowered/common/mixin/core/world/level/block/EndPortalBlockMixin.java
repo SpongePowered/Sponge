@@ -98,7 +98,7 @@ public abstract class EndPortalBlockMixin implements PortalBlockBridge {
     }
 
     @Override
-    public boolean bridge$teleport(final org.spongepowered.api.entity.Entity entity, final ServerLocation destination, final boolean generateDestinationPortal) {
+    public boolean bridge$teleport(final ServerLocation origin, final org.spongepowered.api.entity.Entity entity, final ServerLocation destination, final boolean generateDestinationPortal) {
         final var toLevel = (ServerLevel) destination.world();
         if (toLevel.dimension() == Level.END) {
             if (generateDestinationPortal) {

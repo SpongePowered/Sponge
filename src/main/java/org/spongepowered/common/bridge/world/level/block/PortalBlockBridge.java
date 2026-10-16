@@ -42,5 +42,5 @@ public interface PortalBlockBridge {
 
     Optional<Portal> bridge$generatePortal(ServerLocation location, Axis axis);
 
-    boolean bridge$teleport(Entity entity, ServerLocation destination, boolean generateDestinationPortal);
+    boolean bridge$teleport(ServerLocation origin, Entity entity, ServerLocation destination, boolean generateDestinationPortal);
 }
