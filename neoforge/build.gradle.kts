@@ -427,7 +427,7 @@ tasks {
         dependsOn(prepareServerRun)
 
         extensions.configure(JacocoTaskExtension::class) {
-            excludeClassLoaders = listOf("net.neoforged.fml.classloading.ModuleClassLoader") // the game layer, which NeoJacocoTransformer instruments
+            excludeClassLoaders = listOf("net.neoforged.fml.classloading.transformation.TransformingClassLoader") // the game layer, which NeoJacocoTransformer instruments
         }
 
         finalizedBy(jacocoTestReport)
@@ -446,7 +446,7 @@ spongeImpl.gameTests {
     val run = tasks.named("runGameTestServer", JavaExec::class)
     bootArguments = provider { run.get().args!! } // an argfile, read by SpongeTestBoot
     jvmArguments = provider { run.get().jvmArgs!! }
-    gameClassLoader = "net.neoforged.fml.classloading.ModuleClassLoader" // the game layer, which NeoJacocoTransformer instruments
+    gameClassLoader = "net.neoforged.fml.classloading.transformation.TransformingClassLoader" // the game layer, which NeoJacocoTransformer instruments
     systemProperty("sponge.test.main", "net.minecraft.gametest.Main")
     dependsOn("prepareGameTestServerRun")
 }
