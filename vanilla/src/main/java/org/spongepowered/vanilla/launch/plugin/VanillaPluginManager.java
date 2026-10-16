@@ -168,6 +168,11 @@ public final class VanillaPluginManager implements SpongePluginManager {
         this.ready = true;
     }
 
+    public void addPlugin(final PluginContainer plugin, final PluginResource resource) {
+        this.addPlugin(plugin);
+        this.containerToResource.put(plugin, resource);
+    }
+
     public void addPlugin(final PluginContainer plugin) {
         this.plugins.put(plugin.metadata().id(), Objects.requireNonNull(plugin, "plugin"));
         this.sortedPlugins.add(plugin);

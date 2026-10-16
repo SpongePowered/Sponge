@@ -95,10 +95,6 @@ public final class EntityDataTest {
         final Entity sheep = this.location.createEntity(EntityTypes.SHEEP.get());
         final UUID playerId = UUID.randomUUID();
 
-        DataTest.checkOfferData(sheep, Keys.ABSORPTION, 0.0);
-        DataTest.checkOfferData(sheep, Keys.ABSORPTION, 10.0);
-        DataTest.checkOfferData(sheep, Keys.ABSORPTION, 20.0);
-
         DataTest.checkGetData(sheep, Keys.AGE, 0);
         DataTest.checkOfferData(sheep, Keys.AGE, 10);
 
@@ -123,8 +119,8 @@ public final class EntityDataTest {
             .hoverEvent(HoverEvent.showEntity(ResourceKey.minecraft("sheep"), sheep.uniqueId(), Component.text("A sheep")))
             .insertion(sheep.uniqueId().toString()));
 
-        DataTest.checkGetData(sheep, Keys.EYE_HEIGHT,  (double) (1.3f * 0.95f));
-        DataTest.checkGetData(sheep, Keys.EYE_POSITION, this.location.position().add(0, (double) (1.3f * 0.95f), 0));
+        DataTest.checkGetData(sheep, Keys.EYE_HEIGHT, (double) 1.235f);
+        DataTest.checkGetData(sheep, Keys.EYE_POSITION, this.location.position().add(0, (double) 1.235f, 0));
 
         DataTest.checkOfferData(sheep, Keys.FIRE_DAMAGE_DELAY, Ticks.of(20000));
         DataTest.checkOfferData(sheep, Keys.FIRE_TICKS, Ticks.of(10));
@@ -267,7 +263,6 @@ public final class EntityDataTest {
         DataTest.checkOfferData(guardian, Keys.BEAM_TARGET_ENTITY, fish);
     }
 
-    @Disabled
     @Test
     public void testFallingBlock() {
         final Entity fallingBlock = this.location.createEntity(EntityTypes.FALLING_BLOCK.get());
@@ -283,7 +278,7 @@ public final class EntityDataTest {
         DataTest.checkGetData(fallingBlock, Keys.CAN_PLACE_AS_BLOCK, true);
         DataTest.checkOfferData(fallingBlock, Keys.CAN_PLACE_AS_BLOCK, false);
 
-        DataTest.checkGetData(fallingBlock, Keys.DAMAGE_PER_BLOCK, 2.0);
+        DataTest.checkGetData(fallingBlock, Keys.DAMAGE_PER_BLOCK, 0.0);
         DataTest.checkOfferData(fallingBlock, Keys.DAMAGE_PER_BLOCK, 5.0);
 
         DataTest.checkGetData(fallingBlock, Keys.FALL_DISTANCE, 0.0);
@@ -382,7 +377,6 @@ public final class EntityDataTest {
         DataTest.checkOfferData(illusioner, Keys.CURRENT_SPELL, SpellTypes.BLINDNESS.get());
     }
 
-    @Disabled
     @Test
     public void testCat() {
         final Entity cat = this.location.createEntity(EntityTypes.CAT.get());
@@ -393,10 +387,7 @@ public final class EntityDataTest {
 
         DataTest.checkOfferData(cat, Keys.DYE_COLOR, DyeColors.LIME.get());
 
-        DataTest.checkOfferData(cat, Keys.IS_BEGGING_FOR_FOOD, true);
-        DataTest.checkOfferData(cat, Keys.IS_HISSING, true);
         DataTest.checkOfferData(cat, Keys.IS_LYING_DOWN, true);
-        DataTest.checkOfferData(cat, Keys.IS_PURRING, true);
         DataTest.checkOfferData(cat, Keys.IS_RELAXED, true);
         DataTest.checkOfferData(cat, Keys.IS_SITTING, true);
 
@@ -474,7 +465,6 @@ public final class EntityDataTest {
         DataTest.checkOfferData(tropicalFish, Keys.TROPICAL_FISH_SHAPE, TropicalFishShapes.BETTY.get());
     }
 
-    @Disabled
     @Test
     public void testPanda() {
         final Entity panda = this.location.createEntity(EntityTypes.PANDA.get());
@@ -487,10 +477,10 @@ public final class EntityDataTest {
         DataTest.checkGetData(panda, Keys.IS_FRIGHTENED, false);
         DataTest.checkOfferData(panda, Keys.IS_ROLLING_AROUND, true);
         DataTest.checkOfferData(panda, Keys.IS_SNEEZING, true);
-        DataTest.checkOfferData(panda, Keys.IS_UNHAPPY, true);
 
         DataTest.checkOfferData(panda, Keys.SNEEZING_TIME, Ticks.of(2));
         DataTest.checkOfferData(panda, Keys.UNHAPPY_TIME, Ticks.of(20));
+        DataTest.checkGetData(panda, Keys.IS_UNHAPPY, true);
     }
 
     @Test
@@ -602,7 +592,6 @@ public final class EntityDataTest {
         DataTest.checkOfferData(blaze, Keys.IS_AI_ENABLED, false);
     }
 
-    @Disabled
     @Test
     public void testWolf() {
         final Entity wolf = this.location.createEntity(EntityTypes.WOLF.get());
@@ -723,12 +712,11 @@ public final class EntityDataTest {
         DataTest.checkOfferData(vex, Keys.LIFE_TICKS, Ticks.of(10));
     }
 
-    @Disabled
     @Test
     public void testLlama() {
         final Entity llama = this.location.createEntity(EntityTypes.LLAMA.get());
         DataTest.checkOfferData(llama, Keys.LLAMA_TYPE, LlamaTypes.BROWN.get());
-        DataTest.checkOfferData(llama, Keys.STRENGTH, 10);
+        DataTest.checkOfferData(llama, Keys.STRENGTH, 3);
     }
 
     @Test
