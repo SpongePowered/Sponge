@@ -79,6 +79,7 @@ public class IngredientUtil {
         return IngredientUtil.fromNative(ingredient);
     }
 
-
-
+    public static boolean isCustom(final @Nullable Ingredient ingredient) {
+        return ingredient instanceof SpongeIngredient;
+    }
 }
