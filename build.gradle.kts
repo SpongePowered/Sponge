@@ -8,6 +8,7 @@ plugins {
     `maven-publish`
     `java-library`
     eclipse
+    jacoco
     id("org.spongepowered.gradle.vanilla")
     alias(libs.plugins.shadow)
     alias(apiLibs.plugins.spongeGradle.convention) apply false // for version json generation
@@ -101,6 +102,17 @@ val main by sourceSets.named("main") {
     }
 }
 
+// Minecraft gametests shared by all platforms; each platform's gametest source set depends on this and provides the runner
+val gametest by sourceSets.registering {
+    spongeImpl.addDependencyToImplementation(applaunch.get(), this)
+    spongeImpl.addDependencyToImplementation(accessors.get(), this)
+    spongeImpl.addDependencyToImplementation(main, this)
+
+    configurations.named(implementationConfigurationName) {
+        extendsFrom(gameLayerConfig.get())
+    }
+}
+
 
 dependencies {
     val service = serviceLibrariesConfig.name
@@ -142,6 +154,11 @@ dependencies {
     testImplementation(apiLibs.mockito)
 
     testImplementation(libs.mixin)
+
+    // The JUnit engine that runs the gametests, and @Testable for IDE run icons; each platform's gameTest task supplies the runtime
+    val gametestCompileOnly = gametest.get().compileOnlyConfigurationName
+    gametestCompileOnly(platform(apiLibs.junit.bom))
+    gametestCompileOnly(apiLibs.junit.launcher)
 }
 
 minecraft {
@@ -405,6 +422,19 @@ tasks {
     check {
         dependsOn(gradle.includedBuild("SpongeAPI").task(":check"))
     }
+}
+
+// Coverage across whichever platforms' test and gameTest runs left data behind; it runs no tests itself
+val jacocoAggregateReport by tasks.registering(JacocoReport::class) {
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    description = "Combines the coverage of every platform's last test and gameTest runs"
+    val platformReports = provider { subprojects.mapNotNull { it.tasks.findByName("jacocoTestReport") as JacocoReport? } }
+    executionData.from(platformReports.map { reports -> reports.map { it.executionData } })
+    sourceDirectories.from(platformReports.map { reports -> reports.map { it.sourceDirectories } })
+    classDirectories.from(platformReports.map { reports -> reports.map { it.classDirectories } })
+    mustRunAfter(platformReports)
+    // JaCoCo only adds pages, so packages no longer reported would otherwise linger
+    doFirst { delete(reports.html.outputLocation) }
 }
 
 publishing {

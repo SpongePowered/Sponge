@@ -75,3 +75,27 @@ jobs:
         with:
           name: SpongeVanilla installer libraries
           path: "${{ github.workspace }}/vanilla/build/resources/installer/sponge-libraries.json"
+      - name: gametests with Gradle
+        if: "!startsWith(github.ref, 'refs/heads/update/') || matrix.project == 'vanilla'"
+        run: ./gradlew -Pprojects=${{ matrix.project }},testplugins :${{ matrix.gradleProject }}:gameTest --stacktrace
+        env:
+          CI_SYSTEM: Github Actions
+      - name: Archive gametest results
+        if: "failure() && (!startsWith(github.ref, 'refs/heads/update/') || matrix.project == 'vanilla')"
+        uses: "actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3" # v4.3.1
+        with:
+          name: ${{ matrix.gradleProject }} gametest results
+          path: |
+            ${{ github.workspace }}/${{ matrix.project }}/build/test-results/gameTest/
+            ${{ github.workspace }}/${{ matrix.project }}/build/gametest-run/logs/
+      # Unit tests and gametests together; Codecov merges the platforms' uploads per commit
+      - name: Upload coverage
+        if: "!cancelled() && (!startsWith(github.ref, 'refs/heads/update/') || matrix.project == 'vanilla')"
+        uses: "codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5" # v7.1.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ${{ github.workspace }}/${{ matrix.project }}/build/reports/jacoco/test/jacocoTestReport.xml
+          disable_search: true
+          flags: ${{ matrix.project }}
+          name: ${{ matrix.gradleProject }}
+          fail_ci_if_error: false

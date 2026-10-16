@@ -24,7 +24,12 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import com.mojang.serialization.DynamicOps;
+import net.kyori.adventure.text.Component;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PortalProcessor;
@@ -32,17 +37,20 @@ import net.minecraft.world.entity.player.Player;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.type.PushReaction;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.portal.Portal;
 import org.spongepowered.api.world.portal.PortalLogic;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.accessor.world.entity.PortalProcessorAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.entity.EntityMaxAirBridge;
 import org.spongepowered.common.bridge.world.entity.PortalProcessorBridge;
+import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.entity.SpongeEntityArchetype;
 import org.spongepowered.common.entity.SpongeEntitySnapshot;
@@ -51,6 +59,7 @@ import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public final class EntityData {
@@ -262,10 +271,32 @@ public final class EntityData {
         registrator.spongeDataStore(ResourceKey.sponge("max_air"), EntityMaxAirBridge.class, Keys.MAX_AIR);
         registrator.newDataStore(SpongeEntitySnapshot.class, SpongeEntityArchetype.class)
                 .dataStore(Keys.CUSTOM_NAME,
-                    (dv, v) -> dv.set(Constants.Entity.CUSTOM_NAME, GsonComponentSerializer.gson().serialize(v)),
-                    dv -> dv.getString(Constants.Entity.CUSTOM_NAME).map(GsonComponentSerializer.gson()::deserialize));
+                    (dv, v) -> EntityData.encodeCustomName(v).ifPresent(name -> dv.set(Constants.Entity.CUSTOM_NAME, name)),
+                    dv -> dv.get(Constants.Entity.CUSTOM_NAME).flatMap(EntityData::decodeCustomName));
 
         // @formatter:on
+    }
+
+    // Since 1.21.5 vanilla saves CustomName as a text component tag rather than a JSON string
+    private static Optional<Object> encodeCustomName(final Component name) {
+        final DynamicOps<Tag> ops = SpongeCommon.vanillaRegistryAccess().createSerializationContext(NbtOps.INSTANCE);
+        return ComponentSerialization.CODEC.encodeStart(ops, SpongeAdventure.asVanilla(name))
+            .resultOrPartial(SpongeCommon.logger()::error)
+            .flatMap(tag -> {
+                final CompoundTag wrapper = new CompoundTag();
+                wrapper.put(Constants.Entity.CUSTOM_NAME.asString('.'), tag);
+                return NBTTranslator.INSTANCE.translate(wrapper).get(Constants.Entity.CUSTOM_NAME);
+            });
+    }
+
+    private static Optional<Component> decodeCustomName(final Object name) {
+        final DataContainer wrapper = DataContainer.createNew();
+        wrapper.set(Constants.Entity.CUSTOM_NAME, name);
+        final Tag tag = NBTTranslator.INSTANCE.translate(wrapper).get(Constants.Entity.CUSTOM_NAME.asString('.'));
+        final DynamicOps<Tag> ops = SpongeCommon.vanillaRegistryAccess().createSerializationContext(NbtOps.INSTANCE);
+        return ComponentSerialization.CODEC.parse(ops, tag)
+            .resultOrPartial(SpongeCommon.logger()::error)
+            .map(SpongeAdventure::asAdventure);
     }
 
 }

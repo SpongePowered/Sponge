@@ -49,9 +49,8 @@ public abstract class WolfMixin extends AgableMobMixin implements AggressiveEnti
 
     // @formatter:off
     @Shadow public abstract void shadow$startPersistentAngerTimer();
-    @Shadow protected abstract void shadow$tryToTame(final Player $$0);
+    @Shadow protected abstract void shadow$tryToTame(final Player player);
     // @formatter:on
-
 
     @Override
     public boolean bridge$isAngry() {
@@ -60,9 +59,12 @@ public abstract class WolfMixin extends AgableMobMixin implements AggressiveEnti
 
     @Override
     public void bridge$setAngry(boolean angry) {
-        this.shadow$startPersistentAngerTimer();
+        if (angry) {
+            this.shadow$startPersistentAngerTimer();
+        } else {
+            ((NeutralMob) this).setPersistentAngerEndTime(NeutralMob.NO_ANGER_END_TIME);
+        }
     }
-
 
     @Redirect(method = "mobInteract",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/wolf/Wolf;tryToTame(Lnet/minecraft/world/entity/player/Player;)V"))

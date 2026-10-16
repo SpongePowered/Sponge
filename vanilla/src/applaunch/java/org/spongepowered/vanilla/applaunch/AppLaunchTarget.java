@@ -30,7 +30,8 @@ public enum AppLaunchTarget {
     SERVER_DEVELOPMENT("sponge_server_dev"),
     SERVER_PRODUCTION("sponge_server_prod"),
     CLIENT_INTEGRATION_TEST("sponge_client_it"),
-    SERVER_INTEGRATION_TEST("sponge_server_it");
+    SERVER_INTEGRATION_TEST("sponge_server_it"),
+    SERVER_GAMETEST("sponge_server_gametest");
 
     private final String launchTarget;
 
@@ -50,6 +51,7 @@ public enum AppLaunchTarget {
             case "sponge_server_prod" -> AppLaunchTarget.SERVER_PRODUCTION;
             case "sponge_client_it" -> AppLaunchTarget.CLIENT_INTEGRATION_TEST;
             case "sponge_server_it" -> AppLaunchTarget.SERVER_INTEGRATION_TEST;
+            case "sponge_server_gametest" -> AppLaunchTarget.SERVER_GAMETEST;
             default -> null;
         };
     }

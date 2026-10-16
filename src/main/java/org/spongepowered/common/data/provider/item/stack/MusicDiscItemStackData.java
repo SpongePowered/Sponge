@@ -24,7 +24,10 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.JukeboxSong;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -39,8 +42,8 @@ public final class MusicDiscItemStackData {
         registrator
                 .asMutable(ItemStack.class)
                     .create(Keys.MUSIC_DISC)
-                        .get(h -> h.getItem() instanceof MusicDisc ? (MusicDisc) h.getItem() : null)
-                        .supports(h -> h.getItem() instanceof MusicDisc);
+                        .get(h -> (MusicDisc) (Object) JukeboxSong.fromStack(h).map(Holder::value).orElse(null))
+                        .supports(h -> h.has(DataComponents.JUKEBOX_PLAYABLE));
     }
     // @formatter:on
 }
