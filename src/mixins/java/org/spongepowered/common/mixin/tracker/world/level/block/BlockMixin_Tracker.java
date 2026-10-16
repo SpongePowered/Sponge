@@ -32,7 +32,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -60,33 +59,12 @@ public abstract class BlockMixin_Tracker implements TrackableBlockBridge, Regist
         return this.tracker$hasEntityInsideLogicOverridden;
     }
 
-    @WrapMethod(method = "dropResources(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)V")
-    private static void tracker$captureBlockProposedToBeSpawningDrops(final BlockState state, final Level worldIn,
-        final BlockPos pos, final Operation<Void> original) {
-        BlockMixin_Tracker.tracker$logBlockDrops(worldIn, pos, state, null, () -> original.call(state, worldIn, pos));
-    }
-
-    @WrapMethod(method = "dropResources(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/LevelAccessor;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/BlockEntity;)V")
-    private static void tracker$captureBlockProposedToBeSpawningDrops(
-        final BlockState state, final LevelAccessor worldIn,
-        final BlockPos pos, final @Nullable BlockEntity tileEntity, final Operation<Void> original
-    ) {
-        if (!(worldIn instanceof final Level level)) {
-            return; // In the name of my father, and his father before him, I cast you out!
-        }
-
-        BlockMixin_Tracker.tracker$logBlockDrops(level, pos, state, tileEntity, () -> original.call(state, worldIn, pos, tileEntity));
-    }
-
+    // The other dropResources overloads delegate here, wrapping them too would log the drops twice
     @WrapMethod(method = "dropResources(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/item/ItemStack;)V")
     private static void tracker$captureBlockProposedToBeSpawningDrops(final BlockState state, final Level worldIn,
         final BlockPos pos, final @Nullable BlockEntity tileEntity, final Entity entity, final ItemStack itemStack,
         final Operation<Void> original) {
-        BlockMixin_Tracker.tracker$logBlockDrops(worldIn, pos, state, tileEntity, () -> original.call(state, worldIn, pos, tileEntity, entity, itemStack));
-    }
-
-    private static void tracker$logBlockDrops(final Level worldIn, final BlockPos pos, final BlockState state,
-            final @Nullable BlockEntity tileEntity, final Runnable runnable) {
+        final Runnable runnable = () -> original.call(state, worldIn, pos, tileEntity, entity, itemStack);
         final PhaseTracker tracker = PhaseTracker.getWorldInstance(worldIn);
         if (tracker.onSidedThread()) {
             if (tracker.getPhaseContext().isRestoring()) {

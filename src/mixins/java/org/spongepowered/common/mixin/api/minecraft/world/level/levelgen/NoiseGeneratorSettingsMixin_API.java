@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen;
 
 import net.minecraft.core.Holder;
 import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.Aquifer;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.NoiseRouter;
@@ -56,7 +57,6 @@ public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorC
 
     // @formatter:off
     @Shadow @Final private NoiseSettings noiseSettings;
-    @Shadow @Final private net.minecraft.world.level.block.state.BlockState defaultBlock;
     @Shadow @Final private net.minecraft.world.level.block.state.BlockState defaultFluid;
     @Shadow @Final private NoiseRouter noiseRouter;
     @Shadow @Final private Holder<MaterialRule> materialRule;
@@ -82,9 +82,10 @@ public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorC
         return (List) this.spawnTarget;
     }
 
-    @Intrinsic
-    public BlockState noiseGeneratorConfig$defaultBlock() {
-        return (BlockState) this.defaultBlock;
+    @Override
+    public BlockState defaultBlock() {
+        // TODO 26.4 - vanilla removed NoiseGeneratorSettings#defaultBlock, the terrain block is now provided by the material rule
+        return (BlockState) Blocks.STONE.defaultBlockState();
     }
 
     @Intrinsic

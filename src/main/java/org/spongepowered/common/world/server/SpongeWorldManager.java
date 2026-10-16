@@ -57,7 +57,6 @@ import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.TicketStorage;
-import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -1044,11 +1043,10 @@ public class SpongeWorldManager implements WorldManager {
 
         levelData.setModdedInfo(this.server.getServerModName(), this.server.getModdedStatus().shouldReportAsModified());
         final var spongeData = ((PrimaryLevelDataBridge) levelData).bridge$spongeData();
-        final var seed = BiomeManager.obfuscateSeed(spongeData.worldGenOptions().seed());
         final Executor executor = ((MinecraftServerAccessor) this.server).accessor$executor();
 
         final ServerLevel world = new ServerLevel(this.server, executor, storageSource, levelData,
-            registryKey, resolvedStem, levelData.isDebugWorld(), seed, spawners, true);
+            registryKey, resolvedStem, levelData.isDebugWorld(), spawners, true);
         this.worlds.put(registryKey, world);
 
         // Persist the LevelStem (with resolved holder) in the server's WorldGenSettings so custom

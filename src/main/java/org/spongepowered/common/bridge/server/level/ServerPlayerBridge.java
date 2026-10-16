@@ -91,12 +91,11 @@ public interface ServerPlayerBridge extends ServerPlayerEntityHealthScaleBridge 
     default void bridge$sendDimensionData(final Connection manager, final DimensionType dimensionType, final ResourceKey<Level> key) {
     }
 
-    default void bridge$sendChangeDimension(final Holder<DimensionType> dimensionType, final ResourceKey<Level> key, final long hashedSeed,
+    default void bridge$sendChangeDimension(final Holder<DimensionType> dimensionType, final ResourceKey<Level> key,
             final GameType gameType, final GameType previousGameType, final boolean isDebug, final boolean isFlat, final byte dataToKeepMask) {
         ((ServerPlayer) this).connection.send(new ClientboundRespawnPacket(new CommonPlayerSpawnInfo(
             dimensionType,
             key,
-            hashedSeed,
             gameType,
             Optional.ofNullable(previousGameType),
             isDebug,

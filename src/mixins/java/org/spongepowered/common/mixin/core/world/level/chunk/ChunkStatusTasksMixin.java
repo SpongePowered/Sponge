@@ -32,6 +32,7 @@ import net.minecraft.util.StaticCache2D;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.chunk.status.ChunkStatusTasks;
 import net.minecraft.world.level.chunk.status.ChunkStep;
@@ -67,6 +68,7 @@ public abstract class ChunkStatusTasksMixin {
      * @author aromaa - December 18th, 2023 - Updated to 1.20.2
      * @author aromaa - May 14th, 2024 - Updated to 1.20.6
      * @author aromaa - June 1st, 2024 - Updated to 1.21
+     * @author gabizou - September 29th, 2026 - Updated to 26.4 (generateBiomes -> generateNoiseBiomes)
      * @reason Fixes a deadlock when the world is unloading/unloaded.
      * The Blender#of method calls to the IOWorker#isOldChunkAround which
      * submits a task to the main thread while blocking the current thread
@@ -82,11 +84,11 @@ public abstract class ChunkStatusTasksMixin {
      * See IOWorkerMixin#createOldDataForRegion and GenerationChunkHolderMixin#impl$guardForUnloadedChunkOnGenerate
      */
     @Overwrite
-    static CompletableFuture<ChunkAccess> generateBiomes(final WorldGenContext context, final ChunkStep step, final StaticCache2D<GenerationChunkHolder> cache, final ChunkAccess chunkAccess) {
+    static CompletableFuture<ChunkAccess> generateNoiseBiomes(final WorldGenContext context, final ChunkStep step, final StaticCache2D<GenerationChunkHolder> cache, final ChunkAccess chunkAccess) {
         ServerLevel level = context.level();
         WorldGenRegion region = new WorldGenRegion(level, cache, step, chunkAccess);
         try { //Sponge: Add try
-            return context.generator().createBiomes(level.getChunkSource().randomState(), Blender.of(region), level.structureManager().forWorldGenRegion(region), chunkAccess);
+            return context.generator().createNoiseBiomes(level.getChunkSource().randomState(), Blender.of(region), (ProtoChunk) chunkAccess, level.palettedContainerFactory());
         } catch (final Exception e) { //Sponge start: Add catch
             if (e.getCause() != SpongeUnloadedChunkException.INSTANCE) {
                 throw e;

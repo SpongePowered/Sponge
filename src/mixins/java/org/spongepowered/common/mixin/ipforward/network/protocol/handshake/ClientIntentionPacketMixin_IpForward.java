@@ -24,23 +24,22 @@
  */
 package org.spongepowered.common.mixin.ipforward.network.protocol.handshake;
 
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.common.launch.config.common.IpForwardingCategory;
 import org.spongepowered.common.launch.config.core.SpongeConfigs;
 
 @Mixin(ClientIntentionPacket.class)
 public abstract class ClientIntentionPacketMixin_IpForward {
 
-    @Redirect(method = "<init>(Lnet/minecraft/network/FriendlyByteBuf;)V",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/network/FriendlyByteBuf;readUtf(I)Ljava/lang/String;"))
-    private static String bungee$patchReadStringForPortForwarding(final FriendlyByteBuf buf, final int value) {
+    @ModifyArg(method = "<clinit>",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/network/codec/ByteBufCodecs;stringUtf8(I)Lnet/minecraft/network/codec/StreamCodec;"))
+    private static int bungee$patchHostNameLengthForPortForwarding(final int maxLength) {
         if (SpongeConfigs.getCommon().get().ipForwarding.mode != IpForwardingCategory.Mode.LEGACY) {
-            return buf.readUtf(255);
+            return maxLength;
         }
-        return buf.readUtf(Short.MAX_VALUE);
+        return Short.MAX_VALUE;
     }
 }

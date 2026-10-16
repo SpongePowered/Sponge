@@ -29,6 +29,6 @@ import org.spongepowered.api.world.generation.config.SurfaceRule;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(VerticalAnchor.class)
-public interface VerticalAnchorMixin_API extends SurfaceRule.VerticalAnchor {
+public abstract class VerticalAnchorMixin_API implements SurfaceRule.VerticalAnchor {
 
 }

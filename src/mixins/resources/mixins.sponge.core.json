@@ -261,7 +261,6 @@
     "world.level.block.entity.SignBlockEntityMixin",
     "world.level.block.entity.SkullBlockEntityMixin",
     "world.level.block.piston.PistonMovingBlockEntityMixin",
-    "world.level.block.state.BlockBehaviour_PropertiesMixin",
     "world.level.block.state.BlockStateMixin",
     "world.level.border.WorldBorderMixin",
     "world.level.chunk.ChunkGeneratorMixin",

@@ -27,7 +27,6 @@ package org.spongepowered.common.world.volume;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.Registries;
@@ -177,17 +176,15 @@ public final class VolumeStreamUtils {
         final org.spongepowered.api.world.biome.Biome biome, final Function<Integer, @Nullable LevelChunkSection> accessor,
         final Runnable finalizer
     ) {
-        // See ChunkAccess#getNoiseBiome
-        final int quartYMin = QuartPos.fromBlock(minY);
-        final int quartYMax = quartYMin + QuartPos.fromBlock(height) - 1;
-        final int quartY = Mth.clamp(QuartPos.fromBlock(y), quartYMin, quartYMax);
-        final @Nullable LevelChunkSection section = accessor.apply(QuartPos.toBlock(quartY));
+        // See ChunkAccess#getBiome
+        final int clampedY = Mth.clamp(y, minY, minY + height - 1);
+        final @Nullable LevelChunkSection section = accessor.apply(clampedY);
         if (section == null) {
             return false;
         }
-        final int maskedX = QuartPos.quartLocal(QuartPos.fromBlock(x));
-        final int maskedY = QuartPos.quartLocal(quartY);
-        final int maskedZ = QuartPos.quartLocal(QuartPos.fromBlock(z));
+        final int maskedX = SectionPos.sectionRelative(x);
+        final int maskedY = SectionPos.sectionRelative(clampedY);
+        final int maskedZ = SectionPos.sectionRelative(z);
         final Holder<Biome> biomeHolder = SpongeCommon.vanillaRegistry(Registries.BIOME).wrapAsHolder((Biome) (Object) biome);
         final var old = ((PalettedContainer<Holder<Biome>>) section.getBiomes()).getAndSet(maskedX, maskedY, maskedZ, biomeHolder);
         if (old.value() == (Object) biome) {
@@ -373,13 +370,13 @@ public final class VolumeStreamUtils {
         return ((chunk, chunkSection, pos, world) -> {
             if (chunk.getSection(chunk.getSectionIndex(pos.getY())) == null) {
                 if (chunk instanceof LevelChunk) {
-                    return ((LevelChunk) chunk).getLevel().getNoiseBiome(pos.getX(), pos.getY(), pos.getZ()).value();
+                    return ((LevelChunk) chunk).getLevel().getBiome(pos.getX(), pos.getY(), pos.getZ()).value();
                 } else {
                     // Failover to use the World
-                    return world.getUncachedNoiseBiome(pos.getX(), pos.getY(), pos.getZ()).value();
+                    return world.getUncachedBiome(pos.getX(), pos.getY(), pos.getZ()).value();
                 }
             }
-            return chunk.getNoiseBiome(pos.getX(), pos.getY(), pos.getZ()).value();
+            return chunk.getBiome(pos.getX(), pos.getY(), pos.getZ()).value();
         }
         );
     }

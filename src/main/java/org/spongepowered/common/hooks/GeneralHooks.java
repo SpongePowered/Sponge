@@ -41,6 +41,6 @@ public interface GeneralHooks {
     }
 
     default ServerStatus createServerStatus(ServerStatus originalStatus, Component description, Optional<ServerStatus.Players> players, Optional<ServerStatus.Version> version, Optional<ServerStatus.Favicon> favicon) {
-        return new ServerStatus(description, players, version, favicon, originalStatus.enforcesSecureChat());
+        return new ServerStatus(description, players, version, favicon, originalStatus.enforcesSecureChat(), originalStatus.contact());
     }
 }

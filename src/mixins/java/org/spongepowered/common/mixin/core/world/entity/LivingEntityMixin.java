@@ -90,7 +90,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Shadow protected int useItemRemaining;
     @Shadow protected boolean dead;
     @Shadow protected ItemStack useItem;
-    @Shadow @Nullable private DamageSource lastDamageSource;
+    @Shadow @Nullable protected DamageSource lastDamageSource;
     @Shadow private long lastDamageStamp;
 
     @Shadow public abstract AttributeInstance shadow$getAttribute(Holder<Attribute> attribute);

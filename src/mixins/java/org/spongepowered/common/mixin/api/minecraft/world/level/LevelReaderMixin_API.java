@@ -77,7 +77,7 @@ public interface LevelReaderMixin_API<R extends Region<R>> extends Region<R> {
     @Deprecated @Shadow boolean shadow$hasChunksAt(int p_217344_1_, int p_217344_2_, int p_217344_3_, int p_217344_4_, int p_217344_5_, int p_217344_6_);
     @Shadow net.minecraft.world.level.dimension.DimensionType shadow$dimensionType();
     @Shadow boolean shadow$containsAnyLiquid(net.minecraft.world.phys.AABB bb);
-    @Shadow Holder<net.minecraft.world.level.biome.Biome> shadow$getBiome(BlockPos p_226691_1_);
+    @Shadow Holder<net.minecraft.world.level.biome.Biome> shadow$getBiome(int x, int y, int z);
     @Shadow RegistryAccess shadow$registryAccess();
     // @formatter:on
 
@@ -187,7 +187,7 @@ public interface LevelReaderMixin_API<R extends Region<R>> extends Region<R> {
 
     @Override
     default Biome biome(final int x, final int y, final int z) {
-        return (Biome) (Object) this.shadow$getBiome(new BlockPos(x, y, z)).value();
+        return (Biome) (Object) this.shadow$getBiome(x, y, z).value();
     }
 
     @Override

@@ -175,7 +175,6 @@ public final class SpongeNoiseGeneratorConfigBuilder implements NoiseGeneratorCo
         final var mcRouter = (net.minecraft.world.level.levelgen.NoiseRouter) (Object) Objects.requireNonNull(this.router, "router");
         final NoiseGeneratorSettings settings = new NoiseGeneratorSettings(
             (NoiseSettings) (Object) this.noiseConfig,
-            (net.minecraft.world.level.block.state.BlockState) this.defaultBlock,
             (net.minecraft.world.level.block.state.BlockState) this.defaultFluid,
             mcRouter,
             this.materialRule != null ? this.materialRule

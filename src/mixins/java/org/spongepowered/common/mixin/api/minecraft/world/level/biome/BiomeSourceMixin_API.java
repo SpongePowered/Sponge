@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.biome;
 
-import net.minecraft.world.level.biome.BiomeResolver;
 import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.biome.NoiseBiomeResolver;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Set;
 
 @Mixin(BiomeSource.class)
-public abstract class BiomeSourceMixin_API implements org.spongepowered.api.world.biome.provider.BiomeProvider, BiomeResolver {
+public abstract class BiomeSourceMixin_API implements org.spongepowered.api.world.biome.provider.BiomeProvider, NoiseBiomeResolver {
 
     // @formatter:off
     @Shadow public abstract Set<net.minecraft.world.level.biome.Biome> shadow$possibleBiomes();

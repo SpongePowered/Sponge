@@ -36,7 +36,7 @@ import net.minecraft.world.level.chunk.PalettedContainerFactory;
 import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
-import net.minecraft.world.level.levelgen.BelowZeroRetrogen;
+import net.minecraft.world.level.levelgen.RetroGen;
 import net.minecraft.world.level.levelgen.blending.BlendingData;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockState;
@@ -72,11 +72,10 @@ import java.util.Objects;
 public abstract class ProtoChunkMixin_API extends ChunkAccess implements GenerationChunk, SpongeServerLocationBaseDataHolder {
 
     //@formatter:off
-    @Shadow @Nullable private BelowZeroRetrogen belowZeroRetrogen;
+    @Shadow @Nullable private RetroGen retroGen;
     @Shadow public abstract Map<BlockPos, net.minecraft.world.level.block.entity.BlockEntity> shadow$getBlockEntities();
     @Shadow public abstract void shadow$setBlockEntity(final net.minecraft.world.level.block.entity.BlockEntity param1);
     @Shadow public abstract void shadow$removeBlockEntity(final BlockPos param0);
-    @Shadow public abstract Holder<net.minecraft.world.level.biome.Biome> shadow$getNoiseBiome(int $$0, int $$1, int $$2);
     @Shadow public abstract ChunkStatus shadow$getPersistedStatus();
 
     //@formatter:on
@@ -145,7 +144,7 @@ public abstract class ProtoChunkMixin_API extends ChunkAccess implements Generat
 
     @Override
     public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
-        if (!this.shadow$getPersistedStatus().isOrAfter(ChunkStatus.BIOMES) && (this.belowZeroRetrogen == null || !this.belowZeroRetrogen.targetStatus().isOrAfter(ChunkStatus.BIOMES))) {
+        if (!this.shadow$getPersistedStatus().isOrAfter(ChunkStatus.BIOMES) && (this.retroGen == null || !this.retroGen.targetStatus().isOrAfter(ChunkStatus.BIOMES))) {
             throw new IllegalStateException("Asking for biomes before we have biomes");
         }
         return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, this.getMinY(), this.getHeight(),
@@ -181,7 +180,7 @@ public abstract class ProtoChunkMixin_API extends ChunkAccess implements Generat
         if (!this.contains(x, y, z)) {
             throw new PositionOutOfBoundsException(new Vector3i(x, y, z), Constants.World.BLOCK_MIN, Constants.World.BLOCK_MAX);
         }
-        return (Biome) (Object) this.shadow$getNoiseBiome(x, y, z).value();
+        return (Biome) (Object) this.getBiome(x, y, z).value();
     }
 
     @Override

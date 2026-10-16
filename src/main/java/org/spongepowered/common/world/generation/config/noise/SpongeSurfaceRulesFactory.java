@@ -149,14 +149,14 @@ public final class SpongeSurfaceRulesFactory implements SurfaceRule.Factory {
 
     @Override
     public SurfaceRule.Condition verticalGradient(final String randomSource, final int fromY, final int toY) {
-        final VerticalAnchor trueAtAndBelowAnchor = new VerticalAnchor.Absolute(fromY);
-        final VerticalAnchor falseAtAndAboveAnchor = new VerticalAnchor.Absolute(toY);
+        final VerticalAnchor trueAtAndBelowAnchor = VerticalAnchor.absolute(fromY);
+        final VerticalAnchor falseAtAndAboveAnchor = VerticalAnchor.absolute(toY);
         return (SurfaceRule.Condition) MaterialRules.verticalGradient(randomSource, trueAtAndBelowAnchor, falseAtAndAboveAnchor);
     }
 
     @Override
     public SurfaceRule.Condition verticalGradient(final String randomSource, final SurfaceRule.VerticalAnchor trueAtAndBelow, final SurfaceRule.VerticalAnchor falseAtAndAbove) {
-        return (SurfaceRule.Condition) MaterialRules.verticalGradient(randomSource, (VerticalAnchor) trueAtAndBelow, (VerticalAnchor) falseAtAndAbove);
+        return (SurfaceRule.Condition) MaterialRules.verticalGradient(randomSource, (VerticalAnchor) (Object) trueAtAndBelow, (VerticalAnchor) (Object) falseAtAndAbove);
     }
 
     @Override
@@ -206,12 +206,12 @@ public final class SpongeSurfaceRulesFactory implements SurfaceRule.Factory {
 
     @Override
     public SurfaceRule.Condition blockAbove(final SurfaceRule.VerticalAnchor anchor, final int depthMultiplier) {
-        return (SurfaceRule.Condition) MaterialRules.yBlockCheck((VerticalAnchor) anchor, depthMultiplier);
+        return (SurfaceRule.Condition) MaterialRules.yBlockCheck((VerticalAnchor) (Object) anchor, depthMultiplier);
     }
 
     @Override
     public SurfaceRule.Condition surfaceAbove(final SurfaceRule.VerticalAnchor anchor, final int depthMultiplier) {
-        return (SurfaceRule.Condition) MaterialRules.yStartCheck((VerticalAnchor) anchor, depthMultiplier);
+        return (SurfaceRule.Condition) MaterialRules.yStartCheck((VerticalAnchor) (Object) anchor, depthMultiplier);
     }
 
     @Override
@@ -224,26 +224,26 @@ public final class SpongeSurfaceRulesFactory implements SurfaceRule.Factory {
 
     @Override
     public SurfaceRule.VerticalAnchor absolute(final int y) {
-        return (SurfaceRule.VerticalAnchor) net.minecraft.world.level.levelgen.VerticalAnchor.absolute(y);
+        return (SurfaceRule.VerticalAnchor) (Object) net.minecraft.world.level.levelgen.VerticalAnchor.absolute(y);
     }
 
     @Override
     public SurfaceRule.VerticalAnchor belowTop(final int blocks) {
-        return (SurfaceRule.VerticalAnchor) net.minecraft.world.level.levelgen.VerticalAnchor.belowTop(blocks);
+        return (SurfaceRule.VerticalAnchor) (Object) net.minecraft.world.level.levelgen.VerticalAnchor.belowTop(blocks);
     }
 
     @Override
     public SurfaceRule.VerticalAnchor top() {
-        return (SurfaceRule.VerticalAnchor) net.minecraft.world.level.levelgen.VerticalAnchor.top();
+        return (SurfaceRule.VerticalAnchor) (Object) net.minecraft.world.level.levelgen.VerticalAnchor.top();
     }
 
     @Override
     public SurfaceRule.VerticalAnchor aboveBottom(final int blocks) {
-        return (SurfaceRule.VerticalAnchor) net.minecraft.world.level.levelgen.VerticalAnchor.aboveBottom(blocks);
+        return (SurfaceRule.VerticalAnchor) (Object) net.minecraft.world.level.levelgen.VerticalAnchor.aboveBottom(blocks);
     }
 
     @Override
     public SurfaceRule.VerticalAnchor bottom() {
-        return (SurfaceRule.VerticalAnchor) net.minecraft.world.level.levelgen.VerticalAnchor.bottom();
+        return (SurfaceRule.VerticalAnchor) (Object) net.minecraft.world.level.levelgen.VerticalAnchor.bottom();
     }
 }

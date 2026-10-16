@@ -63,7 +63,7 @@ public abstract class GenerationChunkHolderMixin {
     // @formatter:on
 
     /**
-     * See IOWorkerMixin#createOldDataForRegion and ChunkStatusTasksMixin#generateBiomes
+     * See IOWorkerMixin#createOldDataForRegion and ChunkStatusTasksMixin#generateNoiseBiomes
      */
     @Inject(method = "lambda$applyStep$0", at = @At("HEAD"), cancellable = true)
     private void impl$guardForUnloadedChunkOnGenerate(final ChunkStep $$0x, final ChunkAccess $$1x, final Throwable $$2x, final CallbackInfoReturnable<ChunkResult<ChunkAccess>> cir) {

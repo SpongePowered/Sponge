@@ -44,7 +44,7 @@ public abstract class ClientLevelMixin extends LevelMixin {
     private void impl$onInit(
         final ClientPacketListener listener, final ClientLevel.ClientLevelData data, final ResourceKey<Level> key,
         final Holder<DimensionType> holder, final int storageRange, final int serverSimulationDistance, final LevelExtractor levelExtractor, final boolean isDebug,
-        final long biomeZoomSeed, final int seaLevel, final CallbackInfo ci) {
+        final int seaLevel, final CallbackInfo ci) {
         this.bridge$adjustDimensionLogic(holder.value());
     }
 
