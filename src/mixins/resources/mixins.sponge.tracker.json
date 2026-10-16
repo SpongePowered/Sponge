@@ -48,6 +48,7 @@
         "world.level.chunk.LevelChunkMixin_Tracker",
         "world.level.chunk.storage.SerializableChunkDataMixin_Tracker",
         "world.level.dimension.end.EndDragonFightMixin_Tracker",
+        "world.level.redstone.CollectingNeighborUpdater_MultiNeighborUpdateMixin_Tracker",
         "world.level.redstone.NeighborUpdaterMixin_Tracker",
         "world.ticks.LevelTicksMixin_Tracker"
     ],

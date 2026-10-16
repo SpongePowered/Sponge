@@ -38,6 +38,7 @@ import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.BlockItemStateProperties;
@@ -123,7 +124,10 @@ public final class ItemStackData {
                             return ResolvableInt.getFromItem(h, DataComponents.COOKING_FUEL, CookingFuel::burnTime, context, 0);
                         })
                     .create(Keys.CONTAINER_ITEM)
-                        .get(h -> (ItemType) h.getItem().getCraftingRemainder().item())
+                        .get(h -> {
+                            final ItemStackTemplate remainder = h.getItem().getCraftingRemainder();
+                            return remainder == null ? null : (ItemType) remainder.item().value();
+                        })
                     .create(Keys.DISPLAY_NAME)
                         .get(h -> SpongeAdventure.asAdventure(h.getDisplayName()))
                     .create(Keys.CUSTOM_MODEL_DATA_FLOATS)

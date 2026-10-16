@@ -50,5 +50,7 @@ public class SpongeImplementationPlugin implements Plugin<Project> {
         });
 
         IdeaIntegration.addSynchronizationTask(target, () -> intellijRuns.isEmpty() ? Optional.empty() : Optional.of(genIntelliJRuns));
+
+        GameTests.markTestSources(target);
     }
 }
