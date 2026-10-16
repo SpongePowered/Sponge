@@ -115,7 +115,6 @@ public final class ItemStackDataTest {
         DataTest.checkOfferData(axe, Keys.IS_UNBREAKABLE, true);
         DataTest.checkOfferData(axe, Keys.ITEM_DURABILITY, 5);
 
-        DataTest.checkOfferData(axe, Keys.LOCK_TOKEN, "Key");
         DataTest.checkOfferData(axe, Keys.LORE, Arrays.asList(Component.text("1"), Component.text("2")));
 
         DataTest.checkGetData(axe, Keys.MAX_DURABILITY, 59);

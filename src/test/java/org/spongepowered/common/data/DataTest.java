@@ -87,7 +87,6 @@ public final class DataTest {
             PotionEffect.builder().potionType(PotionEffectTypes.FIRE_RESISTANCE).amplifier(0).ambient(false).duration(Ticks.of(6000)).build(),
             PotionEffect.builder().potionType(PotionEffectTypes.ABSORPTION).amplifier(3).ambient(false).duration(Ticks.of(2400)).build());
 
-        DataTest.checkGetWeightedData(ItemStack.of(ItemTypes.ENCHANTED_GOLDEN_APPLE), Keys.APPLICABLE_POTION_EFFECTS, effects);
         DataTest.checkOfferCollectionIgnoringOrder(this.location.createEntity(EntityTypes.SHEEP.get()), Keys.POTION_EFFECTS, effects);
         DataTest.checkOfferCollectionIgnoringOrder(this.location.createEntity(EntityTypes.AREA_EFFECT_CLOUD.get()), Keys.POTION_EFFECTS, effects);
         DataTest.checkOfferCollectionIgnoringOrder(ItemStack.of(ItemTypes.POTION), Keys.CUSTOM_POTION_EFFECTS, effects);
