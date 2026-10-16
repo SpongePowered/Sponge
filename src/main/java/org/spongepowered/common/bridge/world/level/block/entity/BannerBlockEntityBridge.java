@@ -25,7 +25,6 @@
 package org.spongepowered.common.bridge.world.level.block.entity;
 
 import org.spongepowered.api.data.meta.BannerPatternLayer;
-import org.spongepowered.api.data.type.DyeColor;
 
 import java.util.List;
 
@@ -35,7 +34,4 @@ public interface BannerBlockEntityBridge {
 
     void bridge$setLayers(List<BannerPatternLayer> layers);
 
-    DyeColor bridge$getBaseColor();
-
-    void bridge$setBaseColor(DyeColor baseColor);
 }
