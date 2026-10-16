@@ -1,0 +1,14 @@
+# Coverage is reported but doesn't gate pull requests yet
+coverage:
+  status:
+    project:
+      default:
+        informational: true
+    patch:
+      default:
+        informational: true
+
+# update/ branches only build Vanilla, so keep the other platforms' last coverage
+flag_management:
+  default_rules:
+    carryforward: true

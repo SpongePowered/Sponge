@@ -26,51 +26,18 @@ package org.spongepowered.common.mixin.core.world.level.block.entity;
 
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BannerBlockEntity;
-import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.common.bridge.CustomNameableBridge;
 import org.spongepowered.common.bridge.world.level.block.entity.BannerBlockEntityBridge;
-
-import java.util.Objects;
 
 import javax.annotation.Nullable;
 
 @Mixin(BannerBlockEntity.class)
 public abstract class BannerBlockEntityMixin extends BlockEntityMixin implements BannerBlockEntityBridge, CustomNameableBridge {
 
-    @Shadow @Final @org.spongepowered.asm.mixin.Mutable private net.minecraft.world.item.DyeColor baseColor;
     @Shadow @Nullable private Component name;
-
-    @Unique
-    private void impl$markDirtyAndUpdate() {
-        this.shadow$setChanged();
-        if (this.level != null && !this.level.isClientSide()) {
-            ((ServerLevel) this.level).getChunkSource().blockChanged(this.shadow$getBlockPos());
-        }
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @Override
-    public DyeColor bridge$getBaseColor() {
-        return (DyeColor) (Object) this.baseColor;
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @Override
-    public void bridge$setBaseColor(final DyeColor baseColor) {
-        Objects.requireNonNull(baseColor, "Null DyeColor!");
-        try {
-            this.baseColor = (net.minecraft.world.item.DyeColor) (Object) baseColor;
-        } catch (final Exception e) {
-            this.baseColor = net.minecraft.world.item.DyeColor.BLACK;
-        }
-        this.impl$markDirtyAndUpdate();
-    }
 
     @Override
     public void bridge$setCustomDisplayName(final Component customName) {

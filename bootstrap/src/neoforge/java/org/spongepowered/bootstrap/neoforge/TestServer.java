@@ -39,7 +39,9 @@ public class TestServer extends Entrypoint {
         // Do not close the loader until tests are done
         final StartupResult startup = Entrypoint.startup(args, true, Dist.DEDICATED_SERVER, true);
 
-        final MethodHandle main = Entrypoint.createMainMethodCallable(startup, "net.minecraft.server.Main");
+        // The gameTest suite starts net.minecraft.gametest.Main instead
+        final String mainClass = System.getProperty("sponge.test.main", "net.minecraft.server.Main");
+        final MethodHandle main = Entrypoint.createMainMethodCallable(startup, mainClass);
         try {
             main.invokeExact(startup.loader().getProgramArgs().getArguments());
         } catch (Throwable e) {

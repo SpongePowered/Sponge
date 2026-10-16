@@ -33,7 +33,7 @@ import net.minecraft.world.level.block.entity.BannerPatternLayers;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.meta.BannerPatternLayer;
-import org.spongepowered.common.bridge.world.level.block.entity.BannerBlockEntityBridge;
+import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 import java.util.List;
@@ -59,7 +59,7 @@ public final class BannerData {
                         })
             .asImmutable(BannerBlockEntity.class)
                     .create(Keys.DYE_COLOR)
-                        .get(h -> ((BannerBlockEntityBridge) h).bridge$getBaseColor())
+                        .get(h -> (DyeColor) (Object) h.getBaseColor())
         ;
     }
     // @formatter:on
