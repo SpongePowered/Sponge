@@ -39,7 +39,10 @@ public final class AnimalData {
         registrator
                 .asMutable(AnimalAccessor.class)
                     .create(Keys.BREEDER)
-                        .get(a -> a.accessor$loveCause().getUUID())
+                        .get(a -> {
+                            final var cause = a.accessor$loveCause();
+                            return cause == null ? null : cause.getUUID();
+                        })
                         .set(((animalAccessor, uuid) -> animalAccessor.accessor$loveCause(EntityReference.of(uuid))));
     }
     // @formatter:on
