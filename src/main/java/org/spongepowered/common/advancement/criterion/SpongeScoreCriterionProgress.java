@@ -25,7 +25,6 @@
 package org.spongepowered.common.advancement.criterion;
 
 
-import net.minecraft.util.Mth;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementProgress;
@@ -139,12 +138,12 @@ public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, Imp
 
     @Override
     public Optional<Instant> add(final int score) {
-        return this.set(Mth.clamp(this.score() + score, 0, this.goal()));
+        return this.set(Math.clamp(this.score() + score, 0, this.goal()));
     }
 
     @Override
     public Optional<Instant> remove(final int score) {
-        return this.set(Mth.clamp(this.score() - score, 0, this.goal()));
+        return this.set(Math.clamp(this.score() - score, 0, this.goal()));
     }
 
     @Override

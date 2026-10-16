@@ -30,7 +30,6 @@ import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -143,12 +142,12 @@ public abstract class AbstractFurnaceBlockEntityMixin_Neo extends BaseContainerB
     }
 
     // Tick down
-    @Redirect(method = "serverTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;clamp(III)I"))
+    @Redirect(method = "serverTick", at = @At(value = "INVOKE", target = "Ljava/lang/Math;clamp(JII)I"))
     private static int neo$resetCookTimeIfCancelled(
-        final int newCookTime, final int zero, final int totalCookTime,
+        final long newCookTime, final int zero, final int totalCookTime,
         final ServerLevel level, final BlockPos entityPos, final BlockState state,
         final AbstractFurnaceBlockEntity entityIn) {
-        final int clampedCookTime = Mth.clamp(newCookTime, zero, totalCookTime);
+        final int clampedCookTime = Math.clamp(newCookTime, zero, totalCookTime);
         final var entity = (AbstractFurnaceBlockEntityMixin_Neo) (Object) entityIn;
         if (PhaseTracker.getInstance().getPhaseContext() != switched.get()) {
             // we're in an invariant state

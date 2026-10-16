@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.api.minecraft.world.item;
 
 
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemCooldowns;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.ResourceKey;
@@ -81,7 +80,7 @@ public abstract class ItemCooldownsMixin_API implements org.spongepowered.api.en
         if (cooldown != null) {
             float $$4 = (float)(cooldown.accessor$endTime() - cooldown.accessor$startTime());
             float $$5 = (float)cooldown.accessor$endTime() - ((float)this.tickCount);
-            return Mth.clamp($$5 / $$4, 0.0F, 1.0F);
+            return Math.clamp($$5 / $$4, 0.0F, 1.0F);
         }
         return 0;
     }

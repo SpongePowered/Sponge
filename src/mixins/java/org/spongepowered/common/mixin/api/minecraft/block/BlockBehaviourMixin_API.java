@@ -24,15 +24,20 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.block;
 
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.EntityBlock;
-import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.sounds.BlockSoundSet;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.spongepowered.api.block.BlockSoundGroup;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeCommon;
+
+import java.util.Optional;
 
 @Mixin(value = BlockBehaviour.class)
 public abstract class BlockBehaviourMixin_API implements BlockType {
@@ -40,7 +45,7 @@ public abstract class BlockBehaviourMixin_API implements BlockType {
     // @formatter:off
     @Shadow @Final @org.spongepowered.asm.mixin.Mutable protected boolean isRandomlyTicking;
     @Shadow public abstract Item shadow$asItem();
-    @Shadow @Final protected SoundType soundType;
+    @Shadow @Final protected Optional<ResourceKey<BlockSoundSet>> blockSoundSet;
     @Shadow public abstract String shadow$getDescriptionId();
 
     // @formatter:on
@@ -57,7 +62,9 @@ public abstract class BlockBehaviourMixin_API implements BlockType {
 
     @Override
     public BlockSoundGroup soundGroup() {
-        return (BlockSoundGroup) this.soundType;
+        return (BlockSoundGroup) (Object) this.blockSoundSet
+            .flatMap(SpongeCommon.<BlockSoundSet>vanillaRegistry(Registries.BLOCK_SOUND_SET)::getOptional)
+            .orElse(BlockSoundSet.EMPTY);
     }
 
     @Override

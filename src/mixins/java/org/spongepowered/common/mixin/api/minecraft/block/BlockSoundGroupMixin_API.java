@@ -24,25 +24,34 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.block;
 
+import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.level.block.SoundType;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.level.block.sounds.BlockSoundSet;
 import org.spongepowered.api.block.BlockSoundGroup;
+import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(SoundType.class)
+import java.util.Optional;
+
+@Mixin(BlockSoundSet.class)
 public abstract class BlockSoundGroupMixin_API implements BlockSoundGroup {
 
     // @formatter:off
-    @Shadow @Final public float volume;
-    @Shadow @Final public float pitch;
-    @Shadow @Final private SoundEvent breakSound;
-    @Shadow @Final private SoundEvent stepSound;
-    @Shadow @Final private SoundEvent placeSound;
-    @Shadow @Final private SoundEvent hitSound;
-    @Shadow @Final private SoundEvent fallSound;
+    @Shadow @Final private float volume;
+    @Shadow @Final private float pitch;
+    @Shadow @Final private Optional<Holder<SoundEvent>> breakSound;
+    @Shadow @Final private Optional<Holder<SoundEvent>> stepSound;
+    @Shadow @Final private Optional<Holder<SoundEvent>> placeSound;
+    @Shadow @Final private Optional<Holder<SoundEvent>> hitSound;
+    @Shadow @Final private Optional<Holder<SoundEvent>> fallSound;
     // @formatter:on
+
+    private static SoundType api$sound(final Optional<Holder<SoundEvent>> sound) {
+        return (SoundType) (Object) sound.orElse(SoundEvents.EMPTY).value();
+    }
 
     @Override
     public double volume() {
@@ -55,27 +64,27 @@ public abstract class BlockSoundGroupMixin_API implements BlockSoundGroup {
     }
 
     @Override
-    public org.spongepowered.api.effect.sound.SoundType breakSound() {
-        return (org.spongepowered.api.effect.sound.SoundType) (Object) this.breakSound;
+    public SoundType breakSound() {
+        return BlockSoundGroupMixin_API.api$sound(this.breakSound);
     }
 
     @Override
-    public org.spongepowered.api.effect.sound.SoundType stepSound() {
-        return (org.spongepowered.api.effect.sound.SoundType) (Object) this.stepSound;
+    public SoundType stepSound() {
+        return BlockSoundGroupMixin_API.api$sound(this.stepSound);
     }
 
     @Override
-    public org.spongepowered.api.effect.sound.SoundType placeSound() {
-        return (org.spongepowered.api.effect.sound.SoundType) (Object) this.placeSound;
+    public SoundType placeSound() {
+        return BlockSoundGroupMixin_API.api$sound(this.placeSound);
     }
 
     @Override
-    public org.spongepowered.api.effect.sound.SoundType hitSound() {
-        return (org.spongepowered.api.effect.sound.SoundType) (Object) this.hitSound;
+    public SoundType hitSound() {
+        return BlockSoundGroupMixin_API.api$sound(this.hitSound);
     }
 
     @Override
-    public org.spongepowered.api.effect.sound.SoundType fallSound() {
-        return (org.spongepowered.api.effect.sound.SoundType) (Object) this.fallSound;
+    public SoundType fallSound() {
+        return BlockSoundGroupMixin_API.api$sound(this.fallSound);
     }
 }

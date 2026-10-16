@@ -241,7 +241,7 @@
     "world.level.block.MagmaBlockMixin",
     "world.level.block.NetherPortalBlockMixin",
     "world.level.block.NoteBlockMixin",
-    "world.level.block.PointedDripstoneBlockMixin",
+    "world.level.block.SpeleothemBlockMixin",
     "world.level.block.SweetBerryBushBlockMixin",
     "world.level.block.TntBlockMixin",
     "world.level.block.entity.AbstractFurnaceBlockEntityMixin",

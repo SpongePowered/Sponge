@@ -136,7 +136,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
             ),
             to = @At(
                 value = "INVOKE",
-                target = "Lnet/minecraft/util/Mth;clamp(III)I"
+                target = "Ljava/lang/Math;clamp(JII)I"
             )
         )
     )

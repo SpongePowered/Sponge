@@ -29,7 +29,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.PointedDripstoneBlock;
+import net.minecraft.world.level.block.SpeleothemBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,10 +38,10 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageSources;
 import org.spongepowered.common.mixin.core.block.BlockMixin;
 
-@Mixin(PointedDripstoneBlock.class)
-public abstract class PointedDripstoneBlockMixin extends BlockMixin {
+@Mixin(SpeleothemBlock.class)
+public abstract class SpeleothemBlockMixin extends BlockMixin {
 
-    @Redirect(method = "fallOn",
+    @Redirect(method = "fallOnDamage",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/DamageSources;stalagmite()Lnet/minecraft/world/damagesource/DamageSource;"))
     private DamageSource impl$spongeRedirectForFireDamage(
         final DamageSources instance, final Level level, final BlockState state,

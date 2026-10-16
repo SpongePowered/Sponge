@@ -24,10 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.projectile.throwableitemprojectile;
 
+import net.minecraft.world.phys.EntityHitResult;
 import org.spongepowered.api.entity.projectile.Snowball;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.mixin.core.world.entity.projectile.ThrowableProjectileMixin;
 
 @Mixin(net.minecraft.world.entity.projectile.throwableitemprojectile.Snowball.class)
@@ -37,10 +39,11 @@ public abstract class SnowballMixin extends ThrowableProjectileMixin implements 
     private double impl$damageAmount = 0;
     private boolean impl$damageSet = false;
 
-    @ModifyArg(method = "onHitEntity", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)V"))
-    private float impl$onAttackEntityFromUseCustomDamage(float damage) {
-        return this.impl$damageSet ? (float) this.impl$damageAmount : damage;
+    @Inject(method = "getDamage", at = @At("RETURN"), cancellable = true)
+    private void impl$onGetDamageUseCustomDamage(final EntityHitResult hitResult, final CallbackInfoReturnable<Integer> cir) {
+        if (this.impl$damageSet) {
+            cir.setReturnValue((int) this.impl$damageAmount);
+        }
     }
 
 }

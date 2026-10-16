@@ -32,7 +32,6 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Mth;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -177,7 +176,7 @@ public final class VolumeStreamUtils {
         final Runnable finalizer
     ) {
         // See ChunkAccess#getBiome
-        final int clampedY = Mth.clamp(y, minY, minY + height - 1);
+        final int clampedY = Math.clamp(y, minY, minY + height - 1);
         final @Nullable LevelChunkSection section = accessor.apply(clampedY);
         if (section == null) {
             return false;

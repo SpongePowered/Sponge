@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.server.level;
 
 import net.minecraft.server.level.DistanceManager;
 import net.minecraft.server.level.TicketType;
-import net.minecraft.util.Mth;
 import net.minecraft.world.level.TicketStorage;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -98,7 +97,7 @@ public abstract class DistanceManagerMixin implements DistanceManagerBridge {
     public <S, T> Optional<Ticket<T>> bridge$registerTicket(
             final ServerWorld world, final org.spongepowered.api.world.server.TicketType<T> ticketType,
             final Vector3i pos, final T value, final int distanceLimit) {
-        final int distance = Mth.clamp(Constants.ChunkTicket.MAX_FULL_CHUNK_DISTANCE - distanceLimit, 0, Constants.ChunkTicket.MAX_FULL_CHUNK_TICKET_LEVEL);
+        final int distance = Math.clamp(Constants.ChunkTicket.MAX_FULL_CHUNK_DISTANCE - distanceLimit, 0, Constants.ChunkTicket.MAX_FULL_CHUNK_TICKET_LEVEL);
         final TicketType type = (TicketType) (Object) ticketType;
         final net.minecraft.server.level.Ticket ticketToRequest = new net.minecraft.server.level.Ticket(type, distance);
         this.ticketStorage.addTicket(VecHelper.toChunkPos(pos).pack(), ticketToRequest);

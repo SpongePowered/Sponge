@@ -43,6 +43,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureSpawnOverride;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataView;
@@ -80,7 +81,7 @@ public abstract class StructureMixin_API implements org.spongepowered.api.world.
         final ServerLevel level = (ServerLevel) world;
         final ServerChunkCache chunkSource = level.getChunkSource();
         final var key = level.registryAccess().lookupOrThrow(Registries.STRUCTURE).wrapAsHolder((Structure) (Object) this);
-        final StructureStart start = ((Structure) (Object) this).generate(
+        final @Nullable StructureStart start = ((Structure) (Object) this).generate(
             key,
             level.dimension(),
             level.registryAccess(),
@@ -91,11 +92,10 @@ public abstract class StructureMixin_API implements org.spongepowered.api.world.
             level.getStructureTemplateManager(),
             level.getSeed(),
             ChunkPos.containing(VecHelper.toBlockPos(pos)),
-            0,
             level,
             ignored -> true);
 
-        if (!start.isValid()) {
+        if (start == null) {
             return false;
         }
 
