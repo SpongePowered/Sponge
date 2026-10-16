@@ -104,7 +104,7 @@ public abstract class VanillaLaunch extends Launch {
     protected final void createPlatformPlugins() {
         this.pluginPlatform().getCandidates().values().stream().flatMap(Collection::stream)
             .filter(plugin -> PLATFORM_IDS.contains(plugin.metadata().id()))
-            .map(plugin -> new VanillaDummyPluginContainer(plugin, this.logger(), this))
-            .forEach(this.pluginManager()::addPlugin);
+            // With their resources, so their packs serve what they ship, like any other plugin's
+            .forEach(plugin -> this.pluginManager().addPlugin(new VanillaDummyPluginContainer(plugin, this.logger(), this), plugin.resource()));
     }
 }

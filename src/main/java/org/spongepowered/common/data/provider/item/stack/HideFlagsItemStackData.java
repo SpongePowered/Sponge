@@ -49,7 +49,7 @@ public final class HideFlagsItemStackData {
         registrator
                 .asMutable(ItemStack.class)
                     .create(Keys.HIDE_ATTRIBUTES)
-                        .get(h -> h.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY).showInTooltip())
+                        .get(h -> !h.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY).showInTooltip())
                         .set((h, v) -> h.update(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY, p -> new ItemAttributeModifiers(p.modifiers(), !v)))
                     .create(Keys.HIDE_CAN_DESTROY)
                         .get(h -> !h.get(DataComponents.CAN_BREAK).showInTooltip())
@@ -60,23 +60,23 @@ public final class HideFlagsItemStackData {
                         .set((h, v) -> h.set(DataComponents.CAN_PLACE_ON, HideFlagsItemStackData.newAdventureModePredicate(h, DataComponents.CAN_PLACE_ON, !v)))
                         .supports(h -> h.has(DataComponents.CAN_PLACE_ON))
                     .create(Keys.HIDE_ENCHANTMENTS)
-                        .get(h -> ((ItemEnchantmentsAccessor)h.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY)).accessor$showInTooltip())
+                        .get(h -> !((ItemEnchantmentsAccessor)h.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY)).accessor$showInTooltip())
                         .set((h, v) -> h.set(DataComponents.ENCHANTMENTS, HideFlagsItemStackData.newItemEnchantments(h, !v)))
                     .create(Keys.HIDE_STORED_ENCHANTMENTS)
-                        .get(h -> ((ItemEnchantmentsAccessor)h.getOrDefault(DataComponents.STORED_ENCHANTMENTS, ItemEnchantments.EMPTY)).accessor$showInTooltip())
+                        .get(h -> !((ItemEnchantmentsAccessor)h.getOrDefault(DataComponents.STORED_ENCHANTMENTS, ItemEnchantments.EMPTY)).accessor$showInTooltip())
                         .set((h, v) -> h.set(DataComponents.STORED_ENCHANTMENTS, HideFlagsItemStackData.newItemEnchantments(h, !v)))
                     .create(Keys.HIDE_MISCELLANEOUS)
-                        .get(h -> h.get(DataComponents.HIDE_ADDITIONAL_TOOLTIP) != Unit.INSTANCE)
+                        .get(h -> h.get(DataComponents.HIDE_ADDITIONAL_TOOLTIP) != null)
                         .set((h, v) -> h.set(DataComponents.HIDE_ADDITIONAL_TOOLTIP, v ? Unit.INSTANCE : null))
                     .create(Keys.HIDE_UNBREAKABLE)
                         .get(h -> h.has(DataComponents.UNBREAKABLE) && !h.get(DataComponents.UNBREAKABLE).showInTooltip())
                         .set((h, v) -> {
                             if (h.has(DataComponents.UNBREAKABLE)) {
-                                h.set(DataComponents.UNBREAKABLE, new Unbreakable(v));
+                                h.set(DataComponents.UNBREAKABLE, new Unbreakable(!v));
                             } // else TODO not supported?
                         })
                     .create(Keys.HIDE_TOOLTIP)
-                        .get(h -> h.get(DataComponents.HIDE_ADDITIONAL_TOOLTIP) != Unit.INSTANCE)
+                        .get(h -> h.get(DataComponents.HIDE_ADDITIONAL_TOOLTIP) != null)
                         .set((h, v) -> h.set(DataComponents.HIDE_ADDITIONAL_TOOLTIP, v ? Unit.INSTANCE : null))
         ;
 

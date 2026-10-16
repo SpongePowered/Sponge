@@ -54,7 +54,7 @@ public final class ServerLocationData {
                         .get(h -> {
                             final Level world = (Level) h.world();
                             final BlockPos pos = VecHelper.toBlockPos(h);
-                            final Biome biome = world.getBiome(pos).unwrap().right().get();
+                            final Biome biome = world.getBiome(pos).value();
                             return (double) biome.getBaseTemperature();
                         })
                     .create(Keys.BLOCK_LIGHT)
@@ -66,7 +66,7 @@ public final class ServerLocationData {
                         .get(h -> {
                             final Level world = (Level) h.world();
                             final BlockPos pos = VecHelper.toBlockPos(h);
-                            final Biome biome = world.getBiome(pos).unwrap().right().get();
+                            final Biome biome = world.getBiome(pos).value();
                             return (double) ((BiomeAccessor) (Object) biome).shadow$getTemperature(pos, world.getSeaLevel());
                         })
                     .create(Keys.SKY_LIGHT)

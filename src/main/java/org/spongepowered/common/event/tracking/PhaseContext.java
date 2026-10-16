@@ -24,7 +24,8 @@
  */
 package org.spongepowered.common.event.tracking;
 
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.redstone.NeighborUpdater;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -85,6 +86,33 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
     @Nullable Deque<CauseStackManager.StackFrame> usedFrame;
 
     private @Nullable Object source;
+    // The block whose neighbors vanilla is updating, which vanilla no longer passes down to each neighbor's update
+    private @Nullable BlockPos neighborUpdateSource;
+
+    /**
+     * Records the block whose neighbors are being updated, for the {@link NeighborUpdater} update that no longer
+     * receives it. Never set on the empty context, which every thread shares.
+     *
+     * @return The source this replaces, to restore once the update is done
+     */
+    public @Nullable BlockPos setNeighborUpdateSource(final @Nullable BlockPos source) {
+        final @Nullable BlockPos previous = this.neighborUpdateSource;
+        this.neighborUpdateSource = source;
+        return previous;
+    }
+
+    /**
+     * Takes the recorded source for the one update it was recorded for. A mod calling
+     * {@link NeighborUpdater#executeUpdate} directly while a block reacts to that update finds nothing, rather than
+     * the reacting update's source.
+     *
+     * @return The block notifying {@code target}, or {@code target} itself when the update didn't record one
+     */
+    public BlockPos takeNeighborUpdateSource(final BlockPos target) {
+        final @Nullable BlockPos source = this.neighborUpdateSource;
+        this.neighborUpdateSource = null;
+        return source == null ? target : source;
+    }
 
     public P source(final Object owner) {
         Preconditions.checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
@@ -341,6 +369,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
 
     protected void reset() {
         this.source = null;
+        this.neighborUpdateSource = null;
         this.stackTrace = null;
         this.creator = null;
         this.notifier = null;

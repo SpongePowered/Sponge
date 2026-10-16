@@ -26,18 +26,17 @@ package org.spongepowered.common.data;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.meta.BannerPatternLayer;
 import org.spongepowered.api.data.type.*;
+import org.spongepowered.api.data.value.CollectionValue;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.WeightedCollectionValue;
 import org.spongepowered.api.effect.potion.PotionEffect;
@@ -51,11 +50,14 @@ import org.spongepowered.api.world.DefaultWorldKeys;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.math.vector.Vector3d;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 public final class DataTest {
     private ServerLocation location;
@@ -72,13 +74,11 @@ public final class DataTest {
         DataTest.checkOfferData(this.location, Keys.NOTIFIER, playerId);
     }
 
-    @Disabled
     @Test
     public void testBiomeTemperature() {
         DataTest.checkGetData(this.location, Keys.BIOME_TEMPERATURE, this.location.biome().temperature());
     }
 
-    @Disabled
     @Test
     public void testPotionEffects() {
         final List<PotionEffect> effects = List.of(
@@ -88,13 +88,12 @@ public final class DataTest {
             PotionEffect.builder().potionType(PotionEffectTypes.ABSORPTION).amplifier(3).ambient(false).duration(Ticks.of(2400)).build());
 
         DataTest.checkGetWeightedData(ItemStack.of(ItemTypes.ENCHANTED_GOLDEN_APPLE), Keys.APPLICABLE_POTION_EFFECTS, effects);
-        DataTest.checkOfferData(this.location.createEntity(EntityTypes.SHEEP.get()), Keys.POTION_EFFECTS, effects);
-        DataTest.checkOfferData(this.location.createEntity(EntityTypes.AREA_EFFECT_CLOUD.get()), Keys.POTION_EFFECTS, effects);
-        DataTest.checkOfferData(ItemStack.of(ItemTypes.POTION), Keys.POTION_EFFECTS, effects);
-        DataTest.checkOfferData(ItemStack.of(ItemTypes.SPLASH_POTION), Keys.POTION_EFFECTS, effects);
+        DataTest.checkOfferCollectionIgnoringOrder(this.location.createEntity(EntityTypes.SHEEP.get()), Keys.POTION_EFFECTS, effects);
+        DataTest.checkOfferCollectionIgnoringOrder(this.location.createEntity(EntityTypes.AREA_EFFECT_CLOUD.get()), Keys.POTION_EFFECTS, effects);
+        DataTest.checkOfferCollectionIgnoringOrder(ItemStack.of(ItemTypes.POTION), Keys.CUSTOM_POTION_EFFECTS, effects);
+        DataTest.checkOfferCollectionIgnoringOrder(ItemStack.of(ItemTypes.SPLASH_POTION), Keys.CUSTOM_POTION_EFFECTS, effects);
     }
 
-    @Disabled
     @Test
     public void testBanner() {
         final List<BannerPatternLayer> pattern = Arrays.asList(BannerPatternLayer.of(BannerPatternShapes.BASE, DyeColors.BLACK), BannerPatternLayer.of(BannerPatternShapes.RHOMBUS, DyeColors.ORANGE));
@@ -116,9 +115,22 @@ public final class DataTest {
     }
 
     public static <T> void checkOfferData(final DataHolder.Mutable holder, final Key<? extends Value<T>> key, final T value) {
-        final DataTransactionResult result = holder.offer(key, value);
-        Assertions.assertTrue(result.isSuccessful(), () -> "Failed offer on " + DataTest.holderName(holder) + " for " + key.key().asString() + " with " + value + ".");
+        DataTest.checkOfferSuccessful(holder, key, value);
         DataTest.checkGetData(holder, key, value);
+    }
+
+    public static <E, C extends Collection<E>> void checkOfferCollection(final DataHolder.Mutable holder, final Key<? extends CollectionValue<E, C>> key, final C value) {
+        DataTest.checkOfferSuccessful(holder, key, value);
+        DataTest.checkGetCollection(holder, key, value);
+    }
+
+    public static <E, C extends Collection<E>> void checkOfferCollectionIgnoringOrder(final DataHolder.Mutable holder, final Key<? extends CollectionValue<E, C>> key, final C value) {
+        DataTest.checkOfferSuccessful(holder, key, value);
+        DataTest.checkGetCollectionIgnoringOrder(holder, key, value);
+    }
+
+    private static <T> void checkOfferSuccessful(final DataHolder.Mutable holder, final Key<? extends Value<T>> key, final T value) {
+        Assertions.assertTrue(holder.offer(key, value).isSuccessful(), () -> "Failed offer on " + DataTest.holderName(holder) + " for " + key.key().asString() + " with " + value + ".");
     }
 
     public static <T> void checkWithData(final DataHolder.Immutable<?> holder, final Key<? extends Value<T>> key, final T value) {
@@ -127,15 +139,36 @@ public final class DataTest {
     }
 
     public static <T> void checkGetWeightedData(final DataHolder holder, final Key<WeightedCollectionValue<T>> key, final List<T> expected) {
-        DataTest.assertDataEquals(expected, holder.get(key).map(table -> table.get(new Random(0))).orElse(null), holder, key);
+        DataTest.assertCollectionEquals(expected, holder.get(key).map(table -> table.get(new Random(0))).orElse(null), DataTest.checkMessage(holder, key));
     }
 
     public static <T> void checkGetData(final DataHolder holder, final Key<? extends Value<T>> key, final T expected) {
-        DataTest.assertDataEquals(expected, holder.get(key).orElse(null), holder, key);
+        Assertions.assertEquals(expected, holder.get(key).orElse(null), DataTest.checkMessage(holder, key));
     }
 
-    private static void assertDataEquals(final Object expected, final Object actual, final DataHolder holder, final Key<?> key) {
-        Assertions.assertEquals(expected, actual, () -> "Value differs on " + DataTest.holderName(holder) + " for " + key.key().asString() + ".");
+    public static <E, C extends Collection<E>> void checkGetCollection(final DataHolder holder, final Key<? extends CollectionValue<E, C>> key, final C expected) {
+        DataTest.assertCollectionEquals(expected, holder.get(key).orElse(null), DataTest.checkMessage(holder, key));
+    }
+
+    public static <E, C extends Collection<E>> void checkGetCollectionIgnoringOrder(final DataHolder holder, final Key<? extends CollectionValue<E, C>> key, final C expected) {
+        DataTest.assertCollectionEqualsIgnoringOrder(expected, holder.get(key).orElse(null), DataTest.checkMessage(holder, key));
+    }
+
+    private static void assertCollectionEquals(final Collection<?> expected, final Collection<?> actual, final Supplier<String> message) {
+        Assertions.assertArrayEquals(expected.toArray(), actual.toArray(), message);
+    }
+
+    private static <T> void assertCollectionEqualsIgnoringOrder(final Collection<T> expected, final Collection<T> actual, final Supplier<String> message) {
+        Assertions.assertEquals(expected.size(), actual.size(), () -> message + " Size differs.");
+        final List<T> expectedList = new ArrayList<>(expected);
+        final List<T> actualList = new ArrayList<>(actual);
+        expectedList.removeIf(actualList::remove);
+        Assertions.assertTrue(expectedList.isEmpty(), () -> message + " Expected elements not found: " + expectedList);
+        Assertions.assertTrue(actualList.isEmpty(), () -> message + " Found unexpected elements: " + actualList);
+    }
+
+    private static Supplier<String> checkMessage(final DataHolder holder, final Key<?> key) {
+        return () -> "Value differs on " + DataTest.holderName(holder) + " for " + key.key().asString() + ".";
     }
 
     private static String holderName(final DataHolder holder) {

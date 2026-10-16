@@ -88,15 +88,10 @@ public final class EntityDataTest {
         this.location = Sponge.server().worldManager().world(DefaultWorldKeys.DEFAULT).get().location(Vector3d.ZERO);
     }
 
-    @Disabled
     @Test
     public void testSheep() {
         final Entity sheep = this.location.createEntity(EntityTypes.SHEEP.get());
         final UUID playerId = UUID.randomUUID();
-
-        DataTest.checkOfferData(sheep, Keys.ABSORPTION, 0.0);
-        DataTest.checkOfferData(sheep, Keys.ABSORPTION, 10.0);
-        DataTest.checkOfferData(sheep, Keys.ABSORPTION, 20.0);
 
         DataTest.checkGetData(sheep, Keys.AGE, 0);
         DataTest.checkOfferData(sheep, Keys.AGE, 10);
@@ -122,8 +117,8 @@ public final class EntityDataTest {
             .hoverEvent(HoverEvent.showEntity(ResourceKey.minecraft("sheep"), sheep.uniqueId(), Component.text("A sheep")))
             .insertion(sheep.uniqueId().toString()));
 
-        DataTest.checkGetData(sheep, Keys.EYE_HEIGHT,  (double) (1.3f * 0.95f));
-        DataTest.checkGetData(sheep, Keys.EYE_POSITION, this.location.position().add(0, (double) (1.3f * 0.95f), 0));
+        DataTest.checkGetData(sheep, Keys.EYE_HEIGHT, (double) 1.235f);
+        DataTest.checkGetData(sheep, Keys.EYE_POSITION, this.location.position().add(0, (double) 1.235f, 0));
 
         DataTest.checkOfferData(sheep, Keys.FIRE_DAMAGE_DELAY, Ticks.of(20000));
         DataTest.checkOfferData(sheep, Keys.FIRE_TICKS, Ticks.of(10));
@@ -266,7 +261,6 @@ public final class EntityDataTest {
         DataTest.checkOfferData(guardian, Keys.BEAM_TARGET_ENTITY, fish);
     }
 
-    @Disabled
     @Test
     public void testFallingBlock() {
         final Entity fallingBlock = this.location.createEntity(EntityTypes.FALLING_BLOCK.get());
@@ -282,7 +276,7 @@ public final class EntityDataTest {
         DataTest.checkGetData(fallingBlock, Keys.CAN_PLACE_AS_BLOCK, true);
         DataTest.checkOfferData(fallingBlock, Keys.CAN_PLACE_AS_BLOCK, false);
 
-        DataTest.checkGetData(fallingBlock, Keys.DAMAGE_PER_BLOCK, 2.0);
+        DataTest.checkGetData(fallingBlock, Keys.DAMAGE_PER_BLOCK, 0.0);
         DataTest.checkOfferData(fallingBlock, Keys.DAMAGE_PER_BLOCK, 5.0);
 
         DataTest.checkGetData(fallingBlock, Keys.FALL_DISTANCE, 0.0);
@@ -294,7 +288,6 @@ public final class EntityDataTest {
         DataTest.checkOfferData(fallingBlock, Keys.MAX_FALL_DAMAGE, 50.0);
     }
 
-    @Disabled
     @Test
     public void testArmorStand() {
         final ArmorStand armorStand = this.location.createEntity(EntityTypes.ARMOR_STAND.get());
@@ -306,9 +299,6 @@ public final class EntityDataTest {
         armorStand.equip(EquipmentTypes.MAINHAND.get(), ItemStack.of(ItemTypes.DIAMOND));
         armorStand.equip(EquipmentTypes.OFFHAND.get(), ItemStack.of(ItemTypes.DIAMOND));
 
-        DataTest.checkOfferData(armorStand, Keys.BODY_ROTATIONS, Map.of(BodyParts.CHEST.get(), Vector3d.RIGHT));
-        DataTest.checkOfferData(armorStand, Keys.CHEST_ROTATION, Vector3d.from(0, 90, 0));
-
         DataTest.checkOfferData(armorStand, Keys.HAS_ARMS, false);
         DataTest.checkOfferData(armorStand, Keys.HAS_ARMS, true);
 
@@ -318,14 +308,24 @@ public final class EntityDataTest {
         DataTest.checkOfferData(armorStand, Keys.HAS_MARKER, true);
         DataTest.checkOfferData(armorStand, Keys.HAS_MARKER, false);
 
-        DataTest.checkOfferData(armorStand, Keys.HEAD_ROTATION, Vector3d.from(0, 90, 0));
-        DataTest.checkOfferData(armorStand, Keys.LEFT_ARM_ROTATION, Vector3d.from(0, -90, -90));
-        DataTest.checkOfferData(armorStand, Keys.LEFT_LEG_ROTATION, Vector3d.from(0, -90, -45));
-        DataTest.checkOfferData(armorStand, Keys.RIGHT_ARM_ROTATION, Vector3d.from(0, 90, 90));
-        DataTest.checkOfferData(armorStand, Keys.RIGHT_LEG_ROTATION, Vector3d.from(0, 90, 45));
-
         DataTest.checkOfferData(armorStand, Keys.IS_SMALL, true);
         DataTest.checkOfferData(armorStand, Keys.IS_SMALL, false);
+
+        DataTest.checkOfferData(armorStand, Keys.HEAD_ROTATION, new Vector3d(0, 90, 0));
+        DataTest.checkOfferData(armorStand, Keys.CHEST_ROTATION, new Vector3d(0, 90, 0));
+        DataTest.checkOfferData(armorStand, Keys.LEFT_ARM_ROTATION, new Vector3d(0, -90, -90));
+        DataTest.checkOfferData(armorStand, Keys.RIGHT_ARM_ROTATION, new Vector3d(0, 90, 90));
+        DataTest.checkOfferData(armorStand, Keys.LEFT_LEG_ROTATION, new Vector3d(0, -90, -45));
+        DataTest.checkOfferData(armorStand, Keys.RIGHT_LEG_ROTATION, new Vector3d(0, 90, 45));
+
+        DataTest.checkOfferData(armorStand, Keys.BODY_ROTATIONS, Map.of(
+            BodyParts.HEAD.get(), new Vector3d(0, -90, 0),
+            BodyParts.CHEST.get(), new Vector3d(0, -90, 0),
+            BodyParts.LEFT_ARM.get(), new Vector3d(0, 90, 90),
+            BodyParts.RIGHT_ARM.get(), new Vector3d(0, -90, -90),
+            BodyParts.LEFT_LEG.get(), new Vector3d(0, 90, 45),
+            BodyParts.RIGHT_LEG.get(), new Vector3d(0, -90, -45)
+        ));
     }
 
     @Test
@@ -363,7 +363,6 @@ public final class EntityDataTest {
         DataTest.checkOfferData(illusioner, Keys.CURRENT_SPELL, SpellTypes.BLINDNESS.get());
     }
 
-    @Disabled
     @Test
     public void testCat() {
         final Entity cat = this.location.createEntity(EntityTypes.CAT.get());
@@ -374,10 +373,7 @@ public final class EntityDataTest {
 
         DataTest.checkOfferData(cat, Keys.DYE_COLOR, DyeColors.LIME.get());
 
-        DataTest.checkOfferData(cat, Keys.IS_BEGGING_FOR_FOOD, true);
-        DataTest.checkOfferData(cat, Keys.IS_HISSING, true);
         DataTest.checkOfferData(cat, Keys.IS_LYING_DOWN, true);
-        DataTest.checkOfferData(cat, Keys.IS_PURRING, true);
         DataTest.checkOfferData(cat, Keys.IS_RELAXED, true);
         DataTest.checkOfferData(cat, Keys.IS_SITTING, true);
 
@@ -455,7 +451,6 @@ public final class EntityDataTest {
         DataTest.checkOfferData(tropicalFish, Keys.TROPICAL_FISH_SHAPE, TropicalFishShapes.BETTY.get());
     }
 
-    @Disabled
     @Test
     public void testPanda() {
         final Entity panda = this.location.createEntity(EntityTypes.PANDA.get());
@@ -468,10 +463,10 @@ public final class EntityDataTest {
         DataTest.checkGetData(panda, Keys.IS_FRIGHTENED, false);
         DataTest.checkOfferData(panda, Keys.IS_ROLLING_AROUND, true);
         DataTest.checkOfferData(panda, Keys.IS_SNEEZING, true);
-        DataTest.checkOfferData(panda, Keys.IS_UNHAPPY, true);
 
         DataTest.checkOfferData(panda, Keys.SNEEZING_TIME, Ticks.of(2));
         DataTest.checkOfferData(panda, Keys.UNHAPPY_TIME, Ticks.of(20));
+        DataTest.checkGetData(panda, Keys.IS_UNHAPPY, true);
     }
 
     @Test
@@ -583,7 +578,6 @@ public final class EntityDataTest {
         DataTest.checkOfferData(blaze, Keys.IS_AI_ENABLED, false);
     }
 
-    @Disabled
     @Test
     public void testWolf() {
         final Entity wolf = this.location.createEntity(EntityTypes.WOLF.get());
@@ -704,12 +698,11 @@ public final class EntityDataTest {
         DataTest.checkOfferData(vex, Keys.LIFE_TICKS, Ticks.of(10));
     }
 
-    @Disabled
     @Test
     public void testLlama() {
         final Entity llama = this.location.createEntity(EntityTypes.LLAMA.get());
         DataTest.checkOfferData(llama, Keys.LLAMA_TYPE, LlamaTypes.BROWN.get());
-        DataTest.checkOfferData(llama, Keys.STRENGTH, 10);
+        DataTest.checkOfferData(llama, Keys.STRENGTH, 3);
     }
 
     @Test

@@ -65,12 +65,14 @@ public final class NeighborNotification extends WorldBasedTransaction<NotifyNeig
     private Supplier<LocatableBlock> locatableBlock;
     private Supplier<SpongeBlockSnapshot> targetSnapshot;
     private Supplier<NotificationTicket> ticketSupplier;
+    // The latest change at the source when this was logged: what the notification is about
+    private final @Nullable ChangeBlock cause;
 
     public NeighborNotification(
         final Supplier<ServerLevel> serverWorldSupplier,
         final BlockState notifyState, final BlockPos notifyPos,
         final Block sourceBlock, final BlockPos sourcePos,
-        final @Nullable BlockEntity existingTile
+        final @Nullable BlockEntity existingTile, final @Nullable ChangeBlock cause
     ) {
         super(TransactionTypes.NEIGHBOR_NOTIFICATION.get(), ((org.spongepowered.api.world.server.ServerWorld) serverWorldSupplier.get()).key());
         this.affectedPosition = sourcePos;
@@ -79,6 +81,7 @@ public final class NeighborNotification extends WorldBasedTransaction<NotifyNeig
         this.notifyPos = notifyPos;
         this.sourceBlock = sourceBlock;
         this.sourcePos = sourcePos;
+        this.cause = cause;
         this.original = serverWorldSupplier.get().getBlockState(sourcePos);
         // This is one way to have lazily initialized fields
         this.locatableBlock = () -> {
@@ -165,25 +168,33 @@ public final class NeighborNotification extends WorldBasedTransaction<NotifyNeig
 
     }
 
+    // The target's reaction only needs its own events ahead of the rest of the batch when it changed blocks
+    @Override
+    protected boolean childrenEndBatch() {
+        return this.hasAnyPrimaryChildrenTransactions();
+    }
+
+    // Once the change a notification is about is rolled back, the notification never happened
+    @Override
+    protected boolean cancelIfCauseCancelled() {
+        if (this.cancelled || this.cause == null || !this.cause.isCancelled()) {
+            return false;
+        }
+        this.markCancelled();
+        this.ticketSupplier.get().invalidate();
+        return true;
+    }
+
     @Override
     public boolean markCancelledTransactions(final NotifyNeighborBlockEvent event,
         final ImmutableList<? extends GameTransaction<NotifyNeighborBlockEvent>> blockTransactions
     ) {
         boolean cancelledAny = false;
-        for (final NotificationTicket transaction : event.tickets()) {
-            if (!transaction.valid()) {
+        // Each notification has its own ticket, positions alone can match notifications the ticket isn't for
+        for (final GameTransaction<NotifyNeighborBlockEvent> gameTransaction : blockTransactions) {
+            if (!((NeighborNotification) gameTransaction).ticketSupplier.get().valid()) {
                 cancelledAny = true;
-                for (final GameTransaction<NotifyNeighborBlockEvent> gameTransaction : blockTransactions) {
-                    final NeighborNotification blockTransaction = (NeighborNotification) gameTransaction;
-                    final Vector3i position = transaction.targetPosition();
-                    final BlockPos affectedPosition = blockTransaction.affectedPosition;
-                    if (position.x() == affectedPosition.getX()
-                            && position.y() == affectedPosition.getY()
-                            && position.z() == affectedPosition.getZ()
-                    ) {
-                        gameTransaction.markCancelled();
-                    }
-                }
+                gameTransaction.markCancelled();
             }
         }
 

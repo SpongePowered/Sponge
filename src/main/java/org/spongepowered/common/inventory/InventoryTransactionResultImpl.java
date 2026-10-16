@@ -58,17 +58,21 @@ public class InventoryTransactionResultImpl implements InventoryTransactionResul
 
     @Override
     public InventoryTransactionResult and(InventoryTransactionResult other) {
-        Type resultType = Type.SUCCESS;
+        final Type resultType;
         if (this.type == Type.ERROR || other.type() == Type.ERROR) {
             resultType = Type.ERROR;
-        }
-        if (this.type == Type.FAILURE || other.type() == Type.FAILURE) {
+        } else if (this.type == Type.FAILURE || other.type() == Type.FAILURE) {
             resultType = Type.FAILURE;
+        } else if (this.type == Type.NO_SLOT || other.type() == Type.NO_SLOT) {
+            resultType = Type.NO_SLOT;
+        } else {
+            resultType = Type.SUCCESS;
         }
         InventoryTransactionResult.Builder builder =
                 InventoryTransactionResult.builder().type(resultType).reject(this.rejected).reject(other.rejectedItems())
                         .transaction(this.slotTransactions).transaction(other.slotTransactions());
         this.polled.forEach(builder::poll);
+        other.polledItems().forEach(builder::poll);
         return builder.build();
     }
 
@@ -189,6 +193,7 @@ public class InventoryTransactionResultImpl implements InventoryTransactionResul
             this.resultType = Objects.requireNonNull(value.type(), "ResultType cannot be null!");
             this.slotTransactions = new ArrayList<>(value.slotTransactions());
             this.rejected = new ArrayList<>(value.rejectedItems());
+            this.polled = new ArrayList<>(value.polledItems());
             return this;
         }
 
@@ -197,6 +202,7 @@ public class InventoryTransactionResultImpl implements InventoryTransactionResul
             this.resultType = null;
             this.rejected = null;
             this.slotTransactions = null;
+            this.polled = null;
             return this;
         }
 

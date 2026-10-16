@@ -27,13 +27,18 @@ package org.spongepowered.common.event.tracking.phase.tick;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.block.Block;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge;
@@ -41,8 +46,10 @@ import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.world.BlockChange;
 
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
@@ -110,6 +117,20 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
         final BlockEventTickContext context, final Entity entityToSpawn
     ) {
         return SpawnTypes.CUSTOM;
+    }
+
+    // The only items a block event drops are the blocks a piston destroys while pushing
+    @Override
+    public SpawnEntityEvent createSpawnEvent(
+        final BlockEventTickContext context,
+        final @Nullable GameTransaction<@NonNull ?> parent,
+        final List<Entity> collect,
+        final Cause currentCause
+    ) {
+        if (collect.stream().allMatch(entity -> entity instanceof ItemEntity)) {
+            return SpongeEventFactory.createDropItemEventDestruct(currentCause, (List) collect);
+        }
+        return super.createSpawnEvent(context, parent, collect, currentCause);
     }
 
 }
