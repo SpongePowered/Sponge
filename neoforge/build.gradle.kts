@@ -132,6 +132,8 @@ val main by sourceSets.named("main") {
     spongeImpl.addDependencyToRuntimeOnly(bootstrapMain.get(), this)
     spongeImpl.addDependencyToRuntimeOnly(bootstrapNeoForge.get(), this)
 }
+// Neo-only gametests and gametest mixins; the common gametests come along through the root project's
+val gametest = spongeImpl.gameTestSourceSet()
 val testSources = sourceSets.named("test") {
     spongeImpl.addDependencyToImplementation(commonTest.get(), this)
 
@@ -168,11 +170,20 @@ neoForge {
             programArgument("--nogui")
             mainClass = "org.spongepowered.bootstrap.neoforge.DevServer"
         }
+
+        // Minecraft gametests (common + neo); exits non-zero when a required test fails
+        create("gameTestServer") {
+            type = "gameTestServer"
+            sourceSet = gametest
+            mainClass = "org.spongepowered.bootstrap.neoforge.DevGameTestServer"
+            programArguments.addAll("--report", "gametest-report.xml") // relative to run/
+        }
     }
 }
 
 bootLibrariesConfig.get().extendsFrom(configurations.getByName("modDevCompileDependencies"))
 configurations.testRuntimeOnly.get().extendsFrom(configurations.getByName("modDevRuntimeDependencies"))
+configurations.named(gametest.runtimeOnlyConfigurationName) { extendsFrom(configurations.getByName("modDevRuntimeDependencies")) }
 
 dependencies {
     val service = serviceLibrariesConfig.name
@@ -308,6 +319,21 @@ tasks {
         }
     }
 
+    // The dev manifest is how mixin configs reach Mixin on Neo, so the gametest runs get a copy that adds the gametest configs.
+    // FML takes the manifest of a dev mod's last folder and DevClasspath sorts them by path, so "overrides" beats "main";
+    // only the gametest classpath has it, so test and gameTest can share a build.
+    val gameTestManifest by registering {
+        val directory = project.layout.buildDirectory.dir("resources/overrides")
+        val configs = provider { (mixinConfigs + "mixins.sponge.gametest.json" + "mixins.spongeneo.gametest.json").toList() }
+        inputs.property("mixinConfigs", configs)
+        outputs.dir(directory)
+        doLast {
+            java.manifest { attributes(modManifest.attributes + ("MixinConfigs" to configs.get().joinToString(","))) }
+                .writeTo(directory.get().file("META-INF/MANIFEST.MF").asFile)
+        }
+    }
+    gametest.output.dir(mapOf("builtBy" to gameTestManifest), gameTestManifest.map { it.outputs.files.singleFile })
+
     val servicesShadowJar by register("servicesShadowJar", ShadowJar::class) {
         group = "build"
         archiveClassifier.set("services")
@@ -401,17 +427,28 @@ tasks {
         dependsOn(prepareServerRun)
 
         extensions.configure(JacocoTaskExtension::class) {
-            excludeClassLoaders = listOf("cpw.mods.modlauncher.TransformingClassLoader")
+            excludeClassLoaders = listOf("net.neoforged.fml.classloading.ModuleClassLoader") // the game layer, which NeoJacocoTransformer instruments
         }
 
         finalizedBy(jacocoTestReport)
     }
 
     jacocoTestReport {
-        sourceSets(commonAppLaunchConf.get(), commonAppLaunch.get(), commonAccessors.get(), commonMixins.get(), commonMain.get())
-        sourceSets(appLaunch, accessors, mixins, main)
-        dependsOn(test)
+        // Accessors are left out: Mixin replaces their bodies, so they never carry meaningful coverage
+        sourceSets(commonAppLaunchConf.get(), commonAppLaunch.get(), commonMixins.get(), commonMain.get())
+        sourceSets(appLaunch, mixins, main)
     }
+}
+
+// The gametests through JUnit, booted like the gameTestServer run; runGameTestServer still works as before
+spongeImpl.gameTests {
+    platformName = "Neo"
+    val run = tasks.named("runGameTestServer", JavaExec::class)
+    bootArguments = provider { run.get().args!! } // an argfile, read by SpongeTestBoot
+    jvmArguments = provider { run.get().jvmArgs!! }
+    gameClassLoader = "net.neoforged.fml.classloading.ModuleClassLoader" // the game layer, which NeoJacocoTransformer instruments
+    systemProperty("sponge.test.main", "net.minecraft.gametest.Main")
+    dependsOn("prepareGameTestServerRun")
 }
 
 publishing {

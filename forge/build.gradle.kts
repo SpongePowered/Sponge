@@ -155,6 +155,8 @@ val main by sourceSets.named("main") {
     spongeImpl.addDependencyToRuntimeOnly(bootstrapMain.get(), this)
     spongeImpl.addDependencyToRuntimeOnly(bootstrapForge.get(), this)
 }
+// Forge-only gametests and gametest mixins; the common gametests come along through the root project's
+val gametest = spongeImpl.gameTestSourceSet()
 val testSources = sourceSets.named("test") {
     spongeImpl.addDependencyToImplementation(commonTest.get(), this)
 
@@ -264,6 +266,12 @@ minecraft {
 
         register("server") {
             args("--nogui")
+        }
+
+        // Minecraft gametests (common + forge); exits non-zero when a required test fails
+        register("gameTestServer") {
+            args("--mixin.config", "mixins.sponge.gametest.json", "--mixin.config", "mixins.spongeforge.gametest.json")
+            args("--report", "gametest-report.xml") // relative to run/
         }
     }
 }
@@ -458,13 +466,26 @@ tasks {
     }
 
     jacocoTestReport {
-        sourceSets(commonAppLaunchConf.get(), commonAppLaunch.get(), commonAccessors.get(), commonMixins.get(), commonMain.get())
-        sourceSets(appLaunch, lang, accessors, mixins, main)
-        dependsOn(test)
+        // Accessors are left out: Mixin replaces their bodies, so they never carry meaningful coverage
+        sourceSets(commonAppLaunchConf.get(), commonAppLaunch.get(), commonMixins.get(), commonMain.get())
+        sourceSets(appLaunch, lang, mixins, main)
     }
 }
 
-
+// The gametests through JUnit, booted like the gameTestServer run; runGameTestServer still works as before
+spongeImpl.gameTests {
+    platformName = "Forge"
+    val run = minecraft.runs.getByName("gameTestServer")
+    // FG7 leaves the launch target to the userdev run config, which only the run task reads
+    bootArguments = provider { listOf("--launchTarget", "forge_userdev_server_gametest") + run.args.get() }
+    jvmArguments = provider { run.jvmArgs.get() }
+    gameClassLoader = "cpw.mods.modlauncher.TransformingClassLoader"
+}
+tasks.named("gameTest", Test::class) {
+    // Mockito sits on the module path, as for test
+    jvmArgs("--module-path=" + testModulesConfig.get().asPath)
+    jvmArgs("--add-modules=net.bytebuddy.agent,net.bytebuddy")
+}
 
 publishing {
     publications {

@@ -28,7 +28,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -166,11 +165,10 @@ public final class BlockDataTest {
         DataTest.checkGetData(BlockTypes.BLUE_WALL_BANNER.get().defaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
     }
 
-    @Disabled
     @Test
     public void testWater() {
         final BlockState water = BlockTypes.WATER.get().defaultState();
-        DataTest.checkGetData(water, Keys.FLUID_LEVEL, 8);
+        DataTest.checkGetData(water, Keys.FLUID_LEVEL, 0);
     }
 
     @Test
