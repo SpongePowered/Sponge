@@ -91,6 +91,11 @@ public final class SpongeTicks implements Ticks {
         return Objects.hash(this.ticks);
     }
 
+    @Override
+    public String toString() {
+        return "SpongeTicks{ticks=" + this.ticks + '}';
+    }
+
     public static int toSaturatedIntOrInfinite(final Ticks ticks) {
         return SpongeTicks.toSaturatedIntOrInfinite(ticks, Constants.TickConversions.INFINITE_TICKS);
     }

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.gradle.impl;
 
+import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ModuleDependency;
@@ -226,6 +227,22 @@ public abstract class SpongeImplementationExtension {
         return Stream.of(minecraftVersion, addedVersionInfo, implVersionAsReleaseCandidateOrRecommended)
             .filter(Objects::nonNull)
             .collect(Collectors.joining("-"));
+    }
+
+    /**
+     * Registers this platform's {@code gametest} source set, for its own gametests and gametest mixins. Called before
+     * the game test server run configuration, which runs from it.
+     */
+    public SourceSet gameTestSourceSet() {
+        return GameTests.sourceSet(this.project, this);
+    }
+
+    /**
+     * Runs the common and this platform's gametests through JUnit from a {@code gameTest} task, and the common ones
+     * alone from the root project's {@code gameTest<platformName>}, for IntelliJ's run icons.
+     */
+    public void gameTests(final Action<? super GameTestSettings> configure) {
+        GameTests.register(this.project, configure);
     }
 
     /**

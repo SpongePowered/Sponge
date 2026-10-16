@@ -187,7 +187,7 @@ public final class SpongeEntityChunk implements EntityChunk {
     @Override
     public Optional<Entity> createEntity(final DataContainer container) {
         return Optional.ofNullable(((LevelBridge) this.level).bridge$createEntity(container, null,
-                position -> VecHelper.inBounds(position, this.min(), this.max())));
+                position -> VecHelper.inBounds(position.toInt(), this.min(), this.max())));
     }
 
     @Override
@@ -231,7 +231,7 @@ public final class SpongeEntityChunk implements EntityChunk {
     }
 
     private void checkPositionInChunk(final Vector3d position) {
-        if (!VecHelper.inBounds(position, this.min(), this.max())) {
+        if (!VecHelper.inBounds(position.toInt(), this.min(), this.max())) {
             throw new IllegalArgumentException("Supplied bounds are not within this chunk.");
         }
     }
