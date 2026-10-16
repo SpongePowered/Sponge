@@ -467,12 +467,9 @@ public final class Constants {
 
     public static final class ChunkTicket {
 
-        public static final int MAX_FULL_CHUNK_TICKET_LEVEL = ChunkLevel.byStatus(FullChunkStatus.ENTITY_TICKING);
+        public static final int FULL_CHUNK_MAX_TICKET_LEVEL = ChunkLevel.byStatus(FullChunkStatus.FULL);
 
-        // Highest ticket level that will cause loading a full chunk, plus one.
-        public static final int MAX_FULL_CHUNK_DISTANCE = ChunkTicket.MAX_FULL_CHUNK_TICKET_LEVEL + 1;
-
-        public static final int INFINITE_TIMEOUT = 0;
+        public static final long INFINITE_TIMEOUT = 0;
     }
 
     public static final class Networking {

@@ -25,7 +25,7 @@
 package org.spongepowered.test.chunkmanager;
 
 import com.google.inject.Inject;
-import net.kyori.adventure.identity.Identity;
+import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.LinearComponents;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -39,12 +39,14 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.world.chunk.ChunkEvent;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.server.ChunkManager;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.Ticket;
 import org.spongepowered.api.world.server.TicketType;
+import org.spongepowered.api.world.server.TicketTypes;
 import org.spongepowered.math.vector.Vector3i;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
@@ -53,7 +55,6 @@ import org.spongepowered.test.LoadableModule;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 @Plugin("chunkmanagertest")
@@ -62,7 +63,7 @@ public final class ChunkManagerTest implements LoadableModule {
     private final PluginContainer pluginContainer;
     private final ChunkListener listener;
 
-    private Map<Vector3i, Set<Ticket<Vector3i>>> ticketsMap = new HashMap<>();
+    private final Map<Vector3i, Set<Ticket>> ticketsMap = new HashMap<>();
 
     @Inject
     public ChunkManagerTest(final PluginContainer pluginContainer, final Logger logger) {
@@ -82,81 +83,71 @@ public final class ChunkManagerTest implements LoadableModule {
 
     private Command.Parameterized registerTicketCommand() {
         final Parameter.Value<ServerLocation> serverLocationParameter = Parameter.location().key("position").build();
-        final Parameter.Value<Integer> timeParameter = Parameter.integerNumber().key("time").optional().build();
+        final Parameter.Value<TicketType> typeParameter = Parameter.registryElement(TypeToken.get(TicketType.class), RegistryTypes.TICKET_TYPE, "minecraft").key("time").optional().build();
 
         return Command.builder()
                 .addParameter(serverLocationParameter)
-                .addParameter(timeParameter)
+                .addParameter(typeParameter)
                 .executor(context -> {
                     final ServerLocation location = context.requireOne(serverLocationParameter);
-                    final Optional<Integer> time = context.one(timeParameter);
-
-                    final TicketType<Vector3i> ticketType = TicketType.<Vector3i>builder()
-                            .name("chunkManagerTest")
-                            .comparator(Vector3i::compareTo)
-                            .lifetime(time.map(Ticks::of).orElse(Ticks.infinite()))
-                            .build();
+                    final TicketType ticketType = context.one(typeParameter).orElseGet(TicketTypes.FORCED);
 
                     final ChunkManager manager = location.world().chunkManager();
-                    final Optional<Ticket<Vector3i>> optionalTicket = manager
-                            .requestTicket(ticketType, location.chunkPosition(), location.chunkPosition(), 5);
-                    if (optionalTicket.isPresent()) {
-                        final Ticket<Vector3i> ticket = optionalTicket.get();
-                        final Set<Ticket<Vector3i>> tickets = this.ticketsMap.computeIfAbsent(location.chunkPosition(), k -> new HashSet<>());
-                        tickets.add(ticket);
-                        context.sendMessage(Identity.nil(), LinearComponents.linear(
-                                Component.text("Ticket registered. Lifetime - "),
-                                Component.text(manager.timeLeft(ticket).ticks())));
+                    final Ticket ticket = manager.requestTicket(ticketType, location.chunkPosition(), 5);
 
-                        context.sendMessage(Identity.nil(), LinearComponents.linear(
-                                Component.text("Ticket validity check: "),
-                                Component.text(manager.valid(ticket))
-                        ));
+                    final Set<Ticket> tickets = this.ticketsMap.computeIfAbsent(location.chunkPosition(), k -> new HashSet<>());
+                    tickets.add(ticket);
 
-                        // now find the ticket
-                        if (manager.findTickets(ticketType).contains(ticket)) {
-                            context.sendMessage(Identity.nil(),
-                                    Component.text().content("Ticket was found in the chunk manager").color(NamedTextColor.GREEN).build());
-                        } else {
-                            context.sendMessage(Identity.nil(),
-                                    Component.text().content("Ticket was not found in the chunk manager").color(NamedTextColor.RED).build());
-                        }
+                    context.sendMessage(Component.text("Ticket registered."));
+                    final Ticks timeLeft = manager.timeLeft(ticket);
+                    context.sendMessage(Component.text("Ticks left: " + (timeLeft.isInfinite() ? "Infinite" : timeLeft.ticks())));
+                    context.sendMessage(Component.text("Chunk origin: " + ticket.chunkOrigin()));
+                    context.sendMessage(Component.text("Radius: " + ticket.radius()));
+                    context.sendMessage(Component.text("Ticket validity check: " + manager.valid(ticket)));
 
-                        time.ifPresentOrElse(t -> {
-                            Sponge.server().scheduler().submit(Task.builder()
-                                    .plugin(this.pluginContainer)
-                                    .delay(Ticks.of(t + 1))
-                                    .execute(() -> context.sendMessage(Identity.nil(), LinearComponents.linear(
-                                            Component.text("Ticket validity check (1 tick before expiration): "),
-                                            Component.text(manager.valid(ticket))
-                                    ))).build());
-
-                            Sponge.server().scheduler().submit(Task.builder()
-                                    .plugin(this.pluginContainer)
-                                    .delay(Ticks.of(t + 2))
-                                    .execute(() -> {
-                                        tickets.remove(ticket);
-                                        if (tickets.isEmpty()) {
-                                            this.ticketsMap.remove(location.chunkPosition(), tickets);
-                                        }
-                                        context.sendMessage(Identity.nil(), LinearComponents.linear(
-                                            Component.text("Ticket validity check (After expiration): "),
-                                            Component.text(manager.valid(ticket))));
-                                    }).build());
-                        }, () -> Sponge.server().scheduler().submit(Task.builder()
-                                .plugin(this.pluginContainer)
-                                .interval(Ticks.of(20))
-                                .execute(t -> {
-                                    context.sendMessage(Identity.nil(), LinearComponents.linear(
-                                        Component.text("Ticket validity check (Repeating 20 ticks): "),
-                                        Component.text(manager.valid(ticket))));
-                                    if (!manager.valid(ticket)) {
-                                        t.cancel();
-                                    }
-                                }).build()));
+                    // now find the ticket
+                    if (manager.findTickets(ticketType).contains(ticket)) {
+                        context.sendMessage(Component.text().content("Ticket was found in the chunk manager").color(NamedTextColor.GREEN).build());
                     } else {
-                        context.sendMessage(Identity.nil(), Component.text("Ticket was not registered."));
+                        context.sendMessage(Component.text().content("Ticket was not found in the chunk manager").color(NamedTextColor.RED).build());
                     }
+
+                    final Ticks lifetime = ticketType.lifetime();
+                    if (lifetime.isInfinite()) {
+                        Sponge.server().scheduler().submit(Task.builder()
+                            .plugin(this.pluginContainer)
+                            .interval(Ticks.of(20))
+                            .execute(t -> {
+                                context.sendMessage(LinearComponents.linear(
+                                    Component.text("Ticket validity check (Repeating 20 ticks): "),
+                                    Component.text(manager.valid(ticket))));
+                                if (!manager.valid(ticket)) {
+                                    t.cancel();
+                                }
+                            }).build());
+                    } else {
+                        Sponge.server().scheduler().submit(Task.builder()
+                            .plugin(this.pluginContainer)
+                            .delay(Ticks.of(lifetime.ticks() + 1))
+                            .execute(() -> context.sendMessage(LinearComponents.linear(
+                                Component.text("Ticket validity check (1 tick before expiration): "),
+                                Component.text(manager.valid(ticket))
+                            ))).build());
+
+                        Sponge.server().scheduler().submit(Task.builder()
+                            .plugin(this.pluginContainer)
+                            .delay(Ticks.of(lifetime.ticks() + 2))
+                            .execute(() -> {
+                                tickets.remove(ticket);
+                                if (tickets.isEmpty()) {
+                                    this.ticketsMap.remove(location.chunkPosition(), tickets);
+                                }
+                                context.sendMessage(LinearComponents.linear(
+                                    Component.text("Ticket validity check (After expiration): "),
+                                    Component.text(manager.valid(ticket))));
+                            }).build());
+                    }
+
                     return CommandResult.success();
                 })
                 .build();
@@ -169,13 +160,13 @@ public final class ChunkManagerTest implements LoadableModule {
                 .addParameter(serverLocationParameter)
                 .executor(context -> {
                     final ServerLocation location = context.requireOne(serverLocationParameter);
-                    final @Nullable Set<Ticket<Vector3i>> tickets = this.ticketsMap.remove(location.chunkPosition());
+                    final @Nullable Set<Ticket> tickets = this.ticketsMap.remove(location.chunkPosition());
                     if (tickets != null) {
                         final ChunkManager manager = location.world().chunkManager();
                         tickets.forEach(manager::releaseTicket);
-                        context.sendMessage(Identity.nil(), Component.text("Removed tickets.", NamedTextColor.GREEN));
+                        context.sendMessage(Component.text("Removed tickets.", NamedTextColor.GREEN));
                     } else {
-                        context.sendMessage(Identity.nil(), Component.text("No valid tickets.", NamedTextColor.RED));
+                        context.sendMessage(Component.text("No valid tickets.", NamedTextColor.RED));
                     }
                     return CommandResult.success();
                 })
@@ -185,13 +176,13 @@ public final class ChunkManagerTest implements LoadableModule {
     @Override
     public void disable(final CommandContext ctx) {
         Sponge.eventManager().unregisterListeners(this.listener);
-        ctx.sendMessage(Identity.nil(), Component.text("Disabled ChunkManagerTest listener"));
+        ctx.sendMessage(Component.text("Disabled ChunkManagerTest listener"));
     }
 
     @Override
     public void enable(final CommandContext ctx) {
         Sponge.eventManager().registerListeners(this.pluginContainer, this.listener);
-        ctx.sendMessage(Identity.nil(), Component.text("Enabled ChunkManagerTest listener"));
+        ctx.sendMessage(Component.text("Enabled ChunkManagerTest listener"));
     }
 
     static class ChunkListener {
