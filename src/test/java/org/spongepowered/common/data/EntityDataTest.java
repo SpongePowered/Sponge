@@ -89,7 +89,6 @@ public final class EntityDataTest {
         this.location = Sponge.server().worldManager().world(DefaultWorldKeys.DEFAULT).get().location(Vector3d.ZERO);
     }
 
-    @Disabled
     @Test
     public void testSheep() {
         final Entity sheep = this.location.createEntity(EntityTypes.SHEEP.get());

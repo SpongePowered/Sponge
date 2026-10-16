@@ -26,7 +26,6 @@ package org.spongepowered.common.data;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
@@ -80,7 +79,6 @@ public final class DataTest {
         DataTest.checkGetData(this.location, Keys.BIOME_TEMPERATURE, this.location.biome().temperature());
     }
 
-    @Disabled
     @Test
     public void testPotionEffects() {
         final List<PotionEffect> effects = List.of(
@@ -95,7 +93,6 @@ public final class DataTest {
         DataTest.checkOfferCollectionIgnoringOrder(ItemStack.of(ItemTypes.SPLASH_POTION), Keys.CUSTOM_POTION_EFFECTS, effects);
     }
 
-    @Disabled
     @Test
     public void testBanner() {
         final List<BannerPatternLayer> pattern = Arrays.asList(BannerPatternLayer.of(BannerPatternShapes.BASE, DyeColors.BLACK), BannerPatternLayer.of(BannerPatternShapes.RHOMBUS, DyeColors.ORANGE));

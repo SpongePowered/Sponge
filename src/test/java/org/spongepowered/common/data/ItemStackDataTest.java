@@ -93,7 +93,6 @@ public final class ItemStackDataTest {
         DataTest.checkOfferData(writableBook, Keys.PLAIN_PAGES, Arrays.asList("Page 1", "Page 2"));
     }
 
-    @Disabled
     @Test
     public void testAxe() {
         final ItemStack axe = ItemStack.of(ItemTypes.WOODEN_AXE);
