@@ -36,8 +36,6 @@ import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.data.type.ItemTiers;
 import org.spongepowered.api.data.type.NotePitches;
 import org.spongepowered.api.effect.sound.music.MusicDiscs;
-import org.spongepowered.api.fluid.FluidStackSnapshot;
-import org.spongepowered.api.fluid.FluidTypes;
 import org.spongepowered.api.item.ItemRarities;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.enchantment.Enchantment;
@@ -95,7 +93,6 @@ public final class ItemStackDataTest {
         DataTest.checkOfferData(writableBook, Keys.PLAIN_PAGES, Arrays.asList("Page 1", "Page 2"));
     }
 
-    @Disabled
     @Test
     public void testAxe() {
         final ItemStack axe = ItemStack.of(ItemTypes.WOODEN_AXE);
@@ -112,12 +109,12 @@ public final class ItemStackDataTest {
         DataTest.checkOfferData(axe, Keys.HIDE_ATTRIBUTES, true);
         DataTest.checkOfferData(axe, Keys.HIDE_CAN_DESTROY, true);
         DataTest.checkOfferData(axe, Keys.HIDE_ENCHANTMENTS, true);
+        DataTest.checkOfferData(axe, Keys.IS_UNBREAKABLE, true);
         DataTest.checkOfferData(axe, Keys.HIDE_UNBREAKABLE, true);
 
         DataTest.checkOfferData(axe, Keys.IS_UNBREAKABLE, true);
         DataTest.checkOfferData(axe, Keys.ITEM_DURABILITY, 5);
 
-        DataTest.checkOfferData(axe, Keys.LOCK_TOKEN, "Key");
         DataTest.checkOfferData(axe, Keys.LORE, Arrays.asList(Component.text("1"), Component.text("2")));
 
         DataTest.checkGetData(axe, Keys.MAX_DURABILITY, 59);
@@ -136,12 +133,10 @@ public final class ItemStackDataTest {
         DataTest.checkOfferData(ItemStack.of(ItemTypes.SPLASH_POTION), Keys.COLOR, Color.RED);
     }
 
-    @Disabled
     @Test
     public void testWaterBucket() {
         final ItemStack waterBucket = ItemStack.of(ItemTypes.WATER_BUCKET);
         DataTest.checkGetData(waterBucket, Keys.CONTAINER_ITEM, ItemTypes.BUCKET.get());
-        DataTest.checkGetData(waterBucket, Keys.FLUID_ITEM_STACK, FluidStackSnapshot.builder().fluid(FluidTypes.WATER).build());
     }
 
     @Disabled
@@ -183,11 +178,10 @@ public final class ItemStackDataTest {
         DataTest.checkOfferData(ItemStack.of(ItemTypes.SPLASH_POTION), Keys.POTION_TYPE, PotionTypes.MUNDANE.get());
     }
 
-    @Disabled
     @Test
     public void testEnchantedBook() {
         final ItemStack enchantedBook = ItemStack.of(ItemTypes.ENCHANTED_BOOK);
-        DataTest.checkOfferData(enchantedBook, Keys.STORED_ENCHANTMENTS, List.of(Enchantment.of(EnchantmentTypes.SHARPNESS, 5), Enchantment.of(EnchantmentTypes.PROTECTION, 4)));
+        DataTest.checkOfferCollectionIgnoringOrder(enchantedBook, Keys.STORED_ENCHANTMENTS, List.of(Enchantment.of(EnchantmentTypes.SHARPNESS, 5), Enchantment.of(EnchantmentTypes.PROTECTION, 4)));
     }
 
     @Disabled

@@ -81,7 +81,7 @@ public final class ArmorStandData {
                         .get(ArmorStand::showArms)
                         .set(ArmorStand::setShowArms)
                     .create(Keys.HAS_BASE_PLATE)
-                        .get(h -> !h.showBasePlate())
+                        .get(ArmorStand::showBasePlate)
                         .set((h, v) -> h.setNoBasePlate(!v))
                     .create(Keys.HAS_MARKER)
                         .get(ArmorStand::isMarker)

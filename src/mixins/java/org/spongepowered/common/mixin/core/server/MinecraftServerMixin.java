@@ -436,9 +436,12 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         if (isForced || this.tickCount % 6000 == 0) {
             // We want to save the username cache json, as we normally bypass it.
             final GameProfileCache profileCache = this.shadow$getProfileCache();
-            ((GameProfileCacheBridge) profileCache).bridge$setCanSave(true);
-            profileCache.save();
-            ((GameProfileCacheBridge) profileCache).bridge$setCanSave(false);
+            // The game test server has no profile cache
+            if (profileCache != null) {
+                ((GameProfileCacheBridge) profileCache).bridge$setCanSave(true);
+                profileCache.save();
+                ((GameProfileCacheBridge) profileCache).bridge$setCanSave(false);
+            }
         }
         // Sponge end
 
