@@ -260,13 +260,7 @@ sourceSets {
             property("version", version.toString())
             property("description", description.toString())
             property("neoForgeVersion", neoForgeVersion)
-            // mods.toml is how mixin configs reach Mixin on Neo, so only the gametest run and suite add the gametest configs.
-            // Read from the task graph rather than the requested task names: IntelliJ selects tests without naming tasks.
-            val gameTests = provider { gradle.taskGraph.allTasks.any { it.project == project && (it.name == "runGameTestServer" || it.name == "gameTest") } }
-            property("mixins", gameTests.map { enabled ->
-                val configs = if (enabled) mixinConfigs + "mixins.sponge.gametest.json" + "mixins.spongeneo.gametest.json" else mixinConfigs
-                configs.joinToString(",") { "{config=\"$it\"}" }
-            })
+            property("mixins", mixinConfigs.joinToString(",") { "{config=\"$it\"}" })
         }
     }
 
@@ -306,6 +300,24 @@ tasks {
     named(appLaunch.processResourcesTaskName) {
         dependsOn(emitDependencies)
     }
+
+    // mods.toml is how mixin configs reach Mixin on Neo, so the gametest runs get a copy that adds the gametest configs.
+    // FML gives later folders of a dev mod priority and DevClasspath sorts them by path, so "overrides" beats "main";
+    // only the gametest classpath has it, so test and gameTest can share a build.
+    val gameTestModsToml by registering(Sync::class) {
+        from(named(main.processResourcesTaskName)) {
+            include("META-INF/neoforge.mods.toml")
+            filter { line ->
+                if (line.startsWith("mixins = [")) {
+                    line.removeSuffix("]") + ",{config=\"mixins.sponge.gametest.json\"},{config=\"mixins.spongeneo.gametest.json\"}]"
+                } else {
+                    line
+                }
+            }
+        }
+        into(project.layout.buildDirectory.dir("resources/overrides"))
+    }
+    gametest.output.dir(mapOf("builtBy" to gameTestModsToml), gameTestModsToml.map { it.destinationDir })
 
     val servicesShadowJar by register("servicesShadowJar", ShadowJar::class) {
         group = "build"
