@@ -79,6 +79,7 @@ import net.minecraft.world.level.entity.PersistentEntitySectionManager;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gamerules.GameRuleMap;
 import net.minecraft.world.level.gamerules.GameRules;
+import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.saveddata.WeatherData;
 import net.minecraft.world.level.storage.LevelData;
@@ -122,6 +123,7 @@ import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.entity.MobAccessor;
@@ -447,7 +449,6 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         "saveLevelData",
         "findNearestMapStructure",
         "isFlat",
-        "getSeed",
         "enabledFeatures"
     }, at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWorldData()Lnet/minecraft/world/level/storage/WorldData;"))
     private WorldData impl$usePerWorldLevelData(final MinecraftServer server) {
@@ -456,6 +457,16 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
             return worldData;
         }
         return server.getWorldData();
+    }
+
+    @Inject(method = "getSeed", at = @At("HEAD"), cancellable = true)
+    private void impl$usePerWorldSeed(final CallbackInfoReturnable<Long> cir) {
+        if (levelData instanceof PrimaryLevelDataBridge bridge) {
+            final WorldOptions options = bridge.bridge$spongeData().worldGenOptions();
+            if (options != null) {
+                cir.setReturnValue(options.seed());
+            }
+        }
     }
 
     @Inject(method = "save", at = @At("HEAD"), cancellable = true)
