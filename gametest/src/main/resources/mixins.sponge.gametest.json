@@ -1,6 +1,7 @@
 {
     "required": true,
     "parent": "mixins.sponge.parent.json",
+    "plugin": "org.spongepowered.common.test.gametest.GameTestMixinPlugin",
     "package": "org.spongepowered.common.mixin.gametest",
     "mixins": [
         "GameTestHelperMixin_GameTest",
