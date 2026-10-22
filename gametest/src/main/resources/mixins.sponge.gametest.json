@@ -7,6 +7,7 @@
         "GameTestInfoMixin_GameTest",
         "GameTestRegistryMixin_GameTest",
         "GameTestServerMixin_GameTest",
-        "ServerLevel_EntityCallbacksMixin_GameTest"
+        "ServerLevel_EntityCallbacksMixin_GameTest",
+        "SyncSchedulerMixin_GameTest"
     ]
 }
