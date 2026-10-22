@@ -187,6 +187,7 @@ neoForge {
         create("gameTestServer") {
             type = "gameTestServer"
             sourceSet = gametest
+            jvmArgument(spongeImpl.gameTestRootsArgument())
             programArguments.addAll("--mixin.config", "mixins.sponge.gametest.json")
         }
     }

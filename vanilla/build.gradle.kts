@@ -264,6 +264,7 @@ minecraft {
             args("--nogui", "--launchTarget", "sponge_server_dev")
         }
         client() {
+            jvmArgs(spongeImpl.gameTestRootsArgument())
             args("--launchTarget", "sponge_client_dev")
         }
 
@@ -279,6 +280,7 @@ minecraft {
         server("gameTestServer") {
             sourceSet.set(gametest)
             ideaRunSourceSet.set(gametestLaunch)
+            jvmArgs(spongeImpl.gameTestRootsArgument())
             args("--launchTarget", "sponge_server_gametest")
             args("--mixin.config", "mixins.sponge.gametest.json", "--mixin.config", "mixins.spongevanilla.gametest.json")
             args("--report", "gametest-report.xml") // relative to run/

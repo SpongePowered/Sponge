@@ -150,10 +150,8 @@ dependencies {
         exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
     }
 
-    // The JUnit engine that runs the gametests, and @Testable for IDE run icons; each platform's gameTest task supplies the runtime
-    val gametestCompileOnly = gametest.get().compileOnlyConfigurationName
-    gametestCompileOnly(platform(apiLibs.junit.bom))
-    gametestCompileOnly(apiLibs.junit.launcher)
+    // The gametest framework; each platform's gameTest task supplies the JUnit runtime
+    add(gametest.get().implementationConfigurationName, project(":sponge-gametest"))
 }
 
 minecraft {

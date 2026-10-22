@@ -28,52 +28,60 @@ import io.leangen.geantyref.TypeToken;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.gametest.framework.TestFunction;
 import net.minecraft.world.level.block.Rotation;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.EventListenerRegistration;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.common.test.gametest.block.ChangeBlockEventGameTests;
-import org.spongepowered.common.test.gametest.block.NeighborNotificationGameTests;
-import org.spongepowered.common.test.gametest.block.PistonGameTests;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.ServiceLoader;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
- * Collects every gametest visible to the running platform: the {@link GameTest}
- * methods of the common classes listed here, plus those of the platform classes
- * that implement {@link Provider} and are listed in {@code META-INF/services}.
- *
- * <p>Common classes are listed in code rather than in a service file because
- * all Sponge source sets are unioned into one module in development, where
- * same-named resources shadow each other and only one service file would win.</p>
+ * Collects every gametest of the running launch: the {@link GameTest} methods of every {@link GameTestGroup} class
+ * under the roots the build names, whether Sponge's own or a plugin's.
  */
 public final class SpongeGameTests {
 
-    /** Marks a platform's gametest class, so it can be listed in {@code META-INF/services} */
-    public interface Provider {
-    }
+    /**
+     * Where the gametest classes are, as the build knows: {@code [<plugin id>=]<path>&<path>;...}, each path a directory
+     * of compiled classes or a jar. Sponge's own roots name no plugin, so its tests are unprefixed.
+     */
+    public static final String ROOTS = "sponge.gametest.roots";
 
-    private static final List<Class<?>> COMMON = List.of(
-        ChangeBlockEventGameTests.class,
-        NeighborNotificationGameTests.class,
-        PistonGameTests.class
-    );
     private static final Pattern WORD_START = Pattern.compile("(?<=[a-z0-9])(?=[A-Z])");
-    // 1.21.1 ships no empty test structure, so the default is ours
+    // 1.21.1 ships no empty test structure, so the default is ours, served from the Sponge plugin's own resources
     private static final String EMPTY = "minecraft:empty";
     private static final String SPONGE_EMPTY = "sponge:empty";
+    private static final String GROUP = Type.getDescriptor(GameTestGroup.class);
+    // Each found test class and the plugin its root names, if any
+    private static final Map<Class<?>, String> OWNERS = new HashMap<>();
 
     public static List<TestFunction> all() {
         return Holder.ALL;
@@ -92,13 +100,15 @@ public final class SpongeGameTests {
         return SpongeGameTests.group(method) + "." + SpongeGameTests.WORD_START.matcher(method.getName()).replaceAll("_").toLowerCase();
     }
 
-    /** Runs every test of the class with {@code /test runall <group>} */
+    /** Runs every test of the class with {@code /test runall <group>}; a plugin's groups carry its id */
     public static String group(final Method method) {
-        final GameTestGroup group = method.getDeclaringClass().getAnnotation(GameTestGroup.class);
+        final Class<?> type = method.getDeclaringClass();
+        final GameTestGroup group = type.getAnnotation(GameTestGroup.class);
         if (group == null) {
-            throw new IllegalStateException(method.getDeclaringClass().getName() + " has gametests but no @GameTestGroup");
+            throw new IllegalStateException(type.getName() + " has gametests but no @GameTestGroup");
         }
-        return group.value();
+        final String plugin = group.plugin().isEmpty() ? SpongeGameTests.OWNERS.getOrDefault(type, "") : group.plugin();
+        return plugin.isEmpty() ? group.value() : plugin + "." + group.value();
     }
 
     public static <E extends Event> void listen(final Class<E> type, final EventListener<? super E> listener) {
@@ -157,14 +167,84 @@ public final class SpongeGameTests {
         };
     }
 
-    // Resolved once, when GameTestRegistry is first loaded
+    // Resolved once, when GameTestRegistry is first loaded; every plugin is in the game layer by then
     private static final class Holder {
-        static final List<TestFunction> ALL = Stream.concat(
-                SpongeGameTests.COMMON.stream(),
-                ServiceLoader.load(Provider.class, Provider.class.getClassLoader()).stream().map(ServiceLoader.Provider::type)
-            )
-            .flatMap(SpongeGameTests::tests)
-            .toList();
+        static final List<TestFunction> ALL = SpongeGameTests.scan().stream().flatMap(SpongeGameTests::tests).toList();
+    }
+
+    /**
+     * Every {@link GameTestGroup} class under the {@link #ROOTS}, read with ASM so that only test classes are loaded.
+     * The roots only say where to look: the classes load through the game layer, so each root must be part of a
+     * loaded plugin, as a plugin's test output is part of the plugin under test.
+     */
+    private static List<Class<?>> scan() {
+        final @Nullable String roots = System.getProperty(SpongeGameTests.ROOTS);
+        if (roots == null || roots.isBlank()) {
+            throw new IllegalStateException("No gametest roots: the build passes -D" + SpongeGameTests.ROOTS + "=[<plugin id>=]<path>&<path>;...");
+        }
+        final Set<Class<?>> found = new LinkedHashSet<>();
+        for (final String entry : roots.split(";")) {
+            final int equals = entry.indexOf('=');
+            final String prefix = equals < 0 ? "" : entry.substring(0, equals);
+            // A path may hold '=', but a plugin id never holds a path separator
+            final @Nullable String owner = prefix.isEmpty() || prefix.indexOf('/') >= 0 || prefix.indexOf('\\') >= 0 ? null : prefix;
+            for (final String path : (owner == null ? entry : entry.substring(equals + 1)).split("&")) {
+                if (!path.isEmpty()) {
+                    SpongeGameTests.scan(Path.of(path), owner, found);
+                }
+            }
+        }
+        return List.copyOf(found);
+    }
+
+    private static void scan(final Path path, final @Nullable String owner, final Set<Class<?>> found) {
+        if (Files.isDirectory(path)) {
+            SpongeGameTests.scanRoot(path, owner, found);
+        } else if (Files.isRegularFile(path)) {
+            try (final FileSystem jar = FileSystems.newFileSystem(path)) {
+                SpongeGameTests.scanRoot(jar.getPath("/"), owner, found);
+            } catch (final IOException e) {
+                throw new UncheckedIOException("Opening " + path + " for gametests", e);
+            }
+        }
+        // A root that isn't there holds no tests: a source set with nothing in it is never compiled
+    }
+
+    private static void scanRoot(final Path root, final @Nullable String owner, final Set<Class<?>> found) {
+        try (final Stream<Path> files = Files.walk(root)) {
+            for (final Path file : files.filter(file -> file.toString().endsWith(".class")).toList()) {
+                final String name = root.relativize(file).toString().replace(root.getFileSystem().getSeparator(), "/");
+                if (name.startsWith("META-INF/") || name.equals("module-info.class")) {
+                    continue;
+                }
+                try (final InputStream in = Files.newInputStream(file)) {
+                    if (SpongeGameTests.isGroup(in)) {
+                        // One loader serves the whole game layer, so this one reaches every plugin's classes
+                        final Class<?> type = Class.forName(name.substring(0, name.length() - ".class".length()).replace('/', '.'), false, SpongeGameTests.class.getClassLoader());
+                        if (owner != null) {
+                            SpongeGameTests.OWNERS.put(type, owner);
+                        }
+                        found.add(type);
+                    }
+                }
+            }
+        } catch (final IOException e) {
+            throw new UncheckedIOException("Scanning " + root + " for gametests", e);
+        } catch (final ClassNotFoundException e) {
+            throw new IllegalStateException("Gametest class under " + root + " is not in a loaded plugin", e);
+        }
+    }
+
+    private static boolean isGroup(final InputStream in) throws IOException {
+        final boolean[] group = new boolean[1];
+        new ClassReader(in).accept(new ClassVisitor(Opcodes.ASM9) {
+            @Override
+            public AnnotationVisitor visitAnnotation(final String descriptor, final boolean visible) {
+                group[0] |= SpongeGameTests.GROUP.equals(descriptor);
+                return null;
+            }
+        }, ClassReader.SKIP_CODE | ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
+        return group[0];
     }
 
     private SpongeGameTests() {

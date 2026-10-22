@@ -257,6 +257,7 @@ minecraft {
         // Minecraft gametests (common + forge); exits non-zero when a required test fails
         create("gameTestServer") {
             source(gametest)
+            jvmArgs(spongeImpl.gameTestRootsArgument())
             // Forge runs the server Main, which takes no --report; JUnit through gameTest reports instead
             args("--mixin.config", "mixins.sponge.gametest.json")
         }
