@@ -87,8 +87,10 @@ public final class SpongeGameTests {
         return Holder.ALL;
     }
 
+    /** Whether the method is a gametest this launch can run: a {@link GameTest#client()} test only where a client is present */
     public static boolean isTest(final Method method) {
-        return method.isAnnotationPresent(GameTest.class);
+        final GameTest test = method.getAnnotation(GameTest.class);
+        return test != null && (!test.client() || !Launch.instance().dedicatedServer());
     }
 
     /**
