@@ -175,6 +175,8 @@ neoForge {
             type = "gameTestServer"
             sourceSet = gametest
             mainClass = "org.spongepowered.bootstrap.neoforge.DevGameTestServer"
+            jvmArgument("-Dsponge.gametest=true") // the gametest mixins only apply to a game test run
+            jvmArgument(spongeImpl.gameTestRootsArgument())
             programArguments.addAll("--report", "gametest-report.xml") // relative to run/
         }
     }
@@ -301,15 +303,18 @@ tasks {
         dependsOn(emitDependencies)
     }
 
-    // mods.toml is how mixin configs reach Mixin on Neo, so the gametest runs get a copy that adds the gametest configs.
+    // mods.toml is how mixin configs reach Mixin on Neo, so the gametest runs get a copy that adds the Neo gametest config
+    // (sponge-gametest names its own in its manifest).
     // FML gives later folders of a dev mod priority and DevClasspath sorts them by path, so "overrides" beats "main";
     // only the gametest classpath has it, so test and gameTest can share a build.
     val gameTestModsToml by registering(Sync::class) {
+        val gameTestConfig = "mixins.spongeneo.gametest.json"
+        inputs.property("gameTestConfig", gameTestConfig) // the filter below isn't an input on its own
         from(named(main.processResourcesTaskName)) {
             include("META-INF/neoforge.mods.toml")
             filter { line ->
                 if (line.startsWith("mixins = [")) {
-                    line.removeSuffix("]") + ",{config=\"mixins.sponge.gametest.json\"},{config=\"mixins.spongeneo.gametest.json\"}]"
+                    line.removeSuffix("]") + ",{config=\"$gameTestConfig\"}]"
                 } else {
                     line
                 }
