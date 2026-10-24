@@ -93,14 +93,13 @@ public final class GameTestLaunch extends VanillaLaunch {
             .defaultsTo("gametestserver");
         final OptionSpec<File> report = parser.accepts("report", "Exports results in a junit-like XML report at the given path")
             .withRequiredArg()
-            .ofType(File.class);
+            .ofType(File.class)
+            .defaultsTo(new File("gametest-report.xml"));
         final OptionSpec<String> tests = parser.accepts("tests", "Which tests to run by name, with * as a wildcard, e.g. piston.*")
             .withRequiredArg();
         final OptionSet options = parser.parse(args);
 
-        if (options.has(report)) {
-            GlobalTestReporter.replaceWith(new JUnitLikeTestReporter(options.valueOf(report)));
-        }
+        GlobalTestReporter.replaceWith(new JUnitLikeTestReporter(options.valueOf(report)));
         Bootstrap.bootStrap();
         Util.startTimerHackThread();
 

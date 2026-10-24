@@ -279,6 +279,7 @@ minecraft {
         server("gameTestServer") {
             sourceSet.set(gametest)
             ideaRunSourceSet.set(gametestLaunch)
+            jvmArgs(spongeImpl.gameTestRootsArgument())
             args("--launchTarget", "sponge_server_gametest")
             args("--mixin.config", "mixins.sponge.gametest.json", "--mixin.config", "mixins.spongevanilla.gametest.json")
             args("--report", "gametest-report.xml") // relative to run/
@@ -287,6 +288,8 @@ minecraft {
         client("gameTestClient") {
             sourceSet.set(gametest)
             ideaRunSourceSet.set(gametestLaunch)
+            jvmArgs(spongeImpl.gameTestRootsArgument())
+            jvmArgs("-Dsponge.gametest=true") // the gametest mixins only apply to a game test run
             args("--launchTarget", "sponge_client_dev")
             // 1.21.1 only ticks gametests and registers /test from Mojang's IDE setup; the vanilla gametest mixins turn both on
             args("--mixin.config", "mixins.sponge.gametest.json", "--mixin.config", "mixins.spongevanilla.gametest.json")

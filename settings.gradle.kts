@@ -66,6 +66,9 @@ include("modlauncher-transformers")
 include("library-manager")
 include("bootstrap")
 include("generator")
+// The gametest framework plugins test against, published as org.spongepowered:sponge-gametest
+include("sponge-gametest")
+project(":sponge-gametest").projectDir = file("gametest")
 
 // Optional projects
 
@@ -92,6 +95,9 @@ if (projectsArg == null) {
 if (projects.contains("vanilla")) {
     include(":SpongeVanilla")
     project(":SpongeVanilla").projectDir = file("vanilla")
+    // Runs gametests on SpongeVanilla, published as org.spongepowered:spongevanilla-gametest
+    include(":spongevanilla-gametest")
+    project(":spongevanilla-gametest").projectDir = file("vanilla/gametest")
 }
 
 if (projects.contains("forge")) {

@@ -190,7 +190,7 @@ public final class SpongeGameTestEngine implements TestEngine {
                 .findFirst();
             if (function.isEmpty()) {
                 listener.executionFinished(test, TestExecutionResult.failed(new IllegalStateException(
-                    test.name + " is not registered: list its class in SpongeGameTests, or in META-INF/services for a platform test")));
+                    test.name + " is not registered: its class must be in a plugin of the game layer with @GameTestGroup")));
                 continue;
             }
             final GameTestInfo info = new GameTestInfo(function.get(), Rotation.NONE, level, RetryOptions.noRetries());

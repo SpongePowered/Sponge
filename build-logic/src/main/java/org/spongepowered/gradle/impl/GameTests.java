@@ -27,7 +27,6 @@ package org.spongepowered.gradle.impl;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
-import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.internal.tasks.testing.filter.DefaultTestFilter;
 import org.gradle.api.plugins.JavaPlugin;
@@ -44,6 +43,7 @@ import org.gradle.plugins.ide.idea.model.IdeaModule;
 import org.gradle.process.CommandLineArgumentProvider;
 import org.gradle.testing.jacoco.plugins.JacocoTaskExtension;
 import org.gradle.testing.jacoco.tasks.JacocoReport;
+import javax.annotation.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,7 +54,9 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -97,12 +99,23 @@ final class GameTests {
                 c -> c.extendsFrom(configurations.getByName(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME)));
             configurations.named(set.getRuntimeOnlyConfigurationName(),
                 c -> c.extendsFrom(configurations.getByName(JavaPlugin.RUNTIME_ONLY_CONFIGURATION_NAME)));
-            // The common compile-only dependencies, JUnit's @Testable among them, which IntelliJ needs to offer run icons
-            final Configuration commonCompileOnly = GameTests.parent(project).getConfigurations()
-                .getByName(common.getByName(GameTests.SOURCE_SET).getCompileOnlyConfigurationName());
-            configurations.named(set.getCompileOnlyConfigurationName(),
-                c -> c.getDependencies().addAllLater(project.provider(commonCompileOnly::getDependencies)));
+            // The framework, which brings JUnit's @Testable along for IntelliJ's run icons, and the platform's runner
+            // module when it has one, e.g. :spongevanilla-gametest for SpongeVanilla
+            project.getDependencies().add(set.getImplementationConfigurationName(), project.project(":sponge-gametest"));
+            final @Nullable Project runner = project.getRootProject().findProject(":" + project.getName().toLowerCase(Locale.ROOT) + "-gametest");
+            if (runner != null) {
+                project.getDependencies().add(set.getRuntimeOnlyConfigurationName(), runner);
+            }
         });
+    }
+
+    /** Where Sponge's own gametests are, the common and this platform's gametest classes, for the gametest engine */
+    static String rootsArgument(final Project project) {
+        final SourceSet gametest = GameTests.sourceSets(project).getByName(GameTests.SOURCE_SET);
+        final SourceSet common = GameTests.sourceSets(GameTests.parent(project)).getByName(GameTests.SOURCE_SET);
+        return "-Dsponge.gametest.roots=" + common.getOutput().getClassesDirs().plus(gametest.getOutput().getClassesDirs()).getFiles().stream()
+            .map(File::getAbsolutePath)
+            .collect(Collectors.joining("&"));
     }
 
     static void register(final Project project, final Action<? super GameTestSettings> configure) {
