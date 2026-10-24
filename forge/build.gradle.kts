@@ -154,7 +154,11 @@ val main by sourceSets.named("main") {
     spongeImpl.addDependencyToRuntimeOnly(bootstrapForge.get(), this)
 }
 // Forge-only gametests and gametest mixins; the common gametests come along through the root project's
-val gametest = spongeImpl.gameTestSourceSet()
+val gametest = spongeImpl.gameTestSourceSet().apply {
+    // For GameTestServerBoot, the gameTestServer run's main class
+    spongeImpl.addDependencyToImplementation(bootstrapMain.get(), this)
+    spongeImpl.addDependencyToImplementation(bootstrapForge.get(), this)
+}
 val testSources = sourceSets.named("test") {
     spongeImpl.addDependencyToImplementation(commonTest.get(), this)
 
@@ -255,6 +259,8 @@ minecraft {
 
         // Minecraft gametests (common + forge); exits non-zero when a required test fails
         create("gameTestServer") {
+            ideaModule("Sponge.SpongeForge.gametest") // main's module has neither the gametests nor sponge-gametest
+            main("org.spongepowered.forge.test.gametest.GameTestServerBoot")
             source(gametest)
             jvmArgs("-Dsponge.gametest=true") // the gametest mixins only apply to a game test run
             jvmArgs(spongeImpl.gameTestRootsArgument())

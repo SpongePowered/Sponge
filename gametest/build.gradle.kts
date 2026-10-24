@@ -1,3 +1,6 @@
+import org.gradle.internal.DefaultTaskExecutionRequest
+import org.spongepowered.gradle.impl.IdeHelper
+
 plugins {
     id("org.spongepowered.gradle.vanilla")
     id("implementation-structure")
@@ -49,12 +52,36 @@ dependencies {
     runtimeOnly(apiLibs.junit.launcher)
 }
 
+val manifestAttributes = mapOf(
+    "Automatic-Module-Name" to "sponge.gametest",
+    "MixinConfigs" to "mixins.sponge.gametest.json"
+)
+
+// The same manifest as a folder of the main output, so a dev classpath of folders carries MixinConfigs too: on Neo
+// that is how the gametest mixins load, from the jar or, in IntelliJ, from this folder beside out/
+val devManifest by tasks.registering {
+    val output = layout.buildDirectory.dir("generated/devManifest")
+    inputs.property("attributes", manifestAttributes)
+    outputs.dir(output)
+    doLast {
+        val manifest = output.get().file("META-INF/MANIFEST.MF").asFile
+        manifest.parentFile.mkdirs()
+        manifest.writeText("Manifest-Version: 1.0\n" + manifestAttributes.entries.joinToString("") { "${it.key}: ${it.value}\n" })
+    }
+}
+sourceSets.main {
+    output.dir(mapOf("builtBy" to devManifest), devManifest.map { it.outputs.files.singleFile })
+}
+
 tasks.jar {
-    manifest {
-        attributes(
-            "Automatic-Module-Name" to "sponge.gametest",
-            "MixinConfigs" to "mixins.sponge.gametest.json"
-        )
+    manifest.attributes(manifestAttributes)
+    exclude("META-INF/MANIFEST.MF") // the folder's copy; the jar writes its own
+}
+
+// IntelliJ builds without Gradle, so the folder is made when the project syncs
+if (IdeHelper.isIdeaSync()) {
+    afterEvaluate {
+        gradle.startParameter.taskRequests.add(DefaultTaskExecutionRequest(listOf(":sponge-gametest:devManifest")))
     }
 }
 
