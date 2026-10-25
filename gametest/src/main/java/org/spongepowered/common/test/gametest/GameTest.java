@@ -67,4 +67,10 @@ public @interface GameTest {
      * cancelled, needs this to keep it that way once the test is over.
      */
     boolean skyAccess() default false;
+
+    /**
+     * Needs the Minecraft client in the same JVM, as a {@code gameTestClient} run has: a screen or widget test.
+     * Skipped by the dedicated and game test servers, so it never runs through {@code gameTest} or JUnit.
+     */
+    boolean client() default false;
 }

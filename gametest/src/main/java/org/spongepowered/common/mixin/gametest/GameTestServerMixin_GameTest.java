@@ -31,6 +31,7 @@ import net.minecraft.gametest.framework.GameTestServer;
 import net.minecraft.gametest.framework.MultipleTestTracker;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.players.CachedUserNameToIdResolver;
 import org.spongepowered.api.Server;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -39,9 +40,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
+import org.spongepowered.common.bridge.server.players.GameProfileCacheBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
+
+import java.io.File;
 
 /**
  * Sponge only publishes dedicated and integrated servers, and only tracks the
@@ -54,6 +58,9 @@ public abstract class GameTestServerMixin_GameTest implements MinecraftServerBri
     @Shadow private MultipleTestTracker testTracker;
     // @formatter:on
 
+    // The services hold a mock resolver Sponge doesn't mix into; this one stays out of them, so it's never saved
+    private final GameProfileCacheBridge gametest$profileCache = (GameProfileCacheBridge) new CachedUserNameToIdResolver(null, new File("usercache.json"));
+
     @Inject(method = "<init>", at = @At("TAIL"))
     private void gametest$setServerOnGame(final CallbackInfo ci) {
         SpongeCommon.game().setServer((Server) this);
@@ -63,6 +70,11 @@ public abstract class GameTestServerMixin_GameTest implements MinecraftServerBri
     @Override
     public boolean bridge$performAutosaveChecks() {
         return false;
+    }
+
+    @Override
+    public GameProfileCacheBridge bridge$profileCache() {
+        return this.gametest$profileCache;
     }
 
     // Test structures are spawned after super.tickServer() returns, outside the tracked server tick.

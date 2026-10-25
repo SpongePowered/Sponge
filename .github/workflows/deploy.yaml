@@ -35,9 +35,12 @@ jobs:
         include:
           - project: common
             gradleProject: ''
+            # Published apart: a project path's publish task skips its subprojects
+            extraPublish: ':sponge-gametest:publish'
             skipUpdateBranch: false
           - project: vanilla
             gradleProject: ':SpongeVanilla'
+            extraPublish: ':spongevanilla-gametest:publish'
             skipUpdateBranch: false
           - project: forge
             gradleProject: ':SpongeForge'
@@ -72,7 +75,7 @@ jobs:
           echo "BUILD_NUMBER=${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
       - name: Publish to Sponge Maven & GitHub Packages
         if: "!(matrix.skipUpdateBranch && startsWith(github.ref, 'refs/heads/update/'))"
-        run: ./gradlew -s -Pprojects=${{ matrix.project }} ${{ matrix.gradleProject }}:publish
+        run: ./gradlew -s -Pprojects=${{ matrix.project }} ${{ matrix.gradleProject }}:publish ${{ matrix.extraPublish }}
         env:
           CI_SYSTEM: Github Actions
           GITHUB_USERNAME: "${{ github.actor }}"
