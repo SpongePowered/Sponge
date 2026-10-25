@@ -40,6 +40,7 @@ import org.spongepowered.vanilla.applaunch.plugin.discovery.SecureJarPluginResou
 import org.spongepowered.vanilla.applaunch.transformation.VanillaAccessWidenerTransformer;
 import org.spongepowered.vanilla.applaunch.transformation.VanillaSuperclassChangeTransformer;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -79,7 +80,7 @@ public final class VanillaTransformationService implements ITransformationServic
 
                 if (mixin != null) {
                     final Path path = jarResource.jar().getPrimaryPath();
-                    mixin.offerResource(path, path.getFileName().toString());
+                    mixin.offerResource(VanillaTransformationService.mixinRoot(jarResource), path.getFileName().toString());
 
                     if (resource.property(org.spongepowered.asm.util.Constants.ManifestAttributes.MIXINCONFIGS).isPresent()) {
                         if (candidate.metadata().stream().noneMatch(m -> "spongevanilla".equals(m.id()))) {
@@ -99,6 +100,16 @@ public final class VanillaTransformationService implements ITransformationServic
         }
 
         return List.of(new Resource(IModuleLayerManager.Layer.GAME, gameLibs));
+    }
+
+    /**
+     * Mixin reads {@code MixinConfigs} from {@code META-INF/MANIFEST.MF} under the offered path. A resource made of
+     * directories, as a dev workspace is, keeps that manifest in whichever of them holds the resources, so the union
+     * root is offered: Mixin reads it through NIO.
+     */
+    private static Path mixinRoot(final SecureJarPluginResource resource) {
+        final Path path = resource.jar().getPrimaryPath();
+        return Files.isDirectory(path) ? resource.jar().getRootPath() : path;
     }
 
     @SuppressWarnings("rawtypes")

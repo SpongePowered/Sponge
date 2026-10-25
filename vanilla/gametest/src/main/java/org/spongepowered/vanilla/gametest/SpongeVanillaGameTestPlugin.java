@@ -22,17 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.test.gametest;
+package org.spongepowered.vanilla.gametest;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.spongepowered.plugin.builtin.jvm.Plugin;
 
-/** The id prefix of every {@link GameTest} in the class: {@code sponge:<value>/<method_name>} */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface GameTestGroup {
-
-    String value();
+/** The runner module as a plugin; see {@code SpongeGameTestPlugin} */
+@Plugin("spongevanilla_gametest")
+public final class SpongeVanillaGameTestPlugin {
 }

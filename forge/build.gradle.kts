@@ -1,4 +1,6 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.jetbrains.gradle.ext.runConfigurations
+import org.jetbrains.gradle.ext.settings
 import org.spongepowered.gradle.impl.AWToAT
 
 buildscript {
@@ -270,6 +272,8 @@ minecraft {
 
         // Minecraft gametests (common + forge); exits non-zero when a required test fails
         register("gameTestServer") {
+            jvmArgs("-Dsponge.gametest=true") // the gametest mixins only apply to a game test run
+            jvmArgs(spongeImpl.gameTestRootsArgument())
             args("--mixin.config", "mixins.sponge.gametest.json", "--mixin.config", "mixins.spongeforge.gametest.json")
             args("--report", "gametest-report.xml") // relative to run/
         }
@@ -480,6 +484,13 @@ spongeImpl.gameTests {
     bootArguments = provider { listOf("--launchTarget", "forge_userdev_server_gametest") + run.args.get() }
     jvmArguments = provider { run.jvmArgs.get() }
     gameClassLoader = "cpw.mods.modlauncher.TransformingClassLoader"
+}
+// FG7 makes no IntelliJ run configurations, so IntelliJ runs the gametest server through FG7's run task
+rootProject.extensions.getByType<org.gradle.plugins.ide.idea.model.IdeaModel>().project.settings.runConfigurations {
+    register("SpongeForge gameTestServer", org.jetbrains.gradle.ext.Gradle::class.java) {
+        projectPath = rootDir.absolutePath
+        taskNames = listOf(":SpongeForge:runGametestGameTestServer")
+    }
 }
 tasks.named("gameTest", Test::class) {
     // Mockito sits on the module path, as for test

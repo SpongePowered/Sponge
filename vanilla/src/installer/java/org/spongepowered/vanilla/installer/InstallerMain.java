@@ -176,6 +176,11 @@ public final class InstallerMain {
         for (final Path lib : gameLibs) {
             resourcesEnv.add(lib.toAbsolutePath().toString());
         }
+        // Kept after ours: what the launch already asked for, like a plugin's libraries on a run without its jar
+        final String launchResources = System.getProperty("sponge.resources");
+        if (launchResources != null && !launchResources.isBlank()) {
+            resourcesEnv.add(launchResources);
+        }
         System.setProperty("sponge.resources", resourcesEnv.toString());
 
         final List<String> gameArgs = new ArrayList<>(LauncherCommandLine.remainingArgs);
