@@ -176,6 +176,8 @@ neoForge {
             type = "gameTestServer"
             sourceSet = gametest
             mainClass = "org.spongepowered.bootstrap.neoforge.DevGameTestServer"
+            jvmArgument("-Dsponge.gametest=true") // the gametest mixins only apply to a game test run
+            jvmArgument(spongeImpl.gameTestRootsArgument())
             programArguments.addAll("--report", "gametest-report.xml") // relative to run/
         }
     }
@@ -319,12 +321,13 @@ tasks {
         }
     }
 
-    // The dev manifest is how mixin configs reach Mixin on Neo, so the gametest runs get a copy that adds the gametest configs.
+    // The dev manifest is how mixin configs reach Mixin on Neo, so the gametest runs get a copy that adds the Neo gametest config
+    // (sponge-gametest names its own in its manifest).
     // FML takes the manifest of a dev mod's last folder and DevClasspath sorts them by path, so "overrides" beats "main";
     // only the gametest classpath has it, so test and gameTest can share a build.
     val gameTestManifest by registering {
         val directory = project.layout.buildDirectory.dir("resources/overrides")
-        val configs = provider { (mixinConfigs + "mixins.sponge.gametest.json" + "mixins.spongeneo.gametest.json").toList() }
+        val configs = provider { (mixinConfigs + "mixins.spongeneo.gametest.json").toList() }
         inputs.property("mixinConfigs", configs)
         outputs.dir(directory)
         doLast {

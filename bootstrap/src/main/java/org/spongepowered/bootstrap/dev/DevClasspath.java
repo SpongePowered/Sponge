@@ -35,6 +35,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 public class DevClasspath {
 
@@ -47,6 +48,7 @@ public class DevClasspath {
         final String[] cp = System.getProperty("java.class.path").split(File.pathSeparator);
         final Path spongeRoot = Paths.get(System.getProperty("sponge.dev.root")).toAbsolutePath();
         final Set<String> bootNames = Set.of(System.getProperty("sponge.dev.boot").split(File.pathSeparator));
+        final Set<String> bootArtifacts = bootNames.stream().map(DevClasspath::withoutVersion).collect(Collectors.toSet());
         final Set<String> gameShadedNames = Set.of(System.getProperty("sponge.dev.gameShaded").split(File.pathSeparator));
 
         // boot layer
@@ -100,7 +102,10 @@ public class DevClasspath {
                             }
                             break;
                         case "", "vanilla", "forge", "neoforge":
-                            final WeightedPath weightedPath = new WeightedPath(projectName.isEmpty() ? 1 : 2, path);
+                            // A platform's "overrides" resources replace its own (e.g. the gametest manifest): later folders win,
+                            // and IntelliJ's out/ would otherwise sort after Gradle's build/resources/overrides
+                            final int weight = projectName.isEmpty() ? 1 : sourceSet.name().equals("overrides") ? 3 : 2;
+                            final WeightedPath weightedPath = new WeightedPath(weight, path);
                             switch (sourceSet.name()) {
                                 case "applaunchConfig":
                                 case "applaunch":
@@ -148,6 +153,15 @@ public class DevClasspath {
                     System.out.println("Boot: " + path);
                 }
                 bootLibs.add(path);
+                continue;
+            }
+
+            // IntelliJ puts compile-only versions on the run classpath too (e.g. NeoForm's mergetool beside FML's);
+            // a second copy of a boot library would load its classes again in the game layer
+            if (bootArtifacts.contains(DevClasspath.withoutVersion(fileName))) {
+                if (Bootstrap.DEBUG) {
+                    System.out.println("Ignored, another version of a boot library: " + path);
+                }
                 continue;
             }
 
@@ -208,5 +222,13 @@ public class DevClasspath {
         System.setProperty("sponge.resources", resourcesEnv);
 
         return classpath;
+    }
+
+    /**
+     * {@code mergetool-2.0.7-api.jar} as {@code mergetool-api.jar}: the version is the first run of dash-separated parts
+     * starting with a digit, so {@code annotations-26.0.2-1.jar} is {@code annotations.jar}
+     */
+    static String withoutVersion(final String fileName) {
+        return fileName.replaceFirst("-\\d[^-]*(?:-\\d[^-]*)*(?=-\\D|\\.jar$)", "");
     }
 }

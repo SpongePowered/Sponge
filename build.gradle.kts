@@ -105,7 +105,6 @@ val main by sourceSets.named("main") {
 // Minecraft gametests shared by all platforms; each platform's gametest source set depends on this and provides the runner
 val gametest by sourceSets.registering {
     spongeImpl.addDependencyToImplementation(applaunch.get(), this)
-    spongeImpl.addDependencyToImplementation(accessors.get(), this)
     spongeImpl.addDependencyToImplementation(main, this)
 
     configurations.named(implementationConfigurationName) {
@@ -155,10 +154,8 @@ dependencies {
 
     testImplementation(libs.mixin)
 
-    // The JUnit engine that runs the gametests, and @Testable for IDE run icons; each platform's gameTest task supplies the runtime
-    val gametestCompileOnly = gametest.get().compileOnlyConfigurationName
-    gametestCompileOnly(platform(apiLibs.junit.bom))
-    gametestCompileOnly(apiLibs.junit.launcher)
+    // The gametest framework; each platform's gameTest task supplies the JUnit runtime
+    add(gametest.get().implementationConfigurationName, project(":sponge-gametest"))
 }
 
 minecraft {

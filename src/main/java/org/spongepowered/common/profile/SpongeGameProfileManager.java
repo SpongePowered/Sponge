@@ -25,7 +25,6 @@
 package org.spongepowered.common.profile;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,6 +35,7 @@ import org.spongepowered.api.profile.GameProfileCache;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.profile.GameProfileProvider;
 import org.spongepowered.common.SpongeServer;
+import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.server.players.GameProfileCacheBridge;
 import org.spongepowered.common.bridge.server.players.GameProfileCache_GameProfileInfoBridge;
 import org.spongepowered.common.launch.config.core.SpongeConfigs;
@@ -67,7 +67,7 @@ public final class SpongeGameProfileManager implements GameProfileManager {
 
     public SpongeGameProfileManager(final Server server) {
         this.usernameCache = ((SpongeServer) server).getUsernameCache();
-        this.cache = (GameProfileCacheBridge) ((MinecraftServer) server).services().nameToIdCache();
+        this.cache = ((MinecraftServerBridge) server).bridge$profileCache();
         this.gameLookupExecutorService = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
             .setNameFormat("Sponge - Async User Lookup Thread").build());
     }

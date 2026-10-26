@@ -153,7 +153,7 @@ public final class SpongeGameTestEngine implements TestEngine {
                 .get(ResourceKey.create(Registries.TEST_INSTANCE, test.id));
             if (instance.isEmpty()) {
                 listener.executionFinished(test, TestExecutionResult.failed(new IllegalStateException(
-                    test.id + " is not registered: list its class in SpongeGameTests, or in META-INF/services for a platform test")));
+                    test.id + " is not registered: its class must be in a plugin of the game layer with @GameTestGroup")));
                 continue;
             }
             final @Nullable ServerLevel level = server.getLevel(instance.get().value().dimension());
