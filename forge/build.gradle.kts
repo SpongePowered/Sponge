@@ -260,6 +260,8 @@ minecraft {
         // Minecraft gametests (common + forge); exits non-zero when a required test fails
         create("gameTestServer") {
             source(gametest)
+            jvmArgs("-Dsponge.gametest=true") // the gametest mixins only apply to a game test run
+            jvmArgs(spongeImpl.gameTestRootsArgument())
             args("--mixin.config", "mixins.sponge.gametest.json", "--mixin.config", "mixins.spongeforge.gametest.json")
         }
     }
