@@ -245,6 +245,11 @@ public abstract class SpongeImplementationExtension {
         GameTests.register(this.project, configure);
     }
 
+    /** The JVM argument telling the gametest engine where Sponge's own gametests are, for every game test run */
+    public String gameTestRootsArgument() {
+        return GameTests.rootsArgument(this.project);
+    }
+
     /**
      * Get all mixin configurations that should be applied to this project
      * @return the mixin configuration files that should be applied to this project

@@ -28,6 +28,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.StainedGlassBlock;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.common.accessor.world.level.block.StainedGlassBlockAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class StainedGlassBlockData {
@@ -40,7 +41,7 @@ public final class StainedGlassBlockData {
         registrator
                 .asImmutable(Block.class)
                     .create(Keys.DYE_COLOR)
-                        .get(h -> (DyeColor) (Object) ((StainedGlassBlock) h).getColor())
+                        .get(h -> (DyeColor) (Object) ((StainedGlassBlockAccessor) h).accessor$color())
                         .supports(h -> h instanceof StainedGlassBlock);
     }
     // @formatter:on

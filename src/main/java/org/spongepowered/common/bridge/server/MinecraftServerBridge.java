@@ -25,9 +25,11 @@
 package org.spongepowered.common.bridge.server;
 
 import net.kyori.adventure.resource.ResourcePackRequest;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.thread.BlockableEventLoop;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.registry.RegistryHolder;
+import org.spongepowered.common.bridge.server.players.GameProfileCacheBridge;
 import org.spongepowered.common.registry.RegistryHolderLogic;
 import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
 import org.spongepowered.common.user.SpongeUserManager;
@@ -41,6 +43,10 @@ public interface MinecraftServerBridge {
     boolean bridge$performAutosaveChecks();
 
     SpongeUserManager bridge$userManager();
+
+    default GameProfileCacheBridge bridge$profileCache() {
+        return (GameProfileCacheBridge) ((MinecraftServer) this).services().nameToIdCache();
+    }
 
     BlockableEventLoop<Runnable> bridge$spongeMainThreadExecutor();
 

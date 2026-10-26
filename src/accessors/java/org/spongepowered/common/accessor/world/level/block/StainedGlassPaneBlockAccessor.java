@@ -22,17 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.test.gametest;
+package org.spongepowered.common.accessor.world.level.block;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.block.StainedGlassPaneBlock;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-/** The id prefix of every {@link GameTest} in the class: {@code sponge:<value>/<method_name>} */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface GameTestGroup {
+@Mixin(StainedGlassPaneBlock.class)
+public interface StainedGlassPaneBlockAccessor {
 
-    String value();
+    @Accessor("color") DyeColor accessor$color();
+
 }

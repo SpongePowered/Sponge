@@ -29,11 +29,10 @@ import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.common.test.gametest.GameTest;
 import org.spongepowered.common.test.gametest.GameTestGroup;
-import org.spongepowered.common.test.gametest.SpongeGameTests;
 
 /** Vanilla-only gametests, discovered by {@link SpongeGameTests} through {@code META-INF/services}. */
 @GameTestGroup("vanilla")
-public final class VanillaGameTests implements SpongeGameTests.Provider {
+public final class VanillaGameTests {
 
     @GameTest(maxTicks = 1)
     void platformIsVanilla(final GameTestHelper helper) {
