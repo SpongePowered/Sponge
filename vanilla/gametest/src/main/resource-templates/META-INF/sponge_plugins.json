@@ -1,0 +1,37 @@
+{
+    "loader": {
+        "name": "java_plain",
+        "version": "1.0"
+    },
+    "license": "MIT",
+    "plugins": [
+        {
+            "id": "spongevanilla_gametest",
+            "name": "SpongeVanilla GameTests",
+            "version": "{{ version }}",
+            "entrypoint": "org.spongepowered.vanilla.gametest.SpongeVanillaGameTestPlugin",
+            "description": "Runs Minecraft gametests on SpongeVanilla: the game test server's Sponge lifecycle, and /test in a world",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [
+                {
+                    "name": "SpongePowered",
+                    "description": "Lead Developer"
+                }
+            ],
+            "dependencies": [
+                {
+                    "id": "spongevanilla",
+                    "version": "{{ version }}"
+                },
+                {
+                    "id": "sponge_gametest",
+                    "version": "{{ gametestVersion }}"
+                }
+            ]
+        }
+    ]
+}

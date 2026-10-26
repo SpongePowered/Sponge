@@ -1,11 +1,13 @@
 {
     "required": true,
     "parent": "mixins.sponge.parent.json",
+    "plugin": "org.spongepowered.common.test.gametest.GameTestMixinPlugin",
     "package": "org.spongepowered.common.mixin.gametest",
     "mixins": [
         "GameTestInfoMixin_GameTest",
         "GameTestRegistryMixin_GameTest",
         "GameTestServerMixin_GameTest",
-        "ServerLevel_EntityCallbacksMixin_GameTest"
+        "ServerLevel_EntityCallbacksMixin_GameTest",
+        "SyncSchedulerMixin_GameTest"
     ]
 }

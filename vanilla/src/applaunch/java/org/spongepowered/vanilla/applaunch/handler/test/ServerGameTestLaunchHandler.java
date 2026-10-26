@@ -24,6 +24,7 @@
  */
 package org.spongepowered.vanilla.applaunch.handler.test;
 
+import cpw.mods.modlauncher.api.ServiceRunner;
 import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.vanilla.applaunch.AppLaunchTarget;
 import org.spongepowered.vanilla.applaunch.handler.AbstractVanillaLaunchHandler;
@@ -34,6 +35,13 @@ public class ServerGameTestLaunchHandler extends AbstractVanillaLaunchHandler {
     @Override
     public AppLaunchTarget target() {
         return AppLaunchTarget.SERVER_GAMETEST;
+    }
+
+    @Override
+    public ServiceRunner launchService(final String[] arguments, final ModuleLayer gameLayer) {
+        // Before any gametest target class is transformed: the gametest mixins only apply to a game test run, which this marks
+        System.setProperty("sponge.gametest", "true");
+        return super.launchService(arguments, gameLayer);
     }
 
     @Override
