@@ -257,6 +257,8 @@ minecraft {
         // Minecraft gametests (common + forge); exits non-zero when a required test fails
         create("gameTestServer") {
             source(gametest)
+            jvmArgs("-Dsponge.gametest=true") // the gametest mixins only apply to a game test run
+            jvmArgs(spongeImpl.gameTestRootsArgument())
             // Forge 55 comments out the server Main's GameTestServer branch, so this starts a plain dedicated server and
             // runs no tests on its own; gameTest still runs them through JUnit, whose engine schedules them itself
             args("--mixin.config", "mixins.sponge.gametest.json")

@@ -1,0 +1,33 @@
+{
+    "loader": {
+        "name": "java_plain",
+        "version": "1.0"
+    },
+    "license": "MIT",
+    "plugins": [
+        {
+            "id": "sponge_gametest",
+            "name": "Sponge GameTests",
+            "version": "{{ version }}",
+            "entrypoint": "org.spongepowered.common.test.gametest.SpongeGameTestPlugin",
+            "description": "Minecraft gametests with Sponge loaded: the test declaration, its registration, and the JUnit engine that runs it",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [
+                {
+                    "name": "SpongePowered",
+                    "description": "Lead Developer"
+                }
+            ],
+            "dependencies": [
+                {
+                    "id": "sponge",
+                    "version": "{{ minecraftVersion }}-{{ apiVersion }}"
+                }
+            ]
+        }
+    ]
+}
