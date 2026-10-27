@@ -24,28 +24,39 @@
  */
 package org.spongepowered.vanilla.mixin.core.registries;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import net.minecraft.core.Registry;
+import net.minecraft.core.WritableRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.BuiltinRegistryBuilder;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.Lifecycle;
 
-@Mixin(BuiltInRegistries.class)
-public abstract class BuiltInRegistriesMixin_Vanilla {
+@Mixin(BuiltinRegistryBuilder.class)
+public abstract class BuiltinRegistryBuilderMixin_Vanilla {
 
-    @Inject(method = "bootStrap", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/registries/BuiltInRegistries;freeze()V"))
-    private static void impl$beforeFreeze(final CallbackInfo ci) {
+    // @formatter:off
+    @Shadow @Final private WritableRegistry<WritableRegistry<?>> registry;
+    // @formatter:on
+
+    @WrapOperation(method = "bootStrap", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/registries/BuiltinRegistryBuilder;freeze()V"))
+    private void impl$establishSpongeRegistries(final BuiltinRegistryBuilder instance, final Operation<Void> original) {
+        // The client registries share this builder, only hook the built-in game registries
+        if ((Registry<?>) this.registry != BuiltInRegistries.REGISTRY) {
+            original.call(instance);
+            return;
+        }
         final Lifecycle lifecycle = Launch.instance().lifecycle();
         lifecycle.establishDataProviders();
         lifecycle.callRegisterDataEvent();
         lifecycle.establishEarlyGlobalRegistries();
         lifecycle.establishGlobalRegistries();
-    }
-
-    @Inject(method = "freeze", at = @At("TAIL"))
-    private static void impl$afterFreeze(final CallbackInfo ci) {
-        Launch.instance().lifecycle().endEstablishGlobalRegistries();
+        original.call(instance);
+        lifecycle.endEstablishGlobalRegistries();
     }
 }

@@ -24,7 +24,7 @@
     "network.ConnectionMixin_Vanilla",
     "network.protocol.common.ClientboundCustomPayloadPacketMixin_Vanilla",
     "network.protocol.common.ServerboundCustomPayloadPacketMixin_Vanilla",
-    "registries.BuiltInRegistriesMixin_Vanilla",
+    "registries.BuiltinRegistryBuilderMixin_Vanilla",
     "resources.RegistryDataLoaderMixin_Vanilla",
     "server.BootstrapMixin_Vanilla",
     "server.MinecraftServerMixin_Vanilla",

@@ -377,14 +377,13 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
             mcExplosion.explode();
 
             // see ServerLevel#explode/Level#explode
-            ParticleOptions particle = mcExplosion.isSmall() ? ParticleTypes.EXPLOSION : ParticleTypes.EXPLOSION_EMITTER;
-            var sound = SoundEvents.GENERIC_EXPLODE;
+            final Optional<ParticleOptions> particle = Optional.of(mcExplosion.isSmall() ? ParticleTypes.EXPLOSION : ParticleTypes.EXPLOSION_EMITTER);
             final var explosionSource = mcExplosion.getDirectSourceEntity();
-            final boolean playSound = explosionSource == null || !explosionSource.isSilent();
+            final Optional<Holder<SoundEvent>> sound = explosionSource != null && explosionSource.isSilent() ? Optional.empty() : Optional.of(SoundEvents.GENERIC_EXPLODE);
             for (ServerPlayer player : this.players) {
                 if (player.distanceToSqr(mcExplosion.center()) < 4096.0) {
                     Optional<Vec3> kb = Optional.ofNullable(mcExplosion.getHitPlayers().get(player));
-                    final var packet = new ClientboundExplodePacket(mcExplosion.center(), explosion.radius(), 1, kb, particle, sound, WeightedList.of(), playSound);
+                    final var packet = new ClientboundExplodePacket(mcExplosion.center(), explosion.radius(), 1, kb, particle, sound, WeightedList.of());
                     this.bridge$handleExplosionPacket(player.connection, explosion, packet);
                     player.connection.send(packet);
                 }
@@ -395,13 +394,13 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     @Override
     public void bridge$handleExplosionPacket(final ServerGamePacketListenerImpl instance, Explosion apiExplosion, final ClientboundExplodePacket packet) {
         // TODO control particle in API
-        ParticleOptions particleData = new BlockParticleOption(ParticleTypes.BLOCK, Blocks.AIR.defaultBlockState()); // "no" particle
+        Optional<ParticleOptions> particleData = Optional.of(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.AIR.defaultBlockState())); // "no" particle
         particleData = packet.explosionParticle();
         // TODO control sound in API
-        var soundEvent = Holder.direct(new SoundEvent(Identifier.parse("sponge:none"), Optional.of(0f))); // "no" sound
+        Optional<Holder<SoundEvent>> soundEvent = Optional.of(Holder.direct(new SoundEvent(Identifier.parse("sponge:none"), Optional.of(0f)))); // "no" sound
         soundEvent = packet.explosionSound();
         // TODO apiExplosion.shouldPlaySmoke() is not initialized correctly
-        var newPacket = new ClientboundExplodePacket(packet.center(), packet.radius(), packet.blockCount(), packet.playerKnockback(), particleData, soundEvent, packet.blockParticles(), packet.playSound());
+        var newPacket = new ClientboundExplodePacket(packet.center(), packet.radius(), packet.blockCount(), packet.playerKnockback(), particleData, soundEvent, packet.blockParticles());
         instance.send(newPacket);
     }
 

@@ -89,7 +89,6 @@ public final class BlockStateDataProvider {
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.EYE, BlockStateProperties.EYE);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.FACING, BlockStateProperties.FACING);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.FACING_HOPPER, BlockStateProperties.FACING_HOPPER);
-        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.FALLING, BlockStateProperties.FALLING);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.FLOWER_AMOUNT, BlockStateProperties.FLOWER_AMOUNT);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.HALF, BlockStateProperties.HALF);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.HANGING, BlockStateProperties.HANGING);
@@ -125,6 +124,7 @@ public final class BlockStateDataProvider {
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.OPEN, BlockStateProperties.OPEN);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.ORIENTATION, BlockStateProperties.ORIENTATION);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.PERSISTENT, BlockStateProperties.PERSISTENT);
+        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.PLAYLIST_MODE, BlockStateProperties.PLAYLIST_MODE);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.PICKLES, BlockStateProperties.PICKLES);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.PISTON_TYPE, BlockStateProperties.PISTON_TYPE);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.POTENT_SULFUR_STATE, BlockStateProperties.POTENT_SULFUR_STATE);
@@ -148,6 +148,7 @@ public final class BlockStateDataProvider {
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SLOT_4_OCCUPIED, BlockStateProperties.SLOT_4_OCCUPIED);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SLOT_5_OCCUPIED, BlockStateProperties.SLOT_5_OCCUPIED);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SNOWY, BlockStateProperties.SNOWY);
+        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SOURCE, BlockStateProperties.SOURCE);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SOUTH, BlockStateProperties.SOUTH);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SOUTH_REDSTONE, BlockStateProperties.SOUTH_REDSTONE);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SOUTH_WALL, BlockStateProperties.SOUTH_WALL);

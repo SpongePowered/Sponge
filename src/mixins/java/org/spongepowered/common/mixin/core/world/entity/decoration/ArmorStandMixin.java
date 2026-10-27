@@ -171,7 +171,7 @@ public abstract class ArmorStandMixin extends LivingEntityMixin {
      */
     @Redirect(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/decoration/ArmorStand;kill(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;)V"))
     private void impl$actuallyKill(final ArmorStand self, final ServerLevel level, final DamageSource source) {
-        this.lastDamageSource = source;
+        self.setLastDamageSource(source);
         self.remove(RemovalReason.KILLED);
         self.gameEvent(GameEvent.ENTITY_DIE);
     }
@@ -185,7 +185,7 @@ public abstract class ArmorStandMixin extends LivingEntityMixin {
      */
     @Redirect(method = "causeDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/decoration/ArmorStand;kill(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;)V"))
     private void impl$actuallyKill2(final ArmorStand self, final ServerLevel level, final DamageSource source) {
-        this.lastDamageSource = source;
+        self.setLastDamageSource(source);
         self.remove(RemovalReason.KILLED);
         self.gameEvent(GameEvent.ENTITY_DIE);
     }

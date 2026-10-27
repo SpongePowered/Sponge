@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.api.minecraft.block;
 
 import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.level.block.sounds.BlockSoundSet;
 import org.spongepowered.api.block.BlockSoundGroup;
 import org.spongepowered.api.effect.sound.SoundType;
@@ -49,8 +48,8 @@ public abstract class BlockSoundGroupMixin_API implements BlockSoundGroup {
     @Shadow @Final private Optional<Holder<SoundEvent>> fallSound;
     // @formatter:on
 
-    private static SoundType api$sound(final Optional<Holder<SoundEvent>> sound) {
-        return (SoundType) (Object) sound.orElse(SoundEvents.EMPTY).value();
+    private static Optional<SoundType> api$sound(final Optional<Holder<SoundEvent>> sound) {
+        return sound.map(holder -> (SoundType) (Object) holder.value());
     }
 
     @Override
@@ -64,27 +63,27 @@ public abstract class BlockSoundGroupMixin_API implements BlockSoundGroup {
     }
 
     @Override
-    public SoundType breakSound() {
+    public Optional<SoundType> breakSound() {
         return BlockSoundGroupMixin_API.api$sound(this.breakSound);
     }
 
     @Override
-    public SoundType stepSound() {
+    public Optional<SoundType> stepSound() {
         return BlockSoundGroupMixin_API.api$sound(this.stepSound);
     }
 
     @Override
-    public SoundType placeSound() {
+    public Optional<SoundType> placeSound() {
         return BlockSoundGroupMixin_API.api$sound(this.placeSound);
     }
 
     @Override
-    public SoundType hitSound() {
+    public Optional<SoundType> hitSound() {
         return BlockSoundGroupMixin_API.api$sound(this.hitSound);
     }
 
     @Override
-    public SoundType fallSound() {
+    public Optional<SoundType> fallSound() {
         return BlockSoundGroupMixin_API.api$sound(this.fallSound);
     }
 }
