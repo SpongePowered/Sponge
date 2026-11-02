@@ -45,6 +45,7 @@ import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.bridge.world.entity.GrieferBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.ExplosionUtil;
 
 import java.util.Optional;
 
@@ -148,7 +149,7 @@ public abstract class CreeperMixin extends MonsterMixin implements FusedExplosiv
                 .sourceExplosive(((Creeper) this))
                 .radius(strength)
                 .shouldPlaySmoke(mode != Level.ExplosionInteraction.NONE)
-                .shouldBreakBlocks(mode != Level.ExplosionInteraction.NONE && ((GrieferBridge) this).bridge$canGrief()))
+                .shouldBreakBlocks(((GrieferBridge) this).bridge$canGrief() && ExplosionUtil.breaksBlocks(world, self, mode)))
                 .orElseGet(() -> {
                     this.impl$detonationCancelled = true;
                     return null;

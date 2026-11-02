@@ -26,7 +26,10 @@ package org.spongepowered.neoforge.hook;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.CommonHooks;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.hooks.EventHooks;
 
 public final class NeoEventHooks implements EventHooks {
@@ -34,6 +37,11 @@ public final class NeoEventHooks implements EventHooks {
     @Override
     public boolean callPlayerDestruction(ServerPlayer serverPlayer, DamageSource cause) {
         return CommonHooks.onLivingDeath(serverPlayer, cause);
+    }
+
+    @Override
+    public boolean canEntityGrief(final Level level, final @Nullable Entity entity) {
+        return net.neoforged.neoforge.event.EventHooks.canEntityGrief(level, entity);
     }
 
 }

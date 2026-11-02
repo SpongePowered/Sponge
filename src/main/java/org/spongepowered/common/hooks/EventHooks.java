@@ -28,6 +28,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.Level;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.common.SpongeCommon;
@@ -49,5 +52,13 @@ public interface EventHooks {
 
     default boolean callPlayerDestruction(ServerPlayer serverPlayer, DamageSource cause) {
         return false;
+    }
+
+    /**
+     * Whether the entity may change blocks in the level, as the {@link GameRules#RULE_MOBGRIEFING mobGriefing} rule
+     * says. Platforms with their own mob griefing event fire it here instead.
+     */
+    default boolean canEntityGrief(final Level level, final @Nullable Entity entity) {
+        return level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
     }
 }

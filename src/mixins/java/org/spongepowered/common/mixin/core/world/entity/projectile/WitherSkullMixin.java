@@ -46,6 +46,7 @@ import org.spongepowered.common.bridge.world.entity.projectile.WitherSkullBridge
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.ExplosionUtil;
 
 import java.util.Optional;
 
@@ -105,7 +106,7 @@ public abstract class WitherSkullMixin extends AbstractHurtingProjectileMixin im
                     .radius(this.impl$explosionRadius)
                     .canCauseFire(flaming)
                     .shouldPlaySmoke(mode != Level.ExplosionInteraction.NONE && griefer)
-                    .shouldBreakBlocks(mode != Level.ExplosionInteraction.NONE && griefer))
+                    .shouldBreakBlocks(griefer && ExplosionUtil.breaksBlocks(worldObj, self, mode)))
                     .orElse(null);
         }
     }

@@ -46,6 +46,7 @@ import org.spongepowered.common.bridge.world.entity.projectile.LargeFireballBrid
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.ExplosionUtil;
 
 import java.util.Optional;
 
@@ -87,7 +88,7 @@ public abstract class LargeFireballMixin extends AbstractHurtingProjectileMixin 
                     .radius(strength)
                     .canCauseFire(flaming && griefer)
                     .shouldPlaySmoke(mode != Level.ExplosionInteraction.NONE && griefer)
-                    .shouldBreakBlocks(mode != Level.ExplosionInteraction.NONE && griefer));
+                    .shouldBreakBlocks(griefer && ExplosionUtil.breaksBlocks(worldObj, nil, mode)));
 
             return ex.orElse(null);
         }
