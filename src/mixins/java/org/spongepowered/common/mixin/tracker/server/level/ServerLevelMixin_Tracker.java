@@ -367,6 +367,11 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
             this.tracker$cancelExplosionEffects(entity);
             return;
         }
+        // Explode with what the listeners changed. The builder knows nothing of vanilla's damage source or calculator, so
+        // the explosion it builds only replaces the original when it differs, and an unchanged explosion stays vanilla's
+        if (!this.tracker$sameExplosion(apiExplosion, (org.spongepowered.api.world.explosion.Explosion) instance)) {
+            mcExplosion = (ServerExplosion) apiExplosion;
+        }
 
         if (ShouldFire.EXPLOSION_EVENT_PRE) {
             // Set up the pre event
@@ -397,6 +402,21 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         }
 
         this.tracker$apiExplosion = apiExplosion;
+    }
+
+    @Unique
+    private boolean tracker$sameExplosion(final org.spongepowered.api.world.explosion.Explosion built,
+        final org.spongepowered.api.world.explosion.Explosion original) {
+        return built.serverLocation().equals(original.serverLocation())
+            && built.sourceExplosive().equals(original.sourceExplosive())
+            && built.radius() == original.radius()
+            && built.canCauseFire() == original.canCauseFire()
+            && ((ServerExplosion) built).getBlockInteraction() == ((ServerExplosion) original).getBlockInteraction()
+            && built.shouldPlaySmoke() == original.shouldPlaySmoke()
+            && built.shouldDamageEntities() == original.shouldDamageEntities()
+            && built.resolution() == original.resolution()
+            && built.randomness() == original.randomness()
+            && built.knockback() == original.knockback();
     }
 
     @Inject(method = "explode", cancellable = true, at = @At(value = "INVOKE",

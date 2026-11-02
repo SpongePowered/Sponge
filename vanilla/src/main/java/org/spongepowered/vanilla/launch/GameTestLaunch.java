@@ -42,7 +42,6 @@ import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.apache.commons.io.FileUtils;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.common.launch.Lifecycle;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 
 import java.io.File;
@@ -109,10 +108,6 @@ public final class GameTestLaunch extends VanillaLaunch {
         }
         Files.createDirectories(directory);
         final LevelStorageSource.LevelStorageAccess access = LevelStorageSource.createDefault(directory).createAccess("gametestworld");
-        // As MainMixin does for the dedicated server, which this skips
-        final Lifecycle lifecycle = Launch.instance().lifecycle();
-        lifecycle.establishDataProviders();
-        lifecycle.callRegisterDataEvent();
         final PackRepository packs = ServerPacksSource.createPackRepository(access);
         final Collection<TestFunction> functions = options.has(tests)
             ? GameTestLaunch.select(options.valueOf(tests))

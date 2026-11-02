@@ -27,6 +27,7 @@ package org.spongepowered.common.test.gametest;
 import io.leangen.geantyref.TypeToken;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.gametest.framework.TestFunction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Rotation;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
@@ -39,6 +40,7 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.EventListenerRegistration;
 import org.spongepowered.api.event.Order;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.launch.Launch;
 
 import java.io.IOException;
@@ -47,6 +49,7 @@ import java.io.UncheckedIOException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.file.FileSystem;
@@ -57,7 +60,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -85,6 +90,19 @@ public final class SpongeGameTests {
 
     public static List<TestFunction> all() {
         return Holder.ALL;
+    }
+
+    /**
+     * What vanilla runs before each batch, by batch name. 1.21.1 has no test environments, but batches each group on
+     * its own, so a group's {@link GameTestGroup#environment()} is set up before its batch and torn down after it.
+     */
+    public static Map<String, Consumer<ServerLevel>> beforeBatch() {
+        return Holder.BEFORE_BATCH;
+    }
+
+    /** What vanilla runs after each batch, by batch name, see {@link #beforeBatch()} */
+    public static Map<String, Consumer<ServerLevel>> afterBatch() {
+        return Holder.AFTER_BATCH;
     }
 
     /** Whether the method is a gametest this launch can run: a {@link GameTest#client()} test only where a client is present */
@@ -128,15 +146,20 @@ public final class SpongeGameTests {
     }
 
     private static Stream<TestFunction> tests(final Class<?> type) {
-        final Object instance;
-        try {
-            final Constructor<?> constructor = type.getDeclaredConstructor();
-            constructor.setAccessible(true);
-            instance = constructor.newInstance();
-        } catch (final ReflectiveOperationException e) {
-            throw new IllegalStateException("Gametest class " + type.getName() + " needs a no-argument constructor", e);
-        }
+        final Object instance = SpongeGameTests.instantiate(type, "Gametest class");
         return Arrays.stream(type.getDeclaredMethods()).filter(SpongeGameTests::isTest).map(method -> SpongeGameTests.test(instance, method));
+    }
+
+    private static <T> T instantiate(final Class<T> type, final String what) {
+        try {
+            final Constructor<T> constructor = type.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            return constructor.newInstance();
+        } catch (final InvocationTargetException e) {
+            throw new IllegalStateException("Creating " + what.toLowerCase(Locale.ROOT) + " " + type.getName() + " failed", e.getCause());
+        } catch (final ReflectiveOperationException e) {
+            throw new IllegalStateException(what + " " + type.getName() + " needs a no-argument constructor", e);
+        }
     }
 
     // Instance methods rather than static: IntelliJ only gives non-static methods a run icon
@@ -171,7 +194,24 @@ public final class SpongeGameTests {
 
     // Resolved once, when GameTestRegistry is first loaded; every plugin is in the game layer by then
     private static final class Holder {
-        static final List<TestFunction> ALL = SpongeGameTests.scan().stream().flatMap(SpongeGameTests::tests).toList();
+        static final List<Class<?>> CLASSES = SpongeGameTests.scan();
+        static final List<TestFunction> ALL = Holder.CLASSES.stream().flatMap(SpongeGameTests::tests).toList();
+        static final Map<String, Consumer<ServerLevel>> BEFORE_BATCH = new HashMap<>();
+        static final Map<String, Consumer<ServerLevel>> AFTER_BATCH = new HashMap<>();
+
+        static {
+            for (final Class<?> type : Holder.CLASSES) {
+                final Class<? extends GameTestEnvironment> environment = type.getAnnotation(GameTestGroup.class).environment();
+                final Optional<Method> test = Arrays.stream(type.getDeclaredMethods()).filter(SpongeGameTests::isTest).findFirst();
+                if (environment != GameTestEnvironment.None.class && test.isPresent()) {
+                    // A group's tests share its batch name
+                    final String batch = SpongeGameTests.group(test.get());
+                    final GameTestEnvironment instance = SpongeGameTests.instantiate(environment, "Gametest environment");
+                    Holder.BEFORE_BATCH.put(batch, level -> instance.setup((ServerWorld) level));
+                    Holder.AFTER_BATCH.put(batch, level -> instance.teardown((ServerWorld) level));
+                }
+            }
+        }
     }
 
     /**
