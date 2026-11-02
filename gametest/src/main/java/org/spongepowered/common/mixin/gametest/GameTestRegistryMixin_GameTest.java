@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.gametest;
 
 import net.minecraft.gametest.framework.GameTestRegistry;
 import net.minecraft.gametest.framework.TestFunction;
+import net.minecraft.server.level.ServerLevel;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -35,7 +36,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.test.gametest.SpongeGameTests;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * Test functions live in this static registry, which Forge and NeoForge fill from their own events. Adding
@@ -47,6 +50,8 @@ public abstract class GameTestRegistryMixin_GameTest {
     // @formatter:off
     @Shadow @Final private static Collection<TestFunction> TEST_FUNCTIONS;
     @Shadow @Final private static Set<String> TEST_CLASS_NAMES;
+    @Shadow @Final private static Map<String, Consumer<ServerLevel>> BEFORE_BATCH_FUNCTIONS;
+    @Shadow @Final private static Map<String, Consumer<ServerLevel>> AFTER_BATCH_FUNCTIONS;
     // @formatter:on
 
     @Inject(method = "<clinit>", at = @At("TAIL"))
@@ -55,5 +60,7 @@ public abstract class GameTestRegistryMixin_GameTest {
             GameTestRegistryMixin_GameTest.TEST_FUNCTIONS.add(test);
             GameTestRegistryMixin_GameTest.TEST_CLASS_NAMES.add(test.batchName());
         });
+        GameTestRegistryMixin_GameTest.BEFORE_BATCH_FUNCTIONS.putAll(SpongeGameTests.beforeBatch());
+        GameTestRegistryMixin_GameTest.AFTER_BATCH_FUNCTIONS.putAll(SpongeGameTests.afterBatch());
     }
 }
