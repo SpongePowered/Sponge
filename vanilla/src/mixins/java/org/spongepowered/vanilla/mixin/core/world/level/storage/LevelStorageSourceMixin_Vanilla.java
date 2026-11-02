@@ -42,7 +42,8 @@ import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridg
 @Mixin(LevelStorageSource.class)
 public abstract class LevelStorageSourceMixin_Vanilla {
 
-    private static Dynamic<Tag> impl$spongeLevelData;
+    // TODO: Move Sponge data to SavedData
+    private static final ThreadLocal<Dynamic<Tag>> impl$spongeLevelData = new ThreadLocal<>();
 
     @WrapOperation(
             method = "readLevelDataTagFixed",
@@ -53,7 +54,7 @@ public abstract class LevelStorageSourceMixin_Vanilla {
             )
     )
     private static CompoundTag impl$createSpongeLevelData(final CompoundTag compoundNBT, final String path, final Operation<CompoundTag> original) {
-        LevelStorageSourceMixin_Vanilla.impl$spongeLevelData = new Dynamic<>(NbtOps.INSTANCE, compoundNBT);
+        LevelStorageSourceMixin_Vanilla.impl$spongeLevelData.set(new Dynamic<>(NbtOps.INSTANCE, compoundNBT));
         return original.call(compoundNBT, path);
     }
 
@@ -69,9 +70,9 @@ public abstract class LevelStorageSourceMixin_Vanilla {
     {
         final PrimaryLevelData levelData = original.call(dynamic, settings, special, options, lifecycle);
 
-        ((PrimaryLevelDataBridge) levelData).bridge$readSpongeLevelData(LevelStorageSourceMixin_Vanilla.impl$spongeLevelData);
+        ((PrimaryLevelDataBridge) levelData).bridge$readSpongeLevelData(LevelStorageSourceMixin_Vanilla.impl$spongeLevelData.get());
 
-        LevelStorageSourceMixin_Vanilla.impl$spongeLevelData = null;
+        LevelStorageSourceMixin_Vanilla.impl$spongeLevelData.remove();
         return levelData;
     }
 }
