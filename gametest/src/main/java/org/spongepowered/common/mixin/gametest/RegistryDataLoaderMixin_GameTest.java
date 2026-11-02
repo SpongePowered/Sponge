@@ -40,12 +40,13 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.accessor.resources.RegistryLoadTaskAccessor;
 import org.spongepowered.common.test.gametest.SpongeGameTests;
+import org.spongepowered.common.test.gametest.TestEnvironments;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 /**
- * Test instances are a datapack registry. Registering them from code here
+ * Test instances and environments are datapack registries. Registering them from code here
  * mirrors what NeoForge's RegisterGameTestsEvent does, but works on Vanilla and Forge too.
  * Each registry loads asynchronously, so the instances are added once the datapack ones are in.
  */
@@ -60,6 +61,13 @@ public abstract class RegistryDataLoaderMixin_GameTest {
         final CallbackInfoReturnable<CompletableFuture<?>> cir
     ) {
         final WritableRegistry<?> registry = ((RegistryLoadTaskAccessor<?>) this).accessor$registry();
+        // Environments load before the instances that run in them
+        if (Registries.TEST_ENVIRONMENT.equals(registry.key())) {
+            final WritableRegistry<TestEnvironmentDefinition<?>> environments = (WritableRegistry<TestEnvironmentDefinition<?>>) registry;
+            cir.setReturnValue(cir.getReturnValue().thenRun(() -> SpongeGameTests.environments().forEach((key, type) ->
+                environments.register(key, TestEnvironments.definition(type), RegistrationInfo.BUILT_IN))));
+            return;
+        }
         if (!Registries.TEST_INSTANCE.equals(registry.key())) {
             return;
         }
