@@ -41,11 +41,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.test.gametest.SpongeGameTests;
+import org.spongepowered.common.test.gametest.TestEnvironments;
 
 import java.util.Map;
 
 /**
- * Test instances are a datapack registry. Registering them from code here
+ * Test instances and environments are datapack registries. Registering them from code here
  * mirrors what NeoForge's RegisterGameTestsEvent does, but works on Vanilla and Forge too.
  */
 @Mixin(RegistryDataLoader.class)
@@ -61,6 +62,12 @@ public abstract class RegistryDataLoaderMixin_GameTest {
         final Map<ResourceKey<?>, Exception> errors,
         final CallbackInfo ci
     ) {
+        // Environments load before the instances that run in them
+        if (Registries.TEST_ENVIRONMENT.equals(registry.key())) {
+            final WritableRegistry<TestEnvironmentDefinition> environments = (WritableRegistry<TestEnvironmentDefinition>) registry;
+            SpongeGameTests.environments().forEach((key, type) -> environments.register(key, TestEnvironments.definition(type), RegistrationInfo.BUILT_IN));
+            return;
+        }
         if (!Registries.TEST_INSTANCE.equals(registry.key())) {
             return;
         }

@@ -25,10 +25,13 @@
 package org.spongepowered.common.test.gametest;
 
 import io.leangen.geantyref.TypeToken;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestEnvironments;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.gametest.framework.GeneratedTest;
 import net.minecraft.gametest.framework.TestData;
+import net.minecraft.gametest.framework.TestEnvironmentDefinition;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Rotation;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -50,6 +53,7 @@ import java.io.UncheckedIOException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.file.FileSystem;
@@ -60,6 +64,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -122,16 +127,39 @@ public final class SpongeGameTests {
             .build());
     }
 
+    /**
+     * Every {@link GameTestGroup#environment()} the tests name, by the key of the vanilla test environment their tests
+     * run in. Registered as vanilla test environments, see {@link TestEnvironments}.
+     */
+    public static Map<ResourceKey<TestEnvironmentDefinition>, Class<? extends GameTestEnvironment>> environments() {
+        return Holder.ENVIRONMENTS;
+    }
+
     private static Stream<GeneratedTest> tests(final Class<?> type) {
-        final Object instance;
-        try {
-            final Constructor<?> constructor = type.getDeclaredConstructor();
-            constructor.setAccessible(true);
-            instance = constructor.newInstance();
-        } catch (final ReflectiveOperationException e) {
-            throw new IllegalStateException("Gametest class " + type.getName() + " needs a no-argument constructor", e);
-        }
+        final Object instance = SpongeGameTests.instantiate(type, "Gametest class");
         return Arrays.stream(type.getDeclaredMethods()).filter(SpongeGameTests::isTest).map(method -> SpongeGameTests.test(instance, method));
+    }
+
+    static <T> T instantiate(final Class<T> type, final String what) {
+        try {
+            final Constructor<T> constructor = type.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            return constructor.newInstance();
+        } catch (final InvocationTargetException e) {
+            throw new IllegalStateException("Creating " + what.toLowerCase(Locale.ROOT) + " " + type.getName() + " failed", e.getCause());
+        } catch (final ReflectiveOperationException e) {
+            throw new IllegalStateException(what + " " + type.getName() + " needs a no-argument constructor", e);
+        }
+    }
+
+    private static ResourceKey<TestEnvironmentDefinition> environment(final Class<?> type) {
+        final Class<? extends GameTestEnvironment> environment = type.getAnnotation(GameTestGroup.class).environment();
+        if (environment == GameTestEnvironment.None.class) {
+            return GameTestEnvironments.DEFAULT_KEY;
+        }
+        // sponge:org/spongepowered/common/test/gametest/entity/no_mob_griefing for ...entity.NoMobGriefing
+        final String path = SpongeGameTests.WORD_START.matcher(environment.getName().replace('.', '/').replace('$', '/')).replaceAll("_").toLowerCase(Locale.ROOT);
+        return ResourceKey.create(Registries.TEST_ENVIRONMENT, ResourceLocation.fromNamespaceAndPath("sponge", path));
     }
 
     // Instance methods rather than static: IntelliJ only gives non-static methods a run icon
@@ -142,7 +170,7 @@ public final class SpongeGameTests {
         final GameTest test = method.getAnnotation(GameTest.class);
         return new GeneratedTest(
             SpongeGameTests.id(method),
-            new TestData<>(GameTestEnvironments.DEFAULT_KEY, ResourceLocation.parse(test.structure()), test.maxTicks(), test.setupTicks(), test.required(),
+            new TestData<>(SpongeGameTests.environment(method.getDeclaringClass()), ResourceLocation.parse(test.structure()), test.maxTicks(), test.setupTicks(), test.required(),
                 Rotation.NONE, false, 1, 1, test.skyAccess()),
             SpongeGameTests.function(instance, method)
         );
@@ -170,7 +198,18 @@ public final class SpongeGameTests {
     // Resolved once: functions are registered at registry bootstrap, instances on every datapack load,
     // and both must agree on the same function objects. Every plugin is in the game layer by then
     private static final class Holder {
-        static final List<GeneratedTest> ALL = SpongeGameTests.scan().stream().flatMap(SpongeGameTests::tests).toList();
+        static final List<Class<?>> CLASSES = SpongeGameTests.scan();
+        static final List<GeneratedTest> ALL = Holder.CLASSES.stream().flatMap(SpongeGameTests::tests).toList();
+        static final Map<ResourceKey<TestEnvironmentDefinition>, Class<? extends GameTestEnvironment>> ENVIRONMENTS = new HashMap<>();
+
+        static {
+            for (final Class<?> type : Holder.CLASSES) {
+                final ResourceKey<TestEnvironmentDefinition> key = SpongeGameTests.environment(type);
+                if (key != GameTestEnvironments.DEFAULT_KEY) {
+                    Holder.ENVIRONMENTS.put(key, type.getAnnotation(GameTestGroup.class).environment());
+                }
+            }
+        }
     }
 
     /**
