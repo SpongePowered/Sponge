@@ -45,4 +45,7 @@ public @interface GameTestGroup {
      * namespace.
      */
     String plugin() default "";
+
+    /** What the world is set up as while the tests run, see {@link GameTestEnvironment} */
+    Class<? extends GameTestEnvironment> environment() default GameTestEnvironment.None.class;
 }
