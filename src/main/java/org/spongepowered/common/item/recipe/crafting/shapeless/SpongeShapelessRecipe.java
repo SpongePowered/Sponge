@@ -33,7 +33,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.level.Level;
 import org.spongepowered.common.accessor.world.item.crafting.ShapelessRecipeAccessor;
-import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
+import org.spongepowered.common.bridge.world.item.crafting.PlacementInfoBridge;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -50,8 +50,6 @@ import java.util.function.Function;
  */
 public class SpongeShapelessRecipe extends ShapelessRecipe {
 
-    private final boolean onlyVanillaIngredients;
-
     private final Function<CraftingInput, ItemStack> resultFunction;
     private final Function<CraftingInput, NonNullList<net.minecraft.world.item.ItemStack>> remainingItemsFunction;
 
@@ -62,14 +60,13 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
             final Function<CraftingInput, net.minecraft.world.item.ItemStack> resultFunction,
             final Function<CraftingInput, NonNullList<ItemStack>> remainingItemsFunction) {
         super(groupIn, category, spongeResultStack, recipeItemsIn);
-        this.onlyVanillaIngredients = recipeItemsIn.stream().noneMatch(i -> i instanceof SpongeIngredient);
         this.resultFunction = resultFunction;
         this.remainingItemsFunction = remainingItemsFunction;
     }
 
     @Override
     public boolean matches(final CraftingInput $$0, final Level $$1) {
-        if (this.onlyVanillaIngredients) {
+        if (!((PlacementInfoBridge) this.placementInfo()).bridge$hasCustomIngredients()) {
             return super.matches($$0, $$1);
         }
         return SpongeShapelessRecipe.matches($$0, ((ShapelessRecipeAccessor) this).accessor$ingredients());
