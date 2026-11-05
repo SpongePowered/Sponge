@@ -55,7 +55,7 @@ public class DummyMetadataReader implements PluginMetadataReader {
 
     @Override
     public Collection<? extends PluginMetadata> readPluginMetadata(final Environment environment, final PluginResource resource, final List<PluginResourceLocator> locators) {
-        if (resource instanceof DummyPluginResource) {
+        if (resource instanceof DummyPluginResource && resource.property("dummy_key").isPresent()) {
             return List.of(DummyMetadataReader.DUMMY_METADATA);
         }
         return List.of();

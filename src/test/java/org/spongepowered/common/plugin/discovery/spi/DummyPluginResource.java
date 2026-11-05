@@ -35,15 +35,25 @@ import java.util.Optional;
  * WARNING: This class may exist in multiple classloaders.
  */
 public class DummyPluginResource implements PluginResource {
+    private final List<Path> paths;
+
+    public DummyPluginResource() {
+        this(List.of());
+    }
+
+    // With paths it stands for a plain jar or a dev plugin union, and is no dummy plugin
+    public DummyPluginResource(final List<Path> paths) {
+        this.paths = paths;
+    }
 
     @Override
     public List<Path> paths() {
-        return List.of();
+        return this.paths;
     }
 
     @Override
     public Optional<String> property(final String key) {
-        return "dummy_key".equals(key) ? Optional.of("dummy_value") : Optional.empty();
+        return this.paths.isEmpty() && "dummy_key".equals(key) ? Optional.of("dummy_value") : Optional.empty();
     }
 
     @Override
