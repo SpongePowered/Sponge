@@ -54,6 +54,13 @@ public class WorldRegistries {
                 "sponge"
             ),
             new RegistryEntriesGenerator<>(
+                "world.server",
+                "TicketTypes",
+                "TICKET_TYPE",
+                context.relativeClass("world.server", "TicketType"),
+                Registries.TICKET_TYPE
+            ),
+            new RegistryEntriesGenerator<>(
                 "effect.particle",
                 "ParticleTypes",
                 "PARTICLE_TYPE",

@@ -24,33 +24,50 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.server.level;
 
+import net.minecraft.server.level.TicketType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.util.Ticks;
-import org.spongepowered.api.world.server.TicketType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.Constants;
 
-@Mixin(net.minecraft.server.level.TicketType.class)
-public abstract class TicketTypeMixin_API<T> implements TicketType<T> {
+@Mixin(TicketType.class)
+public abstract class TicketTypeMixin_API implements org.spongepowered.api.world.server.TicketType {
 
     // @formatter:off
     @Shadow @Final private long timeout;
-
+    @Shadow @Final private int flags;
     // @formatter:on
 
     @Override
-    public String name() {
-        // TODO - change this out
-        return "";
+    public boolean persists() {
+        return (this.flags & TicketType.FLAG_PERSIST) != 0;
+    }
+
+    @Override
+    public boolean loadsChunks() {
+        return (this.flags & TicketType.FLAG_LOADING) != 0;
+    }
+
+    @Override
+    public boolean simulatesChunks() {
+        return (this.flags & TicketType.FLAG_SIMULATION) != 0;
+    }
+
+    @Override
+    public boolean keepsWorldActive() {
+        return (this.flags & TicketType.FLAG_KEEP_DIMENSION_ACTIVE) != 0;
+    }
+
+    @Override
+    public boolean canExpireIfUnloaded() {
+        return (this.flags & TicketType.FLAG_CAN_EXPIRE_IF_UNLOADED) != 0;
     }
 
     @Override
     @NonNull
     public Ticks lifetime() {
-        return this.timeout == Constants.ChunkTicket.INFINITE_TIMEOUT
-                ? Ticks.infinite()
-                : Ticks.of(this.timeout);
+        return this.timeout == Constants.ChunkTicket.INFINITE_TIMEOUT ? Ticks.infinite() : Ticks.of(this.timeout);
     }
 }

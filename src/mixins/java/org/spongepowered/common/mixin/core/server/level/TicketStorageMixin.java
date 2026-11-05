@@ -37,13 +37,11 @@ import org.spongepowered.common.bridge.world.server.TicketBridge;
 @Mixin(TicketStorage.class)
 public class TicketStorageMixin {
 
-    @SuppressWarnings("ConstantConditions")
     @Inject(method = "addTicket(JLnet/minecraft/server/level/Ticket;)Z", at = @At("HEAD"))
     private void impl$addChunkPosToTicket(final long chunkPos, final net.minecraft.server.level.Ticket ticket, final CallbackInfoReturnable<Boolean> ci) {
-        ((TicketBridge) (Object) ticket).bridge$setChunkPosition(chunkPos);
+        ((TicketBridge) ticket).bridge$setChunkPosition(chunkPos);
     }
 
-    @SuppressWarnings("ConstantConditions")
     @ModifyVariable(method = "addTicket(JLnet/minecraft/server/level/Ticket;)Z",
         at = @At(value = "LOAD"),
         slice = @Slice(
@@ -58,7 +56,7 @@ public class TicketStorageMixin {
         // potentially costly search on an array - because addTicket doesn't return the ticket that is actually
         // in the manager.
         if (storedTicket != originalTicket) {
-            ((TicketBridge) (Object) originalTicket).bridge$setParentTicket(storedTicket);
+            ((TicketBridge) originalTicket).bridge$setParentTicket(storedTicket);
         }
         return storedTicket;
     }
