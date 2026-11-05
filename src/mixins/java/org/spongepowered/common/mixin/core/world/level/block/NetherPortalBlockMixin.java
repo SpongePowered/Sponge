@@ -27,33 +27,42 @@ package org.spongepowered.common.mixin.core.world.level.block;
 import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.ai.village.poi.PoiManager;
-import net.minecraft.world.entity.ai.village.poi.PoiRecord;
-import net.minecraft.world.entity.ai.village.poi.PoiTypes;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.NetherPortalBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.portal.PortalShape;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Axis;
+import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.portal.Portal;
 import org.spongepowered.api.world.portal.PortalLogic;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.level.block.PortalBlockBridge;
 import org.spongepowered.common.util.AxisUtil;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.portal.SpongeNetherPortalTeleportBehavior;
 import org.spongepowered.common.world.portal.SpongePortal;
 import org.spongepowered.math.vector.Vector3i;
 
-import java.util.Comparator;
 import java.util.Optional;
 
 @Mixin(NetherPortalBlock.class)
 public abstract class NetherPortalBlockMixin implements PortalBlockBridge {
+
+    @Shadow
+    private static DimensionTransition getDimensionTransitionFromExit(Entity $$0, BlockPos $$1, BlockUtil.FoundRectangle $$2, ServerLevel $$3, DimensionTransition.PostDimensionTransition $$4) {
+        throw new UnsupportedOperationException("Implemented via mixin");
+    }
 
     @Override
     public Optional<ServerLocation> bridge$calculatePortalExit(final ServerWorld from, final Vector3i fromPos, final org.spongepowered.api.entity.Entity entity) {
@@ -73,16 +82,8 @@ public abstract class NetherPortalBlockMixin implements PortalBlockBridge {
         final var level = ((ServerLevel) at.world());
         final var worldBorder = level.getWorldBorder();
         final var blockPos = VecHelper.toBlockPos(at.position());
-        final var poiManager = level.getPoiManager();
-        final int range = Math.clamp(searchRange, 1, 128);
 
-        poiManager.ensureLoadedAndValid(level, blockPos, range);
-        final var foundPortalPos = poiManager.getInSquare(poi -> poi.is(PoiTypes.NETHER_PORTAL), blockPos, range, PoiManager.Occupancy.ANY)
-                .map(PoiRecord::getPos)
-                .filter(worldBorder::isWithinBounds)
-                .filter(pos -> level.getBlockState(pos).hasProperty(BlockStateProperties.HORIZONTAL_AXIS))
-                .min(Comparator.<BlockPos>comparingDouble($$1x -> $$1x.distSqr(blockPos)).thenComparingInt(Vec3i::getY));
-        return foundPortalPos.map(pos -> {
+        return level.getPortalForcer().findClosestPortalPosition(blockPos, level.dimension() == Level.NETHER, worldBorder).map(pos -> {
             final var portalBlockState = level.getBlockState(pos);
             final var axis = portalBlockState.getValue(BlockStateProperties.HORIZONTAL_AXIS);
             final var foundRectangle = BlockUtil.getLargestRectangleAround(pos, axis, 21, Direction.Axis.Y, 21, pos2 -> level.getBlockState(pos2) == portalBlockState);
@@ -109,11 +110,11 @@ public abstract class NetherPortalBlockMixin implements PortalBlockBridge {
     }
 
     @Override
-    public boolean bridge$teleport(final org.spongepowered.api.entity.Entity entity, final ServerLocation destination, final boolean generateDestinationPortal) {
+    public boolean bridge$teleport(final ServerLocation origin, final org.spongepowered.api.entity.Entity entity, final ServerLocation destination, final boolean generateDestinationPortal) {
         final var toLevel = (ServerLevel) destination.world();
         boolean toSmallerScaleLevel = toLevel.dimension() == Level.NETHER;
         var found = this.bridge$findPortal(destination, toSmallerScaleLevel ? 16 : 128);
-        var portalDestination = found.map(Portal::position);
+        var portalDestination = found.map(portal -> SpongeNetherPortalTeleportBehavior.INSTANCE.spawnLocation(origin, destination, entity));
         if (portalDestination.isPresent()) {
             entity.setLocation(portalDestination.get());
             return true;
@@ -123,13 +124,12 @@ public abstract class NetherPortalBlockMixin implements PortalBlockBridge {
         }
         final Axis axis = AxisUtil.getFor(Direction.Axis.X);
         var generated = this.bridge$generatePortal(destination, axis);
-        portalDestination = generated.map(Portal::position);
+        portalDestination = generated.map(portal -> SpongeNetherPortalTeleportBehavior.INSTANCE.spawnLocation(origin, destination, entity));
         if (portalDestination.isPresent()) {
             entity.setLocation(portalDestination.get());
             return true;
         }
         return false;
     }
-
 
 }
