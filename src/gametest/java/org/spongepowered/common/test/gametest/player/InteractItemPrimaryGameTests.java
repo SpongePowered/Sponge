@@ -27,10 +27,13 @@ package org.spongepowered.common.test.gametest.player;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.protocol.game.ServerboundSwingPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
@@ -42,13 +45,17 @@ import org.spongepowered.common.test.gametest.GameTest;
 import org.spongepowered.common.test.gametest.GameTestAssertions;
 import org.spongepowered.common.test.gametest.GameTestGroup;
 import org.spongepowered.common.test.gametest.SpongeGameTests;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 @GameTestGroup("interact_item_primary")
 public final class InteractItemPrimaryGameTests {
 
     private static final BlockPos BLOCK = new BlockPos(0, 2, 2);
+    // In reach of the player, who stands at (0.5, 1, 0.5)
+    private static final Vec3 ENTITY = new Vec3(0.5, 1, 1.5);
     private static final int CLICKS = 5;
 
     @GameTest(skyAccess = true)
@@ -80,13 +87,61 @@ public final class InteractItemPrimaryGameTests {
     // The swing that goes with dropping an item is still skipped, and only that one
     @GameTest(skyAccess = true)
     void dropSwingSkipped(final GameTestHelper helper) {
+        InteractItemPrimaryGameTests.assertSwingSkipped(helper, "the drop", player ->
+            player.connection.handlePlayerAction(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.DROP_ITEM, BlockPos.ZERO, Direction.DOWN)));
+    }
+
+    @GameTest(skyAccess = true)
+    void entityAttackSwingSkipped(final GameTestHelper helper) {
+        final ArmorStand stand = helper.spawn(EntityType.ARMOR_STAND, InteractItemPrimaryGameTests.ENTITY);
+        try {
+            InteractItemPrimaryGameTests.assertSwingSkipped(helper, "the entity attack", player ->
+                player.connection.handleInteract(ServerboundInteractPacket.createAttackPacket(stand, false)));
+        } finally {
+            stand.discard();
+        }
+    }
+
+    @GameTest(skyAccess = true)
+    void entityInteractSwingSkipped(final GameTestHelper helper) {
+        final ArmorStand stand = helper.spawn(EntityType.ARMOR_STAND, InteractItemPrimaryGameTests.ENTITY);
+        try {
+            InteractItemPrimaryGameTests.assertSwingSkipped(helper, "the entity interaction", player ->
+                player.connection.handleInteract(ServerboundInteractPacket.createInteractionPacket(stand, false, InteractionHand.MAIN_HAND, Vec3.ZERO)));
+        } finally {
+            stand.discard();
+        }
+    }
+
+    // A plugin cancelling the hit doesn't turn the swing that goes with it into a click at air
+    @GameTest(skyAccess = true)
+    void cancelledBlockHitSwingSkipped(final GameTestHelper helper) {
+        helper.setBlock(InteractItemPrimaryGameTests.BLOCK, Blocks.STONE);
+        final BlockPos block = helper.absolutePos(InteractItemPrimaryGameTests.BLOCK);
+        final AtomicInteger cancelled = new AtomicInteger();
+        final EventListener<InteractBlockEvent.Primary.Start> canceller = event -> {
+            if (event.block().position().equals(VecHelper.toVector3i(block))) {
+                event.setCancelled(true);
+                cancelled.incrementAndGet();
+            }
+        };
+        SpongeGameTests.listen(InteractBlockEvent.Primary.Start.class, canceller);
+        try {
+            InteractItemPrimaryGameTests.assertSwingSkipped(helper, "the cancelled block hit", player ->
+                player.connection.handlePlayerAction(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, block, Direction.NORTH)));
+            GameTestAssertions.assertValueEqual(helper, cancelled.get(), 1, "cancelled InteractBlockEvent.Primary.Start count");
+        } finally {
+            Sponge.eventManager().unregisterListeners(canceller);
+        }
+    }
+
+    private static void assertSwingSkipped(final GameTestHelper helper, final String action, final Consumer<ServerPlayer> perform) {
         final ServerPlayer player = InteractItemPrimaryGameTests.survivalPlayer(helper);
         final Counters counters = Counters.listen(player);
         try {
-            InteractItemPrimaryGameTests.lookUp(player);
-            player.connection.handlePlayerAction(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.DROP_ITEM, BlockPos.ZERO, Direction.DOWN));
-            player.connection.handleAnimate(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
-            GameTestAssertions.assertValueEqual(helper, counters.airClicks.get(), 0, "InteractItemEvent.Primary count for the drop's swing");
+            perform.accept(player);
+            InteractItemPrimaryGameTests.clickAir(player);
+            GameTestAssertions.assertValueEqual(helper, counters.airClicks.get(), 0, "InteractItemEvent.Primary count for the swing after " + action);
 
             InteractItemPrimaryGameTests.clickAir(player);
             GameTestAssertions.assertValueEqual(helper, counters.airClicks.get(), 1, "InteractItemEvent.Primary count after clicking air");
