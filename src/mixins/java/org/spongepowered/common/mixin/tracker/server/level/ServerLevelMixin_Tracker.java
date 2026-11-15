@@ -440,8 +440,6 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
     public Optional<WorldPipeline.Builder> bridge$startBlockChange(final BlockPos pos, final BlockState newState, final int flags) {
         if (((ServerLevel) (Object) this).isOutsideBuildHeight(pos)) {
             return Optional.empty();
-        } else if (this.shadow$isDebug()) { // isClientSide is always false since this is WorldServer
-            return Optional.empty();
         }
         // Sponge Start - Sanity check against the PhaseTracker for instances
         if (this.bridge$isFake()) {
@@ -501,8 +499,6 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
     @Override
     public boolean setBlock(final BlockPos pos, final net.minecraft.world.level.block.state.BlockState newState, final int flags, final int limit) {
         if (((ServerLevel) (Object) this).isOutsideBuildHeight(pos)) {
-            return false;
-        } else if (this.shadow$isDebug()) { // isClientSide is always false since this is WorldServer
             return false;
         }
         // Sponge Start - Sanity check against the PhaseTracker for instances
@@ -647,9 +643,6 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
 
     @Unique
     private PhaseTracker tracker$validateServerThread() {
-        if (this.shadow$isDebug()) { // isClientSide is always false since this is WorldServer
-            return null;
-        }
         if (this.bridge$isFake()) {
             return null;
         }

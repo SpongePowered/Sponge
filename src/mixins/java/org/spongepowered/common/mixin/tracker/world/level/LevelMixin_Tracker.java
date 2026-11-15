@@ -63,7 +63,6 @@ public abstract class LevelMixin_Tracker implements LevelBridge, LevelAccessor {
     @Shadow @Nullable public abstract BlockEntity shadow$getBlockEntity(BlockPos pos);
     @Shadow public void shadow$setBlockEntity(final BlockEntity tileEntity) { } // Shadowed
     @Shadow public abstract BlockState shadow$getBlockState(BlockPos pos);
-    @Shadow public abstract boolean shadow$isDebug();
     @Override
     @Shadow public boolean destroyBlock(final BlockPos p_241212_1_, final boolean p_241212_2_, @Nullable final Entity p_241212_3_, final int p_241212_4_) { throw new IllegalStateException("Untransformed shadow!"); }
     @Shadow public abstract FluidState shadow$getFluidState(BlockPos p_204610_1_);

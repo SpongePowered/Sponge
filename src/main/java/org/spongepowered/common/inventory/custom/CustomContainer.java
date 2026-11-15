@@ -40,16 +40,16 @@ public class CustomContainer extends AbstractContainerMenu {
         this.inv = inventory;
 
         for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
-            this.addSlot(new Slot(inventory, slot, 0, 0));
+            this.addSlot(new Slot(inventory, slot, 0, 0, Slot.Section.CONTAINER));
         }
 
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                this.addSlot(new Slot(player.getInventory(), (row + 1) * 9 + col, 0, 0));
+                this.addSlot(new Slot(player.getInventory(), (row + 1) * 9 + col, 0, 0, Slot.Section.INVENTORY));
             }
         }
         for (int col = 0; col < 9; col++) {
-            this.addSlot(new Slot(player.getInventory(), col, 0, 0));
+            this.addSlot(new Slot(player.getInventory(), col, 0, 0, Slot.Section.HOTBAR));
         }
 
         ((TrackedMenuBridge) inventory).bridge$trackContainerMenu(this);

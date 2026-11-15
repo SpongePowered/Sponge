@@ -69,8 +69,8 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
         throw new IllegalStateException("Untransformed shadow method!");
     }
 
-    public ResultSlotMixin_Inventory(final Container inventoryIn, final int index, final int xPosition, final int yPosition) {
-        super(inventoryIn, index, xPosition, yPosition);
+    public ResultSlotMixin_Inventory(final Container inventoryIn, final int index, final int xPosition, final int yPosition, final Slot.Section section) {
+        super(inventoryIn, index, xPosition, yPosition, section);
     }
 
     @Nullable private RecipeHolder<net.minecraft.world.item.crafting.CraftingRecipe> impl$onTakeRecipe;

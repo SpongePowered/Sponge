@@ -28,6 +28,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractSelectionList;
+import net.minecraft.client.gui.narration.GroupNarration;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.narration.NarrationSupplier;
@@ -167,12 +168,12 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
     protected void updateWidgetNarration(final NarrationElementOutput narrationConsumer) {
         final @org.checkerframework.checker.nullness.qual.Nullable E hovered = this.getCurrentHoveredEntry();
         if (hovered != null) {
-            this.narrateListElementPosition(narrationConsumer, hovered);
+            GroupNarration.LIST.narratePosition(narrationConsumer, this.children(), hovered);
             hovered.updateNarration(narrationConsumer);
         } else {
             final E selected = this.getSelected();
             if (selected != null) {
-                this.narrateListElementPosition(narrationConsumer.nest(), selected);
+                GroupNarration.LIST.narratePosition(narrationConsumer.nest(), this.children(), selected);
                 selected.updateNarration(narrationConsumer);
             }
         }

@@ -43,7 +43,7 @@ public abstract class ClientLevelMixin extends LevelMixin {
     @Inject(method = "<init>", at = @At("TAIL"))
     private void impl$onInit(
         final ClientPacketListener listener, final ClientLevel.ClientLevelData data, final ResourceKey<Level> key,
-        final Holder<DimensionType> holder, final int storageRange, final int serverSimulationDistance, final LevelExtractor levelExtractor, final boolean isDebug,
+        final Holder<DimensionType> holder, final int storageRange, final int serverSimulationDistance, final LevelExtractor levelExtractor,
         final int seaLevel, final CallbackInfo ci) {
         this.bridge$adjustDimensionLogic(holder.value());
     }

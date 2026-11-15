@@ -40,8 +40,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 @Mixin(ServerLevel.class)
 public abstract class ServerLevelMixin_Vanilla extends Level {
 
-    protected ServerLevelMixin_Vanilla(WritableLevelData levelData, ResourceKey<Level> dimension, RegistryAccess registryAccess, Holder<DimensionType> dimensionTypeRegistration, boolean isClientSide, boolean isDebug, int maxChainedNeighborUpdates) {
-        super(levelData, dimension, registryAccess, dimensionTypeRegistration, isClientSide, isDebug, maxChainedNeighborUpdates);
+    protected ServerLevelMixin_Vanilla(WritableLevelData levelData, ResourceKey<Level> dimension, RegistryAccess registryAccess, Holder<DimensionType> dimensionTypeRegistration, boolean isClientSide, int maxChainedNeighborUpdates) {
+        super(levelData, dimension, registryAccess, dimensionTypeRegistration, isClientSide, maxChainedNeighborUpdates);
     }
 
     @Redirect(

@@ -1046,7 +1046,7 @@ public class SpongeWorldManager implements WorldManager {
         final Executor executor = ((MinecraftServerAccessor) this.server).accessor$executor();
 
         final ServerLevel world = new ServerLevel(this.server, executor, storageSource, levelData,
-            registryKey, resolvedStem, levelData.isDebugWorld(), spawners, true);
+            registryKey, resolvedStem, spawners, true);
         this.worlds.put(registryKey, world);
 
         // Persist the LevelStem (with resolved holder) in the server's WorldGenSettings so custom

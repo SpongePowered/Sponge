@@ -259,7 +259,6 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         final ServerLevelData levelData,
         final net.minecraft.resources.ResourceKey<Level> dimension,
         final LevelStem levelStem,
-        final boolean isDebug,
         final List<CustomSpawner> customSpawners,
         final boolean tickTime,
         final CallbackInfo ci
