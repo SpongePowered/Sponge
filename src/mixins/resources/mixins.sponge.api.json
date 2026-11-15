@@ -20,7 +20,6 @@
     "minecraft.advancements.DisplayInfoMixin_API",
     "minecraft.block.BlockBehaviourMixin_API",
     "minecraft.block.BlockMixin_API",
-    "minecraft.block.BlockSoundGroupMixin_API",
     "minecraft.commands.CommandSourceStackMixin_API",
     "minecraft.commands.arguments.selector.EntitySelectorMixin_API",
     "minecraft.commands.arguments.selector.EntitySelectorParserMixin_API",

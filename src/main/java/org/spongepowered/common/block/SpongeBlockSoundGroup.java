@@ -22,68 +22,59 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.block;
+package org.spongepowered.common.block;
 
 import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.level.block.sounds.BlockSoundSet;
 import org.spongepowered.api.block.BlockSoundGroup;
 import org.spongepowered.api.effect.sound.SoundType;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Optional;
 
-@Mixin(BlockSoundSet.class)
-public abstract class BlockSoundGroupMixin_API implements BlockSoundGroup {
+/**
+ * Wraps a {@link BlockSoundSet} rather than being mixed into it: the record's
+ * accessors share their names and erased descriptors with the API methods, so
+ * a mixin would replace them and break the registry codec.
+ */
+public record SpongeBlockSoundGroup(BlockSoundSet set) implements BlockSoundGroup {
 
-    // @formatter:off
-    @Shadow @Final private float volume;
-    @Shadow @Final private float pitch;
-    @Shadow @Final private Optional<Holder<SoundEvent>> breakSound;
-    @Shadow @Final private Optional<Holder<SoundEvent>> stepSound;
-    @Shadow @Final private Optional<Holder<SoundEvent>> placeSound;
-    @Shadow @Final private Optional<Holder<SoundEvent>> hitSound;
-    @Shadow @Final private Optional<Holder<SoundEvent>> fallSound;
-    // @formatter:on
-
-    private static Optional<SoundType> api$sound(final Optional<Holder<SoundEvent>> sound) {
+    private static Optional<SoundType> sound(final Optional<Holder<SoundEvent>> sound) {
         return sound.map(holder -> (SoundType) (Object) holder.value());
     }
 
     @Override
     public double volume() {
-        return this.volume;
+        return this.set.volume();
     }
 
     @Override
     public double pitch() {
-        return this.pitch;
+        return this.set.pitch();
     }
 
     @Override
     public Optional<SoundType> breakSound() {
-        return BlockSoundGroupMixin_API.api$sound(this.breakSound);
+        return SpongeBlockSoundGroup.sound(this.set.breakSound());
     }
 
     @Override
     public Optional<SoundType> stepSound() {
-        return BlockSoundGroupMixin_API.api$sound(this.stepSound);
+        return SpongeBlockSoundGroup.sound(this.set.stepSound());
     }
 
     @Override
     public Optional<SoundType> placeSound() {
-        return BlockSoundGroupMixin_API.api$sound(this.placeSound);
+        return SpongeBlockSoundGroup.sound(this.set.placeSound());
     }
 
     @Override
     public Optional<SoundType> hitSound() {
-        return BlockSoundGroupMixin_API.api$sound(this.hitSound);
+        return SpongeBlockSoundGroup.sound(this.set.hitSound());
     }
 
     @Override
     public Optional<SoundType> fallSound() {
-        return BlockSoundGroupMixin_API.api$sound(this.fallSound);
+        return SpongeBlockSoundGroup.sound(this.set.fallSound());
     }
 }

@@ -36,6 +36,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.block.SpongeBlockSoundGroup;
 
 import java.util.Optional;
 
@@ -62,9 +63,9 @@ public abstract class BlockBehaviourMixin_API implements BlockType {
 
     @Override
     public BlockSoundGroup soundGroup() {
-        return (BlockSoundGroup) (Object) this.blockSoundSet
+        return new SpongeBlockSoundGroup(this.blockSoundSet
             .flatMap(SpongeCommon.<BlockSoundSet>vanillaRegistry(Registries.BLOCK_SOUND_SET)::getOptional)
-            .orElse(BlockSoundSet.EMPTY);
+            .orElse(BlockSoundSet.EMPTY));
     }
 
     @Override
