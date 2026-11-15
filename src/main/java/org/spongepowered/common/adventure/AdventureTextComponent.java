@@ -161,13 +161,13 @@ public class AdventureTextComponent implements net.minecraft.network.chat.Compon
     }
 
     @Override
-    public <T> Optional<T> visit(final StyledContentConsumer<T> visitor, final Style style) {
-        return this.deepConvertedLocalized().visit(visitor, style);
+    public <T> Optional<T> visitUnbounded(final StyledContentConsumer<T> visitor, final Style style) {
+        return this.deepConvertedLocalized().visitUnbounded(visitor, style);
     }
 
     @Override
-    public <T> Optional<T> visit(final ContentConsumer<T> visitor) {
-        return this.deepConverted().visit(visitor);
+    public <T> Optional<T> visitUnbounded(final ContentConsumer<T> visitor) {
+        return this.deepConverted().visitUnbounded(visitor);
     }
 
 }
