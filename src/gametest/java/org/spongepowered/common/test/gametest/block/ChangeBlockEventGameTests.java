@@ -94,6 +94,30 @@ public final class ChangeBlockEventGameTests {
         });
     }
 
+    /** The control for FrozenGameGameTests#scheduledBlockChangeWaitsForStep: with the game running the sand falls */
+    @GameTest(maxTicks = 40)
+    void scheduledTickFires(final GameTestHelper helper) {
+        final BlockPos sand = new BlockPos(0, 3, 0);
+        final Vector3i target = VecHelper.toVector3i(helper.absolutePos(sand));
+        final AtomicBoolean fell = new AtomicBoolean();
+        final EventListener<ChangeBlockEvent.All> listener = event -> {
+            if (ChangeBlockEventGameTests.find(event, target)
+                .filter(transaction -> (Object) transaction.original().state() == Blocks.SAND.defaultBlockState()).isPresent()) {
+                fell.set(true);
+            }
+        };
+        SpongeGameTests.listen(ChangeBlockEvent.All.class, listener);
+
+        helper.setBlock(sand.below(), Blocks.AIR);
+        helper.setBlock(sand, Blocks.SAND);
+
+        helper.succeedWhen(() -> {
+            helper.assertTrue(fell.get(), "ChangeBlockEvent.All was not thrown for the falling sand at " + target);
+            helper.assertBlockPresent(Blocks.AIR, sand);
+            Sponge.eventManager().unregisterListeners(listener);
+        });
+    }
+
     private static Optional<BlockTransaction> find(final ChangeBlockEvent.All event, final Vector3i target) {
         return event.transactions().stream()
             .filter(transaction -> transaction.original().position().equals(target))
