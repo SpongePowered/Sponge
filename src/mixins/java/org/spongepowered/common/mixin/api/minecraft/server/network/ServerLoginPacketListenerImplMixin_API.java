@@ -39,7 +39,7 @@ import org.spongepowered.common.profile.SpongeGameProfile;
 public abstract class ServerLoginPacketListenerImplMixin_API implements ServerConnectionState.Login {
 
     // @formatter:off
-    @Shadow private com.mojang.authlib.GameProfile authenticatedProfile;
+    @Shadow private com.mojang.authlib.GameProfile resolvedUserProfile;
     @Shadow @Final private boolean transferred;
     @Shadow @Final Connection connection;
     // @formatter:on
@@ -56,6 +56,6 @@ public abstract class ServerLoginPacketListenerImplMixin_API implements ServerCo
 
     @Override
     public GameProfile profile() {
-        return SpongeGameProfile.of(this.authenticatedProfile);
+        return SpongeGameProfile.of(this.resolvedUserProfile);
     }
 }

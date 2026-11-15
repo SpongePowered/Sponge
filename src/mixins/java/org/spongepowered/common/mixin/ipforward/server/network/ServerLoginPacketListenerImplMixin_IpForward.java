@@ -80,7 +80,7 @@ public abstract class ServerLoginPacketListenerImplMixin_IpForward {
     @ModifyArg(method = "handleHello",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/server/network/ServerLoginPacketListenerImpl;startClientVerification(Lcom/mojang/authlib/GameProfile;)V",
+            target = "Lnet/minecraft/server/network/ServerLoginPacketListenerImpl;startOfflineClientVerification(Lcom/mojang/authlib/GameProfile;)V",
             ordinal = 1))
     private GameProfile bungee$initUuid(GameProfile $$0) {
         if (!this.server.usesAuthentication() && SpongeConfigs.getCommon().get().ipForwarding.mode == IpForwardingCategory.Mode.LEGACY) {

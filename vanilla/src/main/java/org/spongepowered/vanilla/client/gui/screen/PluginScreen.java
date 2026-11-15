@@ -104,8 +104,8 @@ public final class PluginScreen extends Screen {
     }
 
     @Override
-    public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float partialTicks) {
-        super.extractRenderState(graphics, mouseX, mouseY, partialTicks);
+    public void extractRenderState(final GuiGraphicsExtractor graphics) {
+        super.extractRenderState(graphics);
         // TODO: drawCenteredString needs GuiGraphicsExtractor rewrite (see .docs/plugin-gui-rewrite-plan.md)
     }
 

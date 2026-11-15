@@ -55,7 +55,7 @@ public final class PluginSelectionList extends FilterableList<PluginSelectionLis
         }
 
         @Override
-        public void extractContent(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final boolean hovered, final float partialTicks) {
+        public void extractContent(final GuiGraphicsExtractor graphics, final boolean hovered) {
             // TODO: Implement rendering via GuiGraphicsExtractor (see .docs/plugin-gui-rewrite-plan.md)
             // Should draw: plugin name (or ID), and ID below if name is present
         }

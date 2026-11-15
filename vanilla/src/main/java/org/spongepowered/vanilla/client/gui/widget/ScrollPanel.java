@@ -169,11 +169,11 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
     }
 
     @Override
-    public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float partialTicks) {
+    public void extractRenderState(final GuiGraphicsExtractor graphics) {
         this.drawBackground();
         // TODO: Rewrite rendering for GuiGraphicsExtractor pipeline
         final int baseY = this.top + this.border - (int) this.scrollDistance;
-        this.drawPanel(graphics, this.right, baseY, mouseX, mouseY);
+        this.drawPanel(graphics, this.right, baseY, graphics.mouseX(), graphics.mouseY());
     }
 
     @Override

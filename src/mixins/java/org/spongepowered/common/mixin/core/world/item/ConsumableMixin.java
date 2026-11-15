@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.world.item;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -32,6 +35,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.data.VanishableBridge;
+
+import java.util.Optional;
 
 @Mixin(Consumable.class)
 public abstract class ConsumableMixin {
@@ -45,13 +50,14 @@ public abstract class ConsumableMixin {
     }
 
 
-    @Redirect(method = "emitParticlesAndSounds", at = @At(value = "INVOKE",
-        target = "Lnet/minecraft/world/entity/LivingEntity;playSound(Lnet/minecraft/sounds/SoundEvent;FF)V"))
-    private void impl$ignoreExperienceLevelSoundsWhileVanished(final LivingEntity instance, final SoundEvent soundEvent,
-        final float $$1, final float $$2) {
-        if (!(instance instanceof VanishableBridge bridge) || bridge.bridge$vanishState().createsSounds()) {
-            instance.playSound(soundEvent, $$1, $$2);
+    @WrapOperation(method = "emitParticlesAndSounds", at = @At(value = "INVOKE",
+        target = "Lnet/minecraft/world/item/component/Consumable;getConsumingSound(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;)Ljava/util/Optional;"))
+    private Optional<Holder<SoundEvent>> impl$ignoreConsumeSoundsWhileVanished(final Consumable instance, final LivingEntity user,
+        final ItemStack stack, final Operation<Optional<Holder<SoundEvent>>> original) {
+        if (user instanceof VanishableBridge bridge && !bridge.bridge$vanishState().createsSounds()) {
+            return Optional.empty();
         }
+        return original.call(instance, user, stack);
     }
 
 }

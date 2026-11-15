@@ -91,7 +91,7 @@ import java.util.Optional;
 public final class ItemStackData {
 
     public static final FoodProperties DEFAULT_FOOD_PROPERTIES = new FoodProperties(0, 0, false);
-    public static final Consumable DEFAULT_CONSUMABLE_PROPERTIES = new Consumable(1.6F, ItemUseAnimation.EAT, SoundEvents.GENERIC_EAT, true, List.of());
+    public static final Consumable DEFAULT_CONSUMABLE_PROPERTIES = new Consumable(1.6F, ItemUseAnimation.EAT, Optional.of(SoundEvents.GENERIC_EAT), true, List.of());
 
     private ItemStackData() {
     }

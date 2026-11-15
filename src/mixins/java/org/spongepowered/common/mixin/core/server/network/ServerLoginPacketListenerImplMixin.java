@@ -43,6 +43,7 @@ import net.minecraft.util.Crypt;
 import net.minecraft.util.CryptException;
 import org.apache.commons.lang3.Validate;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.objectweb.asm.Opcodes;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
@@ -76,12 +77,12 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.PrivateKey;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 
 @Mixin(ServerLoginPacketListenerImpl.class)
@@ -91,14 +92,14 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
     @Shadow @Final static Logger LOGGER;
 
     @Shadow @Final Connection connection;
-    @Shadow private com.mojang.authlib.GameProfile authenticatedProfile;
+    @Shadow private com.mojang.authlib.GameProfile resolvedUserProfile;
     @Shadow @Final MinecraftServer server;
     @Shadow private ServerLoginPacketListenerImpl.State state;
     @Shadow @Final private byte[] challenge;
     @Shadow @Nullable String requestedUsername;
 
     @Shadow public abstract void shadow$disconnect(Component reason);
-    @Shadow abstract void shadow$startClientVerification(GameProfile profile);
+    @Shadow abstract void shadow$applyConnectionEncryption(GameProfile profile, SecretKey secretKey);
     // @formatter:on
 
     private static final ExecutorService impl$EXECUTOR = Executors.newCachedThreadPool(new ThreadFactoryBuilder()
@@ -149,9 +150,11 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
         this.shadow$disconnect(reason);
     }
 
-    @Inject(method = "startClientVerification(Lcom/mojang/authlib/GameProfile;)V",
+    // Offline profiles verify straight away, authenticated ones once the client has applied encryption
+    @Inject(method = {"startOfflineClientVerification", "handleOptionsEnabled"},
             at = @At(
                     value = "FIELD",
+                    opcode = Opcodes.PUTFIELD,
                     target = "Lnet/minecraft/server/network/ServerLoginPacketListenerImpl;state:Lnet/minecraft/server/network/ServerLoginPacketListenerImpl$State;"),
             cancellable = true)
     private void impl$handleAuthEventCancellation(final CallbackInfo ci) {
@@ -168,12 +171,12 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
     }
 
     private void impl$processVerification() {
-        ((PlayerListBridge) this.server.getPlayerList()).bridge$canPlayerLogin(this.connection.getRemoteAddress(), this.authenticatedProfile)
+        ((PlayerListBridge) this.server.getPlayerList()).bridge$canPlayerLogin(this.connection.getRemoteAddress(), this.resolvedUserProfile)
             .handle((componentOpt, throwable) -> {
                 if (throwable != null) {
                     // An error occurred during login checks so we ask to abort.
                     ((ConnectionBridge) this.connection).bridge$setKickReason(Component.literal("An error occurred checking ban/whitelist status."));
-                    SpongeCommon.logger().error("An error occurred when checking the ban/whitelist status of {}.", this.authenticatedProfile.id().toString());
+                    SpongeCommon.logger().error("An error occurred when checking the ban/whitelist status of {}.", this.resolvedUserProfile.id().toString());
                     SpongeCommon.logger().error(throwable);
                 } else if (componentOpt != null) {
                     // We handle this later
@@ -192,7 +195,7 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
                 this.impl$fireAuthEvent();
                 return null;
             }, ServerLoginPacketListenerImplMixin.impl$EXECUTOR).exceptionally(throwable -> {
-                SpongeCommon.logger().error("Forcibly disconnecting user {}({}) due to an error during login.", this.authenticatedProfile.name(), this.authenticatedProfile.id(), throwable);
+                SpongeCommon.logger().error("Forcibly disconnecting user {}({}) due to an error during login.", this.resolvedUserProfile.name(), this.resolvedUserProfile.id(), throwable);
                 this.shadow$disconnect(Component.literal("Internal Server Error: unable to complete login."));
                 return null;
             });
@@ -207,11 +210,11 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
             disconnectMessage = net.kyori.adventure.text.Component.text("You are not allowed to log in to this server.");
         }
         final SpongeEngineConnection connection = ((ConnectionBridge) this.connection).bridge$getEngineConnection();
-        connection.setGameProfile(this.authenticatedProfile);
+        connection.setGameProfile(this.resolvedUserProfile);
         final Cause cause = Cause.of(EventContext.empty(), this);
         final ServerSideConnectionEvent.Auth event = SpongeEventFactory.createServerSideConnectionEventAuth(
                 cause, disconnectMessage, disconnectMessage, (ServerSideConnection) connection,
-                SpongeGameProfile.of(this.authenticatedProfile));
+                SpongeGameProfile.of(this.resolvedUserProfile));
         if (kickReason != null) {
             event.setCancelled(true);
         }
@@ -233,20 +236,19 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
         Validate.validState(this.state == ServerLoginPacketListenerImpl.State.KEY, "Unexpected key packet");
 
         final String $$5;
+        final SecretKey secretKey;
         try {
             final PrivateKey $$1 = this.server.getKeyPair().getPrivate();
-            if (!packet.isChallengeValid(this.challenge, $$1)) {
+            final byte[] receivedChallenge = Crypt.decryptUsingKey($$1, packet.encryptedChallenge());
+            secretKey = Crypt.decryptByteToSecretKey($$1, packet.encryptedSecretKey());
+            if (!Arrays.equals(this.challenge, receivedChallenge)) {
                 throw new IllegalStateException("Protocol error");
             }
 
-            final SecretKey $$2 = packet.getSecretKey($$1);
-            final Cipher $$3 = Crypt.getCipher(2, $$2);
-            final Cipher $$4 = Crypt.getCipher(1, $$2);
-            $$5 = new BigInteger(Crypt.digestData("", this.server.getKeyPair().getPublic(), $$2)).toString(16);
+            $$5 = new BigInteger(Crypt.digestData("", this.server.getKeyPair().getPublic(), secretKey)).toString(16);
             this.state = ServerLoginPacketListenerImpl.State.AUTHENTICATING;
-            this.connection.setEncryptionKey($$3, $$4);
-        } catch (CryptException var7) {
-            throw new IllegalStateException("Protocol error", var7);
+        } catch (CryptException var6) {
+            throw new IllegalStateException("Protocol error", var6);
         }
 
         //Sponge start
@@ -259,10 +261,10 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
                 if ($$1 != null) {
                     final GameProfile $$2 = $$1.profile();
                     ServerLoginPacketListenerImplMixin.LOGGER.info("UUID of player {} is {}", $$2.name(), $$2.id());
-                    ServerLoginPacketListenerImplMixin.this.shadow$startClientVerification($$2);
+                    ServerLoginPacketListenerImplMixin.this.shadow$applyConnectionEncryption($$2, secretKey);
                 } else if (ServerLoginPacketListenerImplMixin.this.server.isSingleplayer()) {
                     ServerLoginPacketListenerImplMixin.LOGGER.warn("Failed to verify username but will let them in anyway!");
-                    ServerLoginPacketListenerImplMixin.this.shadow$startClientVerification(UUIDUtil.createOfflineProfile(username));
+                    ServerLoginPacketListenerImplMixin.this.shadow$applyConnectionEncryption(UUIDUtil.createOfflineProfile(username), secretKey);
                 } else {
                     ServerLoginPacketListenerImplMixin.this.shadow$disconnect(Component.translatable("multiplayer.disconnect.unverified_username"));
                     ServerLoginPacketListenerImplMixin.LOGGER.error("Username '{}' tried to join with an invalid session", username);
@@ -270,7 +272,7 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
             } catch (AuthenticationUnavailableException var4) {
                 if (ServerLoginPacketListenerImplMixin.this.server.isSingleplayer()) {
                     ServerLoginPacketListenerImplMixin.LOGGER.warn("Authentication servers are down but will let them in anyway!");
-                    ServerLoginPacketListenerImplMixin.this.shadow$startClientVerification(UUIDUtil.createOfflineProfile(username));
+                    ServerLoginPacketListenerImplMixin.this.shadow$applyConnectionEncryption(UUIDUtil.createOfflineProfile(username), secretKey);
                 } else {
                     ServerLoginPacketListenerImplMixin.this.shadow$disconnect(Component.translatable("multiplayer.disconnect.authservers_down"));
                     ServerLoginPacketListenerImplMixin.LOGGER.error("Couldn't verify username because servers are unavailable");
@@ -344,7 +346,7 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
             ((SpongeChannelManager) Sponge.channelManager()).sendLoginChannelRegistry(connection).thenAccept(result -> {
                 final Cause cause = Cause.of(EventContext.empty(), this);
                 final ServerSideConnectionEvent.Handshake event =
-                    SpongeEventFactory.createServerSideConnectionEventHandshake(cause, connection, SpongeGameProfile.of(this.authenticatedProfile));
+                    SpongeEventFactory.createServerSideConnectionEventHandshake(cause, connection, SpongeGameProfile.of(this.resolvedUserProfile));
                 SpongeCommon.post(event);
                 this.impl$changeNegotiationState(ServerLoginPacketListenerImplMixin.HANDSHAKE_SYNC_PLUGIN_DATA);
             });

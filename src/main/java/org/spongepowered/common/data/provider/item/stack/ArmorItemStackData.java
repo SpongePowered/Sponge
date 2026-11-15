@@ -264,7 +264,7 @@ public final class ArmorItemStackData {
                             if (equippable == null) {
                                 return null;
                             }
-                            return (SoundType) (Object) equippable.equipSound().value();
+                            return equippable.equipSound().map(sound -> (SoundType) (Object) sound.value()).orElse(null);
                         })
                         .setAnd((h, v) -> {
                             final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
@@ -342,7 +342,7 @@ public final class ArmorItemStackData {
                             if (equippable == null) {
                                 return null;
                             }
-                            return (SoundType) (Object) equippable.shearingSound().value();
+                            return equippable.shearingSound().map(sound -> (SoundType) (Object) sound.value()).orElse(null);
                         })
                         .setAnd((h, v) -> {
                             final @Nullable Equippable equippable = h.get(DataComponents.EQUIPPABLE);
@@ -357,13 +357,13 @@ public final class ArmorItemStackData {
 
     private static Equippable.Builder asBuilder(final Equippable equippable) {
         final Equippable.Builder builder = Equippable.builder(equippable.slot())
-            .setEquipSound(equippable.equipSound())
             .setDispensable(equippable.dispensable())
             .setSwappable(equippable.swappable())
             .setDamageOnHurt(equippable.damageOnHurt())
             .setEquipOnInteract(equippable.equipOnInteract())
-            .setCanBeSheared(equippable.canBeSheared())
-            .setShearingSound(equippable.shearingSound());
+            .setCanBeSheared(equippable.canBeSheared());
+        equippable.equipSound().ifPresentOrElse(builder::setEquipSound, builder::noEquidSound);
+        equippable.shearingSound().ifPresentOrElse(builder::setShearingSound, builder::noShearingSound);
         equippable.assetId().ifPresent(builder::setAsset);
         equippable.cameraOverlay().ifPresent(builder::setCameraOverlay);
         equippable.allowedEntities().ifPresent(builder::setAllowedEntities);

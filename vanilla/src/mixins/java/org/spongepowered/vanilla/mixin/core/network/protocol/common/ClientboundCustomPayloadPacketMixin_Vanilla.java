@@ -25,6 +25,7 @@
 package org.spongepowered.vanilla.mixin.core.network.protocol.common;
 
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
+import net.minecraft.util.Util;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,6 +35,7 @@ import org.spongepowered.common.network.channel.ChannelUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 @Mixin(ClientboundCustomPayloadPacket.class)
@@ -43,9 +45,9 @@ public abstract class ClientboundCustomPayloadPacketMixin_Vanilla {
     @Shadow @Final private static int MAX_PAYLOAD_SIZE;
     // @formatter: on
 
-    @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "Lcom/google/common/collect/Lists;newArrayList([Ljava/lang/Object;)Ljava/util/ArrayList;"), remap = false)
-    private static ArrayList vanilla$registerCustomPacketPayloadsGame(final Object[] registrations) {
-        final ArrayList allRegistrations = new ArrayList<>(List.of(registrations));
+    @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Util;make(Ljava/lang/Object;Ljava/util/function/Consumer;)Ljava/lang/Object;"))
+    private static Object vanilla$registerCustomPacketPayloadsGame(final Object registrations, final Consumer<Object> init) {
+        final List allRegistrations = (List) Util.make(registrations, init);
         allRegistrations.addAll(ChannelUtils.spongeChannelCodecs(ClientboundCustomPayloadPacketMixin_Vanilla.MAX_PAYLOAD_SIZE));
         return allRegistrations;
     }

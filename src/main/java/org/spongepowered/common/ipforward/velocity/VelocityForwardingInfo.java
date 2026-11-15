@@ -98,7 +98,7 @@ public class VelocityForwardingInfo {
                 ((ConnectionAccessor) connection).accessor$address(new InetSocketAddress(VelocityForwardingInfo.readAddress(response),
                         ((InetSocketAddress) connection.getRemoteAddress()).getPort()));
 
-                ((ServerLoginPacketListenerImplAccessor) mcConn).invoker$startClientVerification(VelocityForwardingInfo.createProfile(response));
+                ((ServerLoginPacketListenerImplAccessor) mcConn).invoker$startOfflineClientVerification(VelocityForwardingInfo.createProfile(response));
         }).exceptionally(err -> {
             if (!(err instanceof NoResponseException)) { // Handled above
                 VelocityForwardingInfo.LOGGER.error("Failed to process velocity forwarding info", err);

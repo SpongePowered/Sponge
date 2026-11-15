@@ -27,6 +27,12 @@ package org.spongepowered.common.data;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.component.Consumable;
+import net.minecraft.world.item.equipment.Equippable;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.spongepowered.api.ResourceKey;
@@ -58,6 +64,7 @@ import org.spongepowered.api.util.Ticks;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public final class ItemStackDataTest {
@@ -108,6 +115,36 @@ public final class ItemStackDataTest {
         DataTest.checkOfferData(armor, Keys.IS_DISPENSABLE, false);
         DataTest.checkOfferData(armor, Keys.IS_SWAPPABLE, false);
         DataTest.checkOfferData(armor, Keys.SHEARING_SOUND, SoundTypes.ENTITY_SHEEP_SHEAR.get());
+    }
+
+    @Test
+    public void testEquippableWithoutSounds() {
+        final ItemStack armor = ItemStack.of(ItemTypes.DIAMOND_CHESTPLATE);
+        final net.minecraft.world.item.ItemStack mcArmor = (net.minecraft.world.item.ItemStack) (Object) armor;
+        mcArmor.set(DataComponents.EQUIPPABLE, Equippable.builder(EquipmentSlot.CHEST).noEquidSound().noShearingSound().build());
+        Assertions.assertTrue(armor.get(Keys.EQUIP_SOUND).isEmpty(), "equip sound of a silent equippable");
+        Assertions.assertTrue(armor.get(Keys.SHEARING_SOUND).isEmpty(), "shearing sound of a silent equippable");
+
+        DataTest.checkOfferData(armor, Keys.IS_DISPENSABLE, false);
+        Assertions.assertTrue(armor.get(Keys.EQUIP_SOUND).isEmpty(), "equip sound after offering another equippable key");
+        Assertions.assertTrue(armor.get(Keys.SHEARING_SOUND).isEmpty(), "shearing sound after offering another equippable key");
+
+        DataTest.checkOfferData(armor, Keys.EQUIP_SOUND, SoundTypes.ITEM_ARMOR_EQUIP_DIAMOND.get());
+        Assertions.assertTrue(armor.get(Keys.SHEARING_SOUND).isEmpty(), "shearing sound after offering the equip sound");
+    }
+
+    @Test
+    public void testConsumableSound() {
+        final ItemStack silent = ItemStack.of(ItemTypes.APPLE);
+        final net.minecraft.world.item.ItemStack mcSilent = (net.minecraft.world.item.ItemStack) (Object) silent;
+        mcSilent.set(DataComponents.CONSUMABLE, Consumable.builder().noSound().build());
+        DataTest.checkOfferData(silent, Keys.EATING_TIME, Ticks.of(40));
+        Assertions.assertTrue(mcSilent.get(DataComponents.CONSUMABLE).sound().isEmpty(), "sound of a silent consumable after offering its eating time");
+
+        final ItemStack bricks = ItemStack.of(ItemTypes.BRICKS);
+        DataTest.checkOfferData(bricks, Keys.EATING_TIME, Ticks.of(40));
+        final Consumable created = ((net.minecraft.world.item.ItemStack) (Object) bricks).get(DataComponents.CONSUMABLE);
+        Assertions.assertEquals(Optional.of(SoundEvents.GENERIC_EAT), created.sound(), "sound of a consumable created by offering an eating time");
     }
 
     @Test
