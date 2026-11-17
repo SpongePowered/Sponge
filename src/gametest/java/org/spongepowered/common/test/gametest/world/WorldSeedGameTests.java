@@ -24,8 +24,12 @@
  */
 package org.spongepowered.common.test.gametest.world;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.StructureTags;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.structure.StructureCheck;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -84,8 +88,8 @@ public final class WorldSeedGameTests {
             .thenCompose(generation -> WorldSeedGameTests.unload(key).thenApply($ -> generation)));
     }
 
-    // Chunk generation asks the world's structure manager whether to place structures. The world asks for the opposite
-    // of the default world, which on the game test server places none
+    // Chunk generation and /locate ask whether to place and search for structures. The world asks for the opposite of
+    // the default world, which on the game test server places none
     @GameTest(maxTicks = WorldSeedGameTests.MAX_TICKS)
     void createdWorldKeepsItsStructureOption(final GameTestHelper helper) {
         final ResourceKey key = ResourceKey.sponge("gametest_structure_option");
@@ -94,13 +98,20 @@ public final class WorldSeedGameTests {
             .seed(WorldSeedGameTests.SEED)
             .generateStructures(structures)
             .build();
-        final CompletableFuture<Generation> loaded = WorldSeedGameTests.load(key, WorldSeedGameTests.archetype(config))
-            .thenCompose(generation -> WorldSeedGameTests.unload(key).thenApply($ -> generation));
+        final CompletableFuture<Placement> loaded = WorldSeedGameTests.loadWorld(key, WorldSeedGameTests.archetype(config))
+            .thenApply(Placement::of)
+            .thenCompose(placement -> WorldSeedGameTests.unload(key).thenApply($ -> placement));
         helper.succeedWhen(() -> {
-            final Generation generation = WorldSeedGameTests.finished(helper, loaded);
-            GameTestAssertions.assertTrue(helper, generation.generatesStructures() == structures, structures
+            final Placement placement = WorldSeedGameTests.finished(helper, loaded);
+            GameTestAssertions.assertTrue(helper, placement.generatesStructures() == structures, structures
                 ? "The world places no structures though created with them"
                 : "The world places structures though created without them");
+            if (structures) {
+                GameTestAssertions.assertTrue(helper, placement.village() != null, "Locating a village in the world found none");
+                GameTestAssertions.assertTrue(helper, placement.villageStarts(), "The chunk the village was located in has no structure start");
+            } else {
+                GameTestAssertions.assertTrue(helper, placement.village() == null, "Locating a village found one in a world without structures");
+            }
         });
     }
 
@@ -115,8 +126,12 @@ public final class WorldSeedGameTests {
     }
 
     private static CompletableFuture<Generation> load(final ResourceKey key, final WorldArchetype archetype) {
+        return WorldSeedGameTests.loadWorld(key, archetype).thenApply(Generation::of);
+    }
+
+    private static CompletableFuture<ServerWorld> loadWorld(final ResourceKey key, final WorldArchetype archetype) {
         return Sponge.server().worldManager().loadWorld(key, ServerWorldProperties.LoadOptions.create(archetype))
-            .thenApply(world -> world.map(Generation::of).orElseThrow(() -> new IllegalStateException(key + " was not loaded")));
+            .thenApply(world -> world.orElseThrow(() -> new IllegalStateException(key + " was not loaded")));
     }
 
     private static CompletableFuture<Boolean> unload(final ResourceKey key) {
@@ -138,7 +153,7 @@ public final class WorldSeedGameTests {
         });
     }
 
-    private static Generation finished(final GameTestHelper helper, final CompletableFuture<Generation> loaded) {
+    private static <T> T finished(final GameTestHelper helper, final CompletableFuture<T> loaded) {
         GameTestAssertions.assertTrue(helper, loaded.isDone(), "The world has not finished loading and unloading");
         if (loaded.isCompletedExceptionally()) {
             GameTestAssertions.assertTrue(helper, false, "Loading or unloading the world failed: " + loaded.handle(($, error) -> error).join());
@@ -163,6 +178,24 @@ public final class WorldSeedGameTests {
             final StructureCheck structureCheck = ((StructureManagerAccessor_GameTest) level.structureManager()).accessor$structureCheck();
             return new Generation(world.seed(), level.getChunkSource().getGeneratorState().getLevelSeed(),
                 ((StructureCheckAccessor_GameTest) structureCheck).accessor$seed(), level.structureManager().shouldGenerateStructures());
+        }
+    }
+
+    /**
+     * Whether a world places structures: what its structure manager answers, the village {@code /locate} finds near
+     * the origin, and whether generating that village's chunk gave it a structure start
+     */
+    private record Placement(boolean generatesStructures, @Nullable BlockPos village, boolean villageStarts) {
+
+        // Searches as far as /locate does
+        private static final int SEARCH_RADIUS = 100;
+
+        static Placement of(final ServerWorld world) {
+            final ServerLevel level = (ServerLevel) world;
+            final @Nullable BlockPos village = level.findNearestMapStructure(StructureTags.VILLAGE, BlockPos.ZERO, Placement.SEARCH_RADIUS, false);
+            final boolean starts = village != null && !level.getChunk(SectionPos.blockToSectionCoord(village.getX()),
+                SectionPos.blockToSectionCoord(village.getZ()), ChunkStatus.STRUCTURE_STARTS, true).getAllStarts().isEmpty();
+            return new Placement(level.structureManager().shouldGenerateStructures(), village, starts);
         }
     }
 }

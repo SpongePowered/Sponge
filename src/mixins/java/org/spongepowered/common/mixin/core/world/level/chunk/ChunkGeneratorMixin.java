@@ -24,15 +24,20 @@
  */
 package org.spongepowered.common.mixin.core.world.level.chunk;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.core.Holder;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeGenerationSettings;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.WorldOptions;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.biome.BiomeSourceBridge;
 
 import java.util.function.Function;
@@ -43,5 +48,12 @@ public abstract class ChunkGeneratorMixin {
     @Inject(method = "<init>(Lnet/minecraft/world/level/biome/BiomeSource;Ljava/util/function/Function;)V", at = @At("RETURN"))
     private void impl$assignGeneratorRefToSource(final BiomeSource $$0, final Function<Holder<Biome>, BiomeGenerationSettings> $$1, final CallbackInfo ci) {
         ((BiomeSourceBridge) $$0).bridge$setChunkGenerator((ChunkGenerator) (Object) this);
+    }
+
+    // /locate and explorer maps find nothing in a world that places no structures: ask the world searched, not the server
+    @ModifyExpressionValue(method = "findNearestMapStructure",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/levelgen/WorldGenSettings;options()Lnet/minecraft/world/level/levelgen/WorldOptions;"))
+    private WorldOptions impl$usePerWorldGenOptions(final WorldOptions serverOptions, final @Local(argsOnly = true) ServerLevel level) {
+        return ((ServerLevelBridge) level).bridge$worldGenOptions();
     }
 }
