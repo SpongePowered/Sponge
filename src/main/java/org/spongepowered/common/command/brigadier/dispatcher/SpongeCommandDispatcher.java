@@ -583,7 +583,10 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
         for (final CommandNode<CommandSourceStack> node : children) { // Sponge: parent.getChildren() -> children
             CompletableFuture<Suggestions> future = Suggestions.empty();
             try {
-                future = node.listSuggestions(context.build(truncatedInput), new SuggestionsBuilder(truncatedInput, start));
+                // Sponge: the parse only checks the nodes it went through, and what the source may not use is not theirs to be suggested
+                if (node.canUse(context.getSource())) {
+                    future = node.listSuggestions(context.build(truncatedInput), new SuggestionsBuilder(truncatedInput, start));
+                }
             } catch (final CommandSyntaxException ignored) {
             }
             futures[i++] = future;

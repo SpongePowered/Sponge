@@ -87,6 +87,16 @@ public interface ArgumentParser<T> {
 
     boolean doesNotRead();
 
+    /**
+     * Completions that never change and so can be handed to the client with
+     * the command tree, sparing it a request to the server for each one.
+     *
+     * @return The completions, or null if the server has to be asked
+     */
+    default @Nullable List<String> fixedCompletions() {
+        return null;
+    }
+
     default boolean hasClientNativeCompletions() {
         return false;
     }

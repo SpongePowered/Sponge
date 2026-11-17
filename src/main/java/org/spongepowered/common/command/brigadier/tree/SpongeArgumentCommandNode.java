@@ -42,6 +42,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.suggestions.SuggestLiteralString;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.parameter.Parameter;
@@ -97,6 +98,8 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
     private final ValueUsage usage;
     private final boolean isComplexSuggestions;
     private final boolean isOptional;
+    // What the client is told to suggest with: the fixed completions themselves where there are any
+    private final @Nullable SuggestionProvider<CommandSourceStack> clientSuggestions;
 
     // used so we can have insertion order.
     private final UnsortedNodeHolder nodeHolder = new UnsortedNodeHolder();
@@ -132,6 +135,9 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
         this.key = key;
         this.usage = usage;
         this.isOptional = isOptional;
+        // A modifier or a completer other than the parser's own can change what is suggested
+        final List<String> fixedCompletions = parameterModifier == null && valueCompleter == parser ? parser.fixedCompletions() : null;
+        this.clientSuggestions = fixedCompletions == null ? this.getCustomSuggestions() : new SuggestLiteralString(fixedCompletions).toBrigadier();
     }
 
     public Parameter.Key<? super T> key() {
@@ -222,8 +228,8 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
             }
             if (this.modifier != null || forceCustomSuggestions && !CommandUtil.checkForCustomSuggestions(previousNode)) {
                 toReturn.suggests(Constants.Command.ASK_SERVER);
-            } else if (this.getCustomSuggestions() != null) {
-                toReturn.suggests(this.getCustomSuggestions());
+            } else if (this.clientSuggestions != null) {
+                toReturn.suggests(this.clientSuggestions);
             }
             if (this.getRedirect() != null) {
                 toReturn.forward(this.getRedirect(), this.getRedirectModifier(), this.isFork());
@@ -241,7 +247,7 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
             if (type != this.getType()) {
                 builder.suggests(Constants.Command.ASK_SERVER);
             } else {
-                builder.suggests(this.getCustomSuggestions());
+                builder.suggests(this.clientSuggestions);
             }
         }
         if (this.getCommand() != null) {

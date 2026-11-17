@@ -26,10 +26,14 @@ package org.spongepowered.common.util;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.Message;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
+import net.minecraft.commands.suggestions.CustomSuggestion;
+import net.minecraft.commands.suggestions.SuggestLiteralString;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.exception.CommandException;
@@ -50,7 +54,17 @@ public final class CommandUtil {
         return rootSuggestion.getChildren()
                 .stream()
                 .filter(x -> x instanceof ArgumentCommandNode)
-                .anyMatch(x -> ((ArgumentCommandNode<?, ?>) x).getCustomSuggestions() != null);
+                .anyMatch(x -> CommandUtil.asksServer(((ArgumentCommandNode<?, ?>) x).getCustomSuggestions()));
+    }
+
+    /**
+     * Whether a client asks the server on meeting these suggestions, which
+     * only one of a node's children may have it do: all but those whose
+     * values the client is sent.
+     */
+    public static boolean asksServer(final @Nullable SuggestionProvider<?> suggestions) {
+        return suggestions != null
+            && !(suggestions instanceof final CustomSuggestion.BrigadierWrapper<?> wrapper && wrapper.suggestion() instanceof SuggestLiteralString);
     }
 
     public static CompletableFuture<Suggestions> buildSuggestionsFromCompletions(

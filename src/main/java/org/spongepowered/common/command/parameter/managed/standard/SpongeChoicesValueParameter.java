@@ -27,6 +27,7 @@ package org.spongepowered.common.command.parameter.managed.standard;
 import com.mojang.brigadier.CommandDispatcher;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
@@ -50,6 +51,19 @@ public final class SpongeChoicesValueParameter<T> extends AbstractArgumentParser
     private final Function<String, ? extends T> results;
     private final boolean showInUsage;
     private final boolean forceLowercase;
+    // Only set for choices given as a map, which both callers pass as immutable
+    private @Nullable List<String> fixedCompletions;
+
+    private static final int MAX_FIXED_COMPLETIONS = 64;
+
+    private static String quoteIfNeeded(final String choice) {
+        return choice.contains(CommandDispatcher.ARGUMENT_SEPARATOR) ? "\"" + choice + "\"" : choice;
+    }
+
+    @Override
+    public @Nullable List<String> fixedCompletions() {
+        return this.fixedCompletions;
+    }
 
     public SpongeChoicesValueParameter(
             final Map<String, Supplier<? extends T>> choices,
@@ -61,6 +75,12 @@ public final class SpongeChoicesValueParameter<T> extends AbstractArgumentParser
                 showInUsage,
                 forceLowercase
         );
+        // shortcut: longer lists are left to the server to keep the commands packet small, raise the limit if that proves too cautious
+        // A choice with a space in it is completed quoted, which a client cannot match against what was typed before the quote
+        if (choices.size() <= SpongeChoicesValueParameter.MAX_FIXED_COMPLETIONS
+                && choices.keySet().stream().noneMatch(choice -> choice.contains(CommandDispatcher.ARGUMENT_SEPARATOR))) {
+            this.fixedCompletions = List.copyOf(choices.keySet());
+        }
     }
 
     public SpongeChoicesValueParameter(
@@ -78,12 +98,7 @@ public final class SpongeChoicesValueParameter<T> extends AbstractArgumentParser
     public List<CommandCompletion> complete(final @NonNull CommandContext context, final String currentInput) {
         return this.choices.get().stream()
                 .filter(x -> x.startsWith(currentInput))
-                .map(x -> {
-                    if (x.contains(CommandDispatcher.ARGUMENT_SEPARATOR)) {
-                        return "\"" + x + "\"";
-                    }
-                    return x;
-                })
+                .map(SpongeChoicesValueParameter::quoteIfNeeded)
                 .map(SpongeCommandCompletion::new)
                 .collect(Collectors.toList());
     }

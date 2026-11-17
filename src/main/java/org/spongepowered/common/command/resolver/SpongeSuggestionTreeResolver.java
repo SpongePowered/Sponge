@@ -68,12 +68,12 @@ public record SpongeSuggestionTreeResolver(
                         //
                         // Because we don't control the client, we have to work around it here.
                         if (hasCustomSuggestionsAlready && node instanceof ArgumentCommandNode<CommandSourceStack, ?> argNode) {
-                            if (argNode.getCustomSuggestions() != null) {
+                            if (CommandUtil.asksServer(argNode.getCustomSuggestions())) {
                                 // Rebuild the node without the custom suggestions.
                                 rootSuggestion.addChild(SpongeSuggestionTreeResolver.cloneArgumentWithoutSuggestions(argNode));
                                 continue;
                             }
-                        } else if (node instanceof ArgumentCommandNode && ((ArgumentCommandNode<?, ?>) node).getCustomSuggestions() != null) {
+                        } else if (node instanceof ArgumentCommandNode && CommandUtil.asksServer(((ArgumentCommandNode<?, ?>) node).getCustomSuggestions())) {
                             hasCustomSuggestionsAlready = true; // no more custom suggestions
                         }
                         rootSuggestion.addChild(node);
