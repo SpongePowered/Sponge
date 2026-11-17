@@ -9,7 +9,10 @@
   ],
   "mixins": [
     "advancements.CriteriaTriggersAccessor",
+    "commands.CommandBoxAccessor",
     "commands.CommandSourceStackAccessor",
+    "commands.ParseBoxAccessor",
+    "commands.SuggestionBoxAccessor",
     "commands.arguments.DimensionArgumentAccessor",
     "commands.arguments.OperationArgumentAccessor",
     "commands.arguments.selector.EntitySelectorParserAccessor",

@@ -22,19 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.ipforward.network.protocol.game;
+package org.spongepowered.common.mixin.ipforward.commands.arguments;
 
-import com.mojang.brigadier.arguments.ArgumentType;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import io.netty.buffer.Unpooled;
-import net.minecraft.commands.synchronization.ArgumentTypeInfo;
+import net.minecraft.commands.arguments.SerializableArgument;
+import net.minecraft.commands.arguments.SerializableArgumentTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * If a proxy server tries to inspect the commands sent
@@ -50,29 +50,41 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * afterward to allow the client to parse the commands
  * as normal.
  */
-@Mixin(targets = "net/minecraft/network/protocol/game/ClientboundCommandsPacket$ArgumentNodeStub")
-public final class ClientboundCommandsPacket_ArgumentNodeStub_IpForward {
+@Mixin(SerializableArgumentTypes.class)
+public abstract class SerializableArgumentTypesMixin_IpForward {
 
     //Magic value that was chosen by the proxy implementation.
     private static final int ipForward$MOD_ARGUMENT_ID = -256;
 
-    @Inject(method = "serializeCap(Lnet/minecraft/network/FriendlyByteBuf;Lnet/minecraft/commands/synchronization/ArgumentTypeInfo;Lnet/minecraft/commands/synchronization/ArgumentTypeInfo$Template;)V", at = @At("HEAD"), cancellable = true)
-    private static <A extends ArgumentType<?>, T extends ArgumentTypeInfo.Template<A>> void ipForward$onSerializeCap(
-        final FriendlyByteBuf buf, final ArgumentTypeInfo<A, T> $$1, final ArgumentTypeInfo.Template<A> $$2, final CallbackInfo ci) {
-        final @Nullable Identifier key = BuiltInRegistries.COMMAND_ARGUMENT_TYPE.getKey($$1);
-        if (key == null || ClientboundCommandsPacket_ArgumentNodeStub_IpForward.ipForward$isVanillaArgument(key)) {
-            return;
-        }
+    @ModifyExpressionValue(method = "<clinit>", at = @At(value = "INVOKE",
+        target = "Lnet/minecraft/network/codec/StreamCodec;dispatch(Ljava/util/function/Function;Ljava/util/function/Function;)Lnet/minecraft/network/codec/StreamCodec;"))
+    private static StreamCodec<RegistryFriendlyByteBuf, SerializableArgument<?>> ipForward$wrapModArguments(
+        final StreamCodec<RegistryFriendlyByteBuf, SerializableArgument<?>> original) {
+        return new StreamCodec<>() {
+            @Override
+            public SerializableArgument<?> decode(final RegistryFriendlyByteBuf buf) {
+                return original.decode(buf);
+            }
 
-        ci.cancel();
+            @Override
+            public void encode(final RegistryFriendlyByteBuf buf, final SerializableArgument<?> argument) {
+                final @Nullable Identifier key = BuiltInRegistries.COMMAND_ARGUMENT_TYPE.getKey(argument.type());
+                if (key == null || SerializableArgumentTypesMixin_IpForward.ipForward$isVanillaArgument(key)) {
+                    original.encode(buf, argument);
+                    return;
+                }
 
-        final FriendlyByteBuf commandData = new FriendlyByteBuf(Unpooled.buffer());
-        $$1.serializeToNetwork((T) $$2, commandData);
+                // The type id comes first, the argument's own data follows
+                final RegistryFriendlyByteBuf commandData = new RegistryFriendlyByteBuf(Unpooled.buffer(), buf.registries(), buf.ids());
+                original.encode(commandData, argument);
+                final int id = commandData.readVarInt();
 
-        buf.writeVarInt(ClientboundCommandsPacket_ArgumentNodeStub_IpForward.ipForward$MOD_ARGUMENT_ID);
-        buf.writeVarInt(BuiltInRegistries.COMMAND_ARGUMENT_TYPE.getId($$1));
-        buf.writeVarInt(commandData.readableBytes());
-        buf.writeBytes(commandData);
+                buf.writeVarInt(SerializableArgumentTypesMixin_IpForward.ipForward$MOD_ARGUMENT_ID);
+                buf.writeVarInt(id);
+                buf.writeVarInt(commandData.readableBytes());
+                buf.writeBytes(commandData);
+            }
+        };
     }
 
     private static boolean ipForward$isVanillaArgument(final Identifier key) {

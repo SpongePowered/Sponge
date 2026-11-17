@@ -128,6 +128,10 @@ public final class DelegatingCommandDispatcher extends CommandDispatcher<Command
         this.brigadier.getDispatcher().findAmbiguities(consumer);
     }
 
+    public SpongeCommandDispatcher spongeDispatcher() {
+        return this.brigadier.getDispatcher();
+    }
+
     public void permissionService(final PermissionService permissionService) {
         this.permissionService = permissionService;
     }

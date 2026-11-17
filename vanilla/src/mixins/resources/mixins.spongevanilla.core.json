@@ -20,6 +20,7 @@
   "mixins": [
     "CrashReportMixin_Vanilla",
     "commands.CommandsMixin_Vanilla",
+    "commands.SuggestionBoxMixin_Vanilla",
     "commands.arguments.selector.EntitySelectorMixin_Vanilla",
     "network.ConnectionMixin_Vanilla",
     "network.protocol.common.ClientboundCustomPayloadPacketMixin_Vanilla",

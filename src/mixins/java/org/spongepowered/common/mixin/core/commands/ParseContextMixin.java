@@ -22,37 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.server.network;
+package org.spongepowered.common.mixin.core.commands;
 
-import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.ParseResults;
-import com.mojang.brigadier.StringReader;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.ParseContext;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.ServerCommandSuggestionsProvider;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.command.manager.SpongeCommandManager;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(ServerCommandSuggestionsProvider.class)
-public abstract class ServerCommandSuggestionsProviderMixin {
+/**
+ * Vanilla parses a command with a context that only knows the sender's
+ * permissions and registries. Sponge's dispatcher parses for the sender
+ * itself (its cause, its subject), and a source is a parse context of its
+ * own, so that is what a command is parsed with.
+ */
+@Mixin(ParseContext.class)
+public interface ParseContextMixin {
 
-    // @formatter:off
-    @Shadow @Final private ServerPlayer player;
-    // @formatter:on
+    @Inject(method = "of(Lnet/minecraft/commands/CommandSourceStack;)Lnet/minecraft/commands/ParseContext;", at = @At("HEAD"), cancellable = true)
+    private static void impl$parseAsSender(final CommandSourceStack sender, final CallbackInfoReturnable<ParseContext> cir) {
+        cir.setReturnValue((ParseContext) sender);
+    }
 
-    @Redirect(method = "tryProcessRequest",
-            at = @At(value = "INVOKE",
-                    target = "Lcom/mojang/brigadier/CommandDispatcher;parse(Lcom/mojang/brigadier/StringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/ParseResults;",
-                    remap = false
-            )
-    )
-    private ParseResults<CommandSourceStack> impl$informParserThisIsASuggestionCheck(final CommandDispatcher<CommandSourceStack> commandDispatcher,
-            final StringReader command,
-            final Object source) {
-        return SpongeCommandManager.get(this.player.level().getServer()).getDispatcher().parse(command, (CommandSourceStack) source, true);
+    @Inject(method = "of(Lnet/minecraft/server/level/ServerPlayer;)Lnet/minecraft/commands/ParseContext;", at = @At("HEAD"), cancellable = true)
+    private static void impl$parseAsPlayer(final ServerPlayer sender, final CallbackInfoReturnable<ParseContext> cir) {
+        cir.setReturnValue((ParseContext) sender.createCommandSourceStack());
     }
 }

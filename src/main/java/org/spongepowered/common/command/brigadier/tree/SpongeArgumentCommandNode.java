@@ -42,7 +42,6 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.synchronization.SuggestionProviders;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.parameter.Parameter;
@@ -200,7 +199,7 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
                         arg.requires(x -> true);
                         // if the first node is forced to be custom suggestions or is a string argument type, send the completions.
                         if (forceCustomSuggestionsInner || isFirst && type instanceof StringArgumentType) {
-                            arg.suggests((SuggestionProvider) SuggestionProviders.ASK_SERVER);
+                            arg.suggests(Constants.Command.ASK_SERVER);
                         }
                         final CommandNode<CommandSourceStack> built = arg.build();
                         previousNode.addChild(built);
@@ -222,7 +221,7 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
                 toReturn.executes(x -> 0);
             }
             if (this.modifier != null || forceCustomSuggestions && !CommandUtil.checkForCustomSuggestions(previousNode)) {
-                toReturn.suggests((SuggestionProvider) SuggestionProviders.ASK_SERVER);
+                toReturn.suggests(Constants.Command.ASK_SERVER);
             } else if (this.getCustomSuggestions() != null) {
                 toReturn.suggests(this.getCustomSuggestions());
             }
@@ -237,10 +236,10 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
         builder.requires(this.getRequirement());
         builder.forward(this.getRedirect(), this.getRedirectModifier(), this.isFork());
         if (this.modifier != null) {
-            builder.suggests((SuggestionProvider) SuggestionProviders.ASK_SERVER);
+            builder.suggests(Constants.Command.ASK_SERVER);
         } if (!CommandUtil.checkForCustomSuggestions(rootSuggestionNode)) {
             if (type != this.getType()) {
-                builder.suggests((SuggestionProvider) SuggestionProviders.ASK_SERVER);
+                builder.suggests(Constants.Command.ASK_SERVER);
             } else {
                 builder.suggests(this.getCustomSuggestions());
             }

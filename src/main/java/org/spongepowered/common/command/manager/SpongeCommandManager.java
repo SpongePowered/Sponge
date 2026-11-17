@@ -125,6 +125,21 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
     private final Map<Class<?>, CommandRegistrar<?>> knownRegistrars = new ConcurrentHashMap<>();
     private BrigadierCommandRegistrar brigadierRegistrar;
 
+    // The registries of the server resources being loaded, for the Commands created in between
+    private static final ThreadLocal<RegistryHolder> LOADING_REGISTRIES = new ThreadLocal<>();
+
+    public static void loadingRegistries(final @Nullable RegistryHolder registries) {
+        if (registries == null) {
+            SpongeCommandManager.LOADING_REGISTRIES.remove();
+        } else {
+            SpongeCommandManager.LOADING_REGISTRIES.set(registries);
+        }
+    }
+
+    public static @Nullable RegistryHolder loadingRegistries() {
+        return SpongeCommandManager.LOADING_REGISTRIES.get();
+    }
+
     public static SpongeCommandManager get(final MinecraftServer server) {
         return ((CommandsBridge) server.getCommands()).bridge$commandManager();
     }

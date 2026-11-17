@@ -381,8 +381,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
             final Optional<Holder<SoundEvent>> sound = explosionSource != null && explosionSource.isSilent() ? Optional.empty() : Optional.of(SoundEvents.GENERIC_EXPLODE);
             for (ServerPlayer player : this.players) {
                 if (player.distanceToSqr(mcExplosion.center()) < 4096.0) {
-                    Optional<Vec3> kb = Optional.ofNullable(mcExplosion.getHitPlayers().get(player));
-                    final var packet = new ClientboundExplodePacket(mcExplosion.center(), explosion.radius(), 1, kb, particle, sound, WeightedList.of());
+                    final var packet = new ClientboundExplodePacket(mcExplosion.center(), explosion.radius(), 1, particle, sound, WeightedList.of());
                     this.bridge$handleExplosionPacket(player.connection, explosion, packet);
                     player.connection.send(packet);
                 }
@@ -399,7 +398,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         Optional<Holder<SoundEvent>> soundEvent = Optional.of(Holder.direct(new SoundEvent(Identifier.parse("sponge:none"), Optional.of(0f)))); // "no" sound
         soundEvent = packet.explosionSound();
         // TODO apiExplosion.shouldPlaySmoke() is not initialized correctly
-        var newPacket = new ClientboundExplodePacket(packet.center(), packet.radius(), packet.blockCount(), packet.playerKnockback(), particleData, soundEvent, packet.blockParticles());
+        var newPacket = new ClientboundExplodePacket(packet.center(), packet.radius(), packet.blockCount(), particleData, soundEvent, packet.blockParticles());
         instance.send(newPacket);
     }
 

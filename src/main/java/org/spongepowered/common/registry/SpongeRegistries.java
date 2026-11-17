@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.registry;
 
-import net.minecraft.commands.CommandBuildContext;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.flag.FeatureFlagSet;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.item.recipe.Recipe;
@@ -37,7 +35,6 @@ import org.spongepowered.common.registry.loader.SpongeCommonRegistryLoader;
 import org.spongepowered.common.registry.loader.SpongeRegistryLoader;
 import org.spongepowered.common.registry.loader.VanillaRegistryLoader;
 
-import java.util.List;
 
 public final class SpongeRegistries {
 
@@ -100,8 +97,7 @@ public final class SpongeRegistries {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static void registerServerRegistries(final SpongeRegistryHolder holder, final FeatureFlagSet featureFlags) {
         holder.createFrozenRegistry(RegistryTypes.COMMAND_TREE_NODE_TYPE, (h) ->
-            CommandRegistryLoader.clientCompletionKey(CommandBuildContext.simple(
-                new RegistryAccess.ImmutableRegistryAccess((List) h.streamRegistries().toList()), featureFlags)), RegistryTypes.WORLD_ARCHETYPE_TYPE);
+            CommandRegistryLoader.clientCompletionKey(), RegistryTypes.WORLD_ARCHETYPE_TYPE);
 
         holder.createFrozenRegistry(RegistryTypes.FLAT_GENERATOR_CONFIG, SpongeRegistryLoader::flatGeneratorConfig, RegistryTypes.WORLD_ARCHETYPE_TYPE);
 

@@ -35,8 +35,9 @@ import net.minecraft.server.permissions.PermissionSet;
 import net.minecraft.world.flag.FeatureFlagSet;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.common.accessor.commands.CommandBoxAccessor;
 import org.spongepowered.common.bridge.server.packs.resources.ResourceManagerBridge;
-import org.spongepowered.common.command.brigadier.dispatcher.DelegatingCommandDispatcher;
+import org.spongepowered.common.command.brigadier.dispatcher.SpongeBoxDispatcher;
 
 import java.util.List;
 
@@ -55,9 +56,9 @@ public abstract class ReloadableServerResourcesMixin_Vanilla {
         final @Local(argsOnly = true) ResourceManager resourceManager
     ) {
         final ReloadableServerResources instance = original.call(loadingContext, enabledFeatures, commandSelection, postponedTags, functionCompilationPermissions, newComponents);
-        if (instance.getCommands().getDispatcher() instanceof
-            final DelegatingCommandDispatcher delegatingCommandDispatcher) {
-            delegatingCommandDispatcher.permissionService(((ResourceManagerBridge) resourceManager).bridge$services().permissionService());
+        if (((CommandBoxAccessor) instance.getCommands().parseBox()).accessor$dispatcher() instanceof
+            final SpongeBoxDispatcher<?> dispatcher) {
+            dispatcher.permissionService(((ResourceManagerBridge) resourceManager).bridge$services().permissionService());
         }
         return instance;
     }

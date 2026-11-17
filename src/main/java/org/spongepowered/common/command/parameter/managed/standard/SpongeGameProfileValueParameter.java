@@ -25,6 +25,7 @@
 package org.spongepowered.common.command.parameter.managed.standard;
 
 import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
@@ -47,7 +48,7 @@ import java.util.concurrent.CompletableFuture;
 
 public final class SpongeGameProfileValueParameter extends ResourceKeyedArgumentValueParser.ClientNativeCompletions<GameProfile> {
 
-    private final GameProfileArgument argument = GameProfileArgument.gameProfile();
+    private final ArgumentType<GameProfileArgument.Result> argument = GameProfileArgument.gameProfile();
 
     public SpongeGameProfileValueParameter(final ResourceKey key) {
         super(key);
@@ -66,7 +67,7 @@ public final class SpongeGameProfileValueParameter extends ResourceKeyedArgument
             final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader) throws ArgumentParseException {
         try {
             final Collection<NameAndId> profileCollection =
-                    this.argument.parse((StringReader) reader).getNames((CommandSourceStack) cause);
+                    this.argument.parse((StringReader) reader, cause).getNames((CommandSourceStack) cause);
             if (profileCollection.size() == 1) {
                 return Optional.of(SpongeGameProfile.of(profileCollection.iterator().next()));
             } else if (profileCollection.isEmpty()) {

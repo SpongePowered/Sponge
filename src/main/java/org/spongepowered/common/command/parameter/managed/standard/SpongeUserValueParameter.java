@@ -25,10 +25,12 @@
 package org.spongepowered.common.command.parameter.managed.standard;
 
 import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.kyori.adventure.text.Component;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.selector.EntitySelector;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -51,7 +53,7 @@ import java.util.stream.Collectors;
 
 public final class SpongeUserValueParameter extends ResourceKeyedArgumentValueParser<UUID> {
 
-    private final EntityArgument selectorArgumentType = EntityArgument.player();
+    private final ArgumentType<EntitySelector> selectorArgumentType = EntityArgument.player();
 
     public SpongeUserValueParameter(final ResourceKey key) {
         super(key);
@@ -73,7 +75,7 @@ public final class SpongeUserValueParameter extends ResourceKeyedArgumentValuePa
         if (peek.startsWith("@")) {
             try {
                 final ServerPlayer entity =
-                        (ServerPlayer) (this.selectorArgumentType.parse((StringReader) reader)
+                        (ServerPlayer) (this.selectorArgumentType.parse((StringReader) reader, cause)
                                 .findSingleEntity(((CommandSourceStack) cause)));
                 return Optional.of(entity.uniqueId());
             } catch (final CommandSyntaxException e) {

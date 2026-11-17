@@ -26,12 +26,10 @@ package org.spongepowered.common.command.resolver;
 
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
-import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.synchronization.SuggestionProviders;
 import org.spongepowered.common.bridge.commands.arguments.CompletionsArgumentTypeBridge;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeNodePermissionCache;
 import org.spongepowered.common.command.brigadier.tree.SpongeArgumentCommandNode;
@@ -39,6 +37,7 @@ import org.spongepowered.common.command.brigadier.tree.SpongeNode;
 import org.spongepowered.common.command.brigadier.tree.SuggestionArgumentNode;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.util.CommandUtil;
+import org.spongepowered.common.util.Constants;
 
 import java.util.*;
 
@@ -110,7 +109,7 @@ public record SpongeSuggestionTreeResolver(
                     .forward(argNode.getRedirect(), argNode.getRedirectModifier(), argNode.isFork())
                     .requires(argNode.getRequirement());
                 if (!CommandUtil.checkForCustomSuggestions(rootSuggestion)) {
-                    r.suggests((SuggestionProvider) SuggestionProviders.ASK_SERVER);
+                    r.suggests(Constants.Command.ASK_SERVER);
                 }
                 builder = r;
             } else {
@@ -126,7 +125,7 @@ public record SpongeSuggestionTreeResolver(
             // meaning thenRun(...) does not run, which is how displaying the suggestions works...
             //
             // Because we don't control the client, we have to work around it here.
-            if (builder instanceof RequiredArgumentBuilder r && r.getSuggestionsProvider() == SuggestionProviders.ASK_SERVER && CommandUtil.checkForCustomSuggestions(rootSuggestion)) {
+            if (builder instanceof RequiredArgumentBuilder r && r.getSuggestionsProvider() == Constants.Command.ASK_SERVER && CommandUtil.checkForCustomSuggestions(rootSuggestion)) {
                 r.suggests(null);
             }
 

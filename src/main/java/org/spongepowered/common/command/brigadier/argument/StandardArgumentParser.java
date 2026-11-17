@@ -92,7 +92,7 @@ public class StandardArgumentParser<S, T> implements ArgumentParser<T>, ValuePar
         final CommandContext.Builder.Transaction transaction = contextBuilder.startTransaction();
         try {
             final T value = this.modifyResult(key, contextBuilder, reader, modifier,
-                    this.converter.convert(reader, contextBuilder.cause(), this.type.parse(reader)));
+                    this.converter.convert(reader, contextBuilder.cause(), this.type.parse(reader, contextBuilder.cause())));
             contextBuilder.commit(transaction);
             return value;
         } catch (final ArgumentParseException e) {
@@ -139,7 +139,7 @@ public class StandardArgumentParser<S, T> implements ArgumentParser<T>, ValuePar
     public @NonNull Optional<? extends T> parseValue(final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader)
             throws ArgumentParseException {
         try {
-            return Optional.of(this.converter.convert((StringReader) reader, cause, this.type.parse((StringReader) reader)));
+            return Optional.of(this.converter.convert((StringReader) reader, cause, this.type.parse((StringReader) reader, cause)));
         } catch (final CommandSyntaxException e) {
             throw new ArgumentParseException(SpongeAdventure.asAdventure(e.getRawMessage()), e, e.getInput(), e.getCursor());
         }

@@ -22,12 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.commands.synchronization;
+package org.spongepowered.common.mixin.api.minecraft.commands.suggestions;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.suggestions.CustomSuggestion;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -41,19 +41,19 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-@Mixin(targets = "net/minecraft/commands/synchronization/SuggestionProviders$RegisteredSuggestion")
-public abstract class SuggestionProviders_WrapperMixin_API implements CommandCompletionProvider {
+@Mixin(CustomSuggestion.BrigadierWrapper.class)
+public abstract class CustomSuggestion_BrigadierWrapperMixin_API<T> implements CommandCompletionProvider {
 
     // @formatter:off
     @Shadow public abstract CompletableFuture<Suggestions> shadow$getSuggestions(
-            com.mojang.brigadier.context.CommandContext<SharedSuggestionProvider> var1, SuggestionsBuilder var2) throws CommandSyntaxException;
+            com.mojang.brigadier.context.CommandContext<T> var1, SuggestionsBuilder var2) throws CommandSyntaxException;
     // @formatter:on
 
     @SuppressWarnings("unchecked")
     @Override
     public List<CommandCompletion> complete(final @NonNull CommandContext context, final @NonNull String currentInput) {
         try {
-            return this.shadow$getSuggestions((com.mojang.brigadier.context.CommandContext<SharedSuggestionProvider>) context,
+            return this.shadow$getSuggestions((com.mojang.brigadier.context.CommandContext<T>) context,
                     new SuggestionsBuilder(currentInput, 0)).join().getList().stream()
                         .map(SpongeCommandCompletion::from).collect(Collectors.toList());
         } catch (final Exception e) {

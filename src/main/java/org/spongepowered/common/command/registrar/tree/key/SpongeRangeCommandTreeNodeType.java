@@ -29,11 +29,11 @@ import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
-import net.minecraft.commands.synchronization.ArgumentTypeInfo;
-import net.minecraft.commands.synchronization.brigadier.DoubleArgumentInfo;
-import net.minecraft.commands.synchronization.brigadier.FloatArgumentInfo;
-import net.minecraft.commands.synchronization.brigadier.IntegerArgumentInfo;
-import net.minecraft.commands.synchronization.brigadier.LongArgumentInfo;
+import net.minecraft.commands.arguments.DoubleArgument;
+import net.minecraft.commands.arguments.FloatArgument;
+import net.minecraft.commands.arguments.IntegerArgument;
+import net.minecraft.commands.arguments.LongArgument;
+import net.minecraft.commands.arguments.SerializableArgument;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -46,17 +46,17 @@ import java.util.function.BiFunction;
 
 public final class SpongeRangeCommandTreeNodeType<N extends Number> extends AbstractResourceKeyed implements CommandTreeNodeType<CommandTreeNode.@NonNull Range<@NonNull N>> {
 
-    public static @Nullable SpongeRangeCommandTreeNodeType<?> createFrom(final ResourceKey key, final ArgumentTypeInfo<?, ?> serializer) {
-        if (serializer instanceof FloatArgumentInfo) {
+    public static @Nullable SpongeRangeCommandTreeNodeType<?> createFrom(final ResourceKey key, final SerializableArgument.Type<?> serializer) {
+        if (serializer == FloatArgument.TYPE) {
             return new SpongeRangeCommandTreeNodeType<>(key, FloatArgumentType::floatArg, Float.MIN_VALUE, Float.MAX_VALUE);
         }
-        if (serializer instanceof DoubleArgumentInfo) {
+        if (serializer == DoubleArgument.TYPE) {
             return new SpongeRangeCommandTreeNodeType<>(key, DoubleArgumentType::doubleArg, Double.MIN_VALUE, Double.MAX_VALUE);
         }
-        if (serializer instanceof IntegerArgumentInfo) {
+        if (serializer == IntegerArgument.TYPE) {
             return new SpongeRangeCommandTreeNodeType<>(key, IntegerArgumentType::integer, Integer.MIN_VALUE, Integer.MAX_VALUE);
         }
-        if (serializer instanceof LongArgumentInfo) {
+        if (serializer == LongArgument.TYPE) {
             return new SpongeRangeCommandTreeNodeType<>(key, LongArgumentType::longArg, Long.MIN_VALUE, Long.MAX_VALUE);
         }
         return null;

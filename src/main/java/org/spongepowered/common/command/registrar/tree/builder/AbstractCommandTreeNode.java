@@ -29,13 +29,13 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.synchronization.SuggestionProviders;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.registrar.tree.CommandCompletionProvider;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 import org.spongepowered.common.command.brigadier.tree.ForcedRedirectNode;
+import org.spongepowered.common.util.Constants;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -100,7 +100,7 @@ public abstract class AbstractCommandTreeNode<T extends CommandTreeNode<@NonNull
 
     @Override
     public @NonNull T customCompletions() {
-        return this.completions((CommandCompletionProvider) SuggestionProviders.ASK_SERVER);
+        return this.completions((CommandCompletionProvider) (Object) Constants.Command.ASK_SERVER);
     }
 
     @Override

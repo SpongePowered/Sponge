@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -65,14 +65,14 @@ public abstract class BlockEntityMixin_API implements BlockEntity {
     @Shadow protected boolean remove;
     @Shadow private net.minecraft.world.level.block.state.BlockState blockState;
     @Shadow public abstract BlockPos shadow$getBlockPos();
-    @Shadow public abstract CompoundTag shadow$saveWithFullMetadata(HolderLookup.Provider $$0);
+    @Shadow public abstract CompoundTag shadow$saveWithFullMetadata(HolderGetter.Provider $$0);
     @Shadow @Final protected BlockPos worldPosition;
     @Shadow public abstract net.minecraft.world.level.block.state.BlockState shadow$getBlockState();
     @Shadow public abstract void shadow$setChanged();
     //@formatter:on
 
     @Shadow
-    public abstract CompoundTag saveWithFullMetadata(HolderLookup.Provider $$0);
+    public abstract CompoundTag saveWithFullMetadata(HolderGetter.Provider $$0);
 
     @Nullable private LocatableBlock api$LocatableBlock;
     private boolean api$canTickRequested = false;

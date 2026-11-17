@@ -28,7 +28,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.ServerExplosion;
 import net.minecraft.world.phys.Vec3;
@@ -43,14 +42,12 @@ import org.spongepowered.common.bridge.world.level.ExplosionBridge;
 import org.spongepowered.common.event.ShouldFire;
 
 import java.util.List;
-import java.util.Map;
 import java.util.StringJoiner;
 
 @Mixin(net.minecraft.world.level.ServerExplosion.class)
 public abstract class ServerExplosionMixin implements ExplosionBridge {
 
     // @formatter:off
-    @Shadow @Final private Map<Player, Vec3> hitPlayers;
     @Shadow @Final private boolean fire;
     @Shadow @Final private ServerLevel level;
     @Shadow @Final private Entity source;
@@ -170,7 +167,6 @@ public abstract class ServerExplosionMixin implements ExplosionBridge {
             .add("z=" + this.center.z)
             .add("exploder=" + this.source)
             .add("size=" + this.radius)
-            .add("playerKnockbackMap=" + this.hitPlayers)
             .add("shouldDamageEntities=" + this.impl$shouldDamageEntities)
             .add("resolution=" + this.impl$resolution)
             .add("randomness=" + this.impl$randomness)

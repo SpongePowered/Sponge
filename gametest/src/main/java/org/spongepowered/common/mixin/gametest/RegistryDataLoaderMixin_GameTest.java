@@ -31,7 +31,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.FunctionGameTestInstance;
 import net.minecraft.gametest.framework.GameTestInstance;
 import net.minecraft.gametest.framework.TestEnvironmentDefinition;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceManagerRegistryLoadTask;
 import org.spongepowered.asm.mixin.Mixin;
@@ -56,7 +55,7 @@ public abstract class RegistryDataLoaderMixin_GameTest {
     @SuppressWarnings("unchecked")
     @Inject(method = "load", at = @At("RETURN"), cancellable = true)
     private void gametest$registerSpongeInstances(
-        final RegistryOps.RegistryInfoLookup context,
+        final HolderGetter.Provider context,
         final Executor executor,
         final CallbackInfoReturnable<CompletableFuture<?>> cir
     ) {
@@ -71,8 +70,7 @@ public abstract class RegistryDataLoaderMixin_GameTest {
         if (!Registries.TEST_INSTANCE.equals(registry.key())) {
             return;
         }
-        final HolderGetter<TestEnvironmentDefinition<?>> environments = context.<TestEnvironmentDefinition<?>>lookup(Registries.TEST_ENVIRONMENT)
-            .orElseThrow();
+        final HolderGetter<TestEnvironmentDefinition<?>> environments = context.lookupOrThrow(Registries.TEST_ENVIRONMENT);
         final WritableRegistry<GameTestInstance> instances = (WritableRegistry<GameTestInstance>) registry;
         cir.setReturnValue(cir.getReturnValue().thenRun(() -> SpongeGameTests.all().forEach(test -> test.tests().forEach((id, data) -> instances.register(
             ResourceKey.create(Registries.TEST_INSTANCE, id),

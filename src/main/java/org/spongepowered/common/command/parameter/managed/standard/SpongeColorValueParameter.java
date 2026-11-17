@@ -68,7 +68,7 @@ public final class SpongeColorValueParameter extends ResourceKeyedArgumentValueP
     private final static Collection<String> TEAM_COLOR_NAMES = TeamColor.VALUES.stream()
             .map(TeamColor::getSerializedName)
             .toList();
-    private final TeamColorArgument colorArgumentType = TeamColorArgument.teamColor();
+    private final ArgumentType<TeamColor> colorArgumentType = TeamColorArgument.teamColor();
 
     public SpongeColorValueParameter(final ResourceKey key) {
         super(key);

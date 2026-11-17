@@ -25,6 +25,7 @@
 package org.spongepowered.common.bridge.commands;
 
 import net.minecraft.commands.CommandSource;
+import net.minecraft.commands.ParseContext;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.event.Cause;
@@ -50,4 +51,10 @@ public interface CommandSourceStackBridge {
     void bridge$setPotentialPermissionNode(@Nullable Supplier<String> permission);
 
     void bridge$permissionService(PermissionService permissionService);
+
+    /**
+     * Sets what this source parses with when it is not a real source, such as
+     * for a function being compiled.
+     */
+    void bridge$parseContext(@Nullable ParseContext context);
 }

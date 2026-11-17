@@ -4,7 +4,7 @@
     "plugin": "org.spongepowered.common.mixin.plugin.IpForwardPlugin",
     "mixins": [
         "network.ConnectionMixin_IpForward",
-        "network.protocol.game.ClientboundCommandsPacket_ArgumentNodeStub_IpForward",
+        "commands.arguments.SerializableArgumentTypesMixin_IpForward",
         "network.protocol.handshake.ClientIntentionPacketMixin_IpForward",
         "server.MinecraftServerMixin_IpForward",
         "server.network.ServerHandshakePacketListenerImplMixin_IpForward",

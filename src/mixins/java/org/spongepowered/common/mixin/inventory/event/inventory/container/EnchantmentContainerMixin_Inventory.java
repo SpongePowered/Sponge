@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.inventory.event.inventory.container;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
@@ -74,7 +74,7 @@ public abstract class EnchantmentContainerMixin_Inventory {
     }
 
     @Inject(method = "getEnchantmentList", cancellable = true, at = @At(value = "RETURN"))
-    private void impl$onBuildEnchantmentList(final RegistryAccess ra,
+    private void impl$onBuildEnchantmentList(final HolderGetter.Provider access,
         final ItemStack stack, final int enchantSlot, final int level, final CallbackInfoReturnable<List<EnchantmentInstance>> cir) {
         final List<EnchantmentInstance> newList = InventoryEventFactory
                 .callEnchantEventEnchantmentList((EnchantmentMenu) (Object) this, this.enchantmentSeed.get(), stack, enchantSlot, level, cir.getReturnValue());

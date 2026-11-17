@@ -23,7 +23,7 @@
     "minecraft.commands.CommandSourceStackMixin_API",
     "minecraft.commands.arguments.selector.EntitySelectorMixin_API",
     "minecraft.commands.arguments.selector.EntitySelectorParserMixin_API",
-    "minecraft.commands.synchronization.SuggestionProviders_WrapperMixin_API",
+    "minecraft.commands.suggestions.CustomSuggestion_BrigadierWrapperMixin_API",
     "minecraft.core.MappedRegistryMixin_API",
     "minecraft.core.RegistryMixin",
     "minecraft.core.particles.ParticleTypeMixin_API",

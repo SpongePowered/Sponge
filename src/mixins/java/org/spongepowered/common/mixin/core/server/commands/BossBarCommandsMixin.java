@@ -27,7 +27,8 @@ package org.spongepowered.common.mixin.core.server.commands;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.suggestions.SuggestionContext;
+import net.minecraft.commands.suggestions.SuggestionProviders;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.bossevents.CustomBossEvents;
 import net.minecraft.server.commands.BossBarCommands;
@@ -43,7 +44,8 @@ import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 public abstract class BossBarCommandsMixin {
 
     // @formatter:off
-    @Shadow @Mutable @Final public static SuggestionProvider<CommandSourceStack> SUGGEST_BOSS_BAR = ((context, builder) -> SharedSuggestionProvider.suggestResource(((ServerLevelBridge) context.getSource().getLevel()).bridge$getBossBarManager().getIds(), builder));
+    @Shadow @Mutable @Final public static SuggestionProvider<CommandSourceStack> SUGGEST_BOSS_BAR = SuggestionProviders.serverOnly((server, context, builder) ->
+        SuggestionContext.suggestResource(((ServerLevelBridge) context.getSource().level()).bridge$getBossBarManager().getIds(), builder));
     // @formatter:on
 
     @Redirect(method = "listBars", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()Lnet/minecraft/server/bossevents/CustomBossEvents;"))

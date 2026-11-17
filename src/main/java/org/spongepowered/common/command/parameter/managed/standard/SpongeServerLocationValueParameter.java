@@ -61,7 +61,7 @@ import java.util.stream.Stream;
 
 public final class SpongeServerLocationValueParameter extends ResourceKeyedArgumentValueParser<ServerLocation> implements ComplexSuggestionNodeProvider {
 
-    private static final Vec3Argument VEC_3_ARGUMENT = Vec3Argument.vec3(false);
+    private static final ArgumentType<Coordinates> VEC_3_ARGUMENT = Vec3Argument.vec3(false);
     private static final Pattern STARTS_WITH_NUMBER = Pattern.compile("^\\s*((-)?[0-9]|~|\\^)");
 
     public SpongeServerLocationValueParameter(final ResourceKey key) {

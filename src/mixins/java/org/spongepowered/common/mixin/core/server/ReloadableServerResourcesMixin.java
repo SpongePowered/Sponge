@@ -26,6 +26,10 @@ package org.spongepowered.common.mixin.core.server;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.LayeredRegistryAccess;
@@ -45,6 +49,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.common.accessor.core.MappedRegistryAccessor;
 import org.spongepowered.common.bridge.server.ReloadableServerResourcesBridge;
+import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 
@@ -66,6 +71,21 @@ public abstract class ReloadableServerResourcesMixin implements ReloadableServer
     @Override
     public @Nullable ResourceManager bridge$resourceManager() {
         return this.impl$resourceManager;
+    }
+
+    // Commands no longer take the registries they are created for, the command manager still does
+    @WrapOperation(method = "<init>", at = @At(value = "INVOKE",
+        target = "Lnet/minecraft/commands/Commands;createVanilla(Lnet/minecraft/commands/Commands$CommandSelection;Lnet/minecraft/commands/CommandBuildContext;)Lnet/minecraft/commands/Commands;"))
+    private Commands impl$createCommandsWithRegistries(
+        final Commands.CommandSelection commandSelection, final CommandBuildContext context, final Operation<Commands> original,
+        final @Local HolderLookup.Provider fullRegistries
+    ) {
+        SpongeCommandManager.loadingRegistries((RegistryHolder) fullRegistries);
+        try {
+            return original.call(commandSelection, context);
+        } finally {
+            SpongeCommandManager.loadingRegistries(null);
+        }
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

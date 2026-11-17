@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
 
 public final class SpongeOperatorValueParameter extends ResourceKeyedArgumentValueParser.ClientNativeCompletions<Operator> {
 
-    private final OperationArgument operationArgument = OperationArgument.operation();
+    private final ArgumentType<OperationArgument.Operation> operationArgument = OperationArgument.operation();
     private Map<String, Operator> operators;
 
     public SpongeOperatorValueParameter(final ResourceKey key) {

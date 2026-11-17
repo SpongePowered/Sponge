@@ -31,9 +31,12 @@ import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.HashBiMap;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.serialization.Codec;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.CompoundTagArgument;
 import net.minecraft.commands.arguments.IdentifierArgument;
+import net.minecraft.commands.suggestions.AskServer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.DoubleTag;
@@ -1419,7 +1422,9 @@ public final class Constants {
         public static final ArgumentType<?> STANDARD_STRING_ARGUMENT_TYPE = StringArgumentType.string();
         public static final ArgumentType<?> GREEDY_STRING_ARGUMENT_TYPE = StringArgumentType.greedyString();
         public static final ArgumentType<?> NBT_ARGUMENT_TYPE = CompoundTagArgument.compoundTag();
-        public static final IdentifierArgument RESOURCE_LOCATION_TYPE = IdentifierArgument.id();
+        public static final ArgumentType<net.minecraft.resources.Identifier> RESOURCE_LOCATION_TYPE = IdentifierArgument.id();
+        // One instance, so nodes that ask the server can be told apart by identity
+        public static final SuggestionProvider<CommandSourceStack> ASK_SERVER = AskServer.INSTANCE.toBrigadier();
         public static final String COMMAND_BLOCK_COMMAND = "";
         public static final String SELECTOR_COMMAND = "@";
         public static final String SPONGE_HELP_COMMAND = "sponge:help";

@@ -40,6 +40,7 @@ import org.spongepowered.api.command.parameter.managed.standard.ResourceKeyedVal
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.SpongeCommandCompletion;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
+import org.spongepowered.common.command.manager.SpongeCommandManager;
 
 import java.util.List;
 import java.util.Optional;
@@ -80,7 +81,7 @@ public abstract class ResourceKeyedArgumentValueParser<T> extends AbstractArgume
 
         @Override
         public final List<CommandCompletion> complete(final @NonNull CommandCause cause, final @NonNull String currentInput) {
-            final CommandDispatcher<CommandSourceStack> dispatcher = SpongeCommon.server().getCommands().getDispatcher();
+            final CommandDispatcher<CommandSourceStack> dispatcher = SpongeCommandManager.get(SpongeCommon.server()).getDispatcher();
             final SpongeCommandContextBuilder builder = new SpongeCommandContextBuilder(
                     dispatcher,
                     (CommandSourceStack) cause,

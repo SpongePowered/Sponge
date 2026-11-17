@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.registry.loader;
 
+import com.google.gson.JsonObject;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
@@ -31,17 +32,23 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.serialization.JsonOps;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.BooleanArgument;
 import net.minecraft.commands.arguments.ComponentArgument;
 import net.minecraft.commands.arguments.CompoundTagArgument;
 import net.minecraft.commands.arguments.DimensionArgument;
+import net.minecraft.commands.arguments.DoubleArgument;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.FloatArgument;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.commands.arguments.IdentifierArgument;
+import net.minecraft.commands.arguments.IntegerArgument;
+import net.minecraft.commands.arguments.LongArgument;
 import net.minecraft.commands.arguments.ScoreHolderArgument;
+import net.minecraft.commands.arguments.SerializableArgument;
 import net.minecraft.commands.arguments.TimeArgument;
 import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.commands.arguments.blocks.BlockStateArgument;
@@ -51,14 +58,8 @@ import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
-import net.minecraft.commands.synchronization.ArgumentTypeInfo;
-import net.minecraft.commands.synchronization.SingletonArgumentInfo;
-import net.minecraft.commands.synchronization.SuggestionProviders;
-import net.minecraft.commands.synchronization.brigadier.DoubleArgumentInfo;
-import net.minecraft.commands.synchronization.brigadier.FloatArgumentInfo;
-import net.minecraft.commands.synchronization.brigadier.IntegerArgumentInfo;
-import net.minecraft.commands.synchronization.brigadier.LongArgumentInfo;
-import net.minecraft.core.HolderLookup;
+import net.minecraft.commands.suggestions.SuggestAvailableSounds;
+import net.minecraft.commands.suggestions.SuggestSummonableEntities;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec2;
@@ -85,7 +86,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.accessor.commands.arguments.DimensionArgumentAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.command.brigadier.argument.BindableValueParameter;
 import org.spongepowered.common.command.brigadier.argument.ClientNativeArgumentParser;
 import org.spongepowered.common.command.parameter.managed.clientcompletion.SpongeClientCompletionType;
 import org.spongepowered.common.command.parameter.managed.operator.SpongeAdditionOperator;
@@ -141,7 +141,7 @@ public final class CommandRegistryLoader {
         return RegistryLoader.of(l -> {
             l.add(ResourceKeyedValueParameters.BIG_DECIMAL, SpongeBigDecimalValueParameter::new);
             l.add(ResourceKeyedValueParameters.BIG_INTEGER, SpongeBigIntegerValueParameter::new);
-            l.add(ResourceKeyedValueParameters.BLOCK_STATE, k -> new BindableValueParameter<>(k, h -> ClientNativeArgumentParser.createConverter(k, BlockStateArgument.block(CommandBuildContext.simple((HolderLookup.Provider) h, ((CommandBuildContext) h).enabledFeatures())), (reader, cause, state) -> (BlockState) state.getState())));
+            l.add(ResourceKeyedValueParameters.BLOCK_STATE, k -> ClientNativeArgumentParser.createConverter(k, BlockStateArgument.block(), (reader, cause, state) -> (BlockState) state.getState()));
             l.add(ResourceKeyedValueParameters.BOOLEAN, k -> ClientNativeArgumentParser.createIdentity(k, BoolArgumentType.bool()));
             l.add(ResourceKeyedValueParameters.COLOR, SpongeColorValueParameter::new);
             l.add(ResourceKeyedValueParameters.DATA_CONTAINER, SpongeDataContainerValueParameter::new);
@@ -152,7 +152,7 @@ public final class CommandRegistryLoader {
             l.add(ResourceKeyedValueParameters.GAME_PROFILE, SpongeGameProfileValueParameter::new);
             l.add(ResourceKeyedValueParameters.INTEGER, k -> ClientNativeArgumentParser.createIdentity(k, IntegerArgumentType.integer()));
             l.add(ResourceKeyedValueParameters.IP, SpongeIPAddressValueParameter::new);
-            l.add(ResourceKeyedValueParameters.ITEM_STACK_SNAPSHOT, k -> new BindableValueParameter<>(k, h -> ClientNativeArgumentParser.createConverter(k, ItemArgument.item(CommandBuildContext.simple((HolderLookup.Provider) h, ((CommandBuildContext) h).enabledFeatures())), (reader, cause, converter) -> new SpongeItemStackSnapshot((ItemStack) (Object) converter.createItemStack(1)))));
+            l.add(ResourceKeyedValueParameters.ITEM_STACK_SNAPSHOT, k -> ClientNativeArgumentParser.createConverter(k, ItemArgument.item(), (reader, cause, converter) -> new SpongeItemStackSnapshot((ItemStack) (Object) converter.createItemStack(1))));
             l.add(ResourceKeyedValueParameters.LOCATION, SpongeServerLocationValueParameter::new);
             l.add(ResourceKeyedValueParameters.LONG, k -> ClientNativeArgumentParser.createIdentity(k, LongArgumentType.longArg()));
             l.add(ResourceKeyedValueParameters.MANY_ENTITIES, k -> ClientNativeArgumentParser.createConverter(k, EntityArgument.entities(), (reader, cause, selector) -> selector.findEntities((CommandSourceStack) cause).stream().map(x -> (Entity) x).collect(
@@ -175,7 +175,7 @@ public final class CommandRegistryLoader {
             l.add(ResourceKeyedValueParameters.TARGET_PLAYER, k -> new SpongeTargetEntityValueParameter(k, true));
             l.add(ResourceKeyedValueParameters.TEXT_FORMATTING_CODE, k -> ClientNativeArgumentParser.createConverter(k, StringArgumentType.string(), (reader, cause, result) -> LegacyComponentSerializer.legacyAmpersand().deserialize(result)));
             l.add(ResourceKeyedValueParameters.TEXT_FORMATTING_CODE_ALL, k -> ClientNativeArgumentParser.createConverter(k, StringArgumentType.greedyString(), (reader, cause, result) -> LegacyComponentSerializer.legacyAmpersand().deserialize(result)));
-            l.add(ResourceKeyedValueParameters.TEXT_JSON, k -> new BindableValueParameter<>(k, h -> ClientNativeArgumentParser.createConverter(k, ComponentArgument.textComponent(CommandBuildContext.simple((HolderLookup.Provider) h, ((CommandBuildContext) h).enabledFeatures())), (reader, cause, result) -> SpongeAdventure.asAdventure(result))));
+            l.add(ResourceKeyedValueParameters.TEXT_JSON, k -> ClientNativeArgumentParser.createConverter(k, ComponentArgument.textComponent(), (reader, cause, result) -> SpongeAdventure.asAdventure(result)));
             l.add(ResourceKeyedValueParameters.TEXT_JSON_ALL, k -> ClientNativeArgumentParser.createConverter(k, StringArgumentType.greedyString(), (reader, cause, result) -> GsonComponentSerializer.gson().deserialize(result)));
             l.add(ResourceKeyedValueParameters.URL, k -> ClientNativeArgumentParser.createConverter(k, StringArgumentType.string(),
                     (reader, cause, input) -> {
@@ -221,28 +221,29 @@ public final class CommandRegistryLoader {
     public static RegistryLoader<CommandCompletionProvider> clientSuggestionProvider() {
         return RegistryLoader.of(l -> {
             // TODO based on SuggestionProviders.PROVIDERS_BY_NAME instead
-            l.add(CommandCompletionProviders.AVAILABLE_SOUNDS, k -> (CommandCompletionProvider) SuggestionProviders.AVAILABLE_SOUNDS);
-            l.add(CommandCompletionProviders.SUMMONABLE_ENTITIES, k -> (CommandCompletionProvider) SuggestionProviders.SUMMONABLE_ENTITIES);
+            l.add(CommandCompletionProviders.AVAILABLE_SOUNDS, k -> (CommandCompletionProvider) (Object) SuggestAvailableSounds.suggestAvailableSounds());
+            l.add(CommandCompletionProviders.SUMMONABLE_ENTITIES, k -> (CommandCompletionProvider) (Object) SuggestSummonableEntities.suggestSummonableEntities());
         });
     }
 
 
-    public static RegistryLoader<CommandTreeNodeType<?>> clientCompletionKey(final CommandBuildContext cbCtx) {
+    public static RegistryLoader<CommandTreeNodeType<?>> clientCompletionKey() {
         // TODO check ArgumentTypeInfos
-        final Function<ResourceKey, ArgumentType<?>> fn = key -> argumentTypeFromKey(key, cbCtx);
+        final Function<ResourceKey, ArgumentType<?>> fn = CommandRegistryLoader::argumentTypeFromKey;
         return RegistryLoader.of(l -> {
-            l.add(CommandTreeNodeTypes.BOOL, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.FLOAT, k -> SpongeRangeCommandTreeNodeType.createFrom(k, new FloatArgumentInfo()));
-            l.add(CommandTreeNodeTypes.DOUBLE, k -> SpongeRangeCommandTreeNodeType.createFrom(k, new DoubleArgumentInfo()));
-            l.add(CommandTreeNodeTypes.INTEGER, k -> SpongeRangeCommandTreeNodeType.createFrom(k, new IntegerArgumentInfo()));
-            l.add(CommandTreeNodeTypes.LONG, k -> SpongeRangeCommandTreeNodeType.createFrom(k, new LongArgumentInfo()));
+            // The brigadier types are no longer registered under their own namespace
+            l.add(CommandTreeNodeTypes.BOOL, k -> new SpongeBasicCommandTreeNodeType(k, BooleanArgument.bool()));
+            l.add(CommandTreeNodeTypes.FLOAT, k -> SpongeRangeCommandTreeNodeType.createFrom(k, FloatArgument.TYPE));
+            l.add(CommandTreeNodeTypes.DOUBLE, k -> SpongeRangeCommandTreeNodeType.createFrom(k, DoubleArgument.TYPE));
+            l.add(CommandTreeNodeTypes.INTEGER, k -> SpongeRangeCommandTreeNodeType.createFrom(k, IntegerArgument.TYPE));
+            l.add(CommandTreeNodeTypes.LONG, k -> SpongeRangeCommandTreeNodeType.createFrom(k, LongArgument.TYPE));
             l.add(CommandTreeNodeTypes.STRING, SpongeStringCommandTreeNodeType::new);
             l.add(CommandTreeNodeTypes.ENTITY, SpongeEntityCommandTreeNodeType::new);
             l.add(CommandTreeNodeTypes.GAME_PROFILE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.BLOCK_POS, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.COLUMN_POS, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.VEC3, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.VEC2, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            l.add(CommandTreeNodeTypes.VEC3, k -> new SpongeBasicCommandTreeNodeType(k, Vec3Argument.vec3()));
+            l.add(CommandTreeNodeTypes.VEC2, k -> new SpongeBasicCommandTreeNodeType(k, Vec2Argument.vec2()));
             l.add(CommandTreeNodeTypes.BLOCK_STATE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.BLOCK_PREDICATE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.ITEM_STACK, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
@@ -296,12 +297,15 @@ public final class CommandRegistryLoader {
 
     // Helper
 
-    static ArgumentType<?> argumentTypeFromKey(ResourceKey key, CommandBuildContext ctx) {
-        final ArgumentTypeInfo<?,?> argumentTypeInfo = BuiltInRegistries.COMMAND_ARGUMENT_TYPE.getValue((Identifier) (Object) key);
-        if (argumentTypeInfo instanceof SingletonArgumentInfo<?> s) {
-            return s.unpack(null).instantiate(ctx);
+    static ArgumentType<?> argumentTypeFromKey(final ResourceKey key) {
+        final SerializableArgument.Type<?> type = BuiltInRegistries.COMMAND_ARGUMENT_TYPE.getValue((Identifier) (Object) key);
+        if (type == null) {
+            throw new IllegalArgumentException(key.asString());
         }
-        throw new IllegalArgumentException(key.asString());
+        // Only arguments that take no options decode from nothing
+        return type.codec().codec().parse(JsonOps.INSTANCE, new JsonObject())
+            .getOrThrow(error -> new IllegalArgumentException(key.asString() + ": " + error))
+            .toBrigadier();
     }
 
     public static RegistryLoader<Operator> operator() {

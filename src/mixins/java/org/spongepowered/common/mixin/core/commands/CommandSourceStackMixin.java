@@ -24,16 +24,35 @@
  */
 package org.spongepowered.common.mixin.core.commands;
 
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.commands.CommandResultCallback;
 import net.minecraft.commands.CommandSigningContext;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.ParseContext;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
+import net.minecraft.commands.arguments.ValidationWrapper;
+import net.minecraft.commands.suggestions.SuggestionContext;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.permissions.PermissionSet;
+import net.minecraft.server.permissions.Permissions;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.TaskChainer;
+import net.minecraft.util.context.ContextKeySet;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.loot.Validatable;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -61,12 +80,19 @@ import org.spongepowered.common.bridge.commands.CommandSourceBridge;
 import org.spongepowered.common.bridge.commands.CommandSourceStackBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.service.server.permission.SpongePermissions;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 @Mixin(CommandSourceStack.class)
-public abstract class CommandSourceStackMixin implements CommandSourceStackBridge {
+public abstract class CommandSourceStackMixin implements CommandSourceStackBridge, SuggestionContext {
 
 
     //@formatter:off
@@ -91,6 +117,7 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
     private Cause impl$cause;
     @Nullable private Supplier<String> impl$potentialPermissionNode = null;
     private @Nullable PermissionService impl$permissionService;
+    private @Nullable ParseContext impl$parseContext;
 
     @Inject(method = "<init>(Lnet/minecraft/commands/CommandSource;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec2;Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/server/permissions/PermissionSet;Lnet/minecraft/commands/CommandSourceStack$NamesProvider;Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/world/entity/Entity;ZLnet/minecraft/commands/CommandResultCallback;Lnet/minecraft/commands/arguments/EntityAnchorArgument$Anchor;Lnet/minecraft/commands/CommandSigningContext;Lnet/minecraft/util/TaskChainer;)V",
         at = @At("RETURN"))
@@ -164,6 +191,7 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
             commandSourceStackBridge.bridge$setPotentialPermissionNode(this.impl$potentialPermissionNode);
             commandSourceStackBridge.bridge$setCause(this.impl$cause);
             commandSourceStackBridge.bridge$permissionService(this.impl$permissionService);
+            commandSourceStackBridge.bridge$parseContext(this.impl$parseContext);
         }
     }
 
@@ -173,6 +201,7 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
         final CommandCause instance = (CommandCause) CommandSourceStackAccessor.invoker$new(this.source, this.worldPosition, this.rotation, this.level, this.permissions,
             this.namesProvider, this.server, this.entity, this.silent, this.resultCallback, this.anchor, this.signingContext, this.chatMessageChainer);
         ((CommandSourceStackBridge) instance).bridge$permissionService(this.impl$permissionService);
+        ((CommandSourceStackBridge) instance).bridge$parseContext(this.impl$parseContext);
         return instance;
     }
 
@@ -263,5 +292,118 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
     @Override
     public void bridge$permissionService(final PermissionService permissionService) {
         this.impl$permissionService = permissionService;
+    }
+
+    @Override
+    public void bridge$parseContext(final @Nullable ParseContext context) {
+        this.impl$parseContext = context;
+    }
+
+    /*
+     * Vanilla parses commands and suggests for them with contexts of their own rather than with the source.
+     * Sponge's dispatcher works on the source throughout, so the source is those contexts too. One that only
+     * stands in for a context it was given, such as while a function is compiled, has no server or level to
+     * answer from and passes the questions on.
+     */
+
+    @Inject(method = "holderGetters", at = @At("HEAD"), cancellable = true)
+    private void impl$holderGettersOfParseContext(final CallbackInfoReturnable<HolderGetter.Provider> cir) {
+        if (this.impl$parseContext != null) {
+            cir.setReturnValue(this.impl$parseContext.holderGetters());
+        }
+    }
+
+    @Inject(method = "enabledFeatures", at = @At("HEAD"), cancellable = true)
+    private void impl$enabledFeaturesOfParseContext(final CallbackInfoReturnable<FeatureFlagSet> cir) {
+        if (this.impl$parseContext != null) {
+            cir.setReturnValue(this.impl$parseContext.enabledFeatures());
+        }
+    }
+
+    @Override
+    public boolean allowsSelectors() {
+        if (this.impl$parseContext != null) {
+            return this.impl$parseContext.allowsSelectors();
+        }
+        return ((CommandCause) this).hasPermission(Constants.Permissions.SELECTOR_PERMISSION)
+            || this.permissions().hasPermission(Permissions.COMMANDS_ENTITY_SELECTORS);
+    }
+
+    @Override
+    public <T extends Validatable> ValidationWrapper<T> getOrCreateValidationWrapper(final Holder<T> element, final ContextKeySet contextKeySet) throws CommandSyntaxException {
+        if (this.impl$parseContext != null) {
+            return this.impl$parseContext.getOrCreateValidationWrapper(element, contextKeySet);
+        }
+        // As for a command that is about to run
+        return ValidationWrapper.Provider.IMMEDIATE.getOrCreate(element, contextKeySet);
+    }
+
+    @Override
+    public Collection<String> onlinePlayerNames() {
+        return List.of(this.server.getPlayerNames());
+    }
+
+    @Override
+    public Collection<String> allTeams() {
+        return this.server.getScoreboard().getTeamNames();
+    }
+
+    @Override
+    public Stream<Identifier> availableSounds() {
+        return BuiltInRegistries.SOUND_EVENT.stream().map(SoundEvent::location);
+    }
+
+    @Override
+    public Stream<Identifier> availablePostEffects() {
+        return Stream.empty();
+    }
+
+    @Override
+    public @Nullable MinecraftServer server() {
+        return this.server;
+    }
+
+    @Override
+    public @Nullable Level level() {
+        return this.level;
+    }
+
+    @Override
+    public Set<ResourceKey<Level>> levels() {
+        return this.server.levelKeys();
+    }
+
+    @Override
+    public @Nullable Entity entity() {
+        return this.entity;
+    }
+
+    @Override
+    public Vec3 position() {
+        return this.worldPosition;
+    }
+
+    @Override
+    public CompletableFuture<Suggestions> suggestObjectiveNames(final CommandContext<?> context, final SuggestionsBuilder builder) {
+        return SuggestionContext.suggest(this.server.getScoreboard().getObjectiveNames(), builder);
+    }
+
+    @Override
+    public CompletableFuture<Suggestions> customSuggestion(final CommandContext<?> context) {
+        return Suggestions.empty();
+    }
+
+    @Override
+    public <E> CompletableFuture<Suggestions> suggestRegistryElements(
+        final CommandContext<?> context,
+        final ResourceKey<? extends Registry<? extends E>> key,
+        final SuggestionContext.ElementSuggestionType elements,
+        final SuggestionsBuilder builder,
+        final Predicate<E> filter
+    ) {
+        return this.holderLookups().lookup(key).map(registry -> {
+            this.suggestRegistryElements(registry, elements, builder, filter);
+            return builder.buildFuture();
+        }).orElseGet(Suggestions::empty);
     }
 }
