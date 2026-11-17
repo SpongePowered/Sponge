@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server.level;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -79,6 +80,7 @@ import net.minecraft.world.level.entity.PersistentEntitySectionManager;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gamerules.GameRuleMap;
 import net.minecraft.world.level.gamerules.GameRules;
+import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.saveddata.WeatherData;
 import net.minecraft.world.level.storage.LevelData;
@@ -443,11 +445,14 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         return this.impl$recentTickTimes;
     }
 
+    @Override
+    public WorldOptions bridge$worldGenOptions() {
+        final @Nullable WorldOptions worldOptions = ((ServerLevelDataBridge) this.serverLevelData).bridge$spongeData().worldGenOptions();
+        return worldOptions == null ? this.server.getWorldGenSettings().options() : worldOptions;
+    }
+
     @Redirect(method = {
-        "saveLevelData",
-        "findNearestMapStructure",
         "isFlat",
-        "getSeed",
         "enabledFeatures"
     }, at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWorldData()Lnet/minecraft/world/level/storage/WorldData;"))
     private WorldData impl$usePerWorldLevelData(final MinecraftServer server) {
@@ -456,6 +461,23 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
             return worldData;
         }
         return server.getWorldData();
+    }
+
+    /*
+     Since 26.1 the seed and generation options are the server's WorldGenSettings, no longer part of the WorldData
+     redirected above. Each world keeps its own in its Sponge data; the default world has none and uses the server's.
+     Everything else asks the world for its seed through getSeed. Matching any method reaches each read here, wherever
+     a platform moves it: the constructor, which hands them to the world's StructureCheck and StructureManager that
+     /locate searches with, and getSeed, whose read NeoForge moves into a lambda after its own seed override. Each
+     platform has exactly these two, so losing one in an update fails startup rather than the seed. The other two
+     reads, whether to place structures and whether /locate searches at all, take the world from ChunkStatusTasks and
+     ChunkGenerator, through bridge$worldGenOptions.
+    */
+    @ModifyExpressionValue(method = "*", require = 2,
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/levelgen/WorldGenSettings;options()Lnet/minecraft/world/level/levelgen/WorldOptions;"))
+    private WorldOptions impl$usePerWorldGenOptions(final WorldOptions serverOptions) {
+        final @Nullable WorldOptions worldOptions = ((ServerLevelDataBridge) this.serverLevelData).bridge$spongeData().worldGenOptions();
+        return worldOptions == null ? serverOptions : worldOptions;
     }
 
     @Inject(method = "save", at = @At("HEAD"), cancellable = true)

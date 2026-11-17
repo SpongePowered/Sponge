@@ -74,6 +74,7 @@ import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.LevelDataAndDimensions;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
+import net.minecraft.world.level.storage.SavedDataStorage;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.WorldData;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -900,10 +901,24 @@ public class SpongeWorldManager implements WorldManager {
         spongeData.setKey(key);
         spongeData.setConfigAdapter(SpongeGameConfigs.load(dimensionType, key));
         if (spongeData.worldGenOptions() == null) {
-            spongeData.setWorldGenOptions(this.server.getWorldGenSettings());
+            spongeData.setWorldOptions(this.loadWorldGenOptions(SpongeWorldManager.createRegistryKey(key))
+                .orElseGet(() -> this.server.getWorldGenSettings().options()));
         }
         ((PrimaryLevelDataBridge) data).bridge$populateFromLevelStem(stem);
         return new LevelDataLoadResult(data, stem);
+    }
+
+    /**
+     * Reads the options a world was generated with, its seed among them, from the {@code world_gen_settings.dat} that
+     * {@link #createLevel} keeps in the world's own saved data. The server's holds only the default world's, so
+     * without this a world loaded again, such as every world on startup, would take the default world's seed.
+     */
+    private Optional<WorldOptions> loadWorldGenOptions(final net.minecraft.resources.ResourceKey<Level> registryKey) {
+        final Path dataFolder = this.serverStorageSource().getDimensionPath(registryKey).resolve("data");
+        // Only read from, so closing it has nothing to save
+        try (final SavedDataStorage storage = new SavedDataStorage(dataFolder, this.server.getFixerUpper(), this.server.registryAccess())) {
+            return Optional.ofNullable(storage.get(WorldGenSettings.TYPE)).map(WorldGenSettings::options);
+        }
     }
 
     /**
