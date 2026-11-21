@@ -87,17 +87,6 @@ public abstract class CommandsMixin_Forge implements CommandsBridge {
             frame.pushCause(player);
             frame.addContext(EventContextKeys.SUBJECT, (Subject) player);
             final CommandCause sourceToUse = ((CommandSourceStackBridge) sourceToResult).bridge$withCurrentCause();
-            // CommandHelper#mergeCommandNode filters the client bound tree with CommandNode#canUse(sourceToUse),
-            // which evaluates the execution requirements registered by plugins against the sending source. The
-            // sending source is built from the current cause, which does not always contain the player (see
-            // https://github.com/SpongePowered/Sponge/issues/4245). Without the player in the cause, requirements
-            // such as "cause.first(ServerPlayer.class).isPresent()" evaluate to false and the command is dropped
-            // from the packet, even though it executes fine through the real execution cause. Make sure the player
-            // is part of the cause before the tree is merged.
-            if (((CommandSourceStackBridge) sourceToUse).bridge$getCause()
-                    .first(org.spongepowered.api.entity.living.player.server.ServerPlayer.class).isEmpty()) {
-                ((CommandSourceStackBridge) sourceToUse).bridge$setCause(sourceToUse.with(player));
-            }
             try {
                 this.impl$playerNodeCache.put(player, new IdentityHashMap<>());
                 // We use this because the redirects should be a 1:1 mapping (which is what this map is for).
