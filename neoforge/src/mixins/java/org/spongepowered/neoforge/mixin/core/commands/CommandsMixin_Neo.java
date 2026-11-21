@@ -60,7 +60,7 @@ public abstract class CommandsMixin_Neo implements CommandsBridge {
     private WeakHashMap<ServerPlayer, Map<CommandNode<CommandSourceStack>, List<CommandNode<SharedSuggestionProvider>>>> impl$playerNodeCache;
     private SpongeCommandManager impl$commandManager;
 
-    // The event fired by Neo is fired in NeoCommandManager at the appropriate time.
+    // The event fired by Forge is fired in ForgeCommandManager at the appropriate time.
     @Redirect(method = "performCommand",
         at = @At(value = "INVOKE", target = "Lnet/neoforged/bus/api/IEventBus;post(Lnet/neoforged/bus/api/Event;)Lnet/neoforged/bus/api/Event;"))
     private Event neo$redirectToSpongeCommandManager(IEventBus instance, Event event) {
