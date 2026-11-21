@@ -60,7 +60,7 @@ public abstract class CommandsMixin_Neo implements CommandsBridge {
     private WeakHashMap<ServerPlayer, Map<CommandNode<CommandSourceStack>, List<CommandNode<SharedSuggestionProvider>>>> impl$playerNodeCache;
     private SpongeCommandManager impl$commandManager;
 
-    // The event fired by Forge is fired in ForgeCommandManager at the appropriate time.
+    // The event fired by Neo is fired in NeoCommandManager at the appropriate time.
     @Redirect(method = "performCommand",
         at = @At(value = "INVOKE", target = "Lnet/neoforged/bus/api/IEventBus;post(Lnet/neoforged/bus/api/Event;)Lnet/neoforged/bus/api/Event;"))
     private Event neo$redirectToSpongeCommandManager(IEventBus instance, Event event) {
@@ -95,13 +95,13 @@ public abstract class CommandsMixin_Neo implements CommandsBridge {
             // is part of the cause before the tree is merged.
             if (((CommandSourceStackBridge) sourceToUse).bridge$getCause()
                     .first(org.spongepowered.api.entity.living.player.server.ServerPlayer.class).isEmpty()) {
-                ((CommandSourceStackBridge) sourceToResult).bridge$setCause(sourceToUse.with(player));
+                ((CommandSourceStackBridge) sourceToUse).bridge$setCause(sourceToUse.with(player));
             }
             try {
                 this.impl$playerNodeCache.put(player, new IdentityHashMap<>());
                 // We use this because the redirects should be a 1:1 mapping (which is what this map is for).
                 final IdentityHashMap<CommandNode<S>, CommandNode<T>> idMap = new IdentityHashMap<>(resultNode);
-                CommandHelper.<S, T>mergeCommandNode(sourceChild, sourceNode, idMap, sourceToResult, canUse, execute);
+                CommandHelper.<S, T>mergeCommandNode(sourceChild, sourceNode, idMap, (S) sourceToUse, canUse, execute);
             } finally {
                 this.impl$playerNodeCache.remove(player);
             }
