@@ -91,7 +91,7 @@ public abstract class CommandsMixin_Forge implements CommandsBridge {
                 this.impl$playerNodeCache.put(player, new IdentityHashMap<>());
                 // We use this because the redirects should be a 1:1 mapping (which is what this map is for).
                 final IdentityHashMap<CommandNode<S>, CommandNode<T>> idMap = new IdentityHashMap<>(resultNode);
-                CommandHelper.<S, T>mergeCommandNode(sourceChild, sourceNode, idMap, sourceToResult, canUse, execute);
+                CommandHelper.<S, T>mergeCommandNode(sourceChild, sourceNode, idMap, (S) sourceToUse, canUse, execute);
             } finally {
                 this.impl$playerNodeCache.remove(player);
             }
