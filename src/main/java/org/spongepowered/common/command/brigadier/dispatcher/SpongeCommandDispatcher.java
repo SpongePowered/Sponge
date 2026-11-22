@@ -310,7 +310,12 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
 
                 command = preEvent.command();
                 args = preEvent.arguments();
-                reader = new SpongeStringReader(command + (args.isEmpty() ? "" : " " + args));
+                if (command.equals(originalCommand) && args.equals(originalArgs)) {
+                    // Keep the original reader so that a trailing argument separator is preserved.
+                    reader = originalReader;
+                } else {
+                    reader = new SpongeStringReader(command + (args.isEmpty() ? "" : " " + args));
+                }
             }
 
             final Optional<CommandMapping> mapping = this.commandManager.commandMapping(command);
