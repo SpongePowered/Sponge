@@ -73,7 +73,7 @@ public abstract class CommandHelperMixin_Neo {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    @Inject(method = "toResult", at = @At("RETURN"))
+    @Inject(method = "toResult", at = @At("RETURN"), cancellable = true)
     private static void impl$askTheServerOnlyOnce(final CallbackInfoReturnable<CommandNode<?>> cir) {
         if (impl$mergeDepth.get() == 0) {
             return;
