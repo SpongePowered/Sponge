@@ -35,6 +35,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.ArrayDeque;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.IdentityHashMap;
+import java.util.Set;
+
 /**
  * On NeoForge the client-bound command tree is built by
  * {@link CommandHelper#mergeCommandNode}, so the workaround in
@@ -43,39 +49,37 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * has more than one such child, a later request cancels the earlier future, the combined future completes
  * exceptionally and the suggestion window never opens.
  *
- * <p>The same rule is applied here: only the first argument node in the tree keeps its
- * {@code ASK_SERVER} suggestions, any further node is replaced with an equivalent node that has no suggestions.
- * The server still computes completions for every node from its own tree, so no candidates are lost.</p>
+ * <p>The same rule is applied here, per parent: only the first argument node below a given parent keeps its
+ * {@code ASK_SERVER} suggestions, and any further sibling below that parent is replaced with an equivalent node
+ * that has no suggestions. Nodes below other parents keep their own first suggestion node. The server still
+ * computes completions for every node from its own tree, so no candidates are lost.</p>
  */
 @Mixin(value = CommandHelper.class, remap = false)
 public abstract class CommandHelperMixin_Neo {
 
-    private static final ThreadLocal<Integer> impl$mergeDepth = ThreadLocal.withInitial(() -> 0);
-    private static final ThreadLocal<Boolean> impl$customSuggestionsEmitted = ThreadLocal.withInitial(() -> false);
+    private static final ThreadLocal<Deque<CommandNode<?>>> impl$mergeParents = ThreadLocal.withInitial(ArrayDeque::new);
+    private static final ThreadLocal<Set<CommandNode<?>>> impl$customSuggestionsEmitted = ThreadLocal.withInitial(() -> Collections.newSetFromMap(new IdentityHashMap<>()));
 
     @Inject(method = "mergeCommandNode", at = @At("HEAD"))
-    private static void impl$beginClientTree(final CallbackInfo ci) {
-        if (impl$mergeDepth.get() == 0) {
-            impl$customSuggestionsEmitted.set(false);
-        }
-        impl$mergeDepth.set(impl$mergeDepth.get() + 1);
+    private static void impl$beginMerge(final CommandNode<?> source, final CallbackInfo ci) {
+        impl$mergeParents.get().push(source);
     }
 
     @Inject(method = "mergeCommandNode", at = @At("RETURN"))
-    private static void impl$endClientTree(final CallbackInfo ci) {
-        final int remaining = impl$mergeDepth.get() - 1;
-        if (remaining <= 0) {
-            impl$mergeDepth.remove();
+    private static void impl$endMerge(final CommandNode<?> source, final CallbackInfo ci) {
+        final Deque<CommandNode<?>> parents = impl$mergeParents.get();
+        parents.pop();
+        if (parents.isEmpty()) {
+            impl$mergeParents.remove();
             impl$customSuggestionsEmitted.remove();
-        } else {
-            impl$mergeDepth.set(remaining);
         }
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    @Inject(method = "toResult", at = @At("RETURN"), cancellable = true)
-    private static void impl$askTheServerOnlyOnce(final CallbackInfoReturnable<CommandNode<?>> cir) {
-        if (impl$mergeDepth.get() == 0) {
+    @Inject(method = "toResult", at = @At("RETURN"))
+    private static void impl$askTheServerOnlyOncePerParent(final CallbackInfoReturnable<CommandNode<?>> cir) {
+        final CommandNode<?> parent = impl$mergeParents.get().peek();
+        if (parent == null) {
             return;
         }
         final CommandNode<?> result = cir.getReturnValue();
@@ -85,8 +89,8 @@ public abstract class CommandHelperMixin_Neo {
         if (argument.getCustomSuggestions() != SuggestionProviders.ASK_SERVER) {
             return;
         }
-        if (!impl$customSuggestionsEmitted.get()) {
-            impl$customSuggestionsEmitted.set(true);
+        final Set<CommandNode<?>> emitted = impl$customSuggestionsEmitted.get();
+        if (emitted.add(parent)) {
             return;
         }
         final RequiredArgumentBuilder<?, ?> builder = argument.createBuilder();
