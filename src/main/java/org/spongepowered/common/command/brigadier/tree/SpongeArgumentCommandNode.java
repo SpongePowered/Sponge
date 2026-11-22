@@ -43,6 +43,7 @@ import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCompletion;
@@ -103,7 +104,11 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
             final ArgumentType<?> clientType = type instanceof CompletionsArgumentTypeBridge
                     ? ((CompletionsArgumentTypeBridge<?>) type).bridge$clientSideCompletionType()
                     : type;
-            return (ArgumentType<T>) clientType;
+            // The client can only deserialize argument types that are registered for network use;
+            // fall back to the old behaviour rather than sending a type the client cannot read.
+            if (ArgumentTypeInfos.isClassRecognized(clientType.getClass())) {
+                return (ArgumentType<T>) clientType;
+            }
         }
         return (ArgumentType<T>) Constants.Command.STANDARD_STRING_ARGUMENT_TYPE;
     }
