@@ -24,7 +24,7 @@
  */
 package org.spongepowered.neoforge.mixin.core.commands;
 
-import com.mojang.brigadier.builder.ArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.commands.synchronization.SuggestionProviders;
@@ -89,10 +89,10 @@ public abstract class CommandHelperMixin_Neo {
             impl$customSuggestionsEmitted.set(true);
             return;
         }
-        final ArgumentBuilder<?, ?> builder = argument.createBuilder();
+        final RequiredArgumentBuilder<?, ?> builder = argument.createBuilder();
         builder.suggests(null);
         for (final CommandNode<?> child : argument.getChildren()) {
-            ((ArgumentBuilder) builder).then(child);
+            ((RequiredArgumentBuilder) builder).then(child);
         }
         cir.setReturnValue(builder.build());
     }
