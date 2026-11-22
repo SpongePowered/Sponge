@@ -10,6 +10,7 @@
         "api.event.entity.ChangeEventWorldEvent_PostMixin_Neo",
         "neoforge.event.entity.item.ItemTossEventMixin_Neo",
         "commands.CommandsMixin_Neo",
+        "commands.CommandHelperMixin_Neo",
         "neoforge.NeoForgeMixin_Neo",
         "neoforge.event.entity.EntityTravelToDimensionEventMixin_Neo",
         "neoforge.event.entity.player.PlayerEvent_PlayerChangedDimensionEventMixin_Neo",
