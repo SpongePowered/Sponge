@@ -76,7 +76,7 @@ public abstract class CommandHelperMixin_Neo {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    @Inject(method = "toResult", at = @At("RETURN"))
+    @Inject(method = "toResult", at = @At("RETURN"), cancellable = true)
     private static void impl$askTheServerOnlyOncePerParent(final CallbackInfoReturnable<CommandNode<?>> cir) {
         final CommandNode<?> parent = impl$mergeParents.get().peek();
         if (parent == null) {
