@@ -131,6 +131,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -280,16 +281,14 @@ public class SpongeWorldManager implements WorldManager {
                 if (loadOperation != null && this.worldExists(key)) {
                     final Optional<LevelDataLoadResult> result = this.loadLevelData(storageSource, registryKey, loadOperation);
                     if (result.isPresent()) {
-                        loadOperation.loadCallback().ifPresent(c -> c.accept((ServerWorldProperties) result.get().data()));
-                        return this.loadWorld0(t, registryKey, result.get(), storageSource);
+                        return this.loadWorld0(t, registryKey, result.get(), storageSource, loadOperation.loadCallback().orElse(null));
                     }
                 }
 
                 final ServerWorldProperties.LoadOptions.@Nullable CreateOperation createOperation = propertiesLoadOption.createOperation().orElse(null);
                 if (createOperation != null) {
                     final LevelDataLoadResult result = this.createLevelData(registryKey, createOperation.worldArchetype());
-                    createOperation.createCallback().ifPresent(c -> c.accept((ServerWorldProperties) result.data()));
-                    return this.loadWorld0(t, registryKey, result, storageSource);
+                    return this.loadWorld0(t, registryKey, result, storageSource, createOperation.createCallback().orElse(null));
                 }
 
                 return CompletableFuture.completedFuture(Optional.empty());
@@ -298,10 +297,15 @@ public class SpongeWorldManager implements WorldManager {
     }
 
     private CompletableFuture<Optional<ServerWorld>> loadWorld0(final WorldOperationTask task, final net.minecraft.resources.ResourceKey<Level> registryKey,
-                                                                final LevelDataLoadResult levelData, final LevelStorageSource.LevelStorageAccess storageSource) {
+                                                                final LevelDataLoadResult levelData, final LevelStorageSource.LevelStorageAccess storageSource,
+                                                                final @Nullable Consumer<ServerWorldProperties> callback) {
         return CompletableFuture.<CompletableFuture<ServerLevel>>supplyAsync(() -> {
                 if (task.isCancelled()) {
                     return CompletableFuture.failedFuture(new CancellationException());
+                }
+
+                if (callback != null) {
+                    callback.accept((ServerWorldProperties) levelData.data());
                 }
 
                 final ServerLevel world = this.createLevel(registryKey, levelData.stem(), storageSource, levelData.data());
@@ -379,7 +383,7 @@ public class SpongeWorldManager implements WorldManager {
                 }
             }
 
-            return SpongeCommon.asyncScheduler().submit(() -> {
+            return SpongeCommon.asyncScheduler().<CompletableFuture<Optional<ServerWorldProperties>>>submit(() -> {
                 if (t.isCancelled()) {
                     throw new CancellationException();
                 }
@@ -389,20 +393,24 @@ public class SpongeWorldManager implements WorldManager {
                     final Optional<LevelDataLoadResult> result = this.loadLevelData(registryKey, loadOperation);
                     if (result.isPresent()) {
                         final ServerWorldProperties properties = (ServerWorldProperties) result.get().data();
-                        loadOperation.loadCallback().ifPresent(c -> c.accept(properties));
-                        return Optional.of(properties);
+                        return CompletableFuture.supplyAsync(() -> {
+                            loadOperation.loadCallback().ifPresent(c -> c.accept(properties));
+                            return Optional.of(properties);
+                        }, SpongeCommon.server());
                     }
                 }
 
                 final ServerWorldProperties.LoadOptions.@Nullable CreateOperation createOperation = propertiesLoadOptions.createOperation().orElse(null);
                 if (createOperation != null) {
                     final LevelDataLoadResult result = this.createLevelData(registryKey, createOperation.worldArchetype());
-                    createOperation.createCallback().ifPresent(c -> c.accept((ServerWorldProperties) result.data()));
-                    return Optional.of((ServerWorldProperties) result.data());
+                    return CompletableFuture.supplyAsync(() -> {
+                        createOperation.createCallback().ifPresent(c -> c.accept((ServerWorldProperties) result.data()));
+                        return Optional.of((ServerWorldProperties) result.data());
+                    }, SpongeCommon.server());
                 }
 
-                return Optional.empty();
-            });
+                return CompletableFuture.completedFuture(Optional.empty());
+            }).thenCompose(Function.identity());
         });
     }
 
