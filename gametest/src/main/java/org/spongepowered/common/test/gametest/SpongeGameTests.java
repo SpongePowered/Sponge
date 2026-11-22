@@ -56,6 +56,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -87,6 +88,11 @@ public final class SpongeGameTests {
     private static final String GROUP = Type.getDescriptor(GameTestGroup.class);
     // Each found test class and the plugin its root names, if any
     private static final Map<Class<?>, String> OWNERS = new HashMap<>();
+    // Listeners asked for before plugins are created, when there is no plugin to own them yet: gametest classes may
+    // be created that early, and a test class's constructor is where it listens for the server starting
+    private static @Nullable List<Runnable> pendingListeners = new ArrayList<>();
+    // Test classes and plugins may be created on different threads
+    private static final Object LISTENERS_LOCK = new Object();
 
     public static List<TestFunction> all() {
         return Holder.ALL;
@@ -138,11 +144,28 @@ public final class SpongeGameTests {
     // ponytail: a test that times out never reaches its unregister; harmless since listeners filter by position
     // and the gametest server exits afterwards. Unregister from a GameTestListener if tests ever share a long-lived server.
     public static <E extends Event> void listen(final TypeToken<E> type, final Order order, final EventListener<? super E> listener) {
-        Sponge.eventManager().registerListener(EventListenerRegistration.builder(type)
+        final Runnable register = () -> Sponge.eventManager().registerListener(EventListenerRegistration.builder(type)
             .plugin(Launch.instance().commonPlugin())
             .order(order)
             .listener(listener)
             .build());
+        synchronized (SpongeGameTests.LISTENERS_LOCK) {
+            if (SpongeGameTests.pendingListeners != null) {
+                SpongeGameTests.pendingListeners.add(register);
+                return;
+            }
+        }
+        register.run();
+    }
+
+    /** Registers the listeners asked for so far, and any later ones at once, now that plugins are being created */
+    static void registerPendingListeners() {
+        synchronized (SpongeGameTests.LISTENERS_LOCK) {
+            if (SpongeGameTests.pendingListeners != null) {
+                SpongeGameTests.pendingListeners.forEach(Runnable::run);
+                SpongeGameTests.pendingListeners = null;
+            }
+        }
     }
 
     private static Stream<TestFunction> tests(final Class<?> type) {

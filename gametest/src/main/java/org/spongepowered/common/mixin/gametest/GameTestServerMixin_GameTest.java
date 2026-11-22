@@ -37,8 +37,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
+import org.spongepowered.common.datapack.SpongeDataPackManager;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
@@ -57,6 +59,13 @@ public abstract class GameTestServerMixin_GameTest implements MinecraftServerBri
     @Inject(method = "<init>", at = @At("TAIL"))
     private void gametest$setServerOnGame(final CallbackInfo ci) {
         SpongeCommon.game().setServer((Server) this);
+    }
+
+    // Plugin data packs, such as TagTemplates, as DedicatedServerMixin writes them on construction. Their reload saves
+    // the player list, which only exists from here, and blocks on the server thread, so it is done before any test runs
+    @Inject(method = "initServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/gametest/framework/GameTestServer;loadLevel()V"))
+    private void gametest$registerPluginDataPacks(final CallbackInfoReturnable<Boolean> cir) {
+        ((SpongeDataPackManager) ((Server) this).dataPackManager()).init();
     }
 
     // Implemented by every other server mixin; throwaway test worlds have no per-world autosave settings to honour
