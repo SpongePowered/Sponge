@@ -28,6 +28,7 @@ import org.spongepowered.plugin.Environment;
 import org.spongepowered.plugin.discovery.PluginResourceLocator;
 import org.spongepowered.plugin.discovery.UnknownResourceStrategy;
 
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 
@@ -35,10 +36,17 @@ import java.util.List;
  * WARNING: This class may exist in multiple classloaders.
  */
 public class DummyResourceLocator implements PluginResourceLocator {
+    public static final Path UNIONED_JAR = Path.of("dummy", "meta.jar");
+    public static final List<Path> UNION = List.of(Path.of("dummy", "classes"), DummyResourceLocator.UNIONED_JAR);
 
     @Override
     public Collection<Result> locatePluginResources(final Environment environment) {
-        return List.of(new Result(new DummyPluginResource(), UnknownResourceStrategy.IGNORE));
+        // Union plus one of its jars alone, as in a gametest run
+        return List.of(
+            new Result(new DummyPluginResource(), UnknownResourceStrategy.IGNORE),
+            new Result(new DummyPluginResource(List.of(DummyResourceLocator.UNIONED_JAR)), UnknownResourceStrategy.IGNORE),
+            new Result(new DummyPluginResource(DummyResourceLocator.UNION), UnknownResourceStrategy.IGNORE)
+        );
     }
 
     @Override

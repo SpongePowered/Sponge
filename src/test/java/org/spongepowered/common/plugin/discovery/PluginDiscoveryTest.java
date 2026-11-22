@@ -30,8 +30,10 @@ import org.junit.jupiter.api.Test;
 import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.common.applaunch.plugin.discovery.PluginDiscovery;
 import org.spongepowered.common.plugin.discovery.spi.DummyMetadataReader;
+import org.spongepowered.common.plugin.discovery.spi.DummyResourceLocator;
 import org.spongepowered.plugin.PluginService;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,5 +51,12 @@ public class PluginDiscoveryTest {
         // reader
         assertTrue(candidate.get().gameResource());
         assertIterableEquals(List.of(DummyMetadataReader.DUMMY_METADATA), candidate.get().metadata());
+    }
+
+    @Test
+    public void unionedJarIsNoCandidateOfItsOwn() {
+        final List<List<Path>> paths = AppLaunch.pluginPlatform().discovery().candidates().stream().map(c -> c.resource().paths()).toList();
+        assertTrue(paths.contains(DummyResourceLocator.UNION));
+        assertFalse(paths.contains(List.of(DummyResourceLocator.UNIONED_JAR)));
     }
 }

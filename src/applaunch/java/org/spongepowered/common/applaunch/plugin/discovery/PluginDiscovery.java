@@ -38,6 +38,7 @@ import org.spongepowered.plugin.metadata.builtin.MetadataParser;
 import org.spongepowered.plugin.metadata.model.PluginConflict;
 
 import java.lang.module.ModuleDescriptor;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -117,6 +118,12 @@ public abstract class PluginDiscovery extends PluginServiceLoader {
                 break;
             }
         }
+
+        // The classpath also lists a dev plugin's jars apart from their union; dropped, or both claim the plugin's
+        // module and hash order picks the winner
+        final Set<Path> unioned = candidates.keySet().stream().filter(r -> r.paths().size() > 1)
+            .flatMap(r -> r.paths().stream()).collect(Collectors.toSet());
+        candidates.keySet().removeIf(resource -> resource.paths().size() == 1 && unioned.contains(resource.paths().getFirst()));
 
         for (final Candidate candidate : candidates.values()) {
             this.environment.logger().debug("Found {} located by [{}] ({}).", candidate.resource, candidate.locatorNames(), candidate.serviceNames());
