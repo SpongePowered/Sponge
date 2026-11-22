@@ -24,6 +24,7 @@
  */
 package org.spongepowered.neoforge.mixin.core.commands;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
@@ -39,7 +40,9 @@ import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * On NeoForge the client-bound command tree is built by
@@ -61,12 +64,16 @@ public abstract class CommandHelperMixin_Neo {
     private static final ThreadLocal<Set<CommandNode<?>>> impl$customSuggestionsEmitted = ThreadLocal.withInitial(() -> Collections.newSetFromMap(new IdentityHashMap<>()));
 
     @Inject(method = "mergeCommandNode", at = @At("HEAD"))
-    private static void impl$beginMerge(final CommandNode<?> source, final CallbackInfo ci) {
+    private static void impl$beginMerge(final CommandNode<?> source, final CommandNode<?> result, final Map<?, ?> resultNodeMap,
+            final Object sourceToUse, final Command<?> canUse,
+            final Function<?, ?> execute, final CallbackInfo ci) {
         impl$mergeParents.get().push(source);
     }
 
     @Inject(method = "mergeCommandNode", at = @At("RETURN"))
-    private static void impl$endMerge(final CommandNode<?> source, final CallbackInfo ci) {
+    private static void impl$endMerge(final CommandNode<?> source, final CommandNode<?> result, final Map<?, ?> resultNodeMap,
+            final Object sourceToUse, final Command<?> canUse,
+            final Function<?, ?> execute, final CallbackInfo ci) {
         final Deque<CommandNode<?>> parents = impl$mergeParents.get();
         parents.pop();
         if (parents.isEmpty()) {
