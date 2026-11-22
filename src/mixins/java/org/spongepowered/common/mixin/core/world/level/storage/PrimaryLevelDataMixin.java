@@ -29,6 +29,8 @@ import com.google.common.collect.HashBiMap;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.Lifecycle;
+import net.minecraft.world.level.levelgen.WorldOptions;
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
@@ -362,5 +364,18 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
     @Override
     public void data$setCompound(final CompoundTag nbt) {
         this.impl$compound = nbt;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Inject(
+            method = "parse(Lcom/mojang/serialization/Dynamic;Lnet/minecraft/world/level/LevelSettings;Lnet/minecraft/world/level/storage/PrimaryLevelData$SpecialWorldProperty;Lnet/minecraft/world/level/levelgen/WorldOptions;Lcom/mojang/serialization/Lifecycle;)Lnet/minecraft/world/level/storage/PrimaryLevelData;",
+            at = @At("RETURN"))
+    private static void impl$readSpongeLevelDataOnLoad(final Dynamic<?> data, final LevelSettings settings,
+            final PrimaryLevelData.SpecialWorldProperty special, final WorldOptions options,
+            final Lifecycle lifecycle, final CallbackInfoReturnable<PrimaryLevelData> cir) {
+        final PrimaryLevelData result = cir.getReturnValue();
+        if (result != null) {
+            ((PrimaryLevelDataBridge) result).bridge$readSpongeLevelData((Dynamic<Tag>) data);
+        }
     }
 }
