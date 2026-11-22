@@ -80,7 +80,9 @@ import org.spongepowered.test.LoadableModule;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Plugin("inventorytest")
 public final class InventoryTest implements LoadableModule {
@@ -190,6 +192,24 @@ public final class InventoryTest implements LoadableModule {
             final String title = component.map(c -> PlainTextComponentSerializer.plainText().serialize(c)).orElse("No Title");
             if (title.equals("Foobar")) {
                 InventoryTest.doFancyStuff(this.plugin, event.cause().first(Player.class).get());
+            }
+        }
+
+        @Listener
+        public void onScrollBundle(final ChangeInventoryEvent.ValueChange event) {
+            if (event.affectedKeys().contains(Keys.SLOT_INDEX)) {
+                for (SlotTransaction transaction : event.transactions()) {
+                    if (transaction.finalReplacement().getOrElse(Keys.SLOT_INDEX, -1) > 3) {
+                        event.setCancelled(true);
+                        return;
+                    }
+
+                    this.plugin.logger().info(
+                        "Bundle slot was scrolled: {} -> {}",
+                        transaction.original().getOrElse(Keys.SLOT_INDEX, -1),
+                        transaction.finalReplacement().getOrElse(Keys.SLOT_INDEX, -1)
+                    );
+                }
             }
         }
 
@@ -306,7 +326,56 @@ public final class InventoryTest implements LoadableModule {
         doubleMyInventory.set(8, ItemStack.of(ItemTypes.GOLD_INGOT));
         doubleMyInventory.set(45, ItemStack.of(ItemTypes.EMERALD));
         doubleMyInventory.set(53, ItemStack.of(ItemTypes.DIAMOND));
+
+        final var bundleInventory = Inventory.builder()
+            .slots(10)
+            .completeStructure()
+            .plugin(plugin)
+            .build();
+
+        for (int i = 0; i < 10; i++) {
+            bundleInventory.set(i, ItemStack.of(ItemTypes.DIRT));
+        }
+
+        doubleMyInventory.set(2 * 9 + 4, ItemStack.builder()
+            .itemType(ItemTypes.BUNDLE)
+            .add(Keys.ITEM_NAME, Component.text("Scrollable counter"))
+            .add(Keys.LORE, List.of(Component.text(0)))
+            .add(Keys.HIDE_BUNDLE_CONTENTS, true)
+            .add(Keys.INVENTORY, bundleInventory)
+            .add(Keys.MODEL, ItemTypes.PAPER.location())
+            .build());
         menu.registerSlotClick(new MySlotClickHandler(plugin, menu, doubleMyInventory));
+
+        AtomicInteger counter = new AtomicInteger();
+        menu.registerChange((cause, container, slot, slotIndex, oldStack, newStack) -> {
+            plugin.logger().info("Foobar slot change: {}", slotIndex);
+
+            if (slotIndex != 2 * 9 + 4) {
+                return true;
+            }
+
+            final int idx = newStack.getOrElse(Keys.SLOT_INDEX, -1);
+
+            if (idx >= 0 && idx < 5) {
+                counter.decrementAndGet();
+            }
+
+            else if (idx >= 5) {
+                counter.incrementAndGet();
+            }
+
+            plugin.logger().info("Counter: {}", counter.get());
+
+            final var stackCopy = newStack.asMutableCopy();
+            stackCopy.offer(Keys.LORE, List.of(Component.text(counter.get())));
+
+            Sponge.server().scheduler().submit(Task.builder().plugin(plugin).execute(() -> {
+                slot.set(stackCopy);
+            }).build());
+
+            return false;
+        });
         Sponge.server().scheduler().submit(Task.builder().plugin(plugin).execute(() -> {
             menu.open((ServerPlayer) player);
         }).build());

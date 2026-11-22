@@ -147,6 +147,7 @@
     "world.inventory.SmithingMenuAccessor",
     "world.item.AdventureModePredicateAccessor",
     "world.item.ItemCooldowns_CooldownInstanceAccessor",
+    "world.item.component.BundleContentsAccessor",
     "world.item.component.CustomDataAccessor",
     "world.item.context.UseOnContextAccessor",
     "world.item.crafting.RecipeMapAccessor",
