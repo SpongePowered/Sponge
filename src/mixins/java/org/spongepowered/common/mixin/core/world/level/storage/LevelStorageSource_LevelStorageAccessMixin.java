@@ -28,6 +28,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -77,7 +78,17 @@ public abstract class LevelStorageSource_LevelStorageAccessMixin implements Leve
     )
     private void impl$saveSpongeLevelData(final LevelStorageSource.LevelStorageAccess instance, final CompoundTag root, final Operation<Void> original,
             final RegistryAccess registry, final WorldData levelData, final @Nullable CompoundTag tag) {
-        root.put(Constants.Sponge.Data.V2.SPONGE_DATA, ((PrimaryLevelDataBridge) levelData).bridge$writeSpongeLevelData());
+        // The level data parser only ever receives the "Data" compound (see PrimaryLevelData#parse),
+        // so Sponge's data has to live there as well, otherwise it is never read back on load.
+        final CompoundTag data = root.getCompound("Data");
+        final CompoundTag spongeData = ((PrimaryLevelDataBridge) levelData).bridge$writeSpongeLevelData();
+        if (data.isEmpty()) {
+            root.put(Constants.Sponge.Data.V2.SPONGE_DATA, spongeData);
+        } else {
+            data.put(Constants.Sponge.Data.V2.SPONGE_DATA, spongeData);
+            // migrate worlds that still carry the compound at the root
+            root.remove(Constants.Sponge.Data.V2.SPONGE_DATA);
+        }
         if (DataUtil.syncDataToTag(levelData)) {
             root.merge(((DataCompoundHolder) levelData).data$getCompound());
         }
