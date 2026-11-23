@@ -58,7 +58,7 @@ public final class BundleItemStackData {
                             final var inventory = Inventory.builder().slots(contents.isEmpty() ? 1 : contents.size()).completeStructure()
                                 .plugin(SpongeCommon.game().platform().container(Platform.Component.IMPLEMENTATION))
                                 .build();
-                            for(int i = 0; i < contents.size(); i++) {
+                            for (int i = 0; i < contents.size(); i++) {
                                 inventory.set(i, ItemStackUtil.cloneDefensive(contents.getItemUnsafe(i)));
                             }
                             return inventory;
@@ -73,9 +73,7 @@ public final class BundleItemStackData {
                             h.set(DataComponents.BUNDLE_CONTENTS, result.getOrThrow());
                             return true;
                         })
-                        .delete(h -> {
-                            h.remove(DataComponents.BUNDLE_CONTENTS);
-                        })
+                        .delete(h -> h.remove(DataComponents.BUNDLE_CONTENTS))
                         .supports(h -> h.has(DataComponents.BUNDLE_CONTENTS))
                     .create(Keys.SLOT_INDEX)
                         .get(h -> BundleItem.hasSelectedItem(h) ? BundleItem.getSelectedItem(h) : null)
