@@ -10,6 +10,8 @@
         "MinecraftServerMixin_GameTest",
         "RegistryDataLoaderMixin_GameTest",
         "ServerLevel_EntityCallbacksMixin_GameTest",
+        "StructureCheckAccessor_GameTest",
+        "StructureManagerAccessor_GameTest",
         "SyncSchedulerMixin_GameTest"
     ]
 }

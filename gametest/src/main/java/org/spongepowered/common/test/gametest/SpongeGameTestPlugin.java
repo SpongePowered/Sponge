@@ -32,4 +32,8 @@ import org.spongepowered.plugin.builtin.jvm.Plugin;
  */
 @Plugin("sponge_gametest")
 public final class SpongeGameTestPlugin {
+
+    public SpongeGameTestPlugin() {
+        SpongeGameTests.registerPendingListeners();
+    }
 }

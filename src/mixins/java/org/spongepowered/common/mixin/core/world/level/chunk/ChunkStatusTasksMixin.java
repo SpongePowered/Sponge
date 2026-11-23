@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.level.chunk;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.server.level.GenerationChunkHolder;
 import net.minecraft.server.level.ServerLevel;
@@ -37,6 +38,7 @@ import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.chunk.status.ChunkStatusTasks;
 import net.minecraft.world.level.chunk.status.ChunkStep;
 import net.minecraft.world.level.chunk.status.WorldGenContext;
+import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.blending.Blender;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -49,6 +51,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -84,7 +87,7 @@ public abstract class ChunkStatusTasksMixin {
      * See IOWorkerMixin#createOldDataForRegion and GenerationChunkHolderMixin#impl$guardForUnloadedChunkOnGenerate
      */
     @Overwrite
-    static CompletableFuture<ChunkAccess> generateNoiseBiomes(final WorldGenContext context, final ChunkStep step, final StaticCache2D<GenerationChunkHolder> cache, final ChunkAccess chunkAccess) {
+    public static CompletableFuture<ChunkAccess> generateNoiseBiomes(final WorldGenContext context, final ChunkStep step, final StaticCache2D<GenerationChunkHolder> cache, final ChunkAccess chunkAccess) {
         ServerLevel level = context.level();
         WorldGenRegion region = new WorldGenRegion(level, cache, step, chunkAccess);
         try { //Sponge: Add try
@@ -96,6 +99,13 @@ public abstract class ChunkStatusTasksMixin {
 
             return SpongeUnloadedChunkException.INSTANCE_FUTURE;
         } //Sponge end
+    }
+
+    // Whether the chunk gets structure starts: ask the world generating it, not the server
+    @ModifyExpressionValue(method = "generateStructureStarts",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/levelgen/WorldGenSettings;options()Lnet/minecraft/world/level/levelgen/WorldOptions;"))
+    private static WorldOptions impl$usePerWorldGenOptions(final WorldOptions serverOptions, final @Local ServerLevel level) {
+        return ((ServerLevelBridge) level).bridge$worldGenOptions();
     }
 
     @Inject(method = "lambda$full$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;setLoaded(Z)V"))
