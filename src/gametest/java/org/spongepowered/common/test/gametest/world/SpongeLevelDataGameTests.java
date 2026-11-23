@@ -63,8 +63,8 @@ public final class SpongeLevelDataGameTests {
         try {
             helper.assertTrue(Files.isRegularFile(levelDat), "level.dat was not written to " + levelDat);
             final CompoundTag root = NbtIo.readCompressed(levelDat, NbtAccounter.unlimitedHeap());
-            final CompoundTag spongeData = root.getCompound("Data").getCompound("SpongeData");
-            helper.assertTrue(spongeData.contains("UUID"), "SpongeData has no UUID in level.dat");
+            final CompoundTag spongeData = root.getCompound("SpongeData");
+            helper.assertTrue(spongeData.contains("UUID"), "SpongeData has no UUID at the root of level.dat");
             helper.assertTrue(SpongeLevelDataGameTests.readUuid(spongeData.getIntArray("UUID")).equals(expected),
                 "level.dat stores a different world id than the loaded world");
             helper.succeed();
