@@ -58,17 +58,17 @@ public final class ClientArgumentTypeGameTests {
 
     private boolean greedyTextNodeKeepsTheClientType() {
         final ArgumentType<String> greedy = StringArgumentType.greedyString();
-        return this.node(name -> ClientNativeArgumentParser.createIdentity(ResourceKey.key("test", name), greedy)).getType() == greedy;
+        return this.node(name -> ClientNativeArgumentParser.createIdentity(ResourceKey.of("test", name), greedy)).getType() == greedy;
     }
 
     private boolean playerNodeKeepsTheClientType() {
         final ArgumentType<?> player = EntityArgument.player();
-        return this.node(name -> ClientNativeArgumentParser.createIdentity(ResourceKey.key("test", name), player)).getType() == player;
+        return this.node(name -> ClientNativeArgumentParser.createIdentity(ResourceKey.of("test", name), player)).getType() == player;
     }
 
     private boolean nativeCompleterIsNotForwarded() {
         final ArgumentType<String> greedy = StringArgumentType.greedyString();
-        return this.node(name -> ClientNativeArgumentParser.createIdentity(ResourceKey.key("test", name), greedy)).getCustomSuggestions() == null;
+        return this.node(name -> ClientNativeArgumentParser.createIdentity(ResourceKey.of("test", name), greedy)).getCustomSuggestions() == null;
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
