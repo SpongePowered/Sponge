@@ -37,8 +37,7 @@
         "world.entity.player.PlayerMixin_Vanilla_Attack_Impl",
         "world.entity.vehicle.BoatMixin_Vanilla",
         "world.level.block.FireBlockMixin_Vanilla",
-        "world.level.block.entity.AbstractFurnaceBlockEntityMixin_Vanilla",
-        "world.level.storage.LevelStorageSourceMixin_Vanilla"
+        "world.level.block.entity.AbstractFurnaceBlockEntityMixin_Vanilla"
     ],
     "overwrites": {
         "conformVisibility": true
