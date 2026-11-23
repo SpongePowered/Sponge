@@ -29,6 +29,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
+import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
@@ -53,15 +54,17 @@ import java.util.function.Function;
 @GameTestGroup("command")
 public final class SiblingSuggestionsGameTests {
 
+    @SuppressWarnings("unchecked")
     @GameTest(maxTicks = 20)
     public void mergeKeepsOneServerSuggestion(final GameTestHelper helper) {
         final CommandSourceStack source = helper.getLevel().getServer().createCommandSourceStack();
+        final SuggestionProvider<CommandSourceStack> askServer = (SuggestionProvider<CommandSourceStack>) (SuggestionProvider<?>) SuggestionProviders.ASK_SERVER;
 
         final LiteralArgumentBuilder<CommandSourceStack> parent = LiteralArgumentBuilder.literal("siblingtest");
         parent.then(RequiredArgumentBuilder.<CommandSourceStack, String>argument("first", StringArgumentType.word())
-                .suggests(SuggestionProviders.ASK_SERVER));
+                .suggests(askServer));
         parent.then(RequiredArgumentBuilder.<CommandSourceStack, String>argument("second", StringArgumentType.word())
-                .suggests(SuggestionProviders.ASK_SERVER));
+                .suggests(askServer));
         final LiteralCommandNode<CommandSourceStack> sourceParent = parent.build();
 
         final RootCommandNode<CommandSourceStack> sourceRoot = new RootCommandNode<>();
@@ -76,7 +79,8 @@ public final class SiblingSuggestionsGameTests {
         helper.assertTrue(merged != null, "The test command was not merged into the result tree");
         int asking = 0;
         for (final CommandNode<CommandSourceStack> child : merged.getChildren()) {
-            if (child.getCustomSuggestions() == SuggestionProviders.ASK_SERVER) {
+            if (child instanceof ArgumentCommandNode
+                    && ((ArgumentCommandNode<?, ?>) child).getCustomSuggestions() == SuggestionProviders.ASK_SERVER) {
                 asking++;
             }
         }
