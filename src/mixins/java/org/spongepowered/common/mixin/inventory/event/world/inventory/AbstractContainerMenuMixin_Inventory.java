@@ -43,6 +43,7 @@ import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.BundleItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.BundleContents;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
@@ -245,35 +246,29 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     }
 
     @WrapOperation(method = "setSelectedBundleItemIndex", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/BundleItem;toggleSelectedItem(Lnet/minecraft/world/item/ItemStack;I)V"))
-    private void impl$captureBundleSelectedIndexChange(ItemStack $$0, int $$1, Operation<Void> operation, @Local(argsOnly = true, ordinal = 0) int slotIndex, @Local ItemStack stack) {
+    private void impl$captureBundleSelectedIndexChange(final ItemStack stack, final int bundleIndex, final Operation<Void> operation, @Local(argsOnly = true, index = 1) int slotIndex) {
         if (!PhaseTracker.getWorldInstance().onSidedThread() || !stack.has(DataComponents.BUNDLE_CONTENTS)) {
             return;
         }
 
         final var originalStack = ItemStackUtil.cloneDefensive(stack);
-
-        operation.call($$0, $$1);
+        operation.call(stack, bundleIndex);
+        final SpongeInventoryMenu menu = ((MenuBridge) this).bridge$getMenu();
+        if (menu != null) {
+            if (!menu.onChange(ItemStackUtil.cloneDefensiveNative(stack), ItemStackUtil.cloneDefensiveNative(originalStack), (Container) this, slotIndex, this.slots.get(slotIndex))) {
+                BundleItem.toggleSelectedItem(stack, BundleContents.NO_SELECTED_ITEM_INDEX);
+                if (synchronizer != null) {
+                    this.synchronizer.sendSlotChange((AbstractContainerMenu) (Object) this, slotIndex, stack);
+                }
+                return;
+            }
+        }
 
         final var transaction = new SlotTransaction(
             this.inventoryAdapter$getSlot(slotIndex).orElseThrow(),
             ItemStackUtil.snapshotOf(originalStack),
             ItemStackUtil.snapshotOf(stack)
         );
-
-        final SpongeInventoryMenu menu = ((MenuBridge)this).bridge$getMenu();
-
-        if (menu != null) {
-            if (!menu.onChange(ItemStackUtil.cloneDefensiveNative(stack), ItemStackUtil.cloneDefensiveNative(originalStack), (Container) this, slotIndex, this.slots.get(slotIndex))) {
-                BundleItem.toggleSelectedItem(stack, -1);
-
-                if (synchronizer != null) {
-                    this.synchronizer.sendSlotChange((AbstractContainerMenu) (Object) this, slotIndex, stack);
-                }
-
-                return;
-            }
-        }
-
         final var event = SpongeEventFactory.createChangeInventoryEventValueChange(
             PhaseTracker.getInstance().currentCause(),
             List.of(Keys.SLOT_INDEX),
@@ -282,18 +277,14 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         );
 
         if (SpongeCommon.post(event)) {
-            BundleItem.toggleSelectedItem(stack, -1);
-
+            BundleItem.toggleSelectedItem(stack, BundleContents.NO_SELECTED_ITEM_INDEX);
             if (synchronizer != null) {
                 this.synchronizer.sendSlotChange((AbstractContainerMenu) (Object) this, slotIndex, stack);
             }
-
             return;
         }
 
-        transaction.custom().ifPresent(custom -> {
-            transaction.slot().set(custom);
-        });
+        transaction.custom().ifPresent(custom -> transaction.slot().set(custom));
     }
 
     // broadcastChanges

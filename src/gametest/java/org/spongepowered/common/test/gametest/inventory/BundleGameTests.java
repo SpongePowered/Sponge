@@ -26,26 +26,33 @@ package org.spongepowered.common.test.gametest.inventory;
 
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.BundleItem;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.BundleContents;
 import net.minecraft.world.level.GameType;
+import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.item.inventory.Container;
+import org.spongepowered.api.item.inventory.ContainerTypes;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.test.gametest.GameTest;
 import org.spongepowered.common.test.gametest.GameTestAssertions;
 import org.spongepowered.common.test.gametest.GameTestGroup;
 import org.spongepowered.common.test.gametest.SpongeGameTests;
+import org.spongepowered.plugin.PluginContainer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,6 +72,8 @@ public final class BundleGameTests {
 
     // The first hotbar slot in a player's InventoryMenu
     private static final int HOTBAR_0 = InventoryMenu.USE_ROW_SLOT_START;
+    // Where the bundle is in the plugin menu tests
+    private static final int MENU_SLOT = 4;
 
     @GameTest
     void selectingThrowsValueChange(final GameTestHelper helper) {
@@ -147,9 +156,91 @@ public final class BundleGameTests {
     }
 
     @GameTest
+    void inventoryKeyReadsContents(final GameTestHelper helper) {
+        final net.minecraft.world.item.ItemStack nativeBundle = BundleGameTests.bundle(2);
+
+        final Inventory inventory = ItemStackUtil.fromNative(nativeBundle).get(Keys.INVENTORY).orElse(null);
+        GameTestAssertions.assertTrue(helper, inventory != null, "a bundle has no INVENTORY");
+        GameTestAssertions.assertValueEqual(helper, inventory.capacity(), 2, "capacity of the bundle's INVENTORY");
+        GameTestAssertions.assertValueEqual(helper, inventory.peekAt(0).map(ItemStack::type).orElse(null), ItemTypes.DIRT.get(), "type in slot 0");
+        GameTestAssertions.assertValueEqual(helper, inventory.peekAt(1).map(ItemStack::type).orElse(null), ItemTypes.STONE.get(), "type in slot 1");
+
+        // A copy: changing it leaves the bundle alone
+        inventory.set(0, ItemStack.of(ItemTypes.DIAMOND));
+        GameTestAssertions.assertValueEqual(helper, nativeBundle.get(DataComponents.BUNDLE_CONTENTS).getItemUnsafe(0).getItem(), Items.DIRT,
+            "bundle's first item after changing the read INVENTORY");
+        helper.succeed();
+    }
+
+    // An inventory cannot have no slots, so an empty bundle reads as one empty slot
+    @GameTest
+    void inventoryKeyReadsEmptyBundle(final GameTestHelper helper) {
+        final Inventory inventory = ItemStack.of(ItemTypes.BUNDLE).get(Keys.INVENTORY).orElse(null);
+        GameTestAssertions.assertTrue(helper, inventory != null, "an empty bundle has no INVENTORY");
+        GameTestAssertions.assertValueEqual(helper, inventory.capacity(), 1, "capacity of an empty bundle's INVENTORY");
+        GameTestAssertions.assertTrue(helper, inventory.peekAt(0).map(ItemStack::isEmpty).orElse(true), "slot 0 of an empty bundle is not empty");
+        helper.succeed();
+    }
+
+    @GameTest
+    void inventoryKeyRemoves(final GameTestHelper helper) {
+        final net.minecraft.world.item.ItemStack nativeBundle = BundleGameTests.bundle(2);
+
+        GameTestAssertions.assertTrue(helper, ItemStackUtil.fromNative(nativeBundle).remove(Keys.INVENTORY).isSuccessful(), "removing INVENTORY failed");
+        GameTestAssertions.assertFalse(helper, nativeBundle.has(DataComponents.BUNDLE_CONTENTS), "the bundle still has contents");
+        GameTestAssertions.assertFalse(helper, ItemStackUtil.fromNative(nativeBundle).supports(Keys.INVENTORY), "INVENTORY is supported without contents");
+        helper.succeed();
+    }
+
+    @GameTest
+    void inventoryKeyNotOnOtherItems(final GameTestHelper helper) {
+        GameTestAssertions.assertFalse(helper, ItemStack.of(ItemTypes.DIRT).supports(Keys.INVENTORY), "dirt supports INVENTORY");
+        helper.succeed();
+    }
+
+    /*
+     * Vanilla only rejects contents whose weight cannot be counted. A stack weighs its count over its max stack size,
+     * and slots cap the count, so the way to get there is a sum of fractions whose common denominator overflows an int:
+     * single items whose max stack sizes are distinct primes.
+     */
+    @GameTest
+    void inventoryKeyRejectsUncountableWeight(final GameTestHelper helper) {
+        final ItemStack bundle = ItemStack.of(ItemTypes.BUNDLE);
+        // 2 * 3 * ... * 29 is past Integer.MAX_VALUE
+        final int[] primes = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29};
+        final Inventory contents = Inventory.builder().slots(primes.length).completeStructure().plugin(BundleGameTests.plugin()).build();
+        for (int i = 0; i < primes.length; i++) {
+            contents.set(i, ItemStackUtil.fromNative(BundleGameTests.stackingTo(primes[i])));
+        }
+
+        GameTestAssertions.assertFalse(helper, bundle.offer(Keys.INVENTORY, contents).isSuccessful(), "offering contents of uncountable weight succeeded");
+        GameTestAssertions.assertTrue(helper, ItemStackUtil.toNative(bundle).get(DataComponents.BUNDLE_CONTENTS).isEmpty(), "the bundle changed");
+        helper.succeed();
+    }
+
+    @GameTest
+    void selectedSlotKeyRejectsUncountableWeight(final GameTestHelper helper) {
+        // 3 * 5 * ... * 23 still fits an int; with the 3 swapped for a 97 it does not
+        final List<net.minecraft.world.item.ItemStack> items = new ArrayList<>();
+        for (final int prime : new int[] {3, 5, 7, 11, 13, 17, 19, 23}) {
+            items.add(BundleGameTests.stackingTo(prime));
+        }
+        final net.minecraft.world.item.ItemStack nativeBundle = new net.minecraft.world.item.ItemStack(Items.BUNDLE);
+        nativeBundle.set(DataComponents.BUNDLE_CONTENTS, new BundleContents(items));
+        BundleItem.toggleSelectedItem(nativeBundle, 0);
+
+        GameTestAssertions.assertFalse(helper,
+            ItemStackUtil.fromNative(nativeBundle).offer(Keys.SLOT_ITEM_STACK_SNAPSHOT, ItemStackUtil.snapshotOf(BundleGameTests.stackingTo(97))).isSuccessful(),
+            "offering a selected item of uncountable weight succeeded");
+        GameTestAssertions.assertValueEqual(helper, nativeBundle.get(DataComponents.BUNDLE_CONTENTS).getItemUnsafe(0).getMaxStackSize(), 3,
+            "max stack size of the bundle's selected item");
+        helper.succeed();
+    }
+
+    @GameTest
     void inventoryKeyWritesContents(final GameTestHelper helper) {
         final ItemStack bundle = ItemStack.of(ItemTypes.BUNDLE);
-        final Inventory contents = Inventory.builder().slots(2).completeStructure().plugin(Sponge.game().platform().container(org.spongepowered.api.Platform.Component.IMPLEMENTATION)).build();
+        final Inventory contents = Inventory.builder().slots(2).completeStructure().plugin(BundleGameTests.plugin()).build();
         contents.set(0, ItemStack.of(ItemTypes.EMERALD, 3));
         contents.set(1, ItemStack.of(ItemTypes.GOLD_INGOT, 4));
 
@@ -184,6 +275,43 @@ public final class BundleGameTests {
         helper.succeed();
     }
 
+    @GameTest
+    void menuChangeHandlerSeesSelection(final GameTestHelper helper) {
+        BundleGameTests.withMenu(helper, (player, container, recorded) -> {
+            final List<ChangeInventoryEvent.ValueChange> events = BundleGameTests.select(container, BundleGameTests.MENU_SLOT, 1, event -> {});
+
+            GameTestAssertions.assertValueEqual(helper, recorded.size(), 1, "number of menu change callbacks");
+            GameTestAssertions.assertValueEqual(helper, recorded.getFirst().get(Keys.SLOT_INDEX).orElse(-1), 1, "SLOT_INDEX the change handler saw");
+            GameTestAssertions.assertValueEqual(helper, events.size(), 1, "number of ValueChange events");
+            GameTestAssertions.assertValueEqual(helper, BundleItem.getSelectedItem(container.getSlot(BundleGameTests.MENU_SLOT).getItem()), 1, "selected index of the bundle");
+        }, true);
+        helper.succeed();
+    }
+
+    @GameTest
+    void menuChangeHandlerCanReject(final GameTestHelper helper) {
+        BundleGameTests.withMenu(helper, (player, container, recorded) -> {
+            final List<ChangeInventoryEvent.ValueChange> events = BundleGameTests.select(container, BundleGameTests.MENU_SLOT, 1, event -> {});
+
+            GameTestAssertions.assertValueEqual(helper, recorded.size(), 1, "number of menu change callbacks");
+            GameTestAssertions.assertTrue(helper, events.isEmpty(), "ValueChange was thrown after the menu rejected the change");
+            GameTestAssertions.assertValueEqual(helper, BundleItem.getSelectedItem(container.getSlot(BundleGameTests.MENU_SLOT).getItem()), -1, "selected index of the bundle");
+        }, false);
+        helper.succeed();
+    }
+
+    // A player with a connection has a synchronizer, which is told about the deselection
+    @GameTest
+    void cancellingInOpenMenuDeselects(final GameTestHelper helper) {
+        BundleGameTests.withMenu(helper, (player, container, recorded) -> {
+            final List<ChangeInventoryEvent.ValueChange> events = BundleGameTests.select(container, BundleGameTests.MENU_SLOT, 1, event -> event.setCancelled(true));
+
+            GameTestAssertions.assertValueEqual(helper, events.size(), 1, "number of ValueChange events");
+            GameTestAssertions.assertValueEqual(helper, BundleItem.getSelectedItem(container.getSlot(BundleGameTests.MENU_SLOT).getItem()), -1, "selected index of the bundle");
+        }, true);
+        helper.succeed();
+    }
+
     /** A dirt, stone, ... bundle of {@code size} single items */
     private static net.minecraft.world.item.ItemStack bundle(final int size) {
         final List<net.minecraft.world.item.ItemStack> items = new ArrayList<>();
@@ -193,6 +321,54 @@ public final class BundleGameTests {
         final net.minecraft.world.item.ItemStack bundle = new net.minecraft.world.item.ItemStack(Items.BUNDLE);
         bundle.set(DataComponents.BUNDLE_CONTENTS, new BundleContents(items));
         return bundle;
+    }
+
+    /** A single dirt that stacks to {@code size}, so it weighs 1/{@code size} in a bundle */
+    private static net.minecraft.world.item.ItemStack stackingTo(final int size) {
+        final net.minecraft.world.item.ItemStack dirt = new net.minecraft.world.item.ItemStack(Items.DIRT);
+        dirt.set(DataComponents.MAX_STACK_SIZE, size);
+        return dirt;
+    }
+
+    private static PluginContainer plugin() {
+        return Sponge.game().platform().container(Platform.Component.IMPLEMENTATION);
+    }
+
+    private interface MenuTest {
+        void run(ServerPlayer player, AbstractContainerMenu container, List<ItemStackSnapshot> recorded);
+    }
+
+    /**
+     * Opens a plugin's single row menu with a bundle in {@link #MENU_SLOT} for a new player, whose change handler
+     * records each new stack and returns {@code accept}, and closes it and removes the player afterwards.
+     */
+    @SuppressWarnings("removal")
+    private static void withMenu(final GameTestHelper helper, final MenuTest test, final boolean accept) {
+        final ServerPlayer player = helper.makeMockServerPlayerInLevel();
+        try {
+            final Inventory row = Inventory.builder().slots(9).completeStructure().plugin(BundleGameTests.plugin()).build();
+            final ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X1)
+                .slots(row.slots(), 0)
+                .completeStructure()
+                .plugin(BundleGameTests.plugin())
+                .build();
+            inventory.set(BundleGameTests.MENU_SLOT, ItemStackUtil.fromNative(BundleGameTests.bundle(3)));
+            final org.spongepowered.api.item.inventory.menu.InventoryMenu menu = inventory.asMenu();
+            final List<ItemStackSnapshot> recorded = new ArrayList<>();
+            menu.registerChange((cause, container, slot, slotIndex, oldStack, newStack) -> {
+                if (slotIndex == BundleGameTests.MENU_SLOT) {
+                    recorded.add(newStack);
+                }
+                return accept;
+            });
+            final Container opened = menu.open((org.spongepowered.api.entity.living.player.server.ServerPlayer) player).orElse(null);
+            GameTestAssertions.assertTrue(helper, opened != null, "the menu did not open");
+
+            test.run(player, (AbstractContainerMenu) opened, recorded);
+        } finally {
+            player.closeContainer();
+            player.level().getServer().getPlayerList().remove(player);
+        }
     }
 
     private static Player playerWithBundle(final GameTestHelper helper, final int size) {
@@ -205,22 +381,26 @@ public final class BundleGameTests {
         return BundleItem.getSelectedItem(player.getInventory().getItem(0));
     }
 
-    /**
-     * Selects {@code index} in the bundle in the player's first hotbar slot, and returns every
-     * {@link ChangeInventoryEvent.ValueChange} thrown for the player's inventory menu meanwhile, after {@code handler}
-     * has seen it.
-     */
     private static List<ChangeInventoryEvent.ValueChange> select(final Player player, final int index, final Consumer<ChangeInventoryEvent.ValueChange> handler) {
+        return BundleGameTests.select(player.inventoryMenu, BundleGameTests.HOTBAR_0, index, handler);
+    }
+
+    /**
+     * Selects {@code index} in the bundle in the menu's {@code slot}, and returns every
+     * {@link ChangeInventoryEvent.ValueChange} thrown for the menu meanwhile, after {@code handler} has seen it.
+     */
+    private static List<ChangeInventoryEvent.ValueChange> select(final AbstractContainerMenu menu, final int slot, final int index,
+        final Consumer<ChangeInventoryEvent.ValueChange> handler) {
         final List<ChangeInventoryEvent.ValueChange> events = new ArrayList<>();
         final EventListener<ChangeInventoryEvent.ValueChange> listener = event -> {
-            if (event.inventory() == player.inventoryMenu) {
+            if (event.inventory() == menu) {
                 handler.accept(event);
                 events.add(event);
             }
         };
         SpongeGameTests.listen(ChangeInventoryEvent.ValueChange.class, listener);
         try {
-            player.inventoryMenu.setSelectedBundleItemIndex(BundleGameTests.HOTBAR_0, index);
+            menu.setSelectedBundleItemIndex(slot, index);
         } finally {
             Sponge.eventManager().unregisterListeners(listener);
         }
