@@ -29,6 +29,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.world.level.storage.LevelResource;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.world.DefaultWorldKeys;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
@@ -50,7 +52,7 @@ public final class SpongeLevelDataGameTests {
 
     @GameTest(maxTicks = 20 * 60 * 5)
     void levelDataStoresTheWorldId(final GameTestHelper helper) {
-        final ServerWorld overworld = SpongeCommon.server().worldManager().world(DefaultWorldKeys.DEFAULT)
+        final ServerWorld overworld = Sponge.server().worldManager().world(DefaultWorldKeys.DEFAULT)
             .orElseThrow(() -> new IllegalStateException("The overworld is not loaded"));
         final UUID expected = overworld.uniqueId();
 
