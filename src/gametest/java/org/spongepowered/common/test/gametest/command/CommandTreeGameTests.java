@@ -72,8 +72,14 @@ public final class CommandTreeGameTests {
                 return true;
             }));
 
+        // The mock player stays in the player list once placed, and any player in range makes the chunks around every
+        // test structure spawn mobs for the rest of the run, so it leaves as soon as the tree is built
         final ServerPlayer player = helper.makeMockServerPlayerInLevel();
-        server.getCommands().sendCommands(player);
+        try {
+            server.getCommands().sendCommands(player);
+        } finally {
+            server.getPlayerList().remove(player);
+        }
 
         GameTestAssertions.assertTrue(helper, evaluations.get() > 0,
             "The requirement of the test command was never evaluated while building the client-bound command tree");
