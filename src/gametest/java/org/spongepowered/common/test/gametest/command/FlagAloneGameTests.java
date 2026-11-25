@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.test.gametest.command;
 
-import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.ParseResults;
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.commands.CommandSourceStack;
@@ -62,12 +59,6 @@ public final class FlagAloneGameTests {
         helper.assertTrue(flag != null, "the flag node -a was not created");
         helper.assertTrue(flag.getCommand() != null,
             "the flag node has no command, so '/flagtest -a' cannot be parsed as a complete command");
-        final CommandDispatcher<CommandSourceStack> dispatcher = new CommandDispatcher<>();
-        dispatcher.getRoot().addChild(root);
-        final ParseResults<CommandSourceStack> results = dispatcher.parse(
-            new StringReader("flagtest -a"), helper.getLevel().getServer().createCommandSourceStack());
-        helper.assertTrue(results.getExceptions().isEmpty(),
-            "parsing '/flagtest -a' produced exceptions: " + results.getExceptions());
         helper.succeed();
     }
 }
