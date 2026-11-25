@@ -181,6 +181,17 @@ public final class SpongeParameterTranslator {
 
         }
 
+        // Plain flags (no associated parameter) have no command of their own. If the command
+        // itself is executable, copy its executor onto those flag nodes so that a command that
+        // ends at the flag is still considered complete (GH-3281).
+        if (node.getCommand() != null) {
+            for (final CommandNode<CommandSourceStack> child : node.getChildren()) {
+                if (child instanceof final SpongeFlagLiteralCommandNode flagNode && flagNode.getCommand() == null) {
+                    flagNode.forceExecutor(node.getCommand());
+                }
+            }
+        }
+
     }
 
     private Collection<? extends CommandNode<CommandSourceStack>> createAndAttachNode(
