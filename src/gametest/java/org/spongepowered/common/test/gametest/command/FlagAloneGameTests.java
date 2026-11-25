@@ -25,7 +25,6 @@
 package org.spongepowered.common.test.gametest.command;
 
 import com.mojang.brigadier.ParseResults;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.leangen.geantyref.TypeToken;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -110,14 +109,10 @@ public final class FlagAloneGameTests {
 
     private static void assertComplete(final GameTestHelper helper, final String input, final boolean expected) {
         final MinecraftServer server = helper.getLevel().getServer();
-        final boolean complete;
-        try {
-            final ParseResults<CommandSourceStack> results = server.getCommands().getDispatcher()
-                .parse(input, server.createCommandSourceStack());
-            complete = results.getContext().getCommand() != null;
-        } catch (final CommandSyntaxException e) {
-            complete = false;
-        }
+        final ParseResults<CommandSourceStack> results = server.getCommands().getDispatcher()
+            .parse(input, server.createCommandSourceStack());
+        final boolean complete = results.getExceptions().isEmpty()
+            && results.getContext().getCommand() != null;
         helper.assertTrue(complete == expected,
             "expected '" + input + "' to be " + (expected ? "a complete command" : "incomplete"));
     }
