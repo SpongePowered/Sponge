@@ -52,6 +52,7 @@ public final class FlagAloneGameTests {
     public void flagAloneCompletesCommand(final GameTestHelper helper) {
         final Command.Parameterized command = Command.builder()
             .addFlag(Flag.of("a"))
+            .terminal(true)
             .executor(context -> CommandResult.success())
             .build();
         final Collection<LiteralCommandNode<CommandSourceStack>> nodes =
