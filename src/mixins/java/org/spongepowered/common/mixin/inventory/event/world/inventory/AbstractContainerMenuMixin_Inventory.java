@@ -248,6 +248,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     @WrapOperation(method = "setSelectedBundleItemIndex", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/BundleItem;toggleSelectedItem(Lnet/minecraft/world/item/ItemStack;I)V"))
     private void impl$captureBundleSelectedIndexChange(final ItemStack stack, final int bundleIndex, final Operation<Void> operation, @Local(argsOnly = true, index = 1) int slotIndex) {
         if (!PhaseTracker.getWorldInstance().onSidedThread() || !stack.has(DataComponents.BUNDLE_CONTENTS)) {
+            operation.call(stack, bundleIndex);
             return;
         }
 
