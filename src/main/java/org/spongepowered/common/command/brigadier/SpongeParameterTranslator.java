@@ -97,16 +97,6 @@ public final class SpongeParameterTranslator {
 
         this.createFlags(commandNode, command.flags(), executor);
 
-        if (command.isTerminal() && executor != null) {
-            // A terminal command can be run without parameters, so a plain flag must be able
-            // to end the command even though it has no command of its own.
-            for (final CommandNode<CommandSourceStack> child : commandNode.getChildren()) {
-                if (child instanceof final SpongeFlagLiteralCommandNode flagNode && flagNode.getCommand() == null) {
-                    flagNode.forceExecutor(executor);
-                }
-            }
-        }
-
         final List<LiteralCommandNode<CommandSourceStack>> allCommandNodes = new ArrayList<>();
         allCommandNodes.add(commandNode);
         final Collection<CommandNode<CommandSourceStack>> children = commandNode.getChildren();
@@ -144,6 +134,12 @@ public final class SpongeParameterTranslator {
             final Iterator<String> aliasIterator = flag.aliases().iterator();
             final LiteralArgumentBuilder<CommandSourceStack> flagLiteral = LiteralArgumentBuilder.literal(aliasIterator.next());
             flagLiteral.requires((Predicate) flag.requirement());
+            if (flag.associatedParameter().isEmpty() && node.getCommand() != null) {
+                // A plain flag can end the command, so it needs the command's executor. Flags with an
+                // associated parameter get theirs from createAndAttachNode, which knows whether the
+                // parameter is optional.
+                flagLiteral.executes(node.getCommand());
+            }
             final Collection<? extends CommandNode<CommandSourceStack>> toBeRedirected;
             final SpongeFlagLiteralCommandNode flagNode = new SpongeFlagLiteralCommandNode(flagLiteral, flag);
             if (flag.associatedParameter().isPresent()) {
