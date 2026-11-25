@@ -96,7 +96,7 @@ public final class SpongeParameterTranslator {
         }
 
         this.createFlags(commandNode, command.flags(), executor);
-        
+
         if (command.isTerminal() && executor != null) {
             // A terminal command can be run without parameters, so a plain flag must be able
             // to end the command even though it has no command of its own.
@@ -106,7 +106,7 @@ public final class SpongeParameterTranslator {
                 }
             }
         }
-        
+
         final List<LiteralCommandNode<CommandSourceStack>> allCommandNodes = new ArrayList<>();
         allCommandNodes.add(commandNode);
         final Collection<CommandNode<CommandSourceStack>> children = commandNode.getChildren();
