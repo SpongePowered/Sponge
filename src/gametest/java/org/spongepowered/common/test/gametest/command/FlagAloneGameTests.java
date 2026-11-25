@@ -25,6 +25,7 @@
 package org.spongepowered.common.test.gametest.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
@@ -63,7 +64,7 @@ public final class FlagAloneGameTests {
         final CommandDispatcher<CommandSourceStack> dispatcher = new CommandDispatcher<>();
         dispatcher.getRoot().addChild(root);
         try {
-            dispatcher.parse("flagtest -a", helper.getLevel().getServer().createCommandSourceStack());
+            dispatcher.parse(new StringReader("flagtest -a"), helper.getLevel().getServer().createCommandSourceStack());
         } catch (final CommandSyntaxException e) {
             helper.fail("parsing '/flagtest -a' failed: " + e.getMessage());
         }
