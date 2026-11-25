@@ -145,6 +145,7 @@ public final class FlagAloneGameTests {
         return Command.builder()
             .addFlag(Flag.of("a"))
             .addParameter(Parameter.string().key("value").optional().build())
+            .terminal(true)
             .executor(context -> CommandResult.success())
             .build();
     }
@@ -153,6 +154,7 @@ public final class FlagAloneGameTests {
         return Command.builder()
             .addFlag(Flag.of(Parameter.string().key("flagValue").optional().build(), "b"))
             .addParameter(Parameter.string().key("value").optional().build())
+            .terminal(true)
             .executor(context -> CommandResult.success())
             .build();
     }
