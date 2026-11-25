@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.entity.projectile;
 
-import com.google.common.collect.Maps;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
@@ -72,14 +71,15 @@ import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
 public final class ProjectileUtil {
 
-    private static final Map<EntityType<? extends Projectile>, ProjectileLogic<?>> projectileLogic = Maps.newHashMap();
-    private static final Map<Class<? extends ProjectileSource>, ProjectileSourceLogic<?>> projectileSourceLogic = Maps.newHashMap();
+    private static final Map<EntityType<? extends Projectile>, ProjectileLogic<?>> projectileLogic = new HashMap<>();
+    private static final Map<Class<? extends ProjectileSource>, ProjectileSourceLogic<?>> projectileSourceLogic = new HashMap<>();
 
     public static <T extends Projectile> Optional<T> launch(final EntityType<T> projectileType, final ProjectileSource source,
             final @Nullable Vector3d vel) {

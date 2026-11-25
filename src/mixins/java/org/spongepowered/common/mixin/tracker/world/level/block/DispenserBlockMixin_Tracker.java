@@ -32,7 +32,7 @@ import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.dispenser.BlockSource;
-import net.minecraft.core.dispenser.DispenseItemBehavior;
+import net.minecraft.core.dispenser.DispenseBehavior;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.DispenserBlock;
@@ -47,7 +47,6 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
@@ -81,18 +80,13 @@ public abstract class DispenserBlockMixin_Tracker {
     @WrapOperation(method = "dispenseFrom",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/core/dispenser/DispenseItemBehavior;dispense(Lnet/minecraft/core/dispenser/BlockSource;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/item/ItemStack;"
-        ),
-        slice = @Slice(
-            from = @At(value = "FIELD",
-                target = "Lnet/minecraft/core/dispenser/DispenseItemBehavior;NOOP:Lnet/minecraft/core/dispenser/DispenseItemBehavior;"),
-            to = @At("TAIL")
+            target = "Lnet/minecraft/core/dispenser/DispenseBehavior;dispense(Ljava/lang/Iterable;Lnet/minecraft/core/dispenser/BlockSource;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/item/ItemStack;"
         )
     )
-    private ItemStack tracker$storeOriginalItem(final DispenseItemBehavior instance, final BlockSource blockSource, final ItemStack itemStack,
+    private ItemStack tracker$storeOriginalItem(final Iterable<DispenseBehavior> behaviors, final BlockSource blockSource, final ItemStack itemStack,
             final Operation<ItemStack> original, final @Share("original-item") LocalRef<ItemStack> originalItemRef) {
         originalItemRef.set(ItemStackUtil.cloneDefensiveNative(itemStack));
-        return original.call(instance, blockSource, itemStack);
+        return original.call(behaviors, blockSource, itemStack);
     }
 
     @WrapOperation(method = "dispenseFrom",

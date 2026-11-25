@@ -201,7 +201,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         Thread serverThread, LevelStorageSource.LevelStorageAccess storageSource, PackRepository packRepository,
         WorldStem worldStem, Optional<GameRules> gameRules, Proxy proxy, DataFixer fixerUpper, Services services,
         LevelLoadListener levelLoadListener, boolean propagatesCrashes,
-        NotificationManager notificationManager, CallbackInfo ci
+        NotificationManager notificationManager, long minRekeyTimeMs, CallbackInfo ci
     ) {
         try {
             PhaseTracker.getServerInstanceExplicitly().setThread(serverThread);

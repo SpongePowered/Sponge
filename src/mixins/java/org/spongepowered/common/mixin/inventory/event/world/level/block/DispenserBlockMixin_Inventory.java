@@ -29,51 +29,63 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
-import net.minecraft.core.Direction;
+import net.minecraft.core.dispenser.BlockSource;
+import net.minecraft.core.dispenser.DispenseBehavior;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.DropperBlock;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
+import org.spongepowered.common.event.tracking.ContainerTransfer;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 
-@Mixin(DropperBlock.class)
-public abstract class DropperBlockMixin_Inventory {
+/**
+ * Fires the transfer post event for an item a dropper (or any dispenser with
+ * an {@code insert_into_container} behavior) moved into a container. The pre
+ * event and the container hand-off are in
+ * {@code InsertIntoContainerDispenseBehaviorMixin_Inventory}.
+ */
+@Mixin(DispenserBlock.class)
+public abstract class DispenserBlockMixin_Inventory {
 
     @WrapOperation(method = "dispenseFrom", at = @At(
         value = "INVOKE",
-        target = "Lnet/minecraft/world/level/block/entity/HopperBlockEntity;addItem(Lnet/minecraft/world/Container;Lnet/minecraft/world/Container;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/core/Direction;)Lnet/minecraft/world/item/ItemStack;"
+        target = "Lnet/minecraft/core/dispenser/DispenseBehavior;dispense(Ljava/lang/Iterable;Lnet/minecraft/core/dispenser/BlockSource;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/item/ItemStack;"
     ))
-    private ItemStack impl$beforeDispense(
-        final Container dispenser, final Container container, final ItemStack stackToInsert, final Direction direction,
-        final Operation<ItemStack> original, @Share("container") LocalRef<Container> containerRef
+    private ItemStack impl$trackTransfer(
+        final Iterable<DispenseBehavior> behaviors, final BlockSource source, final ItemStack stack,
+        final Operation<ItemStack> original, @Share("container") final LocalRef<Container> containerRef
     ) {
-        if (ShouldFire.TRANSFER_INVENTORY_EVENT_PRE && InventoryEventFactory.callTransferPre(((Inventory) dispenser), ((Inventory) container)).isCancelled()) {
-            return stackToInsert;
+        // Open only while the behaviors run; InsertIntoContainerDispenseBehaviorMixin_Inventory reports the target to it
+        try (final ContainerTransfer transfer = PhaseTracker.getInstance().pushTransfer(source.blockEntity())) {
+            final ItemStack remainder = original.call(behaviors, source, stack);
+            containerRef.set(transfer.target());
+            return remainder;
         }
-        containerRef.set(container);
-        return original.call(dispenser, container, stackToInsert, direction);
     }
 
-    @Inject(method = "dispenseFrom", at = @At(
+    @WrapOperation(method = "dispenseFrom", at = @At(
         value = "INVOKE",
-        target = "Lnet/minecraft/world/level/block/entity/DispenserBlockEntity;setItem(ILnet/minecraft/world/item/ItemStack;)V",
-        shift = At.Shift.AFTER
+        target = "Lnet/minecraft/world/level/block/entity/DispenserBlockEntity;setItem(ILnet/minecraft/world/item/ItemStack;)V"
     ))
     private void impl$afterDispense(
-        final CallbackInfo ci, @Local final DispenserBlockEntity dispenser, @Local final int index,
-        @Local(ordinal = 0) final ItemStack stack, @Local(ordinal = 1) final ItemStack remainingStack,
-        @Share("container") final LocalRef<Container> containerRef
+        final DispenserBlockEntity dispenser, final int index, final ItemStack remainingStack, final Operation<Void> original,
+        @Local final ItemStack stack, @Share("container") final LocalRef<Container> containerRef
     ) {
+        original.call(dispenser, index, remainingStack);
+
         final Container container = containerRef.get();
+        if (container == null && !((Object) this instanceof DropperBlock)) {
+            return;
+        }
         if (ShouldFire.TRANSFER_INVENTORY_EVENT_POST && container != null) {
             // Transfer worked if remainder is one less than the original stack
             if (remainingStack.getCount() == stack.getCount() - 1) {

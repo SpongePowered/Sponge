@@ -27,7 +27,6 @@ package org.spongepowered.common.data.provider.item.stack;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.component.TypedEntityData;
@@ -46,9 +45,7 @@ public final class SpawnEggItemStackData {
                 .create(Keys.ENTITY_TO_SPAWN)
                     .supports(stack -> !stack.isEmpty() && stack.getItem() instanceof SpawnEggItem)
                     .get(stack -> {
-                        final Item item = stack.getItem();
-                        final SpawnEggItem eggItem = (SpawnEggItem) item;
-                        final @Nullable EntityType<?> type = eggItem.getType(stack);
+                        final @Nullable EntityType<?> type = TypedEntityData.getType(stack);
                         if (type == null) {
                             return null;
                         }
@@ -62,11 +59,7 @@ public final class SpawnEggItemStackData {
             .asImmutable(ItemStack.class)
                 .create(Keys.ENTITY_TYPE)
                     .supports(stack -> !stack.isEmpty() && stack.getItem() instanceof net.minecraft.world.item.SpawnEggItem)
-                    .get(stack -> {
-                        final Item item = stack.getItem();
-                        final SpawnEggItem eggItem = (SpawnEggItem) item;
-                        return (org.spongepowered.api.entity.EntityType) eggItem.getType(stack);
-                    })
+                    .get(stack -> (org.spongepowered.api.entity.EntityType) TypedEntityData.getType(stack))
         ;
     }
     // @formatter:on

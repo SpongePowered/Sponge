@@ -26,18 +26,20 @@ package org.spongepowered.common.entity.projectile;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.dispenser.BlockSource;
-import net.minecraft.core.dispenser.DispenseItemBehavior;
+import net.minecraft.core.dispenser.DispenseBehavior;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.entity.carrier.Dispenser;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.projectile.Projectile;
-import org.spongepowered.common.accessor.world.level.block.DispenserBlockAccessor;
 
 import java.util.List;
 import java.util.Optional;
@@ -70,9 +72,11 @@ public final class DispenserSourceLogic implements ProjectileSourceLogic<Dispens
 
     @SuppressWarnings("unchecked")
     private <P extends Projectile> Optional<P> launch(final DispenserBlockEntity dispenser, final EntityType<P> projectileType, final Item item) {
-        final DispenseItemBehavior behavior = DispenserBlockAccessor.accessor$DISPENSER_REGISTRY().get(item);
+        final ItemStack stack = new ItemStack(item);
+        final @Nullable Holder<List<DispenseBehavior>> behaviors = stack.get(DataComponents.DISPENSE_BEHAVIOR);
         final ServerLevel world = (ServerLevel) dispenser.getLevel();
-        behavior.dispense(new BlockSource(world, dispenser.getBlockPos(), dispenser.getLevel().getBlockState(dispenser.getBlockPos()), dispenser), new ItemStack(item));
+        DispenseBehavior.dispense(behaviors == null ? List.of() : behaviors.value(),
+            new BlockSource(world, dispenser.getBlockPos(), dispenser.getLevel().getBlockState(dispenser.getBlockPos()), dispenser), stack);
         final List<P> entities = (List<P>) world.getEntities((net.minecraft.world.entity.EntityType<?>) projectileType, entity -> true);
         if (entities.isEmpty()) {
             return Optional.empty();

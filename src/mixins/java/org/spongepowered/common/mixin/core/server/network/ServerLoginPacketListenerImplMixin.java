@@ -25,23 +25,15 @@
 package org.spongepowered.common.mixin.core.server.network;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.exceptions.AuthenticationUnavailableException;
-import com.mojang.authlib.services.ProfileResult;
 import net.minecraft.DefaultUncaughtExceptionHandler;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.login.ServerboundCustomQueryAnswerPacket;
-import net.minecraft.network.protocol.login.ServerboundKeyPacket;
 import net.minecraft.network.protocol.login.custom.CustomQueryAnswerPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import net.minecraft.server.players.NameAndId;
 import net.minecraft.server.players.PlayerList;
-import net.minecraft.util.Crypt;
-import net.minecraft.util.CryptException;
-import org.apache.commons.lang3.Validate;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.slf4j.Logger;
@@ -55,7 +47,6 @@ import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -72,18 +63,10 @@ import org.spongepowered.common.network.channel.SpongeChannelManager;
 import org.spongepowered.common.network.channel.TransactionStore;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
-import java.math.BigInteger;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.security.PrivateKey;
-import java.util.Arrays;
-import java.util.Objects;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import javax.crypto.SecretKey;
 
 @Mixin(ServerLoginPacketListenerImpl.class)
 public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginPacketListenerImplBridge {
@@ -95,11 +78,8 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
     @Shadow private com.mojang.authlib.GameProfile resolvedUserProfile;
     @Shadow @Final MinecraftServer server;
     @Shadow private ServerLoginPacketListenerImpl.State state;
-    @Shadow @Final private byte[] challenge;
-    @Shadow @Nullable String requestedUsername;
 
     @Shadow public abstract void shadow$disconnect(Component reason);
-    @Shadow abstract void shadow$applyConnectionEncryption(GameProfile profile, SecretKey secretKey);
     // @formatter:on
 
     private static final ExecutorService impl$EXECUTOR = Executors.newCachedThreadPool(new ThreadFactoryBuilder()
@@ -227,66 +207,10 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
         this.state = ServerLoginPacketListenerImpl.State.NEGOTIATING;
     }
 
-    /**
-     * @author aromaa
-     * @reason Use thread pool
-     */
-    @Overwrite
-    public void handleKey(final ServerboundKeyPacket packet) {
-        Validate.validState(this.state == ServerLoginPacketListenerImpl.State.KEY, "Unexpected key packet");
-
-        final String $$5;
-        final SecretKey secretKey;
-        try {
-            final PrivateKey $$1 = this.server.getKeyPair().getPrivate();
-            final byte[] receivedChallenge = Crypt.decryptUsingKey($$1, packet.encryptedChallenge());
-            secretKey = Crypt.decryptByteToSecretKey($$1, packet.encryptedSecretKey());
-            if (!Arrays.equals(this.challenge, receivedChallenge)) {
-                throw new IllegalStateException("Protocol error");
-            }
-
-            $$5 = new BigInteger(Crypt.digestData("", this.server.getKeyPair().getPublic(), secretKey)).toString(16);
-            this.state = ServerLoginPacketListenerImpl.State.AUTHENTICATING;
-        } catch (CryptException var6) {
-            throw new IllegalStateException("Protocol error", var6);
-        }
-
-        //Sponge start
-        ServerLoginPacketListenerImplMixin.impl$EXECUTOR.submit(() -> {
-            //Sponge end
-            final String username = Objects.requireNonNull(this.requestedUsername, "Player name not initialized");
-
-            try {
-                final ProfileResult $$1 = ServerLoginPacketListenerImplMixin.this.server.services().sessionService().hasJoinedServer(username, $$5, this.impl$getAddress());
-                if ($$1 != null) {
-                    final GameProfile $$2 = $$1.profile();
-                    ServerLoginPacketListenerImplMixin.LOGGER.info("UUID of player {} is {}", $$2.name(), $$2.id());
-                    ServerLoginPacketListenerImplMixin.this.shadow$applyConnectionEncryption($$2, secretKey);
-                } else if (ServerLoginPacketListenerImplMixin.this.server.isSingleplayer()) {
-                    ServerLoginPacketListenerImplMixin.LOGGER.warn("Failed to verify username but will let them in anyway!");
-                    ServerLoginPacketListenerImplMixin.this.shadow$applyConnectionEncryption(UUIDUtil.createOfflineProfile(username), secretKey);
-                } else {
-                    ServerLoginPacketListenerImplMixin.this.shadow$disconnect(Component.translatable("multiplayer.disconnect.unverified_username"));
-                    ServerLoginPacketListenerImplMixin.LOGGER.error("Username '{}' tried to join with an invalid session", username);
-                }
-            } catch (AuthenticationUnavailableException var4) {
-                if (ServerLoginPacketListenerImplMixin.this.server.isSingleplayer()) {
-                    ServerLoginPacketListenerImplMixin.LOGGER.warn("Authentication servers are down but will let them in anyway!");
-                    ServerLoginPacketListenerImplMixin.this.shadow$applyConnectionEncryption(UUIDUtil.createOfflineProfile(username), secretKey);
-                } else {
-                    ServerLoginPacketListenerImplMixin.this.shadow$disconnect(Component.translatable("multiplayer.disconnect.authservers_down"));
-                    ServerLoginPacketListenerImplMixin.LOGGER.error("Couldn't verify username because servers are unavailable");
-                }
-            }
-        });
-    }
-
-    @Nullable
-    private InetAddress impl$getAddress() {
-        SocketAddress $$0 = this.connection.getRemoteAddress();
-        return this.server.getPreventProxyConnections() && $$0 instanceof InetSocketAddress
-                ? ((InetSocketAddress)$$0).getAddress()
-                : null;
+    // Runs vanilla's authenticator on the login thread pool instead of a new thread per login
+    @Redirect(method = "handleKey", at = @At(value = "INVOKE", target = "Ljava/lang/Thread;start()V"))
+    private void impl$authenticateOnThreadPool(final Thread authenticator) {
+        ServerLoginPacketListenerImplMixin.impl$EXECUTOR.execute(authenticator);
     }
 
     @Inject(method = "handleCustomQueryPacket", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerLoginPacketListenerImpl;disconnect(Lnet/minecraft/network/chat/Component;)V"), cancellable = true)

@@ -40,7 +40,6 @@ public class DedicatedServerMixin_Test {
     @Redirect(method = "initServer",
         at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;info(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V"),
         slice = @Slice(
-            from = @At(value = "INVOKE", target = "net/minecraft/server/dedicated/DedicatedServer.initializeKeyPair()V"),
             to = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerConnectionListener;startTcpServerListener(Ljava/net/InetAddress;I)V")))
     private void removeAddressInLog(final Logger logger, final String message, final Object arg1, final Object arg2) {
         logger.info("Starting Minecraft test server");

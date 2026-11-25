@@ -44,8 +44,8 @@ public class SimpleDispenserLaunchLogic<P extends Projectile> extends SimpleEnti
         if (ret.isPresent()) {
             return ret;
         }
-        if (source instanceof Dispenser) {
-            return ProjectileUtil.getSourceLogic(Dispenser.class).launch(this, (Dispenser) source, this.projectileType.get());
+        if (source instanceof Dispenser disp) {
+            return ProjectileUtil.getSourceLogic(Dispenser.class).launch(this, disp, this.projectileType.get());
         }
         return ret;
     }

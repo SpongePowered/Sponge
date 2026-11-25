@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.core.dispenser;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
 import net.minecraft.core.dispenser.BlockSource;
-import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
-import net.minecraft.core.dispenser.ProjectileDispenseBehavior;
+import net.minecraft.core.dispenser.ShootProjectileDispenseBehavior;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileItem;
 import net.minecraft.world.level.Level;
@@ -38,20 +40,20 @@ import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(ProjectileDispenseBehavior.class)
-public abstract class ProjectileDispenseBehaviorMixin extends DefaultDispenseItemBehavior {
+@Mixin(ShootProjectileDispenseBehavior.class)
+public abstract class ShootProjectileDispenseBehaviorMixin {
 
-    @Redirect(method = "execute", at = @At(value = "INVOKE",
+    @WrapOperation(method = "execute", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/item/ProjectileItem;asProjectile(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/Position;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/core/Direction;)Lnet/minecraft/world/entity/projectile/Projectile;"))
     private net.minecraft.world.entity.projectile.Projectile impl$spawnEntityAndSetShooter(final ProjectileItem instance, final Level level,
-        final Position position, final ItemStack stack, final Direction direction, final BlockSource source) {
-        final var entity = instance.asProjectile(level, position, stack, direction);
+        final Position position, final ItemStack stack, final Direction direction,
+        final Operation<net.minecraft.world.entity.projectile.Projectile> original, @Local(argsOnly = true) final BlockSource source) {
+        final var entity = original.call(instance, level, position, stack, direction);
 
         final BlockEntity tileEntity = source.blockEntity();
-        if (entity instanceof Projectile && tileEntity instanceof ProjectileSource) {
-            ((Projectile) entity).offer(Keys.SHOOTER, (ProjectileSource) tileEntity);
+        if (entity instanceof Projectile projectile && tileEntity instanceof ProjectileSource ps) {
+            projectile.offer(Keys.SHOOTER, ps);
         }
 
         return entity;

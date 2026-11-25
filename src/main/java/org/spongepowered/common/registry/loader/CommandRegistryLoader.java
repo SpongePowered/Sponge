@@ -273,7 +273,7 @@ public final class CommandRegistryLoader {
             l.add(CommandTreeNodeTypes.FLOAT_RANGE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.DIMENSION, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             //  TODO API          l.add(CommandTreeNodeTypes.GAMEMODE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.TIME, k -> new SpongeBasicCommandTreeNodeType(k, TimeArgument.time()));
+            l.add(CommandTreeNodeTypes.TIME, k -> new SpongeBasicCommandTreeNodeType(k, TimeArgument.unboundedTime()));
             // TODO API           l.add(CommandTreeNodeTypes.RESOURCE_OR_TAG, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             // TODO API           l.add(CommandTreeNodeTypes.RESOURCE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             // TODO API           l.add(CommandTreeNodeTypes.RESOURCE_KEY, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));

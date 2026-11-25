@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.entity;
 
-import com.llamalad7.mixinextras.expression.Expression;
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -47,7 +45,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.event.cause.entity.damage.DamageStepTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -66,6 +63,7 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.Optional;
 
 @Mixin(value = LivingEntity.class, priority = 900)
 public abstract class LivingEntityMixin_Damage extends EntityMixin implements LivingEntityBridge, TrackedDamageBridge {
@@ -97,8 +95,9 @@ public abstract class LivingEntityMixin_Damage extends EntityMixin implements Li
         }
     }
 
-    @ModifyVariable(method = "applyItemBlocking", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/BlocksAttacks;resolveBlockedDamage(Lnet/minecraft/world/damagesource/DamageSource;FD)F"), argsOnly = true)
-    private float damage$modifyBeforeShield(final float originalDamage, @Local final ItemStack stack, @Cancellable final CallbackInfoReturnable<Float> cir) {
+    // ordinal 1: the first call only decides whether a zero damage knockback weapon is blocked
+    @ModifyVariable(method = "applyItemBlocking", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/BlocksAttacks;resolveBlockedDamage(Lnet/minecraft/world/damagesource/DamageSource;FD)Ljava/util/Optional;", ordinal = 1), argsOnly = true)
+    private float damage$modifyBeforeShield(final float originalDamage, @Local(ordinal = 0) final ItemStack stack, @Cancellable final CallbackInfoReturnable<Optional<Float>> cir) {
         final SpongeDamageTracker tracker = this.damage$tracker();
         if (tracker == null) {
             return originalDamage;
@@ -107,15 +106,16 @@ public abstract class LivingEntityMixin_Damage extends EntityMixin implements Li
         final float inputDamage = (float) step.applyChildrenBefore(originalDamage);
         if (step.isSkipped()) {
             final float outputDamage = (float) step.applyChildrenAfter(inputDamage);
-            cir.setReturnValue(originalDamage - outputDamage);
+            final float blocked = originalDamage - outputDamage;
+            cir.setReturnValue(blocked == 0 ? Optional.empty() : Optional.of(blocked));
         }
         return inputDamage;
     }
 
     @Inject(method = "applyItemBlocking", at = @At("RETURN"), cancellable = true, slice = @Slice(
-        from = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/BlocksAttacks;resolveBlockedDamage(Lnet/minecraft/world/damagesource/DamageSource;FD)F")
+        from = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/BlocksAttacks;resolveBlockedDamage(Lnet/minecraft/world/damagesource/DamageSource;FD)Ljava/util/Optional;", ordinal = 1)
     ))
-    private void damage$modifyAfterShield(final ServerLevel level, final DamageSource source, float damage, final CallbackInfoReturnable<Float> cir) {
+    private void damage$modifyAfterShield(final ServerLevel level, final DamageSource source, float damage, final CallbackInfoReturnable<Optional<Float>> cir) {
         final SpongeDamageTracker tracker = this.damage$tracker();
         if (tracker == null) {
             return;
@@ -124,8 +124,11 @@ public abstract class LivingEntityMixin_Damage extends EntityMixin implements Li
         if (step == null) {
             return;
         }
-        damage = (float) step.applyChildrenAfter(damage - cir.getReturnValueF());
-        cir.setReturnValue((float) step.damageBeforeChildren().getAsDouble() - damage);
+        final Optional<Float> vanillaBlocked = cir.getReturnValue();
+        damage = (float) step.applyChildrenAfter(damage - vanillaBlocked.orElse(0.0F));
+        final float blocked = (float) step.damageBeforeChildren().getAsDouble() - damage;
+        // Vanilla only subtracts the blocked damage when the optional is present, and treats present as "blocked"
+        cir.setReturnValue(vanillaBlocked.isPresent() || blocked != 0 ? Optional.of(blocked) : Optional.empty());
     }
 
     @SuppressWarnings("MixinAnnotationTarget")
@@ -135,22 +138,6 @@ public abstract class LivingEntityMixin_Damage extends EntityMixin implements Li
     })
     private void damage$onHurtShield(final CallbackInfoReturnable<Boolean> cir) {
         this.damage$inventoryChanged = true;
-    }
-
-    // The expression is "vague" due to a Forge bug in 26.1 that it strips the LVT entirely
-    // leaving us with little options to target the local variable assignment
-    @Expression("? > 0.0")
-    @ModifyExpressionValue(method = "hurtServer", at = @At("MIXINEXTRAS:EXPRESSION"), slice = @Slice(
-        from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;applyItemBlocking(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)F"),
-        to = @At(value = "FIELD", target = "Lnet/minecraft/tags/DamageTypeTags;IS_FREEZING:Lnet/minecraft/tags/TagKey;", opcode = Opcodes.GETSTATIC))
-    )
-    private boolean damage$setBlockedFlag(final boolean blocked) {
-        final SpongeDamageTracker tracker = this.damage$tracker();
-        if (tracker == null) {
-            return blocked;
-        }
-        final SpongeDamageStep step = tracker.lastStep(DamageStepTypes.SHIELD);
-        return step == null ? blocked : step.damageAfterSelf().getAsDouble() < step.damageBeforeSelf().getAsDouble();
     }
 
     @ModifyVariable(method = "hurtServer", at = @At("LOAD"), argsOnly = true, slice = @Slice(

@@ -270,6 +270,7 @@ public final class PhaseTracker implements CauseStackManager {
      */
     private final Deque<PhaseContext<?>> phaseContextProviders = new ArrayDeque<>();
     final PhaseStack stack = new PhaseStack();
+    private final Deque<ContainerTransfer> transfers = new ArrayDeque<>();
     private final SpongeCauseStackManager api = new SpongeCauseStackManager();
     private @Nullable SpongeRegistryHolder startupRegistryHolder;
 
@@ -277,6 +278,28 @@ public final class PhaseTracker implements CauseStackManager {
         for (int i = 0; i < PhaseTracker.INITIAL_POOL_SIZE; i++) {
             this.framePool.push(new SpongeCauseStackFrame(this));
         }
+    }
+
+    /**
+     * Starts a transfer out of {@code source}, to be closed once whatever may move the item has run.
+     */
+    public ContainerTransfer pushTransfer(final net.minecraft.world.Container source) {
+        final ContainerTransfer transfer = new ContainerTransfer(this, source);
+        this.transfers.push(transfer);
+        return transfer;
+    }
+
+    /**
+     * @return The innermost transfer in progress if it is out of {@code source}, otherwise {@code null}: code
+     *     moving an item for some other container, or outside any transfer, has nothing to report to
+     */
+    public @Nullable ContainerTransfer currentTransfer(final net.minecraft.world.Container source) {
+        final @Nullable ContainerTransfer top = this.transfers.peek();
+        return top != null && top.source() == source ? top : null;
+    }
+
+    void popTransfer(final ContainerTransfer transfer) {
+        this.transfers.remove(transfer);
     }
 
     public void init() {
