@@ -100,6 +100,7 @@ val main by sourceSets.named("main") {
 // Minecraft gametests shared by all platforms; each platform's gametest source set depends on this and provides the runner
 val gametest by sourceSets.registering {
     spongeImpl.addDependencyToImplementation(applaunch.get(), this)
+    spongeImpl.addDependencyToImplementation(accessors.get(), this)
     spongeImpl.addDependencyToImplementation(main, this)
 
     configurations.named(implementationConfigurationName) {

@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.mixin.tracker.world.item;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -31,17 +34,10 @@ import net.minecraft.world.item.BoneMealItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.world.level.LevelBridge;
-import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
-import org.spongepowered.common.event.tracking.phase.block.GrowablePhaseContext;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 
 @Mixin(BoneMealItem.class)
 public abstract class BoneMealItemMixin_Tracker {
@@ -52,47 +48,24 @@ public abstract class BoneMealItemMixin_Tracker {
      * explicitly attempting to capture the growth, we can enter an
      * alternate phase blockState that will specifically track the block
      * changes as growth, and therefor will be able to throw
-     * {@link ChangeBlockEvent.Grow} without specifying the cases
+     * {@link ChangeBlockEvent.All} without specifying the cases
      * where the phase blockState needs to throw the event during another
      * phases's capturing.
      */
-
-    @SuppressWarnings({"Duplicates"})
-    // Pending https://github.com/SpongePowered/Mixin/issues/312
-    // @Group(name = "org.spongepowered.tracker:bonemeal", min = 1, max = 1)
-    @Redirect(
+    @WrapOperation(
         method = "growCrop",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/level/block/BonemealableBlock;performBonemeal(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/util/RandomSource;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)V"
         ),
-        require = 0, // Will be removed once the above github issue is resolved with a proper solution
-        // Even though we're in a group, expecting this to succeed in forge environments will not work since there is a different mixin
+        // Forge and NeoForge grow from their own applyBonemeal instead, see their BoneMealItemMixin_*_Tracker
+        require = 0,
         expect = 0
     )
     private static void tracker$wrapGrowWithPhaseEntry(
-        final BonemealableBlock iGrowable, final ServerLevel worldIn, final RandomSource rand, final BlockPos pos,
-        final BlockState state, final ItemStack stack
+        final BonemealableBlock block, final ServerLevel level, final RandomSource random, final BlockPos pos, final BlockState state,
+        final Operation<Void> original, @Local(argsOnly = true) final ItemStack stack
     ) {
-        if (((LevelBridge) worldIn).bridge$isFake() || !ShouldFire.CHANGE_BLOCK_EVENT_ALL) {
-            iGrowable.performBonemeal(worldIn, rand, pos, state);
-            return;
-        }
-
-        final PhaseContext<@NonNull ?> current = PhaseTracker.getInstance().getPhaseContext();
-        final boolean doesEvent = current.doesBlockEventTracking();
-        if (doesEvent) {
-            // We can enter the new phase state.
-            try (final GrowablePhaseContext context = BlockPhase.State.GROWING.createPhaseContext(PhaseTracker.SERVER)
-                .provideItem(stack)
-                .world(worldIn)
-                .block(state)
-                .pos(pos)) {
-                context.buildAndSwitch();
-                iGrowable.performBonemeal(worldIn, rand, pos, state);
-            }
-        }
-
+        TrackingUtil.growWithBonemeal(level, pos, state, stack, () -> original.call(block, level, random, pos, state));
     }
-
 }

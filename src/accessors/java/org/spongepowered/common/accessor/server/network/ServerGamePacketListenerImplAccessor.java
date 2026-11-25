@@ -35,4 +35,7 @@ public interface ServerGamePacketListenerImplAccessor {
     @Accessor("messageSignatureCache")
     MessageSignatureCache accessor$messageSignatureCache();
 
+    @Accessor("awaitingTeleport")
+    int accessor$awaitingTeleport();
+
 }
