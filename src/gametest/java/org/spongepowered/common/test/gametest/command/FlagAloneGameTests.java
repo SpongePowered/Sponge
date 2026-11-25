@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.test.gametest.command;
 
-import com.mojang.brigadier.Command;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.context.CommandContextBuilder;
 import io.leangen.geantyref.TypeToken;
@@ -119,8 +118,8 @@ public final class FlagAloneGameTests {
             "expected '" + input + "' to be " + (expected ? "a complete command" : "incomplete"));
     }
 
-    private static Command<CommandSourceStack> findCommand(final CommandContextBuilder<CommandSourceStack> context) {
-        final Command<CommandSourceStack> command = context.getCommand();
+    private static com.mojang.brigadier.Command<CommandSourceStack> findCommand(final CommandContextBuilder<CommandSourceStack> context) {
+        final com.mojang.brigadier.Command<CommandSourceStack> command = context.getCommand();
         if (command != null) {
             return command;
         }
