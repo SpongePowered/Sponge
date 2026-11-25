@@ -7,6 +7,7 @@
     "CreatorTrackedMixin_Tracker",
     "CreatorTrackedPlayerMixin_Tracker",
     "TrackableTypeMixin",
+    "core.dispenser.DefaultDispenseItemBehaviorMixin_Tracker",
     "event.TraitMixin_Tracked_Inventory",
     "network.protocol.PacketUtilsMixin_Tracker",
     "server.MinecraftServerMixin_Tracker",
