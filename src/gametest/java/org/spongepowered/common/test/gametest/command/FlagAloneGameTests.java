@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.test.gametest.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.ParseResults;
+import com.mojang.brigadier.context.CommandContextBuilder;
 import io.leangen.geantyref.TypeToken;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -112,9 +114,18 @@ public final class FlagAloneGameTests {
         final ParseResults<CommandSourceStack> results = server.getCommands().getDispatcher()
             .parse(input, server.createCommandSourceStack());
         final boolean complete = results.getExceptions().isEmpty()
-            && results.getContext().getCommand() != null;
+            && FlagAloneGameTests.findCommand(results.getContext()) != null;
         helper.assertTrue(complete == expected,
             "expected '" + input + "' to be " + (expected ? "a complete command" : "incomplete"));
+    }
+
+    private static Command<CommandSourceStack> findCommand(final CommandContextBuilder<CommandSourceStack> context) {
+        final Command<CommandSourceStack> command = context.getCommand();
+        if (command != null) {
+            return command;
+        }
+        final CommandContextBuilder<CommandSourceStack> child = context.getChild();
+        return child == null ? null : FlagAloneGameTests.findCommand(child);
     }
 
     private static Command.Parameterized plainFlagOnly() {
