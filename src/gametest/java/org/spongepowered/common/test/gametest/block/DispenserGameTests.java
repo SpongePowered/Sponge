@@ -41,9 +41,12 @@ import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.test.gametest.GameTest;
 import org.spongepowered.common.test.gametest.GameTestGroup;
 import org.spongepowered.common.test.gametest.SpongeGameTests;
+import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.math.vector.Vector3i;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -55,12 +58,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * <p>{@code sponge:dispenser/facing_up}: on a 3x3 bedrock floor, an empty upward-facing dispenser at (1,1,1) with air
  * above it, so a dropped item stays inside the test. Each test loads the dispenser and powers it with a redstone block
- * at (1,1,0).</p>
+ * at (1,1,0). {@code sponge:dispenser/dropper_facing_up} is the same with a dropper.</p>
  */
 @GameTestGroup("dispenser")
 public final class DispenserGameTests {
 
     private static final String STRUCTURE = "sponge:dispenser/facing_up";
+    private static final String DROPPER = "sponge:dispenser/dropper_facing_up";
     private static final BlockPos DISPENSER = new BlockPos(1, 1, 1);
     private static final BlockPos POWER = new BlockPos(1, 1, 0);
 
@@ -194,6 +198,38 @@ public final class DispenserGameTests {
                 Sponge.eventManager().unregisterListeners(listener);
             })
             .thenSucceed();
+    }
+
+    @GameTest(structure = DispenserGameTests.STRUCTURE, maxTicks = 40)
+    void dispenserDropThrowsDispenseEvent(final GameTestHelper helper) {
+        DispenserGameTests.assertDispenseEvent(helper);
+    }
+
+    // A dropper with no container in front drops like a dispenser
+    @GameTest(structure = DispenserGameTests.DROPPER, maxTicks = 40)
+    void dropperDropThrowsDispenseEvent(final GameTestHelper helper) {
+        DispenserGameTests.assertDispenseEvent(helper);
+    }
+
+    private static void assertDispenseEvent(final GameTestHelper helper) {
+        DispenserGameTests.load(helper, Items.DIAMOND);
+        final Vector3i at = VecHelper.toVector3i(helper.absolutePos(DispenserGameTests.DISPENSER));
+        final List<ItemEntity> dispensed = new CopyOnWriteArrayList<>();
+        final EventListener<DropItemEvent.Dispense> listener = event -> {
+            if (event.cause().allOf(LocatableBlock.class).stream().anyMatch(block -> block.blockPosition().equals(at))) {
+                event.entities().forEach(entity -> dispensed.add((ItemEntity) entity));
+            }
+        };
+        SpongeGameTests.listen(DropItemEvent.Dispense.class, listener);
+
+        helper.setBlock(DispenserGameTests.POWER, Blocks.REDSTONE_BLOCK);
+
+        helper.succeedWhen(() -> {
+            helper.assertTrue(dispensed.size() == 1, "Expected one item in DropItemEvent.Dispense but got " + dispensed);
+            helper.assertTrue(dispensed.get(0).getItem().is(Items.DIAMOND), "DropItemEvent.Dispense spawned " + dispensed.get(0) + ", not the diamond");
+            helper.assertFalse(DispenserGameTests.drops(helper).isEmpty(), "The dispensed item is not in the world");
+            Sponge.eventManager().unregisterListeners(listener);
+        });
     }
 
     private static List<ItemEntity> drops(final GameTestHelper helper) {
