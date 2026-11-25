@@ -50,16 +50,16 @@ public final class FlagAloneGameTests {
     @GameTest(maxTicks = 40)
     public void flagAloneCompletesCommand(final GameTestHelper helper) {
         final Command.Parameterized command = Command.builder()
-                .addFlag(Flag.of("a"))
-                .executor(context -> CommandResult.success())
-                .build();
+            .addFlag(Flag.of("a"))
+            .executor(context -> CommandResult.success())
+            .build();
         final Collection<LiteralCommandNode<CommandSourceStack>> nodes =
-                SpongeParameterTranslator.INSTANCE.createCommandTree(command, List.of("flagtest"));
+            SpongeParameterTranslator.INSTANCE.createCommandTree(command, List.of("flagtest"));
         final LiteralCommandNode<CommandSourceStack> root = nodes.iterator().next();
         final CommandNode<CommandSourceStack> flag = root.getChild("-a");
         helper.assertTrue(flag != null, "the flag node -a was not created");
         helper.assertTrue(flag.getCommand() != null,
-                "the flag node has no command, so '/flagtest -a' cannot be parsed as a complete command");
+            "the flag node has no command, so '/flagtest -a' cannot be parsed as a complete command");
         final CommandDispatcher<CommandSourceStack> dispatcher = new CommandDispatcher<>();
         dispatcher.getRoot().addChild(root);
         try {
