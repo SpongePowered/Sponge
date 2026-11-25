@@ -35,7 +35,9 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SaplingBlock;
+import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -67,34 +69,40 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
- * A sapling growing into a tree, from bone meal used by a player through the use-item-on packet or by itself on
- * random ticks, one use or tick at a time until the tree grows. Growth is random, so each is checked against the shape
- * for what it did to the sapling:
+ * A sapling growing into a tree, from bone meal used by a player through the use-item-on packet or by a dispenser,
+ * or by itself on random ticks, one use or tick at a time until the tree grows. Growth is random, so each is checked
+ * against the shape for what it did to the sapling:
  * <ul>
  *     <li>the roll failed: no growth events;</li>
  *     <li>stage 0 to 1: {@code ChangeBlockEvent.All} then {@code Post};</li>
  *     <li>the tree: {@code All}, a {@code NotifyNeighborBlockEvent} per update, one {@code ScheduleBlockUpdateEvent},
  *     then {@code Post}.</li>
  * </ul>
- * <p>A player's use starts with {@code InteractBlockEvent.Secondary}; a random tick's starts with
- * {@code TickBlockEvent.Random}, and its stage change is not attributed as growth. Every growth event carries the
- * sapling as {@code GROWTH_ORIGIN}, and the bone meal, if any, as {@code USED_ITEM}; every block change is a growth,
- * and the root is the player's interaction or the sapling. Once grown, the tree belongs to whoever the growth is
- * attributed to: the player, or whoever placed the sapling. A block someone else already created stays theirs, with
- * the growth's player as its notifier.</p>
+ * <p>A player's use starts with {@code InteractBlockEvent.Secondary}; a dispenser's ends with the
+ * {@code ChangeInventoryEvent} for the bone meal it used, after the growth, which unwinds in a phase of its own; a
+ * random tick's starts with {@code TickBlockEvent.Random}, and its stage change is not attributed as growth. Every
+ * growth event carries the sapling as {@code GROWTH_ORIGIN}, and the bone meal, if any, as {@code USED_ITEM}; every
+ * block change is a growth, and the root is the player's interaction, the dispenser or the sapling. Once grown, the
+ * tree belongs to whoever the growth is attributed to: the player, the dispenser's creator, or whoever placed the
+ * sapling. A block someone else already created stays theirs, with the growth's player as its notifier.</p>
  *
  * <p>{@code sponge:growth/oak_sapling}: a 5x5 bedrock floor with dirt at (2,0,2) under a stage 0 oak sapling at
- * (2,1,2). The tests have sky access so the tree has room.</p>
+ * (2,1,2). {@code sponge:growth/oak_sapling_dispenser} adds a south-facing dispenser at (2,1,1), facing the sapling and
+ * powered from (2,1,0). The tests have sky access so the tree has room.</p>
  */
 @GameTestGroup("growth")
 public final class GrowthGameTests {
 
     private static final BlockPos SAPLING = new BlockPos(2, 1, 2);
+    private static final BlockPos DISPENSER = new BlockPos(2, 1, 1);
     private static final int MAX_USES = 30;
+    // Power, unpower, then check once the scheduled dispense four ticks after powering has run
+    private static final int PULSE = 6;
     private static final String INTERACT = "InteractBlockEvent.Secondary";
     private static final String INVENTORY = "ChangeInventoryEvent";
     private static final String RANDOM_TICK = "TickBlockEvent.Random";
@@ -152,6 +160,34 @@ public final class GrowthGameTests {
                 using.set(false);
             }
             uses.endUse();
+        });
+    }
+
+    @GameTest(structure = "sponge:growth/oak_sapling_dispenser", maxTicks = 200, skyAccess = true)
+    void dispenserBoneMealOnSapling(final GameTestHelper helper) {
+        final DispenserBlockEntity dispenser = helper.getBlockEntity(GrowthGameTests.DISPENSER);
+        dispenser.setItem(0, new ItemStack(Items.BONE_MEAL, 64));
+        final UUID placer = UUID.randomUUID();
+        final BlockPos dispenserPos = helper.absolutePos(GrowthGameTests.DISPENSER);
+        ((LevelChunkBridge) helper.getLevel().getChunkAt(dispenserPos)).bridge$setBlockCreator(dispenserPos, placer);
+        final Vector3i at = VecHelper.toVector3i(dispenserPos);
+        final Uses uses = new Uses(helper,
+            event -> event.cause().allOf(LocatableBlock.class).stream().anyMatch(block -> block.blockPosition().equals(at)),
+            LocatableBlock.class, List.of(), List.of(GrowthGameTests.INVENTORY));
+        final AtomicInteger ticks = new AtomicInteger();
+
+        helper.onEachTick(() -> {
+            final int step = ticks.getAndIncrement() % GrowthGameTests.PULSE;
+            if (step == 0) {
+                if (uses.finishIfDone(() -> GrowthGameTests.assertGrownBy(helper, placer))) {
+                    return;
+                }
+                helper.setBlock(GrowthGameTests.DISPENSER.north(), Blocks.REDSTONE_BLOCK);
+            } else if (step == 2) {
+                helper.setBlock(GrowthGameTests.DISPENSER.north(), Blocks.AIR);
+            } else if (step == GrowthGameTests.PULSE - 1) {
+                uses.endUse();
+            }
         });
     }
 
