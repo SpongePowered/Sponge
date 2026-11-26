@@ -25,56 +25,56 @@
 package org.spongepowered.common.test.gametest.world;
 
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtAccounter;
-import net.minecraft.nbt.NbtIo;
-import net.minecraft.world.level.storage.LevelResource;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.world.DefaultWorldKeys;
-import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.common.test.gametest.GameTest;
 import org.spongepowered.common.test.gametest.GameTestGroup;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 /**
- * A world's {@link ServerWorld#uniqueId() unique id} is written to its {@code level.dat} on save and can be read back
- * from there. Sponge keeps that id in its own data compound inside the vanilla level data, so saving the world and
- * parsing the file back exercises the write side of Sponge's level data together with the on-disk layout it depends on.
+ * A world's {@link org.spongepowered.api.world.server.ServerWorld#uniqueId() unique id} is stored in its level data on
+ * save. Create a fresh world, remember its id, unload it, load it again, and compare the ids: this exercises the write
+ * and read paths together with the on-disk layout they depend on, rather than inspecting {@code level.dat} directly.
  */
 @GameTestGroup("level_data")
 public final class SpongeLevelDataGameTests {
 
     @GameTest(maxTicks = 20 * 60 * 5)
-    void levelDataStoresTheWorldId(final GameTestHelper helper) {
-        final ServerWorld overworld = Sponge.server().worldManager().world(DefaultWorldKeys.DEFAULT)
-            .orElseThrow(() -> new IllegalStateException("The overworld is not loaded"));
-        final UUID expected = overworld.uniqueId();
+    void worldIdSurvivesUnloadAndReload(final GameTestHelper helper) {
+        final ResourceKey key = ResourceKey.sponge("gametest_level_data");
+        final WorldTemplate template = WorldTemplate.overworld().asBuilder().key(key).build();
 
-        // Writes level.dat through the same path a normal save uses
-        SpongeCommon.server().saveAllChunks(false, true, true);
+        final CompletableFuture<UUID[]> ids = Sponge.server().worldManager().loadWorld(template)
+            .thenCompose(created -> {
+                final UUID id = created.uniqueId();
+                return Sponge.server().worldManager().unloadWorld(key)
+                    .thenCompose(unloaded -> {
+                        if (!unloaded) {
+                            throw new IllegalStateException("The world " + key + " was not unloaded");
+                        }
+                        return Sponge.server().worldManager().loadWorld(key);
+                    })
+                    .thenApply(reloaded -> new UUID[]{id, reloaded.uniqueId()});
+            })
+            .thenCompose(pair -> Sponge.server().worldManager().unloadWorld(key)
+                .thenApply(unloaded -> {
+                    if (!unloaded) {
+                        throw new IllegalStateException("The world " + key + " was not unloaded the second time");
+                    }
+                    return pair;
+                }));
 
-        final Path levelDat = SpongeCommon.server().getWorldPath(LevelResource.ROOT).resolve("level.dat");
-        try {
-            helper.assertTrue(Files.isRegularFile(levelDat), "level.dat was not written to " + levelDat);
-            final CompoundTag root = NbtIo.readCompressed(levelDat, NbtAccounter.unlimitedHeap());
-            final CompoundTag spongeData = root.getCompound("SpongeData");
-            helper.assertTrue(spongeData.contains("UUID"), "SpongeData has no UUID at the root of level.dat");
-            helper.assertTrue(SpongeLevelDataGameTests.readUuid(spongeData.getIntArray("UUID")).equals(expected),
-                "level.dat stores a different world id than the loaded world");
-            helper.succeed();
-        } catch (final IOException e) {
-            helper.fail("Could not read level.dat: " + e.getMessage());
-        }
-    }
-
-    private static UUID readUuid(final int[] parts) {
-        final long most = ((long) parts[0] << 32) | (parts[1] & 0xffffffffL);
-        final long least = ((long) parts[2] << 32) | (parts[3] & 0xffffffffL);
-        return new UUID(most, least);
+        helper.succeedWhen(() -> {
+            helper.assertTrue(ids.isDone(), "The world has not finished loading and unloading");
+            if (ids.isCompletedExceptionally()) {
+                helper.fail("Loading or unloading the world failed: " + ids.handle((result, error) -> error).join());
+            }
+            final UUID[] pair = ids.join();
+            helper.assertTrue(pair[0].equals(pair[1]),
+                "The world id changed after reload: " + pair[0] + " != " + pair[1]);
+        });
     }
 }
