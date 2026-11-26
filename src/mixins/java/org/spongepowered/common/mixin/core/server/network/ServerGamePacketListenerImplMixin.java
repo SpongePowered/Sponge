@@ -144,7 +144,7 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
 
     private final SpongeTabList impl$tabList = new SpongeTabList((ServerGamePacketListenerImpl) (Object) this);
 
-    private int impl$ignorePackets;
+    private boolean impl$ignoreNextSwing;
 
     @Override
     public @Nullable Packet<?> impl$modifyClientBoundPacket(final Packet<?> packet) {
@@ -157,8 +157,8 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
     }
 
     @Override
-    public void bridge$incrementIgnorePackets() {
-        this.impl$ignorePackets++;
+    public void bridge$ignoreNextSwing() {
+        this.impl$ignoreNextSwing = true;
     }
 
     @Inject(method = "handleCustomCommandSuggestions", at = @At(value = "NEW", target = "(Ljava/lang/String;)Lcom/mojang/brigadier/StringReader;", remap = false),
@@ -381,9 +381,7 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
         final InteractionHand hand = packetIn.getHand();
 
         if (!((ServerPlayerGameModeAccessor) this.player.gameMode).accessor$isDestroyingBlock()) {
-            if (this.impl$ignorePackets > 0) {
-                this.impl$ignorePackets--;
-            } else {
+            if (!this.impl$ignoreNextSwing) {
                 if (ShouldFire.INTERACT_ITEM_EVENT_PRIMARY) {
                     final Vec3 startPos = this.player.getEyePosition(1);
                     final Vec3 endPos = startPos.add(this.player.getLookAngle().scale(5d)); // TODO hook for blockReachDistance?
@@ -395,6 +393,8 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
                 }
             }
         }
+
+        this.impl$ignoreNextSwing = false;
 
         if (ShouldFire.ANIMATE_HAND_EVENT) {
             final HandType handType = (HandType) (Object) hand;
@@ -414,7 +414,7 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
 
     @Inject(method = "handlePlayerAction", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;drop(Z)Z"))
     public void impl$dropItem(final ServerboundPlayerActionPacket p_147345_1_, final CallbackInfo ci) {
-        this.impl$ignorePackets++;
+        this.impl$ignoreNextSwing = true;
     }
 
     @Redirect(method = "handlePlayerAction", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayerGameMode;handleBlockBreakAction(Lnet/minecraft/core/BlockPos;Lnet/minecraft/network/protocol/game/ServerboundPlayerActionPacket$Action;Lnet/minecraft/core/Direction;II)V"))
@@ -431,7 +431,7 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
             if (event instanceof Cancellable && ((Cancellable) event).isCancelled()) {
                 this.player.connection.send(new ClientboundBlockUpdatePacket(pos, level.getBlockState(pos)));
                 this.player.connection.ackBlockChangesUpTo(sequence);
-                this.impl$ignorePackets++;
+                this.impl$ignoreNextSwing = true;
                 return;
             }
         } else {
@@ -453,7 +453,7 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
             }
             playerInteractionManager.handleBlockBreakAction(pos, act, dir, maxBuildHeight, sequence);
             if (act == ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK) {
-                this.impl$ignorePackets++;
+                this.impl$ignoreNextSwing = true;
             }
         }
     }
