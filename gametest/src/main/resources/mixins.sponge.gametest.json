@@ -5,9 +5,12 @@
     "package": "org.spongepowered.common.mixin.gametest",
     "mixins": [
         "BuiltinTestFunctionsMixin_GameTest",
+        "GameTestHelperMixin_GameTest",
         "GameTestInfoMixin_GameTest",
         "GameTestServerMixin_GameTest",
+        "MinecraftServerAccessor_GameTest",
         "RegistryDataLoaderMixin_GameTest",
+        "ServerGamePacketListenerImplAccessor_GameTest",
         "ServerLevel_EntityCallbacksMixin_GameTest",
         "SyncSchedulerMixin_GameTest"
     ]
