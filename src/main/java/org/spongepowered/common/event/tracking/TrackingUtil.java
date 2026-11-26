@@ -55,12 +55,15 @@ import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.inventory.ViewableInventoryBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
+import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
+import org.spongepowered.common.event.tracking.phase.block.GrowablePhaseContext;
 import org.spongepowered.common.event.tracking.phase.tick.BlockEventTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
@@ -345,6 +348,30 @@ public final class TrackingUtil {
         } // We can't return onBlockEventReceived because the phase state may have cancelled all transactions
         // at which point we want to keep track of the return value from the target, and from the block events.
         return result;
+    }
+
+    /**
+     * Runs {@code grow}, bone meal growing the block at {@code pos}, in the growing phase, so its block changes are
+     * thrown as growth with the bone meal used and what grew as their context. Every platform calls this where it has
+     * bone meal grow a block.
+     */
+    public static void growWithBonemeal(
+        final ServerLevel level, final BlockPos pos, final net.minecraft.world.level.block.state.BlockState state,
+        final net.minecraft.world.item.ItemStack stack, final Runnable grow
+    ) {
+        if (((LevelBridge) level).bridge$isFake() || !ShouldFire.CHANGE_BLOCK_EVENT_ALL
+            || !PhaseTracker.getInstance().getPhaseContext().doesBlockEventTracking()) {
+            grow.run();
+            return;
+        }
+        try (final GrowablePhaseContext context = BlockPhase.State.GROWING.createPhaseContext(PhaseTracker.getWorldInstance(level))
+            .provideItem(stack)
+            .world(level)
+            .block(state)
+            .pos(pos)) {
+            context.buildAndSwitch();
+            grow.run();
+        }
     }
 
     private TrackingUtil() {
