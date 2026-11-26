@@ -30,6 +30,7 @@ import org.spongepowered.api.world.portal.PortalLogic;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.level.block.PortalBlockBridge;
+import org.spongepowered.common.world.portal.SpongeNetherPortalTeleportBehavior;
 
 import java.util.Optional;
 
@@ -61,9 +62,17 @@ public interface PortalMixin_API extends PortalLogic {
     }
 
     @Override
-    default boolean teleport(final Entity entity, final ServerLocation destination, final boolean generateDestinationPortal) {
+    default Optional<TeleportBehavior> teleporter() {
         if (this instanceof PortalBlockBridge pbb) {
-            return pbb.bridge$teleport(entity, destination, generateDestinationPortal);
+            return Optional.of(SpongeNetherPortalTeleportBehavior.INSTANCE);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    default boolean teleport(final ServerLocation origin, final Entity entity, final ServerLocation destination, final boolean generateDestinationPortal) {
+        if (this instanceof PortalBlockBridge pbb) {
+            return pbb.bridge$teleport(origin, entity, destination, generateDestinationPortal);
         }
         return false;
     }
