@@ -43,6 +43,7 @@ import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCompletion;
@@ -93,6 +94,25 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
         };
     }
 
+    @SuppressWarnings("unchecked")
+    private static <T> ArgumentType<T> clientType(final ArgumentParser<T> parser) {
+        final Collection<ArgumentType<?>> types = parser.getClientCompletionArgumentType();
+        for (final ArgumentType<?> type : types) {
+            if (type == null) {
+                continue;
+            }
+            final ArgumentType<?> clientType = type instanceof CompletionsArgumentTypeBridge
+                    ? ((CompletionsArgumentTypeBridge<?>) type).bridge$clientSideCompletionType()
+                    : type;
+            // The client can only deserialize argument types that are registered for network use;
+            // fall back to the old behaviour rather than sending a type the client cannot read.
+            if (ArgumentTypeInfos.isClassRecognized(clientType.getClass())) {
+                return (ArgumentType<T>) clientType;
+            }
+        }
+        return (ArgumentType<T>) Constants.Command.STANDARD_STRING_ARGUMENT_TYPE;
+    }
+
     private final Parameter.Key<? super T> key;
     private final ArgumentParser<T> parser;
     private final @Nullable ValueParameterModifier<T> modifier;
@@ -121,7 +141,11 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
             final @Nullable ValueParameterModifier<T> parameterModifier,
             final boolean isOptional) {
         super(keyName,
-                (ArgumentType<T>) Constants.Command.STANDARD_STRING_ARGUMENT_TYPE, // we can abuse generics, we're not actually going to use this.
+                // The client-bound tree is built from this type (and only from this type: parsing always goes
+                // through the parser above), so it must be the parser's client completion type. Otherwise a
+                // text parameter reaches the client as a plain string, native completions are lost and the
+                // client-side parser rejects input that the parameter is actually supposed to consume.
+                clientType(parser),
                 command,
                 predicate,
                 redirect,
