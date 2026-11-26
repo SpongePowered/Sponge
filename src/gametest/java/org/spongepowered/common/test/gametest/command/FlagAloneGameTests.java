@@ -60,6 +60,7 @@ public final class FlagAloneGameTests {
     private static final String FLAG_PARAM_REQUIRED = "spongefix-flagparam-required";
     private static final String PLAIN_FLAG_OPTIONAL = "spongefix-flag-optional";
     private static final String FLAG_PARAM_OPTIONAL = "spongefix-flagparam-optional";
+    private static final String FLAG_PARAM_OPTIONAL_REQUIRED = "spongefix-flagparam-optional-required";
 
     public FlagAloneGameTests() {
         // Gametest classes are created before the server starts, which fires the event.
@@ -69,6 +70,7 @@ public final class FlagAloneGameTests {
             event.register(Launch.instance().commonPlugin(), FlagAloneGameTests.flagWithRequiredParameter(), FLAG_PARAM_REQUIRED);
             event.register(Launch.instance().commonPlugin(), FlagAloneGameTests.plainFlagOptionalParameter(), PLAIN_FLAG_OPTIONAL);
             event.register(Launch.instance().commonPlugin(), FlagAloneGameTests.flagWithOptionalParameter(), FLAG_PARAM_OPTIONAL);
+            event.register(Launch.instance().commonPlugin(), FlagAloneGameTests.flagWithOptionalParameterRequiredParameter(), FLAG_PARAM_OPTIONAL_REQUIRED);
         });
     }
 
@@ -107,6 +109,15 @@ public final class FlagAloneGameTests {
         FlagAloneGameTests.assertComplete(helper, FlagAloneGameTests.FLAG_PARAM_OPTIONAL, true);
         FlagAloneGameTests.assertComplete(helper, FlagAloneGameTests.FLAG_PARAM_OPTIONAL + " -b", true);
         FlagAloneGameTests.assertComplete(helper, FlagAloneGameTests.FLAG_PARAM_OPTIONAL + " -b bvalue", true);
+        helper.succeed();
+    }
+
+    @GameTest(maxTicks = 40)
+    public void flagWithOptionalParameterAndRequiredParameter(final GameTestHelper helper) {
+        FlagAloneGameTests.assertComplete(helper, FlagAloneGameTests.FLAG_PARAM_OPTIONAL_REQUIRED + " -b", false);
+        FlagAloneGameTests.assertComplete(helper, FlagAloneGameTests.FLAG_PARAM_OPTIONAL_REQUIRED + " -b true", false);
+        FlagAloneGameTests.assertComplete(helper, FlagAloneGameTests.FLAG_PARAM_OPTIONAL_REQUIRED + " 5", true);
+        FlagAloneGameTests.assertComplete(helper, FlagAloneGameTests.FLAG_PARAM_OPTIONAL_REQUIRED + " -b true 5", true);
         helper.succeed();
     }
 
@@ -166,6 +177,14 @@ public final class FlagAloneGameTests {
         return Command.builder()
             .addFlag(Flag.of(Parameter.string().key("flagValue").optional().build(), "b"))
             .addParameter(Parameter.string().key("value").optional().build())
+            .executor(context -> FlagAloneGameTests.executed())
+            .build();
+    }
+
+    private static Command.Parameterized flagWithOptionalParameterRequiredParameter() {
+        return Command.builder()
+            .addFlag(Flag.of(Parameter.bool().key("flagValue").optional().build(), "b"))
+            .addParameter(Parameter.integerNumber().key("value").build())
             .executor(context -> FlagAloneGameTests.executed())
             .build();
     }
