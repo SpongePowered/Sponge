@@ -24,7 +24,11 @@
  */
 package org.spongepowered.common.mixin.inventory.event.world.inventory;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
@@ -37,9 +41,14 @@ import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.inventory.RemoteSlot;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.BundleItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.BundleContents;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.mixin.Final;
@@ -234,6 +243,49 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         this.shadow$sendAllDataToRemote();
         this.impl$captureSuccess = true; // Detect mod overrides
         ci.cancel();
+    }
+
+    @WrapOperation(method = "setSelectedBundleItemIndex", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/BundleItem;toggleSelectedItem(Lnet/minecraft/world/item/ItemStack;I)V"))
+    private void impl$captureBundleSelectedIndexChange(final ItemStack stack, final int bundleIndex, final Operation<Void> operation, @Local(argsOnly = true, index = 1) int slotIndex) {
+        if (!PhaseTracker.getWorldInstance().onSidedThread() || !stack.has(DataComponents.BUNDLE_CONTENTS)) {
+            operation.call(stack, bundleIndex);
+            return;
+        }
+
+        final var originalStack = ItemStackUtil.cloneDefensive(stack);
+        operation.call(stack, bundleIndex);
+        final SpongeInventoryMenu menu = ((MenuBridge) this).bridge$getMenu();
+        if (menu != null) {
+            if (!menu.onChange(ItemStackUtil.cloneDefensiveNative(stack), ItemStackUtil.cloneDefensiveNative(originalStack), (Container) this, slotIndex, this.slots.get(slotIndex))) {
+                BundleItem.toggleSelectedItem(stack, BundleContents.NO_SELECTED_ITEM_INDEX);
+                if (synchronizer != null) {
+                    this.synchronizer.sendSlotChange((AbstractContainerMenu) (Object) this, slotIndex, stack);
+                }
+                return;
+            }
+        }
+
+        final var transaction = new SlotTransaction(
+            this.inventoryAdapter$getSlot(slotIndex).orElseThrow(),
+            ItemStackUtil.snapshotOf(originalStack),
+            ItemStackUtil.snapshotOf(stack)
+        );
+        final var event = SpongeEventFactory.createChangeInventoryEventValueChange(
+            PhaseTracker.getInstance().currentCause(),
+            List.of(Keys.SLOT_INDEX),
+            (Container) this,
+            List.of(transaction)
+        );
+
+        if (SpongeCommon.post(event)) {
+            BundleItem.toggleSelectedItem(stack, BundleContents.NO_SELECTED_ITEM_INDEX);
+            if (synchronizer != null) {
+                this.synchronizer.sendSlotChange((AbstractContainerMenu) (Object) this, slotIndex, stack);
+            }
+            return;
+        }
+
+        transaction.custom().ifPresent(custom -> transaction.slot().set(custom));
     }
 
     // broadcastChanges

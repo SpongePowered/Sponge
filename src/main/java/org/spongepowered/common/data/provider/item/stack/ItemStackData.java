@@ -299,6 +299,7 @@ public final class ItemStackData {
                             h.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(items));
                         })
                         .delete(stack -> stack.remove(DataComponents.CONTAINER))
+                        .supports(h -> h.has(DataComponents.CONTAINER))
                     .create(Keys.FIRE_RESISTANT)
                         .get(h -> {
                             final @Nullable DamageResistant resist = h.get(DataComponents.DAMAGE_RESISTANT);
