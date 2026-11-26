@@ -62,7 +62,7 @@ public abstract class ServerGamePacketListenerImpl_1Mixin implements Serverbound
         if (event.isCancelled()) {
             ci.cancel();
         } else {
-            ((ServerGamePacketListenerImplBridge) this.this$0).bridge$incrementIgnorePackets();
+            ((ServerGamePacketListenerImplBridge) this.this$0).bridge$ignoreNextSwing();
         }
     }
 
@@ -77,7 +77,7 @@ public abstract class ServerGamePacketListenerImpl_1Mixin implements Serverbound
         if (event.isCancelled()) {
             ci.cancel();
         } else {
-            ((ServerGamePacketListenerImplBridge) this.this$0).bridge$incrementIgnorePackets();
+            ((ServerGamePacketListenerImplBridge) this.this$0).bridge$ignoreNextSwing();
         }
     }
 
