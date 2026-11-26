@@ -33,6 +33,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -83,13 +84,18 @@ public class GrowablePhaseContext extends PhaseContext<GrowablePhaseContext> {
         Preconditions.checkState(this.world != null, "World is null");
         this.priorContext = this.createdTracker.getPhaseContext();
         Preconditions.checkState(this.priorContext != null, "Prior context is null");
+        // The growth belongs to whoever the prior context attributes it to, or else to whoever placed what is growing
+        if (!this.priorContext.applyOwnerIfAvailable(this::creator)) {
+            this.creator(() -> ((LevelChunkBridge) this.world.getChunkAt(this.pos)).bridge$getBlockCreatorUUID(this.pos));
+        }
+        this.priorContext.applyNotifierIfAvailable(this::notifier);
         final SpongeBlockSnapshot.BuilderImpl builder = SpongeBlockSnapshot.BuilderImpl.pooled()
                 .world(((ServerLevel) this.world))
                 .position(VecHelper.toVector3i(this.pos))
                 .blockState(this.blockState)
                 .flag(BlockChangeFlags.NONE.withPhysics(true).withUpdateNeighbors(true).withNotifyObservers(true));
-        this.priorContext.applyOwnerIfAvailable(builder::creator);
-        this.priorContext.applyNotifierIfAvailable(builder::notifier);
+        this.applyOwnerIfAvailable(builder::creator);
+        this.applyNotifierIfAvailable(builder::notifier);
         this.snapshot = builder.build();
         return super.buildAndSwitch();
     }
