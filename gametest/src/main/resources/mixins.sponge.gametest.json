@@ -4,9 +4,12 @@
     "plugin": "org.spongepowered.common.test.gametest.GameTestMixinPlugin",
     "package": "org.spongepowered.common.mixin.gametest",
     "mixins": [
+        "GameTestHelperMixin_GameTest",
         "GameTestInfoMixin_GameTest",
         "GameTestRegistryMixin_GameTest",
         "GameTestServerMixin_GameTest",
+        "MinecraftServerAccessor_GameTest",
+        "ServerGamePacketListenerImplAccessor_GameTest",
         "ServerLevel_EntityCallbacksMixin_GameTest",
         "SyncSchedulerMixin_GameTest"
     ]

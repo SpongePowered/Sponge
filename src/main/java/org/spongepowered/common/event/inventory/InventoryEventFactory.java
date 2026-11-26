@@ -197,6 +197,27 @@ public class InventoryEventFactory {
         }
     }
 
+    /**
+     * Throws the event for a block's own change to one slot of its inventory, such as a dispenser using up an item,
+     * with the current cause. A cancelled or invalidated change has its slot restored.
+     *
+     * @return Whether the change stands
+     */
+    public static boolean callChangeInventoryEvent(final Container inventory, final int index, final ItemStack originalStack) {
+        final Inventory spongeInventory = InventoryUtil.toInventory(inventory, null);
+        final Optional<org.spongepowered.api.item.inventory.Slot> slot = spongeInventory.slot(index);
+        if (slot.isEmpty()) {
+            return true;
+        }
+        final SlotTransaction transaction = new SlotTransaction(slot.get(), ItemStackUtil.snapshotOf(originalStack), ItemStackUtil.snapshotOf(inventory.getItem(index)));
+        final List<SlotTransaction> transactions = new ArrayList<>();
+        transactions.add(transaction);
+        final ChangeInventoryEvent event = SpongeEventFactory.createChangeInventoryEvent(PhaseTracker.getInstance().currentCause(), spongeInventory, transactions);
+        SpongeCommon.post(event);
+        PacketPhaseUtil.handleSlotRestore(null, null, event.transactions(), event.isCancelled());
+        return !event.isCancelled() && transaction.isValid();
+    }
+
     private static boolean callInventoryPickupEvent(final Container inventory, final ItemStack[] prevInventory) {
         final Inventory spongeInventory = InventoryUtil.toInventory(inventory, null);
         final List<SlotTransaction> trans = InventoryEventFactory.generateTransactions(spongeInventory, inventory, prevInventory);

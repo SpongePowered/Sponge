@@ -500,6 +500,11 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
                 }
                 return EffectResult.nullPass();
             })
+            // As vanilla's setBlock, the placed state has to still be there, onPlace may have replaced or changed it already
+            .addEffect((pipeline, oldState, args) -> {
+                final BlockState current = pipeline.getAffectedSection().getBlockState(pos.getX() & 15, pos.getY() & 15, pos.getZ() & 15);
+                return current == args.newState() ? EffectResult.nullPass() : new EffectResult<>(args.newState(), true);
+            })
             .addEffect(UpdateWorldRendererEffect.getInstance())
             .addEffect(NotifyClientEffect.getInstance())
             .addEffect(NotifyNeighborSideEffect.getInstance())
