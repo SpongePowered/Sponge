@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.core.world.level.storage;
+package org.spongepowered.common.mixin.core.world.level.storage;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -40,7 +40,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 
 @Mixin(LevelStorageSource.class)
-public abstract class LevelStorageSourceMixin_Vanilla {
+public abstract class LevelStorageSourceMixin {
 
     // TODO: Move Sponge data to SavedData
     private static final ThreadLocal<Dynamic<Tag>> impl$spongeLevelData = new ThreadLocal<>();
@@ -54,7 +54,7 @@ public abstract class LevelStorageSourceMixin_Vanilla {
             )
     )
     private static CompoundTag impl$createSpongeLevelData(final CompoundTag compoundNBT, final String path, final Operation<CompoundTag> original) {
-        LevelStorageSourceMixin_Vanilla.impl$spongeLevelData.set(new Dynamic<>(NbtOps.INSTANCE, compoundNBT));
+        LevelStorageSourceMixin.impl$spongeLevelData.set(new Dynamic<>(NbtOps.INSTANCE, compoundNBT));
         return original.call(compoundNBT, path);
     }
 
@@ -66,13 +66,12 @@ public abstract class LevelStorageSourceMixin_Vanilla {
             )
     )
     private static PrimaryLevelData impl$readSpongeLevelData(final Dynamic<?> dynamic, final LevelSettings settings,
-            final PrimaryLevelData.SpecialWorldProperty special, final WorldOptions options, final Lifecycle lifecycle, final Operation<PrimaryLevelData> original)
-    {
+            final PrimaryLevelData.SpecialWorldProperty special, final WorldOptions options, final Lifecycle lifecycle, final Operation<PrimaryLevelData> original) {
         final PrimaryLevelData levelData = original.call(dynamic, settings, special, options, lifecycle);
 
-        ((PrimaryLevelDataBridge) levelData).bridge$readSpongeLevelData(LevelStorageSourceMixin_Vanilla.impl$spongeLevelData.get());
+        ((PrimaryLevelDataBridge) levelData).bridge$readSpongeLevelData(LevelStorageSourceMixin.impl$spongeLevelData.get());
 
-        LevelStorageSourceMixin_Vanilla.impl$spongeLevelData.remove();
+        LevelStorageSourceMixin.impl$spongeLevelData.remove();
         return levelData;
     }
 }

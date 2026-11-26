@@ -48,6 +48,7 @@ import net.minecraft.world.entity.npc.WanderingTraderSpawner;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.ForcedChunksSavedData;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.biome.BiomeManager;
@@ -61,7 +62,6 @@ import net.minecraft.world.level.levelgen.PatrolSpawner;
 import net.minecraft.world.level.levelgen.PhantomSpawner;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.LevelDataAndDimensions;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
@@ -1077,7 +1077,7 @@ public class SpongeWorldManager implements WorldManager {
         final ServerChunkCache chunkSource = level.getChunkSource();
         level.setDefaultSpawnPos(level.getSharedSpawnPos(), level.getSharedSpawnAngle());
 
-        final int spawnRadius = SpongeWorldManager.getSpawnRadius(level.getLevelData());
+        final int spawnRadius = SpongeWorldManager.getSpawnRadius((ServerLevelData) level.getLevelData());
         final int spawnSize = spawnRadius > 0 ? Mth.square(ChunkProgressListener.calculateDiameter(spawnRadius)) : 0;
 
         final CompletableFuture<ServerLevel> generationFuture = new CompletableFuture<>();
@@ -1133,12 +1133,8 @@ public class SpongeWorldManager implements WorldManager {
     }
 
 
-    private static int getSpawnRadius(final LevelData levelData) {
-
-        final int borderRadius = 11;
-        final int diameter = ((borderRadius - 1) * 2) + 1;
-        final int spawnChunks = diameter * diameter;
-        return spawnChunks;
+    private static int getSpawnRadius(final ServerLevelData levelData) {
+        return ((ServerLevelDataBridge) levelData).bridge$performsSpawnLogic() ? levelData.getGameRules().getInt(GameRules.RULE_SPAWN_CHUNK_RADIUS) : 0;
     }
 
     private boolean isVanillaSubWorld(final String directoryName) {
