@@ -27,7 +27,6 @@ package org.spongepowered.common.test.gametest.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -54,7 +53,6 @@ import org.spongepowered.api.event.block.TickBlockEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.common.accessor.server.network.ServerGamePacketListenerImplAccessor;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -135,9 +133,6 @@ public final class GrowthGameTests {
 
     private static void boneMealAsPlayer(final GameTestHelper helper, final Consumer<ServerPlayer> assertGrown) {
         final ServerPlayer player = helper.makeMockServerPlayerInLevel();
-        // The join teleport leaves the server waiting on the client, which ignores the player's interactions until acked
-        player.connection.handleAcceptTeleportPacket(
-            new ServerboundAcceptTeleportationPacket(((ServerGamePacketListenerImplAccessor) player.connection).accessor$awaitingTeleport()));
         player.moveTo(Vec3.atBottomCenterOf(helper.absolutePos(new BlockPos(2, 1, 0))));
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.BONE_MEAL, 64));
 

@@ -8,6 +8,7 @@
         "GameTestInfoMixin_GameTest",
         "GameTestRegistryMixin_GameTest",
         "GameTestServerMixin_GameTest",
+        "ServerGamePacketListenerImplAccessor_GameTest",
         "ServerLevel_EntityCallbacksMixin_GameTest",
         "SyncSchedulerMixin_GameTest"
     ]

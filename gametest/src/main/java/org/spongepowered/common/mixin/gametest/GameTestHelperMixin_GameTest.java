@@ -24,14 +24,19 @@
  */
 package org.spongepowered.common.mixin.gametest;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.gametest.framework.GameTestInfo;
 import net.minecraft.gametest.framework.StructureUtils;
+import net.minecraft.server.level.ServerPlayer;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.common.test.gametest.MockPlayers;
 
 /**
  * Until 1.21.3, test positions are measured from the structure block, which sits one block below the structure, so
@@ -41,6 +46,16 @@ import org.spongepowered.asm.mixin.injection.At;
  */
 @Mixin(GameTestHelper.class)
 public abstract class GameTestHelperMixin_GameTest {
+
+    // @formatter:off
+    @Shadow @Final private GameTestInfo testInfo;
+    // @formatter:on
+
+    // A mock player joins the server, so it's readied to interact and removed again once its test is done
+    @ModifyReturnValue(method = "makeMockServerPlayerInLevel", at = @At("RETURN"))
+    private ServerPlayer gametest$readyMockPlayer(final ServerPlayer player) {
+        return MockPlayers.joined(this.testInfo, player);
+    }
 
     @WrapOperation(
         method = {"absolutePos", "relativePos", "absoluteVec", "relativeVec"},
