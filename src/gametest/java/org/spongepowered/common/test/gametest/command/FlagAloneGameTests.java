@@ -108,7 +108,9 @@ public final class FlagAloneGameTests {
     public void flagWithOptionalParameter(final GameTestHelper helper) {
         FlagAloneGameTests.assertComplete(helper, FlagAloneGameTests.FLAG_PARAM_OPTIONAL, true);
         FlagAloneGameTests.assertComplete(helper, FlagAloneGameTests.FLAG_PARAM_OPTIONAL + " -b", true);
-        FlagAloneGameTests.assertComplete(helper, FlagAloneGameTests.FLAG_PARAM_OPTIONAL + " -b bvalue", true);
+        FlagAloneGameTests.assertComplete(helper, FlagAloneGameTests.FLAG_PARAM_OPTIONAL + " -b true", true);
+        FlagAloneGameTests.assertComplete(helper, FlagAloneGameTests.FLAG_PARAM_OPTIONAL + " 5", true);
+        FlagAloneGameTests.assertComplete(helper, FlagAloneGameTests.FLAG_PARAM_OPTIONAL + " -b true 5", true);
         helper.succeed();
     }
 
@@ -175,8 +177,8 @@ public final class FlagAloneGameTests {
 
     private static Command.Parameterized flagWithOptionalParameter() {
         return Command.builder()
-            .addFlag(Flag.of(Parameter.string().key("flagValue").optional().build(), "b"))
-            .addParameter(Parameter.string().key("value").optional().build())
+            .addFlag(Flag.of(Parameter.bool().key("flagValue").optional().build(), "b"))
+            .addParameter(Parameter.integerNumber().key("value").optional().build())
             .executor(context -> FlagAloneGameTests.executed())
             .build();
     }
