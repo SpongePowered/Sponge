@@ -30,8 +30,10 @@ import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.RailBlock;
 import net.minecraft.world.level.block.RedstoneLampBlock;
 import net.minecraft.world.level.block.piston.PistonBaseBlock;
+import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.level.material.Fluids;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.transaction.NotificationTicket;
@@ -72,6 +74,9 @@ import java.util.stream.Collectors;
  *
  * <p>{@code sponge:notify/tnt_water}: stone on each side of (3,1,3), where the test spawns primed tnt, and a water source
  * at (5,1,3) beside the east stone, walled in by obsidian on its other sides and open above.</p>
+ *
+ * <p>{@code sponge:notify/rail_reshape}: on a bedrock floor, an east-west rail at (2,1,1); the test places a rail at (1,1,1)
+ * beside it, which reshapes itself as it is placed.</p>
  */
 @GameTestGroup("notify_neighbor")
 public final class NeighborNotificationGameTests {
@@ -92,6 +97,29 @@ public final class NeighborNotificationGameTests {
     private static final BlockPos WATER_STONE = new BlockPos(4, 1, 3);
     private static final List<BlockPos> TNT_STONES = List.of(new BlockPos(2, 1, 3), NeighborNotificationGameTests.WATER_STONE, new BlockPos(3, 1, 2), new BlockPos(3, 1, 4));
     private static final BlockPos TNT_WATER_SOURCE = new BlockPos(5, 1, 3);
+    private static final String RAIL_RESHAPE = "sponge:notify/rail_reshape";
+    private static final BlockPos RAIL = new BlockPos(1, 1, 1);
+
+    // The rail reshapes itself as it is placed, by setting its new shape, which notifies its neighbors. Vanilla's setBlock
+    // then skips its own updates, as the placed state is gone, so each neighbor hears from the rail once
+    @GameTest(structure = NeighborNotificationGameTests.RAIL_RESHAPE)
+    void reshapedRailNotifiesOnce(final GameTestHelper helper) {
+        final Vector3i rail = VecHelper.toVector3i(helper.absolutePos(NeighborNotificationGameTests.RAIL));
+        final List<Vector3i> targets = new CopyOnWriteArrayList<>();
+        final EventListener<NotifyNeighborBlockEvent> listener = event -> event.tickets().stream()
+            .filter(ticket -> ticket.notifierPosition().equals(rail))
+            .forEach(ticket -> targets.add(ticket.targetPosition()));
+        SpongeGameTests.listen(NotifyNeighborBlockEvent.class, listener);
+
+        helper.setBlock(NeighborNotificationGameTests.RAIL, Blocks.RAIL);
+
+        helper.succeedWhen(() -> {
+            helper.assertBlockProperty(NeighborNotificationGameTests.RAIL, RailBlock.SHAPE, RailShape.EAST_WEST);
+            helper.assertFalse(targets.isEmpty(), "The rail notified no neighbors");
+            helper.assertTrue(Set.copyOf(targets).size() == targets.size(), "The rail notified a neighbor twice: " + targets);
+            Sponge.eventManager().unregisterListeners(listener);
+        });
+    }
 
     // The lever's notification is what lights the lamp
     @GameTest(structure = NeighborNotificationGameTests.LEVER_LAMP)

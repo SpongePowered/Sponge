@@ -110,6 +110,17 @@ public final class EventRecorder {
         return recorder;
     }
 
+    /**
+     * Also records events of {@code type}, each named by the API type thrown, at the {@link LocatableBlock} that
+     * caused it, for events with no position of their own such as {@code DropItemEvent.Pre} or
+     * {@code ChangeInventoryEvent}. Opt-in so that existing sequences stay as they are.
+     */
+    public <E extends Event> EventRecorder alsoRecord(final Class<E> type) {
+        this.record(TypeToken.get(type), EventRecorder::apiName,
+            event -> event.cause().first(LocatableBlock.class).map(LocatableBlock::blockPosition).stream());
+        return this;
+    }
+
     public List<Entry> entries() {
         return List.copyOf(this.entries);
     }
