@@ -134,6 +134,12 @@ public final class SpongeParameterTranslator {
             final Iterator<String> aliasIterator = flag.aliases().iterator();
             final LiteralArgumentBuilder<CommandSourceStack> flagLiteral = LiteralArgumentBuilder.literal(aliasIterator.next());
             flagLiteral.requires((Predicate) flag.requirement());
+            if (flag.associatedParameter().isEmpty() && node.getCommand() != null) {
+                // A plain flag can end the command, so it needs the command's executor. Flags with an
+                // associated parameter get theirs from createAndAttachNode, which knows whether the
+                // parameter is optional.
+                flagLiteral.executes(node.getCommand());
+            }
             final Collection<? extends CommandNode<CommandSourceStack>> toBeRedirected;
             final SpongeFlagLiteralCommandNode flagNode = new SpongeFlagLiteralCommandNode(flagLiteral, flag);
             if (flag.associatedParameter().isPresent()) {
