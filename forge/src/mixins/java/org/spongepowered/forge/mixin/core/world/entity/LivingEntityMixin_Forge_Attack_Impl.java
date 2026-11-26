@@ -27,8 +27,10 @@ package org.spongepowered.forge.mixin.core.world.entity;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stat;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraftforge.common.ForgeHooks;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.util.DamageEventUtil;
 
@@ -37,6 +39,18 @@ public abstract class LivingEntityMixin_Forge_Attack_Impl {
 
     protected DamageEventUtil.DamageEventResult attackImpl$actuallyHurtResult;
     protected float attackImpl$actuallyHurtFinalDamage;
+
+    /**
+     * Forge applies the damage from a local of its own, not the argument the common mixin sets,
+     * so hand that local the event's final damage on its way through {@link ForgeHooks#onLivingDamage}
+     */
+    @ModifyArg(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/common/ForgeHooks;onLivingDamage(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/damagesource/DamageSource;F)F"))
+    private float attackImpl$useEventDamage(final float damage) {
+        if (this.attackImpl$actuallyHurtResult.event().isCancelled()) {
+            return 0;
+        }
+        return this.attackImpl$actuallyHurtFinalDamage;
+    }
 
     /**
      * Prevents {@link ServerPlayer#awardStat} from running before event

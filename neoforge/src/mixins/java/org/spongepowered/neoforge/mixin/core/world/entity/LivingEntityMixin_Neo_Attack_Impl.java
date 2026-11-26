@@ -26,15 +26,24 @@ package org.spongepowered.neoforge.mixin.core.world.entity;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
+import net.neoforged.neoforge.common.damagesource.DamageContainer;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.util.DamageEventUtil;
+
+import java.util.Stack;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin_Neo_Attack_Impl {
+
+    @Shadow protected Stack<DamageContainer> damageContainers;
 
     protected DamageEventUtil.DamageEventResult attackImpl$actuallyHurtResult;
     protected float attackImpl$actuallyHurtFinalDamage;
@@ -49,6 +58,16 @@ public abstract class LivingEntityMixin_Neo_Attack_Impl {
             return 0;
         }
         return this.attackImpl$actuallyHurtResult.damageAbsorbed().orElse(0f);
+    }
+
+    /**
+     * Neo applies the damage its container holds, not the argument the common mixin sets,
+     * so give the container the event's final damage right after the event in {@link LivingEntity#setAbsorptionAmount}
+     */
+    @Inject(method = "actuallyHurt",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;setAbsorptionAmount(F)V", shift = At.Shift.AFTER))
+    private void attackImpl$useEventDamage(final DamageSource source, final float damage, final CallbackInfo ci) {
+        this.damageContainers.peek().setNewDamage(this.attackImpl$actuallyHurtResult.event().isCancelled() ? 0 : this.attackImpl$actuallyHurtFinalDamage);
     }
 
     /**
