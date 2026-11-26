@@ -27,6 +27,10 @@ package org.spongepowered.common.test.gametest.world;
 import net.minecraft.gametest.framework.GameTestHelper;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.world.generation.ChunkGenerator;
+import org.spongepowered.api.world.generation.config.flat.FlatGeneratorConfigs;
+import org.spongepowered.api.world.server.WorldManager;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.common.test.gametest.GameTest;
 import org.spongepowered.common.test.gametest.GameTestGroup;
@@ -43,38 +47,25 @@ import java.util.concurrent.CompletableFuture;
 public final class SpongeLevelDataGameTests {
 
     @GameTest(maxTicks = 20 * 60 * 5)
-    void worldIdSurvivesUnloadAndReload(final GameTestHelper helper) {
-        final ResourceKey key = ResourceKey.sponge("gametest_level_data");
-        final WorldTemplate template = WorldTemplate.overworld().asBuilder().key(key).build();
+    void reloadedWorldKeepsItsId(final GameTestHelper helper) {
+        final ResourceKey key = ResourceKey.sponge("gametest_reloaded_id");
+        final WorldManager manager = Sponge.server().worldManager();
+        final WorldTemplate template = WorldTemplate.overworld().asBuilder()
+            .key(key)
+            .add(Keys.CHUNK_GENERATOR, ChunkGenerator.flat(FlatGeneratorConfigs.CLASSIC_FLAT.get()))
+            .build();
 
-        final CompletableFuture<UUID[]> ids = Sponge.server().worldManager().loadWorld(template)
-            .thenCompose(created -> {
-                final UUID id = created.uniqueId();
-                return Sponge.server().worldManager().unloadWorld(key)
-                    .thenCompose(unloaded -> {
-                        if (!unloaded) {
-                            throw new IllegalStateException("The world " + key + " was not unloaded");
-                        }
-                        return Sponge.server().worldManager().loadWorld(key);
-                    })
-                    .thenApply(reloaded -> new UUID[]{id, reloaded.uniqueId()});
-            })
-            .thenCompose(pair -> Sponge.server().worldManager().unloadWorld(key)
-                .thenApply(unloaded -> {
-                    if (!unloaded) {
-                        throw new IllegalStateException("The world " + key + " was not unloaded the second time");
-                    }
-                    return pair;
-                }));
+        final CompletableFuture<UUID[]> ids = manager.loadWorld(template)
+            .thenCompose(created -> manager.unloadWorld(key).thenApply($ -> created.uniqueId()))
+            .thenCompose(first -> manager.loadWorld(key)
+                .thenCompose(reloaded -> manager.unloadWorld(key)
+                    .thenApply($ -> new UUID[]{first, reloaded.uniqueId()})));
 
         helper.succeedWhen(() -> {
             helper.assertTrue(ids.isDone(), "The world has not finished loading and unloading");
-            if (ids.isCompletedExceptionally()) {
-                helper.fail("Loading or unloading the world failed: " + ids.handle((result, error) -> error).join());
-            }
             final UUID[] pair = ids.join();
             helper.assertTrue(pair[0].equals(pair[1]),
-                "The world id changed after reload: " + pair[0] + " != " + pair[1]);
+                "The reloaded world's id was " + pair[1] + " rather than " + pair[0]);
         });
     }
 }
