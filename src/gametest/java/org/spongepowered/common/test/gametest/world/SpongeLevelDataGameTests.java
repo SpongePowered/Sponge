@@ -28,8 +28,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.world.generation.ChunkGenerator;
-import org.spongepowered.api.world.generation.config.flat.FlatGeneratorConfigs;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.WorldManager;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.common.test.gametest.GameTest;
@@ -50,9 +49,16 @@ public final class SpongeLevelDataGameTests {
     void reloadedWorldKeepsItsId(final GameTestHelper helper) {
         final ResourceKey key = ResourceKey.sponge("gametest_reloaded_id");
         final WorldManager manager = Sponge.server().worldManager();
-        final WorldTemplate template = WorldTemplate.overworld().asBuilder()
+        // Reuse the already-loaded overworld's generator. A freshly built ChunkGenerator.flat(...)
+        // uses entries from the global registry and fails to encode against the gametest server's
+        // registry set on Forge. Spawn logic is disabled so the test does not generate a full spawn
+        // area while it only needs the world to be created, saved, unloaded and loaded again.
+        final ServerWorld overworld = manager.world(ResourceKey.minecraft("overworld"))
+            .orElseThrow(() -> new IllegalStateException("The overworld is not loaded"));
+        final WorldTemplate template = WorldTemplate.builder()
+            .from(overworld)
             .key(key)
-            .add(Keys.CHUNK_GENERATOR, ChunkGenerator.flat(FlatGeneratorConfigs.CLASSIC_FLAT.get()))
+            .add(Keys.PERFORM_SPAWN_LOGIC, false)
             .build();
 
         final CompletableFuture<UUID[]> ids = manager.loadWorld(template)
