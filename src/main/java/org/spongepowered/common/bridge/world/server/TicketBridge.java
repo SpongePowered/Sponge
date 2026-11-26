@@ -32,7 +32,7 @@ public interface TicketBridge {
 
     void bridge$setChunkPosition(long chunkPos);
 
-    <T> org.spongepowered.api.world.server.Ticket<T> bridge$retrieveAppropriateTicket();
+    Ticket bridge$retrieveAppropriateTicket();
 
     void bridge$setParentTicket(Ticket parentTicket);
 

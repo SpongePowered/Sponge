@@ -39,7 +39,7 @@ import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Collection;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 @Mixin(ChunkMap.class)
@@ -55,41 +55,54 @@ public abstract class ChunkMapMixin_API implements org.spongepowered.api.world.s
     }
 
     @Override
-    public boolean valid(final @NonNull Ticket<?> ticket) {
+    public boolean valid(final @NonNull Ticket ticket) {
+        Objects.requireNonNull(ticket, "ticket");
         return ((ChunkMapBridge) this).bridge$distanceManager().bridge$checkTicketValid(ticket);
     }
 
     @Override
-    public @NonNull Ticks timeLeft(final @NonNull Ticket<?> ticket) {
+    public @NonNull Ticks timeLeft(final @NonNull Ticket ticket) {
+        Objects.requireNonNull(ticket, "ticket");
         return ((ChunkMapBridge) this).bridge$distanceManager().bridge$timeLeft(ticket);
     }
 
     @Override
-    public <T> @NonNull Optional<Ticket<T>> requestTicket(final @NonNull TicketType<T> type, final @NonNull Vector3i chunkPosition,
-            final @NonNull T value, final int radius) {
-        if (!((Object) type instanceof net.minecraft.server.level.TicketType)) {
-            throw new IllegalArgumentException("TicketType must be a Minecraft TicketType");
+    public @NonNull Ticket requestTicket(final @NonNull TicketType type, final @NonNull Vector3i chunkPosition, final int radius) {
+        Objects.requireNonNull(type, "type");
+        Objects.requireNonNull(chunkPosition, "chunkPosition");
+        if (radius < 0) {
+            throw new IllegalArgumentException("The radius must be not be negative.");
         }
-        if (radius < 1) {
-            throw new IllegalArgumentException("The radius must be positive.");
-        }
-        return ((ChunkMapBridge) this).bridge$distanceManager()
-                .bridge$registerTicket(this.world(), type, chunkPosition, value, radius);
+        return ((ChunkMapBridge) this).bridge$distanceManager().bridge$registerTicket(type, chunkPosition, radius);
     }
 
     @Override
-    public boolean renewTicket(final @NonNull Ticket<?> ticket) {
+    public boolean renewTicket(final @NonNull Ticket ticket) {
+        Objects.requireNonNull(ticket, "ticket");
         return ((ChunkMapBridge) this).bridge$distanceManager().bridge$renewTicket(ticket);
     }
 
     @Override
-    public boolean releaseTicket(final @NonNull Ticket<?> ticket) {
+    public boolean releaseTicket(final @NonNull Ticket ticket) {
+        Objects.requireNonNull(ticket, "ticket");
         return ((ChunkMapBridge) this).bridge$distanceManager().bridge$releaseTicket(ticket);
     }
 
     @Override
-    public <T> @NonNull Collection<Ticket<T>> findTickets(final @NonNull TicketType<T> type) {
+    public @NonNull Collection<Ticket> findTickets(final @NonNull Vector3i chunkOrigin) {
+        Objects.requireNonNull(chunkOrigin, "chunkOrigin");
+        return ((ChunkMapBridge) this).bridge$distanceManager().bridge$tickets(chunkOrigin);
+    }
+
+    @Override
+    public @NonNull Collection<Ticket> findTickets(final @NonNull TicketType type) {
+        Objects.requireNonNull(type, "type");
         return ((ChunkMapBridge) this).bridge$distanceManager().bridge$tickets(type);
+    }
+
+    @Override
+    public @NonNull Collection<Ticket> findTickets() {
+        return ((ChunkMapBridge) this).bridge$distanceManager().bridge$tickets();
     }
 
     @Override
