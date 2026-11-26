@@ -24,11 +24,20 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
+import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -37,6 +46,20 @@ final class DispensePhaseState extends BlockPhaseState {
     @Override
     public void unwind(final GeneralizedContext phaseContext) {
         TrackingUtil.processBlockCaptures(phaseContext);
+    }
+
+    // The items a dispenser or dropper drops, after their DropItemEvent.Pre; anything else it spawns stays a plain spawn
+    @Override
+    public SpawnEntityEvent createSpawnEvent(
+        final GeneralizedContext context,
+        final @Nullable GameTransaction<@NonNull ?> parent,
+        final List<Entity> collect,
+        final Cause currentCause
+    ) {
+        if (collect.stream().allMatch(entity -> entity instanceof ItemEntity)) {
+            return SpongeEventFactory.createDropItemEventDispense(currentCause, (List) collect);
+        }
+        return super.createSpawnEvent(context, parent, collect, currentCause);
     }
 
     @Override
