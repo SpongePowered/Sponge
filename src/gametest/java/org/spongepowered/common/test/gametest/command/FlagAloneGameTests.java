@@ -24,14 +24,12 @@
  */
 package org.spongepowered.common.test.gametest.command;
 
-import com.mojang.brigadier.ParseResults;
-import com.mojang.brigadier.context.CommandContextBuilder;
 import io.leangen.geantyref.TypeToken;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.server.MinecraftServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.api.event.Order;
@@ -48,11 +46,15 @@ import org.spongepowered.common.test.gametest.SpongeGameTests;
  * a required associated parameter must not become complete on the flag alone.
  *
  * <p>The commands are registered through {@link RegisterCommandEvent}, as a plugin would register
- * them, so the tests exercise the same command tree construction path as a real command.</p>
+ * them, so the tests exercise the same command tree construction path as a real command. The
+ * commands are then executed through {@link org.spongepowered.api.command.manager.CommandManager#process(String)}
+ * so the assertions check that the command actually ran, rather than only inspecting the parsed
+ * command tree.</p>
  */
 @GameTestGroup("command")
 public final class FlagAloneGameTests {
 
+    private static final int EXECUTED = 0x5EED;
     private static final String PLAIN_FLAG = "spongefix-flag-plain";
     private static final String PLAIN_FLAG_REQUIRED = "spongefix-flag-required";
     private static final String FLAG_PARAM_REQUIRED = "spongefix-flagparam-required";
@@ -109,29 +111,30 @@ public final class FlagAloneGameTests {
     }
 
     private static void assertComplete(final GameTestHelper helper, final String input, final boolean expected) {
-        final MinecraftServer server = helper.getLevel().getServer();
-        final ParseResults<CommandSourceStack> results = server.getCommands().getDispatcher()
-            .parse(input, server.createCommandSourceStack());
-        final boolean complete = results.getExceptions().isEmpty()
-            && FlagAloneGameTests.findCommand(results.getContext()) != null;
-        helper.assertTrue(complete == expected,
-            "expected '" + input + "' to be " + (expected ? "a complete command" : "incomplete"));
+        try {
+            final CommandResult result = Sponge.server().commandManager().process(input);
+            if (expected) {
+                helper.assertTrue(result.isSuccess(), "expected '" + input + "' to be a complete command");
+                helper.assertTrue(result.result() == FlagAloneGameTests.EXECUTED,
+                    "expected '" + input + "' to execute the command");
+            } else {
+                helper.assertTrue(!result.isSuccess() || result.result() != FlagAloneGameTests.EXECUTED,
+                    "expected '" + input + "' to be incomplete");
+            }
+        } catch (final CommandException e) {
+            helper.assertTrue(!expected,
+                "expected '" + input + "' to be a complete command, but it threw: " + e.getMessage());
+        }
     }
 
-    private static com.mojang.brigadier.Command<CommandSourceStack> findCommand(final CommandContextBuilder<CommandSourceStack> context) {
-        final com.mojang.brigadier.Command<CommandSourceStack> command = context.getCommand();
-        if (command != null) {
-            return command;
-        }
-        final CommandContextBuilder<CommandSourceStack> child = context.getChild();
-        return child == null ? null : FlagAloneGameTests.findCommand(child);
+    private static CommandResult executed() {
+        return CommandResult.builder().result(FlagAloneGameTests.EXECUTED).build();
     }
 
     private static Command.Parameterized plainFlagOnly() {
         return Command.builder()
             .addFlag(Flag.of("a"))
-            .terminal(true)
-            .executor(context -> CommandResult.success())
+            .executor(context -> FlagAloneGameTests.executed())
             .build();
     }
 
@@ -139,7 +142,7 @@ public final class FlagAloneGameTests {
         return Command.builder()
             .addFlag(Flag.of("a"))
             .addParameter(Parameter.string().key("value").build())
-            .executor(context -> CommandResult.success())
+            .executor(context -> FlagAloneGameTests.executed())
             .build();
     }
 
@@ -147,7 +150,7 @@ public final class FlagAloneGameTests {
         return Command.builder()
             .addFlag(Flag.of(Parameter.string().key("flagValue").build(), "b"))
             .addParameter(Parameter.string().key("value").build())
-            .executor(context -> CommandResult.success())
+            .executor(context -> FlagAloneGameTests.executed())
             .build();
     }
 
@@ -155,8 +158,7 @@ public final class FlagAloneGameTests {
         return Command.builder()
             .addFlag(Flag.of("a"))
             .addParameter(Parameter.string().key("value").optional().build())
-            .terminal(true)
-            .executor(context -> CommandResult.success())
+            .executor(context -> FlagAloneGameTests.executed())
             .build();
     }
 
@@ -164,8 +166,7 @@ public final class FlagAloneGameTests {
         return Command.builder()
             .addFlag(Flag.of(Parameter.string().key("flagValue").optional().build(), "b"))
             .addParameter(Parameter.string().key("value").optional().build())
-            .terminal(true)
-            .executor(context -> CommandResult.success())
+            .executor(context -> FlagAloneGameTests.executed())
             .build();
     }
 }
