@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.map;
 
-import com.google.common.collect.BiMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapIndex;
@@ -56,14 +55,15 @@ import java.util.UUID;
 public final class SpongeMapStorage implements MapStorage {
 
     private final Map<UUID, MapInfo> loadedMapUUIDs = new HashMap<>();
-    private @Nullable BiMap<Integer, UUID> mapIdUUIDIndex = null;
 
     @Override
     public Collection<MapInfo> allMapInfos() {
         final Set<MapInfo> mapInfos = new HashSet<>();
         final ServerLevel defaultWorld = (ServerLevel) Sponge.server().worldManager().world(DefaultWorldKeys.DEFAULT).get();
 
-        final int highestId = ((MapIndexAccessor) defaultWorld.getDataStorage().computeIfAbsent(MapIndex.TYPE)).accessor$getLastIndexID();
+        // Vanilla keeps its maps in the server's saved data. If there is no map index, no maps were ever made
+        final @Nullable MapIndex mapIndex = defaultWorld.getServer().getDataStorage().get(MapIndex.TYPE);
+        final int highestId = mapIndex == null ? -1 : ((MapIndexAccessor) mapIndex).accessor$getLastIndexID();
         for (int i = 0; i <= highestId; i++) {
             final @Nullable MapInfo mapInfo = (MapInfo) defaultWorld.getMapData(new MapId(i));
             if (mapInfo == null) {
@@ -78,12 +78,11 @@ public final class SpongeMapStorage implements MapStorage {
 
     @Override
     public Optional<MapInfo> mapInfo(final UUID uuid) {
-        this.ensureHasMapUUIDIndex();
         final MapInfo mapInfo = this.loadedMapUUIDs.get(uuid);
         if (mapInfo != null) {
             return Optional.of(mapInfo);
         }
-        final Integer mapId = this.mapIdUUIDIndex.inverse().get(uuid);
+        final Integer mapId = this.mapUUIDData().mapUUIDIndex().inverse().get(uuid);
         if (mapId == null) {
             return Optional.empty();
         }
@@ -105,11 +104,12 @@ public final class SpongeMapStorage implements MapStorage {
      * @return UUID of the map.
      */
     public UUID requestUUID(final int id) {
-        this.ensureHasMapUUIDIndex();
-        UUID uuid = this.mapIdUUIDIndex.get(id);
+        final SpongeMapUUIDData data = this.mapUUIDData();
+        UUID uuid = data.mapUUIDIndex().get(id);
         if (uuid == null) {
             uuid = UUID.randomUUID();
-            this.mapIdUUIDIndex.put(id, uuid);
+            data.mapUUIDIndex().put(id, uuid);
+            data.setDirty();
         }
         return uuid;
     }
@@ -118,10 +118,7 @@ public final class SpongeMapStorage implements MapStorage {
         this.loadedMapUUIDs.put(mapInfo.uniqueId(), mapInfo);
     }
 
-    private void ensureHasMapUUIDIndex() {
-        if (this.mapIdUUIDIndex == null) {
-            this.mapIdUUIDIndex = SpongeCommon.server().getDataStorage()
-                .computeIfAbsent(SpongeMapUUIDData.TYPE).mapUUIDIndex();
-        }
+    private SpongeMapUUIDData mapUUIDData() {
+        return SpongeCommon.server().getDataStorage().computeIfAbsent(SpongeMapUUIDData.TYPE);
     }
 }

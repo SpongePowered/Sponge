@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.tracker.world.level.block;
 
-import com.google.common.collect.ImmutableList;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -41,23 +40,18 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.item.inventory.DropItemEvent;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
+import org.spongepowered.common.event.inventory.InventoryEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.item.util.ItemStackUtil;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Mixin(DispenserBlock.class)
 public abstract class DispenserBlockMixin_Tracker {
@@ -94,19 +88,18 @@ public abstract class DispenserBlockMixin_Tracker {
                     target = "Lnet/minecraft/world/level/block/entity/DispenserBlockEntity;setItem(ILnet/minecraft/world/item/ItemStack;)V"))
     private void tracker$setInventoryContentsCallEvent(final DispenserBlockEntity dispenserTileEntity, final int index, final ItemStack stack,
             final Operation<Void> original, final @Share("original-item") LocalRef<ItemStack> originalItemRef) {
-        final ItemStack dispensedItem = ItemStack.EMPTY;
-        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(dispensedItem);
-        final List<ItemStackSnapshot> items = new ArrayList<>();
-        items.add(snapshot);
+        // DropItemEvent.Pre was thrown by DropItemDispenseBehaviorMixin_Tracker before anything dropped
+        original.call(dispenserTileEntity, index, stack);
+        if (ItemStack.matches(originalItemRef.get(), stack)) {
+            return;
+        }
+        final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(dispenserTileEntity);
-            final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(frame.currentCause(), ImmutableList.of(snapshot), items);
-            if (SpongeCommon.post(dropEvent)) {
-                original.call(dispenserTileEntity, index, originalItemRef.get());
-                return;
+            if (!InventoryEventFactory.callChangeInventoryEvent(dispenserTileEntity, index, originalItemRef.get()) && context.hasCaptures()) {
+                // The item is back in its slot, so whatever was dispensed with it is undone as the phase unwinds
+                context.getTransactor().forEach(GameTransaction::markCancelled);
             }
-
-            original.call(dispenserTileEntity, index, stack);
         }
     }
 }

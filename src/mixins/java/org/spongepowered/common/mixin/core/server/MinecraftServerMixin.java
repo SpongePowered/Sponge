@@ -28,6 +28,7 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.DataFixer;
 import net.kyori.adventure.resource.ResourcePackRequest;
 import net.minecraft.commands.CommandSourceStack;
@@ -38,6 +39,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerFunctionManager;
+import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.Services;
 import net.minecraft.server.WorldStem;
 import net.minecraft.server.level.ServerLevel;
@@ -53,7 +55,10 @@ import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
+import net.minecraft.world.level.storage.SavedDataStorage;
 import net.minecraft.world.level.storage.ServerLevelData;
+import net.minecraft.world.level.storage.WorldData;
+import net.minecraft.world.scores.ScoreboardSaveData;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
@@ -130,6 +135,10 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Shadow @Final private Thread serverThread;
     @Shadow @Final private ServerFunctionManager functionManager;
     @Shadow private volatile boolean isSaving;
+    @Shadow @Final protected LevelStorageSource.LevelStorageAccess storageSource;
+    @Shadow @Final private SavedDataStorage savedDataStorage;
+    @Shadow @Final protected WorldData worldData;
+    @Shadow @Final private ServerScoreboard scoreboard;
 
     @Shadow public abstract CommandSourceStack shadow$createCommandSourceStack();
     @Shadow public abstract Iterable<ServerLevel> shadow$getAllLevels();
@@ -142,6 +151,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Shadow public abstract Services shadow$services();
     @Shadow @Nullable public abstract ServerLevel shadow$getLevel(ResourceKey<Level> $$0);
     @Shadow public abstract boolean shadow$isShutdown();
+    @Shadow public abstract @Nullable GameProfile shadow$getSingleplayerProfile();
     // @formatter:on
 
     private final ChatDecorator impl$spongeDecorator = new SpongeChatDecorator();
@@ -425,12 +435,17 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
             result = true;
         }
 
-        // Sponge start - We do per-world WorldInfo/WorldBorders/BossBars
-//        ServerLevel var2 = this.overworld();
-//        ServerLevelData var3 = this.worldData.overworldData();
-//        var3.setWorldBorder(var2.getWorldBorder().createSettings());
-//        this.worldData.setCustomBossEvents(this.customBossEvents().save(this.registryAccess()));
-//        this.storageSource.saveDataTag(this.registryHolder, this.worldData, this.shadow$getPlayerList().getSingleplayerData());
+        // Sponge start - only save server-level data if a level was saved, as a dedicated server calls this every tick
+        if (result) {
+            this.scoreboard.storeToSaveDataIfDirty(this.savedDataStorage.computeIfAbsent(ScoreboardSaveData.TYPE));
+            final @Nullable GameProfile singleplayerProfile = this.shadow$getSingleplayerProfile();
+            this.storageSource.saveDataTag(this.worldData, singleplayerProfile == null ? null : singleplayerProfile.id());
+            if (flush) {
+                this.savedDataStorage.saveAndJoin();
+            } else {
+                this.savedDataStorage.scheduleSave();
+            }
+        }
         // Sponge end
 
         // Sponge start

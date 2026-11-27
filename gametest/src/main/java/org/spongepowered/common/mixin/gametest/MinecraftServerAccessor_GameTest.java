@@ -22,16 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.core.world.level.storage;
+package org.spongepowered.common.mixin.gametest;
 
-import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.Services;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
 /**
- * Previously captured and read SpongeData from level.dat during world loading.
- * SpongeData is no longer stored in level.dat; per-world identity (UUID, key)
- * is now handled by {@code SpongeRegistryData} via per-dimension SavedDataStorage.
+ * The game test server has no session service, which an authenticated
+ * login needs.
  */
-@Mixin(LevelStorageSource.class)
-public abstract class LevelStorageSourceMixin_Vanilla {
+@Mixin(MinecraftServer.class)
+public interface MinecraftServerAccessor_GameTest {
+
+    @Accessor("services") Services accessor$services();
+
+    @Mutable @Accessor("services") void accessor$services(Services services);
 }

@@ -25,141 +25,221 @@
 package org.spongepowered.common.test.gametest.block;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.DispenserBlock;
-import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
+import net.minecraft.world.phys.AABB;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.projectile.arrow.Arrow;
 import org.spongepowered.api.event.EventListener;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.event.item.inventory.TransferInventoryEvent;
+import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
+import org.spongepowered.api.event.item.inventory.DropItemEvent;
+import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.test.gametest.GameTest;
+import org.spongepowered.common.test.gametest.GameTestAssertions;
 import org.spongepowered.common.test.gametest.GameTestGroup;
 import org.spongepowered.common.test.gametest.SpongeGameTests;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.math.vector.Vector3i;
 
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Sponge's hooks into dispense behaviors: a dispenser still shoots its projectile with them applied, and a dropper
- * that moves an item into a container fires the transfer events.
+ * The {@link DropItemEvent.Pre} a dispenser throws for the items it drops, and the {@link ChangeInventoryEvent} for the
+ * slot it took the item from.
  *
- * <p>{@code sponge:notify/water_spread}: a bedrock floor ringed by obsidian, empty inside. Each test places an
- * upward-facing dispenser or dropper at (3,1,3), a chest above it where it needs one, and powers it with a redstone
- * block at (3,1,2).</p>
+ * <p>{@code sponge:dispenser/facing_up}: on a 3x3 bedrock floor, an empty upward-facing dispenser at (1,1,1) with air
+ * above it, so a dropped item stays inside the test. Each test loads the dispenser and powers it with a redstone block
+ * at (1,1,0). {@code sponge:dispenser/dropper_facing_up} is the same with a dropper.</p>
  */
 @GameTestGroup("dispenser")
 public final class DispenserGameTests {
 
-    private static final String ARENA = "sponge:notify/water_spread";
-    private static final BlockPos DISPENSER = new BlockPos(3, 1, 3);
-    private static final BlockPos CHEST = new BlockPos(3, 2, 3);
-    private static final BlockPos POWER = new BlockPos(3, 1, 2);
+    private static final String STRUCTURE = "sponge:dispenser/facing_up";
+    private static final String DROPPER = "sponge:dispenser/dropper_facing_up";
+    private static final BlockPos DISPENSER = new BlockPos(1, 1, 1);
+    private static final BlockPos POWER = new BlockPos(1, 1, 0);
 
-    @GameTest(structure = DispenserGameTests.ARENA, maxTicks = 40, skyAccess = true)
-    void dispenserShootsArrow(final GameTestHelper helper) {
-        DispenserGameTests.place(helper, Blocks.DISPENSER, Items.ARROW);
-        final Vector3d muzzle = VecHelper.toVector3d(helper.absolutePos(DispenserGameTests.DISPENSER));
-        // The arrow leaves the test's bounds within a tick, so it is caught as it spawns
-        final AtomicBoolean spawned = new AtomicBoolean();
-        final EventListener<SpawnEntityEvent> listener = event -> {
-            if (event.entities().stream().anyMatch(entity -> entity instanceof Arrow && entity.position().distanceSquared(muzzle) < 9)) {
-                spawned.set(true);
+    @GameTest(structure = DispenserGameTests.STRUCTURE, maxTicks = 40)
+    void dropEventNamesDroppedItem(final GameTestHelper helper) {
+        final DispenserBlockEntity dispenser = DispenserGameTests.load(helper, Items.DIAMOND);
+        final List<ItemStackSnapshot> dropped = new CopyOnWriteArrayList<>();
+        final AtomicBoolean beforeDispense = new AtomicBoolean();
+        final EventListener<DropItemEvent.Pre> listener = event -> {
+            if (event.cause().contains(dispenser)) {
+                dropped.addAll(event.droppedItems());
+                beforeDispense.set(!dispenser.getItem(0).isEmpty() && DispenserGameTests.drops(helper).isEmpty());
             }
         };
-        SpongeGameTests.listen(SpawnEntityEvent.class, listener);
+        SpongeGameTests.listen(DropItemEvent.Pre.class, listener);
 
         helper.setBlock(DispenserGameTests.POWER, Blocks.REDSTONE_BLOCK);
 
         helper.succeedWhen(() -> {
-            helper.assertTrue(spawned.get(), "The dispenser shot no arrow");
+            GameTestAssertions.assertTrue(helper, dropped.size() == 1, "Expected one dropped item in DropItemEvent.Pre but got " + dropped);
+            GameTestAssertions.assertTrue(helper, dropped.get(0).type() == ItemTypes.DIAMOND.get(), "DropItemEvent.Pre named " + dropped.get(0) + ", not the diamond");
+            GameTestAssertions.assertTrue(helper, beforeDispense.get(), "DropItemEvent.Pre was thrown after the diamond left the dispenser");
+            GameTestAssertions.assertFalse(helper, DispenserGameTests.drops(helper).isEmpty(), "The dispenser dropped no item");
             helper.assertContainerEmpty(DispenserGameTests.DISPENSER);
             Sponge.eventManager().unregisterListeners(listener);
         });
     }
 
-    @GameTest(structure = DispenserGameTests.ARENA, maxTicks = 40)
-    void dropperTransferFiresPreAndPost(final GameTestHelper helper) {
-        final DispenserBlockEntity dropper = DispenserGameTests.place(helper, Blocks.DROPPER, Items.DIAMOND);
-        helper.setBlock(DispenserGameTests.CHEST, Blocks.CHEST);
-        final ChestBlockEntity chest = helper.getBlockEntity(DispenserGameTests.CHEST, ChestBlockEntity.class);
-        final AtomicBoolean pre = new AtomicBoolean();
-        final AtomicBoolean post = new AtomicBoolean();
-        final EventListener<TransferInventoryEvent.Pre> preListener = event -> {
-            if (event.sourceInventory() == dropper && event.targetInventory() == chest) {
-                pre.set(true);
+    // Armor's behavior overrides execute, and with nobody in front to wear it, drops it through super.execute
+    @GameTest(structure = DispenserGameTests.STRUCTURE, maxTicks = 40)
+    void overriddenBehaviorFallbackThrowsDropEvent(final GameTestHelper helper) {
+        final DispenserBlockEntity dispenser = DispenserGameTests.load(helper, Items.IRON_CHESTPLATE);
+        final List<ItemStackSnapshot> dropped = new CopyOnWriteArrayList<>();
+        final EventListener<DropItemEvent.Pre> listener = event -> {
+            if (event.cause().contains(dispenser)) {
+                dropped.addAll(event.droppedItems());
             }
         };
-        final EventListener<TransferInventoryEvent.Post> postListener = event -> {
-            if (event.sourceInventory() == dropper && event.targetInventory() == chest) {
-                post.set(true);
-            }
-        };
-        SpongeGameTests.listen(TransferInventoryEvent.Pre.class, preListener);
-        SpongeGameTests.listen(TransferInventoryEvent.Post.class, postListener);
+        SpongeGameTests.listen(DropItemEvent.Pre.class, listener);
 
         helper.setBlock(DispenserGameTests.POWER, Blocks.REDSTONE_BLOCK);
 
         helper.succeedWhen(() -> {
-            helper.assertContainerContains(DispenserGameTests.CHEST, Items.DIAMOND);
-            helper.assertContainerEmpty(DispenserGameTests.DISPENSER);
-            helper.assertTrue(pre.get(), "No TransferInventoryEvent.Pre from the dropper to the chest");
-            helper.assertTrue(post.get(), "No TransferInventoryEvent.Post from the dropper to the chest");
-            Sponge.eventManager().unregisterListeners(preListener);
-            Sponge.eventManager().unregisterListeners(postListener);
+            GameTestAssertions.assertTrue(helper, dropped.size() == 1, "Expected one dropped item in DropItemEvent.Pre but got " + dropped);
+            GameTestAssertions.assertTrue(helper, dropped.get(0).type() == ItemTypes.IRON_CHESTPLATE.get(), "DropItemEvent.Pre named " + dropped.get(0) + ", not the chestplate");
+            GameTestAssertions.assertFalse(helper, DispenserGameTests.drops(helper).isEmpty(), "The dispenser dropped no item");
+            Sponge.eventManager().unregisterListeners(listener);
         });
     }
 
-    // A cancelled pre event leaves the item in the dropper: it is neither inserted nor dropped
-    @GameTest(structure = DispenserGameTests.ARENA, maxTicks = 40)
-    void cancelledTransferKeepsItemInDropper(final GameTestHelper helper) {
-        final DispenserBlockEntity dropper = DispenserGameTests.place(helper, Blocks.DROPPER, Items.DIAMOND);
-        helper.setBlock(DispenserGameTests.CHEST, Blocks.CHEST);
+    // The event is thrown before the item leaves the dispenser, so cancelling it means no item entity is ever created
+    @GameTest(structure = DispenserGameTests.STRUCTURE, maxTicks = 40)
+    void cancelledDropKeepsItemInDispenser(final GameTestHelper helper) {
+        final DispenserBlockEntity dispenser = DispenserGameTests.load(helper, Items.DIAMOND);
         final AtomicBoolean cancelled = new AtomicBoolean();
-        final AtomicBoolean post = new AtomicBoolean();
-        final EventListener<TransferInventoryEvent.Pre> preListener = event -> {
-            if (event.sourceInventory() == dropper) {
+        final EventListener<DropItemEvent.Pre> listener = event -> {
+            if (event.cause().contains(dispenser)) {
                 event.setCancelled(true);
                 cancelled.set(true);
             }
         };
-        final EventListener<TransferInventoryEvent.Post> postListener = event -> {
-            if (event.sourceInventory() == dropper) {
-                post.set(true);
-            }
-        };
-        SpongeGameTests.listen(TransferInventoryEvent.Pre.class, preListener);
-        SpongeGameTests.listen(TransferInventoryEvent.Post.class, postListener);
+        SpongeGameTests.listen(DropItemEvent.Pre.class, listener);
 
         helper.setBlock(DispenserGameTests.POWER, Blocks.REDSTONE_BLOCK);
 
         helper.startSequence()
-            .thenWaitUntil(() -> helper.assertTrue(cancelled.get(), "No TransferInventoryEvent.Pre from the dropper"))
+            .thenWaitUntil(() -> GameTestAssertions.assertTrue(helper, cancelled.get(), "No DropItemEvent.Pre from the dispenser"))
             .thenExecuteFor(10, () -> {
-                helper.assertContainerEmpty(DispenserGameTests.CHEST);
                 helper.assertContainerContains(DispenserGameTests.DISPENSER, Items.DIAMOND);
-                helper.assertEntityNotPresent(EntityTypes.ITEM);
-                helper.assertFalse(post.get(), "TransferInventoryEvent.Post fired for a cancelled transfer");
+                GameTestAssertions.assertTrue(helper, DispenserGameTests.drops(helper).isEmpty(), "A cancelled drop is still in the world");
             })
+            .thenExecute(() -> Sponge.eventManager().unregisterListeners(listener))
+            .thenSucceed();
+    }
+
+    // Shooting an arrow drops no item, but the arrow still leaves its slot
+    @GameTest(structure = DispenserGameTests.STRUCTURE, maxTicks = 40, skyAccess = true)
+    void shotArrowThrowsInventoryEventAndNoDropEvent(final GameTestHelper helper) {
+        final DispenserBlockEntity dispenser = DispenserGameTests.load(helper, Items.ARROW);
+        final AtomicBoolean dropped = new AtomicBoolean();
+        final List<SlotTransaction> changes = new CopyOnWriteArrayList<>();
+        final EventListener<DropItemEvent.Pre> dropListener = event -> {
+            if (event.cause().contains(dispenser)) {
+                dropped.set(true);
+            }
+        };
+        final EventListener<ChangeInventoryEvent> changeListener = event -> {
+            if (event.cause().contains(dispenser)) {
+                changes.addAll(event.transactions());
+            }
+        };
+        SpongeGameTests.listen(DropItemEvent.Pre.class, dropListener);
+        SpongeGameTests.listen(ChangeInventoryEvent.class, changeListener);
+
+        helper.setBlock(DispenserGameTests.POWER, Blocks.REDSTONE_BLOCK);
+
+        helper.startSequence()
+            .thenWaitUntil(() -> helper.assertContainerEmpty(DispenserGameTests.DISPENSER))
             .thenExecute(() -> {
-                Sponge.eventManager().unregisterListeners(preListener);
-                Sponge.eventManager().unregisterListeners(postListener);
+                GameTestAssertions.assertFalse(helper, dropped.get(), "DropItemEvent.Pre thrown for a shot arrow");
+                GameTestAssertions.assertTrue(helper, changes.size() == 1, "Expected one slot change in ChangeInventoryEvent but got " + changes);
+                GameTestAssertions.assertTrue(helper, changes.get(0).original().type() == ItemTypes.ARROW.get(), "The slot change did not start from the arrow: " + changes.get(0));
+                GameTestAssertions.assertTrue(helper, changes.get(0).finalReplacement().isEmpty(), "The slot change did not end empty: " + changes.get(0));
+                Sponge.eventManager().unregisterListeners(dropListener);
+                Sponge.eventManager().unregisterListeners(changeListener);
             })
             .thenSucceed();
     }
 
-    private static DispenserBlockEntity place(final GameTestHelper helper, final Block block, final net.minecraft.world.item.Item item) {
-        helper.setBlock(DispenserGameTests.DISPENSER, block.defaultBlockState().setValue(DispenserBlock.FACING, Direction.UP));
-        final DispenserBlockEntity blockEntity = helper.getBlockEntity(DispenserGameTests.DISPENSER, DispenserBlockEntity.class);
-        blockEntity.setItem(0, new ItemStack(item));
-        return blockEntity;
+    // The arrow is already in the world by the time the event is thrown, so cancelling puts the item back and discards it
+    @GameTest(structure = DispenserGameTests.STRUCTURE, maxTicks = 40, skyAccess = true)
+    void cancelledInventoryChangeUndoesShot(final GameTestHelper helper) {
+        final DispenserBlockEntity dispenser = DispenserGameTests.load(helper, Items.ARROW);
+        final AABB around = new AABB(helper.absolutePos(DispenserGameTests.DISPENSER)).inflate(3);
+        final AtomicBoolean cancelled = new AtomicBoolean();
+        final EventListener<ChangeInventoryEvent> listener = event -> {
+            if (event.cause().contains(dispenser)) {
+                event.setCancelled(true);
+                cancelled.set(true);
+            }
+        };
+        SpongeGameTests.listen(ChangeInventoryEvent.class, listener);
+
+        helper.setBlock(DispenserGameTests.POWER, Blocks.REDSTONE_BLOCK);
+
+        helper.startSequence()
+            .thenWaitUntil(() -> GameTestAssertions.assertTrue(helper, cancelled.get(), "No ChangeInventoryEvent from the dispenser"))
+            .thenExecute(() -> {
+                helper.assertContainerContains(DispenserGameTests.DISPENSER, Items.ARROW);
+                GameTestAssertions.assertTrue(helper, helper.getLevel().getEntitiesOfClass(AbstractArrow.class, around).isEmpty(), "A cancelled shot is still in the world");
+                Sponge.eventManager().unregisterListeners(listener);
+            })
+            .thenSucceed();
+    }
+
+    @GameTest(structure = DispenserGameTests.STRUCTURE, maxTicks = 40)
+    void dispenserDropThrowsDispenseEvent(final GameTestHelper helper) {
+        DispenserGameTests.assertDispenseEvent(helper);
+    }
+
+    // A dropper with no container in front drops like a dispenser
+    @GameTest(structure = DispenserGameTests.DROPPER, maxTicks = 40)
+    void dropperDropThrowsDispenseEvent(final GameTestHelper helper) {
+        DispenserGameTests.assertDispenseEvent(helper);
+    }
+
+    private static void assertDispenseEvent(final GameTestHelper helper) {
+        DispenserGameTests.load(helper, Items.DIAMOND);
+        final Vector3i at = VecHelper.toVector3i(helper.absolutePos(DispenserGameTests.DISPENSER));
+        final List<ItemEntity> dispensed = new CopyOnWriteArrayList<>();
+        final EventListener<DropItemEvent.Dispense> listener = event -> {
+            if (event.cause().allOf(LocatableBlock.class).stream().anyMatch(block -> block.blockPosition().equals(at))) {
+                event.entities().forEach(entity -> dispensed.add((ItemEntity) entity));
+            }
+        };
+        SpongeGameTests.listen(DropItemEvent.Dispense.class, listener);
+
+        helper.setBlock(DispenserGameTests.POWER, Blocks.REDSTONE_BLOCK);
+
+        helper.succeedWhen(() -> {
+            GameTestAssertions.assertTrue(helper, dispensed.size() == 1, "Expected one item in DropItemEvent.Dispense but got " + dispensed);
+            GameTestAssertions.assertTrue(helper, dispensed.get(0).getItem().is(Items.DIAMOND), "DropItemEvent.Dispense spawned " + dispensed.get(0) + ", not the diamond");
+            GameTestAssertions.assertFalse(helper, DispenserGameTests.drops(helper).isEmpty(), "The dispensed item is not in the world");
+            Sponge.eventManager().unregisterListeners(listener);
+        });
+    }
+
+    private static List<ItemEntity> drops(final GameTestHelper helper) {
+        return helper.getLevel().getEntitiesOfClass(ItemEntity.class, new AABB(helper.absolutePos(DispenserGameTests.DISPENSER)).inflate(3));
+    }
+
+    private static DispenserBlockEntity load(final GameTestHelper helper, final Item item) {
+        final DispenserBlockEntity dispenser = helper.getBlockEntity(DispenserGameTests.DISPENSER, DispenserBlockEntity.class);
+        dispenser.setItem(0, new ItemStack(item));
+        return dispenser;
     }
 }

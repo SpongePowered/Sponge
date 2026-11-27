@@ -49,27 +49,23 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 /**
- * Mixin on {@link FileFixerUpper} to preserve Sponge's per-world identity (UUID, key)
+ * Mixin on {@link FileFixerUpper} to preserve Sponge's per-world data (UUID, key, player table, map UUIDs, custom data)
  * during vanilla's file-fixing process, which rewrites {@code level.dat} and strips
- * unknown tags including the {@code SpongeData} compound.
+ * unknown tags including the {@code SpongeData} compound and the custom data api-18 merged beside it.
  *
- * <p>This also cleans up old Sponge-created files ({@code DIM-1/level.dat},
- * {@code DIM1/level.dat}, {@code session.lock}) so that vanilla's
- * {@code DimensionStorageFileFix} can fully delete the legacy directories.</p>
+ * <p>This also moves the old Sponge-created {@code DIM-1/level.dat} and {@code DIM1/level.dat}, which hold the
+ * nether's and end's level data, to the new dimension folders. The rest ({@code session.lock}) is cleaned up so that
+ * vanilla's {@code DimensionStorageFileFix} can fully delete the legacy directories.</p>
  */
 @Mixin(FileFixerUpper.class)
 public abstract class FileFixerUpperMixin {
 
     @Unique private static final Logger SPONGE_LOGGER = LogUtils.getLogger();
 
-    // TODO: Also cache MapUUIDs and player-uuid-table from old SpongeData for migration
-    //       to separate SavedData files (sponge:map_uuids, etc.) — see follow-up task
-
     /**
-     * Extracts SpongeData from level.dat and per-dimension level.dat files BEFORE
+     * Keeps level.dat and the per-dimension level.dat files BEFORE
      * vanilla's file fixer rewrites them. Also cleans up old Sponge files so
      * vanilla can fully delete DIM-1/DIM1 directories.
      */
@@ -81,34 +77,30 @@ public abstract class FileFixerUpperMixin {
         final UpgradeProgress upgradeProgress,
         final CallbackInfoReturnable<Dynamic<?>> cir
     ) {
-        final Map<ResourceKey<Level>, UUID> identities = new HashMap<>();
+        final Map<ResourceKey<Level>, CompoundTag> levelDats = new HashMap<>();
         final Path worldDir = worldAccess.getLevelDirectory().path();
 
-        // 1. Extract overworld UUID from root level.dat's SpongeData (in the Dynamic)
+        // 1. Keep the root level.dat. Its SpongeData holds the overworld's id and the map UUIDs, and the custom data
+        //    sits beside it.
         //    Note: levelDataTag is the "Data" compound, but SpongeData is a SIBLING of Data
         //    at the root level. We need to re-read the raw file to get it.
         try {
             final CompoundTag root = NbtIo.readCompressed(worldDir.resolve("level.dat"), NbtAccounter.defaultQuota());
-            final CompoundTag spongeData = root.getCompound("SpongeData").orElse(null);
-            if (spongeData != null && !spongeData.isEmpty()) {
-                sponge$extractUuid(spongeData, Level.OVERWORLD, identities);
-                // Also cache MapUUIDs and player-uuid-table for global migration
-                SpongeLevelMigration.cacheGlobalSpongeData(spongeData);
-            }
+            sponge$keepLevelDat(root, Level.OVERWORLD, levelDats);
         } catch (final IOException e) {
             // No level.dat or can't read — skip
         }
 
-        // 2. Extract nether/end UUIDs from their per-dimension level.dat files
+        // 2. Keep the nether's and end's per-dimension level.dat files, move them to their new folders
         //    and clean up old Sponge files so vanilla can delete the directories
-        sponge$extractAndCleanDimension(worldDir, "DIM-1", Level.NETHER, identities);
-        sponge$extractAndCleanDimension(worldDir, "DIM1", Level.END, identities);
+        sponge$extractAndCleanDimension(worldDir, "DIM-1", Level.NETHER, levelDats);
+        sponge$extractAndCleanDimension(worldDir, "DIM1", Level.END, levelDats);
 
-        if (!identities.isEmpty()) {
-            SPONGE_LOGGER.info("[Sponge] Preserved {} world UUID(s) from old SpongeData during file fix", identities.size());
+        if (!levelDats.isEmpty()) {
+            SPONGE_LOGGER.info("[Sponge] Preserved the old SpongeData of {} world(s) during file fix", levelDats.size());
             // Cache for writing AFTER the fix completes and the COW swap is done.
             // The actual write happens in MinecraftServerMixin.loadLevel() via SpongeLevelMigration.
-            SpongeLevelMigration.cacheIdentities(identities);
+            SpongeLevelMigration.cacheLegacyLevelDats(levelDats);
         }
     }
 
@@ -116,27 +108,23 @@ public abstract class FileFixerUpperMixin {
     // which runs AFTER fix() completes (COW swap done) but BEFORE any ServerLevel is created.
 
     /**
-     * Extracts a UUID from a SpongeData compound's "UUID" IntArray field.
+     * Keeps a level.dat if it has a non-empty SpongeData compound, which holds the world's UUID and player table.
      */
     @Unique
-    private static void sponge$extractUuid(
-        final CompoundTag spongeData,
+    private static void sponge$keepLevelDat(
+        final CompoundTag root,
         final ResourceKey<Level> dimKey,
-        final Map<ResourceKey<Level>, UUID> identities
+        final Map<ResourceKey<Level>, CompoundTag> levelDats
     ) {
-        final int[] uuidArray = spongeData.getIntArray("UUID").orElse(null);
-        if (uuidArray != null && uuidArray.length == 4) {
-            final UUID uuid = new UUID(
-                (long) uuidArray[0] << 32 | uuidArray[1] & 0xFFFFFFFFL,
-                (long) uuidArray[2] << 32 | uuidArray[3] & 0xFFFFFFFFL
-            );
-            identities.put(dimKey, uuid);
+        if (root.getCompound("SpongeData").filter(data -> !data.isEmpty()).isPresent()) {
+            levelDats.put(dimKey, root);
         }
     }
 
     /**
-     * Reads SpongeData from an old per-dimension level.dat (e.g. DIM-1/level.dat),
-     * extracts the UUID, then deletes all Sponge-created files so vanilla's
+     * Reads an old per-dimension level.dat (e.g. DIM-1/level.dat) and keeps it. It is then
+     * moved to the new dimension folder, where its level data is read as the dimension loads,
+     * and all other Sponge-created files are deleted so that vanilla's
      * DimensionStorageFileFix can fully remove the legacy directory.
      */
     @Unique
@@ -144,7 +132,7 @@ public abstract class FileFixerUpperMixin {
         final Path worldDir,
         final String legacyDirName,
         final ResourceKey<Level> dimKey,
-        final Map<ResourceKey<Level>, UUID> identities
+        final Map<ResourceKey<Level>, CompoundTag> levelDats
     ) {
         final Path legacyDir = worldDir.resolve(legacyDirName);
         final Path legacyLevelDat = legacyDir.resolve("level.dat");
@@ -153,13 +141,9 @@ public abstract class FileFixerUpperMixin {
             return;
         }
 
-        // Extract SpongeData
+        // Keep it for its SpongeData
         try {
-            final CompoundTag root = NbtIo.readCompressed(legacyLevelDat, NbtAccounter.defaultQuota());
-            final CompoundTag spongeData = root.getCompound("SpongeData").orElse(null);
-            if (spongeData != null && !spongeData.isEmpty()) {
-                sponge$extractUuid(spongeData, dimKey, identities);
-            }
+            sponge$keepLevelDat(NbtIo.readCompressed(legacyLevelDat, NbtAccounter.defaultQuota()), dimKey, levelDats);
         } catch (final IOException e) {
             SPONGE_LOGGER.warn("[Sponge]   Failed to read SpongeData from {}", legacyLevelDat, e);
         }
@@ -192,9 +176,11 @@ public abstract class FileFixerUpperMixin {
             SPONGE_LOGGER.warn("[Sponge]   Failed to migrate data files from {}", legacyDirName, e);
         }
 
-        // Clean up old Sponge files so vanilla can delete the legacy directory
+        // Clean up old Sponge files so vanilla can delete the legacy directory. The level data is not deleted: it is
+        // moved to the new dimension folder, or, if that fails, kept where it is
         try {
-            Files.deleteIfExists(legacyLevelDat);
+            Files.createDirectories(newDimDir);
+            Files.move(legacyLevelDat, newDimDir.resolve("level.dat"));
             Files.deleteIfExists(legacyDir.resolve("session.lock"));
             if (Files.exists(legacyDataDir)) {
                 PathUtils.deleteDirectory(legacyDataDir);

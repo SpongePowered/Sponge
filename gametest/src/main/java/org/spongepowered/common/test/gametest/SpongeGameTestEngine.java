@@ -100,8 +100,9 @@ import java.util.stream.Collectors;
  */
 public final class SpongeGameTestEngine implements TestEngine {
 
-    // Where the first structure is placed; the game test world is a superflat with its surface at y=-60
-    private static final BlockPos ORIGIN = new BlockPos(0, -59, 0);
+    // Where the first structure is placed, as GameTestServer#startTests: the game test world is a sandstone superflat
+    // with its surface at y=3
+    private static final BlockPos ORIGIN = new BlockPos(0, 4, 0);
     // How long a passed test's structure must then stay as it was
     private static final int SETTLE_TICKS = 20;
 

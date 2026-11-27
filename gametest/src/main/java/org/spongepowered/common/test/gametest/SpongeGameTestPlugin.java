@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.test.gametest;
 
+import com.google.inject.Inject;
+import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 /**
@@ -33,7 +35,8 @@ import org.spongepowered.plugin.builtin.jvm.Plugin;
 @Plugin("sponge_gametest")
 public final class SpongeGameTestPlugin {
 
-    public SpongeGameTestPlugin() {
-        SpongeGameTests.registerPendingListeners();
+    @Inject
+    public SpongeGameTestPlugin(final PluginContainer plugin) {
+        SpongeGameTests.registerPendingListeners(plugin);
     }
 }
