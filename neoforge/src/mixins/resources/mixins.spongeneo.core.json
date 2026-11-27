@@ -42,6 +42,7 @@
         "client.main.MainMixin_Neo"
     ],
     "server": [
-        "server.MainMixin_Neo"
+        "server.MainMixin_Neo",
+        "server.console.ConsoleCommandCompleterMixin_Neo"
   ]
 }
