@@ -33,8 +33,7 @@ import org.spongepowered.common.test.gametest.GameTestGroup;
 /**
  * Checks that parsing keeps the trailing argument separator. Sponge used to
  * rebuild the reader from the split command and arguments, which dropped the
- * separator of inputs such as {@code "help "} and made the console unable to
- * complete (SpongePowered/Sponge#4235).
+ * separator of inputs such as {@code "help "} (SpongePowered/Sponge#4235).
  */
 @GameTestGroup("command")
 public final class TrailingSeparatorGameTests {
