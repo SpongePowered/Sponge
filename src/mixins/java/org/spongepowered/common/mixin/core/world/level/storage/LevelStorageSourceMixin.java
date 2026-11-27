@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.core.world.level.storage;
+package org.spongepowered.common.mixin.core.world.level.storage;
 
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,5 +33,5 @@ import org.spongepowered.asm.mixin.Mixin;
  * is now handled by {@code SpongeRegistryData} via per-dimension SavedDataStorage.
  */
 @Mixin(LevelStorageSource.class)
-public abstract class LevelStorageSourceMixin_Vanilla {
+public abstract class LevelStorageSourceMixin {
 }

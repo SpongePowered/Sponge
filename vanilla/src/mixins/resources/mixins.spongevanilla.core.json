@@ -46,8 +46,7 @@
     "world.level.ServerExplosionMixin_Vanilla",
     "world.item.TeleportRandomlyConsumeEffectMixin_Vanilla",
     "world.level.block.FireBlockMixin_Vanilla",
-    "world.level.block.entity.AbstractFurnaceBlockEntityMixin_Vanilla",
-    "world.level.storage.LevelStorageSourceMixin_Vanilla"
+    "world.level.block.entity.AbstractFurnaceBlockEntityMixin_Vanilla"
   ],
   "overwrites": {
     "conformVisibility": true

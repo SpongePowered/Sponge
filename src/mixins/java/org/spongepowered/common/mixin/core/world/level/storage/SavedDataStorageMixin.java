@@ -31,16 +31,21 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.RegistryOps;
+import net.minecraft.util.Util;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
 import net.minecraft.world.level.storage.SavedDataStorage;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.world.level.storage.DimensionDataStorageBridge;
 import org.spongepowered.common.data.DataUtil;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Optional;
 
 @Mixin(SavedDataStorage.class)
@@ -90,5 +95,25 @@ public abstract class SavedDataStorageMixin implements DimensionDataStorageBridg
     @Override
     public @Nullable Identifier bridge$dimensionKey() {
         return this.impl$dimensionKey;
+    }
+
+    /**
+     * Writes Sponge's own data the way vanilla writes {@code level.dat}: to a temporary file, which then replaces the
+     * old one. We need this because a world's id, level data and players are rewritten on every save, and vanilla
+     * writes saved data in place. Neo already writes all saved data this way through its own call, so there is
+     * nothing to wrap there.
+     */
+    @WrapOperation(method = "tryWrite", require = 0,
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NbtIo;writeCompressed(Lnet/minecraft/nbt/CompoundTag;Ljava/nio/file/Path;)V"))
+    private void impl$writeSpongeDataSafely(final CompoundTag tag, final Path path, final Operation<Void> original,
+        final @Local(argsOnly = true) SavedDataType<?> type
+    ) throws IOException {
+        if (!ResourceKey.SPONGE_NAMESPACE.equals(type.id().getNamespace())) {
+            original.call(tag, path);
+            return;
+        }
+        final Path written = Files.createTempFile(path.getParent(), path.getFileName().toString(), ".tmp");
+        original.call(tag, written);
+        Util.safeReplaceFile(path, written, path.resolveSibling(path.getFileName() + "_old"));
     }
 }

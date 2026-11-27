@@ -33,7 +33,7 @@ public interface ServerGamePacketListenerImplBridge {
 
     long bridge$getLastTryBlockPacketTimeStamp();
 
-    void bridge$incrementIgnorePackets();
+    void bridge$ignoreNextSwing();
 
     SpongeTabList bridge$tabList();
 }
