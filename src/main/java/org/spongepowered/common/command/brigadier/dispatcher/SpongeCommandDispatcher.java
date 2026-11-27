@@ -27,6 +27,7 @@ package org.spongepowered.common.command.brigadier.dispatcher;
 import com.mojang.brigadier.AmbiguityConsumer;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.ImmutableStringReader;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.RedirectModifier;
 import com.mojang.brigadier.ResultConsumer;
@@ -536,6 +537,23 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
             return SpongeCommandDispatcher.getCommand(context.getChild());
         }
         return command;
+    }
+
+    @Override
+    public CompletableFuture<Suggestions> getCompletionSuggestions(final ParseResults<CommandSourceStack> parse) {
+        final ImmutableStringReader reader = parse.getReader();
+        final String input = reader.getString();
+        // The console completer prepends a '/' to the console line, skips it before parsing
+        // and then calls this overload. The default implementation uses the reader's total
+        // length (which still includes that '/'), so the cursor is one past the parsed
+        // command text and completion after the command name returns no suggestions.
+        if (reader.getCursor() == 1 && input.startsWith("/")) {
+            final String command = input.substring(1);
+            return this.getCompletionSuggestions(
+                    this.parse(command, parse.getContext().getSource(), true),
+                    command.length());
+        }
+        return this.getCompletionSuggestions(parse, reader.getTotalLength());
     }
 
     @Override
