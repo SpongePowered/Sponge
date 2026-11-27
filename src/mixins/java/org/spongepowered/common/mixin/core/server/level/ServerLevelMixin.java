@@ -160,7 +160,6 @@ import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.concurrent.Executor;
@@ -280,7 +279,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         final @Nullable SpongeRegistryData saved = dataStorage.get(SpongeRegistryData.TYPE);
         final SpongeRegistryData registryData;
         if (saved == null) {
-            registryData = new SpongeRegistryData(spongeData.uniqueId(), Optional.empty(), Map.of());
+            registryData = new SpongeRegistryData(spongeData.uniqueId());
             dataStorage.set(SpongeRegistryData.TYPE, registryData);
         } else {
             registryData = saved;

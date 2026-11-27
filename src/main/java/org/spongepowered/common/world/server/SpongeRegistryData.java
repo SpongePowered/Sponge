@@ -82,11 +82,11 @@ public final class SpongeRegistryData extends SavedData {
         this.uniqueId = UUID.randomUUID();
     }
 
-    public SpongeRegistryData(final UUID uniqueId, final Optional<ResourceKey<Level>> key, final Map<Integer, UUID> playerUniqueIds) {
-        this(uniqueId, key, Optional.empty(), Optional.empty(), playerUniqueIds);
+    public SpongeRegistryData(final UUID uniqueId) {
+        this(uniqueId, Optional.empty(), Optional.empty(), Optional.empty(), Map.of());
     }
 
-    private SpongeRegistryData(final UUID uniqueId, final Optional<ResourceKey<Level>> key, final Optional<CompoundTag> levelData,
+    SpongeRegistryData(final UUID uniqueId, final Optional<ResourceKey<Level>> key, final Optional<CompoundTag> levelData,
         final Optional<CompoundTag> customData, final Map<Integer, UUID> playerUniqueIds) {
         this.uniqueId = uniqueId;
         this.key = key.orElse(null);

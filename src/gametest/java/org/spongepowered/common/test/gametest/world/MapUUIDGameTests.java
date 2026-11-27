@@ -137,7 +137,10 @@ public final class MapUUIDGameTests {
             List.of(UUID.randomUUID(), player)
         );
 
-        SpongeLevelMigration.cacheSpongeData(Map.of(Level.OVERWORLD, spongeData));
+        final CompoundTag levelDat = new CompoundTag();
+        levelDat.put(Constants.Sponge.Data.V2.SPONGE_DATA, spongeData);
+
+        SpongeLevelMigration.cacheLegacyLevelDats(Map.of(Level.OVERWORLD, levelDat));
         SpongeLevelMigration.writeCachedRegistryData(worldDir);
 
         final @Nullable UUID read = MapUUIDGameTests.mapUuid(server, worldDir.resolve("data"), 3);

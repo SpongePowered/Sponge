@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.test.gametest.world;
 
+import com.mojang.serialization.Lifecycle;
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
@@ -32,11 +33,23 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.datafix.DataFixers;
+import net.minecraft.util.worldupdate.UpgradeProgress;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.gamerules.GameRuleMap;
+import net.minecraft.world.level.gamerules.GameRules;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.saveddata.WeatherData;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.LevelResource;
+import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.PrimaryLevelData;
+import net.minecraft.world.level.storage.SavedDataStorage;
 import net.minecraft.world.level.storage.ServerLevelData;
+import org.apache.commons.io.file.PathUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataRegistration;
@@ -66,13 +79,18 @@ import org.spongepowered.common.test.gametest.GameTestAssertions;
 import org.spongepowered.common.test.gametest.GameTestGroup;
 import org.spongepowered.common.test.gametest.SpongeGameTests;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.world.server.SpongeLevelMigration;
+import org.spongepowered.common.world.server.SpongeRegistryData;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -96,6 +114,11 @@ public final class SpongeLevelDataGameTests {
     private static final long SEED = 0x5EED_CAFEL;
     private static final Vector3i SPAWN = new Vector3i(37, 70, -21);
     private static final long GAME_TIME = 123_456L;
+    // These match the values in the fixtures
+    private static final UUID LEGACY_ID = UUID.fromString("7a1e9c3b-18a2-4d5e-9f00-00000a181121");
+    private static final long LEGACY_SEED = 0x0A18_5EED_1121L;
+    private static final long LEGACY_SERVER_SEED = 0x0A18_0DEF_A017L;
+    private static final double LEGACY_BORDER = 1234.0;
 
     @GameTest(maxTicks = SpongeLevelDataGameTests.MAX_TICKS)
     void reloadedWorldKeepsItsId(final GameTestHelper helper) {
@@ -170,6 +193,8 @@ public final class SpongeLevelDataGameTests {
             .thenCompose($ -> SpongeLevelDataGameTests.unload(key))
             .thenCompose($ -> SpongeLevelDataGameTests.loadProperties(key))
             .thenComposeAsync(properties -> {
+                // The root level.dat is only there once the server has saved
+                server.saveAllChunks(true, true, true);
                 defaultWorld[0] = SpongeLevelDataGameTests.defaultWorld(levelDat);
                 SpongeLevelDataGameTests.change(properties);
                 gameModes[0] = properties.gameMode().equals(GameModes.ADVENTURE.get())
@@ -375,6 +400,164 @@ public final class SpongeLevelDataGameTests {
         });
     }
 
+    // An upgraded api-18 world loads its seed, game rules, weather and border from its old level.dat. Once it is saved,
+    // it keeps them in its own saved data along with its own changes, and no longer reads the old file
+    @GameTest(maxTicks = SpongeLevelDataGameTests.MAX_TICKS)
+    void legacyWorldKeepsItsSavedData(final GameTestHelper helper) {
+        final ResourceKey key = ResourceKey.sponge("gametest_legacy_upgrade");
+        final MinecraftServer server = helper.getLevel().getServer();
+        final WorldManager manager = Sponge.server().worldManager();
+        final Key<Value<String>> customData = CustomData.KEY;
+        final List<Legacy> loads = new CopyOnWriteArrayList<>();
+
+        final CompletableFuture<Boolean> loaded = manager.deleteWorld(key)
+            .thenApply($ -> {
+                SpongeLevelDataGameTests.copyFixture(
+                    "dimensions/sponge/gametest_legacy_upgrade/level.dat",
+                    manager.worldDirectory(key).resolve("level.dat")
+                );
+                return true;
+            })
+            .thenCompose($ -> SpongeLevelDataGameTests.load(key))
+            .thenApplyAsync(world -> {
+                loads.add(Legacy.of(world));
+                // If the legacy level.dat were read again, it would undo these changes
+                world.properties().offer(customData, "26.1");
+                ((ServerLevel) world).getGameRules().set(GameRules.KEEP_INVENTORY, false, null);
+                return true;
+            }, server)
+            .thenCompose($ -> SpongeLevelDataGameTests.unload(key))
+            .thenCompose($ -> SpongeLevelDataGameTests.load(key))
+            .thenApplyAsync(world -> loads.add(Legacy.of(world)), server)
+            .thenCompose($ -> SpongeLevelDataGameTests.unload(key).thenCompose($$ -> manager.deleteWorld(key)));
+
+        helper.succeedWhen(() -> {
+            SpongeLevelDataGameTests.finished(helper, loaded);
+            final Legacy legacy = new Legacy(
+                SpongeLevelDataGameTests.LEGACY_ID,
+                SpongeLevelDataGameTests.LEGACY_SEED,
+                true,
+                true,
+                SpongeLevelDataGameTests.LEGACY_BORDER,
+                Optional.of("api-18")
+            );
+            GameTestAssertions.assertTrue(
+                helper,
+                loads.get(0).equals(legacy),
+                "The legacy world loaded with " + loads.get(0) + " rather than its own " + legacy
+            );
+            final Legacy changed = new Legacy(
+                legacy.uniqueId(),
+                legacy.seed(),
+                false,
+                legacy.raining(),
+                legacy.border(),
+                Optional.of("26.1")
+            );
+            GameTestAssertions.assertTrue(
+                helper,
+                loads.get(1).equals(changed),
+                "The legacy world loaded again with " + loads.get(1) + " rather than what it was saved with, " + changed
+            );
+        });
+    }
+
+    // The api-18 upgrade keeps the custom data from the root of the default world's level.dat. It also keeps the
+    // nether's level data, whose saved data is moved out when the nether first loads from its new folder
+    @GameTest(maxTicks = 1)
+    void upgradeKeepsTheLevelDats(final GameTestHelper helper) throws IOException {
+        final MinecraftServer server = helper.getLevel().getServer();
+        final Key<Value<String>> customData = CustomData.KEY;
+        final Path saves = Files.createTempDirectory("sponge-gametest-upgrade");
+        try {
+            final Path worldDir = saves.resolve("world");
+            SpongeLevelDataGameTests.copyFixture("level.dat", worldDir.resolve("level.dat"));
+            SpongeLevelDataGameTests.copyFixture("DIM-1/level.dat", worldDir.resolve("DIM-1").resolve("level.dat"));
+            // Do what the server does on start: fix the api-18 world, then write what the fix kept before levels load
+            try (final LevelStorageSource.LevelStorageAccess access = LevelStorageSource.createDefault(saves)
+                .createAccess("world")) {
+                DataFixers.getFileFixer().fix(access, access.getUnfixedDataTag(false), new UpgradeProgress());
+            }
+            SpongeLevelMigration.writeCachedRegistryData(worldDir);
+
+            final CompoundTag registry = SpongeLevelDataGameTests.read(
+                DimensionType.getStorageFolder(Level.OVERWORLD, worldDir)
+                    .resolve("data").resolve("sponge").resolve("registry.dat")
+            ).getCompoundOrEmpty("data");
+            final PrimaryLevelData properties = new PrimaryLevelData(
+                ((PrimaryLevelData) server.getWorldData()).getLevelSettings(),
+                PrimaryLevelData.SpecialWorldProperty.NONE,
+                Lifecycle.stable()
+            );
+            SpongeRegistryData.applyCustomData(properties, registry.getCompoundOrEmpty("custom_data"));
+            final Optional<String> defaultCustomData = ((ServerWorldProperties) properties).get(customData);
+            GameTestAssertions.assertTrue(
+                helper,
+                defaultCustomData.equals(Optional.of("api-18 default world")),
+                "The default world's registry.dat has custom data " + defaultCustomData
+                    + " rather than its api-18 level.dat's"
+            );
+
+            final Path nether = DimensionType.getStorageFolder(Level.NETHER, worldDir);
+            GameTestAssertions.assertTrue(
+                helper,
+                Files.notExists(worldDir.resolve("DIM-1")),
+                "The fix left DIM-1 behind"
+            );
+            // Save newer game rules, as an api-19 run would have. The legacy level.dat's rules must not replace them
+            try (final SavedDataStorage storage = new SavedDataStorage(
+                nether.resolve("data"),
+                server.getFixerUpper(),
+                server.registryAccess()
+            )) {
+                final GameRuleMap savedSince = GameRuleMap.of();
+                new GameRules(server.getWorldData().enabledFeatures(), savedSince);
+                storage.set(GameRuleMap.TYPE, savedSince);
+            }
+            final @Nullable CompoundTag legacy = SpongeLevelMigration.readLegacyLevelDat(nether);
+            GameTestAssertions.assertTrue(helper, legacy != null, "The fix left the nether no level.dat in " + nether);
+            final Optional<BlockPos> spawn = legacy.getCompoundOrEmpty("Data")
+                .read("spawn", LevelData.RespawnData.CODEC)
+                .map(LevelData.RespawnData::pos);
+            GameTestAssertions.assertTrue(
+                helper,
+                spawn.equals(Optional.of(new BlockPos(8, 70, -8))),
+                "The nether's level data has spawn " + spawn + " rather than its api-18 level.dat's"
+            );
+            try (final SavedDataStorage storage = new SavedDataStorage(
+                nether.resolve("data"),
+                server.getFixerUpper(),
+                server.registryAccess()
+            )) {
+                final @Nullable WorldGenSettings worldGenSettings = storage.get(WorldGenSettings.TYPE);
+                final @Nullable GameRuleMap gameRules = storage.get(GameRuleMap.TYPE);
+                final @Nullable WeatherData weather = storage.get(WeatherData.TYPE);
+                GameTestAssertions.assertTrue(
+                    helper,
+                    worldGenSettings != null
+                    && worldGenSettings.options().seed() == SpongeLevelDataGameTests.LEGACY_SERVER_SEED,
+                    "The nether's saved world gen settings are " + worldGenSettings
+                        + " rather than its api-18 level.dat's"
+                );
+                GameTestAssertions.assertTrue(
+                    helper,
+                    gameRules != null
+                    && !new GameRules(server.getWorldData().enabledFeatures(), gameRules).get(GameRules.KEEP_INVENTORY),
+                    "The nether's saved game rules are " + gameRules
+                        + " rather than those saved since its api-18 level.dat"
+                );
+                GameTestAssertions.assertTrue(
+                    helper,
+                    weather != null && weather.isRaining(),
+                    "The nether's saved weather is not its api-18 level.dat's"
+                );
+            }
+        } finally {
+            PathUtils.deleteDirectory(saves);
+        }
+        helper.succeed();
+    }
+
     // Uses a superflat, so creating the world generates next to nothing. Any world an earlier run left is deleted first
     private static CompletableFuture<ServerWorld> create(final ResourceKey key) {
         final WorldArchetypeType type = WorldArchetypeType.of(
@@ -490,6 +673,18 @@ public final class SpongeLevelDataGameTests {
         }
     }
 
+    // Copies a file of the api-18 world fixture, which was made from what an api-18 1.21.11 game test run wrote
+    private static void copyFixture(final String path, final Path target) {
+        try (final InputStream fixture = SpongeLevelDataGameTests.class.getResourceAsStream(
+            "/level_data/api-18/world/" + path
+        )) {
+            Files.createDirectories(target.getParent());
+            Files.copy(Objects.requireNonNull(fixture, path), target, StandardCopyOption.REPLACE_EXISTING);
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
     private static <T> T finished(final GameTestHelper helper, final CompletableFuture<T> future) {
         GameTestAssertions.assertTrue(helper, future.isDone(), "The worlds have not finished loading and unloading");
         if (future.isCompletedExceptionally()) {
@@ -503,6 +698,22 @@ public final class SpongeLevelDataGameTests {
     }
 
     private record Loaded(boolean before, Properties properties) {
+    }
+
+    private record Legacy(UUID uniqueId, long seed, boolean keepInventory, boolean raining, double border,
+                          Optional<String> customData) {
+
+        static Legacy of(final ServerWorld world) {
+            final ServerLevel level = (ServerLevel) world;
+            return new Legacy(
+                world.uniqueId(),
+                world.properties().worldGenerationConfig().seed(),
+                level.getGameRules().get(GameRules.KEEP_INVENTORY),
+                level.getWeatherData().isRaining(),
+                level.getWorldBorder().getSize(),
+                world.properties().get(CustomData.KEY)
+            );
+        }
     }
 
     private record Properties(UUID uniqueId, long seed, Vector3i spawn, long gameTime, Difficulty difficulty,
