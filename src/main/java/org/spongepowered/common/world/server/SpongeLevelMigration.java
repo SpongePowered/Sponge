@@ -24,6 +24,10 @@
  */
 package org.spongepowered.common.world.server;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.mojang.serialization.Codec;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtOps;
@@ -33,23 +37,25 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.util.Constants;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Handles migration of old Sponge world data (UUID, key) from the pre-26.1 format
- * to the new per-dimension {@link SpongeRegistryData} SavedData format.
+ * Handles migration of old Sponge world data (UUID, key, player table, map UUIDs) from the pre-26.1 format
+ * to the new per-dimension {@link SpongeRegistryData} and server-level {@link SpongeMapUUIDData} SavedData formats.
  *
  * <p>The migration flow is:</p>
  * <ol>
- *   <li>{@code FileFixerUpperMixin} extracts UUIDs from old {@code SpongeData} in level.dat
- *       and per-dimension level.dat files BEFORE vanilla's file fixer rewrites them.</li>
- *   <li>Cached identities are stored via {@link #cacheIdentities(Map)}.</li>
+ *   <li>{@code FileFixerUpperMixin} extracts the old {@code SpongeData} of level.dat and the per-dimension
+ *       level.dat files BEFORE vanilla's file fixer rewrites them.</li>
+ *   <li>They are cached via {@link #cacheSpongeData(Map)}.</li>
  *   <li>{@code MinecraftServerMixin.loadLevel()} calls {@link #writeCachedRegistryData(Path)}
  *       AFTER the file fix completes but BEFORE any ServerLevel is created.</li>
  * </ol>
@@ -58,105 +64,80 @@ public final class SpongeLevelMigration {
 
     // Static fields (not ThreadLocal) because fix() runs on "main" thread
     // but loadLevel() runs on "Server thread".
-    private static volatile @Nullable Map<ResourceKey<Level>, UUID> cachedIdentities;
-    private static volatile @Nullable CompoundTag cachedGlobalSpongeData;
+    private static volatile @Nullable Map<ResourceKey<Level>, CompoundTag> cachedSpongeData;
 
     private SpongeLevelMigration() {
     }
 
-    public static void cacheIdentities(final Map<ResourceKey<Level>, UUID> identities) {
-        cachedIdentities = identities;
+    public static void cacheSpongeData(final Map<ResourceKey<Level>, CompoundTag> spongeData) {
+        cachedSpongeData = spongeData;
     }
 
-    public static void cacheGlobalSpongeData(final CompoundTag spongeData) {
-        cachedGlobalSpongeData = spongeData;
+    /** Gets the players of the player table in a world's api-18 {@code SpongeData}, by the index api-18 gave them */
+    public static Map<Integer, UUID> legacyPlayerUniqueIds(final CompoundTag spongeData) {
+        return SpongeLevelMigration.indexPlayers(
+            spongeData.read(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, UUIDUtil.CODEC.listOf()).orElse(List.of()));
+    }
+
+    // Indexes the table the same way api-18 read it
+    static Map<Integer, UUID> indexPlayers(final List<UUID> table) {
+        final BiMap<Integer, UUID> players = HashBiMap.create();
+        table.forEach(uuid -> players.inverse().putIfAbsent(uuid, players.size()));
+        return players;
     }
 
     /**
-     * Writes cached migrated identities to per-dimension {@code data/sponge/registry.dat} files.
+     * Writes the cached worlds' ids and player tables to per-dimension {@code data/sponge/registry.dat} files, and the
+     * default world's map UUIDs to the server's {@code data/sponge/map_uuids.dat}, where none exist yet.
      * Must be called AFTER FileFixerUpper.fix() completes (directory structure is final)
      * and BEFORE any ServerLevel is created (so SavedDataStorage finds files on disk).
      */
     public static void writeCachedRegistryData(final Path worldDir) {
-        final @Nullable Map<ResourceKey<Level>, UUID> identities = cachedIdentities;
-        if (identities == null || identities.isEmpty()) {
-            cachedIdentities = null;
-            return;
-        }
-        cachedIdentities = null;
-
-        for (final var entry : identities.entrySet()) {
-            final ResourceKey<Level> dimKey = entry.getKey();
-            final UUID uuid = entry.getValue();
-            try {
-                final Path dimDir = DimensionType.getStorageFolder(dimKey, worldDir);
-                final Path dataDir = dimDir.resolve("data").resolve("sponge");
-                final Path registryFile = dataDir.resolve("registry.dat");
-                if (Files.exists(registryFile)) {
-                    continue;
-                }
-                Files.createDirectories(dataDir);
-                final SpongeRegistryData registryData = new SpongeRegistryData(uuid, Optional.of(dimKey));
-                final var encoded = SpongeRegistryData.CODEC.encodeStart(NbtOps.INSTANCE, registryData);
-                if (encoded.isSuccess()) {
-                    final CompoundTag savedDataTag = new CompoundTag();
-                    savedDataTag.put("data", encoded.getOrThrow());
-                    NbtUtils.addCurrentDataVersion(savedDataTag);
-                    NbtIo.writeCompressed(savedDataTag, registryFile);
-                    SpongeCommon.logger().info("[Sponge]   Wrote migrated {} UUID {} -> {}", dimKey.identifier(), uuid, registryFile);
-                }
-            } catch (final IOException e) {
-                SpongeCommon.logger().warn("[Sponge]   Failed to write registry.dat for {}", dimKey.identifier(), e);
-            }
-        }
-
-        // Write global Sponge data (MapUUIDs, player-uuid-table) to server-level SavedData
-        writeGlobalSpongeData(worldDir);
-    }
-
-    private static void writeGlobalSpongeData(final Path worldDir) {
-        final @Nullable CompoundTag spongeData = cachedGlobalSpongeData;
-        cachedGlobalSpongeData = null;
+        final @Nullable Map<ResourceKey<Level>, CompoundTag> spongeData = cachedSpongeData;
+        cachedSpongeData = null;
         if (spongeData == null) {
             return;
         }
 
-        final Path dataDir = worldDir.resolve("data").resolve("sponge");
-        final Path mapUUIDFile = dataDir.resolve("map_uuids.dat");
-        if (Files.exists(mapUUIDFile)) {
-            return; // Already migrated
+        for (final var entry : spongeData.entrySet()) {
+            final ResourceKey<Level> dimKey = entry.getKey();
+            final @Nullable UUID uuid = entry.getValue().read(Constants.Sponge.World.UNIQUE_ID, UUIDUtil.CODEC).orElse(null);
+            if (uuid == null) {
+                continue;
+            }
+            final Path registryFile = DimensionType.getStorageFolder(dimKey, worldDir).resolve("data").resolve("sponge").resolve("registry.dat");
+            final SpongeRegistryData registryData = new SpongeRegistryData(uuid, Optional.of(dimKey),
+                SpongeLevelMigration.legacyPlayerUniqueIds(entry.getValue()));
+            if (SpongeLevelMigration.write(registryFile, SpongeRegistryData.CODEC, registryData)) {
+                SpongeCommon.logger().info("[Sponge]   Wrote migrated {} UUID {} -> {}", dimKey.identifier(), uuid, registryFile);
+            }
         }
 
-        // Extract MapUUIDs and player-uuid-table from old SpongeData
-        final var mapUUIDs = spongeData.getCompound("MapUUIDs").orElse(null);
-        final var playerTable = spongeData.getList("player-uuid-table").orElse(null);
-
-        // Only write if there's actual data to migrate
-        final boolean hasMapData = mapUUIDs != null && !mapUUIDs.isEmpty();
-        final boolean hasPlayerData = playerTable != null && !playerTable.isEmpty();
-        if (!hasMapData && !hasPlayerData) {
-            return;
+        // Only the default world's map UUIDs were ever used, so we only migrate those
+        final Map<Integer, UUID> mapUUIDs = Optional.ofNullable(spongeData.get(Level.OVERWORLD))
+            .flatMap(defaultWorld -> defaultWorld.read(Constants.Map.MAP_UUID_INDEX, SpongeMapUUIDData.MAP_INDEX_CODEC))
+            .orElse(Map.of());
+        final Path mapUUIDFile = worldDir.resolve("data").resolve("sponge").resolve("map_uuids.dat");
+        if (!mapUUIDs.isEmpty() && SpongeLevelMigration.write(mapUUIDFile, SpongeMapUUIDData.CODEC, new SpongeMapUUIDData(mapUUIDs, Map.of(), List.of()))) {
+            SpongeCommon.logger().info("[Sponge]   Wrote migrated map UUIDs -> {}", mapUUIDFile);
         }
+    }
 
+    // Writes the data the same way SavedDataStorage does, unless the file already exists
+    private static <T> boolean write(final Path file, final Codec<T> codec, final T data) {
+        if (Files.exists(file)) {
+            return false;
+        }
         try {
-            Files.createDirectories(dataDir);
-            // Write as a raw compound since the old format doesn't match the new codec exactly.
-            // The SpongeMapUUIDData.CODEC will read the proper format; here we just preserve the raw data
-            // for potential manual migration. The new SavedData will be created fresh on first access.
             final CompoundTag savedDataTag = new CompoundTag();
-            final CompoundTag data = new CompoundTag();
-            if (hasMapData) {
-                data.put("legacy_map_uuids", mapUUIDs);
-            }
-            if (hasPlayerData) {
-                data.put("legacy_player_uuids", playerTable);
-            }
-            savedDataTag.put("data", data);
+            savedDataTag.put("data", codec.encodeStart(NbtOps.INSTANCE, data).getOrThrow());
             NbtUtils.addCurrentDataVersion(savedDataTag);
-            NbtIo.writeCompressed(savedDataTag, mapUUIDFile);
-            SpongeCommon.logger().info("[Sponge]   Preserved global MapUUIDs/player-uuid-table -> {}", mapUUIDFile);
-        } catch (final IOException e) {
-            SpongeCommon.logger().warn("[Sponge]   Failed to write global Sponge data", e);
+            Files.createDirectories(file.getParent());
+            NbtIo.writeCompressed(savedDataTag, file);
+            return true;
+        } catch (final IOException | IllegalStateException e) {
+            SpongeCommon.logger().warn("[Sponge]   Failed to write {}", file, e);
+            return false;
         }
     }
 }

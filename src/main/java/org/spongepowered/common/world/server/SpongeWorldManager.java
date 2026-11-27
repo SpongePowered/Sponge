@@ -33,6 +33,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
 import net.minecraft.nbt.CompoundTag;
@@ -441,7 +442,14 @@ public class SpongeWorldManager implements WorldManager {
      */
     private void saveUnloadedProperties(final ResourceKey key, final @Nullable PrimaryLevelData properties, final @Nullable UUID uniqueId) {
         try (final SavedDataStorage storage = this.dataStorage(SpongeWorldManager.createRegistryKey(key))) {
-            final SpongeRegistryData registryData = storage.computeIfAbsent(SpongeRegistryData.TYPE);
+            // A world without registry data keeps the id its properties were read with, since that is a legacy
+            // world's own id
+            SpongeRegistryData registryData = storage.get(SpongeRegistryData.TYPE);
+            if (registryData == null) {
+                registryData = new SpongeRegistryData(properties == null ? UUID.randomUUID()
+                    : ((PrimaryLevelDataBridge) properties).bridge$spongeData().uniqueId(), Optional.empty(), Map.of());
+                storage.set(SpongeRegistryData.TYPE, registryData);
+            }
             registryData.setKey(key);
             if (uniqueId != null) {
                 registryData.setUniqueId(uniqueId);
@@ -791,7 +799,8 @@ public class SpongeWorldManager implements WorldManager {
     /**
      * Reads the properties of a world that is not loaded: the level data and custom data its {@link SpongeRegistryData}
      * keeps, else those of the per-dimension {@code level.dat} of a world from before 26.1. A world created before Sponge
-     * kept its level data has neither, and gets level data made again from the dimension it was created with.
+     * kept its level data has neither, and gets level data made again from the dimension it was created with. The id and
+     * players come from the registry data too, else from the legacy {@code level.dat}'s {@code SpongeData}.
      */
     private Optional<LevelDataLoadResult> loadLevelData(final net.minecraft.resources.ResourceKey<Level> registryKey,
                                                         final ServerWorldProperties.LoadOptions.@Nullable LoadOperation loadOperation) {
@@ -805,12 +814,14 @@ public class SpongeWorldManager implements WorldManager {
 
         @Nullable CompoundTag levelTag = registryData == null ? null : registryData.levelData().orElse(null);
         @Nullable CompoundTag customData = registryData == null ? null : registryData.customData().orElse(null);
+        @Nullable CompoundTag legacySpongeData = null;
         if (levelTag == null) {
             final @Nullable CompoundTag legacy = this.loadLegacyLevelDat(registryKey);
             if (legacy != null) {
                 levelTag = legacy.getCompoundOrEmpty("Data");
                 // api-18 merged the custom data into the root of the level.dat
                 customData = legacy;
+                legacySpongeData = legacy.getCompoundOrEmpty(Constants.Sponge.Data.V2.SPONGE_DATA);
             }
         }
 
@@ -825,8 +836,20 @@ public class SpongeWorldManager implements WorldManager {
             return Optional.empty();
         }
 
+        final SpongeServerLevelData spongeData = ((PrimaryLevelDataBridge) result.data()).bridge$spongeData();
         if (registryData != null) {
-            ((PrimaryLevelDataBridge) result.data()).bridge$spongeData().setUniqueId(registryData.uniqueId());
+            spongeData.setUniqueId(registryData.uniqueId());
+            spongeData.setPlayerUniqueIds(registryData.playerUniqueIds());
+        }
+        if (legacySpongeData != null) {
+            // Take what api-18 kept for the world: its id, unless its registry data has one, and the players its chunks
+            // track, unless it already has some
+            if (registryData == null) {
+                legacySpongeData.read(Constants.Sponge.World.UNIQUE_ID, UUIDUtil.CODEC).ifPresent(spongeData::setUniqueId);
+            }
+            if (spongeData.playerUniqueIds().isEmpty()) {
+                spongeData.setPlayerUniqueIds(SpongeLevelMigration.legacyPlayerUniqueIds(legacySpongeData));
+            }
         }
         if (customData != null) {
             SpongeRegistryData.applyCustomData(result.data(), customData);

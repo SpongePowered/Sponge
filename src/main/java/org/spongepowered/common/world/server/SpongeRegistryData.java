@@ -38,15 +38,17 @@ import net.minecraft.world.level.saveddata.SavedDataType;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
+import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.data.DataUtil;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 /**
  * A {@link SavedData} implementation that stores per-dimension Sponge data: the world's unique {@link UUID}, its
- * {@link ResourceKey}, its level data unless it is the default world's, which the root {@code level.dat} holds, and
- * the custom data of its properties.
+ * {@link ResourceKey}, the custom data of its properties, the players its chunks track, and its level data. The
+ * default world's level data is not stored here, since the root {@code level.dat} holds it.
  *
  * <p>This is persisted as {@code data/sponge/registry.dat} within each dimension's
  * saved data directory.</p>
@@ -58,7 +60,8 @@ public final class SpongeRegistryData extends SavedData {
                 UUIDUtil.CODEC.fieldOf("uuid").forGetter(SpongeRegistryData::uniqueId),
                 ResourceKey.codec(Registries.DIMENSION).optionalFieldOf("key").forGetter(SpongeRegistryData::resourceKey),
                 CompoundTag.CODEC.optionalFieldOf("level_data").forGetter(SpongeRegistryData::levelData),
-                CompoundTag.CODEC.optionalFieldOf("custom_data").forGetter(SpongeRegistryData::customData)
+                CompoundTag.CODEC.optionalFieldOf("custom_data").forGetter(SpongeRegistryData::customData),
+                SpongeMapUUIDData.MAP_INDEX_CODEC.optionalFieldOf("player_uuids", Map.of()).forGetter(SpongeRegistryData::playerUniqueIds)
             )
             .apply(i, SpongeRegistryData::new)
     );
@@ -73,21 +76,23 @@ public final class SpongeRegistryData extends SavedData {
     private @Nullable ResourceKey<Level> key;
     private @Nullable CompoundTag levelData;
     private @Nullable CompoundTag customData;
+    private Map<Integer, UUID> playerUniqueIds = Map.of();
 
     public SpongeRegistryData() {
         this.uniqueId = UUID.randomUUID();
     }
 
-    public SpongeRegistryData(final UUID uniqueId, final Optional<ResourceKey<Level>> key) {
-        this(uniqueId, key, Optional.empty(), Optional.empty());
+    public SpongeRegistryData(final UUID uniqueId, final Optional<ResourceKey<Level>> key, final Map<Integer, UUID> playerUniqueIds) {
+        this(uniqueId, key, Optional.empty(), Optional.empty(), playerUniqueIds);
     }
 
     private SpongeRegistryData(final UUID uniqueId, final Optional<ResourceKey<Level>> key, final Optional<CompoundTag> levelData,
-        final Optional<CompoundTag> customData) {
+        final Optional<CompoundTag> customData, final Map<Integer, UUID> playerUniqueIds) {
         this.uniqueId = uniqueId;
         this.key = key.orElse(null);
         this.levelData = levelData.orElse(null);
         this.customData = customData.orElse(null);
+        this.playerUniqueIds = playerUniqueIds;
     }
 
     public UUID uniqueId() {
@@ -124,10 +129,19 @@ public final class SpongeRegistryData extends SavedData {
         return Optional.ofNullable(this.customData);
     }
 
-    /** Keeps the properties of the world: their level data, unless the root {@code level.dat} holds it, and their custom data */
+    /** Gets the players that the world's chunks track, by the index the chunks keep */
+    public Map<Integer, UUID> playerUniqueIds() {
+        return this.playerUniqueIds;
+    }
+
+    /**
+     * Stores the world's properties: their custom data, their players, and their level data unless the root
+     * {@code level.dat} holds it.
+     */
     public void store(final PrimaryLevelData properties, final boolean levelData) {
         this.levelData = levelData ? properties.createTag(null) : null;
         this.customData = DataUtil.syncDataToTag(properties) ? ((DataCompoundHolder) properties).data$getCompound() : null;
+        this.playerUniqueIds = Map.copyOf(((PrimaryLevelDataBridge) properties).bridge$spongeData().playerUniqueIds());
         this.setDirty();
     }
 

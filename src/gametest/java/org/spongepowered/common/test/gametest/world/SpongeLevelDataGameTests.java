@@ -25,6 +25,8 @@
 package org.spongepowered.common.test.gametest.world;
 
 import net.kyori.adventure.text.Component;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
@@ -39,6 +41,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
@@ -49,33 +52,40 @@ import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.api.world.generation.config.flat.FlatGeneratorConfigs;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.WorldArchetype;
 import org.spongepowered.api.world.server.WorldArchetypeType;
 import org.spongepowered.api.world.server.WorldManager;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
+import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.SpongeDataRegistration;
 import org.spongepowered.common.test.gametest.GameTest;
 import org.spongepowered.common.test.gametest.GameTestAssertions;
 import org.spongepowered.common.test.gametest.GameTestGroup;
 import org.spongepowered.common.test.gametest.SpongeGameTests;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 /**
- * A world other than the default one keeps its level data, the custom data of its properties among it, in its own saved
- * data, and the default world its custom data. Each test changes them, has them saved and loads them again, rather than
- * inspecting the files, but where no load can read them back: the default world's, and the root {@code level.dat} an
- * unloaded world's save must leave alone.
+ * Tests for what each world keeps in its own saved data. A world other than the default one keeps its level data and
+ * custom data there, while the default world only keeps its custom data there. Every world also keeps the players its
+ * chunks track. The tests change these, save, and load them back. They only read the files for what a load can't
+ * show: the default world's data, the root {@code level.dat} that an unloaded world's save must not touch, and which
+ * table a player is in.
  */
 @GameTestGroup("level_data")
 public final class SpongeLevelDataGameTests {
@@ -228,6 +238,143 @@ public final class SpongeLevelDataGameTests {
         helper.succeed();
     }
 
+    // Each world has its own player table, as on api-18, and loading it by key reads the table back
+    @GameTest(maxTicks = SpongeLevelDataGameTests.MAX_TICKS)
+    void reloadedWorldKeepsItsPlayers(final GameTestHelper helper) {
+        final ResourceKey key = ResourceKey.sponge("gametest_reloaded_players");
+        final MinecraftServer server = helper.getLevel().getServer();
+        final Path registry = Sponge.server().worldManager().worldDirectory(key)
+            .resolve("data").resolve("sponge").resolve("registry.dat");
+        final Path defaultRegistry = DimensionType.getStorageFolder(
+            Level.OVERWORLD,
+            server.getWorldPath(LevelResource.ROOT)
+        ).resolve("data").resolve("sponge").resolve("registry.dat");
+        final BlockPos defaultPos = helper.absolutePos(BlockPos.ZERO);
+        final ServerLocation defaultLocation = ((ServerWorld) server.overworld()).location(
+            defaultPos.getX(),
+            defaultPos.getY(),
+            defaultPos.getZ()
+        );
+        final UUID creator = UUID.randomUUID();
+        final UUID notifier = UUID.randomUUID();
+        final UUID defaultCreator = UUID.randomUUID();
+        final Vector3i pos = new Vector3i(1, 64, 1);
+        final List<Set<UUID>> tables = new CopyOnWriteArrayList<>();
+
+        final CompletableFuture<List<Optional<UUID>>> tracked = SpongeLevelDataGameTests.create(key)
+            .thenApplyAsync(world -> {
+                world.location(pos).offer(Keys.CREATOR, creator);
+                world.location(pos).offer(Keys.NOTIFIER, notifier);
+                defaultLocation.offer(Keys.CREATOR, defaultCreator);
+                return world;
+            }, server)
+            .thenCompose($ -> SpongeLevelDataGameTests.unload(key))
+            .thenApplyAsync($ -> {
+                // Save only the default world, so the root level.dat that other tests read is left alone
+                server.overworld().save(null, true, false);
+                defaultLocation.remove(Keys.CREATOR);
+                tables.add(SpongeLevelDataGameTests.players(registry));
+                tables.add(SpongeLevelDataGameTests.players(defaultRegistry));
+                return true;
+            }, server)
+            .thenCompose($ -> SpongeLevelDataGameTests.load(key))
+            .thenApplyAsync(
+                world -> List.of(world.location(pos).get(Keys.CREATOR), world.location(pos).get(Keys.NOTIFIER)),
+                server
+            )
+            .thenCompose(players -> SpongeLevelDataGameTests.unload(key)
+                .thenCompose($ -> Sponge.server().worldManager().deleteWorld(key))
+                .thenApply($ -> players));
+
+        helper.succeedWhen(() -> {
+            final List<Optional<UUID>> players = SpongeLevelDataGameTests.finished(helper, tracked);
+            GameTestAssertions.assertTrue(
+                helper,
+                tables.get(0).contains(creator)
+                && tables.get(0).contains(notifier)
+                && !tables.get(0).contains(defaultCreator),
+                "The world's registry.dat has players " + tables.get(0) + " rather than its own " + creator
+                    + " and " + notifier
+            );
+            GameTestAssertions.assertTrue(
+                helper,
+                tables.get(1).contains(defaultCreator)
+                && !tables.get(1).contains(creator)
+                && !tables.get(1).contains(notifier),
+                "The default world's registry.dat has players " + tables.get(1)
+                    + " rather than its own " + defaultCreator
+            );
+            GameTestAssertions.assertTrue(
+                helper,
+                players.equals(List.of(Optional.of(creator), Optional.of(notifier))),
+                "The reloaded world's block has creator and notifier " + players + " rather than " + creator
+                    + " and " + notifier
+            );
+        });
+    }
+
+    // A pre-26.1 world with no registry.dat yet takes its id and players from its level.dat's SpongeData
+    @GameTest(maxTicks = SpongeLevelDataGameTests.MAX_TICKS)
+    void legacyWorldKeepsItsIdAndPlayers(final GameTestHelper helper) {
+        final ResourceKey key = ResourceKey.sponge("gametest_legacy_players");
+        final MinecraftServer server = helper.getLevel().getServer();
+        final Path directory = Sponge.server().worldManager().worldDirectory(key);
+        final UUID uniqueId = UUID.randomUUID();
+        final UUID player = UUID.randomUUID();
+
+        final CompletableFuture<List<Optional<UUID>>> loaded = SpongeLevelDataGameTests.create(key)
+            .thenCompose($ -> SpongeLevelDataGameTests.unload(key))
+            .thenApplyAsync($ -> {
+                // Set it up as api-18 left it, with the level data in the world's own level.dat beside its SpongeData
+                final Path registry = directory.resolve("data").resolve("sponge").resolve("registry.dat");
+                final CompoundTag spongeData = new CompoundTag();
+                spongeData.store(Constants.Sponge.World.UNIQUE_ID, UUIDUtil.CODEC, uniqueId);
+                spongeData.store(
+                    Constants.Sponge.SPONGE_PLAYER_UUID_TABLE,
+                    UUIDUtil.CODEC.listOf(),
+                    List.of(UUID.randomUUID(), player)
+                );
+                final CompoundTag levelDat = new CompoundTag();
+                levelDat.put(
+                    "Data",
+                    SpongeLevelDataGameTests.read(registry).getCompoundOrEmpty("data").getCompoundOrEmpty("level_data")
+                );
+                levelDat.put(Constants.Sponge.Data.V2.SPONGE_DATA, spongeData);
+                try {
+                    Files.delete(registry);
+                    NbtIo.writeCompressed(levelDat, directory.resolve("level.dat"));
+                } catch (final IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+                return true;
+            }, server)
+            .thenCompose($ -> SpongeLevelDataGameTests.load(key))
+            .thenApplyAsync(
+                world -> List.of(
+                    Optional.of(world.uniqueId()),
+                    ((PrimaryLevelDataBridge) world.properties()).bridge$getUniqueIdForIndex(1)
+                ),
+                server
+            )
+            .thenCompose(ids -> SpongeLevelDataGameTests.unload(key)
+                .thenCompose($ -> Sponge.server().worldManager().deleteWorld(key))
+                .thenApply($ -> ids));
+
+        helper.succeedWhen(() -> {
+            final List<Optional<UUID>> ids = SpongeLevelDataGameTests.finished(helper, loaded);
+            GameTestAssertions.assertTrue(
+                helper,
+                ids.get(0).equals(Optional.of(uniqueId)),
+                "The legacy world loaded with id " + ids.get(0) + " rather than its own " + uniqueId
+            );
+            GameTestAssertions.assertTrue(
+                helper,
+                ids.get(1).equals(Optional.of(player)),
+                "The legacy world's player 1 is " + ids.get(1) + " rather than " + player
+            );
+        });
+    }
+
     // Uses a superflat, so creating the world generates next to nothing. Any world an earlier run left is deleted first
     private static CompletableFuture<ServerWorld> create(final ResourceKey key) {
         final WorldArchetypeType type = WorldArchetypeType.of(
@@ -323,6 +470,16 @@ public final class SpongeLevelDataGameTests {
         identity.putString("LevelName", data.getStringOr("LevelName", ""));
         data.getCompound("spawn").ifPresent(spawn -> identity.put("spawn", spawn));
         return identity;
+    }
+
+    // Reads the player table of a registry.dat
+    private static Set<UUID> players(final Path registry) {
+        final CompoundTag players = SpongeLevelDataGameTests.read(registry)
+            .getCompoundOrEmpty("data")
+            .getCompoundOrEmpty("player_uuids");
+        return players.keySet().stream()
+            .flatMap(index -> players.read(index, UUIDUtil.CODEC).stream())
+            .collect(Collectors.toSet());
     }
 
     private static CompoundTag read(final Path file) {

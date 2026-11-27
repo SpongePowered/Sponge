@@ -152,6 +152,7 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.world.level.LevelMixin;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeTicks;
+import org.spongepowered.common.world.server.SpongeMapUUIDData;
 import org.spongepowered.common.world.server.SpongeRegistryData;
 import org.spongepowered.common.world.server.SpongeServerLevelData;
 import org.spongepowered.common.world.weather.SpongeWeather;
@@ -159,6 +160,7 @@ import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.concurrent.Executor;
@@ -272,13 +274,30 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
         final ResourceKey worldKey = ((ServerWorld) this).key();
 
-        // Load per-dimension identity from SpongeRegistryData (SavedDataStorage)
-        final SpongeRegistryData registryData = this.shadow$getDataStorage().computeIfAbsent(SpongeRegistryData.TYPE);
+        // Load per-dimension identity and players from SpongeRegistryData (SavedDataStorage). A world without registry
+        // data keeps the id its properties were read with, since that is a legacy world's own id
+        final SavedDataStorage dataStorage = this.shadow$getDataStorage();
+        final @Nullable SpongeRegistryData saved = dataStorage.get(SpongeRegistryData.TYPE);
+        final SpongeRegistryData registryData;
+        if (saved == null) {
+            registryData = new SpongeRegistryData(spongeData.uniqueId(), Optional.empty(), Map.of());
+            dataStorage.set(SpongeRegistryData.TYPE, registryData);
+        } else {
+            registryData = saved;
+            spongeData.setUniqueId(saved.uniqueId());
+            if (!saved.playerUniqueIds().isEmpty()) {
+                spongeData.setPlayerUniqueIds(saved.playerUniqueIds());
+            } else if (spongeData.playerUniqueIds().isEmpty()) {
+                // It may have been saved by api-19, which kept every world's players in the server's map_uuids.dat
+                final @Nullable SpongeMapUUIDData mapUUIDData = server.getDataStorage().get(SpongeMapUUIDData.TYPE);
+                if (mapUUIDData != null) {
+                    spongeData.setPlayerUniqueIds(mapUUIDData.seedPlayerUniqueIds(Level.OVERWORLD.equals(dimension)));
+                }
+            }
+        }
         if (registryData.key() == null) {
             registryData.setKey(worldKey);
         }
-        // Populate SpongeServerLevelData from registry data
-        spongeData.setUniqueId(registryData.uniqueId());
         // Other worlds' properties were already given their custom data as they were read
         if (Level.OVERWORLD.equals(dimension) && levelData instanceof final PrimaryLevelData properties) {
             registryData.customData().ifPresent(customData -> SpongeRegistryData.applyCustomData(properties, customData));

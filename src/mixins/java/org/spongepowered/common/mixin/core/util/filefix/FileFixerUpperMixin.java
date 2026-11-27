@@ -49,10 +49,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 /**
- * Mixin on {@link FileFixerUpper} to preserve Sponge's per-world identity (UUID, key)
+ * Mixin on {@link FileFixerUpper} to preserve Sponge's per-world data (UUID, key, player table, map UUIDs)
  * during vanilla's file-fixing process, which rewrites {@code level.dat} and strips
  * unknown tags including the {@code SpongeData} compound.
  *
@@ -64,9 +63,6 @@ import java.util.UUID;
 public abstract class FileFixerUpperMixin {
 
     @Unique private static final Logger SPONGE_LOGGER = LogUtils.getLogger();
-
-    // TODO: Also cache MapUUIDs and player-uuid-table from old SpongeData for migration
-    //       to separate SavedData files (sponge:map_uuids, etc.) — see follow-up task
 
     /**
      * Extracts SpongeData from level.dat and per-dimension level.dat files BEFORE
@@ -81,34 +77,29 @@ public abstract class FileFixerUpperMixin {
         final UpgradeProgress upgradeProgress,
         final CallbackInfoReturnable<Dynamic<?>> cir
     ) {
-        final Map<ResourceKey<Level>, UUID> identities = new HashMap<>();
+        final Map<ResourceKey<Level>, CompoundTag> spongeData = new HashMap<>();
         final Path worldDir = worldAccess.getLevelDirectory().path();
 
-        // 1. Extract overworld UUID from root level.dat's SpongeData (in the Dynamic)
+        // 1. Extract the overworld's SpongeData from the root level.dat, which also holds the map UUIDs
         //    Note: levelDataTag is the "Data" compound, but SpongeData is a SIBLING of Data
         //    at the root level. We need to re-read the raw file to get it.
         try {
             final CompoundTag root = NbtIo.readCompressed(worldDir.resolve("level.dat"), NbtAccounter.defaultQuota());
-            final CompoundTag spongeData = root.getCompound("SpongeData").orElse(null);
-            if (spongeData != null && !spongeData.isEmpty()) {
-                sponge$extractUuid(spongeData, Level.OVERWORLD, identities);
-                // Also cache MapUUIDs and player-uuid-table for global migration
-                SpongeLevelMigration.cacheGlobalSpongeData(spongeData);
-            }
+            sponge$keepSpongeData(root, Level.OVERWORLD, spongeData);
         } catch (final IOException e) {
             // No level.dat or can't read — skip
         }
 
-        // 2. Extract nether/end UUIDs from their per-dimension level.dat files
+        // 2. Extract the nether's and end's SpongeData from their per-dimension level.dat files
         //    and clean up old Sponge files so vanilla can delete the directories
-        sponge$extractAndCleanDimension(worldDir, "DIM-1", Level.NETHER, identities);
-        sponge$extractAndCleanDimension(worldDir, "DIM1", Level.END, identities);
+        sponge$extractAndCleanDimension(worldDir, "DIM-1", Level.NETHER, spongeData);
+        sponge$extractAndCleanDimension(worldDir, "DIM1", Level.END, spongeData);
 
-        if (!identities.isEmpty()) {
-            SPONGE_LOGGER.info("[Sponge] Preserved {} world UUID(s) from old SpongeData during file fix", identities.size());
+        if (!spongeData.isEmpty()) {
+            SPONGE_LOGGER.info("[Sponge] Preserved the old SpongeData of {} world(s) during file fix", spongeData.size());
             // Cache for writing AFTER the fix completes and the COW swap is done.
             // The actual write happens in MinecraftServerMixin.loadLevel() via SpongeLevelMigration.
-            SpongeLevelMigration.cacheIdentities(identities);
+            SpongeLevelMigration.cacheSpongeData(spongeData);
         }
     }
 
@@ -116,27 +107,20 @@ public abstract class FileFixerUpperMixin {
     // which runs AFTER fix() completes (COW swap done) but BEFORE any ServerLevel is created.
 
     /**
-     * Extracts a UUID from a SpongeData compound's "UUID" IntArray field.
+     * Keeps the SpongeData compound of a level.dat, which holds the world's UUID and player table.
      */
     @Unique
-    private static void sponge$extractUuid(
-        final CompoundTag spongeData,
+    private static void sponge$keepSpongeData(
+        final CompoundTag root,
         final ResourceKey<Level> dimKey,
-        final Map<ResourceKey<Level>, UUID> identities
+        final Map<ResourceKey<Level>, CompoundTag> spongeData
     ) {
-        final int[] uuidArray = spongeData.getIntArray("UUID").orElse(null);
-        if (uuidArray != null && uuidArray.length == 4) {
-            final UUID uuid = new UUID(
-                (long) uuidArray[0] << 32 | uuidArray[1] & 0xFFFFFFFFL,
-                (long) uuidArray[2] << 32 | uuidArray[3] & 0xFFFFFFFFL
-            );
-            identities.put(dimKey, uuid);
-        }
+        root.getCompound("SpongeData").filter(data -> !data.isEmpty()).ifPresent(data -> spongeData.put(dimKey, data));
     }
 
     /**
      * Reads SpongeData from an old per-dimension level.dat (e.g. DIM-1/level.dat),
-     * extracts the UUID, then deletes all Sponge-created files so vanilla's
+     * keeps it, then deletes all Sponge-created files so vanilla's
      * DimensionStorageFileFix can fully remove the legacy directory.
      */
     @Unique
@@ -144,7 +128,7 @@ public abstract class FileFixerUpperMixin {
         final Path worldDir,
         final String legacyDirName,
         final ResourceKey<Level> dimKey,
-        final Map<ResourceKey<Level>, UUID> identities
+        final Map<ResourceKey<Level>, CompoundTag> spongeData
     ) {
         final Path legacyDir = worldDir.resolve(legacyDirName);
         final Path legacyLevelDat = legacyDir.resolve("level.dat");
@@ -155,11 +139,7 @@ public abstract class FileFixerUpperMixin {
 
         // Extract SpongeData
         try {
-            final CompoundTag root = NbtIo.readCompressed(legacyLevelDat, NbtAccounter.defaultQuota());
-            final CompoundTag spongeData = root.getCompound("SpongeData").orElse(null);
-            if (spongeData != null && !spongeData.isEmpty()) {
-                sponge$extractUuid(spongeData, dimKey, identities);
-            }
+            sponge$keepSpongeData(NbtIo.readCompressed(legacyLevelDat, NbtAccounter.defaultQuota()), dimKey, spongeData);
         } catch (final IOException e) {
             SPONGE_LOGGER.warn("[Sponge]   Failed to read SpongeData from {}", legacyLevelDat, e);
         }

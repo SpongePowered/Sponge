@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.world.server;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.WorldOptions;
@@ -32,6 +34,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -39,6 +42,7 @@ public final class SpongeServerLevelData {
 
     private @Nullable ResourceKey key;
     private UUID uniqueId = UUID.randomUUID();
+    private final BiMap<Integer, UUID> playerUniqueIds = HashBiMap.create();
     private @Nullable InheritableConfigHandle<WorldConfig> configAdapter;
     private WorldOptions worldGenOptions;
 
@@ -63,6 +67,16 @@ public final class SpongeServerLevelData {
 
     public void setUniqueId(final UUID uniqueId) {
         this.uniqueId = uniqueId;
+    }
+
+    /** Gets the players the world's chunks track, by the index the chunks keep. Each world has its own, as on api-18 */
+    public BiMap<Integer, UUID> playerUniqueIds() {
+        return this.playerUniqueIds;
+    }
+
+    public void setPlayerUniqueIds(final Map<Integer, UUID> playerUniqueIds) {
+        this.playerUniqueIds.clear();
+        this.playerUniqueIds.putAll(playerUniqueIds);
     }
 
     public void setWorldGenOptions(final WorldGenSettings worldGenSettings) {

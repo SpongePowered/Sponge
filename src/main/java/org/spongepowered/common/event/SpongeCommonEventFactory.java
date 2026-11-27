@@ -740,7 +740,8 @@ public final class SpongeCommonEventFactory {
     public static Optional<MapInfo> fireCreateMapEvent(final Cause cause, final Set<Value<?>> values) {
 
         final ServerLevel defaultWorld = (ServerLevel) Sponge.server().worldManager().world(DefaultWorldKeys.DEFAULT).get();
-        final MapIdTrackerBridge mapIdTrackerBridge = (MapIdTrackerBridge) defaultWorld.getDataStorage()
+        // Use the server's map index, since that is the one getFreeMapId advances
+        final MapIdTrackerBridge mapIdTrackerBridge = (MapIdTrackerBridge) defaultWorld.getServer().getDataStorage()
                 .computeIfAbsent(MapIndex.TYPE);
 
         final MapItemSavedData mapData = MapItemSavedData.createFresh(0, 0,
