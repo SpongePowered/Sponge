@@ -112,8 +112,9 @@ public final class InheritableConfigHandle<T extends BaseConfig> extends ConfigH
         this.doSave();
     }
 
+    // Synchronized because worlds load on several threads, and each one saves the parent it shares with the others
     @Override
-    public void doSave() throws ConfigurateException {
+    public synchronized void doSave() throws ConfigurateException {
         if (!this.isAttached()) {
             return;
         }

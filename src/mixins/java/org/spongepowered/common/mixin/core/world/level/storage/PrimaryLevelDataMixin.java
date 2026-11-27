@@ -46,12 +46,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.server.SpongeMapUUIDData;
 import org.spongepowered.common.world.server.SpongeServerLevelData;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -230,31 +228,21 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
     }
 
     @Override
-    public BiMap<Integer, UUID> bridge$getMapUUIDIndex() {
-        return this.impl$getMapUUIDData().mapUUIDIndex();
-    }
-
-    @Override
     public int bridge$getIndexForUniqueId(final UUID uuid) {
-        final var data = this.impl$getMapUUIDData();
-        final Integer index = data.playerUUIDIndex().inverse().get(uuid);
+        final BiMap<Integer, UUID> playerUniqueIds = this.impl$spongeData.playerUniqueIds();
+        final Integer index = playerUniqueIds.inverse().get(uuid);
         if (index != null) {
             return index;
         }
 
-        final int newIndex = data.playerUUIDIndex().size();
-        data.playerUUIDIndex().put(newIndex, uuid);
-        data.setDirty();
+        final int newIndex = playerUniqueIds.size();
+        playerUniqueIds.put(newIndex, uuid);
         return newIndex;
     }
 
     @Override
     public Optional<UUID> bridge$getUniqueIdForIndex(final int index) {
-        return Optional.ofNullable(this.impl$getMapUUIDData().playerUUIDIndex().get(index));
-    }
-
-    private SpongeMapUUIDData impl$getMapUUIDData() {
-        return SpongeCommon.server().getDataStorage().computeIfAbsent(SpongeMapUUIDData.TYPE);
+        return Optional.ofNullable(this.impl$spongeData.playerUniqueIds().get(index));
     }
 
     void impl$updateWorldForDifficultyChange(final ServerLevel level, final boolean isLocked) {

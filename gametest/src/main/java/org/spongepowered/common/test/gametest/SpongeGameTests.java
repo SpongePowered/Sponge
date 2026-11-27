@@ -46,6 +46,7 @@ import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.EventListenerRegistration;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.common.launch.Launch;
+import org.spongepowered.plugin.PluginContainer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -90,7 +91,7 @@ public final class SpongeGameTests {
     private static final Map<Class<?>, String> OWNERS = new HashMap<>();
     // Listeners asked for before plugins are created, when there is no plugin to own them yet: gametest classes may
     // be created that early, and a test class's constructor is where it listens for the server starting
-    private static @Nullable List<Runnable> pendingListeners = new ArrayList<>();
+    private static @Nullable List<Consumer<PluginContainer>> pendingListeners = new ArrayList<>();
     // Test classes and plugins may be created on different threads
     private static final Object LISTENERS_LOCK = new Object();
 
@@ -126,8 +127,8 @@ public final class SpongeGameTests {
     // ponytail: a test that times out never reaches its unregister; harmless since listeners filter by position
     // and the gametest server exits afterwards. Unregister from a GameTestListener if tests ever share a long-lived server.
     public static <E extends Event> void listen(final TypeToken<E> type, final Order order, final EventListener<? super E> listener) {
-        final Runnable register = () -> Sponge.eventManager().registerListener(EventListenerRegistration.builder(type)
-            .plugin(Launch.instance().commonPlugin())
+        final Consumer<PluginContainer> register = plugin -> Sponge.eventManager().registerListener(EventListenerRegistration.builder(type)
+            .plugin(plugin)
             .order(order)
             .listener(listener)
             .build());
@@ -137,14 +138,17 @@ public final class SpongeGameTests {
                 return;
             }
         }
-        register.run();
+        register.accept(Launch.instance().commonPlugin());
     }
 
-    /** Registers the listeners asked for so far, and any later ones at once, now that plugins are being created */
-    static void registerPendingListeners() {
+    /**
+     * Registers the listeners asked for so far, owned by {@code owner}, and any later ones at once, now that plugins are
+     * being created. Sponge's own plugin may not exist yet: Neo creates plugins in parallel.
+     */
+    static void registerPendingListeners(final PluginContainer owner) {
         synchronized (SpongeGameTests.LISTENERS_LOCK) {
             if (SpongeGameTests.pendingListeners != null) {
-                SpongeGameTests.pendingListeners.forEach(Runnable::run);
+                SpongeGameTests.pendingListeners.forEach(register -> register.accept(owner));
                 SpongeGameTests.pendingListeners = null;
             }
         }
