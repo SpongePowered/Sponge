@@ -33,7 +33,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
 import net.minecraft.nbt.CompoundTag;
@@ -47,9 +46,7 @@ import net.minecraft.server.level.ChunkLoadCounter;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.LevelLoadListener;
 import net.minecraft.server.level.progress.LoggingLevelLoadListener;
-import net.minecraft.util.datafix.DataFixers;
-import net.minecraft.util.filefix.FileFixException;
-import net.minecraft.util.worldupdate.UpgradeProgress;
+import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.entity.ai.village.VillageSiege;
 import net.minecraft.world.entity.npc.CatSpawner;
 import net.minecraft.world.entity.npc.wanderingtrader.WanderingTraderSpawner;
@@ -71,7 +68,6 @@ import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.storage.LevelData;
-import net.minecraft.world.level.storage.LevelDataAndDimensions;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.SavedDataStorage;
@@ -96,7 +92,6 @@ import org.spongepowered.api.world.server.WorldManager;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
-import org.spongepowered.common.accessor.world.level.storage.PrimaryLevelDataAccessor;
 import org.spongepowered.common.bridge.core.MappedRegistryBridge;
 import org.spongepowered.common.bridge.world.level.chunk.storage.IOWorkerBridge;
 import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
@@ -279,7 +274,7 @@ public class SpongeWorldManager implements WorldManager {
 
                 final ServerWorldProperties.LoadOptions.@Nullable LoadOperation loadOperation = propertiesLoadOption.loadOperation().orElse(null);
                 if (loadOperation != null && this.worldExists(key)) {
-                    final Optional<LevelDataLoadResult> result = this.loadLevelData(storageSource, registryKey, loadOperation);
+                    final Optional<LevelDataLoadResult> result = this.loadLevelData(registryKey, loadOperation);
                     if (result.isPresent()) {
                         return this.loadWorld0(t, registryKey, result.get(), storageSource, loadOperation.loadCallback().orElse(null));
                     }
@@ -428,10 +423,10 @@ public class SpongeWorldManager implements WorldManager {
                 });
             }
 
-            // World is not loaded — save the properties to the level.dat on disk
+            // The world is not loaded, so save the properties to its own saved data, which is read when it loads
             return SpongeCommon.asyncScheduler().submit(() -> {
-                if (properties instanceof WorldData worldData) {
-                    this.saveLevelDat(worldData, properties.key());
+                if (properties instanceof final PrimaryLevelData data) {
+                    this.saveUnloadedProperties(properties.key(), data, null);
                     return true;
                 }
                 return false;
@@ -439,9 +434,26 @@ public class SpongeWorldManager implements WorldManager {
         });
     }
 
-
-    private void saveLevelDat(final WorldData worldData, final ResourceKey key) {
-        this.serverStorageSource().saveDataTag(worldData);
+    /**
+     * Stores the properties of a world that is not loaded in its {@link SpongeRegistryData}, and saves its config.
+     * Without properties, this only gives the world its key and, if one is passed, a new id. This never writes the
+     * root {@code level.dat}, since that belongs to the default world.
+     */
+    private void saveUnloadedProperties(final ResourceKey key, final @Nullable PrimaryLevelData properties, final @Nullable UUID uniqueId) {
+        try (final SavedDataStorage storage = this.dataStorage(SpongeWorldManager.createRegistryKey(key))) {
+            final SpongeRegistryData registryData = storage.computeIfAbsent(SpongeRegistryData.TYPE);
+            registryData.setKey(key);
+            if (uniqueId != null) {
+                registryData.setUniqueId(uniqueId);
+            }
+            if (properties != null) {
+                registryData.store(properties, true);
+            }
+        }
+        final var configAdapter = properties == null ? null : ((PrimaryLevelDataBridge) properties).bridge$spongeData().configAdapter();
+        if (configAdapter != null) {
+            configAdapter.save();
+        }
     }
 
     @Override
@@ -525,10 +537,9 @@ public class SpongeWorldManager implements WorldManager {
                         throw new CompletionException(e);
                     }
 
-                    final Optional<LevelDataLoadResult> levelData = this.loadLevelData(copyRegistryKey, null);
-                    if (levelData.isPresent()) {
-                        this.saveLevelDat(levelData.get().data(), copyKey);
-                    }
+                    // The copy is a world of its own, so it gets a new id
+                    this.saveUnloadedProperties(copyKey, this.loadLevelData(copyRegistryKey, null).map(LevelDataLoadResult::data).orElse(null),
+                        UUID.randomUUID());
                 }).thenApplyAsync($ -> {
                     if (loadedWorld != null) {
                         loadedWorld.noSave = disableLevelSaving;
@@ -593,10 +604,7 @@ public class SpongeWorldManager implements WorldManager {
                 throw new CompletionException(e);
             }
 
-            final Optional<LevelDataLoadResult> levelData = this.loadLevelData(movedRegistryKey, null);
-            if (levelData.isPresent()) {
-                this.saveLevelDat(levelData.get().data(), movedKey);
-            }
+            this.saveUnloadedProperties(movedKey, this.loadLevelData(movedRegistryKey, null).map(LevelDataLoadResult::data).orElse(null), null);
 
             return true;
         });
@@ -765,7 +773,7 @@ public class SpongeWorldManager implements WorldManager {
             final LevelStorageSource.LevelStorageAccess storageSource = this.serverStorageSource();
 
             try {
-                final LevelDataLoadResult levelData = this.loadLevelData(storageSource, registryKey, null)
+                final LevelDataLoadResult levelData = this.loadLevelData(registryKey, null)
                     .orElseGet(() -> this.createLevelData(registryKey, WorldArchetype.of((WorldArchetypeType) (Object) levelStem)));
                 if (!((PrimaryLevelDataBridge) levelData.data()).bridge$loadOnStartup()) {
                     SpongeCommon.logger().warn("World '{}' has been disabled from loading at startup. Skipping...", worldKey);
@@ -781,126 +789,49 @@ public class SpongeWorldManager implements WorldManager {
     }
 
     /**
-     * Migrates old Sponge world data from previous formats.
-     *
-     * <p>In pre-26.1 Sponge, per-world identity (UUID, key) was stored in a {@code SpongeData}
-     * compound inside each dimension's {@code level.dat}. In the new format, this data lives
-     * in {@code data/sponge/registry.dat} per-dimension via {@link SpongeRegistryData}.</p>
-     *
-     * <p>This method handles:</p>
-     * <ul>
-     *   <li>Reading {@code SpongeData} from the root {@code level.dat} (overworld identity)</li>
-     *   <li>Writing it to {@code dimensions/minecraft/overworld/data/sponge/registry.dat}</li>
-     *   <li>Stripping {@code SpongeData} from the root {@code level.dat}</li>
-     * </ul>
-     *
-     * <p>Note: Per-dimension {@code level.dat} files for nether/end are lost during vanilla's
-     * {@code DimensionStorageFileFix} (which deletes {@code DIM-1/} and {@code DIM1/} after
-     * moving region/entities/poi/data). Those dimensions get fresh UUIDs on first load.</p>
+     * Reads the properties of a world that is not loaded: the level data and custom data its {@link SpongeRegistryData}
+     * keeps, else those of the per-dimension {@code level.dat} of a world from before 26.1. A world created before Sponge
+     * kept its level data has neither, and gets level data made again from the dimension it was created with.
      */
-    private void migrateOldSpongeData() {
-        final Path rootLevelDat = this.defaultWorldDirectory.resolve("level.dat");
-        if (!Files.exists(rootLevelDat)) {
-            return;
-        }
-
-        try {
-            final CompoundTag root = NbtIo.readCompressed(rootLevelDat, NbtAccounter.defaultQuota());
-            final CompoundTag spongeData = root.getCompound("SpongeData").orElse(null);
-            if (spongeData == null || spongeData.isEmpty()) {
-                return; // No old SpongeData to migrate
-            }
-
-            SpongeCommon.logger().info("Migrating old SpongeData from level.dat files to per-dimension SavedData...");
-
-            // Migrate each dimension that has SpongeData
-            // Root level.dat = overworld, check dimensions/ for nether/end level.dat
-            // (vanilla's DimensionStorageFileFix moves region/entities/poi/data from DIM-1/DIM1
-            //  to dimensions/minecraft/the_nether|the_end but does NOT move level.dat — those are lost.
-            //  However, if someone manually placed them or they survived, we handle them.)
-            this.migrateOneDimension(spongeData, Level.OVERWORLD, "overworld");
-
-            // Check for per-dimension level.dat files that may survive in the new directories
-            for (final var entry : Map.of(
-                Level.NETHER, "the_nether",
-                Level.END, "the_end"
-            ).entrySet()) {
-                final Path dimLevelDat = DimensionType.getStorageFolder(entry.getKey(), this.defaultWorldDirectory)
-                    .resolve("level.dat");
-                if (Files.exists(dimLevelDat)) {
-                    try {
-                        final CompoundTag dimRoot = NbtIo.readCompressed(dimLevelDat, NbtAccounter.defaultQuota());
-                        final @Nullable CompoundTag dimSpongeData = dimRoot.getCompound("SpongeData").orElse(null);
-                        if (dimSpongeData != null && !dimSpongeData.isEmpty()) {
-                            this.migrateOneDimension(dimSpongeData, entry.getKey(), entry.getValue());
-                            dimRoot.remove("SpongeData");
-                            NbtIo.writeCompressed(dimRoot, dimLevelDat);
-                        }
-                    } catch (final Exception e) {
-                        SpongeCommon.logger().warn("  Failed to migrate SpongeData from {}", dimLevelDat, e);
-                    }
-                }
-            }
-
-            // Strip SpongeData from root level.dat
-            root.remove("SpongeData");
-            NbtIo.writeCompressed(root, rootLevelDat);
-            SpongeCommon.logger().info("  Stripped SpongeData from root level.dat");
-
-        } catch (final Exception e) {
-            SpongeCommon.logger().warn("Failed to migrate old SpongeData from level.dat — worlds will get fresh UUIDs", e);
-        }
-    }
-
-    private void migrateOneDimension(
-        final CompoundTag spongeData,
-        final net.minecraft.resources.ResourceKey<Level> dimensionKey,
-        final String dimensionName
-    ) {
-        try {
-            final Path dataDir = DimensionType.getStorageFolder(dimensionKey, this.defaultWorldDirectory)
-                .resolve("data").resolve("sponge");
-            final Path registryFile = dataDir.resolve("registry.dat");
-            if (Files.exists(registryFile)) {
-                return; // Already migrated
-            }
-
-            final int[] uuidArray = spongeData.getIntArray("UUID").orElse(null);
-            if (uuidArray == null || uuidArray.length != 4) {
-                return;
-            }
-
-            final UUID uuid = new UUID(
-                (long) uuidArray[0] << 32 | uuidArray[1] & 0xFFFFFFFFL,
-                (long) uuidArray[2] << 32 | uuidArray[3] & 0xFFFFFFFFL
-            );
-
-            Files.createDirectories(dataDir);
-            final SpongeRegistryData registryData = new SpongeRegistryData(uuid, Optional.of(dimensionKey));
-            final var encoded = SpongeRegistryData.CODEC.encodeStart(NbtOps.INSTANCE, registryData);
-            if (encoded.isSuccess()) {
-                final CompoundTag savedDataTag = new CompoundTag();
-                savedDataTag.put("data", encoded.getOrThrow());
-                NbtUtils.addCurrentDataVersion(savedDataTag);
-                NbtIo.writeCompressed(savedDataTag, registryFile);
-                SpongeCommon.logger().info("  Migrated {} UUID {} to {}", dimensionName, uuid, registryFile);
-            }
-        } catch (final Exception e) {
-            SpongeCommon.logger().warn("  Failed to migrate SpongeData for dimension {}", dimensionName, e);
-        }
-    }
-
     private Optional<LevelDataLoadResult> loadLevelData(final net.minecraft.resources.ResourceKey<Level> registryKey,
                                                         final ServerWorldProperties.LoadOptions.@Nullable LoadOperation loadOperation) {
-        return this.loadLevelData(this.serverStorageSource(), registryKey, loadOperation);
-    }
+        final @Nullable SpongeRegistryData registryData;
+        final @Nullable WorldGenSettings worldGenSettings;
+        // Only read from, so closing it has nothing to save
+        try (final SavedDataStorage storage = this.dataStorage(registryKey)) {
+            registryData = storage.get(SpongeRegistryData.TYPE);
+            worldGenSettings = storage.get(WorldGenSettings.TYPE);
+        }
 
-    private Optional<LevelDataLoadResult> loadLevelData(
-        final LevelStorageSource.LevelStorageAccess storageSource,
-        final net.minecraft.resources.ResourceKey<Level> registryKey,
-        final ServerWorldProperties.LoadOptions.@Nullable LoadOperation loadOperation
-    ) {
-        return Optional.ofNullable(this.loadLevelTag(registryKey)).map(t -> this.readLevelData(storageSource, registryKey, t, loadOperation));
+        @Nullable CompoundTag levelTag = registryData == null ? null : registryData.levelData().orElse(null);
+        @Nullable CompoundTag customData = registryData == null ? null : registryData.customData().orElse(null);
+        if (levelTag == null) {
+            final @Nullable CompoundTag legacy = this.loadLegacyLevelDat(registryKey);
+            if (legacy != null) {
+                levelTag = legacy.getCompoundOrEmpty("Data");
+                // api-18 merged the custom data into the root of the level.dat
+                customData = legacy;
+            }
+        }
+
+        final LevelDataLoadResult result;
+        if (levelTag != null) {
+            result = this.readLevelData(registryKey, levelTag,
+                SpongeWorldManager.resolveWorldArchetype(this.savedStem(registryKey, worldGenSettings), loadOperation));
+        } else if (worldGenSettings != null) {
+            result = this.createLevelData(registryKey,
+                SpongeWorldManager.resolveWorldArchetype(this.savedStem(registryKey, worldGenSettings), loadOperation));
+        } else {
+            return Optional.empty();
+        }
+
+        if (registryData != null) {
+            ((PrimaryLevelDataBridge) result.data()).bridge$spongeData().setUniqueId(registryData.uniqueId());
+        }
+        if (customData != null) {
+            SpongeRegistryData.applyCustomData(result.data(), customData);
+        }
+        return Optional.of(result);
     }
 
     private LevelDataLoadResult initializeLevelData(final ResourceKey key, final PrimaryLevelData data, final LevelStem stem) {
@@ -922,86 +853,75 @@ public class SpongeWorldManager implements WorldManager {
      * without this a world loaded again, such as every world on startup, would take the default world's seed.
      */
     private Optional<WorldOptions> loadWorldGenOptions(final net.minecraft.resources.ResourceKey<Level> registryKey) {
-        final Path dataFolder = this.serverStorageSource().getDimensionPath(registryKey).resolve("data");
         // Only read from, so closing it has nothing to save
-        try (final SavedDataStorage storage = new SavedDataStorage(dataFolder, this.server.getFixerUpper(), this.server.registryAccess())) {
+        try (final SavedDataStorage storage = this.dataStorage(registryKey)) {
             return Optional.ofNullable(storage.get(WorldGenSettings.TYPE)).map(WorldGenSettings::options);
         }
     }
 
-    /**
-     * Attempts to load a per-dimension level.dat from the dimension's directory.
-     * With the shared LevelStorageAccess, we cannot use storageSource.getUnfixedDataTag()
-     * (which reads from the ROOT level.dat). Instead, check the dimension-specific path.
-     *
-     * <p>In the new architecture, non-overworld dimensions do NOT have their own level.dat
-     * (Sponge no longer writes per-dimension level.dat files). This method returns null
-     * for dimensions without one, causing loadLevelData to fall through to createLevelData.</p>
-     */
-    private @Nullable Dynamic<?> loadLevelTag(final net.minecraft.resources.ResourceKey<Level> registryKey) {
-        final Path dimensionDir = DimensionType.getStorageFolder(registryKey, this.defaultWorldDirectory);
-        final Path levelDat = dimensionDir.resolve("level.dat");
+    /** Opens the saved data of an unloaded world. A loaded world has its own, and this must not write beside it. */
+    private SavedDataStorage dataStorage(final net.minecraft.resources.ResourceKey<Level> registryKey) {
+        final Path dataFolder = this.serverStorageSource().getDimensionPath(registryKey).resolve("data");
+        return new SavedDataStorage(dataFolder, this.server.getFixerUpper(), this.server.registryAccess());
+    }
+
+    /** The {@code level.dat} each dimension of a world from before 26.1 had */
+    private @Nullable CompoundTag loadLegacyLevelDat(final net.minecraft.resources.ResourceKey<Level> registryKey) {
+        final Path levelDat = DimensionType.getStorageFolder(registryKey, this.defaultWorldDirectory).resolve("level.dat");
         if (!Files.exists(levelDat)) {
             return null;
         }
         try {
-            final CompoundTag root = NbtIo.readCompressed(levelDat, NbtAccounter.defaultQuota());
-            return new Dynamic<>(NbtOps.INSTANCE, root.getCompoundOrEmpty("Data"));
+            return NbtIo.readCompressed(levelDat, NbtAccounter.defaultQuota());
         } catch (final IOException e) {
             SpongeCommon.logger().warn("Failed to load level data from {}", levelDat, e);
             return null;
         }
     }
 
-    private LevelDataLoadResult readLevelData(
-        final LevelStorageSource.LevelStorageAccess worldAccess,
-        final net.minecraft.resources.ResourceKey<Level> registryKey,
-        final Dynamic<?> dataTag,
-        final ServerWorldProperties.LoadOptions.@Nullable LoadOperation loadOperation
-    ) {
-        // Apply file-fixing and data-fixing before parsing. In 26.1, FileFixerUpper
-        // requires all level data to be fixed before getLevelDataAndDimensions() can parse it.
-        // Vanilla handles this for the overworld via the WorldLoader pipeline, but Sponge's
-        // per-world level.dat files need the same treatment.
-        final Dynamic<?> fixedDataTag;
-        try {
-            fixedDataTag = DataFixers.getFileFixer().fix(worldAccess, dataTag, new UpgradeProgress());
-        } catch (final FileFixException e) {
-            throw new RuntimeException(String.format("Failed to apply data fixes for world '%s'", registryKey.identifier()), e);
-        }
-
-        final PrimaryLevelData defaultLevelData = (PrimaryLevelData) this.server.getWorldData();
-        final RegistryAccess.Frozen access = this.server.registryAccess();
-        final LevelDataAndDimensions levelData = LevelStorageSource.getLevelDataAndDimensions(worldAccess,
-            fixedDataTag, defaultLevelData.getDataConfiguration(), access.lookupOrThrow(Registries.LEVEL_STEM), access);
-        final WorldArchetype worldArchetype = SpongeWorldManager.resolveWorldArchetype(levelData, registryKey, loadOperation);
+    private LevelDataLoadResult readLevelData(final net.minecraft.resources.ResourceKey<Level> registryKey, final CompoundTag levelTag,
+                                              final WorldArchetype worldArchetype) {
+        // Fixed as LevelStorageSource fixes a level.dat. Not with the file fixer, which fixes the default world's files
+        final Dynamic<?> dataTag = DataFixTypes.LEVEL.updateToCurrentVersion(this.server.getFixerUpper(),
+            new Dynamic<>(NbtOps.INSTANCE, levelTag), NbtUtils.getDataVersion(levelTag));
         final LevelStem levelStem = (LevelStem) (Object) worldArchetype.type();
-        final PrimaryLevelData worldData = (PrimaryLevelData) levelData.worldDataAndGenSettings().data();
+        final PrimaryLevelData defaultLevelData = (PrimaryLevelData) this.server.getWorldData();
+        final PrimaryLevelData worldData = PrimaryLevelData.parse(dataTag, LevelSettings.parse(dataTag, defaultLevelData.getDataConfiguration()),
+            SpongeWorldManager.specialWorldProperty(levelStem), Lifecycle.stable());
         worldArchetype.generationConfig().ifPresent(o ->
             ((PrimaryLevelDataBridge) worldData).bridge$spongeData().setWorldOptions((WorldOptions) o));
-        ((PrimaryLevelDataAccessor) worldData).accessor$specialWorldProperty(SpongeWorldManager.specialWorldProperty(levelStem));
         return this.initializeLevelData((ResourceKey) (Object) registryKey.identifier(), worldData, levelStem);
     }
 
-    private static WorldArchetype resolveWorldArchetype(final LevelDataAndDimensions levelData, final net.minecraft.resources.ResourceKey<Level> registryKey,
+    /**
+     * Gets the dimension a world was created with. As for every vanilla world, this is first looked up in the data
+     * packs. Otherwise, it is the only dimension that the world's own world gen settings keep, which is under its old
+     * key after a copy or move. Failing that, it is the server's.
+     */
+    private @Nullable LevelStem savedStem(final net.minecraft.resources.ResourceKey<Level> registryKey, final @Nullable WorldGenSettings worldGenSettings) {
+        final net.minecraft.resources.ResourceKey<LevelStem> stemKey = Registries.levelToLevelStem(registryKey);
+        final @Nullable LevelStem registered = this.server.registryAccess().lookupOrThrow(Registries.LEVEL_STEM).getValue(stemKey);
+        if (registered != null) {
+            return registered;
+        }
+        if (worldGenSettings != null) {
+            final Map<net.minecraft.resources.ResourceKey<LevelStem>, LevelStem> stems = worldGenSettings.dimensions().dimensions();
+            final @Nullable LevelStem own = stems.getOrDefault(stemKey, stems.values().stream().findFirst().orElse(null));
+            if (own != null) {
+                return own;
+            }
+        }
+        return this.server.getWorldGenSettings().dimensions().dimensions().get(stemKey);
+    }
+
+    private static WorldArchetype resolveWorldArchetype(final @Nullable LevelStem savedStem,
                                                         final ServerWorldProperties.LoadOptions.@Nullable LoadOperation loadOperation) {
         if (loadOperation != null && loadOperation.overrideWorldArchetype().isPresent()) {
             return loadOperation.overrideWorldArchetype().get();
         }
 
-        // Worlds that were loaded with Sponge know the associated world archetype.
-        final Optional<LevelStem> spongeWorldKeyStem = Optional.ofNullable(((PrimaryLevelDataBridge) levelData.worldDataAndGenSettings().data()).bridge$spongeData().key())
-            .flatMap(worldKey -> levelData.dimensions().dimensions().getOptional(
-                Registries.levelToLevelStem(SpongeWorldManager.createRegistryKey(worldKey))));
-        if (spongeWorldKeyStem.isPresent()) {
-            return WorldArchetype.of((WorldArchetypeType) (Object) spongeWorldKeyStem.get());
-        }
-
-        // Fallback to best guess.
-        // TODO: Expose API to iterate the candidates or allow to specify the lookup key?
-        final Optional<LevelStem> worldKeyStem = levelData.dimensions().dimensions().getOptional(Registries.levelToLevelStem(registryKey));
-        if (worldKeyStem.isPresent()) {
-            return WorldArchetype.of((WorldArchetypeType) (Object) worldKeyStem.get());
+        if (savedStem != null) {
+            return WorldArchetype.of((WorldArchetypeType) (Object) savedStem);
         }
 
         if (loadOperation != null && loadOperation.fallbackWorldArchetype().isPresent()) {
@@ -1150,12 +1070,6 @@ public class SpongeWorldManager implements WorldManager {
 
         // Initialize PlayerData in PlayerList, add WorldBorder listener. We change the method in PlayerList to handle per-world border
         this.server.getPlayerList().addWorldborderListener(level);
-
-        final var customBossEvents = levelDataBridge.bridge$spongeData().customBossEvents();
-        if (levelData instanceof WorldData worldData && customBossEvents != null) {
-            // TODO - re-add load to bossbarmanager
-//            ((ServerLevelBridge) level).bridge$getBossBarManager().load(customBossEvents, level.registryAccess());
-        }
 
         return level;
     }

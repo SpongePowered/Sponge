@@ -24,30 +24,70 @@
  */
 package org.spongepowered.common.test.gametest.world;
 
+import net.kyori.adventure.text.Component;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtAccounter;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.level.storage.LevelResource;
+import net.minecraft.world.level.storage.ServerLevelData;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.DataRegistration;
+import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.entity.living.player.gamemode.GameModes;
+import org.spongepowered.api.event.world.LoadWorldEvent;
+import org.spongepowered.api.world.WorldTypes;
+import org.spongepowered.api.world.difficulty.Difficulties;
+import org.spongepowered.api.world.difficulty.Difficulty;
+import org.spongepowered.api.world.generation.ChunkGenerator;
+import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
+import org.spongepowered.api.world.generation.config.flat.FlatGeneratorConfigs;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.WorldArchetype;
+import org.spongepowered.api.world.server.WorldArchetypeType;
 import org.spongepowered.api.world.server.WorldManager;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
+import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.data.SpongeDataRegistration;
 import org.spongepowered.common.test.gametest.GameTest;
 import org.spongepowered.common.test.gametest.GameTestAssertions;
 import org.spongepowered.common.test.gametest.GameTestGroup;
+import org.spongepowered.common.test.gametest.SpongeGameTests;
+import org.spongepowered.math.vector.Vector3i;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * A world's {@link org.spongepowered.api.world.server.ServerWorld#uniqueId() unique id} is stored in its level data on
- * save. Create a fresh world, remember its id, unload it, load it again, and compare the ids: this exercises the write
- * and read paths together with the on-disk layout they depend on, rather than inspecting {@code level.dat} directly.
+ * A world other than the default one keeps its level data, the custom data of its properties among it, in its own saved
+ * data, and the default world its custom data. Each test changes them, has them saved and loads them again, rather than
+ * inspecting the files, but where no load can read them back: the default world's, and the root {@code level.dat} an
+ * unloaded world's save must leave alone.
  */
 @GameTestGroup("level_data")
 public final class SpongeLevelDataGameTests {
 
-    @GameTest(maxTicks = 20 * 60 * 5)
+    // Loading and unloading a world finish on Sponge's async scheduler, which runs on wall-clock time while the game
+    // test server ticks as fast as it can. This is a budget for a slow machine, not how long the tests take
+    private static final int MAX_TICKS = 20 * 60 * 5;
+    private static final long SEED = 0x5EED_CAFEL;
+    private static final Vector3i SPAWN = new Vector3i(37, 70, -21);
+    private static final long GAME_TIME = 123_456L;
+
+    @GameTest(maxTicks = SpongeLevelDataGameTests.MAX_TICKS)
     void reloadedWorldKeepsItsId(final GameTestHelper helper) {
         final ResourceKey key = ResourceKey.sponge("gametest_reloaded_id");
         final WorldManager manager = Sponge.server().worldManager();
@@ -55,8 +95,6 @@ public final class SpongeLevelDataGameTests {
         // uses entries from the global registry and fails to encode against the gametest server's
         // registry set on Forge. Spawn logic is disabled so the test does not generate a full spawn
         // area while it only needs the world to be created, saved, unloaded and loaded again.
-        // api-19 writes no level.dat for a world other than the default one, so a load-only option finds nothing
-        // to load: the reload passes the archetype too, and the id must come back from the world's saved data.
         final ServerWorld overworld = manager.world(ResourceKey.minecraft("overworld"))
             .orElseThrow(() -> new IllegalStateException("The overworld is not loaded"));
         final ServerWorldProperties.LoadOptions create = ServerWorldProperties.LoadOptions.builder()
@@ -68,19 +106,276 @@ public final class SpongeLevelDataGameTests {
         final CompletableFuture<UUID[]> ids = manager.loadWorld(key, create)
             .thenApply(Optional::orElseThrow)
             .thenCompose(created -> manager.unloadWorld(key).thenApply($ -> created.uniqueId()))
-            .thenCompose(first -> manager.loadWorld(key, create)
+            .thenCompose(first -> manager.loadWorld(key)
                 .thenApply(Optional::orElseThrow)
                 .thenCompose(reloaded -> manager.unloadWorld(key)
                     .thenApply($ -> new UUID[]{first, reloaded.uniqueId()})));
 
         helper.succeedWhen(() -> {
-            GameTestAssertions.assertTrue(helper, ids.isDone(), "The world has not finished loading and unloading");
-            if (ids.isCompletedExceptionally()) {
-                GameTestAssertions.assertTrue(helper, false, "Loading or unloading the world failed: " + ids.handle(($, error) -> error).join());
-            }
-            final UUID[] pair = ids.join();
+            final UUID[] pair = SpongeLevelDataGameTests.finished(helper, ids);
             GameTestAssertions.assertTrue(helper, pair[0].equals(pair[1]),
                 "The reloaded world's id was " + pair[1] + " rather than " + pair[0]);
         });
+    }
+
+    // A world loaded by key alone keeps what it was unloaded with. It isn't new either, so its spawn isn't chosen again
+    @GameTest(maxTicks = SpongeLevelDataGameTests.MAX_TICKS)
+    void reloadedWorldKeepsItsProperties(final GameTestHelper helper) {
+        final ResourceKey key = ResourceKey.sponge("gametest_reloaded_properties");
+        final MinecraftServer server = helper.getLevel().getServer();
+        final WorldManager manager = Sponge.server().worldManager();
+        final List<Loaded> loads = SpongeLevelDataGameTests.loads(key);
+
+        final CompletableFuture<Properties> saved = SpongeLevelDataGameTests.create(key)
+            .thenApplyAsync(created -> {
+                SpongeLevelDataGameTests.change(created.properties());
+                return created;
+            }, server)
+            .thenCompose(created -> SpongeLevelDataGameTests.unload(key)
+                .thenApply($ -> Properties.of(created.properties())))
+            .thenCompose(properties -> SpongeLevelDataGameTests.load(key).thenApply($ -> properties))
+            .thenCompose(properties -> SpongeLevelDataGameTests.unload(key)
+                .thenCompose($ -> manager.deleteWorld(key))
+                .thenApply($ -> properties));
+
+        helper.succeedWhen(() -> SpongeLevelDataGameTests.assertLoadedAgain(
+            helper,
+            loads,
+            SpongeLevelDataGameTests.finished(helper, saved)
+        ));
+    }
+
+    // Saving the properties of an unloaded world writes them to that world, not over the default world's level.dat
+    @GameTest(maxTicks = SpongeLevelDataGameTests.MAX_TICKS)
+    void unloadedWorldSavesItsProperties(final GameTestHelper helper) {
+        final ResourceKey key = ResourceKey.sponge("gametest_unloaded_properties");
+        final MinecraftServer server = helper.getLevel().getServer();
+        final WorldManager manager = Sponge.server().worldManager();
+        final Path levelDat = server.getWorldPath(LevelResource.LEVEL_DATA_FILE);
+        final List<Loaded> loads = SpongeLevelDataGameTests.loads(key);
+        final CompoundTag[] defaultWorld = new CompoundTag[2];
+        final GameMode[] gameModes = new GameMode[2];
+
+        final CompletableFuture<Properties> saved = SpongeLevelDataGameTests.create(key)
+            .thenCompose($ -> SpongeLevelDataGameTests.unload(key))
+            .thenCompose($ -> SpongeLevelDataGameTests.loadProperties(key))
+            .thenComposeAsync(properties -> {
+                defaultWorld[0] = SpongeLevelDataGameTests.defaultWorld(levelDat);
+                SpongeLevelDataGameTests.change(properties);
+                gameModes[0] = properties.gameMode().equals(GameModes.ADVENTURE.get())
+                    ? GameModes.SURVIVAL.get()
+                    : GameModes.ADVENTURE.get();
+                properties.setGameMode(gameModes[0]);
+                return manager.saveProperties(properties).thenApply(ok -> {
+                    if (!ok) {
+                        throw new IllegalStateException("The properties of " + key + " were not saved");
+                    }
+                    defaultWorld[1] = SpongeLevelDataGameTests.defaultWorld(levelDat);
+                    return Properties.of(properties);
+                });
+            }, server)
+            .thenCompose(properties -> SpongeLevelDataGameTests.loadProperties(key).thenApply(again -> {
+                gameModes[1] = again.gameMode();
+                return properties;
+            }))
+            .thenCompose(properties -> SpongeLevelDataGameTests.load(key).thenApply($ -> properties))
+            .thenCompose(properties -> SpongeLevelDataGameTests.unload(key)
+                .thenCompose($ -> manager.deleteWorld(key))
+                .thenApply($ -> properties));
+
+        helper.succeedWhen(() -> {
+            final Properties properties = SpongeLevelDataGameTests.finished(helper, saved);
+            GameTestAssertions.assertTrue(
+                helper,
+                defaultWorld[1].equals(defaultWorld[0]),
+                "Saving the unloaded world's properties changed the default world's level.dat to " + defaultWorld[1]
+                    + " from " + defaultWorld[0]
+            );
+            // Check the properties only, since vanilla gives every world it builds the server's game mode
+            GameTestAssertions.assertTrue(
+                helper,
+                gameModes[1].equals(gameModes[0]),
+                "The saved properties have game mode " + gameModes[1] + " rather than " + gameModes[0]
+            );
+            SpongeLevelDataGameTests.assertLoadedAgain(helper, loads, properties);
+        });
+    }
+
+    // Only a restart would load the default world's custom data back, so check its registry.dat instead
+    @GameTest(maxTicks = 1)
+    void defaultWorldSavesItsCustomData(final GameTestHelper helper) {
+        final MinecraftServer server = helper.getLevel().getServer();
+        final ServerWorldProperties properties = (ServerWorldProperties) server.overworld().getLevelData();
+        final String value = UUID.randomUUID().toString();
+        properties.offer(CustomData.KEY, value);
+        try {
+            server.saveAllChunks(true, true, true);
+            final Path registry = DimensionType.getStorageFolder(
+                Level.OVERWORLD,
+                server.getWorldPath(LevelResource.ROOT)
+            ).resolve("data").resolve("sponge").resolve("registry.dat");
+            final CompoundTag customData = SpongeLevelDataGameTests.read(registry)
+                .getCompoundOrEmpty("data")
+                .getCompoundOrEmpty("custom_data");
+            GameTestAssertions.assertTrue(
+                helper,
+                customData.toString().contains(value),
+                "The default world's registry.dat has custom data " + customData + " without " + value
+            );
+        } finally {
+            properties.remove(CustomData.KEY);
+        }
+        helper.succeed();
+    }
+
+    // Uses a superflat, so creating the world generates next to nothing. Any world an earlier run left is deleted first
+    private static CompletableFuture<ServerWorld> create(final ResourceKey key) {
+        final WorldArchetypeType type = WorldArchetypeType.of(
+            WorldTypes.OVERWORLD.get(),
+            ChunkGenerator.flat(FlatGeneratorConfigs.CLASSIC_FLAT.get())
+        );
+        final WorldArchetype archetype = WorldArchetype.of(
+            type,
+            WorldGenerationConfig.builder().seed(SpongeLevelDataGameTests.SEED).build()
+        );
+        final WorldManager manager = Sponge.server().worldManager();
+        return manager.deleteWorld(key)
+            .thenCompose($ -> manager.loadWorld(
+                key,
+                ServerWorldProperties.LoadOptions.create(archetype, p -> p.setPerformsSpawnLogic(false))
+            ))
+            .thenApply(world -> world.orElseThrow(() -> new IllegalStateException(key + " was not created")));
+    }
+
+    private static CompletableFuture<ServerWorld> load(final ResourceKey key) {
+        return Sponge.server().worldManager().loadWorld(key)
+            .thenApply(world -> world.orElseThrow(() -> new IllegalStateException(key + " was not loaded by its key")));
+    }
+
+    private static CompletableFuture<ServerWorldProperties> loadProperties(final ResourceKey key) {
+        return Sponge.server().worldManager().loadProperties(key)
+            .thenApply(properties -> properties.orElseThrow(
+                () -> new IllegalStateException("The properties of " + key + " were not loaded")
+            ));
+    }
+
+    private static CompletableFuture<Boolean> unload(final ResourceKey key) {
+        return Sponge.server().worldManager().unloadWorld(key)
+            .thenApply(unloaded -> {
+                if (!unloaded) {
+                    throw new IllegalStateException(key + " was not unloaded");
+                }
+                return true;
+            });
+    }
+
+    // Records the properties at each load of the world, once it is prepared and before it ticks
+    private static List<Loaded> loads(final ResourceKey key) {
+        final List<Loaded> loads = new CopyOnWriteArrayList<>();
+        SpongeGameTests.listen(LoadWorldEvent.class, event -> {
+            if (event.world().key().equals(key)) {
+                loads.add(new Loaded(event.hasLoadedBefore(), Properties.of(event.world().properties())));
+            }
+        });
+        return loads;
+    }
+
+    // Changes each property to something the created world doesn't have, since it copies them from the default world
+    private static void change(final ServerWorldProperties properties) {
+        properties.setSpawnPosition(SpongeLevelDataGameTests.SPAWN);
+        ((ServerLevelData) properties).setGameTime(SpongeLevelDataGameTests.GAME_TIME);
+        properties.setDifficulty(
+            properties.difficulty().equals(Difficulties.HARD.get()) ? Difficulties.EASY.get() : Difficulties.HARD.get()
+        );
+        properties.setCommands(!properties.commands());
+        properties.setPvp(!properties.pvp());
+        properties.setDisplayName(Component.text("gametest"));
+        properties.offer(CustomData.KEY, "gametest");
+    }
+
+    // Asserts the world was created, then loaded again with what it was saved with
+    private static void assertLoadedAgain(final GameTestHelper helper, final List<Loaded> loads,
+                                          final Properties saved
+    ) {
+        GameTestAssertions.assertTrue(
+            helper,
+            saved.spawn().equals(SpongeLevelDataGameTests.SPAWN)
+            && saved.gameTime() >= SpongeLevelDataGameTests.GAME_TIME
+            && saved.customData().equals(Optional.of("gametest"))
+            && saved.seed() == SpongeLevelDataGameTests.SEED,
+            "The world was saved with " + saved + " rather than the changed properties"
+        );
+        GameTestAssertions.assertTrue(
+            helper,
+            loads.size() == 2 && !loads.get(0).before() && loads.get(1).before(),
+            "The world was loaded " + loads + " rather than as a new world, then as one loaded before"
+        );
+        GameTestAssertions.assertTrue(
+            helper,
+            loads.get(1).properties().equals(saved),
+            "The world was loaded again with " + loads.get(1).properties() + " rather than " + saved
+        );
+    }
+
+    private static CompoundTag defaultWorld(final Path levelDat) {
+        final CompoundTag data = SpongeLevelDataGameTests.read(levelDat).getCompoundOrEmpty("Data");
+        final CompoundTag identity = new CompoundTag();
+        identity.putString("LevelName", data.getStringOr("LevelName", ""));
+        data.getCompound("spawn").ifPresent(spawn -> identity.put("spawn", spawn));
+        return identity;
+    }
+
+    private static CompoundTag read(final Path file) {
+        try {
+            return NbtIo.readCompressed(file, NbtAccounter.unlimitedHeap());
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private static <T> T finished(final GameTestHelper helper, final CompletableFuture<T> future) {
+        GameTestAssertions.assertTrue(helper, future.isDone(), "The worlds have not finished loading and unloading");
+        if (future.isCompletedExceptionally()) {
+            GameTestAssertions.assertTrue(
+                helper,
+                false,
+                "Loading or unloading a world failed: " + future.handle(($, error) -> error).join()
+            );
+        }
+        return future.join();
+    }
+
+    private record Loaded(boolean before, Properties properties) {
+    }
+
+    private record Properties(UUID uniqueId, long seed, Vector3i spawn, long gameTime, Difficulty difficulty,
+                              boolean commands, boolean pvp,
+                              Optional<Component> displayName, Optional<String> customData) {
+
+        static Properties of(final ServerWorldProperties properties) {
+            return new Properties(
+                properties.uniqueId(),
+                properties.worldGenerationConfig().seed(),
+                properties.spawnPosition(),
+                ((LevelData) properties).getGameTime(),
+                properties.difficulty(),
+                properties.commands(),
+                properties.pvp(),
+                properties.displayName(),
+                properties.get(CustomData.KEY)
+            );
+        }
+    }
+
+    // Plugins register custom data during RegisterDataEvent, which has passed by test time, so register it on first use
+    private static final class CustomData {
+
+        static final Key<Value<String>> KEY = Key.from(ResourceKey.sponge("gametest_level_data"), String.class);
+
+        static {
+            SpongeDataManager.INSTANCE.registerCustomDataRegistration(
+                (SpongeDataRegistration) DataRegistration.of(CustomData.KEY, ServerWorldProperties.class)
+            );
+        }
     }
 }

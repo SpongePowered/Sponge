@@ -85,6 +85,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.saveddata.WeatherData;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.SavedDataStorage;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.WorldData;
@@ -278,6 +279,10 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         }
         // Populate SpongeServerLevelData from registry data
         spongeData.setUniqueId(registryData.uniqueId());
+        // Other worlds' properties were already given their custom data as they were read
+        if (Level.OVERWORLD.equals(dimension) && levelData instanceof final PrimaryLevelData properties) {
+            registryData.customData().ifPresent(customData -> SpongeRegistryData.applyCustomData(properties, customData));
+        }
         if (spongeData.key() == null) {
             spongeData.setKey(worldKey);
         } else if (!spongeData.key().equals(worldKey)) {
@@ -488,6 +493,9 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         final SerializationBehavior behavior = ((ServerLevelDataBridge) levelData).bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
 
         if (behavior != SerializationBehavior.NONE) {
+            if (levelData instanceof final PrimaryLevelData properties) {
+                this.shadow$getDataStorage().computeIfAbsent(SpongeRegistryData.TYPE).store(properties, !Level.OVERWORLD.equals(this.shadow$dimension()));
+            }
             original.call(self, flush);
         }
     }
