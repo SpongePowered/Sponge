@@ -547,7 +547,7 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
         // and then calls this overload. The default implementation uses the reader's total
         // length (which still includes that '/'), so the cursor is one past the parsed
         // command text and completion after the command name returns no suggestions.
-        if (reader.getCursor() == 1 && input.startsWith("/")) {
+        if (input.startsWith("/")) {
             final String command = input.substring(1);
             return this.getCompletionSuggestions(
                     this.parse(command, parse.getContext().getSource(), true),
